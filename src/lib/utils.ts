@@ -1,17 +1,50 @@
-import { _isArr, _isFn, _isNum, _isObj, _isObjT, _isStr, _isUndef, hasLength } from './guards'
+import { _isArr, _isFn, _isNum, _isObj, _isObjT, _isStr, _isUndef, hasLn } from './guards'
 
-export function getLength<T>(val: Iterable<T> | ArrayLike<T>): number {
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {(Iterable<T> | ArrayLike<T>)} val
+ * @returns {number}
+ */
+export function ln<T>(val: Iterable<T> | ArrayLike<T>): number {
   return _isArr(val) || _isStr(val) ? val.length : 0
 }
 
+/**
+ * To string type alias shortcut
+ *
+ * @export
+ * @param {*} val
+ * @returns {string}
+ */
 export function s(val: any): string {
   return String(val)
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {(T | T[])} val
+ * @param {any[]} [elseT=[]]
+ * @returns {(T[] | typeof elseT)}
+ */
 export function ensureArray<T>(val: T | T[], elseT: any[] = []): T[] | typeof elseT {
   return _isArr(val) ? val : elseT
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {T} val
+ * @param {*} [elseT={}]
+ * @returns {T extends object ? T : typeof elseT}
+ */
 export function ensureObject<T>(val: T, elseT: any = {}): T extends object ? T : typeof elseT {
   return _isObjT(val) ? val : elseT
 }
@@ -59,19 +92,53 @@ export function getNestedProperty(obj: object, path: string): any {
   return lastObj[lastKey]
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @template K
+ * @param {T} obj
+ * @param {K} key
+ * @returns {T[K]}
+ */
 export function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
   if (!_isObj(obj)) return undefined
   return obj[key]
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {T} obj
+ * @returns {T}
+ */
 export function copyObject<T>(obj: T): T {
   return copy(_isObj(obj) ? obj as Object : obj as unknown)
 }
 
+/**
+ *
+ *
+ * @export
+ * @param {[any, any][]} arr
+ * @returns
+ */
 export function arrayToObjectLiteral(arr: [any, any][]) {
   return Object.assign({}, ...arr.map(([key, val]) => ({ [key]: val })))
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @template K
+ * @param {T} obj
+ * @returns {K[]}
+ */
 export function getAllObjectKeys<T extends object, K extends keyof T>(obj: T): K[] {
   return (
     _isFn(Object.getOwnPropertySymbols)
@@ -80,6 +147,16 @@ export function getAllObjectKeys<T extends object, K extends keyof T>(obj: T): K
   ) as K[]
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @template K
+ * @param {T} target
+ * @param {(val: T[K], key?: K, original?: T) => T[K]} reducerCallback
+ * @returns {T}
+ */
 export function reduceObject<T extends object, K extends keyof T>(
   target: T, reducerCallback: (val: T[K], key?: K, original?: T) => T[K],
 ): T {
@@ -92,9 +169,6 @@ export function reduceObject<T extends object, K extends keyof T>(
     return result
   }, {}) as T
 }
-
-export type MapObjectClbkFn = (value: any, key?: string | number, index?: string | number, array?: Array<any>) => [key: string | number, value: any] | any | void
-export type MapObjectOptions = { copy?: boolean, filter?: boolean, advanced?: boolean, forEach?: boolean }
 
 /**
  * Map object literal for quick editing or build a keyed object literal from
@@ -144,6 +218,27 @@ export function mapObject(target, callbackfn: MapObjectClbkFn, opt?: MapObjectOp
   return undefined
 }
 
+export type MapObjectClbkFn = (
+  value: any,
+  key?: string | number,
+  index?: string | number,
+  array?: Array<any>
+) => [key: string | number, value: any] | any | void
+export type MapObjectOptions = {
+  copy?: boolean,
+  filter?: boolean,
+  advanced?: boolean,
+  forEach?: boolean
+}
+
+/**
+ *
+ *
+ * @export
+ * @param {*} target
+ * @param {*} callbackfn
+ * @returns
+ */
 export function filterObject(target, callbackfn) {
   return mapObject(target, (value, key, ...args): [any, any] | null => {
     if (_isFn(callbackfn) && callbackfn(value, key, ...args)) {
@@ -153,12 +248,33 @@ export function filterObject(target, callbackfn) {
   }, { advanced: true, filter: true })
 }
 
+
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {T} target
+ * @param {T} source
+ * @returns {T}
+ */
 export function updateObject<T>(target: T, source: T): T {
   // Encapsulate the idea of passing a new object as the first parameter
   // to Object.assign to ensure we correctly copy data instead of mutating
   return Object.assign({}, target, source)
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @template K
+ * @param {Readonly<T>} obj
+ * @param {K} key
+ * @param {{ copy: boolean }} [options]
+ * @returns {T}
+ */
 export function deleteProperty<T, K extends keyof T>(obj: Readonly<T>, key: K, options?: { copy: boolean }): T {
   const opts = { copy: false, ...options }
   const newObj = opts.copy ? copyObject(obj) : obj
@@ -166,23 +282,66 @@ export function deleteProperty<T, K extends keyof T>(obj: Readonly<T>, key: K, o
   return newObj
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @template U
+ * @template F
+ * @param {(Iterable<T> | ArrayLike<T>)} iterable
+ * @param {(v: T, k: number) => U} [mapfn]
+ * @param {*} [thisArg]
+ * @returns {F extends undefined ? Array<T> : Array<U>}
+ */
 export function toArray<T, U, F extends (v: T, k: number) => U = undefined>(
   iterable: Iterable<T> | ArrayLike<T>, mapfn?: (v: T, k: number) => U, thisArg?: any,
 ): F extends undefined ? Array<T> : Array<U> {
   return Array.from(iterable, mapfn, thisArg) as F extends undefined ? Array<T> : Array<U>
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @template U
+ * @template F
+ * @param {(Iterable<T> | ArrayLike<T>)} iterable
+ * @param {F} [mapfn]
+ * @param {*} [thisArg]
+ * @returns {F extends undefined ? Array<T> : Array<U>}
+ */
 export function copyArray<T, U, F extends (v: T, k: number) => U = undefined>(
   iterable: Iterable<T> | ArrayLike<T>, mapfn?: F, thisArg?: any,
 ): F extends undefined ? Array<T> : Array<U> {
   return toArray(iterable, mapfn, thisArg)
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {Array<T>} oldArray
+ * @param {(Array<T> | object)} newArray
+ * @returns {Array<T>}
+ */
 export function updateArray<T>(oldArray: Array<T>, newArray: Array<T> | object): Array<T> {
   return Object.assign([], oldArray, newArray)
 }
 
-type MutatedArrayResponse<T> = Record<'items' | 'deleted' | 'added', Array<T>>
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {(number | any)} index
+ * @param {Array<T>} array
+ * @param {(T | Array<T>)} [items]
+ * @param {{ replace?: boolean, copy?: boolean }} [options]
+ * @returns {MutatedArrayResponse<T>}
+ */
 export function mutateArray<T>(
   index: number | any,
   array: Array<T>,
@@ -192,28 +351,80 @@ export function mutateArray<T>(
   const { replace, copy } = { replace: true, copy: false, ...options }
   const _array = copy ? copyArray(array) : array
   const _items = ensureArray(items, items ? [items] : [])
-  const deleteCount = (replace ? getLength(_items) : 0)
+  const deleteCount = (replace ? ln(_items) : 0)
   const deleted = _array.splice(index, deleteCount, ..._items)
 
   return { items: _array, deleted, added: _items }
 }
 
+type MutatedArrayResponse<T> = Record<'items' | 'deleted' | 'added', Array<T>>
+
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {number} index
+ * @param {Array<T>} array
+ * @param {(T | Array<T>)} items
+ * @returns {MutatedArrayResponse<T>}
+ */
 export function addAtIndex<T>(index: number, array: Array<T>, items: T | Array<T>): MutatedArrayResponse<T> {
   return mutateArray(index, array, items, { replace: false })
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {(number | any)} index
+ * @param {Array<T>} array
+ * @param {T} item
+ * @returns {MutatedArrayResponse<T>}
+ */
 export function updateAtIndex<T>(index: number | any, array: Array<T>, item: T): MutatedArrayResponse<T> {
   return mutateArray(index, array, item)
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {number} index
+ * @param {Array<T>} array
+ * @returns {MutatedArrayResponse<T>}
+ */
 export function removeAtIndex<T>(index: number, array: Array<T>): MutatedArrayResponse<T> {
   return mutateArray(index, array)
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {T} item
+ * @param {Array<T>} array
+ * @returns {Array<T>}
+ */
 export function removeFromArray<T>(item: T, array: Array<T>): Array<T> {
   return ensureArray(array).filter(i => i !== item)
 }
 
+/**
+ *
+ *
+ * @export
+ * @template K
+ * @template T
+ * @template U
+ * @param {T} array
+ * @param {(K | any)} currentIndex
+ * @param {(K | any)} newIndex
+ * @returns {T}
+ */
 export function reorderArray<K extends number & keyof T, T extends Array<U>, U>(
   array: T, currentIndex: K | any, newIndex: K | any,
 ): T {
@@ -221,28 +432,52 @@ export function reorderArray<K extends number & keyof T, T extends Array<U>, U>(
   return addAtIndex(newIndex, arr.items, arr.deleted).items as T
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {T} val
+ * @returns {string}
+ */
 export function trimString<T>(val: T): string {
   return s(val).trim()
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {T} val
+ * @returns {T}
+ */
 export function capitalize<T extends string>(val: T): T {
-  if (!_isStr(val) || !hasLength(val)) return val
+  if (!_isStr(val) || !hasLn(val)) return val
   return (s(val).charAt(0).toUpperCase() + s(val).slice(1)) as T
 }
 
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @param {T} val
+ * @returns {T}
+ */
 export function capitalizeTitle<T extends string>(val: T): T {
   return s(val).split(' ').map(i => capitalize(i)).join(' ') as T
 }
 
-export enum NumeronymKind {
-  n19s = 'NumericalContractions', /* first letter + len between(+ last letter) */
-  A9bs = 'AlphanumericAbbreviationS', /* AlphaN. = A9, Abbr. = bs */
-  A2S = 'AlphanumericAcronymS', /* (2) A's and (1) S (e.g. W3 or W3C) */
-}
-export type NumeronymOpts = {
-  kind?: NumeronymKind
-  short?: boolean
-}
+
+/**
+ *
+ *
+ * @export
+ * @param {string} str
+ * @param {NumeronymOpts} [opt]
+ * @returns
+ */
 export function numeronym(str: string, opt?: NumeronymOpts) {
   const { kind, short } = opt ?? {}
   const builder = {
@@ -257,16 +492,48 @@ export function numeronym(str: string, opt?: NumeronymOpts) {
 
   return builder[NumeronymKind[kind] ?? NumeronymKind.n19s]()
 }
-
-export function toNum(val: any, elseT?: any, radix?: number): number | typeof elseT {
-  const num = _isNum(radix) && _isStr(val) ? parseInt(val, radix) : Number(val)
-  return isNaN(num) ? num : elseT
+export enum NumeronymKind {
+  n19s = 'NumericalContractions', /* first letter + len between(+ last letter) */
+  A9bs = 'AlphanumericAbbreviationS', /* AlphaN. = A9, Abbr. = bs */
+  A2S = 'AlphanumericAcronymS', /* (2) A's and (1) S (e.g. W3 or W3C) */
+}
+export type NumeronymOpts = {
+  kind?: NumeronymKind
+  short?: boolean
 }
 
+/**
+ *
+ *
+ * @export
+ * @param {*} val
+ * @param {*} [elseT]
+ * @param {number} [radix]
+ * @returns {(number | typeof elseT)}
+ */
+export function toNum(val: any, elseT?: any, radix?: number): number | typeof elseT {
+  const num = _isNum(radix) && _isStr(val) ? parseInt(val, radix) : Number(val)
+  return isNaN(num) ? elseT : num
+}
+
+/**
+ *
+ *
+ * @export
+ * @param {number} val
+ * @returns {string}
+ */
 export function numToHex(val: number): string {
   return Number(val).toString(16)
 }
 
+/**
+ *
+ *
+ * @export
+ * @param {string} val
+ * @returns {number}
+ */
 export function hexToNum(val: string): number {
   return toNum(val, 0, 16)
 }
