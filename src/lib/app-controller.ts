@@ -1,9 +1,56 @@
-import { Collection } from './collection'
-import { AppConfig, defaultAppConfig } from './config'
+import { defaultAppConfig } from '../app-defaults'
+
+import { Collection, CollectionModel } from './collection'
+import { DK } from './config'
 import { Document } from './document'
-import { ID } from './types'
+import { Dictionary, FieldType, ID } from './types'
+
+interface ModelBase extends Dictionary {
+  id?: ID
+  name?: string
+  kind?: DK
+}
+export interface Field extends ModelBase {
+  subFields?: Field[]
+
+  // TODO: evaluation rules
+  // eval?: Eval | Eval[] | { [field: string]: Eval | Eval[] }
+}
+export interface Blueprint extends ModelBase {
+  kind: DK.DOCUMENT | DK.COLLECTION
+  fields?: Field[]
+
+  // TODO: rules for the fields
+  // rules?: any[]
+}
+export interface BlueprintCollection<Model extends Blueprint = Blueprint> extends ModelBase {
+  kind: DK.COLLECTION
+  model: Model
+  documents: (Model & {
+    entries: Record<
+      Model['fields'][any]['id'],
+      FieldType<Model['fields'][any]['kind']>
+    >[]
+  })[]
+
+  // TODO: Workflow operations/functions
+  // operations?: any[]
+}
 
 
+/**
+ * Describes the initial configuration for the application controller
+ */
+export interface AppControllerConfig {
+  blueprints: BlueprintCollection
+}
+
+/**
+ * All top level support
+ *
+ * @export
+ * @class AppController
+ */
 export class AppController {
 
   /**
@@ -20,10 +67,10 @@ export class AppController {
    * Application configuration
    *
    * @private
-   * @type {AppConfig}
+   * @type {AppControllerConfig}
    * @memberof AppController
    */
-  private readonly _config: AppConfig
+  private readonly _config: AppControllerConfig
 
   /**
    * Create a new singleton instance only if it's undefined
@@ -31,11 +78,11 @@ export class AppController {
    * @private
    * @static
    * @throws
-   * @param {AppConfig} [config]
+   * @param {AppControllerConfig} [config]
    * @returns {AppController}
    * @memberof AppController
    */
-  private static _createInstance(config?: AppConfig): AppController {
+  private static _createInstance(config?: AppControllerConfig): AppController {
     return this._instance ??= new this(config)
   }
 
@@ -43,11 +90,11 @@ export class AppController {
    * Initialize the app controller for the first time
    *
    * @static
-   * @param {AppConfig} [config]
+   * @param {AppControllerConfig} [config]
    * @returns {AppController}
    * @memberof AppController
    */
-  static initialize(config?: AppConfig): AppController {
+  static initialize(config?: AppControllerConfig): AppController {
     return this._instance ?? this._createInstance(config)
   }
 
@@ -71,33 +118,36 @@ export class AppController {
    * @type {Collection<Collection<Document>>}
    * @memberof AppController
    */
-  private _collections: Collection<Collection<Document>>
+  private _collections: CollectionModel
 
 
-  private constructor(config?: AppConfig) {
+  private constructor(config?: AppControllerConfig) {
     this._config = { ...defaultAppConfig, ...config }
-    this._collections = new Collection<Collection<Document>>({
-      items: this._config.collections
-    })
-    this._collections.model = Collection
+    this._collections = new Collection()
+    const bpCollection = new Collection(this._config.blueprints).init()
+    this._collections.addSubCollection(bpCollection)
     this._collections.init()
   }
 
-  getCollection(id: ID): Collection<Document> {
-    return this._collections.getItem(id)
+  getCollectionById(id: ID): CollectionModel | undefined
+  getCollectionById(...ids: ID[]): CollectionModel[]
+  getCollectionById(id: ID, ...ids: ID[]): CollectionModel | CollectionModel[] | undefined {
+    return this._collections.getSubCollectionById(id, ...ids)
   }
 
-  addCollection(v: Collection<Document>): this {
-    this._collections.addItem(v)
+  addCollection(v: CollectionModel<Document>): this {
+    this._collections.addSubCollection(v)
     return this
   }
 
-  deleteCollection(id: ID): this {
-    this._collections.deleteItem(this.getCollection(id))
+  removeCollection(id: ID): this
+  removeCollection(item: CollectionModel): this
+  removeCollection(item: ID | CollectionModel): this {
+    this._collections.removeSubCollection(item)
     return this
   }
 
-  getCollections(): Collection<Collection<Document>> {
+  getAllCollections(): CollectionModel {
     return this._collections
   }
 

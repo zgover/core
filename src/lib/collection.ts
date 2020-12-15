@@ -14,12 +14,20 @@ import { ID } from './types'
  */
 export interface CollectionModel<T extends DocumentModel = DocumentModel, F = any> extends DocumentModel<F>, IterableIterator<T> {
   model: new (...args: any[]) => T
-  items: T[]
+  documents: T[]
 
-  getItem(id: ID): T
-  addItem(item: T): this
-  createItem(...args: any[]): T
-  deleteItem(...args: any[]): this
+  getAllDocuments(): T[]
+
+  getDocumentById(id: ID): T | undefined
+  getDocumentById(...ids: ID[]): T[]
+  getDocumentById(id: ID, ...ids: ID[]): T | T[] | undefined
+
+  addDocument(item: T): this
+  createDocument(...args: any[]): T
+
+  removeDocument(id: ID): this
+  removeDocument(item: T): this
+  removeDocument(item: ID | T): this
 
   length: number
   [Symbol.iterator](): IterableIterator<T>
@@ -40,46 +48,66 @@ export class Collection<T extends DocumentModel = Document, F = any> extends Doc
 
   public model: new (...args: any[]) => T = Document as any
 
-  public get items(): T[] { return this.fields['items'] }
-  public set items(v: T[]) { this.fields['items'] = v }
+  public get documents(): T[] { return this.data['documents'] }
+  public set documents(v: T[]) { this.data['documents'] = v }
 
-  public get length(): number { return (this.items ?? []).length }
+  public get length(): number { return (this.documents ?? []).length }
 
   init(): this {
     this.preInit && this.preInit()
-    // Ensure if items are an object we ensure they are a document instance
-    this.items = this.items.map(item => {
-      if (_isObj(item) && !(item instanceof this.model)) {
-        return this.createItem(item).init()
-      }
-      return item
-    })
+    this.initDocuments()
     this.onInit && this.onInit()
     return this
   }
 
-  getItem(id: ID): T {
-    return this.items?.find(i => i?.get('id') === id)
+  protected initDocuments() {
+    console.log('initDocs', this.get('id'), this.documents)
+    // Ensure if items are an object we ensure they are a document instance
+    this.documents = (this.documents ??= []).map(item => {
+      if (_isObj(item) && !(item instanceof this.model)) {
+        return this.createDocument(item).init()
+      }
+      return item
+    })
   }
 
-  getItems(ids?: ID[]): T[] {
-    return ids ? Array.from(ids).map(id => this.getItem(id)) : this.items
+  getAllDocuments(): T[] {
+    return this.documents
   }
 
-  addItem(item: T): this {
-    (this.items ??= []).push(item)
+  getDocumentById(id: ID): T | undefined
+  getDocumentById(...ids: ID[]): T[]
+  getDocumentById(id: ID, ...ids: ID[]): T | T[] | undefined {
+    if (ids.length) {
+      const _ids = Array.from([id, ...ids])
+      return this.documents?.filter(d => _ids.some(i => i === d?.get('id')))
+    }
+    return this.documents?.find(i => i?.get('id') === id)
+  }
+
+  addDocument(item: T): this {
+    (this.documents ??= []).push(item)
     return this
   }
 
-  createItem(...args: any[]): T {
+  createDocument(...args: any[]): T {
     return new this.model(...args)
   }
 
-  deleteItem(item: T): this {
-    const items = Array.from(this.items)
-    this.items = items.filter(i => i != item)
+  removeDocument(id: ID): this
+  removeDocument(item: T): this
+  removeDocument(item: ID | T): this {
+    const _item = _isObj(item) ? item : this.getDocumentById(item)
+    const items = Array.from(this.documents)
+    this.documents = items.filter(i => i != _item)
     return this
   }
+
+  removeDocumentById(id: ID): this {
+    this.removeDocument(id)
+    return this
+  }
+
 
   private __index__ = 0;
   /** @inheritdoc */
@@ -89,7 +117,7 @@ export class Collection<T extends DocumentModel = Document, F = any> extends Doc
     if (this.__index__ < this.length) {
       return {
         done: false,
-        value: this.items[this.__index__++]
+        value: this.documents[this.__index__++]
       }
     } else {
       return {
