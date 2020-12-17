@@ -1,28 +1,3 @@
-import { Dictionary, ID } from './types'
-
-/**
- * JSONable interface for class method
- *
- * @export
- * @interface toJSON
- * @template T
- */
-export interface toJSON<T> {
-  toJSON(): T
-}
-
-/**
- * Init hooks for object methods
- *
- * @export
- * @interface InitHooks
- */
-export interface InitHooks {
-  preInit?(): void
-  init(...args: any[]): this
-  onInit?(): void
-}
-
 /**
  * Local properties and methods required for CRUD logic
  * (create, read, update delete)
@@ -31,16 +6,56 @@ export interface InitHooks {
  * @interface CrudModel
  * @template T
  */
-export interface CrudModel<T = any> {
-  readonly data: Dictionary
-  set(id: ID, value: T): this
-  get(id: ID): T | undefined
-  has(id: ID): boolean
-  del(id: ID): this
+export interface CrudModel<T = any, V = any> {
+
+  /**
+   * All data to c.r.u.d.
+   *
+   * @type {T}
+   * @memberof CrudModel
+   */
+  readonly data: T
+
+  /**
+   *  Set the value of an index on the data property
+   *
+   * @param {ID} id
+   * @param {V} value
+   * @returns {this}
+   * @memberof CrudModel
+   */
+  set<K extends keyof T>(id: K, value: V): this
+
+  /**
+   * Get the value of an index on the data property
+   *
+   * @param {ID} id
+   * @returns {(V | null)}
+   * @memberof Crud
+   */
+  get<K extends keyof T>(id: K): T[K] | null
+
+  /**
+   * Check if the index signature (id) exists on the data property
+   *
+   * @param {ID} id
+   * @returns {boolean}
+   * @memberof CrudModel
+   */
+  has<K extends keyof T>(id: K): boolean
+
+  /**
+   * Remove an index from the data property
+   *
+   * @param {ID} id
+   * @returns {this}
+   * @memberof CrudModel
+   */
+  del<K extends keyof T>(id: K): this
 }
 
 /**
- * Set, get, has, del methods to retrieve index of data property
+ * Methods (set, get, has, del) to c.r.u.d. an index of the data property
  *
  * @export
  * @abstract
@@ -49,59 +64,19 @@ export interface CrudModel<T = any> {
  * @template T
  */
 export abstract class Crud<T = any> implements CrudModel<T> {
-  constructor(public readonly data: Dictionary = {} as any) { }
-
-  set(id: ID, value: T): this { this.data[id] = value; return this }
-  get(id: ID): T | undefined { return this.data[id] }
-  has(id: ID): boolean { return Object.prototype.hasOwnProperty.call(this.data, id) }
-  del(id: ID): this { delete this.data[id]; return this }
-}
-
-export interface BaseModel<T = any> extends InitHooks, CrudModel<T>, toJSON<Dictionary<T>> {
-  id: ID
-}
-
-export class Base<T = any> extends Crud<T> implements BaseModel<T> {
-
-  public get id(): ID { return this.data['id'] }
-  public set id(v: ID) { this.data['id'] = v }
-
   /**
-   * Called from JSON.stringify(base)
-   *
-   * @returns {Dictionary}
-   * @memberof Base
+   * Creates an instance of Crud.
+   * @param {T} [data={} as any]
+   * @memberof Crud
    */
-  toJSON(): Dictionary { return { ...this.data } }
+  constructor(public readonly data: T = {} as any) { }
 
-  /**
-   * Hook called before init
-   *
-   * @protected
-   * @memberof Base
-   */
-  preInit?(): void
-
-  /**
-   * Initialize the instance, should be called immediately after
-   * creating the object. If overridden you must call preInit and
-   * onInit yourself, do not super this method.
-   *
-   * @public
-   * @memberof Field
-   */
-  init(): this {
-    this.preInit && this.preInit()
-    this.onInit && this.onInit()
-    return this
-  }
-
-  /**
-   * Hook called after init
-   *
-   * @protected
-   * @memberof Field
-   */
-  onInit?(): void
-
+  /** @inheritdoc */
+  set<K extends keyof T>(id: K, value: any): this { this.data[id] = value; return this }
+  /** @inheritdoc */
+  get<K extends keyof T>(id: K): T[K] | null { return this.data[id] }
+  /** @inheritdoc */
+  has<K extends keyof T>(id: K): boolean { return Object.prototype.hasOwnProperty.call(this.data, id) }
+  /** @inheritdoc */
+  del<K extends keyof T>(id: K): this { delete this.data[id]; return this }
 }

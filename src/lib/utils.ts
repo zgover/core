@@ -152,6 +152,18 @@ export function copyObject<T>(obj: T): T {
 }
 
 /**
+ * Copy a json object by stringifying it and then parsing
+ *
+ * @export
+ * @template T
+ * @param {T} json
+ * @returns {T}
+ */
+export function copyJson<T>(json: T): T {
+  return JSON.parse(JSON.stringify(json))
+}
+
+/**
  *
  *
  * @export

@@ -4,7 +4,7 @@ import { DK, } from './config'
 import { Document, DocumentModel } from './document'
 import { Field } from './field'
 import { Dictionary, FieldType, ID } from './types'
-import { copy } from './utils'
+import { copyJson } from './utils'
 
 interface ModelBase extends Dictionary {
   id?: ID
@@ -123,8 +123,8 @@ export class AppController {
 
 
   private constructor(config?: AppControllerConfig) {
-    this._config = { ...copy(defaultAppConfig), ...copy(config) }
-    this._app = new Document(this._config.structure).init()
+    this._config = { ...copyJson(defaultAppConfig), ...copyJson(config ?? {}) }
+    this._app = new Document(copyJson(this._config.structure)).init()
     console.log('appp', this._app)
   }
 

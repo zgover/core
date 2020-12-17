@@ -1,7 +1,7 @@
-import { Base, BaseModel } from './crud'
+import { BaseDocument, BaseDocumentModel } from './base'
 import { Field, FieldModel } from './field'
 import { _isObj } from './guards'
-import { Dictionary, ID } from './types'
+import { ID } from './types'
 
 
 /**
@@ -12,7 +12,7 @@ import { Dictionary, ID } from './types'
  * @extends {CrudModel}
  * @template F
  */
-export interface DocumentModel<F extends FieldModel = FieldModel> extends BaseModel, IterableIterator<F> {
+export interface DocumentModel<F extends FieldModel = FieldModel> extends BaseDocumentModel, IterableIterator<F> {
 
   model: new (...args: any[]) => F
   fields: F[]
@@ -56,7 +56,7 @@ export interface DocumentModel<F extends FieldModel = FieldModel> extends BaseMo
  * @implements {DocumentModel<F>}
  * @template F
  */
-export class Document<F extends FieldModel = FieldModel> extends Base implements DocumentModel<F> {
+export class Document<F extends FieldModel = FieldModel> extends BaseDocument implements DocumentModel<F> {
 
   public model: new (...args: any[]) => F = Field as any
 
@@ -78,6 +78,7 @@ export class Document<F extends FieldModel = FieldModel> extends Base implements
   init(): this {
     this.preInit && this.preInit()
     this.initFields()
+    this.initSubcollections()
     this.onInit && this.onInit()
     return this
   }
@@ -86,11 +87,27 @@ export class Document<F extends FieldModel = FieldModel> extends Base implements
     console.debug('initFields', this.id, this.fields)
     // Ensure if items are an object we ensure they are a document instance
     this.fields = (this.fields ??= []).map(item => {
+      console.debug('initFields item', item)
       if (_isObj(item) && !(item instanceof this.model)) {
+        console.debug('initFields creating', item)
         return this.createField(item).init()
       }
       return item
     })
+  }
+
+  protected initSubcollections() {
+    console.debug('initSubcollections', this.id, this.subcollections)
+    // Ensure if items are an object we ensure they are a document instance
+    this.subcollections = (this.subcollections ??= []).map(item => {
+      console.debug('initSubcollections item', item)
+      if (_isObj(item) && !(item instanceof Document)) {
+        console.debug('initSubcollections creating', item)
+        return new Document(item).init()
+      }
+      return item
+    })
+    console.log('this.subcollections', this.subcollections)
   }
 
   createField(...args: any[]): F {
@@ -166,6 +183,3 @@ export class Document<F extends FieldModel = FieldModel> extends Base implements
   }
 
 }
-
-/** A document-oriented db document type */
-export type DocumentType<T extends Dictionary = any> = { [P in keyof T]: T[P] }

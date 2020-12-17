@@ -4,7 +4,7 @@ import { DK, lbl, Sig } from './lib/config'
 import { Document } from './lib/document'
 import { Field, FieldModel } from './lib/field'
 import { createUid } from './lib/uid'
-import { sortBy } from './lib/utils'
+import { copyJson, sortBy } from './lib/utils'
 
 /**
  * Blueprint field
@@ -18,7 +18,7 @@ const blueprintFields: FieldModel[] = sortBy([
   new Field({
     [Sig.Id]: Sig.Kind,
     [Sig.Kind]: DK.TEXT,
-    [Sig.Name]: lbl[Sig.Id],
+    [Sig.Name]: lbl[Sig.Kind],
   }),
   new Field({
     [Sig.Id]: Sig.Created,
@@ -54,7 +54,7 @@ const blueprintModel = new Document({
       [Sig.Id]: Sig.Name,
       [Sig.Kind]: DK.TEXT,
       [Sig.Name]: lbl[Sig.Name],
-      [Sig.Value]: 'system blueprint - (sample)'
+      [Sig.Value]: lbl[Sig.Model]
     }),
     new Field({
       [Sig.Id]: Sig.Kind,
@@ -66,32 +66,37 @@ const blueprintModel = new Document({
       [Sig.Id]: Sig.Fields,
       [Sig.Kind]: DK.ARRAY,
       [Sig.Name]: lbl[Sig.Fields],
-      [Sig.Value]: Array.from(blueprintFields)
+      [Sig.Value]: copyJson(blueprintFields)
     }),
     new Field({
       [Sig.Id]: Sig.Entries,
-      [Sig.Kind]: DK.ARRAY,
+      [Sig.Kind]: DK.COLLECTION,
       [Sig.Name]: lbl[Sig.Entries],
-      [Sig.Value]: [
-        new Field({
-          [Sig.Id]: createUid(),
-          [Sig.Fields]: Array.from(blueprintFields).map((field: FieldModel) => {
-            const sampleData = {
-              [Sig.Name]: 'blueprint entry - (sample)',
-              [Sig.Kind]: DK.ENTRY,
-              [Sig.Created]: new Date().getMilliseconds(),
-            }
-            const _field = new Field({
-              [Sig.Id]: field.id,
-              [Sig.Value]: sampleData[field.id],
-            }).init()
-            return _field
-          })
-        }).init()
-      ]
+      [Sig.Value]: []
     }),
   ].map(i => i.init()), 'data.name', 'data.id'),
 }).init()
+
+const sampleBp = new Document(copyJson(blueprintModel)).init()
+sampleBp.getFieldById(Sig.Name).set(Sig.Value, 'system blueprint - (sample)')
+sampleBp.getFieldById(Sig.Entries).set(Sig.Value, [
+
+  new Document({
+    [Sig.Id]: createUid(),
+    [Sig.Fields]: copyJson(blueprintFields).map((field: FieldModel) => {
+      const sampleData = {
+        [Sig.Name]: 'blueprint entry - (sample)',
+        [Sig.Kind]: DK.ENTRY,
+        [Sig.Created]: Date.now(),
+      }
+      return new Field({
+        [Sig.Id]: field.id,
+        [Sig.Value]: sampleData[field.id],
+      }).init()
+    })
+  }).init()
+
+])
 
 
 /**
@@ -118,7 +123,7 @@ const blueprints = new Document({
       [Sig.Id]: Sig.Model,
       [Sig.Kind]: DK.DOCUMENT,
       [Sig.Name]: lbl[Sig.Model],
-      [Sig.Value]: blueprintModel
+      [Sig.Value]: copyJson(blueprintModel)
     }),
     new Field({
       [Sig.Id]: Sig.Value,
@@ -126,7 +131,7 @@ const blueprints = new Document({
       [Sig.Name]: lbl[Sig.Value],
       [Sig.Value]: new Collection({
         [Sig.Id]: 'blueprints',
-        [Sig.Documents]: [blueprintModel]
+        [Sig.Documents]: [sampleBp]
       }).init()
     }),
   ].map(i => i.init()), 'data.name', 'data.id'),

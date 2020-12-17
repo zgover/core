@@ -1,9 +1,7 @@
-import { Base, BaseModel } from './crud'
+import { BaseDocument, BaseDocumentModel } from './base'
 import { Document, DocumentModel } from './document'
 import { _isObj } from './guards'
-import { Dictionary, ID } from './types'
-
-
+import { ID } from './types'
 
 /**
  * Instance outline for modeling a collection of documents
@@ -15,7 +13,7 @@ import { Dictionary, ID } from './types'
  * @template D
  * @template F
  */
-export interface CollectionModel<D extends DocumentModel = DocumentModel> extends BaseModel, IterableIterator<D> {
+export interface CollectionModel<D extends DocumentModel = DocumentModel> extends BaseDocumentModel, IterableIterator<D> {
 
   model: new (...args: any[]) => D
   documents: D[]
@@ -46,7 +44,7 @@ export interface CollectionModel<D extends DocumentModel = DocumentModel> extend
  * @implements {CollectionModel<D>}
  * @template D
  */
-export class Collection<D extends DocumentModel = DocumentModel> extends Base implements CollectionModel<D> {
+export class Collection<D extends DocumentModel = DocumentModel> extends BaseDocument implements CollectionModel<D> {
 
   public model: new (...args: any[]) => D = Document as any
 
@@ -128,6 +126,3 @@ export class Collection<D extends DocumentModel = DocumentModel> extends Base im
   }
 
 }
-
-/** A document-oriented db document collection type */
-export type CollectionType<T extends Dictionary = any> = { [P in keyof T]: T[P] }

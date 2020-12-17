@@ -1,10 +1,11 @@
-import { Base, BaseModel } from './crud'
+import { BaseDocument, BaseDocumentFields, BaseDocumentModel } from './base'
 import { _isObj } from './guards'
-import { Dictionary, ID } from './types'
+import { ID } from './types'
 
-
-/** A document-oriented db document field type */
-export type FieldType<T extends Dictionary = any> = { [P in keyof T]: T[P] }
+export interface FieldData extends BaseDocumentFields {
+  id: ID
+  fields?: FieldData[]
+}
 
 /**
  * Instance outline base for all documents in the DB
@@ -14,26 +15,15 @@ export type FieldType<T extends Dictionary = any> = { [P in keyof T]: T[P] }
  * @extends {CrudModel}
  * @template F
  */
-export interface FieldModel<SF extends FieldModel = any> extends BaseModel, IterableIterator<SF> {
+export interface FieldModel<F extends FieldModel = any> extends BaseDocumentModel, IterableIterator<F> {
 
-  model?: new (...args: any[]) => SF
+  model?: new (...args: any[]) => F
 
-  fields: SF[]
-
-  getAllFields(): SF[]
-  getFieldById(id: ID): SF | undefined
-  getFieldById(...ids: ID[]): SF[]
-  getFieldById(id: ID, ...ids: ID[]): SF | SF[] | undefined
-
-  addField(item: SF): this
-
-  removeField(id: ID): this
-  removeField(item: SF): this
-  removeField(item: ID | SF): this
+  fields: F[]
 
   length: number
-  [Symbol.iterator](): IterableIterator<SF>
-  next(): IteratorResult<SF>
+  [Symbol.iterator](): IterableIterator<F>
+  next(): IteratorResult<F>
 }
 
 /**
@@ -44,12 +34,12 @@ export interface FieldModel<SF extends FieldModel = any> extends BaseModel, Iter
  * @implements {FieldModel<F>}
  * @template F
  */
-export class Field<SF extends FieldModel = FieldModel> extends Base implements FieldModel<SF> {
+export class Field<F extends FieldModel = FieldModel> extends BaseDocument implements FieldModel<F> {
 
-  public model: new (...args: any[]) => SF = Field as any
+  public model: new (...args: any[]) => F = Field as any
 
-  public get fields(): SF[] { return this.data['fields'] }
-  public set fields(v: SF[]) { this.data['fields'] = v }
+  public get fields(): F[] { return this.data['fields'] }
+  public set fields(v: F[]) { this.data['fields'] = v }
 
   public get length(): number { return (this.fields ?? []).length }
 
@@ -78,19 +68,19 @@ export class Field<SF extends FieldModel = FieldModel> extends Base implements F
     })
   }
 
-  createField(...args: any[]): SF {
+  createField(...args: any[]): F {
     return new this.model(...args)
   }
-  addField(item: SF): this {
+  addField(item: F): this {
     (this.fields ??= []).push(item)
     return this
   }
-  getAllFields(): SF[] {
+  getAllFields(): F[] {
     return this.fields
   }
-  getFieldById(id: ID): SF | undefined
-  getFieldById(...ids: ID[]): SF[]
-  getFieldById(id: ID, ...ids: ID[]): SF | SF[] | undefined {
+  getFieldById(id: ID): F | undefined
+  getFieldById(...ids: ID[]): F[]
+  getFieldById(id: ID, ...ids: ID[]): F | F[] | undefined {
     if (ids.length) {
       const _ids = Array.from([id, ...ids])
       return this.fields?.filter(d => _ids.some(i => i === d?.id))
@@ -98,8 +88,8 @@ export class Field<SF extends FieldModel = FieldModel> extends Base implements F
     return this.fields?.find(i => i?.id === id)
   }
   removeField(id: ID): this
-  removeField(item: SF): this
-  removeField(item: ID | SF): this {
+  removeField(item: F): this
+  removeField(item: ID | F): this {
     const _item = _isObj(item) ? item : this.getFieldById(item)
     const items = Array.from(this.fields)
     this.fields = items.filter(i => i != _item)
@@ -109,9 +99,9 @@ export class Field<SF extends FieldModel = FieldModel> extends Base implements F
 
   private __index__ = 0;
   /** @inheritdoc */
-  [Symbol.iterator](): IterableIterator<SF> { return this }
+  [Symbol.iterator](): IterableIterator<F> { return this }
   /** @inheritdoc */
-  next(): IteratorResult<SF> {
+  next(): IteratorResult<F> {
     if (this.__index__ < this.length) {
       return {
         done: false,

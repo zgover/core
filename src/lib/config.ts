@@ -36,8 +36,6 @@ export enum Eval {
   Regex = 'r3x',
 }
 
-console.log('DKDKDKDKDK Mapped', DK, JSON.stringify(DK), Object.keys(DK))
-
 /**
  * Property name index signatures
  */

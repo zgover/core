@@ -19,6 +19,7 @@
         "exponentiate",
         "GEOPOINT",
         "globby",
+        "initializable",
         "libauth",
         "mkdir",
         "Numeronym",
