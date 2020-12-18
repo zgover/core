@@ -1,49 +1,16 @@
-import { defaultAppConfig } from '../app-defaults'
+import { blueprintModelId, createNewBlueprintEntryDocument, defaultAppConfig } from '../app-defaults'
 
-import { DK, } from './config'
+import { CollectionModel } from './collection'
 import { Document, DocumentModel } from './document'
-import { Field } from './field'
-import { Dictionary, FieldType, ID } from './types'
+import { ID } from './types'
 import { copyJson } from './utils'
-
-interface ModelBase extends Dictionary {
-  id?: ID
-  name?: string
-  kind?: DK
-}
-export interface FieldT extends ModelBase {
-  subfields?: Field[]
-
-  // TODO: evaluation rules
-  // eval?: Eval | Eval[] | { [field: string]: Eval | Eval[] }
-}
-export interface Blueprint extends ModelBase {
-  kind: DK.DOCUMENT | DK.COLLECTION
-  fields?: FieldT[]
-
-  // TODO: rules for the fields
-  // rules?: any[]
-}
-export interface BlueprintCollection<Model extends Blueprint = Blueprint> extends ModelBase {
-  kind: DK.COLLECTION
-  model: Model
-  documents: (Model & {
-    entries: Record<
-      Model['fields'][any]['id'],
-      FieldType<Model['fields'][any]['kind']>
-    >[]
-  })[]
-
-  // TODO: Workflow operations/functions
-  // operations?: any[]
-}
 
 
 /**
  * Describes the initial configuration for the application controller
  */
 export interface AppControllerConfig {
-  structure: DocumentModel//Blueprint
+  blueprints: DocumentModel
 }
 
 /**
@@ -113,45 +80,55 @@ export class AppController {
   }
 
   /**
-   * Living data
+   * Living collections data
    *
    * @private
    * @type {CollectionModel}
    * @memberof AppController
    */
-  private _app: DocumentModel
+  private _blueprints: DocumentModel
 
 
   private constructor(config?: AppControllerConfig) {
-    this._config = { ...copyJson(defaultAppConfig), ...copyJson(config ?? {}) }
-    this._app = new Document(copyJson(this._config.structure)).init()
-    console.log('appp', this._app)
+    this._config = {
+      ...copyJson(defaultAppConfig),
+      ...copyJson(config ?? {})
+    }
+    this._blueprints = Document.from(this._config.blueprints)
+    this._blueprints.init()
+    console.log('_blueprints', this._blueprints)
   }
 
-  getConfig() {
+  public getConfig() {
     return this._config
   }
 
-  getCollectionById(id: ID): DocumentModel | undefined
-  getCollectionById(...ids: ID[]): DocumentModel[]
-  getCollectionById(id: ID, ...ids: ID[]): DocumentModel | DocumentModel[] | undefined {
-    return this._app.getSubcollectionById(id, ...ids)
+  public createBlueprint(): DocumentModel {
+    const model = this._blueprints.getField(blueprintModelId)
+    return createNewBlueprintEntryDocument(model as any)
   }
 
-  addCollection(v: DocumentModel): this {
-    this._app.addSubcollection(v)
+  public getBlueprintsCollection(): CollectionModel {
+    console.log("this._blueprints.getSubcollection('blueprints')", this._blueprints.getSubcollection('blueprints'))
+    return this._blueprints.getSubcollection('blueprints')
+  }
+
+  public getBlueprint(id: ID): DocumentModel | null {
+    return this.getBlueprintsCollection().getDocument(id)
+  }
+
+  public setBlueprint(id: ID, value: DocumentModel, index?: number): this {
+    this.getBlueprintsCollection().setDocument(id, value, index)
     return this
   }
 
-  removeCollection(id: ID): this
-  removeCollection(item: DocumentModel): this
-  removeCollection(item: ID | DocumentModel): this {
-    this._app.removeSubcollection(item)
-    return this
+  public getAllBlueprints(): DocumentModel[] {
+    console.log('getBlueprintsCollection()', this.getBlueprintsCollection())
+    return this.getBlueprintsCollection().getAllDocuments()
   }
 
-  getAllCollections(): DocumentModel {
-    return this._app
+  public getBlueprints(): DocumentModel {
+    return this._blueprints
   }
 
 }

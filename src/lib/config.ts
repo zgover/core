@@ -41,14 +41,20 @@ export enum Eval {
  */
 export const Sig = {
 
+  Field: 'field',
   Fields: 'fields',
-  Subfields: 'subfields',
+  Document: 'document',
   Documents: 'documents',
+  Collection: 'collection',
   Collections: 'collections',
+  Subcollection: 'subcollection',
   Subcollections: 'subcollections',
 
   Model: 'model',
+  Models: 'models',
   Blueprint: 'blueprint',
+  Blueprints: 'blueprints',
+  Entry: 'entry',
   Entries: 'entries',
 
   Id: 'id',
@@ -93,15 +99,21 @@ export const lbl = {
   [DK.TEXT]: 'Text',
 
   /** Entity type fields */
+  [Sig.Field]: 'Field',
   [Sig.Fields]: 'Fields',
-  [Sig.Subfields]: 'Subfields',
+  [Sig.Document]: 'Document',
   [Sig.Documents]: 'Documents',
+  [Sig.Collection]: 'Collection',
   [Sig.Collections]: 'Collections',
+  [Sig.Subcollection]: 'Subcollection',
   [Sig.Subcollections]: 'Subcollections',
 
   /** Instance fields */
   [Sig.Blueprint]: 'Blueprint',
+  [Sig.Blueprints]: 'Blueprints',
   [Sig.Model]: 'Model',
+  [Sig.Models]: 'Models',
+  [Sig.Entry]: 'Entry',
   [Sig.Entries]: 'Entries',
 
   /** Meta fields */

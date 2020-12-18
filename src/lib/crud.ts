@@ -1,12 +1,16 @@
+import { toJSON } from './json'
+
 /**
  * Local properties and methods required for CRUD logic
  * (create, read, update delete)
  *
  * @export
  * @interface CrudModel
+ * @extends {toJSON<T>}
  * @template T
+ * @template V
  */
-export interface CrudModel<T = any, V = any> {
+export interface CrudModel<T = any, V = any> extends toJSON<T> {
 
   /**
    * All data to c.r.u.d.
@@ -72,11 +76,18 @@ export abstract class Crud<T = any> implements CrudModel<T> {
   constructor(public readonly data: T = {} as any) { }
 
   /** @inheritdoc */
+  toJSON(): T { return this.data }
+
+  /** @inheritdoc */
   set<K extends keyof T>(id: K, value: any): this { this.data[id] = value; return this }
+
   /** @inheritdoc */
   get<K extends keyof T>(id: K): T[K] | null { return this.data[id] }
+
   /** @inheritdoc */
   has<K extends keyof T>(id: K): boolean { return Object.prototype.hasOwnProperty.call(this.data, id) }
+
   /** @inheritdoc */
   del<K extends keyof T>(id: K): this { delete this.data[id]; return this }
+
 }

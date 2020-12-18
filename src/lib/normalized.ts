@@ -1,31 +1,33 @@
 import { _isNum, _isObj } from './guards'
+import { toJSON } from './json'
 import { ID } from './types'
-import { copy, deleteProperty, removeFromArray, reorderArray } from './utils'
+import { deleteProperty, removeFromArray, reorderArray } from './utils'
 
 /** Normalized local state design for interfacing with 3NF rules  */
-export type NormalizedData<T extends any = object, K extends ID = ID> = {
+export type NormalizedData<T = any, K extends ID = ID> = {
   allIds: K[],
   byId: { [P in K]?: T }
 }
 
-export interface NormalizedModel<T extends any = object, K extends ID = ID> extends NormalizedData<T, K> {
+export interface NormalizedModel<T = any, K extends ID = ID> extends NormalizedData<T, K>, toJSON<NormalizedData<T, K>> {
+  readonly length: number
   /**
    * The properties to keep when object is passed to JSON.stringify(...)
    * @returns {NormalizedData<T, K>}
-   * @memberof NormalizedCollection
+   * @memberof NormalizedModel
    */
   toJSON(): NormalizedData<T, K>
   /**
    * Converts the current values into an array ordered by the
    * appearance of the key in allIds array
    * @returns {Array<T>}
-   * @memberof NormalizedCollection
+   * @memberof NormalizedModel
    */
   toArray(): Array<T>
   /**
    * Clears all values
    * @returns {this}
-   * @memberof NormalizedCollection
+   * @memberof NormalizedModel
    */
   clear(): this
   /**
@@ -33,15 +35,15 @@ export interface NormalizedModel<T extends any = object, K extends ID = ID> exte
    *
    * @param {K} id
    * @returns {this}
-   * @memberof NormalizedCollection
+   * @memberof NormalizedModel
    */
-  delete(id: K): this
+  remove(id: K): this
   /**
    * Returns whether or not the data byId has property key
    *
    * @param {ID} id
    * @returns {boolean}
-   * @memberof NormalizedCollection
+   * @memberof NormalizedModel
    */
   has(id: ID): boolean
   /**
@@ -51,7 +53,7 @@ export interface NormalizedModel<T extends any = object, K extends ID = ID> exte
    * @param {*} [value]
    * @param {number} [index]
    * @returns {this}
-   * @memberof NormalizedCollection
+   * @memberof NormalizedModel
    */
   set(id: ID, value?: T, index?: number): this
   /**
@@ -59,7 +61,7 @@ export interface NormalizedModel<T extends any = object, K extends ID = ID> exte
    *
    * @param {ID} id
    * @returns {(undefined | T)}
-   * @memberof NormalizedCollection
+   * @memberof NormalizedModel
    */
   get(id: ID): undefined | T
 }
@@ -69,25 +71,27 @@ export interface NormalizedModel<T extends any = object, K extends ID = ID> exte
  *
  * @export
  * @abstract
- * @class NormalizedCollection
+ * @class Normalized
  * @extends {NormalizedData<T, K>}
  * @template T
  * @template K
  * @see https://en.wikipedia.org/wiki/Third_normal_form
  */
-export class Normalized<T extends any = object, K extends ID = any> implements NormalizedModel<T, K> {
+export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T, K> {
 
-  static build<T extends any = object, K extends ID = ID>(): NormalizedData<T, K> {
+  static build<T, K extends ID>(): NormalizedData<T, K> {
     return { allIds: [], byId: {} }
   }
 
   public allIds: K[] = []
   public byId: { [P in K]?: T } = {}
 
+  public get length(): number { return (this.allIds ?? []).length }
+
   constructor(public readonly props?: NormalizedData<T, K>) {
     const { allIds, byId } = { ...props }
-    this.allIds = copy(allIds ?? [])
-    this.byId = copy(byId ?? {})
+    this.allIds = allIds ?? []
+    this.byId = byId ?? {}
   }
 
   /**
@@ -98,7 +102,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * @template V
    * @param {T} v
    * @returns {V[]}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public static toArray<T extends NormalizedData<V>, V>(v: T): V[] {
     return Array.from(v.allIds).map((id) => v.byId[id])
@@ -110,7 +114,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * @static
    * @param {NormalizedData} v
    * @returns {NormalizedData}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public static clear<T extends NormalizedData<any>>(v: T): T {
     v.allIds = []
@@ -121,7 +125,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
   /**
    * Clears all values
    * @returns {this}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public clear(): this {
     return Normalized.clear(this)
@@ -135,9 +139,9 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * @template K
    * @param {(...T[] | [id: K, value: any][])} items
    * @returns {NormalizedModel<T>}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
-  public static from<T extends object, K extends ID>(...items: T[] | [id: K, value: any][]): NormalizedModel<T> {
+  public static from<T extends { id: ID }, K extends ID>(...items: T[] | [id: K, value: any][]): NormalizedModel<T> {
     const _items = [...items].map(i => _isObj(i) ? [i['id'], i] : [...i])
     const parsed = _items.reduce<NormalizedData<T, K>>((acc, [id, v]) => ({
       allIds: (acc?.allIds ?? []).concat(id),
@@ -154,9 +158,9 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * @param {ID} id
    * @param {NormalizedData<T>} data
    * @returns {NormalizedData<T>}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
-  public static delete<T extends NormalizedData<any, K>, K extends ID>(id: K, data: T): T {
+  public static remove<T extends NormalizedData<any, K>, K extends ID>(id: K, data: T): T {
     data.allIds = removeFromArray(id, data.allIds)
     data.byId = deleteProperty(data.byId, id)
     return data
@@ -173,7 +177,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * @param {T} data
    * @param {number} [index]
    * @returns {T}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public static set<T extends NormalizedData<V, K>, V, K extends ID>(
     item: [id: K, value: V],
@@ -203,7 +207,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * @param {ID} id
    * @param {NormalizedData<T>} data
    * @returns {(undefined | T)}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public static get<T extends NormalizedData<V, K>, K extends ID, V>(id: K, data: T): V | null {
     return data.byId[id] ?? null
@@ -212,7 +216,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
   /**
    * The properties to keep when object is passed to JSON.stringify(...)
    * @returns {NormalizedData<T, K>}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public toJSON(): NormalizedData<T, K> {
     return { allIds: this.allIds, byId: this.byId }
@@ -222,7 +226,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * Converts the current values into an array ordered by the
    * appearance of the key in allIds array
    * @returns {Array<T>}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public toArray(): Array<T> {
     return Normalized.toArray(this)
@@ -233,10 +237,10 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    *
    * @param {K} id
    * @returns {this}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
-  public delete(id: K): this {
-    return Normalized.delete(id, this)
+  public remove(id: K): this {
+    return Normalized.remove(id, this)
   }
 
   /**
@@ -244,7 +248,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    *
    * @param {ID} id
    * @returns {boolean}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public has(id: ID): boolean {
     return Object.prototype.hasOwnProperty.call(this.byId, id)
@@ -257,7 +261,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    * @param {*} [value]
    * @param {number} [index]
    * @returns {this}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public set(id: ID, value?: T, index?: number): this {
     return Normalized.set([id, value], this, index)
@@ -268,7 +272,7 @@ export class Normalized<T extends any = object, K extends ID = any> implements N
    *
    * @param {ID} id
    * @returns {(undefined | T)}
-   * @memberof NormalizedCollection
+   * @memberof Normalized
    */
   public get(id: ID): undefined | T {
     return Normalized.get(id, this)

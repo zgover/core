@@ -7,5 +7,11 @@
  * @template T
  */
 export interface toJSON<T> {
+  /**
+   * Called from JSON.stringify(base)
+   *
+   * @returns {T}
+   * @memberof Base
+   */
   toJSON(): T
 }

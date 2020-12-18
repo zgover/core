@@ -1,7 +1,6 @@
 import { Crud, CrudModel } from './crud'
 import { Dod } from './dod'
 import { Initializable } from './initializable'
-import { toJSON } from './json'
 import { ID } from './types'
 
 /**
@@ -14,7 +13,7 @@ import { ID } from './types'
  * @extends {toJSON<T>}
  * @template T
  */
-export interface BaseDocumentModel<T extends Dod.Map = any> extends Initializable, CrudModel<T>, toJSON<T> {
+export interface BaseDocumentModel<T extends Dod.Ref.Id = Dod.Ref.Id> extends Initializable, CrudModel<T> {
   id: ID
 }
 
@@ -27,25 +26,12 @@ export interface BaseDocumentModel<T extends Dod.Map = any> extends Initializabl
  * @implements {BaseDocumentModel<T>}
  * @template T
  */
-export class BaseDocument<T extends Dod.Map = any> extends Crud<T> implements BaseDocumentModel<T> {
+export class BaseDocument<T extends Dod.Ref.Id = Dod.Ref.Id> extends Crud<T> implements BaseDocumentModel<T> {
 
   public get id(): ID { return this.get('id') }
   public set id(value: ID) { this.set('id', value) }
 
-  /**
-   * Called from JSON.stringify(base)
-   *
-   * @returns {T}
-   * @memberof Base
-   */
-  toJSON(): T { return { ...this.data } }
-
-  /**
-   * Hook called before init
-   *
-   * @protected
-   * @memberof Base
-   */
+  /** @inheritdoc */
   preInit?(): void
 
   /**
@@ -62,12 +48,7 @@ export class BaseDocument<T extends Dod.Map = any> extends Crud<T> implements Ba
     return this
   }
 
-  /**
-   * Hook called after init
-   *
-   * @protected
-   * @memberof Field
-   */
+  /** @inheritdoc */
   onInit?(): void
 
 }

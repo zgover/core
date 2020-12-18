@@ -1,29 +1,27 @@
-import { BaseDocument, BaseDocumentFields, BaseDocumentModel } from './base'
-import { _isObj } from './guards'
+import { BaseDocument, BaseDocumentModel } from './base'
+import { Dod } from './dod'
 import { ID } from './types'
-
-export interface FieldData extends BaseDocumentFields {
-  id: ID
-  fields?: FieldData[]
-}
 
 /**
  * Instance outline base for all documents in the DB
  *
  * @export
- * @interface DocumentModel
- * @extends {CrudModel}
- * @template F
+ * @interface FieldModel
+ * @extends {Dod.FieldRef<T>}
+ * @extends {BaseDocumentModel<Dod.FieldRef<T>>}
+ * @template T
  */
-export interface FieldModel<F extends FieldModel = any> extends BaseDocumentModel, IterableIterator<F> {
+export interface FieldModel<T extends Dod.Field = Dod.Field> extends Dod.Ref.FieldRef<T>, BaseDocumentModel<Dod.Ref.FieldRef<T>> {
 
-  model?: new (...args: any[]) => F
+  readonly value: T | null
+  readonly kind: string | number
 
-  fields: F[]
+  getValue(): T | null
+  setValue(value: T): this
 
-  length: number
-  [Symbol.iterator](): IterableIterator<F>
-  next(): IteratorResult<F>
+  getKind(): string | number
+  setKind(value: string | number): this
+
 }
 
 /**
@@ -31,17 +29,22 @@ export interface FieldModel<F extends FieldModel = any> extends BaseDocumentMode
  *
  * @export
  * @class Field
- * @implements {FieldModel<F>}
- * @template F
+ * @extends {BaseDocument<Dod.FieldRef<T>>}
+ * @implements {FieldModel<T>}
+ * @template T
  */
-export class Field<F extends FieldModel = FieldModel> extends BaseDocument implements FieldModel<F> {
+export class Field<T extends Dod.Field = Dod.Field> extends BaseDocument<Dod.Ref.FieldRef<T>> implements FieldModel<T> {
 
-  public model: new (...args: any[]) => F = Field as any
+  public get value(): T { return this.get('value') }
+  public get kind(): string | number { return this.get('kind') }
 
-  public get fields(): F[] { return this.data['fields'] }
-  public set fields(v: F[]) { this.data['fields'] = v }
+  constructor(id: ID, kind: string, value?: T) {
+    super({ id, kind, value })
+  }
 
-  public get length(): number { return (this.fields ?? []).length }
+  public static from<T extends Dod.Ref.FieldRef>(data: T) {
+    return new this(data?.id, <any>data?.kind, data?.value)
+  }
 
   /**
    * Initialize the instance, should be called immediately after
@@ -50,69 +53,33 @@ export class Field<F extends FieldModel = FieldModel> extends BaseDocument imple
    * @public
    * @memberof Field
    */
-  init(): this {
+  public init(): this {
     this.preInit && this.preInit()
-    this.initFields()
+    this.initValue()
     this.onInit && this.onInit()
     return this
   }
 
-  protected initFields() {
-    console.debug('initFields', this.id, this.fields)
-    // Ensure if items are an object we ensure they are a document instance
-    this.fields = (this.fields ??= []).map(item => {
-      if (_isObj(item) && !(item instanceof this.model)) {
-        return this.createField(item).init()
-      }
-      return item
-    })
+  protected initValue() {
+    console.debug('initValue', this.id, this.value)
   }
 
-  createField(...args: any[]): F {
-    return new this.model(...args)
+  public getValue(): T {
+    return this.value
   }
-  addField(item: F): this {
-    (this.fields ??= []).push(item)
-    return this
-  }
-  getAllFields(): F[] {
-    return this.fields
-  }
-  getFieldById(id: ID): F | undefined
-  getFieldById(...ids: ID[]): F[]
-  getFieldById(id: ID, ...ids: ID[]): F | F[] | undefined {
-    if (ids.length) {
-      const _ids = Array.from([id, ...ids])
-      return this.fields?.filter(d => _ids.some(i => i === d?.id))
-    }
-    return this.fields?.find(i => i?.id === id)
-  }
-  removeField(id: ID): this
-  removeField(item: F): this
-  removeField(item: ID | F): this {
-    const _item = _isObj(item) ? item : this.getFieldById(item)
-    const items = Array.from(this.fields)
-    this.fields = items.filter(i => i != _item)
+
+  public setValue(value: T): this {
+    this.set('value', value)
     return this
   }
 
+  public getKind(): string | number {
+    return this.kind
+  }
 
-  private __index__ = 0;
-  /** @inheritdoc */
-  [Symbol.iterator](): IterableIterator<F> { return this }
-  /** @inheritdoc */
-  next(): IteratorResult<F> {
-    if (this.__index__ < this.length) {
-      return {
-        done: false,
-        value: this.fields[this.__index__++]
-      }
-    } else {
-      return {
-        done: true,
-        value: null
-      }
-    }
+  public setKind(value: string | number): this {
+    this.set('kind', value)
+    return this
   }
 
 }

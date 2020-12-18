@@ -1,6 +1,7 @@
 import { BaseDocument, BaseDocumentModel } from './base'
 import { Document, DocumentModel } from './document'
-import { _isObj } from './guards'
+import { Dod } from './dod'
+import { Normalized, NormalizedData } from './normalized'
 import { ID } from './types'
 
 /**
@@ -13,27 +14,19 @@ import { ID } from './types'
  * @template D
  * @template F
  */
-export interface CollectionModel<D extends DocumentModel = DocumentModel> extends BaseDocumentModel, IterableIterator<D> {
+export interface CollectionModel<D extends DocumentModel = any> extends Dod.Ref.CollectionRef<D>, BaseDocumentModel<Dod.Ref.CollectionRef<D>> {
 
-  model: new (...args: any[]) => D
-  documents: D[]
+  documentModel: new (...args: any[]) => D
+  readonly documents: NormalizedData<D>
+  readonly length: number
 
   createDocument(...args: any[]): D
-  addDocument(item: D): this
-
-  getAllDocuments(): D[]
-
-  getDocumentById(id: ID): D | undefined
-  getDocumentById(...ids: ID[]): D[]
-  getDocumentById(id: ID, ...ids: ID[]): D | D[] | undefined
-
+  setDocument(id: ID, value: D, index?: number): this
+  getDocument(id: ID): D | null
   removeDocument(id: ID): this
-  removeDocument(item: D): this
-  removeDocument(item: ID | D): this
+  getAllDocuments(): D[]
+  setDocuments(documents: NormalizedData<D>): this
 
-  length: number
-  [Symbol.iterator](): IterableIterator<D>
-  next(): IteratorResult<D>
 }
 
 /**
@@ -44,14 +37,22 @@ export interface CollectionModel<D extends DocumentModel = DocumentModel> extend
  * @implements {CollectionModel<D>}
  * @template D
  */
-export class Collection<D extends DocumentModel = DocumentModel> extends BaseDocument implements CollectionModel<D> {
+export class Collection<D extends DocumentModel = DocumentModel> extends BaseDocument<Dod.Ref.CollectionRef<D>> implements CollectionModel<D> {
 
-  public model: new (...args: any[]) => D = Document as any
+  public documentModel: new (...args: any[]) => D = Document as any
+  public get documents(): NormalizedData<D> { return this.get('documents') }
+  public get length(): number { return this.documents?.allIds?.length ?? 0 }
 
-  public get documents(): D[] { return this.data['documents'] }
-  public set documents(v: D[]) { this.data['documents'] = v }
+  constructor(id: ID, documents?: NormalizedData<D>) {
+    super({
+      id: id, documents: new Normalized(documents)
+    })
+  }
 
-  public get length(): number { return (this.documents ?? []).length }
+  public static from<T extends Dod.Ref.CollectionRef>(data: T) {
+    console.log('collection from', data)
+    return new this(data?.id, <any>data?.documents)
+  }
 
   /**
    * Initialize the instance, should be called immediately after
@@ -60,7 +61,7 @@ export class Collection<D extends DocumentModel = DocumentModel> extends BaseDoc
    * @public
    * @memberof Collection
    */
-  init(): this {
+  public init(): this {
     this.preInit && this.preInit()
     this.initDocuments()
     this.onInit && this.onInit()
@@ -70,59 +71,49 @@ export class Collection<D extends DocumentModel = DocumentModel> extends BaseDoc
   protected initDocuments() {
     console.debug('initDocuments', this.id, this.documents)
     // Ensure if items are an object we ensure they are a document instance
-    this.documents = (this.documents ??= []).map(item => {
-      if (_isObj(item) && !(item instanceof this.model)) {
-        return this.createDocument(item).init()
-      }
-      return item
-    })
+    if (!(this.documents instanceof Normalized)) {
+      this.setDocuments(new Normalized(this.documents))
+    }
+    if (this.documents instanceof Normalized) {
+      this.documents.toArray().forEach(doc => {
+        if (!(doc instanceof Document)) {
+          this.setDocument(
+            doc.id, this.createDocument(doc).init()
+          )
+        }
+      })
+    }
   }
 
-  createDocument(...args: any[]): D {
-    return new this.model(...args)
+  public createDocument(data?): D {
+    const { id, fields, subcollections } = data
+    return new this.documentModel(id, fields, subcollections)
   }
-  addDocument(item: D): this {
-    (this.documents ??= []).push(item)
-    return this
-  }
-  getAllDocuments(): D[] {
-    return this.documents
-  }
-  getDocumentById(id: ID): D | undefined
-  getDocumentById(...ids: ID[]): D[]
-  getDocumentById(id: ID, ...ids: ID[]): D | D[] | undefined {
-    if (ids.length) {
-      const _ids = Array.from([id, ...ids])
-      return this.documents?.filter(d => _ids.some(i => i === d?.id))
-    }
-    return this.documents?.find(i => i?.id === id)
-  }
-  removeDocument(id: ID): this
-  removeDocument(item: D): this
-  removeDocument(item: ID | D): this {
-    const _item = _isObj(item) ? item : this.getDocumentById(item)
-    const items = Array.from(this.documents)
-    this.documents = items.filter(i => i !== _item)
+
+  public setDocument(id: ID, value: D, index?: number): this {
+    Normalized.set([id, value], this.documents, index)
     return this
   }
 
-
-  private __index__ = 0;
-  /** @inheritdoc */
-  [Symbol.iterator](): IterableIterator<D> { return this }
-  /** @inheritdoc */
-  next(): IteratorResult<D> {
-    if (this.__index__ < this.length) {
-      return {
-        done: false,
-        value: this.documents[this.__index__++]
-      }
-    } else {
-      return {
-        done: true,
-        value: null
-      }
-    }
+  public getDocument(id: ID): D | null {
+    return Normalized.get(id, this.documents)
   }
+
+  public removeDocument(id: ID): this {
+    Normalized.remove(id, this.documents)
+    return this
+  }
+
+  public getAllDocuments(): D[] {
+    return Normalized.toArray(this.documents)
+  }
+
+  public setDocuments(documents: NormalizedData<D>): this {
+    this.set('documents', documents instanceof Normalized
+      ? documents : new Normalized(documents)
+    )
+    return this
+  }
+
 
 }

@@ -1,6 +1,8 @@
 import { BaseDocument, BaseDocumentModel } from './base'
+import { Collection, CollectionModel } from './collection'
+import { Dod } from './dod'
 import { Field, FieldModel } from './field'
-import { _isObj } from './guards'
+import { Normalized, NormalizedData } from './normalized'
 import { ID } from './types'
 
 
@@ -9,43 +11,37 @@ import { ID } from './types'
  *
  * @export
  * @interface DocumentModel
- * @extends {CrudModel}
- * @template F
+ * @extends {Dod.DocumentRef<FT, ST>}
+ * @extends {BaseDocumentModel<Dod.DocumentRef<FT, ST>>}
+ * @template FT
+ * @template ST
  */
-export interface DocumentModel<F extends FieldModel = FieldModel> extends BaseDocumentModel, IterableIterator<F> {
+export interface DocumentModel<FT extends FieldModel = FieldModel, ST extends CollectionModel = CollectionModel> extends Dod.Ref.DocumentRef<FT, ST>, BaseDocumentModel<Dod.Ref.DocumentRef<FT, ST>> {
 
-  model: new (...args: any[]) => F
-  fields: F[]
-  subcollections: DocumentModel[]
+  fieldModel: new (...args: any[]) => FT
+  subcollectionModel: new (...args: any[]) => ST
 
-  createField(...args: any[]): F
-  addField(item: F): this
+  readonly fields: NormalizedData<FT>
+  readonly subcollections: NormalizedData<ST>
 
-  getAllFields(): F[]
+  createField(...args: any[]): FT
+  createSubcollection(...args: any[]): ST
 
-  getFieldById(id: ID): F | undefined
-  getFieldById(...ids: ID[]): F[]
-  getFieldById(id: ID, ...ids: ID[]): F | F[] | undefined
+  setField(id: ID, value: FT, index?: number): this
+  setSubcollection(id: ID, value: ST, index?: number): this
+
+  getField(id: ID): FT | null
+  getSubcollection(id: ID): ST | null
 
   removeField(id: ID): this
-  removeField(item: F): this
-  removeField(item: ID | F): this
-
-  addSubcollection(item: DocumentModel): this
-
-  getAllSubcollections(): DocumentModel[]
-
-  getSubcollectionById(id: ID): DocumentModel | undefined
-  getSubcollectionById(...ids: ID[]): DocumentModel[]
-  getSubcollectionById(id: ID, ...ids: ID[]): DocumentModel | DocumentModel[] | undefined
-
   removeSubcollection(id: ID): this
-  removeSubcollection(item: DocumentModel): this
-  removeSubcollection(item: ID | DocumentModel): this
 
-  length: number
-  [Symbol.iterator](): IterableIterator<F>
-  next(): IteratorResult<F>
+  getAllFields(): FT[]
+  getAllSubcollections(): ST[]
+
+  setFields(fields: NormalizedData<FT>): this
+  setSubcollections(collections: NormalizedData<ST>): this
+
 }
 
 /**
@@ -53,20 +49,30 @@ export interface DocumentModel<F extends FieldModel = FieldModel> extends BaseDo
  *
  * @export
  * @class Document
- * @implements {DocumentModel<F>}
- * @template F
+ * @extends {BaseDocument<Dod.DocumentRef<FT, ST>>}
+ * @implements {DocumentModel<FT, ST>}
+ * @template FT
+ * @template ST
  */
-export class Document<F extends FieldModel = FieldModel> extends BaseDocument implements DocumentModel<F> {
+export class Document<FT extends FieldModel = FieldModel, ST extends CollectionModel = CollectionModel> extends BaseDocument<Dod.Ref.DocumentRef<FT, ST>> implements DocumentModel<FT, ST> {
 
-  public model: new (...args: any[]) => F = Field as any
+  public fieldModel: new (...args: any[]) => FT = Field as any
+  public subcollectionModel: new (...args: any[]) => ST = Collection as any
 
-  public get fields(): F[] { return this.data['fields'] ??= [] }
-  public set fields(v: F[]) { this.data['fields'] = v }
+  public get fields(): NormalizedData<FT> { return this.get('fields') }
+  public get subcollections(): NormalizedData<ST> { return this.get('subcollections') }
 
-  public get subcollections(): DocumentModel[] { return this.data['subcollections'] }
-  public set subcollections(v: DocumentModel[]) { this.data['subcollections'] = v }
+  constructor(id: ID, fields?: NormalizedData<FT>, subcollections?: NormalizedData<ST>) {
+    super({
+      id,
+      fields: new Normalized(fields),
+      subcollections: new Normalized(subcollections)
+    })
+  }
 
-  public get length(): number { return (this.fields ?? []).length }
+  public static from<T extends Dod.Ref.DocumentRef>(data: T) {
+    return new this(data?.id, <any>data?.fields, <any>data?.subcollections)
+  }
 
   /**
    * Initialize the instance, should be called immediately after
@@ -75,7 +81,7 @@ export class Document<F extends FieldModel = FieldModel> extends BaseDocument im
    * @public
    * @memberof Document
    */
-  init(): this {
+  public init(): this {
     this.preInit && this.preInit()
     this.initFields()
     this.initSubcollections()
@@ -86,100 +92,96 @@ export class Document<F extends FieldModel = FieldModel> extends BaseDocument im
   protected initFields() {
     console.debug('initFields', this.id, this.fields)
     // Ensure if items are an object we ensure they are a document instance
-    this.fields = (this.fields ??= []).map(item => {
-      console.debug('initFields item', item)
-      if (_isObj(item) && !(item instanceof this.model)) {
-        console.debug('initFields creating', item)
-        return this.createField(item).init()
-      }
-      return item
-    })
+    if (!(this.fields instanceof Normalized)) {
+      this.setFields(new Normalized(this.fields))
+    }
+    if (this.fields instanceof Normalized) {
+      this.fields.toArray().forEach(field => {
+        if (!(field instanceof Field)) {
+          this.setField(
+            field.id, this.createField(field).init()
+          )
+        }
+      })
+    }
   }
 
   protected initSubcollections() {
     console.debug('initSubcollections', this.id, this.subcollections)
     // Ensure if items are an object we ensure they are a document instance
-    this.subcollections = (this.subcollections ??= []).map(item => {
-      console.debug('initSubcollections item', item)
-      if (_isObj(item) && !(item instanceof Document)) {
-        console.debug('initSubcollections creating', item)
-        return new Document(item).init()
-      }
-      return item
-    })
-    console.log('this.subcollections', this.subcollections)
-  }
-
-  createField(...args: any[]): F {
-    return new this.model(...args)
-  }
-  addField(item: F): this {
-    (this.fields ??= []).push(item)
-    return this
-  }
-  getAllFields(): F[] {
-    return this.fields
-  }
-  getFieldById(id: ID): F | undefined
-  getFieldById(...ids: ID[]): F[]
-  getFieldById(id: ID, ...ids: ID[]): F | F[] | undefined {
-    if (ids.length) {
-      const _ids = Array.from([id, ...ids])
-      return this.fields?.filter(d => _ids.some(i => i === d?.id))
+    if (!(this.subcollections instanceof Normalized)) {
+      this.setSubcollections(new Normalized(this.subcollections))
     }
-    return this.fields?.find(i => i?.id === id)
-  }
-  removeField(id: ID): this
-  removeField(item: F): this
-  removeField(item: ID | F): this {
-    const _item = _isObj(item) ? item : this.getFieldById(item)
-    const items = Array.from(this.fields)
-    this.fields = items.filter(i => i != _item)
-    return this
-  }
-
-  addSubcollection(item: DocumentModel): this {
-    (this.subcollections ??= []).push(item)
-    return this
-  }
-  getAllSubcollections(): DocumentModel[] {
-    return this.subcollections
-  }
-  getSubcollectionById(id: ID): DocumentModel | undefined
-  getSubcollectionById(...ids: ID[]): DocumentModel[]
-  getSubcollectionById(id: ID, ...ids: ID[]): DocumentModel | DocumentModel[] | undefined {
-    if (ids.length) {
-      const _ids = Array.from([id, ...ids])
-      return this.subcollections?.filter(d => _ids.some(i => i === d?.id))
-    }
-    return this.subcollections?.find(i => i?.id === id)
-  }
-  removeSubcollection(id: ID): this
-  removeSubcollection(item: DocumentModel): this
-  removeSubcollection(item: ID | DocumentModel): this {
-    const _item = _isObj(item) ? item : this.getSubcollectionById(item)
-    const items = Array.from(this.subcollections)
-    this.subcollections = items.filter(i => i !== _item)
-    return this
-  }
-
-
-  private __index__ = 0;
-  /** @inheritdoc */
-  [Symbol.iterator](): IterableIterator<F> { return this }
-  /** @inheritdoc */
-  next(): IteratorResult<F> {
-    if (this.__index__ < this.length) {
-      return {
-        done: false,
-        value: this.fields[this.__index__++]
-      }
-    } else {
-      return {
-        done: true,
-        value: null
-      }
+    if (this.subcollections instanceof Normalized) {
+      this.subcollections.toArray().forEach(col => {
+        if (!(col instanceof Collection)) {
+          this.setSubcollection(
+            col.id, this.createSubcollection(col).init()
+          )
+        }
+      })
     }
   }
+
+  public createField(data?): FT {
+    const { id, kind, value } = data
+    return new this.fieldModel(id, kind, value)
+  }
+
+  public createSubcollection(data): ST {
+    const { id, documents } = data
+    return new this.subcollectionModel(id, documents)
+  }
+
+  public setField(id: ID, value: FT, index?: number): this {
+    Normalized.set([id, value], this.fields, index)
+    return this
+  }
+
+  public setSubcollection(id: ID, value: ST, index?: number): this {
+    Normalized.set([id, value], this.subcollections, index)
+    return this
+  }
+
+  public getField(id: ID): FT | null {
+    return Normalized.get(id, this.fields)
+  }
+
+  public getSubcollection(id: ID): ST | null {
+    return Normalized.get(id, this.subcollections)
+  }
+
+  public removeField(id: ID): this {
+    Normalized.remove(id, this.fields)
+    return this
+  }
+
+  public removeSubcollection(id: ID): this {
+    Normalized.remove(id, this.subcollections)
+    return this
+  }
+
+  public getAllFields(): FT[] {
+    return Normalized.toArray(this.fields)
+  }
+
+  public getAllSubcollections(): ST[] {
+    return Normalized.toArray(this.subcollections)
+  }
+
+  public setFields(fields: NormalizedData<FT>): this {
+    this.set('fields', fields instanceof Normalized
+      ? fields : new Normalized(fields)
+    )
+    return this
+  }
+
+  public setSubcollections(collections: NormalizedData<ST>): this {
+    this.set('subcollections', collections instanceof Normalized
+      ? collections : new Normalized(collections)
+    )
+    return this
+  }
+
 
 }

@@ -97,7 +97,7 @@ export function _isObjT(val: any): val is object {
  * @param {*} val
  * @returns {val is Object}
  */
-export function _isObj(val: any): val is Object {
+export function _isObj(val: any): val is object {
   return !_isNull(val) && _isObjT(val) && !_isArr(val)
 }
 /**

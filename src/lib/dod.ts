@@ -1,3 +1,6 @@
+import { NormalizedData } from './normalized'
+import { Dictionary } from './types'
+
 /**
  * (D)Document-(o)oriented (d)database (Dob)
  *
@@ -20,30 +23,77 @@ export namespace Dod {
   export type ID = string
 
   /** Field Type */
-  export type Bool = boolean
-  export type DateTime = number
-  export type Float = number
-  export type GeoPoint = Record<'longitude' | 'latitude', number>
-  export type Integer = number
-  export type Text = string
-  export type Null = null
-  export type Map = Record<string, any>
-  export type Array = NotArray[]
-  export type NotArray = Text | Bool | Integer | Float | DateTime | GeoPoint | Null | Map
-  export type Field = Array | NotArray
+  export namespace FT {
+    export type Array<T> = T[]
+    export type Bool = boolean
+    export type Bytes = Uint8Array | string
+    export type DateTime = number
+    export type Float = number
+    export type GeoPoint = Record<'longitude' | 'latitude', number>
+    export type Integer = number
+    export type Map = Dictionary
+    export type Null = null
+    export type Text = string
 
-  /** Entity Types */
-  export type Entity = { id: ID }
-  export type Fields = Record<ID, Field>
-  export type Documents = Record<ID, Document>
-  export type Subcollections = Record<ID, Collection>
-  export type Collections = Record<ID, Collection>
-  export type Document = Entity & {
-    subcollections: Subcollections
-    fields: Fields
+    export type NotArray = Bool
+      | Bytes
+      | DateTime
+      | Float
+      | GeoPoint
+      | Integer
+      | Map
+      | Null
+      | Map
+      | Text
+
+    export type Any<T = any> = FT.NotArray | FT.Array<T>
   }
-  export type Collection = Entity & {
-    documents: Documents
+
+  /** Document Field */
+  export type Field<T = any> = FT.Any<T>
+
+  /** Document */
+  export type Document = { [fieldId: string]: Field }
+
+  /** Collection */
+  export type Collection = { [documentId: string]: Document }
+
+  /** Ref Models */
+  export namespace Ref {
+
+    export type Id = {
+      id: ID
+    }
+
+    export type Kind = {
+      kind: string | number
+    }
+
+    export type Value<T = Field> = {
+      value?: T
+    }
+
+    export type Fields<F = FieldRef, T = NormalizedData<F>> = {
+      fields: T
+    }
+
+    export type Documents<D = DocumentRef, T = NormalizedData<D>> = {
+      documents: T
+    }
+
+    export type Subcollections<C = CollectionRef, T = NormalizedData<C>> = {
+      subcollections?: T
+    }
+
+    export type FieldRef<T = Field> =
+      Id & Kind & Value<T>
+
+    export type DocumentRef<F = FieldRef, S = CollectionRef<any>> =
+      Id & Fields<F> & Subcollections<S>
+
+    export type CollectionRef<D = DocumentRef> =
+      Id & Documents<D>
+
   }
 
 }
