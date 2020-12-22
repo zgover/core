@@ -1,40 +1,24 @@
-import { Ref } from '../interfaces/dod'
-import { NormalizedData } from '../interfaces/normalized'
-import { DocumentRef, FieldRef } from '../interfaces/ref-controller'
-import { Normalized } from '../models/Normalized'
-import { ID } from '../types'
+import { PKey, Ref, Schema } from '../interfaces/dod'
 
 import { BaseRefController } from './BaseRefController'
-import { FieldRefController } from './FieldRefController'
-
-
 
 
 /**
- * Provides base logic for all documents in the DB
+ *
  *
  * @export
  * @class DocumentRefController
- * @extends {BaseRefController<DocumentRef<FT, ST>>}
- * @implements {DocumentRef<FT, ST>}
- * @template FT
- * @template ST
+ * @extends {BaseRefController<Ref.Document<S>>}
+ * @template S
  */
-export class DocumentRefController<FT extends FieldRef = FieldRef> extends BaseRefController<Ref.Document<FT>> implements DocumentRef<FT> {
+export class DocumentRefController<S extends Schema.ModelFields> extends BaseRefController<Ref.Document<S>> {
 
-  public fieldModel: new (...args: any[]) => FT = FieldRefController as any
-
-  public get fields(): NormalizedData<FT> { return this.get('fields') }
-
-  constructor(id: ID, fields?: NormalizedData<FT>) {
-    super({
-      id,
-      fields: new Normalized(fields),
-    })
+  constructor(id: PKey, schema: S, fields?: Ref.DocumentFields<S>) {
+    super({ id, schema, fields })
   }
 
-  public static from<T extends Ref.Document>(model: T) {
-    return new this(model?.id, <any>model?.fields)
+  public static from<S extends Schema.ModelFields>(model: Ref.Document<S>) {
+    return new this(model?.id, model?.schema, model?.fields)
   }
 
   /**
@@ -52,50 +36,28 @@ export class DocumentRefController<FT extends FieldRef = FieldRef> extends BaseR
   }
 
   protected initFields() {
-    console.debug('initFields', this.id, this.fields)
+    console.debug('initFields', this.getId(), this.getSchema(), this.getFields())
     // Ensure if items are an object we ensure they are a document instance
-    if (!(this.fields instanceof Normalized)) {
-      this.setFields(new Normalized(this.fields))
-    }
-    if (this.fields instanceof Normalized) {
-      this.fields.toArray().forEach(field => {
-        if (!(field instanceof FieldRefController)) {
-          this.setField(
-            field.id, this.createField(field).init()
-          )
-        }
-      })
-    }
+    // if (!(this.fields instanceof Normalized)) {
+    //   this.setFields(new Normalized(this.fields))
+    // }
+    // if (this.fields instanceof Normalized) {
+    //   this.fields.toArray().forEach(field => {
+    //     if (!(field instanceof FieldRefController)) {
+    //       this.setField(
+    //         field.id, this.createField(field).init()
+    //       )
+    //     }
+    //   })
+    // }
   }
 
-  public createField(model?): FT {
-    const { id, kind, value } = model
-    return new this.fieldModel(id, kind, value)
+  public getFields(): Ref.DocumentFields<S> {
+    return this.get('fields')
   }
 
-  public setField(id: ID, value: FT, index?: number): this {
-    Normalized.set([id, value], this.fields, index)
-    return this
-  }
-
-  public getField(id: ID): FT | null {
-    return Normalized.get(id, this.fields)
-  }
-
-  public removeField(id: ID): this {
-    Normalized.remove(id, this.fields)
-    return this
-  }
-
-  public getAllFields(): FT[] {
-    return Normalized.toArray(this.fields)
-  }
-
-  public setFields(fields: NormalizedData<FT>): this {
-    this.set('fields', fields instanceof Normalized
-      ? fields : new Normalized(fields)
-    )
-    return this
+  public setFields(value: Ref.DocumentFields<S>): this {
+    return this.set('fields', value)
   }
 
 }

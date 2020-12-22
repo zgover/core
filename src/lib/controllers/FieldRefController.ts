@@ -1,29 +1,23 @@
-import { FieldValueType, Ref } from '../interfaces/dod'
-import { FieldRef } from '../interfaces/ref-controller'
-import { ID } from '../types'
+import { FT, PKey, Ref, Schema } from '../interfaces/dod'
 
 import { BaseRefController } from './BaseRefController'
 
 /**
- * Provides base logic for all documents in the DB
+ *
  *
  * @export
  * @class FieldRefController
- * @extends {BaseRefController<FieldRef<T>>}
- * @implements {FieldRef<T>}
- * @template T
+ * @extends {BaseRefController<Ref.Field<S>>}
+ * @template S
  */
-export class FieldRefController<T extends FieldValueType = FieldValueType> extends BaseRefController<Ref.Field<T>> implements FieldRef<T> {
+export class FieldRefController<S extends Schema.FieldMeta> extends BaseRefController<Ref.Field<S>> {
 
-  public get value(): T { return this.get('value') }
-  public get kind(): string | number { return this.get('kind') }
-
-  constructor(id: ID, kind: string, value?: T) {
-    super({ id, kind, value })
+  constructor(id: PKey, schema: S, value?: FT.TypeFromTag<S['$type']>) {
+    super({ id, schema, value })
   }
 
-  public static from<T extends Ref.Field>(model: T) {
-    return new this(model?.id, <any>model?.kind, model?.value)
+  public static from<S extends Schema.FieldMeta>(model: Ref.Field<S>) {
+    return new this(model?.id, <any>model?.schema, model?.value)
   }
 
   /**
@@ -41,25 +35,23 @@ export class FieldRefController<T extends FieldValueType = FieldValueType> exten
   }
 
   protected initValue() {
-    console.debug('initValue', this.id, this.value)
+    console.debug('initValue', this.getId(), this.getSchema(), this.getValue())
   }
 
-  public getValue(): T {
-    return this.value
+  public getValue(): Ref.FieldValue<S> {
+    return this.get('value')
   }
 
-  public setValue(value: T): this {
-    this.set('value', value)
-    return this
+  public setValue(value: Ref.FieldValue<S>): this {
+    return this.set('value', value)
   }
 
-  public getKind(): string | number {
-    return this.kind
+  public getSchema(): S {
+    return this.get('schema')
   }
 
-  public setKind(value: string | number): this {
-    this.set('kind', value)
-    return this
+  public setSchema(value: S): this {
+    return this.set('schema', value)
   }
 
 }

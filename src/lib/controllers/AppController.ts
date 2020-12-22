@@ -1,17 +1,20 @@
-import { blueprintModelId, createNewBlueprintEntryDocument, defaultAppConfig } from '../app-defaults'
-import { CollectionType } from '../interfaces/dod'
-import { CollectionRef, DocumentRef } from "../interfaces/ref-controller"
+import { defaultAppConfig } from '../app-defaults'
+import { PKey, Schema } from '../interfaces/dod'
+import { Ref } from '../interfaces/dod'
 import { copyJson } from '../tools/utils'
-import { ID } from '../types'
 
+import { CollectionRefController } from './CollectionRefController'
+import { DatabaseRefController } from './DatabaseRefController'
 import { DocumentRefController } from './DocumentRefController'
+import { FieldRefController } from './FieldRefController'
 
 /**
  * Describes the initial configuration for the application controller
  */
 export interface AppControllerConfig {
-  blueprints: DocumentRef
-  collections: CollectionType
+  databases: {
+    [databaseId: string]: Ref.Database<Schema.CollectionsMeta>
+  }
 }
 
 /**
@@ -84,10 +87,12 @@ export class AppController {
    * Living collections data
    *
    * @private
-   * @type {CollectionRef}
+   * @type {any}
    * @memberof AppController
    */
-  private _blueprints: DocumentRef
+  private _databases: {
+    [databaseId: string]: Ref.Database<any>
+  } = {}
 
 
   private constructor(config?: AppControllerConfig) {
@@ -95,41 +100,36 @@ export class AppController {
       ...copyJson(defaultAppConfig),
       ...copyJson(config ?? {})
     }
-    this._blueprints = DocumentRefController.from(this._config.blueprints)
-    this._blueprints.init()
-    console.log('_blueprints', this._blueprints)
+    this._databases = this._config.databases
+    console.log('_blueprints', this._databases)
   }
 
   public getConfig() {
     return this._config
   }
 
-  public createBlueprint(): DocumentRef {
-    const model = this._blueprints.getField(blueprintModelId)
-    return createNewBlueprintEntryDocument(model as any)
+  public getDatabase(dbId: PKey): DatabaseRefController<any> {
+    return DatabaseRefController.from(this._databases[dbId])
   }
 
-  public getBlueprintsCollection(): CollectionRef {
-    console.log("this._blueprints.getSubcollection('blueprints')", this._blueprints.getSubcollection('blueprints'))
-    return this._blueprints.getSubcollection('blueprints')
-  }
-
-  public getBlueprint(id: ID): DocumentRef | null {
-    return this.getBlueprintsCollection().getDocument(id)
-  }
-
-  public setBlueprint(id: ID, value: DocumentRef, index?: number): this {
-    this.getBlueprintsCollection().setDocument(id, value, index)
+  public setDatabase(dbId: PKey, value: Ref.Database<any>): this {
+    this._databases[dbId] = value
     return this
   }
 
-  public getAllBlueprints(): DocumentRef[] {
-    console.log('getBlueprintsCollection()', this.getBlueprintsCollection())
-    return this.getBlueprintsCollection().getAllDocuments()
+  public getCollection(dbId: PKey, cId: PKey): CollectionRefController<any> {
+    const collection = this._databases[dbId]?.collections[cId]
+    return collection ? CollectionRefController.from(collection) : null
   }
 
-  public getBlueprints(): DocumentRef {
-    return this._blueprints
+  public getDocument(dbId: PKey, cId: PKey, dId: PKey): DocumentRefController<any> {
+    const document = this._databases[dbId]?.collections[cId]?.documents[dId]
+    return document ? DocumentRefController.from(document) : null
+  }
+
+  public getField(dbId: PKey, cId: PKey, dId: PKey, fId: PKey): FieldRefController<any> {
+    const field = this._databases[dbId]?.collections[cId]?.documents[dId]?.fields[fId]
+    return field ? FieldRefController.from(field) : null
   }
 
 }

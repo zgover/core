@@ -1,25 +1,20 @@
-import { Box } from '../interfaces/dod'
-import { BaseRef } from '../interfaces/ref-controller'
+import { PKey, Ref } from '../interfaces/dod'
+import { RefController } from '../interfaces/ref-controller'
 import { Crud } from '../models/Crud'
-import { ID } from '../types'
-
 
 /**
- * Base model to be shared with all document models
+ *
  *
  * @export
  * @class BaseRefController
- * @extends {Crud<T>}
- * @implements {BaseRef<T>}
- * @template T
+ * @extends {Crud<Ref.Base<S>>}
+ * @implements {RefController<S>}
+ * @template S
  */
-export class BaseRefController<T extends Box.Id = Box.Id> extends Crud<T> implements BaseRef<T> {
-
-  public get id(): ID { return this.get('id') }
-  public set id(value: ID) { this.set('id', value) }
+export class BaseRefController<T extends Ref.Base> extends Crud<T> implements RefController<T> {
 
   /** @inheritdoc */
-  preInit?(): void
+  public preInit?(): void
 
   /**
    * Initialize the instance, should be called immediately after
@@ -29,13 +24,29 @@ export class BaseRefController<T extends Box.Id = Box.Id> extends Crud<T> implem
    * @public
    * @memberof BaseRefController
    */
-  init(): this {
+  public init(): this {
     this.preInit && this.preInit()
     this.onInit && this.onInit()
     return this
   }
 
   /** @inheritdoc */
-  onInit?(): void
+  public onInit?(): void
+
+  public getId(): PKey {
+    return this.get('id')
+  }
+
+  public setId(value: PKey): this {
+    return this.set('id', value)
+  }
+
+  public getSchema(): T['schema'] {
+    return this.get('schema')
+  }
+
+  public setSchema(value: T['schema']): this {
+    return this.set('schema', value)
+  }
 
 }

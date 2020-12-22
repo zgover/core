@@ -1,4 +1,3 @@
-import { Timestamp } from './dod'
 /**
  * (D)Document-(o)oriented (D)Database (DoD)
  *
@@ -23,9 +22,6 @@ import { Timestamp } from './dod'
  */
 
 import { Dictionary } from '../types'
-
-import { Name } from './name'
-import { NormalizedData } from './normalized'
 
 /** Primary key */
 export type PKey = string
@@ -107,10 +103,6 @@ export namespace Relation {
 
 }
 
-export type Lookup = {
-
-}
-
 /** Field Type */
 export namespace FT {
 
@@ -128,7 +120,8 @@ export namespace FT {
 
   export type Nestable = Map | Sorted<any>
 
-  export type Any<T = any> = Sorted<T>
+  export type Any<T = any> =
+    Sorted<T>
     | Bool
     | Bytes
     | Timestamp
@@ -141,39 +134,52 @@ export namespace FT {
     | Text
 
   export namespace Tag {
-    export const bool = Symbol('bool')
-    export const bytes = Symbol('bytes')
-    export const timestamp = Symbol('timestamp')
-    export const float = Symbol('float')
-    export const int32 = Symbol('int32')
-    export const int64 = Symbol('int64')
-    export const nil = Symbol('nil')
-    export const text = Symbol('text')
-    export const coordinates = Symbol('coordinates')
-    export const map = Symbol('map')
-    export const sorted = Symbol('sorted')
+    export const bool: unique symbol = Symbol('bool')
+    export const bytes: unique symbol = Symbol('bytes')
+    export const timestamp: unique symbol = Symbol('timestamp')
+    export const float: unique symbol = Symbol('float')
+    export const int32: unique symbol = Symbol('int32')
+    export const int64: unique symbol = Symbol('int64')
+    export const nil: unique symbol = Symbol('nil')
+    export const text: unique symbol = Symbol('text')
+    export const coordinates: unique symbol = Symbol('coordinates')
+    export const map: unique symbol = Symbol('map')
+    export const sorted: unique symbol = Symbol('sorted')
+
+    export type T =
+      typeof bool
+      | typeof bytes
+      | typeof timestamp
+      | typeof float
+      | typeof int32
+      | typeof int64
+      | typeof nil
+      | typeof text
+      | typeof coordinates
+      | typeof map
+      | typeof sorted
   }
 
   /** Match Type from Tag symbol */
-  export type TypeFromTag<Kind extends symbol> =
-    Kind extends typeof Tag.sorted ? Sorted<any>
-    : Kind extends typeof Tag.bool ? Bool
+  export type TypeFromTag<Kind extends Tag.T> =
+    Kind extends typeof Tag.bool ? Bool
     : Kind extends typeof Tag.bytes ? Uint8Array
     : Kind extends typeof Tag.timestamp ? Timestamp
     : Kind extends typeof Tag.float ? Float
-    : Kind extends typeof Tag.coordinates ? Coordinates
     : Kind extends typeof Tag.int32 ? Int32
     : Kind extends typeof Tag.int64 ? Int64
-    : Kind extends typeof Tag.map ? Map
     : Kind extends typeof Tag.nil ? Null
     : Kind extends typeof Tag.text ? Text
+    : Kind extends typeof Tag.coordinates ? Coordinates
+    : Kind extends typeof Tag.map ? Map
+    : Kind extends typeof Tag.sorted ? Sorted<any>
     : never
 }
 
 /** Field */
 export type FieldValueType<T = any> = FT.Any<T>
 /** Document */
-export type DocumentType = { [fieldId: string]: FieldValueType }
+export type DocumentType<F extends FieldValueType = any> = { [fieldId: string]: F }
 /** Collection */
 export type CollectionType = { [documentId: string]: DocumentType }
 /** Database */
@@ -187,73 +193,120 @@ export type ClusterType = { [databaseId: string]: DatabaseType }
 export namespace Schema {
 
   /**
+   * Name fields
+   */
+  export type Name = FT.Text | {
+    singular?: FT.Text
+    plural?: FT.Text
+  }
+
+  /**
    * Interface properties for a timestamp lifecycle
    *
    * @export
    * @interface StampedLifecycle
    */
-  export interface StampedLifecycle {
-    created?: Timestamp
-    updated?: Timestamp
-    deleted?: Timestamp
-  }
+  export type StampedLifecycle = Partial<Record<StampedKeys, FT.Timestamp>>
+  export type StampedKeys = 'created' | 'updated' | 'delete'
 
-  export interface Named {
+  /** Just a boxed name field */
+  export interface NamedField {
     name: Name
   }
 
-  export interface FieldMeta extends Named {
-    $type: symbol
+  /**
+   * Describes the meta object for a field instance
+   */
+  export interface FieldMeta extends NamedField {
+    $type: FT.Tag.T
   }
 
-  export interface ModelFields {
+  /**
+   * Outlines the fields to be designated for a new
+   * document instance within the parent collection
+   */
+  export type ModelFields = {
     [fieldId: string]: FieldMeta
   }
 
-  export interface Collection extends DocumentType, StampedLifecycle, Named {
+  /**
+   * Describes a collection of documents, the fields
+   * property mocks a model as it describes any
+   * document within the collection.
+   */
+  export interface CollectionDocumentMeta extends DocumentType, StampedLifecycle, NamedField {
     fields: ModelFields
   }
 
-}
-
-/** Boxed properties */
-export namespace Box {
-
-  export type Id = {
-    id: PKey
+  /**
+   * Describes a collection of documents, each document
+   * only describes another collection e.g. the meta
+   */
+  export type CollectionsMeta = CollectionType & {
+    [collectionIdAsDocumentId: string]: CollectionDocumentMeta
   }
 
-  export type Kind = {
-    kind: string | number
+  /**
+   * The actual collection instance of a collection meta
+   */
+  export type CollectionInstance<T extends CollectionDocumentMeta> = CollectionType & {
+    [documentId: string]: DocumentType<
+      FT.TypeFromTag<T['fields'][string]['$type']>
+    >
   }
 
-  export type Value<T = FieldValueType> = {
-    value?: T
-  }
-
-  export type Fields<F = DocumentType, T = NormalizedData<F>> = {
-    fields: T
-  }
-
-  export type Documents<D = CollectionType, T = NormalizedData<D>> = {
-    documents: T
-  }
-
-  export type Collections<C = DatabaseType, T = NormalizedData<C>> = {
-    collections?: T
+  /**
+   * Just simply a database of collections
+   */
+  export type DatabaseCollections<C extends CollectionsMeta> = DatabaseType & {
+    [CID in keyof C]: CollectionInstance<C[CID]>
   }
 
 }
 
 export namespace Ref {
 
-  export type Field<T = FieldValueType> =
-    Box.Id & Box.Kind & Box.Value<T>
+  export interface Base<S = any> {
+    id: PKey
+    schema: S
+  }
 
-  export type Document<F = Field> =
-    Box.Id & Box.Fields<F>
+  /**
+   * =======================================================
+   */
+  export type FieldValue<S extends Schema.FieldMeta> = FT.TypeFromTag<S['$type']>
+  export interface Field<S extends Schema.FieldMeta> extends Base<S> {
+    value: FieldValue<S>
+  }
 
-  export type Collection<D = Document> =
-    Box.Id & Box.Documents<D>
+  /**
+   * =======================================================
+   */
+  export type DocumentFields<S extends Schema.ModelFields> = {
+    [K in keyof S]: Field<S[K]>
+  }
+  export interface Document<S extends Schema.ModelFields> extends Base<S> {
+    fields: DocumentFields<S>
+  }
+
+  /**
+   * =======================================================
+   */
+  export type CollectionDocuments<S extends Schema.CollectionDocumentMeta> = {
+    [documentId: string]: Document<S['fields']>
+  }
+  export interface Collection<S extends Schema.CollectionDocumentMeta> extends Base<S> {
+    documents: CollectionDocuments<S>
+  }
+
+  /**
+   * =======================================================
+   */
+  export type DatabaseCollections<S extends Schema.CollectionsMeta> = {
+    [K in keyof S]: Collection<S[K]>
+  }
+  export interface Database<S extends Schema.CollectionsMeta> extends Base<S> {
+    collections: DatabaseCollections<S>
+  }
 
 }

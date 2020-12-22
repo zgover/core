@@ -1,141 +1,134 @@
-import { DK, lbl, Sig } from './constants'
 import { AppControllerConfig } from './controllers/AppController'
-import { CollectionRefController } from './controllers/CollectionRefController'
-import { DocumentRefController } from './controllers/DocumentRefController'
-import { FieldRefController } from './controllers/FieldRefController'
-import { Ref } from './interfaces/dod'
-import { Normalized } from './models/Normalized'
-import { createUid } from './tools/uid'
-import { copyJson, s } from './tools/utils'
+import { FT, Schema } from './interfaces/dod'
 
-/**
- * Blueprint field model document
- */
-export const fieldModelId = [s(Sig.Field), s(Sig.Model)].join('_')
-export const blueprintModelId = [s(Sig.Blueprint), s(Sig.Model)].join('_')
-export const fieldModel: DocumentRefController = new DocumentRefController(
-  fieldModelId,
-  Normalized.from(
-    new FieldRefController(Sig.Name, DK.TEXT).init(),
-    new FieldRefController(Sig.Kind, DK.TEXT).init(),
-    new FieldRefController(Sig.Created, DK.DATETIME).init(),
-    new FieldRefController(Sig.Updated, DK.DATETIME).init(),
-    new FieldRefController(Sig.Deleted, DK.DATETIME).init(),
-  )
-).init()
+// /**
+//  * Blueprint field model document
+//  */
+// export const fieldModelId = [s(Sig.Field), s(Sig.Model)].join('_')
+// export const blueprintModelId = [s(Sig.Blueprint), s(Sig.Model)].join('_')
+// export const fieldModel: DocumentRefController = new DocumentRefController(
+//   fieldModelId,
+//   Normalized.from(
+//     new FieldRefController(Sig.Name, DK.TEXT).init(),
+//     new FieldRefController(Sig.Kind, DK.TEXT).init(),
+//     new FieldRefController(Sig.Created, DK.DATETIME).init(),
+//     new FieldRefController(Sig.Updated, DK.DATETIME).init(),
+//     new FieldRefController(Sig.Deleted, DK.DATETIME).init(),
+//   )
+// ).init()
 
-/**
- * Blueprint model document
- */
-export const blueprintModel: DocumentRefController = new DocumentRefController(
-  blueprintModelId,
-  Normalized.from(
-    new FieldRefController(Sig.Name, DK.TEXT).init(),
-    new FieldRefController(Sig.Kind, DK.TEXT, DK.BLUEPRINT).init(),
-    new FieldRefController(
-      fieldModelId,
-      DK.DOCUMENT,
-      fieldModel
-    ).init(),
-    new FieldRefController(Sig.Created, DK.DATETIME).init(),
-    new FieldRefController(Sig.Updated, DK.DATETIME).init(),
-    new FieldRefController(Sig.Deleted, DK.DATETIME).init(),
-  ),
-  Normalized.from(
-    new CollectionRefController(s(Sig.Fields)).init(),
-    new CollectionRefController(s(Sig.Entries)).init()
-  )
-).init()
+// /**
+//  * Blueprint model document
+//  */
+// export const blueprintModel: DocumentRefController = new DocumentRefController(
+//   blueprintModelId,
+//   Normalized.from(
+//     new FieldRefController(Sig.Name, DK.TEXT).init(),
+//     new FieldRefController(Sig.Kind, DK.TEXT, DK.BLUEPRINT).init(),
+//     new FieldRefController(
+//       fieldModelId,
+//       DK.DOCUMENT,
+//       fieldModel
+//     ).init(),
+//     new FieldRefController(Sig.Created, DK.DATETIME).init(),
+//     new FieldRefController(Sig.Updated, DK.DATETIME).init(),
+//     new FieldRefController(Sig.Deleted, DK.DATETIME).init(),
+//   ),
+//   Normalized.from(
+//     new CollectionRefController(s(Sig.Fields)).init(),
+//     new CollectionRefController(s(Sig.Entries)).init()
+//   )
+// ).init()
 
-export const createNewBlueprintDocument = (
-  name: string,
-  kind: string,
-): DocumentRefController => {
-  const copy = copyJson(blueprintModel)
-  const blueprint = new DocumentRefController(
-    createUid(),
-    copy.fields,
-    copy.subcollections
-  ).init()
-  console.log('blueprint document', blueprint, blueprint.getField(Sig.Name))
-  blueprint.getField(Sig.Name).setValue(name)
-  blueprint.getField(Sig.Kind).setValue(kind)
-  blueprint.getField(Sig.Created).setValue(Date.now())
-  return blueprint
-}
+// export const createNewBlueprintDocument = (
+//   name: string,
+//   kind: string,
+// ): DocumentRefController => {
+//   const copy = copyJson(blueprintModel)
+//   const blueprint = new DocumentRefController(
+//     createUid(),
+//     copy.fields,
+//     copy.subcollections
+//   ).init()
+//   console.log('blueprint document', blueprint, blueprint.getField(Sig.Name))
+//   blueprint.getField(Sig.Name).setValue(name)
+//   blueprint.getField(Sig.Kind).setValue(kind)
+//   blueprint.getField(Sig.Created).setValue(Date.now())
+//   return blueprint
+// }
 
-export const createNewBlueprintFieldDocument = (blueprint: DocumentRefController) => {
-  const modelField = blueprint.getField(fieldModelId)
-  const copied = copyJson(modelField.getValue() as Ref.Document)
-  const modelFieldVal = DocumentRefController.from(copied).init()
+// export const createNewBlueprintFieldDocument = (blueprint: DocumentRefController) => {
+//   const modelField = blueprint.getField(fieldModelId)
+//   const copied = copyJson(modelField.getValue() as Ref.Document)
+//   const modelFieldVal = DocumentRefController.from(copied).init()
 
-  return new DocumentRefController(
-    createUid(),
-    modelFieldVal.fields,
-    modelFieldVal.subcollections
-  ).init()
-}
+//   return new DocumentRefController(
+//     createUid(),
+//     modelFieldVal.fields,
+//     modelFieldVal.subcollections
+//   ).init()
+// }
 
-export const createNewBlueprintEntryDocument = (blueprint: DocumentRefController) => {
-  console.log('before fieldsCollection', blueprint)
-  const fieldsCollection = CollectionRefController.from(
-    copyJson(
-      <Ref.Collection>blueprint.getSubcollection(Sig.Fields)
-    )
-  ).init()
-  console.log('after fieldsCollection', fieldsCollection)
-  const entryFields = new Normalized()
+// export const createNewBlueprintEntryDocument = (blueprint: DocumentRefController) => {
+//   console.log('before fieldsCollection', blueprint)
+//   const fieldsCollection = CollectionRefController.from(
+//     copyJson(
+//       <Ref.Collection>blueprint.getSubcollection(Sig.Fields)
+//     )
+//   ).init()
+//   console.log('after fieldsCollection', fieldsCollection)
+//   const entryFields = new Normalized()
 
-  fieldsCollection.getAllDocuments().forEach(document => {
-    const _document = DocumentRefController.from(document).init()
-    entryFields.set(
-      _document.id,
-      new FieldRefController(
-        _document.id,
-        _document.getField(Sig.Kind).getValue() as string,
-        _document.getField(Sig.Value).getValue(),
-      )
-    )
-  })
+//   fieldsCollection.getAllDocuments().forEach(document => {
+//     const _document = DocumentRefController.from(document).init()
+//     entryFields.set(
+//       _document.id,
+//       new FieldRefController(
+//         _document.id,
+//         _document.getField(Sig.Kind).getValue() as string,
+//         _document.getField(Sig.Value).getValue(),
+//       )
+//     )
+//   })
 
-  return new DocumentRefController(
-    createUid(),
-    entryFields
-  ).init()
-}
+//   return new DocumentRefController(
+//     createUid(),
+//     entryFields
+//   ).init()
+// }
 
-// const sampleBlueprint = createNewBlueprintEntryDocument(blueprintModel)
-// sampleBlueprint.setField(Sig.Name, 'Blueprint (sample)')
-// sampleBlueprint.setField(Sig.Kind, DK.BLUEPRINT)
-const sampleBlueprint = createNewBlueprintDocument(
-  'Blueprint (sample)', DK.BLUEPRINT
-)
+// // const sampleBlueprint = createNewBlueprintEntryDocument(blueprintModel)
+// // sampleBlueprint.setField(Sig.Name, 'Blueprint (sample)')
+// // sampleBlueprint.setField(Sig.Kind, DK.BLUEPRINT)
+// const sampleBlueprint = createNewBlueprintDocument(
+//   'Blueprint (sample)', DK.BLUEPRINT
+// )
 
-const sampleEntry = createNewBlueprintEntryDocument(sampleBlueprint)
-sampleEntry.setField(s(Sig.Name), 'Blueprint entry (sample)')
-sampleEntry.setField(s(Sig.Kind), DK.ENTRY)
-sampleBlueprint
-  .getSubcollection(Sig.Entries)
-  .setDocument(sampleEntry.id, sampleEntry)
+// const sampleEntry = createNewBlueprintEntryDocument(sampleBlueprint)
+// sampleEntry.setField(s(Sig.Name), 'Blueprint entry (sample)')
+// sampleEntry.setField(s(Sig.Kind), DK.ENTRY)
+// sampleBlueprint
+//   .getSubcollection(Sig.Entries)
+//   .setDocument(sampleEntry.id, sampleEntry)
 
-/**
- * Blueprints collection document
- */
-const blueprints = new DocumentRefController(
-  'blueprints',
-  Normalized.from(
-    new FieldRefController('name', DK.TEXT, lbl[Sig.Blueprint]).init(),
-    new FieldRefController('kind', DK.TEXT, DK.COLLECTION).init(),
-    new FieldRefController(blueprintModelId, DK.DOCUMENT, blueprintModel).init(),
-  ),
-  Normalized.from(
-    new CollectionRefController('blueprints').init()
-  ),
-).init()
+// /**
+//  * Blueprints collection document
+//  */
+// const blueprints = new DocumentRefController(
+//   'blueprints',
+//   Normalized.from(
+//     new FieldRefController('name', DK.TEXT, lbl[Sig.Blueprint]).init(),
+//     new FieldRefController('kind', DK.TEXT, DK.COLLECTION).init(),
+//     new FieldRefController(blueprintModelId, DK.DOCUMENT, blueprintModel).init(),
+//   ),
+//   Normalized.from(
+//     new CollectionRefController('blueprints').init()
+//   ),
+// ).init()
 
-blueprints
-  .getSubcollection('blueprints')
-  .setDocument(sampleBlueprint.id, sampleBlueprint)
+// blueprints
+//   .getSubcollection('blueprints')
+//   .setDocument(sampleBlueprint.id, sampleBlueprint)
 
 
 // /**
@@ -155,13 +148,58 @@ blueprints
 //   ])
 // ).init()
 
+const testDbSchema: Schema.CollectionsMeta = {
+  test_collection: {
+    name: { singular: 'Test Collection', plural: 'Test Collections' },
+    created: Date.now(),
+    fields: {
+      sjdf5lgnc: {
+        name: { singular: 'First Name', plural: 'First Names' },
+        $type: FT.Tag.text
+      },
+      sdkgmlr34: {
+        name: { singular: 'Last Name', plural: 'Last Names' },
+        $type: FT.Tag.text
+      },
+    }
+  },
+}
+
 /**
  * The default application configuration object, can be
  * merged with a custom config to set overrides
  */
 export const defaultAppConfig: AppControllerConfig = {
 
-  blueprints,
-  collections: {}
+  databases: {
+    test_db: {
+      id: 'test_db',
+      schema: testDbSchema,
+      collections: {
+        test_collection: {
+          id: 'test_collection',
+          schema: testDbSchema.test_collection,
+          documents: {
+            test_document: {
+              id: 'test_document',
+              schema: testDbSchema.test_collection.fields,
+              fields: {
+                sjdf5lgnc: {
+                  id: 'sjdf5lgnc',
+                  schema: testDbSchema.test_collection.fields.sjdf5lgnc,
+                  value: 'Zach'
+                },
+                sdkgmlr34: {
+                  id: 'sdkgmlr34',
+                  schema: testDbSchema.test_collection.fields.sdkgmlr34,
+                  value: 'Zach'
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
 }

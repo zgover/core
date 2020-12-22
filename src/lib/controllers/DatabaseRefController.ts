@@ -3,14 +3,14 @@ import { PKey, Ref, Schema } from '../interfaces/dod'
 import { BaseRefController } from './BaseRefController'
 
 
-export class CollectionRefController<S extends Schema.CollectionDocumentMeta> extends BaseRefController<Ref.Collection<S>> {
+export class DatabaseRefController<S extends Schema.CollectionsMeta> extends BaseRefController<Ref.Database<S>> {
 
-  constructor(id: PKey, schema: S, documents?: Ref.CollectionDocuments<S>) {
-    super({ id, schema, documents })
+  constructor(id: PKey, schema: S, collections?: Ref.DatabaseCollections<S>) {
+    super({ id, schema, collections })
   }
 
-  public static from<S extends Schema.CollectionDocumentMeta>(model: Ref.Collection<S>) {
-    return new this(model?.id, model?.schema, model?.documents)
+  public static from<S extends Schema.CollectionsMeta>(model: Ref.Database<S>) {
+    return new this(model?.id, model?.schema, model?.collections)
   }
 
   /**
@@ -28,7 +28,7 @@ export class CollectionRefController<S extends Schema.CollectionDocumentMeta> ex
   }
 
   protected initDocuments() {
-    console.debug('initDocuments', this.getId(), this.getSchema(), this.getDocuments())
+    console.debug('initDocuments', this.getId(), this.getSchema(), this.getCollections())
     // Ensure if items are an object we ensure they are a document instance
     // if (!(this.documents instanceof Normalized)) {
     //   this.setDocuments(new Normalized(this.documents))
@@ -44,12 +44,12 @@ export class CollectionRefController<S extends Schema.CollectionDocumentMeta> ex
     // }
   }
 
-  public getDocuments(): Ref.CollectionDocuments<S> {
-    return this.get('documents')
+  public getCollections(): Ref.DatabaseCollections<S> {
+    return this.get('collections')
   }
 
-  public setDocuments(value: Ref.CollectionDocuments<S>): this {
-    return this.set('documents', value)
+  public setDocuments(value: Ref.DatabaseCollections<S>): this {
+    return this.set('collections', value)
   }
 
 }
