@@ -3,17 +3,22 @@
     "incremental": true,
     "target": "es2017",
     "outDir": "build/main",
-    "rootDir": "src",
     "moduleResolution": "node",
-    "module": "commonjs",
-    "declaration": true,
-    "inlineSourceMap": true,
+    "module": "commonjs" /* For Node.js, use "commonjs"; for require.js, use "amd". Affects module resolution.  */,
+    "declaration": true /* Generate .d.ts files for every TypeScript or JavaScript file inside your project. */,
+    "declarationDir": "build/types" /* Set a custom root dir for where declaration files (*.d.js) are emitted. */,
+    "sourceMap": true /* buldfield.map.js (note ".map") */,
+    // "inlineSourceMap": true, /* inline source map at EOL, results in larger output files */
+    "jsx": "preserve" /* preserve: Emit .jsx files with the JSX unchanged */,
+    "allowUmdGlobalAccess": true /* When TRUE lets you access UMD exports as globals from inside modules */,
+    "preserveConstEnums": true /* True improves runtime performance of enums */,
+    "allowSyntheticDefaultImports": true /* Allows imports like the following "import * as Foo from '../Foo'" to be written like so "import Foo from '../Foo'" (Forced TRUE if allowSyntheticDefaultImports is TRUE) */,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
-    "resolveJsonModule": true /* Include modules imported with .json extension. */,
 
-    // "strict": true /* Enable all strict type-checking options. */,
-
-    /* Strict Type-Checking Options */
+    /* ======================
+     * Strict Type-Checking Options
+     * ====================== */
+    "strict": false /* Enable/disable all strict type-checking options. */,
     // "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
     // "strictNullChecks": true /* Enable strict null checks. */,
     // "strictFunctionTypes": true /* Enable strict checking of function types. */,
@@ -21,33 +26,50 @@
     // "noImplicitThis": true /* Raise error on 'this' expressions with an implied 'any' type. */,
     // "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */,
 
-    /* Additional Checks */
+    /* ======================
+     * Additional Checks
+     * ====================== */
     "noUnusedLocals": true /* Report errors on unused locals. */,
     "noUnusedParameters": true /* Report errors on unused parameters. */,
     "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
     "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
 
-    /* Debugging Options */
+    /* ======================
+     * Debugging Options
+     * ====================== */
+    "noErrorTruncation": true /* Do not truncate error messages. */,
     "traceResolution": false /* Report module resolution log messages. */,
     "listEmittedFiles": false /* Print names of generated files part of the compilation. */,
     "listFiles": false /* Print names of files part of the compilation. */,
     "pretty": true /* Stylize errors and messages using color and context. */,
 
-    /* Experimental Options */
+    /* ======================
+     * Experimental Options
+     * ====================== */
     "experimentalDecorators": true /* Enables experimental support for ES7 decorators. */,
     "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
+    // "noEmit": true /* Do not emit compiler output files like js source code/maps etc.. */,
 
+    /* ======================
+     * Other and resolution
+     * ====================== */
     "lib": ["esnext", "dom"],
     "types": ["node"],
-    "typeRoots": ["node_modules/@types", "src/types"]
-
-    // "baseUrl": "./",
-    // "paths": {
-    //   "@aglyn/core": ["./src"],
-    //   "@aglyn/core/*": ["./src/*"]
-    // }
+    "typeRoots": ["node_modules/@types", "src/types"],
+    "rootDir": "src" /* Root directory in build output */,
+    "allowJs": true /* Allow js/jsx imports instead of just ts/tsx */,
+    "checkJs": true /* Errors are reported in JavaScript files (wildcard equiv for `// @ts-check`) */,
+    "resolveJsonModule": true /* Include modules imported with .json extension. */,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "forceConsistentCasingInFileNames": true /* allows for safe resolution in case-senstive file systems */,
+    "baseUrl": "./src" /* Lets you set a base directory to resolve non-absolute module names. */,
+    "paths": {
+      /* Path equals (import "test/*") = ${baseUrl = "./src"}${value = "./../test/*"} = (e.g., "./src/../test/*") */
+      "@aglyn/core": ["./"], // ./src/./
+      "@aglyn/core/*": ["./*"], // ./src/./*
+      "test/*": ["./../test/*"] // ./src/./../test/*
+    }
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules/**"],
-  "compileOnSave": false
+  "exclude": ["node_modules/**", "src/lib/_samples(remove)"]
 }

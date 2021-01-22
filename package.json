@@ -5,8 +5,9 @@
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
-  "repository": "https://github.com/zgover/@aglyn/core",
+  "repository": "https://github.com/aglyn/core",
   "license": "MIT",
+  "private": true,
   "keywords": [],
   "scripts": {
     "build": "run-p build:*",
