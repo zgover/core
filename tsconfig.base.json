@@ -18,7 +18,7 @@
       "@aglyn/mdi-icons": ["libs/mdi-icons/src/index.ts"],
       "@aglyn/website": ["libs/website/src/index.ts"],
       "@aglyn/shared/tools": ["libs/shared/tools/src/index.ts"],
-      "@aglyn/shared/react-common": ["libs/shared/react-common/src/index.ts"]
+      "@aglyn/shared/ui-react": ["libs/shared/ui-react/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

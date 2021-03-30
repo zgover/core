@@ -1,9 +1,9 @@
 module.exports = {
-  displayName: 'shared-react-common',
+  displayName: 'shared-ui-react',
   preset: '../../../jest.preset.js',
   transform: {
     '^.+\\.[tj]sx?$': 'babel-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../../coverage/libs/shared/react-common',
+  coverageDirectory: '../../../coverage/libs/shared/ui-react',
 }

@@ -39,7 +39,7 @@
     "shared-tools": {
       "tags": []
     },
-    "shared-react-common": {
+    "shared-ui-react": {
       "tags": []
     }
   }

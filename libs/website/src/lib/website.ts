@@ -14,17 +14,16 @@ const PRODUCTION = process.env.NODE_ENV === 'production'
 
 export namespace SiteCore {
 
+  export enum Event {
+    INSTANCE_CREATED = 'website.created-singleton-instance',
+  }
   export enum RestrictType {
     NONE,
     LIMIT = 'limit',
     DISALLOW = 'disallow',
   }
 
-  export enum Event {
-    INSTANCE_CREATED = 'website.created-singleton-instance',
-  }
-
-  export type ElementProps = Record<string, unknown>
+  export type AnyProps = Record<string, unknown>
 
   export interface Component {
     _id: string
@@ -34,9 +33,9 @@ export namespace SiteCore {
     title?: string
     subtitle?: string
     icon?: any
-    defaultProps?: Partial<ElementProps>
+    defaultProps?: Partial<AnyProps>
     propsSchema?: DdfSchema
-    resolveProps?: <T>(...args: T[]) => Partial<ElementProps> | void
+    resolveProps?: <T>(...args: T[]) => Partial<AnyProps> | void
     options?: {
       disableActions?: boolean
       disableBadge?: boolean
@@ -57,7 +56,7 @@ export namespace SiteCore {
     _id: string
     component?: Component | string
     children?: Element[]
-    props: ElementProps
+    props: AnyProps
     temp?: boolean
     parent?: string
     name?: string

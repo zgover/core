@@ -158,22 +158,22 @@
         }
       }
     },
-    "shared-react-common": {
-      "root": "libs/shared/react-common",
-      "sourceRoot": "libs/shared/react-common/src",
+    "shared-ui-react": {
+      "root": "libs/shared/ui-react",
+      "sourceRoot": "libs/shared/ui-react/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/shared/react-common/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["libs/shared/ui-react/**/*.{ts,tsx,js,jsx}"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/shared/react-common"],
+          "outputs": ["coverage/libs/shared/ui-react"],
           "options": {
-            "jestConfig": "libs/shared/react-common/jest.config.js",
+            "jestConfig": "libs/shared/ui-react/jest.config.js",
             "passWithNoTests": true
           }
         }
