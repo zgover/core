@@ -25,7 +25,7 @@ import React, {
 import { createPortal } from 'react-dom'
 
 import useCombinedRefs from '../hooks/use-combined-refs'
-import { _isStr, _isFn, getDisplayName, ChangeCase } from '@aglyn/shared/tools'
+import { _isStr, _isFn, getDisplayName, ChangeCase } from '@aglyn/shared/util'
 
 declare global {
   /** POLYFILL FOR adoptedStyleSheets */

@@ -95,48 +95,6 @@
         }
       }
     },
-    "website": {
-      "root": "libs/website",
-      "sourceRoot": "libs/website/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/website/**/*.ts"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/website"],
-          "options": {
-            "jestConfig": "libs/website/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
-    "shared-tools": {
-      "root": "libs/shared/tools",
-      "sourceRoot": "libs/shared/tools/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/shared/tools/**/*.ts"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/shared/tools"],
-          "options": {
-            "jestConfig": "libs/shared/tools/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
     "shared-ui-react": {
       "root": "libs/shared/ui-react",
       "sourceRoot": "libs/shared/ui-react/src",
@@ -158,22 +116,64 @@
         }
       }
     },
-    "feature-mdi-icons": {
-      "root": "libs/feature-mdi-icons",
-      "sourceRoot": "libs/feature-mdi-icons/src",
+    "shared-util": {
+      "root": "libs/shared/util",
+      "sourceRoot": "libs/shared/util/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/feature-mdi-icons/**/*.ts"]
+            "lintFilePatterns": ["libs/shared/util/**/*.ts"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/feature-mdi-icons"],
+          "outputs": ["coverage/libs/shared/util"],
           "options": {
-            "jestConfig": "libs/feature-mdi-icons/jest.config.js",
+            "jestConfig": "libs/shared/util/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "shared-feature-mdi-icon": {
+      "root": "libs/shared/feature-mdi-icon",
+      "sourceRoot": "libs/shared/feature-mdi-icon/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/shared/feature-mdi-icon/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/feature-mdi-icon"],
+          "options": {
+            "jestConfig": "libs/shared/feature-mdi-icon/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "website-feature-app": {
+      "root": "libs/website/feature-app",
+      "sourceRoot": "libs/website/feature-app/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/website/feature-app/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/website/feature-app"],
+          "options": {
+            "jestConfig": "libs/website/feature-app/jest.config.js",
             "passWithNoTests": true
           }
         }

@@ -30,16 +30,16 @@
       "tags": [],
       "implicitDependencies": ["console"]
     },
-    "website": {
-      "tags": []
-    },
-    "shared-tools": {
-      "tags": []
-    },
     "shared-ui-react": {
       "tags": []
     },
-    "feature-mdi-icons": {
+    "shared-util": {
+      "tags": []
+    },
+    "shared-feature-mdi-icon": {
+      "tags": []
+    },
+    "website-feature-app": {
       "tags": []
     }
   }

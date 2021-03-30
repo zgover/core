@@ -8,6 +8,10 @@
 
 import { _isArr, _isFn, _isNum, _isObj, _isStr, _isUndef, hasLn } from './guards'
 
+export function utils(): string {
+  return 'utils'
+}
+
 /**
  * Shortcut for retrieving the length property,
  * defaults to zero (0) if the property does not exist

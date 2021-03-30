@@ -1,6 +1,6 @@
 module.exports = {
-  displayName: 'feature-mdi-icons',
-  preset: '../../jest.preset.js',
+  displayName: 'shared-feature-mdi-icon',
+  preset: '../../../jest.preset.js',
   globals: {
     'ts-jest': {
       tsConfig: '<rootDir>/tsconfig.spec.json',
@@ -10,5 +10,5 @@ module.exports = {
     '^.+\\.[tj]sx?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/libs/feature-mdi-icons',
+  coverageDirectory: '../../../coverage/libs/shared/feature-mdi-icon',
 }

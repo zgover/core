@@ -2,9 +2,9 @@ import { useCallback, useState, useMemo } from 'react'
 
 import Fuse from 'fuse.js'
 
-import { Icons, icons as mdiIcons } from '@aglyn/feature-mdi-icons'
+import { Icons, icons as mdiIcons } from '@aglyn/shared/feature-mdi-icon'
 
-import { _isArr } from '@aglyn/shared/tools'
+import { _isArr } from '@aglyn/shared/util'
 
 export type MdiIcon = {
   id: string

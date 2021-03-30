@@ -15,10 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@aglyn/website": ["libs/website/src/index.ts"],
-      "@aglyn/shared/tools": ["libs/shared/tools/src/index.ts"],
       "@aglyn/shared/ui-react": ["libs/shared/ui-react/src/index.ts"],
-      "@aglyn/feature-mdi-icons": ["libs/feature-mdi-icons/src/index.ts"]
+      "@aglyn/shared/util": ["libs/shared/util/src/index.ts"],
+      "@aglyn/shared/feature-mdi-icon": ["libs/shared/feature-mdi-icon/src/index.ts"],
+      "@aglyn/website/feature-app": ["libs/website/feature-app/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

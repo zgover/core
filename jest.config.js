@@ -3,7 +3,7 @@ module.exports = {
     '<rootDir>/apps/console',
     '<rootDir>/libs/shared/react-common',
     '<rootDir>/libs/shared/tools',
-    '<rootDir>/libs/website',
-    '<rootDir>/libs/feature-mdi-icons',
+    '<rootDir>/libs/website/feature-website-core',
+    '<rootDir>/libs/shared/featured-mdi-icons',
   ],
 }

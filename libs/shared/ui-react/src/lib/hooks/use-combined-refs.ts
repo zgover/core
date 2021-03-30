@@ -1,6 +1,6 @@
 import { useCallback, Ref, RefCallback, MutableRefObject } from 'react'
 
-import { _isFn } from '@aglyn/shared/tools'
+import { _isFn } from '@aglyn/shared/util'
 
 /**
  * Assign a React ref object, could be a RefCallback or RefObject

@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react'
-import { _isArr, _isNum, _isObj, _isNumPos, _isFn } from '@aglyn/shared/tools'
+import { _isArr, _isNum, _isObj, _isNumPos, _isFn } from '@aglyn/shared/util'
 
 interface Options {
   // The millisecond delay count

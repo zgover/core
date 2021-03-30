@@ -13,9 +13,8 @@ const PKG_VERSION = JSON.stringify(process.env.PKG_VERSION ?? 'N/A')
 const PRODUCTION = process.env.NODE_ENV === 'production'
 
 export namespace SiteCore {
-
   export enum Event {
-    INSTANCE_CREATED = 'website.created-singleton-instance',
+    INSTANCE_CREATED = 'siteApp.created-singleton-instance',
   }
   export enum RestrictType {
     NONE,
@@ -27,7 +26,7 @@ export namespace SiteCore {
 
   export interface Component {
     _id: string
-    ClassFn: any
+    ClassFn?: any
     name: string
     description?: string
     title?: string
@@ -63,50 +62,59 @@ export namespace SiteCore {
     description?: string
   }
 
-  export type ComponentsMap = Map<string, InstanceType<typeof Website.Component>>
+  export type ComponentsMap = Map<string, ComponentModel>
+
+  export class ComponentModel {
+    constructor(public config: Component) {}
+  }
 
 }
 
-export class Website {
+export class SiteApp {
   public static readonly version: string = PKG_VERSION
   public static readonly production: boolean = PRODUCTION
   public static readonly development: boolean = !PRODUCTION
   public static readonly event: EventEmitter = new EventEmitter()
 
-  private static instance: Website
+  private static instance: SiteApp
   private static components: SiteCore.ComponentsMap = new Map()
 
   /**
    * Get the currently living singleton instance
    * @throws
-   * @returns {Website} instance
+   * @returns {SiteApp} instance
    */
-  public static getInstance(): Website {
-    if (this.instance instanceof Website) {
+  public static getInstance(): SiteApp {
+    if (this.instance instanceof SiteApp) {
       return this.instance
     }
     throw new Error("Instance doesn't exist! You must call createInstance(...) first!")
   }
 
   /**
-   * Creates a new singleton instance of Website
+   * Creates a new singleton instance of SiteApp
    * @throws
    */
   public static createInstance() {
-    if (this.instance instanceof Website) {
+    if (this.instance instanceof SiteApp) {
       throw new Error('Instance exist! You have already created an instance.')
     }
-    this.instance = new Website()
-    this.event.emit(Event.INSTANCE_CREATED)
+    this.instance = new SiteApp()
+    this.event.emit(SiteCore.Event.INSTANCE_CREATED)
   }
 
-  public static registerSiteComponent(component: any, options: Component): InstanceType<typeof Website.Component> {
-    return new Website.Component()
+  public static registerSiteComponent(component: any, options: SiteCore.Component) {
+    const { _id, ...opts } = options
+    if (this.components.has(_id)) {
+      throw new Error(`SiteComponent with same ID(${_id}) already exists!`)
+    }
+    this.components.set(_id, new SiteCore.ComponentModel({
+      ...opts, ClassFn: component, _id
+    }))
   }
 
-  private static Component = class {}
 }
 
-export function website() {
-  return 'website'
+export function app() {
+  return 'app'
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { _isFn } from '@aglyn/shared/tools'
+import { _isFn } from '@aglyn/shared/util'
 
 export function useInterval(callback: TimerHandler, delay: number, count?: number, ...args: any[]): void {
   const savedCallback = useRef(null)

@@ -2,10 +2,10 @@ import React from 'react'
 
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@material-ui/core/SvgIcon'
 
-import { getIcon, IconKeys } from '@aglyn/feature-mdi-icons'
+import { getIcon, IconKeys } from '@aglyn/shared/feature-mdi-icon'
 
 import { SvgPathData, svgPathElement } from '../svg-path/svg-path'
-import { _isStr } from '@aglyn/shared/tools'
+import { _isStr } from '@aglyn/shared/util'
 
 export type IconId = IconKeys
 export type Path = SvgPathData | React.ReactElement
