@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react'
-import { _isArr, _isNum, _isObj, isPosNum, _isFn } from '@aglyn/tools'
+import { _isArr, _isNum, _isObj, _isNumPos, _isFn } from '@aglyn/tools'
 
 
 interface Options {
@@ -111,7 +111,7 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
       ? _isNum(state.msDelay) ? state.msDelay : 0
       : optDelay || 0
 
-    const max = isPosNum(optLimit) ? optLimit : null
+    const max = _isNumPos(optLimit) ? optLimit : null
 
     // If run limit was provide ensure we don't run more than specified
     const handler = (arg: HandlerParams['args']) => {

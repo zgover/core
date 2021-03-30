@@ -47,6 +47,28 @@ export function b(...val: Parameters<typeof Boolean>): boolean {
 }
 
 /**
+ * Shortcut for JSON.stringify(...)
+ *
+ * @export
+ * @param args
+ * @return {string}
+ */
+export function JSONs(...args: Parameters<typeof JSON.stringify>): ReturnType<typeof JSON.stringify> {
+  return JSON.stringify(...args)
+}
+
+/**
+ * Shortcut for JSON.parse(...)
+ *
+ * @export
+ * @param args
+ * @return {any}
+ */
+export function JSONp(...args: Parameters<typeof JSON.parse>): ReturnType<typeof JSON.parse> {
+  return JSON.parse(...args)
+}
+
+/**
  * Safe array, will always return an array
  *
  * @export

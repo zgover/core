@@ -168,7 +168,7 @@ export function _isStrEmpty(val: unknown): val is '' {
  * @returns {(val is '' | [])}
  */
 export function _isEmptyStrOrArr(val: unknown): val is ('' | []) {
-  return _isStrEmpty(val) && _isArrEmpty(val)
+  return _isStrEmpty(val) || _isArrEmpty(val)
 }
 /**
  * Is type Buffer
@@ -177,7 +177,7 @@ export function _isEmptyStrOrArr(val: unknown): val is ('' | []) {
  * @param {*} val
  * @returns {val is Buffer}
  */
-export function isBuffer(val: unknown): val is Buffer {
+export function _isBuff(val: unknown): val is Buffer {
   return _isObjT(val) && _isObjT(val.constructor) && 'isBuffer' in val.constructor &&
     _isFn((val.constructor as any).isBuffer) && (val.constructor as any).isBuffer(val)
 }
@@ -200,7 +200,7 @@ export function _isPrim(val: unknown): val is Primitive {
     || _isUndef(val)
   )
 }
-type Primitive = symbol | bigint | boolean | number | string | undefined
+export type Primitive = symbol | bigint | boolean | number | string | undefined
 
 /**
  * Checks if the parameter has length greater than 0 or second parameter
@@ -263,7 +263,7 @@ export function hasLn<T extends Iterable<U> | ArrayLike<U> | number, U>(val: T, 
     if (_isFn(also)) {
       return Boolean(and ? firstCheck && also(len, v) : firstCheck || also(len, v))
     }
-    // !opts && console.log('has len', val, len, isPosNum(len))
+    // !opts && console.log('has len', val, len, _isNumPos(len))
     return firstCheck
   }
   const chkOpt = (equal: boolean, less: boolean, more: boolean, chk: boolean): boolean => {
@@ -271,7 +271,7 @@ export function hasLn<T extends Iterable<U> | ArrayLike<U> | number, U>(val: T, 
   }
   return Boolean(
     noOpt
-      ? chkFunc(isPosNum(len))
+      ? chkFunc(_isNumPos(len))
       : chkOpt(true, false, false, (len === e))
       || chkOpt(false, true, false, (len < l))
       || chkOpt(false, false, true, (len > m))
@@ -294,37 +294,37 @@ export type HasLenOpt<U> = {
 }
 
 /**
- *
+ * Checks if the value is a negative number
  *
  * @export
  * @param {*} val
  * @returns {(val is number & boolean)}
  */
-export function isNegNum(val: unknown): val is number & boolean {
+export function _isNumNeg(val: unknown): val is number & boolean {
   return _isNum(val) && Number(val) < 0
 }
 /**
- *
+ * Checks if the value is a positive number
  *
  * @export
  * @param {*} val
  * @returns {(val is number & boolean)}
  */
-export function isPosNum(val: unknown): val is number & boolean {
+export function _isNumPos(val: unknown): val is number & boolean {
   return _isNum(val) && Number(val) > 0
 }
 /**
- *
+ * Checks if the value is a number equal to zero(0)
  *
  * @export
  * @param {*} val
  * @returns {val is 0}
  */
-export function isZero(val: unknown): val is 0 {
+export function _isNumZero(val: unknown): val is 0 {
   return _isNum(val) && Number(val) === 0
 }
 /**
- *
+ * Check if the value is same as one of the values within the array
  *
  * @export
  * @template U
