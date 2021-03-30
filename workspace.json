@@ -95,48 +95,6 @@
         }
       }
     },
-    "ui-common": {
-      "root": "libs/ui-common",
-      "sourceRoot": "libs/ui-common/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/ui-common/**/*.{ts,tsx,js,jsx}"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/ui-common"],
-          "options": {
-            "jestConfig": "libs/ui-common/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
-    "tools": {
-      "root": "libs/tools",
-      "sourceRoot": "libs/tools/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/tools/**/*.ts"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/tools"],
-          "options": {
-            "jestConfig": "libs/tools/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
     "mdi-icons": {
       "root": "libs/mdi-icons",
       "sourceRoot": "libs/mdi-icons/src",
@@ -174,6 +132,48 @@
           "outputs": ["coverage/libs/website"],
           "options": {
             "jestConfig": "libs/website/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "shared-tools": {
+      "root": "libs/shared/tools",
+      "sourceRoot": "libs/shared/tools/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/shared/tools/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/tools"],
+          "options": {
+            "jestConfig": "libs/shared/tools/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "shared-react-common": {
+      "root": "libs/shared/react-common",
+      "sourceRoot": "libs/shared/react-common/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/shared/react-common/**/*.{ts,tsx,js,jsx}"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/react-common"],
+          "options": {
+            "jestConfig": "libs/shared/react-common/jest.config.js",
             "passWithNoTests": true
           }
         }

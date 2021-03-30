@@ -1,8 +1,8 @@
 module.exports = {
   projects: [
     '<rootDir>/apps/console',
-    '<rootDir>/libs/ui-common',
-    '<rootDir>/libs/tools',
+    '<rootDir>/libs/shared/react-common',
+    '<rootDir>/libs/shared/tools',
     '<rootDir>/libs/website',
     '<rootDir>/libs/mdi-icons',
   ],
