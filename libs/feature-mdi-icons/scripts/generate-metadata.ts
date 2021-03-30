@@ -4,32 +4,39 @@ import { Normal } from '../common/data-type'
 import path from 'path'
 import fs from 'fs'
 
-
-type FileInfo = {out: string, exportName: string, data: Record<string, unknown>}
+type FileInfo = { out: string; exportName: string; data: Record<string, unknown> }
 
 type Icons = {
   iconIds: string[]
-  byIconId: Normal.Lookup<{
-    path: string
-    name: string
-    alias: { [alias: string]: true }
-  }, string>
+  byIconId: Normal.Lookup<
+    {
+      path: string
+      name: string
+      alias: { [alias: string]: true }
+    },
+    string
+  >
 }
 type Authors = {
   authorIds: string[]
-  byAuthorId: Normal.Lookup<{
-    name: string,
-    icon: { [iconId: string]: true },
-  }, string>
+  byAuthorId: Normal.Lookup<
+    {
+      name: string
+      icon: { [iconId: string]: true }
+    },
+    string
+  >
 }
 type Tags = {
   tagIds: string[]
-  byTagId: Normal.Lookup<{
-    name: string,
-    icon: { [iconId: string]: true },
-  }, string>
+  byTagId: Normal.Lookup<
+    {
+      name: string
+      icon: { [iconId: string]: true }
+    },
+    string
+  >
 }
-
 
 const outDir = path.join(__dirname, '../json/')
 const version = util.getVersion()
@@ -37,15 +44,15 @@ const meta = util.getMeta(true)
 const iconIds: string[] = []
 const authorIds: string[] = []
 const tagIds: string[] = []
-const icons: Icons = {iconIds, byIconId: {}}
-const authors: Authors = {authorIds, byAuthorId: {}}
-const tags: Tags = {tagIds, byTagId: {}}
+const icons: Icons = { iconIds, byIconId: {} }
+const authors: Authors = { authorIds, byAuthorId: {} }
+const tags: Tags = { tagIds, byTagId: {} }
 function configureIcon(iconMeta) {
   const { name, path, aliases = [] } = iconMeta
   const iconId = paramCase(name)
   iconIds.push(iconId)
-  icons.byIconId[iconId] = {path, name: capitalCase(iconId), alias: {}}
-  aliases.forEach((aliasId) => icons.byIconId[iconId].alias[aliasId] = true)
+  icons.byIconId[iconId] = { path, name: capitalCase(iconId), alias: {} }
+  aliases.forEach((aliasId) => (icons.byIconId[iconId].alias[aliasId] = true))
   return iconId
 }
 function configureTags(iconId, iconMeta) {
@@ -98,16 +105,16 @@ function generateFile(fileInfo: FileInfo, minify = false): void {
   })
 }
 
-(function (){
+;(function () {
   meta.forEach((iconMeta) => {
     const iconId = configureIcon(iconMeta)
     configureTags(iconId, iconMeta)
     configureAuthors(iconId, iconMeta)
   })
   const filesInfo = [
-    {out: 'icons', exportName: 'icons', data: icons},
-    {out: 'authors', exportName: 'authors', data: authors},
-    {out: 'tags', exportName: 'tags', data: tags},
+    { out: 'icons', exportName: 'icons', data: icons },
+    { out: 'authors', exportName: 'authors', data: authors },
+    { out: 'tags', exportName: 'tags', data: tags },
   ]
   filesInfo.forEach((data) => {
     generateFile(data)

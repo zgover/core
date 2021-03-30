@@ -4,6 +4,6 @@ module.exports = {
     '<rootDir>/libs/shared/react-common',
     '<rootDir>/libs/shared/tools',
     '<rootDir>/libs/website',
-    '<rootDir>/libs/mdi-icons',
+    '<rootDir>/libs/feature-mdi-icons',
   ],
 }

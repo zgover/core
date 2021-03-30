@@ -30,9 +30,6 @@
       "tags": [],
       "implicitDependencies": ["console"]
     },
-    "mdi-icons": {
-      "tags": []
-    },
     "website": {
       "tags": []
     },
@@ -40,6 +37,9 @@
       "tags": []
     },
     "shared-ui-react": {
+      "tags": []
+    },
+    "feature-mdi-icons": {
       "tags": []
     }
   }
