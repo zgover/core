@@ -261,6 +261,32 @@ export function reduceObject<T extends Record<string, unknown>, K extends keyof 
 }
 
 /**
+ * Map an object keys and values
+ * @export
+ * @template K
+ * @template V
+ * @template U
+ * @param target
+ * @param callbackFn
+ * @param thisArg
+ * @returns {{[key in K]: U}}
+ */
+export function map<K extends string, V, U>(
+  target: { [key in K]: V },
+  callbackFn: (value: V, key: K, obj: { [key in K]: V }) => U,
+  thisArg?: unknown
+): { [key in K]: U } {
+  const res: Partial<{ [key in K]: U }> = {}
+  for (const key in target) {
+    if (Object.prototype.hasOwnProperty.call(target, key)) {
+      res[key] = callbackFn.call(thisArg, target[key], key, target)
+    }
+  }
+  return res as { [key in K]: U }
+}
+
+/**
+ *
  * Map object literal for quick editing or build a keyed object literal from
  * an array of objects
  *
@@ -288,6 +314,8 @@ export function reduceObject<T extends Record<string, unknown>, K extends keyof 
  *  if !!advanced - the clbk should return a tuple of the new key and value [k,v]
  * )
  * @returns {object}
+ * @deprecated Move to {@link map}
+ * @see {@link map}
  */
 export function mapObject(target, callbackfn: MapObjectClbkFn, opt?: MapObjectOptions) {
   const { copy: cp = false, filter = false, advanced = false, forEach = false } = opt ?? {}

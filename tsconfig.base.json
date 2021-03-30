@@ -13,6 +13,7 @@
     "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "strictBindCallApply": true,
     "baseUrl": ".",
     "paths": {
       "@aglyn/shared/ui-react": ["libs/shared/ui-react/src/index.ts"],

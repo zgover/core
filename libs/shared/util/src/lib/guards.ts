@@ -208,6 +208,7 @@ export function _isPrim(val: unknown): val is Primitive {
   )
 }
 export type Primitive = symbol | bigint | boolean | number | string | undefined
+export type PrimitiveBasic = number | string | boolean
 
 /**
  * Checks if the parameter has length greater than 0 or second parameter

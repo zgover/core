@@ -2,8 +2,8 @@ export * from './lib/guards'
 export * from './lib/uid'
 export * from './lib/utils'
 
-export { default as deepEqual } from 'deep-equal'
-export { default as mergeDeep } from 'merge-deep'
+export * as deepEqual from 'deep-equal'
+export * as deepMerge from 'deepmerge'
 
 /**
  * Transform a string between camelCase, PascalCase, Capital Case, snake_case,
