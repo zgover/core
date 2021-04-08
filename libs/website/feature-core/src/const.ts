@@ -6,15 +6,15 @@
  * found in the root directory of this source tree.
  */
 
-import { version } from '../../../../package.json'
+import { version as pkgJsonVer } from '../../../../package.json'
 
 
-export const PKG_VERSION = JSON.stringify(version ?? 'N/A')
+export const PKG_VERSION = JSON.stringify(pkgJsonVer ?? 'N/A')
 export const PRODUCTION = process.env.NODE_ENV === 'production'
 
-export enum EventKey {
-  INSTANCE_CREATED = 'site.created-singleton-instance',
-  COMPONENT_REGISTERED = 'site.registered-site-component',
+export enum EventFlag {
+  INSTANCE_CREATED = 'website:app:created-instance',
+  COMPONENT_REGISTERED = 'website:app:set-component',
 }
 
 export enum RestrictType {

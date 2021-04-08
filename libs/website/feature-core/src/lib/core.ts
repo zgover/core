@@ -7,25 +7,26 @@
  */
 
 import DdfSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
-import EventEmitter from 'events'
-import { RestrictType, } from '../const'
-import { App } from './app'
+import { RestrictType } from '../const'
 
 
 export type AnyProps = Record<string, unknown>
-export type ClassOrFunction = ((...args: unknown[])=>unknown) | (new (...args: unknown[])=>unknown)
 
-export interface Component {
+export interface Module {
+  _id?: string
+  declarations: (Component[])[]
+}
+
+export interface Component<T = unknown> {
   _id: string
-  Component?: ClassOrFunction | any
-  name: string
+  displayName?: string
   description?: string
   title?: string
   subtitle?: string
   icon?: any
   defaultProps?: Partial<AnyProps>
-  propsSchema?: DdfSchema
   resolveProps?: <T>(...args: T[]) => Partial<AnyProps> | void
+  propsSchema?: DdfSchema
   options?: {
     disableActions?: boolean
     disableBadge?: boolean
@@ -53,14 +54,7 @@ export interface Element {
   description?: string
 }
 
-export class ComponentController {
-  constructor(public readonly model: Component, protected readonly app: App) {
-
-  }
-}
-
-export const eventEmitter: EventEmitter = new EventEmitter()
-export const components: Map<string, ComponentController> = new Map()
+export type ModulesMap = Map<string, Module>
 
 export function core() {
   return 'core'

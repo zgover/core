@@ -73,6 +73,24 @@ export function JSONp(...args: Parameters<typeof JSON.parse>): ReturnType<typeof
 }
 
 /**
+ * Sort iterable by property or index returned from callbackFn
+ * @export`
+ * @param {T[]} target
+ * @param {(item: T) => (string | number)} callbackFn
+ * @param thisArg
+ * @returns {T[]}
+ */
+export function sortBy<T>(target: T[], callbackFn: ((item: T) => string | number), thisArg?: any) {
+  return target.slice().sort((a, b) => {
+    const propA = callbackFn.call(thisArg, a, target) // callbackFn(a)
+    const propB = callbackFn.call(thisArg, b, target) // prop(b)
+    if (propA < propB) return -1
+    if (propA > propB) return 1
+    return 0
+  })
+}
+
+/**
  * Safe array, will always return an array
  *
  * @export
@@ -176,8 +194,12 @@ export function setDeepProperty<T>(obj: T, path: string, val: any, separator = '
  * @param {string} firstPath
  * @param {string} [secondPath]
  * @returns {T[]}
+ *
+ * @deprecated {@link sortBy}
+ * @see {@link sortBy}
+ * TODO: REMOVE AMBIGUOUS METHOD TO REPLACE WITH `sortBy`
  */
-export function sortBy<T>(items: T[], firstPath: string, secondPath?: string): T[] {
+export function sortByProperty<T>(items: T[], firstPath: string, secondPath?: string): T[] {
   const lgr = (a, b, p) => getDeepProperty(a, p) > getDeepProperty(b, p)
   const eq = (a, b, p) => getDeepProperty(a, p) === getDeepProperty(b, p)
   return items.sort((a, b) =>

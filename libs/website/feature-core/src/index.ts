@@ -6,6 +6,6 @@
  * found in the root directory of this source tree.
  */
 
-export * as website from './lib/index'
-import * as website from './lib/index'
-export default website
+export * as Website from './lib/index'
+import * as Website from './lib/index'
+export default Website

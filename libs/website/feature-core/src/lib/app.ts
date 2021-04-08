@@ -6,23 +6,26 @@
  * found in the root directory of this source tree.
  */
 
+// import EventEmitter from 'events'
+import { Component, Module, ModulesMap } from './core'
+import { EventFlag, PKG_VERSION } from '../const'
 import EventEmitter from 'events'
-import { Component, ComponentController, components, eventEmitter } from './core'
-import { EventKey, PKG_VERSION, PRODUCTION } from '../const'
 
 
 export class App {
 
-  public static readonly version: string = PKG_VERSION
-  public static readonly production: boolean = PRODUCTION
-  public static readonly development: boolean = !PRODUCTION
-  public static readonly event: EventEmitter = eventEmitter
+  public static readonly $VERSION: string = PKG_VERSION
+
+  public static event: EventEmitter = new EventEmitter()
+  public static modules: ModulesMap = new Map()
 
   private static instance?: App
 
+  private constructor() {}
+
 
   /**
-   * Get the currently living singleton instance of Website
+   * Get the currently living singleton instance of App
    * @throws
    * @returns {App} instance
    */
@@ -42,29 +45,28 @@ export class App {
       throw new Error('Instance exist! You have already created an instance.')
     }
     App.instance = new App()
-    App.event.emit(EventKey.INSTANCE_CREATED, this, App.instance)
+    App.event.emit(EventFlag.INSTANCE_CREATED, this, App.instance)
     return App.instance
   }
 
   /**
-   * Builds and registers a {@link ComponentController} instance from the
+   * Builds and registers a {@link Module} instance from the
    * provided {@link Component}
    * @param {string} _id
-   * @param {Component['Component']} Component
-   * @param {Component} options
-   * @return {ComponentController} Reference to the newly created model
+   * @param {Component["ctor"]} ctor
+   * @param {Component["config"]} config
+   * @returns {App}
    */
   public static setComponent(
     _id: string,
-    Component: Component['Component'],
-    options?: Omit<Component, '_id'>,
-  ): ComponentController {
-    const { _id: _1, Component: _2, ...opts } = options as Component
-    const config: Component = { ...opts, Component, _id }
-    const ctrl = new ComponentController(config, App)
-    components.set(_id, ctrl)
-    App.event.emit(EventKey.COMPONENT_REGISTERED, App, ctrl)
-    return ctrl
+    ctor: Component['ctor'],
+    meta?: Component['metadata'],
+  ) {
+    const component: Component = { metadata: { ...meta, _id }, ctor }
+    const module: Module = new class ComponentModule {}
+    App.modules.set(_id, module)
+    App.event.emit(EventFlag.COMPONENT_REGISTERED, App, module)
+    return this
   }
 
 }
