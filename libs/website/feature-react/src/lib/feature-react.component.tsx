@@ -1,6 +1,6 @@
 import React from 'react'
 import Website from '@aglyn/website/feature-core'
-import { ElementComponent, ElementComponentProps } from './element-component'
+import { ElementComponent, ElementComponentProps } from './element.component'
 
 /* eslint-disable-next-line */
 export interface FeatureReactProps {
@@ -19,7 +19,11 @@ export function FeatureReact(props: FeatureReactProps) {
   return (
     <Wrapper {...rest}>
       {elements.map(data =>
-        <Component elementData={data} childrenComponent={Component} />
+        <Component
+          key={data.$id}
+          elementData={data}
+          childrenComponent={Component}
+        />
       )}
     </Wrapper>
   )

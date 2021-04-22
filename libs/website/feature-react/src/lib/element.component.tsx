@@ -1,7 +1,7 @@
 import React from 'react'
 import Website from '@aglyn/website/feature-core'
 import { _isArr, _isArrEmpty, _isFn, _isStr, deepMerge } from '@aglyn/shared/util'
-import { isReactComponent } from '@aglyn/shared/ui-react'
+import * as ReactIs from 'react-is'
 
 /* eslint-disable-next-line */
 export interface ElementComponentProps {
@@ -24,7 +24,7 @@ export function ElementComponent(props: ElementComponentProps) {
     component,
     deepMerge(defaultProps, elementData.props),
   )
-  const ComponentCtor = isReactComponent(ctor) || _isStr(ctor) ? ctor : 'div'
+  const ComponentCtor = ReactIs.isValidElementType(ctor) ? ctor : 'div'
   return (
     <ComponentCtor {...ctorProps}>
       {
@@ -32,6 +32,7 @@ export function ElementComponent(props: ElementComponentProps) {
           ? content
           : children.map(data => (
             <ChildrenComponent
+              key={data.$id}
               childrenComponent={ChildrenComponent}
               elementData={data}
             />

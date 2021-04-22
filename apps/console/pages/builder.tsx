@@ -5,7 +5,7 @@ import { FeatureReact } from '@aglyn/website/feature-react'
 /* eslint-disable-next-line */
 export interface BuilderProps {}
 
-const Root = ({children, ...props}) => <div data-cid={'root'} {...props}>{children}</div>
+const Root = ({children, ...props}) => <span {...props}>{children}</span>
 
 Website.App.setComponent({
   moduleId: 'react',
@@ -16,28 +16,28 @@ Website.App.setComponent({
 export function Builder(props: BuilderProps) {
   const [elements, setElements] = useState([
     {
-      $id: 'root',
+      $id: 'root1',
       component: 'root',
       props: {
         children: 'hello'
       },
       children: [
         {
-          $id: 'root',
+          $id: 'root1',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          $id: 'root',
+          $id: 'root2',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          $id: 'root',
+          $id: 'root3',
           component: 'root',
           props: {
             children: 'hello'
@@ -46,28 +46,28 @@ export function Builder(props: BuilderProps) {
       ]
     },
     {
-      $id: 'root',
+      $id: 'root2',
       component: 'root',
       props: {
         children: 'hello'
       },
       children: [
         {
-          $id: 'root',
+          $id: 'root1',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          $id: 'root',
+          $id: 'root2',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          $id: 'root',
+          $id: 'root3',
           component: 'root',
           props: {
             children: 'hello'
@@ -76,28 +76,28 @@ export function Builder(props: BuilderProps) {
       ]
     },
     {
-      $id: 'root',
+      $id: 'root3',
       component: 'root',
       props: {
         children: 'hello'
       },
       children: [
         {
-          $id: 'root',
+          $id: 'root1',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          $id: 'root',
+          $id: 'root2',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          $id: 'root',
+          $id: 'root3',
           component: 'root',
           props: {
             children: 'hello'

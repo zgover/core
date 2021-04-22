@@ -25,7 +25,7 @@ import React, {
 import { createPortal } from 'react-dom'
 
 import useCombinedRefs from '../hooks/use-combined-refs'
-import { _isStr, _isFn, getDisplayName, changeCase } from '@aglyn/shared/util'
+import { _isStr, _isFn, getDisplayName, ChangeCase } from '@aglyn/shared/util'
 
 declare global {
   /** POLYFILL FOR adoptedStyleSheets */
@@ -120,7 +120,7 @@ export function createShadowDomProxy(target = {}, options?: CreateShadowDomFacto
 
   return new Proxy(target, {
     get: (_, name: string) => {
-      const component = changeCase.paramCase(name) ?? 'div'
+      const component = ChangeCase.paramCase(name) ?? 'div'
       const key = `${keyPrefix ?? 'default'}-${name}`
       if (!components.has(key)) {
         const root = createShadowDomRoot({ render }, component)
