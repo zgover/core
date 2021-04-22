@@ -1,6 +1,6 @@
 module.exports = {
   displayName: 'website-feature-core',
-  preset: '../../../jest.preset.js',
+  preset: '../../../../jest.preset.js',
   globals: {
     'ts-jest': {
       tsConfig: '<rootDir>/tsconfig.spec.json',
@@ -10,5 +10,5 @@ module.exports = {
     '^.+\\.[tj]sx?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../../coverage/libs/website/feature-core',
+  coverageDirectory: '../../../../coverage/libs/website/feature/core',
 }

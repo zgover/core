@@ -1,5 +1,5 @@
 import React from 'react'
-import Website from '@aglyn/website/feature-core'
+import Website from '@aglyn/website/feature/core'
 import { _isArr, _isArrEmpty, _isFn, _isStr, deepMerge } from '@aglyn/shared/util'
 import * as ReactIs from 'react-is'
 
@@ -13,31 +13,26 @@ export function ElementComponent(props: ElementComponentProps) {
   const { elementData, childrenComponent: ChildrenComponent } = props
   const { children, component: cIdOrData } = elementData
   const component: Website.Component = !_isStr(cIdOrData)
-    ? cIdOrData as Website.Component
+    ? (cIdOrData as Website.Component)
     : Website.App.getComponent({
-      moduleId: 'react', componentId: cIdOrData,
-    })
+        moduleId: 'react',
+        componentId: cIdOrData,
+      })
   const { ctor, metadata } = component
   const { defaultProps, resolveProps: metaResolve } = metadata ?? {}
-  const resolveProps = _isFn(metaResolve) ? metaResolve : ((p) => p)
+  const resolveProps = _isFn(metaResolve) ? metaResolve : (p) => p
   const { children: content = null, ...ctorProps } = resolveProps.call(
     component,
-    deepMerge(defaultProps, elementData.props),
+    deepMerge(defaultProps, elementData.props)
   )
   const ComponentCtor = ReactIs.isValidElementType(ctor) ? ctor : 'div'
   return (
     <ComponentCtor {...ctorProps}>
-      {
-        !_isArr(children) || _isArrEmpty(children)
-          ? content
-          : children.map(data => (
-            <ChildrenComponent
-              key={data.$id}
-              childrenComponent={ChildrenComponent}
-              elementData={data}
-            />
-          ))
-      }
+      {!_isArr(children) || _isArrEmpty(children)
+        ? content
+        : children.map((data) => (
+            <ChildrenComponent key={data.$id} childrenComponent={ChildrenComponent} elementData={data} />
+          ))}
     </ComponentCtor>
   )
 }

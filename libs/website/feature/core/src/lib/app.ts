@@ -10,9 +10,7 @@ import { Component, ModulesMap } from './core'
 import { EventFlag, PKG_VERSION } from '../const'
 import EventEmitter from 'events'
 
-
 export class App {
-
   public static readonly $VERSION: string = PKG_VERSION
 
   public static event: EventEmitter = new EventEmitter()
@@ -22,8 +20,9 @@ export class App {
 
   public readonly $CREATED = new Date().toUTCString()
 
-  private constructor() {/* empty */}
-
+  private constructor() {
+    /* empty */
+  }
 
   /**
    * Get or creates the currently living singleton instance of App
@@ -42,7 +41,7 @@ export class App {
     return this.getInstance()
   }
 
-  public static setModule(props: { $id: string, declarations: Component[] }) {
+  public static setModule(props: { $id: string; declarations: Component[] }) {
     const { $id, declarations } = props
     const module = { $id, declarations }
     this.modules.set($id, module)
@@ -50,22 +49,22 @@ export class App {
     return this
   }
 
-  public static getComponent(props: { moduleId: string, componentId: string }) {
+  public static getComponent(props: { moduleId: string; componentId: string }) {
     const { moduleId, componentId } = props
-    return this.modules.get(moduleId)?.declarations.find(m => m.$id === componentId)
+    return this.modules.get(moduleId)?.declarations.find((m) => m.$id === componentId)
   }
 
   public static setComponent(props: {
-    moduleId: string,
+    moduleId: string
     $id: string
-    ctor: Component['ctor'],
+    ctor: Component['ctor']
     metadata?: Component['metadata']
   }) {
     const { moduleId, $id, ctor, metadata } = props
     const module = this.modules.get(moduleId) ?? { $id: moduleId, declarations: [] }
     let component
-    if (module.declarations.some(i => i.$id === $id)) {
-      component = module.declarations.find(i => i.$id === $id)
+    if (module.declarations.some((i) => i.$id === $id)) {
+      component = module.declarations.find((i) => i.$id === $id)
     }
     component = { ...component, $id, ctor, metadata }
     module.declarations.push(component)
@@ -73,9 +72,7 @@ export class App {
     this.event.emit(EventFlag.SET_COMPONENT, this, module)
     return this
   }
-
 }
-
 
 export function app() {
   return 'app'

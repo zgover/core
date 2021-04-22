@@ -8,7 +8,6 @@
 
 import { version as pkgJsonVer } from '../../../../package.json'
 
-
 export const PKG_VERSION = JSON.stringify(pkgJsonVer ?? 'N/A')
 export const PRODUCTION = process.env.NODE_ENV === 'production'
 

@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import Website from '@aglyn/website/feature-core'
-import { FeatureReact } from '@aglyn/website/feature-react'
+import { WebsiteComponent } from '@aglyn/website/feature/react'
 
 /* eslint-disable-next-line */
 export interface BuilderProps {}
 
-const Root = ({children, ...props}) => <span {...props}>{children}</span>
+const Root = ({ children, ...props }) => <span {...props}>{children}</span>
 
 Website.App.setComponent({
   moduleId: 'react',
   $id: 'root',
-  ctor: Root
+  ctor: Root,
 })
 
 export function Builder(props: BuilderProps) {
@@ -19,98 +19,96 @@ export function Builder(props: BuilderProps) {
       $id: 'root1',
       component: 'root',
       props: {
-        children: 'hello'
+        children: 'hello',
       },
       children: [
         {
           $id: 'root1',
           component: 'root',
           props: {
-            children: 'hello'
-          }
+            children: 'hello',
+          },
         },
         {
           $id: 'root2',
           component: 'root',
           props: {
-            children: 'hello'
-          }
+            children: 'hello',
+          },
         },
         {
           $id: 'root3',
           component: 'root',
           props: {
-            children: 'hello'
-          }
-        }
-      ]
+            children: 'hello',
+          },
+        },
+      ],
     },
     {
       $id: 'root2',
       component: 'root',
       props: {
-        children: 'hello'
+        children: 'hello',
       },
       children: [
         {
           $id: 'root1',
           component: 'root',
           props: {
-            children: 'hello'
-          }
+            children: 'hello',
+          },
         },
         {
           $id: 'root2',
           component: 'root',
           props: {
-            children: 'hello'
-          }
+            children: 'hello',
+          },
         },
         {
           $id: 'root3',
           component: 'root',
           props: {
-            children: 'hello'
-          }
-        }
-      ]
+            children: 'hello',
+          },
+        },
+      ],
     },
     {
       $id: 'root3',
       component: 'root',
       props: {
-        children: 'hello'
+        children: 'hello',
       },
       children: [
         {
           $id: 'root1',
           component: 'root',
           props: {
-            children: 'hello'
-          }
+            children: 'hello',
+          },
         },
         {
           $id: 'root2',
           component: 'root',
           props: {
-            children: 'hello'
-          }
+            children: 'hello',
+          },
         },
         {
           $id: 'root3',
           component: 'root',
           props: {
-            children: 'hello'
-          }
-        }
-      ]
+            children: 'hello',
+          },
+        },
+      ],
     },
   ])
 
   console.log('page:/builder', Website.App.getInstance())
-  return (
-    <FeatureReact elements={elements} />
-  )
+  return <WebsiteComponent elements={elements} />
 }
 
 export default Builder
