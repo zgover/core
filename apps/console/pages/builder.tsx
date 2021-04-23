@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Website from '@aglyn/website/feature-core'
+import Website from '@aglyn/website/feature/core'
 import { WebsiteComponent } from '@aglyn/website/feature/react'
 
 /* eslint-disable-next-line */

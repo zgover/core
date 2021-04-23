@@ -24,26 +24,32 @@
   },
   "projects": {
     "console": {
-      "tags": []
+      "tags": ["scope:app", "scope:app:console"],
+      "implicitDependencies": []
     },
     "console-e2e": {
-      "tags": [],
+      "tags": ["scope:app", "scope:app:console"],
       "implicitDependencies": ["console"]
     },
     "shared-ui-react": {
-      "tags": []
+      "tags": ["scope:lib", "scope:shared", "scope:shared:ui"],
+      "implicitDependencies": []
     },
     "shared-util": {
-      "tags": []
+      "tags": ["scope:lib", "scope:shared", "scope:shared:util"],
+      "implicitDependencies": []
     },
     "shared-feature-mdi-icon": {
-      "tags": []
+      "tags": ["scope:lib", "scope:shared", "scope:shared:data"],
+      "implicitDependencies": []
     },
     "website-feature-core": {
-      "tags": []
+      "tags": ["scope:lib", "scope:website", "scope:website:data"],
+      "implicitDependencies": []
     },
     "website-feature-react": {
-      "tags": []
+      "tags": ["scope:lib", "scope:website", "scope:website:feature"],
+      "implicitDependencies": []
     }
   }
 }

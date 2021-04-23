@@ -6,9 +6,9 @@
  * found in the root directory of this source tree.
  */
 
-import { version as pkgJsonVer } from '../../../../package.json'
+import { version } from 'package.json'
 
-export const PKG_VERSION = JSON.stringify(pkgJsonVer ?? 'N/A')
+export const PKG_VERSION = JSON.stringify(version ?? 'N/A')
 export const PRODUCTION = process.env.NODE_ENV === 'production'
 
 export enum EventFlag {
