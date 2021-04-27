@@ -7,7 +7,7 @@
  */
 
 import DdfSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
-import type { RestrictType } from './const'
+import { RestrictFlag } from './const/flags'
 
 export type AnyProps = Record<string, unknown>
 
@@ -40,8 +40,8 @@ export interface Component<T = unknown> {
     disableOutline?: boolean
     disableRemoving?: boolean
     disableSelecting?: boolean
-    restrictChildren?: [type: RestrictType, ids: string[]]
-    restrictParents?: [type: RestrictType, ids: string[]]
+    restrictChildren?: [type: RestrictFlag, ids: string[]]
+    restrictParents?: [type: RestrictFlag, ids: string[]]
   }
 }
 

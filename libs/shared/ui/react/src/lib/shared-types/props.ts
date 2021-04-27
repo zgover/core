@@ -11,4 +11,4 @@ import { ElementType } from 'react'
 
 export type AnyProps = Record<string, unknown>
 export type InferElementTypeProps<T> = T extends ElementType<infer P> ? P : never
-export type ComponentProp<T extends ElementType = any> = { component?: T } & InferElementTypeProps<T>
+export type ComponentProp<T extends ElementType = any> = { component?: T } //& InferElementTypeProps<T>

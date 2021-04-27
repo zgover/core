@@ -6,18 +6,13 @@
  * found in the root directory of this source tree.
  */
 
-import { version } from '../../../../../package.json'
-
-export const PKG_VERSION = JSON.stringify(version ?? 'N/A')
-export const PRODUCTION = process.env.NODE_ENV === 'production'
-
 export enum EventFlag {
   INSTANCE_CREATED = 'website:app:created-instance',
   SET_MODULE = 'website:app:set-module',
   SET_COMPONENT = 'website:app:set-component',
 }
 
-export enum RestrictType {
+export enum RestrictFlag {
   LIMIT = 'limit',
   DISALLOW = 'disallow',
 }

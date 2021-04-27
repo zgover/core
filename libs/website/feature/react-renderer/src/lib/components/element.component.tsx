@@ -7,10 +7,22 @@
  */
 
 import React from 'react'
-import Website from '@aglyn/website/core'
-import { _isArr, _isArrEmpty, _isFn, _isStr, deepMerge } from '@aglyn/shared/util/helpers'
+import Website, { AnyProps } from '@aglyn/website/core'
+import { _isArr, _isArrEmpty, _isFn, _isStr, yes, deepMerge } from '@aglyn/shared/util/helpers'
 import * as ReactIs from 'react-is'
+import ElementsComponent from './elements.component'
 
+
+export function getResolvedMergedProps(
+  props: AnyProps,
+  metadata: Website.Component['metadata'],
+  thisArg?: any
+) {
+  const { defaultProps, resolveProps } = metadata
+  const propsResolver = _isFn(resolveProps) ? resolveProps : (p) => p
+  const mergedProps = deepMerge(defaultProps, props)
+  return propsResolver.call(thisArg, mergedProps)
+}
 
 export interface ElementComponentProps {
   elementData: Website.ElementData
@@ -18,31 +30,23 @@ export interface ElementComponentProps {
 }
 
 export function ElementComponent(props: ElementComponentProps) {
-  const { elementData, childrenComponent: ChildrenComponent } = props
-  const { children, component: cIdOrData } = elementData
-  const component = !_isStr(cIdOrData)
-    ? (cIdOrData as Website.Component)
-    : Website.App.getComponent({ moduleId: 'react', componentId: cIdOrData })
-  const { ctor, metadata } = component
-  const { defaultProps, resolveProps } = metadata ?? {}
-  const propsResolver = _isFn(resolveProps) ? resolveProps : (p) => p
-  const mergedProps = deepMerge(defaultProps, elementData.props)
-  const resolvedProps = propsResolver.call(component, mergedProps)
+  const { elementData: data, childrenComponent: ChildrenComponent } = props
+  const component = !_isStr(data?.component)
+    ? (data?.component as Website.Component)
+    : Website.App.getComponent({ moduleId: 'react', componentId: data?.component })
+  const { ctor, metadata = {} } = component ?? {}
+  const resolvedProps = getResolvedMergedProps(data?.props, metadata, component)
   const { children: content = null, ...ctorProps } = resolvedProps
   const ComponentCtor = ReactIs.isValidElementType(ctor) ? ctor : 'div'
+  const haveChildren = yes(!_isArr(data?.children) || _isArrEmpty(data?.children))
   return (
     <ComponentCtor {...ctorProps}>
-      {
-        (!_isArr(children) || _isArrEmpty(children))
-          ? content
-          : children.map((data) => (
-            <ChildrenComponent
-              key={data.$id}
-              childrenComponent={ChildrenComponent}
-              elementData={data}
-            />
-          ))
-      }
+      {haveChildren ? content : (
+        <ElementsComponent
+          childrenComponent={ChildrenComponent}
+          children={data?.children}
+        />
+      )}
     </ComponentCtor>
   )
 }

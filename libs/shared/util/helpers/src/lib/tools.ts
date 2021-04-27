@@ -46,7 +46,7 @@ export function s(...val: Parameters<typeof String>): string {
  * @param {*} val
  * @returns {boolean}
  */
-export function b(...val: Parameters<typeof Boolean>): boolean {
+export function yes(...val: Parameters<typeof Boolean>): boolean {
   return Boolean(...val)
 }
 

@@ -7,7 +7,7 @@
  */
 
 import React from 'react'
-import Website from '@aglyn/website/core'
+import { Website } from '@aglyn/website/core'
 import { ElementComponent, ElementComponentProps } from './element.component'
 import { ComponentProp } from '@aglyn/shared/ui/react'
 import { ElementsComponent } from './elements.component'
@@ -15,21 +15,21 @@ import { ElementsComponent } from './elements.component'
 
 export interface WebsiteComponentProps extends ComponentProp {
   elements?: Website.ElementData[]
-  elementComponent?: ElementComponentProps['childrenComponent']
+  childrenComponent?: ElementComponentProps['childrenComponent']
 }
 
 export function WebsiteComponent(props: WebsiteComponentProps) {
   const {
     component: Component,
-    elementComponent,
+    childrenComponent,
     elements,
     ...rest
   } = props
   return (
     <Component {...rest}>
       <ElementsComponent
-        elements={elements}
-        elementComponent={elementComponent}
+        children={elements}
+        childrenComponent={childrenComponent}
       />
     </Component>
   )

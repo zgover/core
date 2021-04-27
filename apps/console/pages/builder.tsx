@@ -12,7 +12,6 @@ import { WebsiteComponent } from '@aglyn/website/feature/react-renderer'
 import { samplePageData } from '../constants/sample-data'
 
 
-/* eslint-disable-next-line */
 export interface BuilderProps {
 
 }

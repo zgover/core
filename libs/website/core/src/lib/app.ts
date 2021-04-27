@@ -7,18 +7,23 @@
  */
 
 import { Component, ModuleMap } from './core'
-import { EventFlag, PKG_VERSION } from './const'
 import EventEmitter from 'events'
+import { EventFlag } from './const/flags'
+import { version } from '../../../../../package.json'
 
+
+const VERSION = JSON.stringify(version ?? 'N/A')
+const PRODUCTION = process.env.NODE_ENV === 'production'
 
 export class App {
-  public static readonly VERSION: string = PKG_VERSION
+  public static readonly VERSION: string = VERSION
+  public static readonly PRODUCTION: boolean = PRODUCTION
+
   public static event: EventEmitter = new EventEmitter()
   public static modules: ModuleMap = new Map()
   public readonly CREATED = new Date().toUTCString()
   private static instance?: App
   private constructor() {/*empty*/}
-
   public static getInstance(): App {
     if (this.instance instanceof this) {
       return this.instance
@@ -28,9 +33,11 @@ export class App {
     return this.instance
   }
 
+
   public static init(): App {
     return this.getInstance()
   }
+
 
   public static setModule(props: { $id: string; declarations: Component[] }) {
     const { $id, declarations } = props
@@ -40,10 +47,12 @@ export class App {
     return this
   }
 
+
   public static getComponent(props: { moduleId: string; componentId: string }) {
     const { moduleId, componentId } = props
     return this.modules.get(moduleId)?.declarations.find((m) => m.$id === componentId)
   }
+
 
   public static setComponent(props: {
     moduleId: string
@@ -53,18 +62,19 @@ export class App {
   }) {
     const { moduleId, $id, ctor, metadata } = props
     const module = this.modules.get(moduleId) ?? { $id: moduleId, declarations: [] }
-    let component
-    if (module.declarations.some((i) => i.$id === $id)) {
-      component = module.declarations.find((i) => i.$id === $id)
+    let component = module.declarations.find((i) => i.$id === $id)
+    if (!component) {
+      component = {$id, ctor, metadata}
+      module.declarations.push(component)
+    } else {
+      component.$id = $id
+      component.ctor = ctor
+      component.metadata = metadata
     }
-    component = { ...component, $id, ctor, metadata }
-    module.declarations.push(component)
     this.modules.set(moduleId, module)
     this.event.emit(EventFlag.SET_COMPONENT, this, module)
     return this
   }
 }
 
-export function app() {
-  return
-}
+export const app = App.getInstance()
