@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef } from 'react'
-import { _isFn } from '@aglyn/shared/util'
+import { _isFn } from '@aglyn/shared/util/helpers'
 
 export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]): void {
   const savedCallback = useRef(null)

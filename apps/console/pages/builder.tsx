@@ -9,103 +9,16 @@
 import React, { useState } from 'react'
 import Website from '@aglyn/website/core'
 import { WebsiteComponent } from '@aglyn/website/feature/react-renderer'
+import { samplePageData } from '../constants/sample-data'
+
 
 /* eslint-disable-next-line */
-export interface BuilderProps {}
+export interface BuilderProps {
+
+}
 
 export function Builder(props: BuilderProps) {
-  const [elements, setElements] = useState([
-    {
-      $id: 'root1',
-      component: 'root',
-      props: {
-        children: 'hello',
-      },
-      children: [
-        {
-          $id: 'root1',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-        {
-          $id: 'root2',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-        {
-          $id: 'root3',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-      ],
-    },
-    {
-      $id: 'root2',
-      component: 'root',
-      props: {
-        children: 'hello',
-      },
-      children: [
-        {
-          $id: 'root1',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-        {
-          $id: 'root2',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-        {
-          $id: 'root3',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-      ],
-    },
-    {
-      $id: 'root3',
-      component: 'root',
-      props: {
-        children: 'hello',
-      },
-      children: [
-        {
-          $id: 'root1',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-        {
-          $id: 'root2',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-        {
-          $id: 'root3',
-          component: 'root',
-          props: {
-            children: 'hello',
-          },
-        },
-      ],
-    },
-  ])
+  const [elements, setElements] = useState(samplePageData)
 
   console.log('page:/builder', Website.App.getInstance())
   return <WebsiteComponent elements={elements} />
