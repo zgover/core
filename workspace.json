@@ -158,27 +158,6 @@
         }
       }
     },
-    "website-feature-react": {
-      "root": "libs/website/feature/react",
-      "sourceRoot": "libs/website/feature/react/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/website/feature/react/**/*.{ts,tsx,js,jsx}"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/website/feature/react"],
-          "options": {
-            "jestConfig": "libs/website/feature/react/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
     "website-core": {
       "root": "libs/website/core",
       "sourceRoot": "libs/website/core/src",
@@ -195,6 +174,27 @@
           "outputs": ["coverage/libs/website/core"],
           "options": {
             "jestConfig": "libs/website/core/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "website-feature-react-renderer": {
+      "root": "libs/website/feature/react-renderer",
+      "sourceRoot": "libs/website/feature/react-renderer/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/website/feature/react-renderer/**/*.{ts,tsx,js,jsx}"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/website/feature/react-renderer"],
+          "options": {
+            "jestConfig": "libs/website/feature/react-renderer/jest.config.js",
             "passWithNoTests": true
           }
         }

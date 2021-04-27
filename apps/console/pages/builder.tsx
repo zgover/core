@@ -8,20 +8,10 @@
 
 import React, { useState } from 'react'
 import Website from '@aglyn/website/core'
-import { WebsiteComponent } from '@aglyn/website/feature/react'
+import { WebsiteComponent } from '@aglyn/website/feature/react-renderer'
 
 /* eslint-disable-next-line */
-export interface BuilderProps {
-
-}
-
-const Root = ({ children, ...props }) => <span {...props}>{children}</span>
-
-Website.App.setComponent({
-  moduleId: 'react',
-  $id: 'root',
-  ctor: Root,
-})
+export interface BuilderProps {}
 
 export function Builder(props: BuilderProps) {
   const [elements, setElements] = useState([
@@ -122,3 +112,12 @@ export function Builder(props: BuilderProps) {
 }
 
 export default Builder
+
+
+const Root = ({ children, ...props }) => <span {...props}>{children}</span>
+
+Website.App.setComponent({
+  moduleId: 'react',
+  $id: 'root',
+  ctor: Root,
+})

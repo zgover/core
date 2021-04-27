@@ -47,7 +47,7 @@
       "tags": ["scope:lib", "scope:website", "scope:website:core"],
       "implicitDependencies": []
     },
-    "website-feature-react": {
+    "website-feature-react-renderer": {
       "tags": ["scope:lib", "scope:website", "scope:website:feature"],
       "implicitDependencies": []
     }
