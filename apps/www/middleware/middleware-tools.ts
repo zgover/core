@@ -1,16 +1,25 @@
+/**
+ * @license
+ * Copyright (c) 2021 Aglyn LLC
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the root directory of this source tree.
+ */
+
 import { serialize, CookieSerializeOptions } from 'cookie'
 import { NextApiRequest, NextApiResponse } from 'next'
+
 
 export type ApiRequest = NextApiRequest
 export type ApiRequestWithProp<K extends string, U> = ApiRequest & { [P in K]?: U }
 export type ApiResponse<T = any> = NextApiResponse<T>
 export type ApiHandler<T = any> = (
   req: ApiRequest,
-  res: ApiResponse<T>
+  res: ApiResponse<T>,
 ) => void | Promise<void>
 export type ApiHandlerWithRequestProp<K extends string = any, U = any, T = any> = (
   req: ApiRequestWithProp<K, U>,
-  res: ApiResponse<T>
+  res: ApiResponse<T>,
 ) => void | Promise<void>
 
 
@@ -25,6 +34,7 @@ export type ApiMiddlewareResultResponse<T> = void | Promise<T | void>
 export type ApiMiddlewareResultFn = {
   <T>(result: ApiMiddlewareResult<T>): ApiMiddlewareResultResponse<T>
 }
+
 /**
  * API middleware function
  */
@@ -51,7 +61,7 @@ export type ApiMiddlewareHoc = (handler: ApiHandler) => ApiHandler
 export function runApiMiddleware<T>(
   req: ApiRequest,
   res: ApiResponse,
-  middleware: ApiMiddleware
+  middleware: ApiMiddleware,
 ): Promise<ApiMiddlewareResult<T>> {
   return new Promise((resolve, reject) => {
     const onComplete = <T>(result: ApiMiddlewareResult<T>) => {
@@ -84,7 +94,7 @@ export function runApiMiddleware<T>(
 export function initApiMiddleware(middleware: ApiMiddleware) {
   return (
     req: ApiRequest,
-    res: ApiResponse
+    res: ApiResponse,
   ) => runApiMiddleware(req, res, middleware)
 }
 
@@ -123,12 +133,12 @@ export function setApiCookie(
   res: ApiResponse,
   cookieName: string,
   cookieValue: unknown,
-  options: CookieSerializeOptions = {}
+  options: CookieSerializeOptions = {},
 ) {
   const str = String(
     typeof cookieValue === 'object'
       ? 'j:' + JSON.stringify(cookieValue)
-      : cookieValue
+      : cookieValue,
   )
 
   if ('maxAge' in options) {

@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const withNx = require('@nrwl/next/plugins/with-nx')
+const isProduction = Boolean(process.env.NODE_ENV === 'production')
 
 module.exports = withNx({
   nx: {
@@ -10,7 +11,7 @@ module.exports = withNx({
   target: 'experimental-serverless-trace',
   typescript: {
     // Motivated by https://github.com/zeit/next.js/issues/7687
-    ignoreDevErrors: true,
-    ignoreBuildErrors: true,
+    ignoreDevErrors: isProduction,
+    ignoreBuildErrors: isProduction,
   },
 })
