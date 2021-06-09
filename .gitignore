@@ -29,6 +29,7 @@
 !.idea/codeStyles
 !.idea/fileTemplates
 !.idea/file.template.settings.xml
+!.idea/dictionaries/*
 
 # misc
 /.sass-cache

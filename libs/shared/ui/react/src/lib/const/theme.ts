@@ -6,9 +6,11 @@
  * found in the root directory of this source tree.
  */
 
-import { Color } from '@material-ui/core'
+import { map } from '@aglyn/shared/util/helpers'
+import type { Color } from '@material-ui/core'
 import { cyan, lightBlue, lime, orange, red, purple } from '@material-ui/core/colors'
 import { createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core/styles'
+import type { CSSProperties } from 'react'
 
 // START EXAMPLE – MODULE AUGMENTATION ↓
 // ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
@@ -93,12 +95,12 @@ declare module '@material-ui/core/styles/createPalette' {
     tertiary: Palette['primary']
     quaternary: Palette['primary']
     brand: {
-      primary: React.CSSProperties['color']
-      secondary: React.CSSProperties['color']
+      primary: CSSProperties['color']
+      secondary: CSSProperties['color']
       purple: Color
-      coral: React.CSSProperties['color']
-      green: React.CSSProperties['color']
-      orange: React.CSSProperties['color']
+      coral: CSSProperties['color']
+      green: CSSProperties['color']
+      orange: CSSProperties['color']
     }
   }
 
@@ -106,17 +108,19 @@ declare module '@material-ui/core/styles/createPalette' {
     tertiary: PaletteOptions['primary']
     quaternary: PaletteOptions['primary']
     brand: {
-      primary: React.CSSProperties['color']
-      secondary: React.CSSProperties['color']
+      primary: CSSProperties['color']
+      secondary: CSSProperties['color']
       purple: Color
-      coral: React.CSSProperties['color']
-      green: React.CSSProperties['color']
-      orange: React.CSSProperties['color']
+      coral: CSSProperties['color']
+      green: CSSProperties['color']
+      orange: CSSProperties['color']
     }
   }
 }
 
-// Create a theme instance.
+/**
+ * Console Theme
+ */
 const consoleOptions: ThemeOptions = {
   palette: {
     type: 'light',
@@ -152,6 +156,9 @@ const consoleOptions: ThemeOptions = {
   },
 }
 
+/**
+ * Builder Theme
+ */
 const builderOptions: ThemeOptions = {
   ...consoleOptions,
   palette: {
@@ -162,17 +169,24 @@ const builderOptions: ThemeOptions = {
   },
 }
 
+/**
+ *
+ * @param {ThemeOptions} options
+ * @returns {Theme}
+ */
 export function createTheme(options?: ThemeOptions): Theme {
   const theme = createMuiTheme(options)
+  theme.palette.tertiary = theme.palette.augmentColor(theme.palette.tertiary)
+  theme.palette.quaternary = theme.palette.augmentColor(theme.palette.quaternary)
   return responsiveFontSizes(theme, {
     // Override to include `xs` and `xl` - default: ['sm', 'md', 'lg']
     breakpoints: ['xs', 'sm', 'md', 'lg', 'xl'],
   })
 }
 
-export const themes = {
-  console: createTheme(consoleOptions),
-  builder: createTheme(builderOptions),
+export const options = {
+  console: consoleOptions,
+  builder: builderOptions,
 }
 
-export default themes.console
+export const themes = map(options, (value) => createTheme(value))
