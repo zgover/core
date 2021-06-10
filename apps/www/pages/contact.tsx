@@ -9,6 +9,8 @@
 import { GridItems } from '@aglyn/shared/ui/react'
 import TextField from '@data-driven-forms/mui-component-mapper/text-field'
 import Textarea from '@data-driven-forms/mui-component-mapper/textarea'
+import FormTemplateRenderProps
+  from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
 import componentTypes from '@data-driven-forms/react-form-renderer/component-types'
 import FormRenderer from '@data-driven-forms/react-form-renderer/form-renderer'
 import useFormApi from '@data-driven-forms/react-form-renderer/use-form-api'
@@ -17,9 +19,9 @@ import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
+import { createStyles, `Theme`, WithStyles, withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
-import React, { Children, useState } from 'react'
+import React, { Children, useCallback, useState } from 'react'
 import { DdfForms } from '../forms'
 import MainLayout from '../layouts/MainLayout'
 import SiteFooterView from '../views/SiteFooterView'
@@ -61,16 +63,27 @@ const asyncSubmit = (values, api) => {
   )
 }
 
-const FormTemplate = ({ formFields, schema }) => {
-  const { handleSubmit, onReset, onCancel, getState } = useFormApi()
-  const { submitting, valid, pristine } = getState()
+const FormTemplate = (props: FormTemplateRenderProps) => {
+  const { formFields, schema } = props
+  const { handleSubmit, getState } = useFormApi()
+  const { submitting, submitSucceeded, valid, pristine } = getState()
+
+  if (submitSucceeded) {
+    return (
+      <>
+        <Box>
+
+        </Box>
+      </>
+    )
+  }
 
   console.log('form fields', formFields)
   return (
     <Grid
       container
       component={'form'}
-      style={{width:'100%'}}
+      style={{ width: '100%' }}
       onSubmit={handleSubmit}
       spacing={3}
     >
@@ -104,7 +117,10 @@ interface Props extends WithStyles<typeof styles> {
 
 function Contact(props: Props) {
   const { classes } = props
-  const [values, setValues] = useState({})
+
+  const handleSubmit = useCallback((...args) => {
+    console.log('handle submit', ...args)
+  }, [])
 
   return (
     <MainLayout
@@ -167,10 +183,7 @@ function Contact(props: Props) {
                         FormTemplate={FormTemplate}
                         componentMapper={componentMapper}
                         schema={DdfForms.ContactFormSchema}
-                        onSubmit={asyncSubmit}
-                        onCancel={() => console.log('Cancelling')}
-                        onReset={() => console.log('Resetting')}
-                        debug={({ values }) => setValues(values)}
+                        onSubmit={handleSubmit}
                       />
                     </>
                   ),

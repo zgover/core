@@ -41,6 +41,7 @@
     "deepmerge": "^4.2.2",
     "document-register-element": "1.13.1",
     "firebase": "^8.6.1",
+    "firebase-admin": "^9.9.0",
     "flat": "^5.0.2",
     "fuse.js": "^6.4.6",
     "jss": "^10.6.0",

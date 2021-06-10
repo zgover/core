@@ -29,7 +29,15 @@
 !.idea/codeStyles
 !.idea/fileTemplates
 !.idea/file.template.settings.xml
-!.idea/dictionaries/*
+!.idea/dictionaries
+
+# Environment files
+.env
+.env.*
+!.env.example*
+
+# Log files
+*.log
 
 # misc
 /.sass-cache
@@ -44,8 +52,3 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-
-# Environment files
-.env
-.env.*
-!.env.example*

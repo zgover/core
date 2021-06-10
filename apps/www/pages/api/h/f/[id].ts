@@ -7,10 +7,11 @@
  */
 import { NextApiRequest, NextApiResponse } from 'next'
 import { DdfForms } from '../../../../forms'
-import { Req } from '../../../../lib/api/helpers'
+import { Req, Res } from '../../../../lib/api/helpers'
 import httpRequestMethod from '../../../../lib/api/middleware/http-request-method'
 import { rateLimiterFactory } from '../../../../lib/api/middleware/rate-limit'
 import { handleMiddleware } from '../../../../lib/api/tools/middleware'
+import { saveFormSubmit } from '../../../../lib/firebase/form-submission'
 
 
 /**
@@ -19,30 +20,28 @@ import { handleMiddleware } from '../../../../lib/api/tools/middleware'
  * @param {NextApiRequest} req
  * @param {NextApiResponse} res
  */
-function formHandler(req: NextApiRequest, res: NextApiResponse) {
-  const {
-    query: {
-      id, ...params
-    },
-    method,
-  } = req
-
-  // const json = Res.Error.createSessionCookie
-  // Logger.traceError(json, error)
-
+async function formHandler(req: NextApiRequest, res: NextApiResponse) {
+  const { query: { id, ...params } } = req
   // Ensure Form ID exists
-  // if (!DdfForms.isValidFormId(id)) {
-  //   return res.status(400).end(`Bad Request`)
-  // }
-  //
-  // const formSchema = DdfForms.getFormSchemaFromId(id)
+  if (!DdfForms.isValidFormId(id)) {
+    return Res.Error.handleJsonError(res, Res.Error.notFound)
+  }
+  const schema = DdfForms.getFormSchemaFromId(id)
+  const missingValues = DdfForms.checkRequiredValues(params, schema)
+  if (missingValues.length) {
+    return Res.Error.handleJsonError(
+      res,
+      Res.Error.missingParams('Failed Validation', { errors: missingValues }),
+    )
+  }
 
+  await saveFormSubmit(id, params)
 
-  res.status(200).json({ success: true, code: 200 })
+  return res.status(200).json(Res.Data.success)
 }
 
 export default handleMiddleware(
   rateLimiterFactory({ limit: 3 }),
-  httpRequestMethod([Req.Method.POST])
+  httpRequestMethod([Req.Method.POST]),
 )(formHandler)
 // export default formHandler

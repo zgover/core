@@ -78,13 +78,13 @@ class AppDocument<P = {}> extends NextDocument<P> {
     ctx.renderPage = () => originalRenderPage({
       // useful for wrapping the whole react tree
       enhanceApp: (App) => (props) => {
-        console.log('enhanceApp: App => props => {}', App, props)
+        // console.log('enhanceApp: App => props => {}', App, props)
         return sheets.collect(<App {...props} />)
       },
 
       // useful for wrapping in a per-page basis
       enhanceComponent: (Component: NextComponentType) => {
-        console.log('enhanceComponent: Component => {}',Component.displayName, Component)
+        // console.log('enhanceComponent: Component => {}',Component.displayName, Component)
         // console.log('component enhancement', Component)
         return Component
       },

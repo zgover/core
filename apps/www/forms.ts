@@ -6,9 +6,10 @@
  * found in the root directory of this source tree.
  */
 
-import { Schema, Validator } from '@data-driven-forms/react-form-renderer'
+import { Schema as DdfSchema, Validator } from '@data-driven-forms/react-form-renderer'
+import validatorTypes from '@data-driven-forms/react-form-renderer/validator-types'
 import md5 from 'md5'
-import { _hasKey, _isStr, ln } from '@aglyn/shared/util/helpers'
+import { _hasKey, _isObjT, _isStr, ln } from '@aglyn/shared/util/helpers'
 
 
 export const validateRegex = (value: string, regex) => (new RegExp(regex)).test(value)
@@ -197,8 +198,10 @@ export namespace Fields {
 
 
 export namespace DdfForms {
+  export type Schema = DdfSchema
+  export const ValidatorType = validatorTypes
 
-  export const ContactFormSchema = {
+  export const ContactFormSchema: Schema = {
     fields: [
       {
         component: 'text-field',
@@ -267,24 +270,34 @@ export namespace DdfForms {
     ],
   }
 
-  enum FormId {
-    CONTACT = 'contact'
-  }
-
   export const formIds = {
-    contact: md5(FormId.CONTACT).toLowerCase().trim(),
+    contact: md5('contact').toLowerCase().trim(),
+  }
+  const rawFormIdFromId = {
+    [formIds.contact]: 'contact',
   }
   const formSchemaFromId = {
     [formIds.contact]: ContactFormSchema,
   }
+
   export function isValidFormId(id: unknown): id is string {
-    return _isStr(id) && _hasKey(id, formIds)
+    return _isStr(id) && _hasKey(id, rawFormIdFromId)
   }
   export function getFormSchemaFromId(id: string): Schema {
     return formSchemaFromId[id]
   }
-  export function isValidForm(values) {
-
+  export function checkRequiredValues(values: Record<string, any>, schema: Schema) {
+    // TODO: Update with full validation from data-driven-forms upon API docs
+    const { fields } = schema
+    const invalid = []
+    fields.forEach(i => {
+      if (i.validate?.find(i => _isObjT(i) && i.type === ValidatorType.REQUIRED)) {
+        if (!values[i.name]) {
+          invalid.push({ name: i.name, message: 'Required' })
+        }
+      }
+    })
+    return invalid
   }
 
 

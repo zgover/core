@@ -34,10 +34,7 @@ export namespace Res {
 
   export type ResponseType = DataResponse | ErrorResponse
 
-  const buildResponse = (
-    data?: DataType,
-    error?: ErrorType,
-  ): ResponseType => {
+  const buildResponse = (data?: DataType, error?: ErrorType): ResponseType => {
     return error as ErrorType
       ? { status: Status.ERROR, error }
       : { status: Status.SUCCESS, data }
@@ -49,16 +46,22 @@ export namespace Res {
     // RESPONSES
     /////////////////
     export const success = buildResponse({})
+
+
   }
 
   export namespace Error {
     enum Prefix {
       BAD_REQ = 'bad-request',
       NO_AUTH = 'not-authorized',
+      INVALID_REQ = 'invalid-request',
       TOO_MANY = 'too-many-requests',
     }
 
     enum MsgCode {
+      UNKNOWN = 'unknown',
+      NOT_FOUND = 'not-found',
+      FAILED_REQUIREMENTS = 'failed-requirements',
       MISSING_HDR = 'missing-required-header',
       FAIL_ID_TOKEN_CHECK = 'id-token-verification-failed',
       FAIL_CSRF_TOKEN_CHECK = 'csrf-token-verification-failed',
@@ -73,6 +76,7 @@ export namespace Res {
       NOT_AUTHORIZED = 'Not Authorized',
       TOO_MANY_REQUESTS = 'Too Many Requests',
       METHOD_NOT_ALLOWED = 'Method Not Allowed',
+      RESOURCE_NOT_FOUND = 'Resource Not Found'
     }
 
     enum StatusCode {
@@ -94,17 +98,46 @@ export namespace Res {
       statusCode: number,
       pfx: Prefix,
       code: MsgCode,
-      message: Message,
+      message: Message | string,
+      extra?: Record<string, any>,
     ): ErrorResponse => buildResponse(null, {
+      ...extra,
       code: buildCode(pfx, code),
       message,
       statusCode,
     }) as ErrorResponse
 
+    export const handleJsonError = (res, json: ErrorResponse, error?: any) => {
+      Logger.traceError(json, error)
+      return res.status(json.error.statusCode).json(json)
+    }
+
 
     /////////////////
     // RESPONSES
     /////////////////
+
+    export const badRequest = (message: string = Message.INVALID_REQUEST) => buildError(
+      StatusCode.HTTP400,
+      Prefix.BAD_REQ,
+      MsgCode.UNKNOWN,
+      message,
+    )
+
+    export const missingParams = (message: string = Message.INVALID_REQUEST, errors: Record<string, any>) => buildError(
+      StatusCode.HTTP400,
+      Prefix.BAD_REQ,
+      MsgCode.FAILED_REQUIREMENTS,
+      Message.INVALID_REQUEST,
+      errors,
+    )
+
+    export const notFound = buildError(
+      StatusCode.HTTP404,
+      Prefix.INVALID_REQ,
+      MsgCode.NOT_FOUND,
+      Message.RESOURCE_NOT_FOUND,
+    )
 
     export const missingHeader = buildError(
       StatusCode.HTTP400,
