@@ -9,6 +9,7 @@
 import DdfSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
 import { RestrictFlag } from './const/flags'
 
+
 export type AnyProps = Record<string, unknown>
 
 export interface Module {

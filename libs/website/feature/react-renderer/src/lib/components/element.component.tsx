@@ -41,7 +41,7 @@ export const ElementComponent = forwardRef<any, ElementComponentProps>(
         {haveChildren ? content : (
           <ElementsComponent
             elementComponent={elementComponent}
-            children={data?.children}
+            children={data?.children as Website.ElementData[]}
           />
         )}
       </ComponentCtor>

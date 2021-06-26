@@ -8,10 +8,20 @@
 
 import React, { useState } from 'react'
 import Website from '@aglyn/website/core'
-import { WebsiteComponent } from '@aglyn/website/feature/react-renderer'
 import { BuilderComponent } from '@aglyn/website/feature/react-builder'
 import { samplePageData } from '../constants/sample-data'
 
+
+const Root = ({ children, innerRef, ...props }) => <span ref={innerRef} {...props}>{children}</span>
+Website.App.setComponent({
+  moduleId: 'react',
+  $id: 'root',
+  ctor: Root,
+  metadata: {
+    title: 'Root element',
+    icon: 'block'
+  }
+})
 
 export interface BuilderProps {}
 
@@ -25,12 +35,3 @@ export function Builder(props: BuilderProps) {
 }
 
 export default Builder
-
-
-const Root = ({ children, innerRef, ...props }) => <span ref={innerRef} {...props}>{children}</span>
-
-Website.App.setComponent({
-  moduleId: 'react',
-  $id: 'root',
-  ctor: Root,
-})

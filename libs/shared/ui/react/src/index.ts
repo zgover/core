@@ -15,7 +15,8 @@ export * from './lib/components/svg-path/svg-path'
 export * from './lib/const/svg-icons'
 export * from './lib/const/theme'
 
-export * from './lib/contexts/confirmation'
+export * from './lib/components/confirmation-provider/confirmation-provider.component'
+export * from './lib/contexts/confirmation.context'
 
 export * from './lib/hooks/use-client-rect'
 export * from './lib/hooks/use-combined-refs'
@@ -32,3 +33,5 @@ export * from './lib/hooks/use-timeout'
 export * from './lib/hooks/use-timeout-delay'
 
 export * from './lib/shared-types/props'
+
+export * from './lib/ddf-form'

@@ -12,7 +12,9 @@ import { WebsiteComponent } from '@aglyn/website/feature/react-renderer'
 import { ThemeProvider } from '@material-ui/core/styles'
 import { forwardRef } from 'react'
 import { ElementComponent, ElementComponentProps } from './components/element.component'
-import SelectionProviderComponent from './contexts/selection'
+import AppBarComponent from './components/appbar.component'
+import ElementDrawerComponent from './components/element-drawer.component'
+import SelectionProviderComponent from './components/selection-provider.component'
 
 
 export interface BuilderComponentProps extends ComponentProp {
@@ -30,18 +32,22 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
     } = props
 
     return (
-      <Component ref={ref} {...rest}>
-        <ThemeProvider theme={themes.console}>
-          <SelectionProviderComponent>
-            <ConfirmationProviderComponent>
+      <ThemeProvider theme={themes.builder}>
+        <Component ref={ref} {...rest}>
+          <ConfirmationProviderComponent>
+            <SelectionProviderComponent>
               <WebsiteComponent
                 elements={elements}
                 elementComponent={elementComponent}
               />
-            </ConfirmationProviderComponent>
-          </SelectionProviderComponent>
-        </ThemeProvider>
-      </Component>
+              <AppBarComponent />
+              <ElementDrawerComponent
+                
+              />
+            </SelectionProviderComponent>
+          </ConfirmationProviderComponent>
+        </Component>
+      </ThemeProvider>
     )
   },
 )

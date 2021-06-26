@@ -54,6 +54,14 @@ export class App {
   }
 
 
+  public static getComponents(props: { moduleId: string; componentId?: string[] }) {
+    const { moduleId, componentId } = props
+    return componentId
+      ? componentId.map(i => this.getComponent({ moduleId, componentId: i }))
+      : this.modules.get(moduleId)?.declarations
+  }
+
+
   public static setComponent(props: {
     moduleId: string
     $id: string
@@ -64,7 +72,7 @@ export class App {
     const module = this.modules.get(moduleId) ?? { $id: moduleId, declarations: [] }
     let component = module.declarations.find((i) => i.$id === $id)
     if (!component) {
-      component = {$id, ctor, metadata}
+      component = { $id, ctor, metadata }
       module.declarations.push(component)
     } else {
       component.$id = $id

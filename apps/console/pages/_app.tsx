@@ -6,32 +6,52 @@
  * found in the root directory of this source tree.
  */
 
-import React from 'react'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import { MuiThemeProvider } from '@material-ui/core/styles'
+import { themes } from '@aglyn/shared/ui/react'
+import React, { Fragment, StrictMode, useEffect } from 'react'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import { ReactComponent as NxLogo } from '../public/nx-logo-white.svg'
-import './styles.css'
+import { APP } from '../../www/const'
 import Website from '@aglyn/website/core'
+
 
 Website.App.init()
 
-function CustomApp({ Component, pageProps }: AppProps) {
+
+const previewProduction = false
+const isProduction = process.env.NODE_ENV === 'production' || previewProduction
+
+function _App(props: AppProps) {
+  const { Component, pageProps } = props
+
+  useEffect(() => {
+    // Remove the server-side injected CSS.
+    const jssStyles = document.querySelector('#jss-server-side')
+    if (jssStyles) {
+      jssStyles.parentElement.removeChild(jssStyles)
+    }
+  }, [])
+
+  const Wrapper = isProduction ? Fragment : Fragment// StrictMode
+
   return (
-    <>
+    <Wrapper>
       <Head>
-        <title>Welcome to console!</title>
+        <title children={APP.META_TITLE} />
+        <meta name="description" content={APP.META_DESCRIPTION} />
       </Head>
-      <div className="app">
-        <header className="flex">
-          <NxLogo width="75" height="50" />
-          <h1>Welcome to console!</h1>
-        </header>
-        <main>
-          <Component {...pageProps} />
-        </main>
-      </div>
-    </>
+      <MuiThemeProvider theme={themes.console}>
+        <CssBaseline>
+            <div className="app">
+              <main>
+                <Component {...pageProps} />
+              </main>
+            </div>
+        </CssBaseline>
+      </MuiThemeProvider>
+    </Wrapper>
   )
 }
 
-export default CustomApp
+export default _App

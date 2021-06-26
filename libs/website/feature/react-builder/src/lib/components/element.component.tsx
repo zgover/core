@@ -13,7 +13,7 @@ import {
   ElementComponent as RenderElementComponent,
   ElementComponentProps as RenderElementComponentProps,
 } from '@aglyn/website/feature/react-renderer'
-import { useSelectionContext } from '../contexts/selection'
+import { useSelectionContext } from '../contexts/selection.context'
 
 
 export interface ElementComponentProps extends RenderElementComponentProps {
