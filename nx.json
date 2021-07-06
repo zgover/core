@@ -66,6 +66,6 @@
     "website-feature-react-builder": {
       "tags": ["scope:lib", "scope:website", "scope:website:feature"],
       "implicitDependencies": []
-    },
+    }
   }
 }

@@ -7,7 +7,8 @@
  */
 
 import { createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core/styles'
-import './overrides'
+import './createPalette'
+
 
 /**
  * START EXAMPLE – OVERRIDE DEFAULT PROPS ↓

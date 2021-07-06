@@ -8,7 +8,8 @@
 
 import { Theme, ThemeOptions } from '@material-ui/core/styles'
 import { createTheme } from './utils'
-import './overrides'
+import './createPalette'
+
 
 /**
  * Console Theme
@@ -16,14 +17,14 @@ import './overrides'
 export namespace ConsoleTheme {
   export const palette: ThemeOptions['palette'] = {
     type: 'light',
-    primary: { main: '#404c5c' },
-    secondary: { main: '#039be5' },
-    tertiary: { main: '#9c27b0' },
-    quaternary: { main: '#e040fb' },
-    info: { main: '#4dd0e1' },
-    warning: { main: '#ffab40' },
-    error: { main: '#e53935' },
-    success: { main: '#4caf50' },
+    primary: {main: '#404c5c'},
+    secondary: {main: '#039be5'},
+    tertiary: {main: '#9c27b0'},
+    quaternary: {main: '#e040fb'},
+    info: {main: '#4dd0e1'},
+    warning: {main: '#ffab40'},
+    error: {main: '#e53935'},
+    success: {main: '#4caf50'},
   }
   export const typography: ThemeOptions['typography'] = {
     fontFamily: '"Raleway", "Helvetica", "Arial", sans-serif',
@@ -124,7 +125,7 @@ export namespace ConsoleTheme {
         height: 32,
       },
     },
-    MuiIconButton: { root: { padding: 8 } },
+    MuiIconButton: {root: {padding: 8}},
   }
   export const options: ThemeOptions = {
     palette: ConsoleTheme.palette,

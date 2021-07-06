@@ -9,7 +9,8 @@
 import { Theme, ThemeOptions } from '@material-ui/core/styles'
 import { createTheme } from './utils'
 import { ConsoleTheme } from './console'
-import './overrides'
+import './createPalette'
+
 
 /**
  * Builder Theme
@@ -17,18 +18,18 @@ import './overrides'
 export namespace BuilderTheme {
   export const palette: ThemeOptions['palette'] = {
     ...ConsoleTheme.palette,
-    primary: { main: '#0091ea' },
-    secondary: { main: '#e040fb' },
-    tertiary: { main: '#37474F' },
+    primary: {main: '#0091ea'},
+    secondary: {main: '#e040fb'},
+    tertiary: {main: '#37474F'},
   }
   export const typography: ThemeOptions['typography'] = {
-    ...ConsoleTheme.typography
+    ...ConsoleTheme.typography,
   }
   export const props: ThemeOptions['props'] = {
-    ...ConsoleTheme.props
+    ...ConsoleTheme.props,
   }
   export const overrides: ThemeOptions['overrides'] = {
-    ...ConsoleTheme.overrides
+    ...ConsoleTheme.overrides,
   }
   export const options: ThemeOptions = {
     palette: palette,

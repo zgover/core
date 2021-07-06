@@ -6,6 +6,21 @@
  * found in the root directory of this source tree.
  */
 
+import { Palette, PaletteOptions } from '@material-ui/core/styles'
+
+
+declare module '@material-ui/core/styles/createPalette' {
+  interface Palette {
+    tertiary: Palette['primary']
+    quaternary: Palette['primary']
+  }
+
+  interface PaletteOptions {
+    tertiary: PaletteOptions['primary']
+    quaternary: PaletteOptions['primary']
+  }
+}
+
 /** START EXAMPLE – MODULE AUGMENTATION ↓
  * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
  * ```typescript
@@ -48,14 +63,3 @@
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  * END EXAMPLE – MODULE AUGMENTATION ↑
  */
-export declare module '@material-ui/core/styles/createPalette' {
-  interface Palette {
-    tertiary: Palette['primary']
-    quaternary: Palette['primary']
-  }
-
-  interface PaletteOptions {
-    tertiary: PaletteOptions['primary']
-    quaternary: PaletteOptions['primary']
-  }
-}
