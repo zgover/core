@@ -9,8 +9,7 @@
 import { GridItems } from '@aglyn/shared/ui/react'
 import TextField from '@data-driven-forms/mui-component-mapper/text-field'
 import Textarea from '@data-driven-forms/mui-component-mapper/textarea'
-import FormTemplateRenderProps
-  from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
+import FormTemplateRenderProps from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
 import componentTypes from '@data-driven-forms/react-form-renderer/component-types'
 import FormRenderer from '@data-driven-forms/react-form-renderer/form-renderer'
 import useFormApi from '@data-driven-forms/react-form-renderer/use-form-api'

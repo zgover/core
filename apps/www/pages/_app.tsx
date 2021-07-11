@@ -18,10 +18,12 @@ import { AppContextProvider } from '../contexts/app-context'
 import { CurrentUserProviderComponent } from '../contexts/current-user-context'
 import { APP } from '../const'
 
-import { withAppController as AppControllerFactory } from '../lib/aglyn-deprecated'
 
-
-declare function require(moduleName: string): any;
+declare function require(
+  moduleNames: string[],
+  onLoad: (...args: any[]) => void,
+): void
+import * as AppController from '../lib/aglyn-deprecated'
 
 
 const previewProduction = false
@@ -37,8 +39,9 @@ const appOptions = {
 
 let app
 if (typeof window !== 'undefined') {
-  const withAppController: typeof AppControllerFactory = require('../lib/aglyn-deprecated')
-  app = withAppController(appOptions)
+  require(['../lib/aglyn-deprecated'], (withAppController: typeof AppController) => {
+    app = withAppController.withAppController(appOptions)
+  })
 }
 
 /**

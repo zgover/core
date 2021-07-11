@@ -41,26 +41,28 @@ export type LinkElementsConfig = [rel: LinkElemProps['rel'], href: LinkElemProps
  * renders only on the server side. Commonly used for implementing
  * server side rendering for `css-in-js` libraries.
  *
- * Resolution order
- * On the server:
- * 1. app.getInitialProps
- * 2. page.getInitialProps
- * 3. document.getInitialProps
- * 4. app.render
- * 5. page.render
- * 6. document.render
- *
- * On the server with error:
- * 1. document.getInitialProps
- * 2. app.render
- * 3. page.render
- * 4. document.render
- *
- * On the client
- * 1. app.getInitialProps
- * 2. page.getInitialProps
- * 3. app.render
- * 4. page.render
+ * @example
+ * > ## Resolution order
+ * >
+ * > ### Server-side
+ * > 1. [_App]{@link _App}.getInitialProps (if-exists)
+ * > 2. <PageComponent>.getInitialProps
+ * > 3. [_Document]{@link _Document}.getInitialProps
+ * > 4. [_App]{@link _App}.render
+ * > 5. <PageComponent>.render
+ * > 6. [_Document]{@link _Document}.render
+ * >
+ * > ### Server-side (w/ error)
+ * > 1. [_Document]{@link _Document}.getInitialProps
+ * > 2. [_App]{@link _App}.render
+ * > 3. <PageComponent>.render
+ * > 4. [_Document]{@link _Document}.render
+ * >
+ * > ### Client-side
+ * > 1. [_App]{@link _App}.getInitialProps (if-exists)
+ * > 2. <PageComponent>.getInitialProps
+ * > 3. [_App]{@link _App}.render
+ * > 4. <PageComponent>.render
  *
  * @exports
  * @class _Document
