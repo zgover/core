@@ -6,10 +6,11 @@
  * found in the root directory of this source tree.
  */
 
-import { app } from './app'
+import { WebApp, webApp } from './web-app'
 
-describe('app', () => {
+
+describe('web-app', () => {
   it('should work', () => {
-    expect(app()).toEqual('app')
+    expect(webApp).toBeInstanceOf(WebApp)
   })
 })

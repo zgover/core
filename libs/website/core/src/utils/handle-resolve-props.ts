@@ -6,8 +6,8 @@
  * found in the root directory of this source tree.
  */
 
-import { AnyProps } from '../core'
-import Website from '../../index'
+import { AnyProps } from '../lib/types'
+import Website from '@aglyn/website/core'
 import { _isFn } from '@aglyn/shared/util/helpers'
 import handlePropDefaults from './handle-prop-defaults'
 

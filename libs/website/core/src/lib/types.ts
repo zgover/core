@@ -6,10 +6,5 @@
  * found in the root directory of this source tree.
  */
 
-import { core } from './core'
-
-describe('core', () => {
-  it('should work', () => {
-    expect(core()).toEqual('core')
-  })
-})
+import DdfSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
+import { RestrictFlag } from '../constants/flags'
