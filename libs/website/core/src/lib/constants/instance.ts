@@ -16,11 +16,16 @@
  */
 
 import pkg from '../../../../../../package.json'
+import { _isStr, _isStrEmpty } from '@aglyn/shared/util/helpers'
 
 
-export let VERSION = JSON.stringify(pkg.version ?? 'N/A')
-export function setVersion(version: string): void {
-  VERSION = version
-}
+export let SDK_VERSION = JSON.stringify(pkg.version ?? 'N/A')
 export const PRODUCTION = process.env.NODE_ENV === 'production'
 export const DEVELOPMENT = process.env.NODE_ENV !== 'production'
+
+export function setVersion(version: string): void {
+  if (!_isStr(version) || _isStrEmpty(version)) {
+    throw new Error('invalid version')
+  }
+  SDK_VERSION = version
+}

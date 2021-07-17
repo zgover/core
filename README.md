@@ -17,7 +17,10 @@ Provides auth, data-store, analytics and more.
 
 ------------------------------------------------------------
 
-## Nx Command Summary
+## Nx Monorepo
+
+`apps/*` contain sub packages for the purpose of serving and rendering.
+`libs/*` contain sub packages for purpose of providing components, logic, utils, etc.
 
 ### Basic usage
 
@@ -76,9 +79,11 @@ commands_
 To streamline the refactoring process Nx provides workspace commands to move and/or rename project applications and
 libraries.
 
-- For example run `nx g @nrwl/workspace:move --project website-feature-react website/feature/react-renderer` to move the library under `/libs/website/feature/react` to `/libs/website/feature/react-renderer` 
-  
-*Make sure to provide the Nx project name and not the actual directory (@See [nx.json](./nx.json) for registered project name), followed by its _new_ directory  
+- For example run `nx g @nrwl/workspace:move --project website-feature-react website/feature/react-renderer` to move the
+  library under `/libs/website/feature/react` to `/libs/website/feature/react-renderer`
+
+*Make sure to provide the Nx project name and not the actual directory (@See [nx.json](./nx.json) for registered project
+name), followed by its _new_ directory
 
 #### Nx build framework
 

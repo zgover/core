@@ -23,7 +23,8 @@ import {
   AppsMap,
   Component,
   EventListener,
-  EventName, Module,
+  EventName,
+  Module,
   ModulesMap,
   WebApp,
 } from './core-types'
@@ -35,24 +36,30 @@ const _apps: AppsMap = new Map()
 export function getApps(): WebApp[] {
   return [..._apps.values()]
 }
+
 export function getApp(name: string = DEFAULT_ENTRY_NAME): WebApp {
   const app = _apps.get(name)
   if (app) {return _apps.get(name)}
   throw new Error(`App does not exist ${name}`)
 }
+
 export function deleteApp(app: WebApp): void {
   const name = app.name
   if (_apps.has(name)) {_apps.delete(name)}
 }
+
 export function listenAppOnce<T>(app: WebApp, name: EventName, listener: EventListener<T>) {
   app.mitt.once(name, listener)
 }
+
 export function listenAppOn<T>(app: WebApp, name: EventName, listener: EventListener<T>) {
   app.mitt.on(name, listener)
 }
+
 export function listenAppOff<T>(app: WebApp, name: EventName, listener: EventListener<T>) {
   app.mitt.off(name, listener)
 }
+
 export function initializeApp(options: AppOptions = {}): WebApp {
   const {name = DEFAULT_ENTRY_NAME} = options
   const _name = String(name)
@@ -62,21 +69,24 @@ export function initializeApp(options: AppOptions = {}): WebApp {
   const _mitt: EventEmitter = new EventEmitter()
   const _modules: ModulesMap = new Map()
   const app: WebApp = new class {
-    get mitt() { return _mitt },
-    get modules() { return _modules },
-    get created() { return _created },
-    get name() { return _name },
+    get mitt() { return _mitt }
+    get modules() { return _modules }
+    get created() { return _created }
+    get name() { return _name }
   }
   _apps.set(_name, app)
   return _apps.get(_name)
 }
+
 export function getModules(app: WebApp): Module[] {
   return Array.from(app.modules.values())
 }
+
 export function getModule(app: WebApp, options: { $id: string }): Module {
   const {$id} = options
   return app.modules.get($id)
 }
+
 export function setModule(app: WebApp, props: { $id: string; declarations: Component[] }) {
   const {$id, declarations} = props
   const module = {$id, declarations}
@@ -84,16 +94,19 @@ export function setModule(app: WebApp, props: { $id: string; declarations: Compo
   app.mitt.emit(EventFlag.SET_MODULE, module)
   logger.debug(`Set module value for ${$id}`)
 }
+
 export function getComponent(app: WebApp, props: { moduleId: string; componentId: string }) {
   const {moduleId, componentId} = props
   return app.modules.get(moduleId)?.declarations.find((m) => m.$id === componentId)
 }
+
 export function getComponents(app: WebApp, props: { moduleId: string; componentId?: string[] }) {
   const {moduleId, componentId} = props
   return componentId
     ? componentId.map(i => getComponent(app, {moduleId, componentId: i}))
     : app.modules.get(moduleId)?.declarations
 }
+
 export function setComponent(app: WebApp, props: {
   moduleId: string
   $id: string
@@ -112,6 +125,7 @@ export function setComponent(app: WebApp, props: {
     component.metadata = metadata
   }
   app.modules.set(moduleId, module)
+
   app.mitt.emit(EventFlag.SET_COMPONENT, module)
   logger.debug(`Set component id = ${$id} for module id = ${moduleId}`)
   return this
