@@ -118,7 +118,7 @@ Nx can generate a dependency tree graph
 
 ### Commit messages
 
-- Text template: [commit_template.txt](./commit_template.txt).
+- Message template: [COMMIT_TEMPLATE.md](COMMIT_TEMPLATE.md).
 - Lint documentation: [ConventionalCommits](https://www.conventionalcommits.org)
 
 #### Template
