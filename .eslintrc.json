@@ -1,0 +1,111 @@
+{
+  "root": true,
+  "ignorePatterns": ["**/*"],
+  "plugins": ["@nrwl/nx"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {
+        "@nrwl/nx/enforce-module-boundaries": [
+          "error",
+          {
+            "enforceBuildableLibDependency": true,
+            "allow": [],
+            "depConstraints": [
+              {
+                "sourceTag": "scope:app",
+                "onlyDependOnLibsWithTags": [
+                  "scope:app",
+                  "scope:lib"
+                ]
+              },
+              {
+                "sourceTag": "scope:app:www",
+                "onlyDependOnLibsWithTags": [
+                  "*"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:shared",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:shared:util",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared:util"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:shared:feature",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared:feature"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework",
+                  "scope:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework:core",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework:core",
+                  "scope:lib:shared:util",
+                  "scope:lib:logger",
+                  "scope:lib:timestemp"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework:feature",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework:feature",
+                  "scope:lib:shared",
+                  "scope:lib:framework:core"
+                ]
+              },
+              {
+                "sourceTag": "*",
+                "onlyDependOnLibsWithTags": [
+                  "*"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "extends": ["plugin:@nrwl/nx/typescript"],
+      "rules": {
+        "@typescript-eslint/no-empty-function": "warn",
+        "@typescript-eslint/no-empty-interface": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-namespace": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    },
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off"
+      }
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "extends": ["plugin:@nrwl/nx/javascript"],
+      "rules": {}
+    }
+  ]
+}

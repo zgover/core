@@ -1,0 +1,174 @@
+{
+  "implicitDependencies": {
+    "workspace.json": "*",
+    "package.json": {
+      "dependencies": "*",
+      "devDependencies": "*"
+    },
+    "tsconfig.base.json": "*",
+    "tslint.json": "*",
+    ".eslintrc.json": "*",
+    "nx.json": "*"
+  },
+  "affected": {
+    "defaultBase": "main"
+  },
+  "npmScope": "aglyn",
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@nrwl/workspace/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e"]
+      }
+    }
+  },
+  "projects": {
+    "console": {
+      "tags": [
+        "scope:app",
+        "scope:app:console"
+      ],
+      "implicitDependencies": []
+    },
+    "console-e2e": {
+      "tags": [
+        "scope:app",
+        "scope:app:console"
+      ],
+      "implicitDependencies": [
+        "console"
+      ]
+    },
+    "framework-builder": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:framework",
+        "scope:lib:framework:feature"
+      ],
+      "implicitDependencies": []
+    },
+    "framework-plugins-material": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:framework",
+        "scope:lib:framework:plugins"
+      ],
+      "implicitDependencies": []
+    },
+    "framework-renderer": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:framework",
+        "scope:lib:framework:feature"
+      ],
+      "implicitDependencies": []
+    },
+    "framework-sdk": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:framework",
+        "scope:lib:framework:sdk"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-data-mdi": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:data"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-feature-logger": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:feature",
+        "scope:lib:logger"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-feature-timestamp": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:feature",
+        "scope:lib:timestamp"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-ui-react": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:ui"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-ui-themes": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:ui"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-util-errors": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:util",
+        "scope:lib:error"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-util-guards": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:util"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-util-helpers": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:util"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-util-tools": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:util"
+      ],
+      "implicitDependencies": []
+    },
+    "shared-util-types": {
+      "tags": [
+        "scope:lib",
+        "scope:lib:shared",
+        "scope:lib:shared:util"
+      ],
+      "implicitDependencies": []
+    },
+    "www": {
+      "tags": [
+        "scope:app",
+        "scope:app:www"
+      ],
+      "implicitDependencies": []
+    },
+    "www-e2e": {
+      "tags": [
+        "scope:app",
+        "scope:app:www"
+      ],
+      "implicitDependencies": [
+        "www"
+      ]
+    }
+  }
+}
