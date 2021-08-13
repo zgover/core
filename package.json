@@ -59,7 +59,7 @@
     "lru-cache": "^6.0.0",
     "md5": "^2.3.0",
     "mitt": "^3.0.0",
-    "next": "11.0.1",
+    "next": "11.1.0",
     "next-api-middleware": "^0.7.1",
     "notistack": "^1.0.9",
     "react": "17.0.2",
