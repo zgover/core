@@ -77,18 +77,6 @@ export type Spreaded<L, R> = (
   & { [P in (PartialKeysOnly<R> & (keyof L extends (keyof L & keyof R) ? (PartialKeysOnly<R> & keyof L) : never))]: (L[P] | Exclude<R[P], undefined>) }
   )
 
-
-/** Implements a toString method */
-export interface StringLike {
-  toString(): string
-  [Symbol.toStringTag]?: string
-}
-
-/** Implements a toJSON method */
-export interface Serializable {
-  toJSON(): any
-}
-
 /** Field property getters */
 export type Getters<T> = {
   [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K]
@@ -106,3 +94,18 @@ export type Implements<K1 extends string, K2 extends string, T extends (...args:
 
 /** Field property setters */
 export type ImplementsOn<K extends string, T extends (...args: unknown[]) => void> = Implements<'on', K, T>
+
+
+/** Implements a toString method */
+export interface StringLike {
+  toString(): string
+  [Symbol.toStringTag]?: string
+}
+
+/** Implements a toJSON method */
+export interface Serializable {
+  toJSON(): any
+}
+
+/** Response value, Promise or Promise-Like value  */
+export type ValueOrPromise<T> = T extends Promise<unknown> ? T : T | PromiseLike<T>

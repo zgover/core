@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { forwardRef, useMemo, memo } from 'react'
+import { forwardRef, memo, useMemo } from 'react'
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@material-ui/core/SvgIcon'
 import { getIcon, Icon, IconKeys } from '@aglyn/shared/data/mdi'
-import { _isStr } from '@aglyn/shared/util/helpers'
+import { _isStrT } from '@aglyn/shared/util/helpers'
 import { SvgPathData, svgPathElement } from './svg-path'
 
 
@@ -42,7 +42,7 @@ export function createSvgPathIcon(displayName: string, path: SvgPathIconProps['p
           {...props}
         />
       )
-    }
+    },
   )
   CreateSvgPathIcon.displayName = `CreateSvgPathIcon(${displayName})`
   return memo(CreateSvgPathIcon)
@@ -66,8 +66,8 @@ const SvgPathIcon = forwardRef<any, SvgPathIconProps>(
   function RefRenderFn(props, ref) {
     const {iconId, path, children, ...rest} = props
     const pathElem = useMemo(() => {
-      const data = iconId || !path ? getMdiIconPathData(iconId) : _isStr(path) ? path : null
-      return !_isStr(data) ? path : svgPathElement(data as SvgPathData)
+      const data = iconId || !path ? getMdiIconPathData(iconId) : _isStrT(path) ? path : null
+      return !_isStrT(data) ? path : svgPathElement(data as SvgPathData)
     }, [iconId, path])
 
     return (

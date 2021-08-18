@@ -23,7 +23,7 @@ import {
   getComponent,
   handleResolveProps,
 } from '@aglyn/framework/sdk'
-import { _isArr, _isArrEmpty, _isStr, yes } from '@aglyn/shared/util/helpers'
+import { _isArr, _isArrEmpty, _isStrT, yes } from '@aglyn/shared/util/helpers'
 import * as ReactIs from 'react-is'
 import ElementsComponent from './elements.component'
 import { AnyProps } from '@aglyn/shared/util/types'
@@ -36,7 +36,7 @@ export interface ElementComponentProps extends AnyProps {
 
 const ElementComponent = forwardRef<any, ElementComponentProps>(function RefRenderFn(props, ref) {
   const {elementData: data, elementComponent, ...rest} = props
-  const component = !_isStr(data?.component)
+  const component = !_isStrT(data?.component)
     ? (data?.component as AglynComponent)
     : getComponent(getApp(), {moduleId: 'react', componentId: data?.component})
   const {ctor, metadata = {}} = component ?? {}

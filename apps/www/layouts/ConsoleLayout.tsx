@@ -16,7 +16,7 @@
  */
 
 import { GridItems, GridItemsProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
-import { _isStr, copy, s } from '@aglyn/shared/util/helpers'
+import { _isStrT, copy, s } from '@aglyn/shared/util/helpers'
 import Container from '@material-ui/core/Container'
 import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
@@ -130,8 +130,8 @@ const ConsoleLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                   <SvgPathIcon
                     color="secondary"
                     fontSize="inherit"
-                    {...(_isStr(header.icon) ? { iconId: header.icon } : header.icon)}
-                    className={clsx(classes.icon, _isStr(header.icon) ? null : header.icon.className)}
+                    {...(_isStrT(header.icon) ? { iconId: header.icon } : header.icon)}
+                    className={clsx(classes.icon, _isStrT(header.icon) ? null : header.icon.className)}
                   />
                 ) : null}
                 {header?.children ?? title}

@@ -81,6 +81,9 @@ export namespace LogLevel {
   }
 }
 
+/**
+ * TODO: INTEGRATE PACKAGE`debug`
+ */
 export class Logger {
   /**
    * The default log level

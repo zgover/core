@@ -16,7 +16,7 @@
  */
 
 import React, { useState } from 'react'
-import { getApp, setComponent } from '@aglyn/framework/sdk'
+import { getApp } from '@aglyn/framework/sdk'
 import { BuilderComponent } from '@aglyn/framework/builder'
 import { samplePageData } from '../constants/sample-data'
 
@@ -25,15 +25,15 @@ const Root = ({ children, innerRef, ...props }) => (
     {children}
   </span>
 )
-setComponent(getApp(), {
-  moduleId: 'react',
-  $id: 'root',
-  ctor: Root,
-  metadata: {
-    title: 'Root element',
-    icon: 'block',
-  },
-})
+// setComponent(getApp(), {
+//   moduleId: 'react',
+//   $id: 'root',
+//   ctor: Root,
+//   metadata: {
+//     title: 'Root element',
+//     icon: 'block',
+//   },
+// })
 
 export interface BuilderProps {}
 
@@ -41,7 +41,8 @@ export function Builder(props: BuilderProps) {
   const [elements, setElements] = useState(samplePageData)
 
   console.log('page:/builder', getApp())
-  return <BuilderComponent elements={elements} />
+  return null
+  // return <BuilderComponent elements={elements} />
 }
 
 export default Builder

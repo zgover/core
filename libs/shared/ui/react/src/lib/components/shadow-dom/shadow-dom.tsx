@@ -22,19 +22,17 @@ import React, {
   ForwardRefExoticComponent,
   PropsWithoutRef,
   ReactNode,
+  ReactPortal,
   RefAttributes,
   useEffect,
-  ReactChild,
   useRef,
   useState,
-  ElementType,
-  ReactPortal,
-  ReactElement,
 } from 'react'
 import { createPortal } from 'react-dom'
 
 import useCombinedRefs from '../../hooks/use-combined-refs'
-import { _isStr, _isFn, getDisplayName, ChangeCase } from '@aglyn/shared/util/helpers'
+import { _isFnT, _isStrT, ChangeCase, getDisplayName } from '@aglyn/shared/util/helpers'
+
 
 declare global {
   /** POLYFILL FOR adoptedStyleSheets */
@@ -59,22 +57,20 @@ export type ShadowDomRootProps = ShadowRootInit & {
   styleSheets?: string[]
   adoptedStyleSheets?: string[]
 }
-export type ShadowDomRootExoticComponent<T, P> = ForwardRefExoticComponent<
-  PropsWithoutRef<ShadowDomRootProps> & RefAttributes<T>
->
+export type ShadowDomRootExoticComponent<T, P> = ForwardRefExoticComponent<PropsWithoutRef<ShadowDomRootProps> & RefAttributes<T>>
 
 export function ShadowDomContentPortal<T extends ShadowRoot>(props: ShadowDomContentProps<T>): ReactPortal {
-  const { children, shadowRoot, key } = props
+  const {children, shadowRoot, key} = props
   return createPortal(children, (shadowRoot as unknown) as Element, key)
 }
 
 export function createShadowDomRoot<T, P>(
   options: ShadowDomRootFactoryOptions,
-  Component
+  Component,
 ): ShadowDomRootExoticComponent<T, P> {
-  const { render } = options
+  const {render} = options
   const ShadowDomRoot = forwardRef<T, ShadowDomRootProps>(function RefRenderFn(props, ref) {
-    const { mode, delegatesFocus, styleSheets, adoptedStyleSheets, children, ...rest } = props
+    const {mode, delegatesFocus, styleSheets, adoptedStyleSheets, children, ...rest} = props
     const localRef = useRef<T>(null)
     const elemRef = useCombinedRefs(localRef, ref)
     const [shadowRoot, setShadowRoot] = useState<ShadowRoot>(null)
@@ -83,7 +79,7 @@ export function createShadowDomRoot<T, P>(
     useEffect(() => {
       const instance = (localRef.current as unknown) as Element
       if (instance) {
-        const root: unknown = instance.attachShadow({ mode, delegatesFocus })
+        const root: unknown = instance.attachShadow({mode, delegatesFocus})
         if (styleSheets && styleSheets.length) {
           root['styleSheets'] = styleSheets
         }
@@ -98,14 +94,14 @@ export function createShadowDomRoot<T, P>(
       <Component key={key} ref={elemRef} {...((rest as unknown) as P)}>
         {shadowRoot ? (
           <ShadowDomContentPortal shadowRoot={shadowRoot}>
-            {_isFn(render) ? render({ shadowRoot, children }) : children}
+            {_isFnT(render) ? render({shadowRoot, children}) : children}
           </ShadowDomContentPortal>
         ) : null}
       </Component>
     )
   })
 
-  const name = getDisplayName(Component, null) ?? _isStr(Component) ? Component : 'Component'
+  const name = getDisplayName(Component, null) ?? _isStrT(Component) ? Component : 'Component'
   ShadowDomRoot.displayName = `ShadowDomRoot(${name})`
   ShadowDomRoot.defaultProps = {
     mode: 'open',
@@ -124,15 +120,15 @@ export type CreateShadowDomFactoryOptions = {
 }
 
 export function createShadowDomProxy(target = {}, options?: CreateShadowDomFactoryOptions) {
-  const { keyPrefix, render: _renderFn } = options ?? {}
-  const render = _renderFn ?? (({ children }: ShadowDomRootRenderProps) => children)
+  const {keyPrefix, render: _renderFn} = options ?? {}
+  const render = _renderFn ?? (({children}: ShadowDomRootRenderProps) => children)
 
   return new Proxy(target, {
     get: (_, name: string) => {
       const component = ChangeCase.paramCase(name) ?? 'div'
       const key = `${keyPrefix ?? 'default'}-${name}`
       if (!components.has(key)) {
-        const root = createShadowDomRoot({ render }, component)
+        const root = createShadowDomRoot({render}, component)
         components.set(key, root)
       }
       return components.get(key)

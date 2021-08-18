@@ -19,7 +19,7 @@ import { Schema as DdfSchema } from '@data-driven-forms/react-form-renderer'
 import validatorTypes from '@data-driven-forms/react-form-renderer/validator-types'
 import validation from '@data-driven-forms/react-form-renderer/validation'
 import md5 from 'md5'
-import { _hasKey, _isStr, ln } from '@aglyn/shared/util/helpers'
+import { _hasKey, _isStrT, ln } from '@aglyn/shared/util/helpers'
 import { ValidationOptions } from '@data-driven-forms/react-form-renderer/validation/validation'
 
 
@@ -292,7 +292,7 @@ export namespace DdfForms {
   }
 
   export function isValidFormId(id: unknown): id is string {
-    return _isStr(id) && _hasKey(id, rawFormIdFromId)
+    return _isStrT(id) && _hasKey(id, rawFormIdFromId)
   }
   export function getFormSchemaFromId(id: string): Schema {
     return formSchemaFromId[id]

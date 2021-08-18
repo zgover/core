@@ -15,4 +15,5 @@
  * limitations under the License.
  */
 
-export * from './lib/types'
+export * from './lib/base'
+export * from './lib/lifecycle'

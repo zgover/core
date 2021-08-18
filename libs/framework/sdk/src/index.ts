@@ -23,3 +23,6 @@ export * from './lib/util/handle-resolve-props'
 export * from './lib/util/handle-prop-defaults'
 
 export { RestrictFlag, AglynAppEventFlag } from './lib/constants'
+export { AglynComponentData } from './lib/extensions/components-type.extension'
+export { AglynComponent } from './lib/extensions/components-type.extension'
+export { AglynComponentOptions } from './lib/extensions/components-type.extension'

@@ -20,24 +20,55 @@ import { logger } from './logger'
 import {
   AglynApp,
   AglynAppOptions,
-  AglynCommand,
   AglynCommandController,
   AglynExtension,
   AglynExtensionController,
+  AglynModuleTriggerParams,
 } from './types'
 import {
   AGLYN_APP_ERROR,
   AglynAppEventFlag,
   AglynErrorEventFlag,
+  AglynModuleTriggerFlag,
   DEFAULT_ENTRY_NAME,
 } from './constants'
-import { _apps } from './internal'
+import { _apps, _modules } from './internal'
 import { LogCallback, Logger, LogLevelString, LogOptions } from '@aglyn/shared/feature/logger'
-import { _isFn, _isNull, _isStrEmpty } from '@aglyn/shared/util/guards'
+import { _isFnT, _isNull, _isStrEmpty } from '@aglyn/shared/util/guards'
 import { trim } from '@aglyn/shared/util/tools'
-import { AglynAppImpl } from './models'
+import { AglynAppImpl } from './controllers'
 import { event } from './event'
+import { Mutable } from '@aglyn/shared/util/types'
+import { isAppModule, isCommand, isExtension } from './util/aglyn-is'
 
+
+export function registerModules(app: AglynApp, ...modules: any[]) {
+  modules.forEach(module => {
+    if (!module) {
+      throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.NO_MODULE, undefined)
+    }
+    if (!isAppModule(module)) {
+      throw AGLYN_APP_ERROR.create(
+        AglynErrorEventFlag.INVALID_MODULE_ARG, {
+          moduleName: module?.['$id'] ?? module?.['name'] ?? 'unknown',
+          appName: app.getName() ?? DEFAULT_ENTRY_NAME,
+        },
+      )
+    }
+    if (isExtension(module)) {
+      app.register(
+        AglynModuleTriggerFlag.EXTENSION_REGISTER,
+        {extension: module},
+      )
+    }
+    if (isCommand(module)) {
+      app.register(
+        AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER,
+        {handler: module},
+      )
+    }
+  })
+}
 
 export function initializeApp(appOptions: AglynAppOptions = {}): AglynApp {
   const options = {...appOptions}
@@ -51,9 +82,10 @@ export function initializeApp(appOptions: AglynAppOptions = {}): AglynApp {
   }
   const app: AglynApp = AglynAppImpl(options, event, logger)
   _apps.set(name, app)
+  app.load()
 
-  logger.debug(AglynAppEventFlag.APP_CREATED, {app})
-  event.emit(AglynAppEventFlag.APP_CREATED, {app})
+  registerModules(app, ..._modules.extensions)
+  registerModules(app, ..._modules.commands)
 
   return app
 }
@@ -75,9 +107,9 @@ export function deleteApp(app: AglynApp): void {
   const name = app.getName()
   logger.debug(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
   event.emit(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
-  app.unloadApp()
+  app.unload()
   _apps.delete(name)
-  app['deleted'] = true
+  ;(app as Mutable<AglynApp>)['deleted'] = true
   logger.debug(AglynAppEventFlag.APP_DELETED, {appName: name})
   event.emit(AglynAppEventFlag.APP_DELETED, {appName: name})
 }
@@ -108,7 +140,7 @@ export function _getCommandController(app: AglynApp): AglynCommandController {
  * @param options
  */
 export function onLog(callbackFn: LogCallback | null, options?: LogOptions): void {
-  if (!_isNull(callbackFn) && !_isFn(callbackFn)) {
+  if (!_isNull(callbackFn) && !_isFnT(callbackFn)) {
     throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.INVALID_LOG_ARG, undefined)
   }
   Logger.setUserLogHandler(callbackFn, options)
@@ -125,49 +157,68 @@ export function setLogLevel(logLevel: LogLevelString): void {
   Logger.setLogLevel(logLevel)
 }
 
-export function registerExtension(app: AglynApp, extension: AglynExtension): void {
+export function getExtension(
+  app: AglynApp, data: { extensionId: string },
+): AglynExtension {
+  const {extensionId} = data
   const extensionController = _getExtensionController(app)
-  extensionController.registerExtension(extension)
+  return extensionController.getExtension(extensionId)
 }
 
-export function unregisterExtension(app: AglynApp, extension: AglynExtension): void {
-  const extensionController = _getExtensionController(app)
-  extensionController.unregisterExtension(extension)
-}
-
-export function getExtension(app: AglynApp, options: { $id: string }): AglynExtension {
-  const extensionController = _getExtensionController(app)
-  return extensionController.getExtension(options?.$id)
-}
-
-export function getExtensions(app: AglynApp): AglynExtension[] {
+export function getExtensions(
+  app: AglynApp,
+): AglynExtension[] {
   const extensionController = _getExtensionController(app)
   return extensionController.getExtensions()
 }
 
-export function loadExtension(app: AglynApp, id: string) {
+export function registerExtension(
+  app: AglynApp, data: AglynModuleTriggerParams[AglynModuleTriggerFlag.EXTENSION_REGISTER],
+): void {
   const extensionController = _getExtensionController(app)
-  extensionController.loadExtension(id)
+  extensionController.registerExtension(data)
 }
 
-export function unloadExtension(app: AglynApp, id: string) {
+export function unregisterExtension(
+  app: AglynApp, data: AglynModuleTriggerParams[AglynModuleTriggerFlag.EXTENSION_UNREGISTER],
+): void {
   const extensionController = _getExtensionController(app)
-  extensionController.loadExtension(id)
+  extensionController.unregisterExtension(data)
 }
 
-export function registerCommand(app: AglynApp, command: AglynCommand): void {
-  const commandController = _getCommandController(app)
-  commandController.registerCommand(command)
+export function loadExtension(
+  app: AglynApp, data: AglynModuleTriggerParams[AglynModuleTriggerFlag.EXTENSION_LOAD],
+) {
+  const extensionController = _getExtensionController(app)
+  extensionController.loadExtension(data)
 }
 
-export function unregisterCommand(app: AglynApp, command: AglynCommand): void {
-  const commandController = _getCommandController(app)
-  commandController.unregisterCommand(command)
+export function unloadExtension(
+  app: AglynApp, data: AglynModuleTriggerParams[AglynModuleTriggerFlag.EXTENSION_UNLOAD],
+) {
+  const extensionController = _getExtensionController(app)
+  extensionController.loadExtension(data)
 }
 
-export function triggerCommand(app: AglynApp, id: string): void {
+export function registerCommand(
+  app: AglynApp, data: AglynModuleTriggerParams[AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER],
+): void {
   const commandController = _getCommandController(app)
-  commandController.triggerCommand({$id: id})
+  commandController.registerAction(data)
+}
+
+export function unregisterAction(
+  app: AglynApp, data: AglynModuleTriggerParams[AglynModuleTriggerFlag.COMMAND_ACTION_UNREGISTER],
+): void {
+  const commandController = _getCommandController(app)
+  commandController.unregisterAction(data)
+}
+
+export function triggerCommand(
+  app: AglynApp, data: AglynModuleTriggerParams[AglynModuleTriggerFlag.COMMAND_TRIGGER],
+): void {
+  const commandController = _getCommandController(app)
+  commandController.executeCommand(data)
 }
 
 // export function getComponent(app: AglynApp, extId: string, options: { $id: string }) {

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isUndef } from '@aglyn/shared/util/helpers'
+import { _isUndT } from '@aglyn/shared/util/helpers'
 import { Res, Logger } from '../helpers'
 import {
   ApiHandler,
@@ -35,7 +35,7 @@ export const requireHeader = (
     let error
     try {
       const header = req.headers[key]
-      if (_isUndef(header)) {
+      if (_isUndT(header)) {
         throw new Error(`Missing required header - (key: ${key})!`)
       }
       newReq[name] = header

@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import { useRef, useCallback, useEffect, useState } from 'react'
-import { _isArr, _isNum, _isObj, _isNumPos, _isFn } from '@aglyn/shared/util/helpers'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { _isArr, _isFnT, _isNum, _isNumPos, _isObj } from '@aglyn/shared/util/helpers'
+
 
 interface Options {
   // The millisecond delay count
@@ -69,12 +70,12 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
   const [state] = useState<Options>(() => (_isObj(options) ? options : {}))
   const [mounted, setMounted] = useState(false)
   const savedCallback = useRef(null)
-  const ref = useRef({ runCount: 0, timeoutRef: null, startTime: null })
+  const ref = useRef({runCount: 0, timeoutRef: null, startTime: null})
 
   // On mount and callback updates update the ref
   useEffect(() => {
     savedCallback.current = (params: HandlerParams) => {
-      if (_isFn(callback)) {
+      if (_isFnT(callback)) {
         return callback(params)
       }
     }
@@ -95,10 +96,10 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
   const start = useCallback(
     (opt?: Options) => {
       if (false) {
-        console.error("Can't start timeout or interval when unmounted")
+        console.error('Can\'t start timeout or interval when unmounted')
         return
       } else if (ref.current.timeoutRef) {
-        console.warn("Can't start timeout or interval when one is already running", ref.current.timeoutRef)
+        console.warn('Can\'t start timeout or interval when one is already running', ref.current.timeoutRef)
       }
 
       // Merge param opts with global opts
@@ -148,11 +149,11 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
 
           // Run limit reach callback
           limitReached &&
-            _isFn(optOnLimitReach) &&
-            optOnLimitReach({
-              startTime: Number(ref.current.startTime),
-              endTime: Number(Date.now()),
-            })
+          _isFnT(optOnLimitReach) &&
+          optOnLimitReach({
+            startTime: Number(ref.current.startTime),
+            endTime: Number(Date.now()),
+          })
         }
       }
 
@@ -163,7 +164,7 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
         timeoutRef: optRepeat ? setInterval(handler, ms, ...argArgs) : setTimeout(handler, ms, ...argArgs),
       }
     },
-    [state, ref, clear]
+    [state, ref, clear],
   )
 
   // When mounted set mounted

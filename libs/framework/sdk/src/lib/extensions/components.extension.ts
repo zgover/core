@@ -15,88 +15,115 @@
  * limitations under the License.
  */
 
-import { AglynApp, AglynComponent } from '../types'
+import { AglynApp } from '../types'
 import { AglynModuleTriggerFlag } from '../constants'
+import { AglynControllerModel, AglynExtensionModel } from '../models'
+import { AglynComponent, ComponentsExtensionController } from './components-type.extension'
 
 
 export type ComponentsRegistry = Map<string, AglynComponent>
 
-const TAG = 'AglynExtension'
 const ID = 'components'
-let componentsManager = null
+let instance: ComponentsExtensionController = null
 
-exports.onLoad = (app: AglynApp) => {
-  if (componentsManager) {
-    componentsManager = ComponentsController()
+const extension = new (class extends AglynExtensionModel {
+  protected static __$ID__: string = ID
+  constructor() {
+    super()
   }
-  componentsManager.load(app)
-}
-exports.onUnload = (app: AglynApp) => {
-  if (componentsManager) {
-    componentsManager.unload(app)
+  public override onLoad(app: AglynApp) {
+    if (!(instance instanceof ComponentsControllerModel)) {
+      this.context = instance = new ComponentsControllerModel()
+    }
+    instance.onLoad({app})
   }
-}
-exports.toJSON = () => {
-  return {
-    components: [...componentsManager.getComponents().values()],
+  public override onUnload(app: AglynApp) {
+    if (instance instanceof ComponentsControllerModel) {
+      instance.onUnload({app})
+    }
   }
-}
-exports[Symbol.toStringTag] = `${TAG}`
-exports.toString = function() {return (`${TAG}(identifier: '${ID}')`)}
+  public override toJSON() {
+    return {
+      ...super.toJSON(),
+      componentIds: instance.keys(),
+    }
+  }
+})()
 
-function ComponentsController() {
-  const components: ComponentsRegistry = new Map()
+exports = extension
 
-  const componentsController = {
-    get: (data: { componentId: string }): AglynComponent => {
-      const {componentId} = data
-      return components.get(componentId)
-    },
-    getAll: () => {
-      return [...components.values()]
-    },
-    set: (data: AglynComponent): void => {
-      const {$id, component, options} = data
-      components.set($id, {
-        $id: $id,
-        options: {...options},
-        component: component,
-      })
-    },
-    delete: (data: { componentId: string }): void => {
-      const {componentId} = data
-      components.delete(componentId)
-    },
-    load: (app: AglynApp) => {
-      app.event.on(
-        AglynModuleTriggerFlag.REGISTER_EXTENSION_COMPONENT,
-        registerExtensionComponent,
-      )
-      app.event.on(
-        AglynModuleTriggerFlag.UNREGISTER_EXTENSION_COMPONENT,
-        unregisterExtensionComponent,
-      )
-    },
-    unload: (app: AglynApp) => {
-      app.event.off(
-        AglynModuleTriggerFlag.REGISTER_EXTENSION_COMPONENT,
-        registerExtensionComponent,
-      )
-      app.event.off(
-        AglynModuleTriggerFlag.UNREGISTER_EXTENSION_COMPONENT,
-        unregisterExtensionComponent,
-      )
-    },
-  }
+class ComponentsControllerModel extends AglynControllerModel implements ComponentsExtensionController {
+  static #state: ComponentsRegistry = new Map()
 
-  const registerExtensionComponent = (data) => {
-    const {$id, options, component} = data
-    componentsController.set({$id: $id, options, component})
+  public entries = (): [id: string, component: AglynComponent][] => {
+    return [...ComponentsControllerModel.#state.entries()]
   }
-  const unregisterExtensionComponent = (data) => {
-    const {componentId} = data
-    componentsController.delete({componentId: componentId})
+  public keys = (): string[] => {
+    return [...ComponentsControllerModel.#state.keys()]
   }
-
-  return componentsController
+  public values = (): AglynComponent[] => {
+    return [...ComponentsControllerModel.#state.values()]
+  }
+  public getAll = (options?: { variant: 'entries' | 'keys' | 'values' }) => {
+    const {variant} = {...options}
+    switch (variant) {
+      case 'values':
+        return this.values()
+      case 'keys':
+        return this.keys()
+    }
+    return this.entries()
+  }
+  public get = (payload) => {
+    const {componentId} = payload
+    return ComponentsControllerModel.#state.get(componentId)
+  }
+  public set = (payload) => {
+    const {component} = payload
+    ComponentsControllerModel.#state.set(component.$id, component)
+    return this
+  }
+  public delete = (payload) => {
+    const {componentId} = payload
+    ComponentsControllerModel.#state.delete(componentId)
+    return this
+  }
+  /** @private handled by extension */
+  override onLoad(app: AglynApp) {
+    app.event.on(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENT_REGISTER,
+      this.set,
+    )
+    app.event.on(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENT_UNREGISTER,
+      this.delete,
+    )
+    app.event.on(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENT_GET,
+      this.get,
+    )
+    app.event.on(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENTS_GET,
+      this.getAll,
+    )
+  }
+  /** @private handled by extension */
+  override onUnload(app: AglynApp) {
+    app.event.off(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENT_REGISTER,
+      this.set,
+    )
+    app.event.off(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENT_UNREGISTER,
+      this.delete,
+    )
+    app.event.off(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENT_GET,
+      this.get,
+    )
+    app.event.off(
+      AglynModuleTriggerFlag.EXTENSION_COMPONENTS_GET,
+      this.getAll,
+    )
+  }
 }

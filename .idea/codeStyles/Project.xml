@@ -62,6 +62,7 @@
       <option name="FORCE_SEMICOLON_STYLE" value="true" />
       <option name="SPACE_BEFORE_GENERATOR_MULT" value="true" />
       <option name="FIELD_PREFIX" value="#" />
+      <option name="FILE_NAME_STYLE" value="MIXED" />
       <option name="SPACE_BEFORE_FUNCTION_LEFT_PARENTH" value="false" />
       <option name="REFORMAT_C_STYLE_COMMENTS" value="true" />
       <option name="USE_PUBLIC_MODIFIER" value="true" />

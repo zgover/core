@@ -15,4 +15,6 @@
  * limitations under the License.
  */
 
-export * from './lib/error'
+export * from './lib/types'
+export * from './lib/ns-error'
+export * from './lib/ns-error-factory'

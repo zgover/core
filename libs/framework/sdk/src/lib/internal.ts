@@ -20,7 +20,7 @@ import { AglynAppsMap } from './types'
 export const _apps: AglynAppsMap = new Map()
 export const _modules = {
   extensions: [
-    require('./extensions/components.extension'),
+    async () => await import('./extensions/components.extension'),
   ],
   commands: [],
 }

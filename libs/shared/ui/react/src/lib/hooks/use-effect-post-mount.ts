@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-import { EffectCallback, DependencyList, useEffect, useRef } from 'react'
-import { _isFn } from '@aglyn/shared/util/helpers'
+import { DependencyList, EffectCallback, useEffect, useRef } from 'react'
+import { _isFnT } from '@aglyn/shared/util/helpers'
+
 
 export function useEffectPostMount(callback: EffectCallback, deps?: DependencyList): void {
   const isOnInitialMount = useRef(true)
 
   useEffect(() => {
     if (!isOnInitialMount.current) {
-      return _isFn(callback) && callback()
+      return _isFnT(callback) && callback()
     }
     isOnInitialMount.current = false
   }, deps)

@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { AglynComponent } from '../types'
-import { _isFn } from '@aglyn/shared/util/helpers'
+import { _isFnT } from '@aglyn/shared/util/helpers'
 import { handlePropDefaults } from './handle-prop-defaults'
 import { AnyProps } from '@aglyn/shared/util/types'
+import { AglynComponent } from '../extensions/components-type.extension'
 
 
 /**
@@ -35,5 +35,5 @@ export function handleResolveProps(
 ) {
   const {resolveProps, defaultProps = {}} = metadata
   const mergedProps = handlePropDefaults(props, defaultProps)
-  return _isFn(resolveProps) ? resolveProps.call(thisArg, mergedProps) : mergedProps
+  return _isFnT(resolveProps) ? resolveProps.call(thisArg, mergedProps) : mergedProps
 }

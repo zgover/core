@@ -16,7 +16,8 @@
  */
 
 import { useEffect, useRef } from 'react'
-import { _isFn } from '@aglyn/shared/util/helpers'
+import { _isFnT } from '@aglyn/shared/util/helpers'
+
 
 export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]): void {
   const savedCallback = useRef(null)
@@ -29,7 +30,7 @@ export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]
     let timeout = undefined
 
     const handler = (...args) => {
-      if (_isFn(savedCallback.current)) {
+      if (_isFnT(savedCallback.current)) {
         savedCallback.current(...args)
       }
     }

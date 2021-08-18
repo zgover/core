@@ -16,7 +16,8 @@
  */
 
 import { useEffect, useRef } from 'react'
-import { _isFn } from '@aglyn/shared/util/helpers'
+import { _isFnT } from '@aglyn/shared/util/helpers'
+
 
 export function useInterval(callback: TimerHandler, delay: number, count?: number, ...args: any[]): void {
   const savedCallback = useRef(null)
@@ -30,7 +31,7 @@ export function useInterval(callback: TimerHandler, delay: number, count?: numbe
     let interval = undefined
 
     const handler = (...handlerArgs) => {
-      if (_isFn(savedCallback.current)) {
+      if (_isFnT(savedCallback.current)) {
         if (runCount.current < count || !count) {
           runCount.current = runCount.current + 1
           savedCallback.current(...handlerArgs)

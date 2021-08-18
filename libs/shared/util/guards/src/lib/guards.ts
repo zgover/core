@@ -56,7 +56,7 @@ export function _isNumT(val: unknown): val is number {
  * @returns {val is number}
  */
 export function _isNum(val: unknown, noStr?: boolean): val is number {
-  return noStr && _isStr(val) ? false : !isNaN(Number(val))
+  return noStr && _isStrT(val) ? false : !isNaN(Number(val))
 }
 /**
  * Is literal type symbol
@@ -65,7 +65,7 @@ export function _isNum(val: unknown, noStr?: boolean): val is number {
  * @param {*} val
  * @returns {val is symbol}
  */
-export function _isSym(val: unknown): val is symbol {
+export function _isSymT(val: unknown): val is symbol {
   return typeof val === 'symbol'
 }
 /**
@@ -75,14 +75,9 @@ export function _isSym(val: unknown): val is symbol {
  * @param {*} val
  * @returns {val is Function}
  */
-export function _isFn(val: unknown): val is Func {
+export function _isFnT(val: unknown): val is (...args: unknown[]) => unknown {
   return typeof val === 'function'
 }
-
-export interface Func {
-  (...args: unknown[]): unknown
-}
-
 /**
  * Shortcut for Array.isArray
  *
@@ -120,10 +115,11 @@ export function _isObjT(val: unknown): val is Record<string | number, unknown> {
  *
  * @export
  * @param {*} val
+ * @param array
  * @returns {val is Object}
  */
-export function _isObj(val: unknown): val is Record<string, unknown> {
-  return !_isNull(val) && _isObjT(val) && !_isArr(val)
+export function _isObj(val: unknown, array = false): val is Record<string, unknown> {
+  return !_isNull(val) && _isObjT(val) && (!array ? !_isArr(val) : true)
 }
 /**
  * Is literal type null... null is actually 'object' type literal
@@ -133,7 +129,7 @@ export function _isObj(val: unknown): val is Record<string, unknown> {
  * @returns {val is null}
  */
 export function _isNull(val: unknown): val is null {
-  return _isObjT(val) && typeof val === null
+  return typeof val === 'object' && val === null
 }
 /**
  * Is literal type undefined
@@ -142,7 +138,7 @@ export function _isNull(val: unknown): val is null {
  * @param {*} val
  * @returns {val is undefined}
  */
-export function _isUndef(val: unknown): val is undefined {
+export function _isUndT(val: unknown): val is undefined {
   return typeof val === 'undefined'
 }
 /**
@@ -153,7 +149,7 @@ export function _isUndef(val: unknown): val is undefined {
  * @returns {(val is null | undefined)}
  */
 export function _isUndOrNull(val: unknown): val is null | undefined {
-  return _isNull(val) || _isUndef(val)
+  return _isNull(val) || _isUndT(val)
 }
 /**
  * Is literal type string
@@ -162,7 +158,7 @@ export function _isUndOrNull(val: unknown): val is null | undefined {
  * @param {*} val
  * @returns {val is string}
  */
-export function _isStr(val: unknown): val is string {
+export function _isStrT(val: unknown): val is string {
   return typeof val === 'string'
 }
 /**
@@ -173,7 +169,7 @@ export function _isStr(val: unknown): val is string {
  * @returns {val is ''}
  */
 export function _isStrEmpty(val: unknown): val is '' {
-  return _isStr(val) && !val.length
+  return _isStrT(val) && !val.length
 }
 /**
  * Is type empty array or empty string
@@ -197,7 +193,7 @@ export function _isBuff(val: unknown): val is Buffer {
     _isObjT(val) &&
     _isObjT(val.constructor) &&
     'isBuffer' in val.constructor &&
-    _isFn((val.constructor as any).isBuffer) &&
+    _isFnT((val.constructor as any).isBuffer) &&
     (val.constructor as any).isBuffer(val)
   )
 }
@@ -210,14 +206,14 @@ export function _isBuff(val: unknown): val is Buffer {
  */
 export function _isPrim(val: unknown): val is Primitive {
   return Boolean(
-    _isSym(val) ||
+    _isSymT(val) ||
     _isBig(val) ||
     _isNumT(val) ||
     _isObjT(val) ||
     _isBool(val) ||
-    _isStr(val) ||
-    _isFn(val) ||
-    _isUndef(val),
+    _isStrT(val) ||
+    _isFnT(val) ||
+    _isUndT(val),
   )
 }
 export type Primitive = symbol | bigint | boolean | number | string | undefined
@@ -294,7 +290,7 @@ export function hasLn<T extends Iterable<U> | ArrayLike<U> | number, U>(val: T, 
   const mt = _isNum(m)
   const noOpt = !et && !lt && !mt
   const chkFunc = (firstCheck: boolean): boolean => {
-    if (_isFn(also)) {
+    if (_isFnT(also)) {
       return Boolean(and ? firstCheck && also(len, v) : firstCheck || also(len, v))
     }
     // !opts && console.log('has len', val, len, _isNumPos(len))
@@ -355,6 +351,20 @@ export function _isNumZero(val: unknown): val is 0 {
   return _isNum(val) && Number(val) === 0
 }
 
+/**
+ * Check whether a value is a Promise-like instance.
+ * Recognizes both native promises and third-party promise libraries.
+ *
+ * @param value - The value to check.
+ */
+export function isPromiseLike<T>(
+  value: T | PromiseLike<T> | undefined,
+): value is PromiseLike<T> {
+  if (!value) return false
+  if (typeof value !== 'object' && typeof value !== 'function') return false
+  return typeof (value as PromiseLike<T>).then === 'function'
+}
+
 export namespace EqualityIs {
 
   type EqualityOperator = 'strict' | 'loose'
@@ -373,7 +383,7 @@ export namespace EqualityIs {
   export function sameType<T, U extends T>(
     value: T,
     possibilities: U[],
-    options?: { equality?: EqualityOperator }
+    options?: { equality?: EqualityOperator },
   ): value is U {
     const {equality = Equality.DEFAULT} = {...options}
     return possibilities.some((possibility) => {

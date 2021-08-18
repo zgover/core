@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isFn } from '@aglyn/shared/util/helpers'
+import { _isFnT } from '@aglyn/shared/util/helpers'
 import MuiBackdrop, { BackdropProps as MuiBackdropProps } from '@material-ui/core/Backdrop'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import LinearProgress from '@material-ui/core/LinearProgress'

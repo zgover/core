@@ -29,13 +29,14 @@ import {
   NavbarDrawerProps,
   SvgPathIcon,
 } from '@aglyn/shared/ui/react'
-import { _isStr } from '@aglyn/shared/util/helpers'
+import { _isStrT } from '@aglyn/shared/util/helpers'
 import Button from '@material-ui/core/Button'
 import Box from '@material-ui/core/Box'
 import FormControl from '@material-ui/core/FormControl'
 import Typography from '@material-ui/core/Typography'
-import { getApp, getComponents } from '@aglyn/framework/sdk'
+import { getApp, getExtension } from '@aglyn/framework/sdk'
 import { ElementDrawerOptions } from '../contexts/element-drawer.context'
+import { ComponentsExtensionController } from '../../../../sdk/src/lib/extensions/components-type.extension'
 
 
 export const styles = (theme: Theme) =>
@@ -110,6 +111,12 @@ export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> 
   }['bivarianceHack']
 }
 
+
+const app = getApp()
+const componentsExtension = getExtension(app, {
+  extensionId: 'components'
+}) as unknown as ComponentsExtensionController
+
 const ElementDrawerComponent = forwardRef<any,
   ElementDrawerComponentProps & WithStyles<typeof styles>>(function RefRenderFn(props, ref) {
   const {classes, className, options, onConfirm, onClose, onCancel, onDelete, ...rest} = props
@@ -150,7 +157,8 @@ const ElementDrawerComponent = forwardRef<any,
     [onConfirm],
   )
 
-  const components = getComponents(getApp(), {moduleId: 'react'})
+  const componentEntries = componentsExtension.entries()
+  const components = getExtension(, { extensionId})getComponents(getApp(), {moduleId: 'react'})
   const items = components.map((i) => ({
     id: i?.$id,
     title: i?.options?.title,
@@ -184,7 +192,7 @@ const ElementDrawerComponent = forwardRef<any,
           label={item.title}
           onActionClick={handleItemClick}
           preview={
-            (_isStr(item.icon) ? (
+            (_isStrT(item.icon) ? (
               <Box fontSize={'4.17em'} component={SvgPathIcon} {...{iconId: item.icon}} />
             ) : (
               <Fragment>{item.icon}</Fragment>

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isArr, _isFn, _isNum, _isObj, _isStr, _isUndef } from '@aglyn/shared/util/guards'
+import { _isArr, _isFnT, _isNum, _isObj, _isStrT, _isUndT } from '@aglyn/shared/util/guards'
 
 
 export function tools(): string {
@@ -278,7 +278,7 @@ export function arrayToObjectLiteral(arr: [any, any][]) {
  * @returns {K[]}
  */
 export function getAllObjectKeys<T extends Record<string, unknown>, K extends keyof T>(obj: T): K[] {
-  return (_isFn(Object.getOwnPropertySymbols)
+  return (_isFnT(Object.getOwnPropertySymbols)
     ? Object.keys(obj).concat(Object.getOwnPropertySymbols(obj) as any)
     : Object.keys(obj)) as K[]
 }
@@ -297,7 +297,7 @@ export function reduceObject<T extends Record<string, unknown>, K extends keyof 
   target: T,
   reducerCallback: (val: T[K], key?: K, original?: T) => T[K],
 ): T {
-  if (_isUndef(reducerCallback)) {
+  if (_isUndT(reducerCallback)) {
     return target
   }
   const _target: T = copyObj(target) as T
@@ -377,7 +377,7 @@ export function mapObject(target, callbackfn: MapObjectClbkFn, opt?: MapObjectOp
     !advanced ? [key, callbackfn(value, key, index, array)] : callbackfn(value, key, index, array)
   const result: any = forEach ? entries.forEach(handler) : entries.map(handler)
   if (!forEach) {
-    const filtered = !filter ? result : result.filter(([, v]) => !_isUndef(v))
+    const filtered = !filter ? result : result.filter(([, v]) => !_isUndT(v))
     return Object.fromEntries(filtered)
   }
   return undefined
@@ -705,7 +705,7 @@ export type NumeronymOpts = {
  * @returns {(number | typeof elseT)}
  */
 export function toNum(val: any, elseT?: any, radix?: number): number | typeof elseT {
-  const num = _isNum(radix) && _isStr(val) ? parseInt(val, radix) : Number(val)
+  const num = _isNum(radix) && _isStrT(val) ? parseInt(val, radix) : Number(val)
   return isNaN(num) ? elseT ?? 0 : num
 }
 
@@ -744,10 +744,10 @@ export function getDisplayName(fn, fallback = 'Component'): string {
 
 /**
  * No operation function with no return
- * @param args
  * @returns {any}
+ * @param _
  */
-export function noop(...args: any[]): any {
+export function noop<T>(..._: T[]): void {
   // Do nothing.
 }
 

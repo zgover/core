@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { useCallback, Ref, RefCallback, MutableRefObject } from 'react'
+import { MutableRefObject, Ref, useCallback } from 'react'
 
-import { _isFn } from '@aglyn/shared/util/helpers'
+import { _isFnT } from '@aglyn/shared/util/helpers'
+
 
 /**
  * Assign a React ref object, could be a RefCallback or RefObject
@@ -25,7 +26,7 @@ import { _isFn } from '@aglyn/shared/util/helpers'
  * @param value
  */
 export function assignRefValue<T>(ref: Ref<T>, value: any) {
-  return !ref ? null : _isFn(ref) ? ref(value) : ((ref as MutableRefObject<T>).current = value)
+  return !ref ? null : _isFnT(ref) ? ref(value) : ((ref as MutableRefObject<T>).current = value)
 }
 
 /**
@@ -38,7 +39,7 @@ export function useCombinedRefs<T>(...refs: Ref<T>[]): Ref<T> {
       refs.forEach((ref) => assignRefValue(ref, element))
       return element
     },
-    [refs]
+    [refs],
   )
 }
 
