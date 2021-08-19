@@ -56,16 +56,16 @@ export function registerModules(app: AglynApp, ...modules: any[]) {
       )
     }
     if (isExtension(module)) {
-      app.register(
-        AglynModuleTriggerFlag.EXTENSION_REGISTER,
-        {extension: module},
-      )
+      app.effect({
+        type: AglynModuleTriggerFlag.EXTENSION_REGISTER,
+        payload: {extension: module},
+      })
     }
     if (isCommand(module)) {
-      app.register(
-        AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER,
-        {handler: module},
-      )
+      app.effect({
+        type: AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER,
+        payload: {handler: module},
+      })
     }
   })
 }
@@ -82,7 +82,7 @@ export function initializeApp(appOptions: AglynAppOptions = {}): AglynApp {
   }
   const app: AglynApp = AglynAppImpl(options, event, logger)
   _apps.set(name, app)
-  app.load()
+  app.onInit?.()
 
   registerModules(app, ..._modules.extensions)
   registerModules(app, ..._modules.commands)
@@ -107,7 +107,7 @@ export function deleteApp(app: AglynApp): void {
   const name = app.getName()
   logger.debug(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
   event.emit(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
-  app.unload()
+  app.onDestroy?.()
   _apps.delete(name)
   ;(app as Mutable<AglynApp>)['deleted'] = true
   logger.debug(AglynAppEventFlag.APP_DELETED, {appName: name})

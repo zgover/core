@@ -61,8 +61,7 @@
                 "onlyDependOnLibsWithTags": [
                   "scope:lib:framework:sdk",
                   "scope:lib:shared:util",
-                  "scope:lib:logger",
-                  "scope:lib:timestemp"
+                  "scope:lib:shared:feature"
                 ]
               },
               {

@@ -31,10 +31,9 @@ import {
 import { Timestamp } from '@aglyn/shared/feature/timestamp'
 import { EqualityIs, Mitt } from '@aglyn/shared/util/helpers'
 import { LifecycleFlag, Mutable } from '@aglyn/shared/util/types'
-import { AglynAppEventFlag } from '@aglyn/framework/sdk'
 import { logger } from './logger'
 import { event } from './event'
-import { AglynModuleTriggerFlag, AglynSymbol, DEFAULT_ENTRY_NAME } from './constants'
+import { AglynAppEventFlag, AglynModuleTriggerFlag, AglynSymbol, DEFAULT_ENTRY_NAME } from './constants'
 
 
 export function AglynAppImpl(
@@ -99,16 +98,16 @@ export function AglynAppImpl(
         options: this._options,
       }
     },
-    load(): void {
-      commandController.load()
-      extensionController.load()
+    onInit(): void {
+      commandController.onInit?.()
+      extensionController.onInit?.()
       logger.debug(AglynAppEventFlag.APP_LOADED, {appName: name})
       event.emit(AglynAppEventFlag.APP_LOADED, {appName: name})
     },
-    unload(): void {
+    onDestroy(): void {
       extensionController.unloadExtensions()
-      commandController.unload()
-      extensionController.unload()
+      commandController.onDestroy?.()
+      extensionController.onDestroy?.()
       logger.debug(AglynAppEventFlag.APP_UNLOADED, {appName: name})
       event.emit(AglynAppEventFlag.APP_UNLOADED, {appName: name})
     },
@@ -195,7 +194,7 @@ export function AglynAppExtensionControllerImpl(
       const extension = extensions.get(extensionId) as Mutable<AglynExtension>
       if (extension) {
         extension.lifecycle = LifecycleFlag.LOADING
-        extension.onLoad?.(app)
+        extension.onInit?.(app)
         extension.lifecycle = LifecycleFlag.LOADED
         logger.debug(AglynAppEventFlag.LOADED_EXTENSION, {extensionId})
         event.emit(AglynAppEventFlag.LOADED_EXTENSION, {extensionId})
@@ -207,7 +206,7 @@ export function AglynAppExtensionControllerImpl(
       const {extensionId} = data
       const extension = extensions.get(extensionId) as Mutable<AglynExtension>
       if (extension) {
-        extension.onUnload?.(app)
+        extension.onDestroy?.(app)
         extension.lifecycle = LifecycleFlag.UNLOADED
         logger.debug(AglynAppEventFlag.UNLOADED_EXTENSION, {extensionId})
         event.emit(AglynAppEventFlag.UNLOADED_EXTENSION, {extensionId})
@@ -229,13 +228,13 @@ export function AglynAppExtensionControllerImpl(
         extensions: extensions.keys(),
       }
     },
-    load() {
+    onInit() {
       event.on(AglynModuleTriggerFlag.EXTENSION_REGISTER, registerExtension)
       event.on(AglynModuleTriggerFlag.EXTENSION_UNREGISTER, unregisterExtension)
       event.on(AglynModuleTriggerFlag.EXTENSION_LOAD, loadExtension)
       event.on(AglynModuleTriggerFlag.EXTENSION_UNLOAD, unloadExtension)
     },
-    unload() {
+    onDestroy() {
       event.off(AglynModuleTriggerFlag.EXTENSION_REGISTER, registerExtension)
       event.off(AglynModuleTriggerFlag.EXTENSION_UNREGISTER, unregisterExtension)
       event.off(AglynModuleTriggerFlag.EXTENSION_LOAD, loadExtension)
@@ -315,12 +314,12 @@ export function AglynCommandControllerImpl(
         commands: [...commander.all.values()],
       }
     },
-    load() {
+    onInit() {
       appEvent.on(AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER, registerCommand)
       appEvent.on(AglynModuleTriggerFlag.COMMAND_ACTION_UNREGISTER, unregisterCommand)
       appEvent.on(AglynModuleTriggerFlag.COMMAND_TRIGGER, triggerCommand)
     },
-    unload() {
+    onDestroy() {
       appEvent.off(AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER, registerCommand)
       appEvent.off(AglynModuleTriggerFlag.COMMAND_ACTION_UNREGISTER, unregisterCommand)
       appEvent.off(AglynModuleTriggerFlag.COMMAND_TRIGGER, triggerCommand)

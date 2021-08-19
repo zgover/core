@@ -45,7 +45,7 @@ export type AglynAppModule<T extends AglynUniqueId = any> = T
 export type AglynExtensionMap = Map<string, AglynExtension>
 export type AglynEmitterParams = AglynAppEventParams & AglynModuleTriggerParams
 export type AglynEmitter = Emitter<AglynEmitterParams>
-export type AglynError = NsErrorFactory<AglynErrorEventParams>
+export type AglynError = NsErrorFactory<AglynErrorEventFlag, AglynErrorEventParams>
 export type AglynLogger = Logger
 export type AglynCommander = Emitter<AglynCommandParams>
 

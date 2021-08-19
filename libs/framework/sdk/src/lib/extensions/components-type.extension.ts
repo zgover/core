@@ -15,15 +15,10 @@
  * limitations under the License.
  */
 
-import {
-  AglynModuleController,
-  AglynType,
-  AglynUniqueId,
-  PayloadData,
-  RestrictFlag,
-} from '@aglyn/framework/sdk'
-import { AglynSymbol } from '../constants'
+import { AglynType, AglynUniqueId, PayloadData } from '../types'
+import { AglynSymbol, RestrictFlag } from '../constants'
 import { AnyProps } from '@aglyn/shared/util/types'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { FormSchema } from '@aglyn/shared/ui/react'
 
 
@@ -79,20 +74,11 @@ export type RegistryEvery<P> = P extends { variant: infer X }
       ? RegistryValues
       : RegistryEntries
   : RegistryEntries
+export type ComponentsRegistry = Map<string, AglynComponent>
 
 namespace PayloadParams {
   export type Set = PayloadData<{ component: AglynComponent }>
   export type Get = PayloadData<{ componentId: string }>
   export type GetAll = PayloadData<{ variant: 'entries' | 'keys' | 'values' }>
   export type Delete = PayloadData<{ componentId: string }>
-}
-
-export interface ComponentsExtensionController extends AglynModuleController {
-  entries: () => RegistryEntries
-  keys: () => RegistryKeys
-  values: () => RegistryValues
-  get(payload: PayloadParams.Get): RegistryEntry
-  getAll: (payload?: PayloadParams.GetAll) => RegistryEvery<typeof payload>
-  set: (payload: PayloadParams.Set) => ThisType<ComponentsExtensionController>
-  delete: (payload: PayloadParams.Delete) => ThisType<ComponentsExtensionController>
 }

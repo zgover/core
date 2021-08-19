@@ -63,7 +63,7 @@ import { NsError } from './ns-error'
  * @see inspired by:
  *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#Custom_Error_Types
  */
-export class NsErrorFactory<T extends string = EventFlag, U extends ErrorTagPayloads = ErrorTagPayloads<T>> {
+export class NsErrorFactory<T extends string = EventFlag, U extends ErrorTagPayloads = ErrorTagPayloads> {
 
   constructor(
     private readonly scope: string,

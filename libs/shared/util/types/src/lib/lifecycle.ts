@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-import { ValueOrPromise } from './base'
-
 
 export enum LifecycleFlag {
   INITIALIZED = 'initialized',
@@ -31,24 +29,20 @@ export interface LifecycleObserver {
   /**
    * Should be invoked once immediately after instantiation
    */
-  onInit?<T, U>(...injected: T[]): ValueOrPromise<U>
+  onInit?<T, U>(...args: T[]): U
   /**
    * Should be invoked once as last step before garbage collection
    */
-  onDestroy?<T, U>(...injected: T[]): ValueOrPromise<U>
+  onDestroy?<T, U>(...args: T[]): U
 }
 
 export interface LoadableObserver extends LifecycleObserver {
   /**
    * Should be invoked each time the object is loaded
    */
-  onLoad?<T, U>(...injected: T[]): ValueOrPromise<U>
+  onLoad?<T, U>(...args: T[]): U
   /**
    * Should be invoked each time the object is unloaded
    */
-  onUnload?<T, U>(...injected: T[]): ValueOrPromise<U>
-}
-
-export class LifecycleObserver implements LifecycleObserver {
-
+  onUnload?<T, U>(...args: T[]): U
 }

@@ -19,35 +19,19 @@ import {
   AglynExtension,
   AglynExtensionConfig,
   AglynModuleController,
-} from '@aglyn/framework/sdk'
+} from './types'
 import { AglynSymbol } from './constants'
 import { LifecycleFlag } from '@aglyn/shared/util/types'
 
-
-export abstract class AglynControllerModel implements AglynModuleController {
-  public extension: AglynExtension = null
-  static #__TAG__ = 'AglynModuleController'
-  public get [Symbol.toStringTag]() { return `${AglynControllerModel.#__TAG__}` }
-  public abstract onLoad(data: any[])
-  public abstract onUnload(...data: any[])
-  public toString() {
-    const pfx = AglynControllerModel.#__TAG__
-    const extensionId = this.extension.$id ?? 'NONE'
-    return `${pfx}(extensionId: '${extensionId}')`
-  }
-  public toJSON() {
-    return
-  }
-}
 
 export abstract class AglynExtensionModel implements AglynExtension {
 
   protected static __$ID__: string = null
   static #__TAG__ = 'AglynExtension'
   #lifecycle?: LifecycleFlag = null
-  #context?: any
-  protected getContext() { return this.#context }
-  protected setContext(value) { this.#context = value }
+  context?: any
+  protected getContext() { return this.context }
+  protected setContext(value) { this.context = value }
   public get current() { return this.#lifecycle }
   public set current(value) {
     if (value in LifecycleFlag) {
@@ -62,8 +46,6 @@ export abstract class AglynExtensionModel implements AglynExtension {
   protected constructor() {
 
   }
-  abstract onLoad(app: AglynApp)
-  abstract onUnload(app: AglynApp)
   public toString() {
     const pfx = AglynExtensionModel.#__TAG__
     const extensionId = AglynExtensionModel.__$ID__ ?? 'NONE'
