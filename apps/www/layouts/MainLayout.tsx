@@ -45,7 +45,6 @@ import Link, { LinkProps as LinkProps } from '../components/Link'
 import { APP, tailNavigation } from '../const'
 import { withCurrentUserCtx } from '../contexts/current-user-context'
 import { withAggregatedPageMeta } from '../lib/app-pages'
-import { getGravatarUrl } from '../lib/gravatar'
 
 
 export const styles = (theme: Theme) => createStyles({
@@ -68,7 +67,7 @@ export const styles = (theme: Theme) => createStyles({
     },
     '& $menu': {
       padding: theme.spacing(0.5, 0.25),
-      '&:last-child': { paddingLeft: theme.spacing(0.75) },
+      '&:last-child': {paddingLeft: theme.spacing(0.75)},
     },
   },
   left: {
@@ -80,7 +79,7 @@ export const styles = (theme: Theme) => createStyles({
     flexGrow: 1,
     flexBasis: '72%',
   },
-  right: { display: 'flex' },
+  right: {display: 'flex'},
   logoWrapper: {
     height: 36,
     flex: '0 0 auto',
@@ -99,7 +98,7 @@ export const styles = (theme: Theme) => createStyles({
           lineHeight: '22px',
           fontSize: theme.typography.pxToRem(50),
           height: 'auto',
-          [theme.breakpoints.up('md')]: { fontSize: theme.typography.pxToRem(60) },
+          [theme.breakpoints.up('md')]: {fontSize: theme.typography.pxToRem(60)},
         },
       },
       '& $product': {
@@ -126,7 +125,7 @@ export const styles = (theme: Theme) => createStyles({
     fontWeight: theme.typography.fontWeightLight,
   },
   tabs: {
-    '& $flexContainer': { alignItems: 'center' },
+    '& $flexContainer': {alignItems: 'center'},
     '& $tabIndicator': {
       height: 3,
       backgroundColor: 'unset',
@@ -159,12 +158,12 @@ export const styles = (theme: Theme) => createStyles({
       paddingLeft: 0,
       paddingRight: 0,
       marginLeft: theme.spacing(4),
-      '&:first-child': { marginLeft: theme.spacing(0) },
+      '&:first-child': {marginLeft: theme.spacing(0)},
     },
   },
   avatarButton: {
     padding: theme.spacing(0.5),
-    '& $avatar': { backgroundColor: cyan[600] },
+    '& $avatar': {backgroundColor: cyan[600]},
   },
   avatar: {},
   header: {
@@ -194,7 +193,7 @@ export const styles = (theme: Theme) => createStyles({
       },
     },
   },
-  content: { marginTop: theme.spacing(-6) },
+  content: {marginTop: theme.spacing(-6)},
   footer: {},
   main: {},
 
@@ -259,10 +258,10 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
         current.href.length > prev.href.length ? current : prev,
       ).href ?? ''
 
-      const buildIconButton = ({ avatar, iconId, children, ...item }, i) => (
+      const buildIconButton = ({avatar, iconId, children, ...item}, i) => (
         <IconButton
           key={item.id ?? item.href ?? i}
-          className={clsx(classes.iconBtn, { [classes.avatarButton]: Boolean(avatar) })}
+          className={clsx(classes.iconBtn, {[classes.avatarButton]: Boolean(avatar)})}
           color="inherit"
           {...item}
         >
@@ -287,6 +286,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
         />
       )
 
+      // eslint-disable-next-line react/display-name
       const buildNav = (actionBuilder) => (item, key) => (
         _isArr(item.items) ? (
           <Menu key={key} className={classes.menu} items={item.items}>
@@ -362,7 +362,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                         variant="h6"
                       />
                     )}
-                    {navTabItems && navTabItems.map(({ iconId, ...item }, i) => (
+                    {navTabItems && navTabItems.map(({iconId, ...item}, i) => (
                       <Tab
                         key={item.id ?? item.href ?? i}
                         classes={{
@@ -408,7 +408,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                 </div>
                 <div className={classes.right}>
                   <GridButtons
-                    items={footerNavItems.map(i=>({size: 'small', ...i}))}
+                    items={footerNavItems.map(i => ({size: 'small', ...i}))}
                     spacing={1}
                   />
                 </div>
@@ -444,4 +444,4 @@ MainLayout.defaultProps = {
   footerNavItems: tailNavigation,
 }
 
-export default withStyles(styles, { name: 'Layout:MainLayout' })(MainLayout)
+export default withStyles(styles, {name: 'Layout:MainLayout'})(MainLayout)
