@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
+import React from 'react'
 import { render } from '@testing-library/react'
 
-import BuilderElementComponent from './element.component'
+import ComponentDrawerComponent from './component-drawer.component'
 
-describe('BuilderElementComponent', () => {
+
+describe('ComponentDrawerComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<BuilderElementComponent elementData={null} />)
+    const {baseElement} = render(<ComponentDrawerComponent />)
     expect(baseElement).toBeTruthy()
   })
 })

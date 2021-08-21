@@ -26,7 +26,7 @@ export interface ElementComponentProps extends ElementRendererComponentProps {
   [prop: string]: any
 }
 
-const ElementComponent = forwardRef<any, ElementComponentProps>(
+const ElementBuilderComponent = forwardRef<any, ElementComponentProps>(
   function RefRenderFn(props, ref) {
     const {...rest} = props
     const {confirm} = useConfirmationContext()
@@ -65,9 +65,9 @@ const ElementComponent = forwardRef<any, ElementComponentProps>(
   },
 )
 
-ElementComponent.displayName = 'ElementComponent'
-ElementComponent.defaultProps = {
-  elementComponent: ElementComponent,
+ElementBuilderComponent.displayName = 'ElementBuilderComponent'
+ElementBuilderComponent.defaultProps = {
+  elementComponent: ElementBuilderComponent,
 }
 
-export default ElementComponent
+export default ElementBuilderComponent

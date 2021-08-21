@@ -20,16 +20,9 @@ import ElementDrawerContext, {
   DEFAULT_OPTIONS,
   ElementDrawerOptions,
 } from './element-drawer.context'
-import {
-  ElementType,
-  Fragment,
-  MouseEvent,
-  MouseEventHandler,
-  ReactNode,
-  useCallback,
-  useState,
-} from 'react'
-import ElementDrawerComponent, { ElementDrawerComponentProps } from '../components/element-drawer.component'
+import { ElementType, Fragment, ReactNode, useCallback, useState } from 'react'
+import ElementDrawerComponent, { ElementDrawerComponentProps } from '../components/component-drawer.component'
+
 
 export interface ElementDrawerProviderComponentProps {
   defaultOptions?: ElementDrawerOptions
@@ -47,7 +40,7 @@ function ElementDrawerProviderComponent(props: ElementDrawerProviderComponentPro
     component: Component,
     elements,
   } = props
-  const [options, setOptions] = useState({ ...DEFAULT_OPTIONS, ...defaultOptions })
+  const [options, setOptions] = useState({...DEFAULT_OPTIONS, ...defaultOptions})
   const [resolveReject, setResolveReject] = useState([])
   const [resolve, reject] = resolveReject
   const open = Boolean(resolveReject.length === 2)
@@ -65,23 +58,23 @@ function ElementDrawerProviderComponent(props: ElementDrawerProviderComponentPro
 
   const handleCancel = useCallback(
     (e, reason) => {
-      reject({ reason })
+      reject({reason})
       handleClose(e, reason)
     },
-    [reject, handleClose]
+    [reject, handleClose],
   )
 
   const handleConfirm = useCallback(
     (e, item) => {
-      resolve({ option: item })
+      resolve({option: item})
       handleClose(e, 'resolved')
     },
-    [resolve, handleClose, resolveReject]
+    [resolve, handleClose, resolveReject],
   )
 
   return (
     <Fragment>
-      <ElementDrawerContext.Provider value={{ elementDrawer }}>
+      <ElementDrawerContext.Provider value={{elementDrawer}}>
         {children}
       </ElementDrawerContext.Provider>
       <Component

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { aglynComponent, getAllComponents, getApp, registerComponent } from '@aglyn/framework/sdk'
 import { BuilderComponent } from '@aglyn/framework/builder'
 import { samplePageData } from '../constants/sample-data'
@@ -44,11 +44,17 @@ export function Builder(props: BuilderProps) {
     }))
   }, [])
 
-  console.log('page:/builder app', getApp())
-  return <BuilderComponent
-    elements={elements}
-    elementComponents={elementComponents}
-  />
+  useEffect(() => {
+    console.log('page:/builder app', getApp())
+  }, [])
+
+
+  return (
+    <BuilderComponent
+      elements={elements}
+      elementComponents={elementComponents}
+    />
+  )
 }
 
 export default Builder

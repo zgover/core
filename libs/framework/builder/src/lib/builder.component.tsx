@@ -21,7 +21,7 @@ import { AglynComponentData } from '@aglyn/framework/sdk'
 import { WebsiteRendererComponent } from '@aglyn/framework/renderer'
 import { ThemeProvider } from '@material-ui/core/styles'
 import { forwardRef, memo } from 'react'
-import ElementComponent, { ElementComponentProps } from './components/element.component'
+import ElementBuilderComponent, { ElementComponentProps } from './components/element-builder.component'
 import AppBarComponent from './components/appbar.component'
 import ElementDrawerProviderComponent, { ElementDrawerProviderComponentProps } from './contexts/element-drawer-provider.component'
 import SelectionProviderComponent from './contexts/selection-provider.component'
@@ -33,7 +33,6 @@ import { SnackbarProvider } from 'notistack'
 
 export interface BuilderComponentProps extends ComponentProp {
   elements?: AglynComponentData[]
-  elementComponent?: ElementComponentProps['component']
   elementComponents: ElementDrawerProviderComponentProps['elements']
 }
 
@@ -41,7 +40,6 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       component: Component,
-      elementComponent,
       elements,
       elementComponents,
       ...rest
@@ -60,7 +58,7 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
                         {({elements}) => (
                           <WebsiteRendererComponent
                             elements={elements}
-                            elementComponent={elementComponent}
+                            elementComponent={ElementBuilderComponent}
                           />
                         )}
                       </ElementsContext.Consumer>
@@ -81,7 +79,6 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
 BuilderComponent.displayName = 'BuilderComponent'
 BuilderComponent.defaultProps = {
   component: 'div',
-  elementComponent: ElementComponent,
   elements: [],
 }
 

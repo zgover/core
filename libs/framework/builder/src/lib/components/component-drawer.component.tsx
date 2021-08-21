@@ -34,7 +34,6 @@ import Button from '@material-ui/core/Button'
 import Box from '@material-ui/core/Box'
 import FormControl from '@material-ui/core/FormControl'
 import Typography from '@material-ui/core/Typography'
-import { AglynComponent, getAllComponents, getApp } from '@aglyn/framework/sdk'
 import { ElementDrawerOptions } from '../contexts/element-drawer.context'
 
 
@@ -98,21 +97,21 @@ export const styles = (theme: Theme) =>
   })
 
 export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> {
-  options: ElementDrawerOptions
-  onCancel: {
+  options?: ElementDrawerOptions
+  onCancel?: {
     bivarianceHack<T>(event: MouseEvent<T>, reason: 'canceled'): void
   }['bivarianceHack']
-  onConfirm: {
+  onConfirm?: {
     bivarianceHack<T>(event: null | MouseEvent<T>, data: unknown): void
   }['bivarianceHack']
   onDelete?: {
     bivarianceHack<T>(event: MouseEvent<T>, data: unknown): void
   }['bivarianceHack']
 
-  elements: { id: string, title: string, icon: unknown }[]
+  elements?: { id: string, title: string, icon: unknown }[]
 }
 
-const ElementDrawerComponent = forwardRef<any, ElementDrawerComponentProps & WithStyles<typeof styles>>(
+const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & WithStyles<typeof styles>>(
   function RefRenderFn(props, ref) {
     const {
       classes,
@@ -126,42 +125,27 @@ const ElementDrawerComponent = forwardRef<any, ElementDrawerComponentProps & Wit
       ...rest
     } = props
 
-    const {title, type = 'browse-site-components'} = options
+    const {title, type = 'browse-site-components'} = {...options}
 
     const selectedElementProps: any = {}
     const propsSchema: any = {}
-    const handleElementSave = useCallback(
-      (values) => {
-        onConfirm(null, {type: 'save', data: values})
-      },
-      [onConfirm],
-    )
-    const handleDrawerClose = useCallback(
-      (e, reason) => {
-        onClose(e, reason)
-      },
-      [onClose],
-    )
-    const handleDrawerCancel = useCallback(
-      (e) => {
-        onCancel(e, 'canceled')
-      },
-      [onCancel],
-    )
-    const handleDeleteButtonClick = useCallback(
-      (e) => {
-        onDelete(e, {type: 'delete'})
-      },
-      [onDelete],
-    )
-    const handleItemClick = useCallback(
-      (e, item) => {
-        onConfirm(e, {type: 'selection', data: item})
-      },
-      [onConfirm],
-    )
+    const handleElementSave = useCallback((values) => {
+      onConfirm?.call(null, null, {type: 'save', data: values})
+    }, [onConfirm])
+    const handleDrawerClose = useCallback((e, reason) => {
+      onClose?.call(null, e, reason)
+    }, [onClose])
+    const handleDrawerCancel = useCallback((e) => {
+      onCancel?.call(null, e, 'canceled')
+    }, [onCancel])
+    const handleDeleteButtonClick = useCallback((e) => {
+      onDelete?.call(null, e, {type: 'delete'})
+    }, [onDelete])
+    const handleItemClick = useCallback((e, item) => {
+      onConfirm?.call(null, e, {type: 'selection', data: item})
+    }, [onConfirm])
 
-    const items = elements.map((element) => ({
+    const items = (elements ?? []).map((element) => ({
       id: element?.id,
       title: element?.title,
       icon: element?.icon,
@@ -262,10 +246,10 @@ const ElementDrawerComponent = forwardRef<any, ElementDrawerComponentProps & Wit
         {views[type]}
       </NavbarDrawer>
     )
-  }
+  },
 )
 
-ElementDrawerComponent.displayName = 'ElementDrawerComponent'
-ElementDrawerComponent.defaultProps = {}
+ComponentDrawerComponent.displayName = 'ComponentDrawerComponent'
+ComponentDrawerComponent.defaultProps = {}
 
-export default withStyles(styles, {name: 'ElementDrawerComponent'})(ElementDrawerComponent)
+export default withStyles(styles, {name: 'ComponentDrawerComponent'})(ComponentDrawerComponent)
