@@ -302,7 +302,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
       return (
         <React.Fragment>
           <Head>
-            <title children={title ?? 'Web App'} />
+            <title>{`${title}` ?? 'Web App'}</title>
           </Head>
           <AppBar
             // component="header"
@@ -324,10 +324,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                           />
                         </span>
                         {productName && (
-                          <span
-                            className={classes.product}
-                            children={` ${productName}`}
-                          />
+                          <span className={classes.product}>{` ${productName}`}</span>
                         )}
                       </Link>
                     </div>
@@ -428,9 +425,9 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                     color="textSecondary"
                     variant="overline"
                   >
-                    <span children={`Version ${APP.VERSION}`} />
+                    <span>{`Version ${APP.VERSION}`}</span>
                     {' '}
-                    <span children={`(${APP.BUILD_ID})`} />
+                    <span>{`(${APP.BUILD_ID})`}</span>
                   </Typography>
                 </Box>
               </Box>

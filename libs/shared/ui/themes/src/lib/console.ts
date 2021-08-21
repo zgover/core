@@ -64,7 +64,7 @@ export namespace ConsoleTheme {
           contrastText: '#ffffff',
         }
       }
-      
+
       export namespace Secondary {
         export const LIGHT: SecondaryRecord = {
           main: '#039be5',
@@ -79,7 +79,7 @@ export namespace ConsoleTheme {
           contrastText: '#000000',
         }
       }
-      
+
       export namespace Tertiary {
         export const LIGHT: TertiaryRecord = {
           main: '#9c27b0',
@@ -94,7 +94,7 @@ export namespace ConsoleTheme {
           contrastText: '#ffffff'
         }
       }
-      
+
       export namespace Quaternary {
         export const LIGHT: QuaternaryRecord = {
           main: '#e040fb',
@@ -186,7 +186,7 @@ export namespace ConsoleTheme {
     }
   }
 
-  
+
   export const typography: ThemeOptions['typography'] = {
     fontFamily: '\'Raleway\', \'Helvetica\', \'Arial\', sans-serif',
     fontSize: 14,
@@ -289,7 +289,7 @@ export namespace ConsoleTheme {
     MuiIconButton: {root: {padding: 8}},
   }
   export const options: ThemeOptions = {
-    palette: ConsoleTheme.palette,
+    palette: ConsoleTheme.palette.LIGHT,
     typography: ConsoleTheme.typography,
     props: ConsoleTheme.props,
     overrides: ConsoleTheme.overrides,

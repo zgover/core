@@ -4,7 +4,8 @@
     "jsx": "preserve",
     "allowJs": true,
     "types": ["node", "jest"],
-    "isolatedModules": true
+    "isolatedModules": true,
+    "noImplicitOverride": false
   },
   "include": [
     "**/*.ts",

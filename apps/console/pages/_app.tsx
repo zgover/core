@@ -45,7 +45,7 @@ function _App(props: AppProps) {
   return (
     <Wrapper>
       <Head>
-        <title children={APP.META_TITLE} />
+        <title>{APP.META_TITLE}</title>
         <meta name="description" content={APP.META_DESCRIPTION} />
       </Head>
       <MuiThemeProvider theme={console}>

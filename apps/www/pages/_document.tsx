@@ -27,6 +27,7 @@ import NextDocument, {
   NextScript,
 } from 'next/document'
 import { Children, LinkHTMLAttributes, MetaHTMLAttributes } from 'react'
+import { AnyProps } from '@aglyn/shared/util/types'
 
 
 const isProduction = Boolean(process.env.NODE_ENV === 'production')
@@ -86,7 +87,7 @@ export type LinkElementsConfig = [rel: LinkElemProps['rel'], href: LinkElemProps
  * @extends {NextDocument<P>}
  * @template P
  */
-export default class _Document<P = {}> extends NextDocument<P> {
+export default class _Document<P = AnyProps> extends NextDocument<P> {
 
   /**
    * Returns the context object with the addition of `renderPage`

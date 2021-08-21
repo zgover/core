@@ -20,24 +20,21 @@ import {
   Auth,
   UserCredential,
   User as AuthUser,
-  useAuthEmulator,
+  connectAuthEmulator,
   getAuth as getFbAuth,
   createUserWithEmailAndPassword,
   signOut,
   signInWithEmailAndPassword,
   setPersistence,
   onAuthStateChanged as onFbAuthStateChanged,
-  NextOrObserver,
-  ErrorFn,
-  CompleteFn,
 } from 'firebase/auth'
 import {
-  FirebaseFirestore,
+  Firestore,
   DocumentData,
   DocumentReference,
   DocumentSnapshot,
   CollectionReference,
-  useFirestoreEmulator,
+  connectFirestoreEmulator,
   getFirestore as getFbFirestore,
   collection,
   doc,
@@ -62,7 +59,7 @@ import { getApps } from '@firebase/app'
 
 export type FbApp = FirebaseApp
 export type FbAuth = Auth
-export type FbFirestore = FirebaseFirestore
+export type FbFirestore = Firestore
 export type FbAnalytics = Analytics
 export type FbUserCredential = UserCredential
 export type FbUser = AuthUser
@@ -288,7 +285,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     setAuth = true
     if (config.authEmulator) {
       console.debug('setting auth emulator')
-      useAuthEmulator(auth, config.authEmulator)
+      connectAuthEmulator(auth, config.authEmulator)
     }
     return auth
   }
@@ -298,7 +295,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     if (config.firestoreEmulator) {
       console.debug('setting firestore emulator')
       const {host, port} = config.firestoreEmulator
-      useFirestoreEmulator(firestore, host, port)
+      connectFirestoreEmulator(firestore, host, port)
     }
     return firestore
   }

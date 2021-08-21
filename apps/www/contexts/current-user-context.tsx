@@ -46,14 +46,14 @@ export const CurrentUserProviderComponent = withAppContext<Props>(
   function CurrentUserProviderComponent(props) {
     const {children, app} = props
     const currentUser = app?.getCurrentUser()
-    const [ctxState, setCtxState] = useState({
+    const [ctxState, setCtxState] = useState(()=>({
       currentUser,
       loading: true,
       error: null,
-    })
+    }))
 
     useEffect(() => {
-      const unsubscribe = app?.onAuthStateChanged(
+      const unsubscribe = app?.onAuthStateChanged?.(
         (user: FbUser) => {
           setCtxState(prev => ({
             ...prev,

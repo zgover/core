@@ -5,8 +5,9 @@
     "allowJs": true,
     "types": ["node", "jest"],
     "strict": false,
-    "noEmit": true
-    "isolatedModules": true
+    "noEmit": true,
+    "isolatedModules": true,
+    "noImplicitOverride": false
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
   "exclude": ["node_modules"]

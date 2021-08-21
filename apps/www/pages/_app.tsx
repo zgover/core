@@ -105,7 +105,7 @@ function _App(props: AppProps): JSX.Element {
   return (
     <>
       <Head>
-        <title children={APP.META_TITLE} />
+        <title>{APP.META_TITLE}</title>
         <meta name="description" content={APP.META_DESCRIPTION} />
       </Head>
       <Wrapper>
