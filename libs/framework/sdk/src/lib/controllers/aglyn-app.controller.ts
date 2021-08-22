@@ -59,8 +59,11 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
   public get [TypeOf]() {
     return getStaticField(TypeOf, this)
   }
-  public get extensions(): AglynExtensionControllerInstance {
-    return this.#extensionController
+  public get platform(): AglynExtensionControllerInstance {
+    return getStaticField('platform', this)
+  }
+  public get version(): AglynExtensionControllerInstance {
+    return getStaticField('version', this)
   }
   public get commands(): AglynCommandControllerInstance {
     return this.#commandController

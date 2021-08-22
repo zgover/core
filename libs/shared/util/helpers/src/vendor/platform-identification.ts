@@ -1,5 +1,5 @@
-import * as platform from 'platform'
+export type Platform = ReturnType<typeof platformIdentification>
 
-export type Platform = typeof platform
-
-export const PlatformIdentification: Platform = platform
+export function platformIdentification() {
+  return require('platform')
+}
