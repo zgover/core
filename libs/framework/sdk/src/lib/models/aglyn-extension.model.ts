@@ -58,9 +58,9 @@ export abstract class AglynExtensionModel<T = any> extends AglynBaseModel implem
     super()
     this.#options = {...options}
     this.app = app
-    this.initialize()
+    this.#initialize()
   }
-  private initialize = () => {
+  #initialize() {
     this.setErrorFactory(this.app.getErrorFactory())
     this.setEmitter(this.app.getEmitter())
     this.setLogger(this.app.getLogger())

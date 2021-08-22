@@ -72,9 +72,9 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
     super()
     this.#options = {...options}
     this.#name = this.#options.name ?? DEFAULT_ENTRY_NAME
-    this.initialize()
+    this.#initialize()
   }
-  private initialize = () => {
+  #initialize() {
     this.setErrorFactory(AGLYN_ERROR)
     this.setEmitter(AGLYN_EMITTER)
     this.setLogger(AGLYN_LOGGER)
