@@ -17,22 +17,25 @@
 
 import { forwardRef, HTMLAttributes } from 'react'
 import { AglynComponentData } from '@aglyn/framework/sdk'
-import ElementComponent, { ElementRendererComponentProps } from './element-renderer.component'
+import ElementRendererComponent, { ElementRendererComponentProps } from './element-renderer.component'
 import { ComponentProp } from '@aglyn/shared/ui/react'
 import ElementsComponent from './elements-renderer.component'
 
 
 export interface CanvasRendererComponentProps extends HTMLAttributes<HTMLElement>, ComponentProp {
   elements?: AglynComponentData[]
-  elementComponent?: ElementRendererComponentProps['elementComponent']
+  elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
 }
 
 const CanvasRendererComponent = forwardRef<HTMLElement, CanvasRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const {component: Component, elementComponent, elements, ...rest} = props
+    const {component: Component, elementRendererComponent, elements, ...rest} = props
     return (
       <Component ref={ref} {...rest}>
-        <ElementsComponent children={elements} elementComponent={elementComponent} />
+        <ElementsComponent
+          children={elements}
+          elementRendererComponent={elementRendererComponent}
+        />
       </Component>
     )
   },
@@ -41,7 +44,7 @@ const CanvasRendererComponent = forwardRef<HTMLElement, CanvasRendererComponentP
 CanvasRendererComponent.displayName = 'CanvasRendererComponent'
 CanvasRendererComponent.defaultProps = {
   component: 'div',
-  elementComponent: ElementComponent,
+  elementRendererComponent: ElementRendererComponent,
   elements: [],
 }
 

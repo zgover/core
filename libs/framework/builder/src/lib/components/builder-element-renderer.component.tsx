@@ -28,7 +28,7 @@ export interface BuilderElementRendererComponentProps extends ElementRendererCom
 
 const BuilderElementRendererComponent = forwardRef<any, BuilderElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const {...rest} = props
+    const { elementData, elementRendererComponent, ...rest} = props
     const {confirm} = useConfirmationContext()
     const localRef = useRef(ref)
     const elemRef = useCombinedRefs(localRef, ref)
@@ -48,18 +48,24 @@ const BuilderElementRendererComponent = forwardRef<any, BuilderElementRendererCo
       setEntered(null)
     }, [])
 
-    const handleClick = useCallback((e) => {
-      select({clientRect})
+    const handleClick = useCallback((e, ...args) => {
+      e.stopPropagation()
+      console.log('e click', elementData)
+      select({clientRect, elementData})
       confirm({title: 'clicked'})
-    }, [clientRect])
+    }, [clientRect, elementData])
 
     return (
       <ElementRendererComponent
         ref={elemRef}
-        {...rest}
+        elementRendererComponent={elementRendererComponent}
+        elementData={elementData}
+        data-aglyn-element-component={elementData?.component}
+        data-aglyn-element-id={elementData?.$id}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        {...rest}
       />
     )
   },
@@ -67,7 +73,7 @@ const BuilderElementRendererComponent = forwardRef<any, BuilderElementRendererCo
 
 BuilderElementRendererComponent.displayName = 'BuilderElementRendererComponent'
 BuilderElementRendererComponent.defaultProps = {
-  elementComponent: BuilderElementRendererComponent,
+  elementRendererComponent: BuilderElementRendererComponent,
 }
 
 export default BuilderElementRendererComponent

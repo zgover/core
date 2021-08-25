@@ -31,12 +31,12 @@ import { AnyProps } from '@aglyn/shared/util/types'
 
 export interface ElementRendererComponentProps extends AnyProps {
   elementData: AglynComponentData
-  elementComponent?: ComponentType<ElementRendererComponentProps>
+  elementRendererComponent?: ComponentType<ElementRendererComponentProps>
 }
 
 const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const {elementData: data, elementComponent, ...rest} = props
+    const {elementData: data, elementRendererComponent, ...rest} = props
     const component = _isStrT(data?.component)
       ? getComponent(getApp(), {componentId: _s(data?.component)})
       : data?.component as AglynComponent
@@ -51,7 +51,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
       <ComponentCtor innerRef={ref} {...ctorProps} {...rest}>
         {!haveChildren ? (
           <ElementsComponent
-            elementComponent={elementComponent}
+            elementRendererComponent={elementRendererComponent}
             children={data?.children as AglynComponentData[]}
           />
         ) : (
@@ -64,7 +64,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
 
 ElementRendererComponent.displayName = 'ElementRendererComponent'
 ElementRendererComponent.defaultProps = {
-  elementComponent: ElementRendererComponent,
+  elementRendererComponent: ElementRendererComponent,
 }
 
 export default memo(ElementRendererComponent)

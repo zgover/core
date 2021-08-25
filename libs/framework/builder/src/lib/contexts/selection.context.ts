@@ -16,20 +16,11 @@
  */
 
 import { createContext, useContext } from 'react'
-import { ButtonProps } from '@material-ui/core/Button'
-import { DialogProps } from '@material-ui/core/Dialog'
-import { DialogTitleProps } from '@material-ui/core/DialogTitle'
-import { DialogContentTextProps } from '@material-ui/core/DialogContentText'
+import { AglynComponentData } from '@aglyn/framework/sdk'
 
 export interface SelectionOptions {
-  cancellationText?: ButtonProps['children']
-  selectionText?: ButtonProps['children']
-  cancellationButtonProps?: Partial<ButtonProps>
-  selectionButtonProps?: Partial<ButtonProps>
-  dialogProps?: Partial<DialogProps>
-  title?: DialogTitleProps['children']
-  description?: DialogContentTextProps['children']
   clientRect?: DOMRect
+  elementData: AglynComponentData
 }
 
 export type SelectFn = (options?: SelectionOptions) => Promise<unknown>
@@ -41,37 +32,14 @@ export interface SelectionContextType {
 export type UseSelectionType = () => SelectionContextType
 
 export const DEFAULT_OPTIONS: SelectionOptions = {
-  title: 'Are you sure?',
-  description: '',
-  selectionText: 'OK',
-  cancellationText: 'Cancel',
-  dialogProps: {},
-  selectionButtonProps: {},
-  cancellationButtonProps: {},
   clientRect: null,
 }
 
 export const buildOptions = (defaultOptions, options) => {
-  const dialogProps = {
-    ...(defaultOptions.dialogProps || DEFAULT_OPTIONS.dialogProps),
-    ...(options.dialogProps || {}),
-  }
-  const selectionButtonProps = {
-    ...(defaultOptions.selectionButtonProps || DEFAULT_OPTIONS.selectionButtonProps),
-    ...(options.selectionButtonProps || {}),
-  }
-  const cancellationButtonProps = {
-    ...(defaultOptions.cancellationButtonProps || DEFAULT_OPTIONS.cancellationButtonProps),
-    ...(options.cancellationButtonProps || {}),
-  }
-
   return {
     ...DEFAULT_OPTIONS,
     ...defaultOptions,
     ...options,
-    dialogProps,
-    selectionButtonProps,
-    cancellationButtonProps,
   }
 }
 

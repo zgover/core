@@ -61,13 +61,13 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
                             <CanvasRendererComponent
                               id="aglyn:canvas"
                               elements={elements}
-                              elementComponent={BuilderElementRendererComponent}
+                              elementRendererComponent={BuilderElementRendererComponent}
                             />
                           )}
                         </ElementsContext.Consumer>
                       </PanZoom>
 
-                      <AppBarComponent id="aglyn:app-bar" />
+                      <AppBarComponent id="aglyn:toolbar" />
                     </ElementDrawerProviderComponent>
                   </SelectionProviderComponent>
                 </ConfirmationProviderComponent>

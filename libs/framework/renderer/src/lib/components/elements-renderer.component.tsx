@@ -22,25 +22,25 @@ import { ComponentProp } from '@aglyn/shared/ui/react'
 
 
 export interface ElementsComponentProps extends ComponentProp {
-  elementComponent?: ElementRendererComponentProps['elementComponent']
+  elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
   children?: AglynComponentData[]
 }
 
 const ElementsRendererComponent = forwardRef<any, ElementsComponentProps>(function RefRenderFn(props, ref) {
   const {
     component: Component,
-    elementComponent,
+    elementRendererComponent,
     children,
     ...rest
   } = props
-  const ElementComponent = elementComponent ?? _ElementComponent
+  const ElementRendererComponent = elementRendererComponent ?? _ElementComponent
   return (
     <Component ref={ref} {...rest}>
       {children.map((data, i) => (
-        <ElementComponent
+        <ElementRendererComponent
           key={data?.$id ?? i}
           elementData={data}
-          elementComponent={ElementComponent}
+          elementRendererComponent={ElementRendererComponent}
         />
       ))}
     </Component>
