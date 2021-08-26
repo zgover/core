@@ -1,26 +1,37 @@
-import { Conditional } from '@aglyn/shared/ui/react'
-import { _isBool, _ln, _isFn, Id } from '@aglyn/shared/util/helpers'
-import {
-  useRouterEvent,
-  NextRouterEvent,
-  useOnRouteChangeComplete,
-  useOnRouteChangeError,
-  useOnRouteChangeStart,
-} from '../hooks/router-events'
-import React, { useState } from 'react'
-import { createContext, useContext, useRef, useEffect } from 'react'
-import { useRouter } from 'next/router'
+/**
+ * @license
+ * Copyright 2021 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import { ComponentWithInjectedProp, InjectedContextProp, withContext } from '../hoc/with-consumer'
+import {
+  ComponentWithInjectedProp,
+  InjectedContextProp,
+  withContext,
+} from '@aglyn/shared/ui/react'
+import { _ln, createUid } from '@aglyn/shared/util/helpers'
+import React, { createContext, useContext, useState } from 'react'
+import { Conditional, ConditionalNonDist } from '@aglyn/shared/util/types'
 
 
 export type QueueId = string
 export type Queues = QueueId[]
 export type TupledDequeueFn = [QueueId, DequeueLoading]
-export type QueueResponse<Tuple extends boolean = null> = Conditional<Tuple, true, TupledDequeueFn, DequeueLoading>
+export type QueueResponse<Tuple = false> = ConditionalNonDist<Tuple, true, TupledDequeueFn, DequeueLoading>
 
 export type DequeueLoading = () => void /* Should be called to dequeue/end loading event  */
-export type EnqueueLoading = (asTuple?: boolean) => QueueResponse<typeof asTuple>
+export type EnqueueLoading = <T extends boolean>(asTuple?: T) => QueueResponse<T>
 
 export type AppLoaderContextType = {
   queues: Queues
@@ -38,14 +49,14 @@ export const {
 } = AppLoader
 
 export const useAppLoader = () => useContext(AppLoader)
-const createQueueId = () => Id.nanoid(5)
+const createQueueId = () => createUid(5)
 
 export function AppLoaderProviderComponent(props: React.PropsWithChildren<unknown>) {
-  const { children } = props
+  const {children} = props
   const [state, setState] = useState<AppLoaderContextType>({
     queues: [],
     isLoading: false,
-    queueLoading: (asTuple?: boolean) => {
+    queueLoading: <T extends boolean>(asTuple?: T): QueueResponse<T> => {
       const queueId = createQueueId()
       const enqueue = () => {
         // Queue by appending the queueId to queue array
@@ -65,7 +76,7 @@ export function AppLoaderProviderComponent(props: React.PropsWithChildren<unknow
         })
       }
       enqueue()
-      return asTuple ? [queueId, dequeue] : dequeue
+      return (asTuple === true ? [queueId, dequeue] : dequeue) as QueueResponse<T>
     },
     checkLoading: () => Boolean(state.queues.length),
   })

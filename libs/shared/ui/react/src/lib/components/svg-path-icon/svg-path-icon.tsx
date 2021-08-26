@@ -1,16 +1,25 @@
 /**
  * @license
- * Copyright (c) 2021 Aglyn LLC
+ * Copyright 2021 Aglyn LLC
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the root directory of this source tree.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import React from 'react'
+import { forwardRef, memo, useMemo } from 'react'
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@material-ui/core/SvgIcon'
 import { getIcon, Icon, IconKeys } from '@aglyn/shared/data/mdi'
-import { _isStr } from '@aglyn/shared/util/helpers'
-import { SvgPathData, svgPathElement } from '../svg-path/svg-path'
+import { _isStrT } from '@aglyn/shared/util/helpers'
+import { SvgPathData, svgPathElement } from './svg-path'
 
 
 export type IconId = IconKeys
@@ -23,11 +32,20 @@ export type Path = SvgPathData | JSX.Element
  * @param passProps
  */
 export function createSvgPathIcon(displayName: string, path: SvgPathIconProps['path'], passProps?: SvgPathIconProps) {
-  const CreateSvgPathIcon = React.forwardRef<any, SvgPathIconProps>(function RefRenderFn(props, ref) {
-    return <SvgPathIcon ref={ref} path={path} {...passProps} {...props} />
-  })
+  const CreateSvgPathIcon = forwardRef<any, SvgPathIconProps>(
+    function RefRenderFn(props, ref) {
+      return (
+        <SvgPathIcon
+          ref={ref}
+          path={path}
+          {...passProps}
+          {...props}
+        />
+      )
+    },
+  )
   CreateSvgPathIcon.displayName = `CreateSvgPathIcon(${displayName})`
-  return React.memo(CreateSvgPathIcon)
+  return memo(CreateSvgPathIcon)
 }
 
 /**
@@ -39,17 +57,17 @@ export function getMdiIconPathData(iconId: IconKeys, failover?: Icon): string {
   return getIcon(iconId, failover)?.['path']
 }
 
-export interface SvgPathIconProps extends Omit<MuiSvgIconProps, 'iconId' | 'path'> {
+export interface SvgPathIconProps extends Partial<Omit<MuiSvgIconProps, 'path'>> {
   iconId?: IconKeys
   path?: Path
 }
 
-export const SvgPathIcon = React.forwardRef<any, SvgPathIconProps>(
+export const SvgPathIcon = forwardRef<any, SvgPathIconProps>(
   function RefRenderFn(props, ref) {
-    const { iconId, path, children, ...rest } = props
-    const pathElem = React.useMemo(() => {
-      const data = iconId || !path ? getMdiIconPathData(iconId) : _isStr(path) ? path : null
-      return !_isStr(data) ? path : svgPathElement(data as SvgPathData)
+    const {iconId, path, children, ...rest} = props
+    const pathElem = useMemo(() => {
+      const data = iconId || !path ? getMdiIconPathData(iconId) : _isStrT(path) ? path : null
+      return !_isStrT(data) ? path : svgPathElement(data as SvgPathData)
     }, [iconId, path])
 
     return (

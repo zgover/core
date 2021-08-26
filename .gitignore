@@ -5,6 +5,7 @@
 /tmp
 /out-tsc
 /.firebase
+/.migrations.json
 
 # dependencies
 /node_modules

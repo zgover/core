@@ -1,9 +1,32 @@
-import * as React from 'react'
-import { DataGrid, DataGridProps as MuiDataGridProps, GridOverlay, ComponentProps } from '@material-ui/data-grid'
+/**
+ * @license
+ * Copyright 2021 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+  DataGrid,
+  DataGridProps as MuiDataGridProps,
+  GridOverlay, GridOverlayProps,
+  GridSlotsComponent,
+} from '@material-ui/data-grid'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import LinearProgress, { LinearProgressProps as MuiLinearProgressProps } from '@material-ui/core/LinearProgress'
 import { StandardProps } from '@material-ui/core'
+import { ElementType, HTMLAttributes } from 'react'
+
 
 const useNoRowsOverlayStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -29,12 +52,12 @@ const useNoRowsOverlayStyles = makeStyles((theme: Theme) =>
     label: {
       marginTop: theme.spacing(1),
     },
-  }), { name: 'NoRowsOverlay' }
+  }), {name: 'NoRowsOverlay'},
 )
 
-const noRowsOverlay = (label: string) => function NoRowsOverlay(props: ComponentProps) {
+const noRowsOverlay = (label: string) => function NoRowsOverlay(props: GridOverlayProps) {
   const classes = useNoRowsOverlayStyles(props)
-  const { } = props
+  // const { _ } = props
 
   return (
     <GridOverlay className={classes.root}>
@@ -90,7 +113,7 @@ type LoadingOverlayViewProps = {
 const AppLoaderOverlayView = (props: LoadingOverlayViewProps = {}) => function AppLoaderOverlayView() {
   return (
     <GridOverlay>
-      <div style={{ position: 'absolute', top: 0, width: '100%' }}>
+      <div style={{position: 'absolute', top: 0, width: '100%'}}>
         <LinearProgress color="secondary" {...props.LinearProgressProps} />
       </div>
     </GridOverlay>
@@ -102,11 +125,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     border: 'none',
     '& .MuiDataGrid-cell': {
       '&:focus': {
-        outline: 'none'
-      }
-    }
+        outline: 'none',
+      },
+    },
   },
-}), { name: 'WidgetCard' })
+}), {name: 'WidgetCard'})
 
 function DataTable(props: Props) {
   const classes = useStyles(props)
@@ -122,9 +145,9 @@ function DataTable(props: Props) {
     ...rest
   } = props
   return (
-    <Component style={{ height: 400, width: '100%' }} {...rest as any}>
-      <div style={{ display: 'flex', height: '100%' }}>
-        <div style={{ flexGrow: 1 }}>
+    <Component style={{height: 400, width: '100%'}} {...rest as any}>
+      <div style={{display: 'flex', height: '100%'}}>
+        <div style={{flexGrow: 1}}>
           <DataGrid
             rows={rows}
             columns={columns}
@@ -132,9 +155,9 @@ function DataTable(props: Props) {
             loading={loading}
             {...DataGridProps}
             components={{
-              noRowsOverlay: noRowsOverlay(label),
-              AppLoaderOverlayView: AppLoaderOverlayView(LoadingOverlayViewProps),
-              ...DataGridProps?.components
+              NoRowsOverlay: noRowsOverlay(label),
+              LoadingOverlay: AppLoaderOverlayView(LoadingOverlayViewProps),
+              ...DataGridProps?.components,
             }}
           />
         </div>
@@ -145,7 +168,8 @@ function DataTable(props: Props) {
 
 DataTable.displayName = 'DataTable'
 export type ClassKey = string
-export interface Props extends StandardProps<React.HTMLAttributes<HTMLDivElement>, ClassKey> {
+
+export interface Props extends StandardProps<HTMLAttributes<HTMLDivElement>, ClassKey> {
   rows?: MuiDataGridProps['rows']
   columns?: MuiDataGridProps['columns']
   loading?: MuiDataGridProps['loading']
@@ -155,7 +179,7 @@ export interface Props extends StandardProps<React.HTMLAttributes<HTMLDivElement
    * The component used for the root node.
    * Either a string to use a HTML element or a component.
    */
-  component?: React.ElementType<React.HTMLAttributes<HTMLElement>>
+  component?: ElementType<HTMLAttributes<HTMLElement>>
   label?: string
 }
 

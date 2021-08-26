@@ -14,39 +14,76 @@
             "depConstraints": [
               {
                 "sourceTag": "scope:app",
-                "onlyDependOnLibsWithTags": ["scope:app", "scope:lib"]
-              },
-              {
-                "sourceTag": "scope:lib",
-                "onlyDependOnLibsWithTags": ["scope:lib"]
-              },
-              {
-                "sourceTag": "scope:shared",
-                "onlyDependOnLibsWithTags": ["scope:shared"]
-              },
-              {
-                "sourceTag": "scope:shared:util",
-                "onlyDependOnLibsWithTags": ["scope:shared:util"]
-              },
-              {
-                "sourceTag": "scope:website",
-                "onlyDependOnLibsWithTags": ["scope:website", "scope:shared"]
-              },
-              {
-                "sourceTag": "scope:website:core",
-                "onlyDependOnLibsWithTags": ["scope:website:core", "scope:shared:util"]
-              },
-              {
-                "sourceTag": "scope:website:feature",
-                "onlyDependOnLibsWithTags": ["scope:website:feature", "scope:shared", "scope:website:core"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:app",
+                  "scope:lib"
+                ]
               },
               {
                 "sourceTag": "scope:app:www",
-                "onlyDependOnLibsWithTags": ["*"]
+                "onlyDependOnLibsWithTags": [
+                  "*"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:shared",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:shared:util",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared:util"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:shared:feature",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared:feature"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework",
+                  "scope:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework:sdk",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework:sdk",
+                  "scope:lib:shared:util",
+                  "scope:lib:shared:feature"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework:feature",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework:feature",
+                  "scope:lib:framework:sdk",
+                  "scope:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework:plugin",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework:plugin",
+                  "scope:lib"
+                ]
               },
               {
                 "sourceTag": "*",
-                "onlyDependOnLibsWithTags": ["*"]
+                "onlyDependOnLibsWithTags": [
+                  "*"
+                ]
               }
             ]
           }
@@ -61,7 +98,16 @@
         "@typescript-eslint/no-empty-interface": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-namespace": "off",
-        "@typescript-eslint/no-unused-vars": "warn"
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/no-var-requires": "off",
+        "react/no-children-prop": "off",
+        "no-fallthrough": "off"
+      }
+    },
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off"
       }
     },
     {

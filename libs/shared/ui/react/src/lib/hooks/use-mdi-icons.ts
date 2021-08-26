@@ -1,18 +1,27 @@
 /**
  * @license
- * Copyright (c) 2021 Aglyn LLC
+ * Copyright 2021 Aglyn LLC
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the root directory of this source tree.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import { useCallback, useState, useMemo } from 'react'
-
-import Fuse from 'fuse.js'
+import { useCallback, useMemo, useState } from 'react'
 
 import { Icons, icons as mdiIcons } from '@aglyn/shared/data/mdi'
 
-import { _isArr } from '@aglyn/shared/util/helpers'
+import { _isArr } from '@aglyn/shared/util/guards'
+import { SearchFuzzy } from '@aglyn/shared/util/helpers'
+
 
 export type MdiIcon = {
   id: string
@@ -37,13 +46,13 @@ export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
         return !icon
           ? null
           : {
-              id,
-              name: icon.name,
-              path: icon.path,
-              aliases: Object.keys(icon.alias).filter((i) => icon.alias[i] === true),
-            }
+            id,
+            name: icon.name,
+            path: icon.path,
+            aliases: Object.keys(icon.alias).filter((i) => icon.alias[i] === true),
+          }
       }),
-    [ids]
+    [ids],
   )
 }
 
@@ -51,9 +60,9 @@ const defaultKeys = ['id', 'name', 'aliases']
 
 export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIconsReturn {
   const allIcons = useMemoizedMdiIcons()
-  const options = { keys: opts?.keys ?? defaultKeys }
-  const fuse = new Fuse(allIcons, options)
-  const searchItems = (query: string) => fuse.search(query ?? '').map((i) => i.item)
+  const options = {keys: opts?.keys ?? defaultKeys}
+  const fuzzy = new SearchFuzzy(allIcons, options)
+  const searchItems = (query: string) => fuzzy.search(query ?? '').map((i) => i.item)
   const [query, setQuery] = useState(initialQuery ?? '')
   const filteredIcons = useMemo<MdiIcon[]>(() => {
     return query ? searchItems(query) : allIcons
@@ -62,7 +71,7 @@ export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIco
   const applyFilter: ApplyFilterFn = useCallback((query: string) => setQuery(query), [])
   const clearFilter: ClearFilterFn = useCallback(() => setQuery(''), [])
 
-  return useMemo(() => [filteredIcons, { applyFilter, clearFilter }, mdiIcons], [filteredIcons])
+  return useMemo(() => [filteredIcons, {applyFilter, clearFilter}, mdiIcons], [filteredIcons])
 }
 
 export default useMdiIcons

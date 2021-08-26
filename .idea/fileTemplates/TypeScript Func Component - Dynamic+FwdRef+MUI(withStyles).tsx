@@ -15,16 +15,16 @@ export const ${NAME}Styles = (theme: Theme) => createStyles({
   root: {},
 })
 
-export interface ${NAME}Props extends HTMLAttributes<HTMLElement> {
-  component?: ElementType
+export interface ${NAME}Props<C extends React.ElementType = any> extends WithStyles<typeof ${NAME}Styles> {
+  component?: C
 }
 
-const ${NAME} = forwardRef<any, ${NAME}Props & WithStyles<typeof ${NAME}Styles>>(
+export const Unstyled${NAME} = forwardRef<any, ${NAME}Props>(
   function RefRenderFn(props, ref) {
     const { 
       children,
       component: Component,
-      className: classNameProp,
+      className: prop_className,
       classes,
       ...rest
     } = props
@@ -42,9 +42,13 @@ const ${NAME} = forwardRef<any, ${NAME}Props & WithStyles<typeof ${NAME}Styles>>
   }
 )
 
+const ${NAME} = withStyles(${NAME}Styles, { 
+  name: '${NAME}' 
+})(Unstyled${NAME})
 ${NAME}.displayName = '${NAME}'
 ${NAME}.defaultProps = {
   component: 'div',
 }
 
-export default withStyles(${NAME}Styles, {name: '${NAME}'})(${NAME})
+export { ${NAME} }
+export default ${NAME}

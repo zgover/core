@@ -1,13 +1,22 @@
 /**
  * @license
- * Copyright (c) 2021 Aglyn LLC
+ * Copyright 2021 Aglyn LLC
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the root directory of this source tree.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { GridItems, GridItemsProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
-import { _isStr, copy, s } from '@aglyn/shared/util/helpers'
+import { _isStrT, _s, copy } from '@aglyn/shared/util/helpers'
 import Container from '@material-ui/core/Container'
 import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
@@ -16,7 +25,7 @@ import React from 'react'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { withCurrentUserCtx } from '../contexts/current-user-context'
 import { withAggregatedPageMeta } from '../lib/app-pages'
-import { getGravatarUrl } from '../lib/gravatar'
+import { getGravatarUrl } from '@aglyn/shared/util/helpers'
 import { tabItems } from '../lib/navigation-menus'
 import MainLayout, { Props as MainLayoutProps, styles as mainStyles } from './MainLayout'
 
@@ -71,7 +80,7 @@ const ConsoleLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
       const breadcrumbItems = (breadcrumbItemsProp ?? copy(pageAncestors))
       .concat(overrideMeta ?? pageMeta)
       .map((item: any) => ({
-        href: s(item?.id),
+        href: _s(item?.id),
         children: item?.name.plural,
       }))
       const quickActionMenus = [
@@ -121,8 +130,8 @@ const ConsoleLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                   <SvgPathIcon
                     color="secondary"
                     fontSize="inherit"
-                    {...(_isStr(header.icon) ? { iconId: header.icon } : header.icon)}
-                    className={clsx(classes.icon, _isStr(header.icon) ? null : header.icon.className)}
+                    {...(_isStrT(header.icon) ? {iconId: header.icon} : header.icon)}
+                    className={clsx(classes.icon, _isStrT(header.icon) ? null : header.icon.className)}
                   />
                 ) : null}
                 {header?.children ?? title}
@@ -158,4 +167,4 @@ const ConsoleLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
 ConsoleLayout.displayName = 'Layout:ConsoleLayout'
 ConsoleLayout.defaultProps = {}
 
-export default withStyles(styles, { name: 'Layout:MainLayout' })(ConsoleLayout)
+export default withStyles(styles, {name: 'Layout:MainLayout'})(ConsoleLayout)

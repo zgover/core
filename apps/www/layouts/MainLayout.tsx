@@ -1,9 +1,18 @@
 /**
  * @license
- * Copyright (c) 2021 Aglyn LLC
+ * Copyright 2021 Aglyn LLC
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the root directory of this source tree.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import {
@@ -18,7 +27,7 @@ import AppBar from '@material-ui/core/AppBar'
 import Avatar from '@material-ui/core/Avatar'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
-import { cyan } from '@material-ui/core/colors'
+import { cyan, purple } from '@material-ui/core/colors'
 import Container from '@material-ui/core/Container'
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton'
 import { createStyles, darken, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
@@ -36,7 +45,6 @@ import Link, { LinkProps as LinkProps } from '../components/Link'
 import { APP, tailNavigation } from '../const'
 import { withCurrentUserCtx } from '../contexts/current-user-context'
 import { withAggregatedPageMeta } from '../lib/app-pages'
-import { getGravatarUrl } from '../lib/gravatar'
 
 
 export const styles = (theme: Theme) => createStyles({
@@ -59,7 +67,7 @@ export const styles = (theme: Theme) => createStyles({
     },
     '& $menu': {
       padding: theme.spacing(0.5, 0.25),
-      '&:last-child': { paddingLeft: theme.spacing(0.75) },
+      '&:last-child': {paddingLeft: theme.spacing(0.75)},
     },
   },
   left: {
@@ -71,7 +79,7 @@ export const styles = (theme: Theme) => createStyles({
     flexGrow: 1,
     flexBasis: '72%',
   },
-  right: { display: 'flex' },
+  right: {display: 'flex'},
   logoWrapper: {
     height: 36,
     flex: '0 0 auto',
@@ -90,7 +98,7 @@ export const styles = (theme: Theme) => createStyles({
           lineHeight: '22px',
           fontSize: theme.typography.pxToRem(50),
           height: 'auto',
-          [theme.breakpoints.up('md')]: { fontSize: theme.typography.pxToRem(60) },
+          [theme.breakpoints.up('md')]: {fontSize: theme.typography.pxToRem(60)},
         },
       },
       '& $product': {
@@ -117,7 +125,7 @@ export const styles = (theme: Theme) => createStyles({
     fontWeight: theme.typography.fontWeightLight,
   },
   tabs: {
-    '& $flexContainer': { alignItems: 'center' },
+    '& $flexContainer': {alignItems: 'center'},
     '& $tabIndicator': {
       height: 3,
       backgroundColor: 'unset',
@@ -150,19 +158,19 @@ export const styles = (theme: Theme) => createStyles({
       paddingLeft: 0,
       paddingRight: 0,
       marginLeft: theme.spacing(4),
-      '&:first-child': { marginLeft: theme.spacing(0) },
+      '&:first-child': {marginLeft: theme.spacing(0)},
     },
   },
   avatarButton: {
     padding: theme.spacing(0.5),
-    '& $avatar': { backgroundColor: cyan[600] },
+    '& $avatar': {backgroundColor: cyan[600]},
   },
   avatar: {},
   header: {
     paddingTop: theme.spacing(8),
     paddingBottom: theme.spacing(10),
-    background: theme.palette.brand.purple['600'],
-    color: theme.palette.getContrastText(theme.palette.brand.purple['600']),
+    background: purple['600'],
+    color: theme.palette.getContrastText(purple['600']),
   },
   heading: {
     letterSpacing: '-0.04em',
@@ -176,16 +184,16 @@ export const styles = (theme: Theme) => createStyles({
   },
   breadcrumbs: {
     marginTop: theme.spacing(1),
-    color: darken(theme.palette.getContrastText(theme.palette.brand.purple['600']), 0.12),
+    color: darken(theme.palette.getContrastText(purple['600']), 0.12),
     '& $item': {
       color: 'inherit',
       '&$last': {
-        color: theme.palette.getContrastText(theme.palette.brand.purple['600']),
+        color: theme.palette.getContrastText(purple['600']),
         fontWeight: theme.typography.fontWeightMedium,
       },
     },
   },
-  content: { marginTop: theme.spacing(-6) },
+  content: {marginTop: theme.spacing(-6)},
   footer: {},
   main: {},
 
@@ -250,10 +258,10 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
         current.href.length > prev.href.length ? current : prev,
       ).href ?? ''
 
-      const buildIconButton = ({ avatar, iconId, children, ...item }, i) => (
+      const buildIconButton = ({avatar, iconId, children, ...item}, i) => (
         <IconButton
           key={item.id ?? item.href ?? i}
-          className={clsx(classes.iconBtn, { [classes.avatarButton]: Boolean(avatar) })}
+          className={clsx(classes.iconBtn, {[classes.avatarButton]: Boolean(avatar)})}
           color="inherit"
           {...item}
         >
@@ -278,6 +286,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
         />
       )
 
+      // eslint-disable-next-line react/display-name
       const buildNav = (actionBuilder) => (item, key) => (
         _isArr(item.items) ? (
           <Menu key={key} className={classes.menu} items={item.items}>
@@ -293,7 +302,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
       return (
         <React.Fragment>
           <Head>
-            <title children={title ?? 'Web App'} />
+            <title>{`${title}` ?? 'Web App'}</title>
           </Head>
           <AppBar
             // component="header"
@@ -315,10 +324,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                           />
                         </span>
                         {productName && (
-                          <span
-                            className={classes.product}
-                            children={` ${productName}`}
-                          />
+                          <span className={classes.product}>{` ${productName}`}</span>
                         )}
                       </Link>
                     </div>
@@ -356,7 +362,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                         variant="h6"
                       />
                     )}
-                    {navTabItems && navTabItems.map(({ iconId, ...item }, i) => (
+                    {navTabItems && navTabItems.map(({iconId, ...item}, i) => (
                       <Tab
                         key={item.id ?? item.href ?? i}
                         classes={{
@@ -402,7 +408,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                 </div>
                 <div className={classes.right}>
                   <GridButtons
-                    items={footerNavItems.map(i=>({size: 'small', ...i}))}
+                    items={footerNavItems.map(i => ({size: 'small', ...i}))}
                     spacing={1}
                   />
                 </div>
@@ -419,9 +425,9 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                     color="textSecondary"
                     variant="overline"
                   >
-                    <span children={`Version ${APP.VERSION}`} />
+                    <span>{`Version ${APP.VERSION}`}</span>
                     {' '}
-                    <span children={`(${APP.BUILD_ID})`} />
+                    <span>{`(${APP.BUILD_ID})`}</span>
                   </Typography>
                 </Box>
               </Box>
@@ -438,4 +444,4 @@ MainLayout.defaultProps = {
   footerNavItems: tailNavigation,
 }
 
-export default withStyles(styles, { name: 'Layout:MainLayout' })(MainLayout)
+export default withStyles(styles, {name: 'Layout:MainLayout'})(MainLayout)

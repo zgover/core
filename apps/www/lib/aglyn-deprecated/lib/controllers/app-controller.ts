@@ -1,4 +1,45 @@
-import firebase from 'firebase/app'
+/**
+ * @license
+ * Copyright 2021 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { FirebaseApp, getApp as getFbApp, initializeApp } from 'firebase/app'
+import {
+  Auth,
+  UserCredential,
+  User as AuthUser,
+  connectAuthEmulator,
+  getAuth as getFbAuth,
+  createUserWithEmailAndPassword,
+  signOut,
+  signInWithEmailAndPassword,
+  setPersistence,
+  onAuthStateChanged as onFbAuthStateChanged,
+} from 'firebase/auth'
+import {
+  Firestore,
+  DocumentData,
+  DocumentReference,
+  DocumentSnapshot,
+  CollectionReference,
+  connectFirestoreEmulator,
+  getFirestore as getFbFirestore,
+  collection,
+  doc,
+} from 'firebase/firestore'
+import { Analytics, getAnalytics as getFbAnalytics } from 'firebase/analytics'
 
 import { Persist } from '../constants'
 import { PKey } from '../interfaces/dod'
@@ -13,20 +54,21 @@ import { CollectionRefController } from './CollectionRefController'
 import { DatabaseRefController } from './DatabaseRefController'
 import { DocumentRefController } from './DocumentRefController'
 import { FieldRefController } from './FieldRefController'
+import { getApps } from '@firebase/app'
 
-export type FbApp = firebase.app.App
-export type FbAuth = firebase.auth.Auth
-export type FbFirestore = firebase.firestore.Firestore
-export type FbAnalytics = firebase.analytics.Analytics
-export type FbUserCredential = firebase.auth.UserCredential
-export type FbUser = firebase.User
-export type FbStore = firebase.firestore.Firestore
 
-export type FbDocumentData = firebase.firestore.DocumentData
-export type FbDocumentRef<T = FbDocumentData> = firebase.firestore.DocumentReference<T>
-export type FbDocumentSnapshot<T = FbDocumentData> = firebase.firestore.DocumentSnapshot<T>
+export type FbApp = FirebaseApp
+export type FbAuth = Auth
+export type FbFirestore = Firestore
+export type FbAnalytics = Analytics
+export type FbUserCredential = UserCredential
+export type FbUser = AuthUser
 
-export type FbCollectionRef<T = FbDocumentData> = firebase.firestore.CollectionReference<T>
+export type FbDocumentData = DocumentData
+export type FbDocumentRef<T = FbDocumentData> = DocumentReference<T>
+export type FbDocumentSnapshot<T = FbDocumentData> = DocumentSnapshot<T>
+
+export type FbCollectionRef<T = FbDocumentData> = CollectionReference<T>
 
 /**
  * Describes the initial configuration for the application controller
@@ -93,8 +135,9 @@ export interface AppController {
   signInUser: (email: string, password: string, onSuccess?: (user: FbUserCredential) => void, onError?: (error: any) => void, persistence?: Persist) => Promise<void>
   signUpUser: (email: string, password: string, onSuccess?: (user: FbUserCredential) => void, onError?: (error: any) => void, persistence?: Persist) => Promise<void>
   signOutUser: (onSuccess?: () => void, onError?: (error: any) => void) => Promise<void>
+  onAuthStateChange: (...params: Parameters<typeof onFbAuthStateChanged> extends [unknown, ...infer U] ? U : never) => ReturnType<typeof onFbAuthStateChanged>
   setAuthPersistence: (onSuccess?: () => void, onError?: (error: any) => void, override?: Persist) => Promise<void>
-  getCollectionRef: <T extends firebase.firestore.DocumentData>(cid: string) => FbCollectionRef<T>
+  getCollectionRef: <T extends FbDocumentData>(cid: string) => FbCollectionRef<T>
   getUsersCollectionRef: () => FbCollectionRef<User>
   getUserDocumentRef: (uid: PKey) => FbDocumentRef<User>
   getCurrentUserDocumentRef: () => FbDocumentRef<User>
@@ -105,43 +148,32 @@ export interface AppController {
   getDodField: (dbId: PKey, cId: PKey, dId: PKey, fId: PKey) => FieldRefController<any>
 }
 
-/**
- * Convert Persist enums to Firebase Persistence enum
- */
-export const persistAsAuthPersist = {
-  [Persist.NONE]: firebase.auth.Auth.Persistence.NONE,
-  [Persist.SESSION]: firebase.auth.Auth.Persistence.SESSION,
-  [Persist.LOCAL]: firebase.auth.Auth.Persistence.LOCAL,
-}
-
 const testDb: Ref.Database = {
   schemas: {
     'test_collection': {
-      name: { singular: 'Test Collection', plural: 'Test Collections' },
+      name: {singular: 'Test Collection', plural: 'Test Collections'},
       created: Date.now(),
       fields: {
         sjdf5lgnc: {
-          name: { singular: 'First Name', plural: 'First Names' },
-          type: FT.Tag.text
+          name: {singular: 'First Name', plural: 'First Names'},
+          type: FT.Tag.text,
         },
         sdkgmlr34: {
-          name: { singular: 'Last Name', plural: 'Last Names' },
-          type: FT.Tag.text
+          name: {singular: 'Last Name', plural: 'Last Names'},
+          type: FT.Tag.text,
         },
-      }
-    }
+      },
+    },
   },
   instances: {
     'test_collection': {
       test_document: {
         sjdf5lgnc: 'Zach',
         sdkgmlr34: 'Gover',
-      }
-    }
-  }
+      },
+    },
+  },
 }
-
-testDb
 
 /**
  * The default application configuration object, can be
@@ -224,7 +256,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
 
   const config: AppControllerConfig = {
     ...defaultAppConfig,
-    ...options
+    ...options,
   }
 
   // console.debug('config', config)
@@ -253,7 +285,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     setAuth = true
     if (config.authEmulator) {
       console.debug('setting auth emulator')
-      auth.useEmulator(config.authEmulator)
+      connectAuthEmulator(auth, config.authEmulator)
     }
     return auth
   }
@@ -262,8 +294,8 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     setFirestore = true
     if (config.firestoreEmulator) {
       console.debug('setting firestore emulator')
-      const { host, port } = config.firestoreEmulator
-      firestore.useEmulator(host, port)
+      const {host, port} = config.firestoreEmulator
+      connectFirestoreEmulator(firestore, host, port)
     }
     return firestore
   }
@@ -272,23 +304,23 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     return config
   }
   const getApp = (): FbApp => {
-    return app
+    return app ?? getFbApp(config.appName)
   }
   const getAnalytics = (): FbAnalytics => {
     if (firebaseConfig.measurementId) {
       if (analytics) {
         return analytics
       }
-      return analytics = app?.analytics()
+      return analytics = getFbAnalytics(app ?? getApp())
     }
     return null
   }
   const getAuth = (): FbAuth => {
-    const auth = app?.auth()
+    const auth = getFbAuth(app ?? getApp())
     return !setAuth && !existingApp && auth ? setupAuth(auth) : auth
   }
   const getFirestore = (): FbFirestore => {
-    const firestore = app?.firestore()
+    const firestore = getFbFirestore(app)
     return !setFirestore && !existingApp && firestore ? setupFirestore(firestore) : firestore
   }
 
@@ -300,17 +332,17 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
   try {
     console.debug(`Beginning app setup(${config.appName})`)
     // Check if app is already initialized
-    if (firebase.apps.length && firebase.apps.some(i => i.name === config.appName)) {
+    const apps = getApps()
+    if (apps.some(i => i.name === config.appName)) {
       console.debug(`Retrieving app already initialized(${config.appName})`)
       existingApp = true
-      app = firebase.app(config.appName)
+      app = getFbApp(config.appName)
     } else {
       console.debug(`Initializing app(${config.appName})`)
-      app = firebase.initializeApp(firebaseConfig, config.appName)
+      app = initializeApp(firebaseConfig, config.appName)
     }
     console.debug(`Finished app setup(${config.appName})`)
-  }
-  catch (error) {
+  } catch (error) {
     console.error(`Error initializing app(${config.appName})`, error)
     throw error
   }
@@ -321,7 +353,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
   /////////////////////////////
 
   const getCollectionRef = <T extends FbDocumentData>(cid: string): FbCollectionRef<T> => {
-    return getFirestore()?.collection(cid) as FbCollectionRef<T>
+    return collection(getFirestore(), cid) as FbCollectionRef<T>
   }
 
 
@@ -337,9 +369,9 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     onError?: (error: any) => void,
     override?: Persist,
   ) => {
-    await getAuth()?.setPersistence(persistAsAuthPersist[override ?? config.authPersistence])
-      .then(() => onSuccess && onSuccess())
-      .catch((error) => onError && onError(error))
+    await setPersistence(getAuth(), {type: Persist[override ?? config.authPersistence]})
+    .then(() => onSuccess && onSuccess())
+    .catch((error) => onError && onError(error))
   }
   const signInUser = async (
     email: string,
@@ -350,12 +382,12 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
   ) => {
     await setAuthPersistence(
       async () => {
-        await getAuth()?.signInWithEmailAndPassword(email, password)
-          .then((user) => onSuccess && onSuccess(user))
-          .catch((error) => onError && onError(error))
+        await signInWithEmailAndPassword(getAuth(), email, password)
+        .then((user) => onSuccess && onSuccess(user))
+        .catch((error) => onError && onError(error))
       },
       (error) => onError && onError(error),
-      persistence
+      persistence,
     )
   }
   const signUpUser = async (
@@ -367,21 +399,29 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
   ) => {
     await setAuthPersistence(
       async () => {
-        await getAuth()?.createUserWithEmailAndPassword(email, password)
-          .then((user) => onSuccess && onSuccess(user))
-          .catch((error) => onError && onError(error))
+        await createUserWithEmailAndPassword(getAuth(), email, password)
+        .then((user) => onSuccess && onSuccess(user))
+        .catch((error) => onError && onError(error))
       },
       (error) => onError && onError(error),
-      persistence
+      persistence,
     )
   }
   const signOutUser = async (
     onSuccess?: () => void,
-    onError?: (error: any) => void
+    onError?: (error: any) => void,
   ) => {
-    await getAuth()?.signOut()
-      .then(() => onSuccess && onSuccess())
-      .catch((error) => onError && onError(error))
+    await signOut(getAuth())
+    .then(() => onSuccess && onSuccess())
+    .catch((error) => onError && onError(error))
+  }
+  const onAuthStateChange = (
+    ...params: Parameters<typeof onFbAuthStateChanged> extends [unknown, ...infer U] ? U : never
+  ) => {
+    return onFbAuthStateChanged(
+      getAuth(),
+      ...params,
+    )
   }
 
 
@@ -393,7 +433,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     return getCollectionRef(SysCid.USERS)
   }
   const getUserDocumentRef = (uid: PKey): FbDocumentRef<User> => {
-    return getUsersCollectionRef().doc(uid)
+    return doc(getUsersCollectionRef(), uid)
   }
   const getCurrentUserDocumentRef = (): FbDocumentRef<User> => {
     const uid = getCurrentUser()?.uid ?? ''
@@ -408,13 +448,13 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     return getCollectionRef(SysCid.ROLES)
   }
   const getRoleDocumentRef = (id: PKey): FbDocumentRef<Role> => {
-    return getRolesCollectionRef().doc(id)
+    return doc(getRolesCollectionRef(), id)
   }
   const getPermissionsCollectionRef = (): FbCollectionRef<Permission> => {
     return getCollectionRef(SysCid.PERMISSIONS)
   }
   const getPermissionDocumentRef = (id: PKey): FbDocumentRef<Permission> => {
-    return getPermissionsCollectionRef().doc(id)
+    return doc(getPermissionsCollectionRef(), id)
   }
 
 
@@ -433,7 +473,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
   }
   const getDodCollection = (
     dbId: PKey,
-    cId: PKey
+    cId: PKey,
   ): CollectionRefController<any> => {
     const db = getDodDatabase(dbId)
     const c = db?.get(cId)
@@ -442,7 +482,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
   const getDodDocument = (
     dbId: PKey,
     cId: PKey,
-    dId: PKey
+    dId: PKey,
   ): DocumentRefController<any> => {
     const c = getDodCollection(dbId, cId)
     const doc = c?.get(dId)
@@ -452,7 +492,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     dbId: PKey,
     cId: PKey,
     dId: PKey,
-    fId: PKey
+    fId: PKey,
   ): FieldRefController<any> => {
     const doc = getDodDocument(dbId, cId, dId)
     const f = doc?.get(fId)
@@ -471,6 +511,7 @@ export function withAppController(options: Partial<AppControllerConfig> = defaul
     signInUser,
     signUpUser,
     signOutUser,
+    onAuthStateChange,
     setAuthPersistence,
 
     getCollectionRef,

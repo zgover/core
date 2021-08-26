@@ -1,13 +1,23 @@
 /**
  * @license
- * Copyright (c) 2021 Aglyn LLC
+ * Copyright 2021 Aglyn LLC
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the root directory of this source tree.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import { useRef, useCallback, useEffect, useState } from 'react'
-import { _isArr, _isNum, _isObj, _isNumPos, _isFn } from '@aglyn/shared/util/helpers'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { _isArr, _isFnT, _isNum, _isNumPos, _isObj } from '@aglyn/shared/util/helpers'
+
 
 interface Options {
   // The millisecond delay count
@@ -56,16 +66,16 @@ type HandlerParams = {
  * @param {Options} options
  * @return {TimeoutReturn}
  */
-export default function useTimeoutDelay(callback: Handler, options?: Options): TimeoutReturn {
+export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutReturn {
   const [state] = useState<Options>(() => (_isObj(options) ? options : {}))
   const [mounted, setMounted] = useState(false)
   const savedCallback = useRef(null)
-  const ref = useRef({ runCount: 0, timeoutRef: null, startTime: null })
+  const ref = useRef({runCount: 0, timeoutRef: null, startTime: null})
 
   // On mount and callback updates update the ref
   useEffect(() => {
     savedCallback.current = (params: HandlerParams) => {
-      if (_isFn(callback)) {
+      if (_isFnT(callback)) {
         return callback(params)
       }
     }
@@ -86,10 +96,10 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
   const start = useCallback(
     (opt?: Options) => {
       if (false) {
-        console.error("Can't start timeout or interval when unmounted")
+        console.error('Can\'t start timeout or interval when unmounted')
         return
       } else if (ref.current.timeoutRef) {
-        console.warn("Can't start timeout or interval when one is already running", ref.current.timeoutRef)
+        console.warn('Can\'t start timeout or interval when one is already running', ref.current.timeoutRef)
       }
 
       // Merge param opts with global opts
@@ -139,11 +149,11 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
 
           // Run limit reach callback
           limitReached &&
-            _isFn(optOnLimitReach) &&
-            optOnLimitReach({
-              startTime: Number(ref.current.startTime),
-              endTime: Number(Date.now()),
-            })
+          _isFnT(optOnLimitReach) &&
+          optOnLimitReach({
+            startTime: Number(ref.current.startTime),
+            endTime: Number(Date.now()),
+          })
         }
       }
 
@@ -154,7 +164,7 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
         timeoutRef: optRepeat ? setInterval(handler, ms, ...argArgs) : setTimeout(handler, ms, ...argArgs),
       }
     },
-    [state, ref, clear]
+    [state, ref, clear],
   )
 
   // When mounted set mounted
@@ -174,3 +184,5 @@ export default function useTimeoutDelay(callback: Handler, options?: Options): T
 
   return [start, clear]
 }
+
+export default useTimeoutDelay

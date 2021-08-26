@@ -1,16 +1,25 @@
 /**
  * @license
- * Copyright (c) 2021 Aglyn LLC
+ * Copyright 2021 Aglyn LLC
  *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the root directory of this source tree.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { Schema as DdfSchema } from '@data-driven-forms/react-form-renderer'
 import validatorTypes from '@data-driven-forms/react-form-renderer/validator-types'
 import validation from '@data-driven-forms/react-form-renderer/validation'
 import md5 from 'md5'
-import { _hasKey, _isStr, ln } from '@aglyn/shared/util/helpers'
+import { _hasKey, _isStrT, ln } from '@aglyn/shared/util/helpers'
 import { ValidationOptions } from '@data-driven-forms/react-form-renderer/validation/validation'
 
 
@@ -283,7 +292,7 @@ export namespace DdfForms {
   }
 
   export function isValidFormId(id: unknown): id is string {
-    return _isStr(id) && _hasKey(id, rawFormIdFromId)
+    return _isStrT(id) && _hasKey(id, rawFormIdFromId)
   }
   export function getFormSchemaFromId(id: string): Schema {
     return formSchemaFromId[id]

@@ -9,8 +9,3 @@ This Privacy Policy is current as of the Effective Date set forth above. We may 
 ## Contact information
 
 If you have any questions or concerns, or you feel that this Privacy Policy has been violated in any way, please let us know immediately by contacting [privacy@aglyn.com](mailto:privacy@aglyn.com).
-
-
-
-
-

@@ -3,17 +3,14 @@
   "compilerOptions": {
     "jsx": "preserve",
     "allowJs": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "types": [
       "node",
       "jest"
     ],
+    "isolatedModules": true,
+    "noImplicitOverride": false,
     "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true
+    "noEmit": false
   },
   "include": [
     "**/*.ts",

@@ -1,4 +1,21 @@
-import { themes } from '@aglyn/shared/ui/react'
+/**
+ * @license
+ * Copyright 2021 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { consoleTheme } from '@aglyn/shared/ui/themes'
 import { ServerStyleSheets } from '@material-ui/core/styles'
 import { NextComponentType } from 'next'
 import NextDocument, {
@@ -9,7 +26,8 @@ import NextDocument, {
   Main,
   NextScript,
 } from 'next/document'
-import React from 'react'
+import { Children, LinkHTMLAttributes, MetaHTMLAttributes } from 'react'
+import { AnyProps } from '@aglyn/shared/util/types'
 
 
 const isProduction = Boolean(process.env.NODE_ENV === 'production')
@@ -31,8 +49,8 @@ if (isProduction) {
 
 export type InitPropsResponse = Promise<DocumentInitialProps>
 
-export type MetaElemProps = React.HTMLProps<HTMLMetaElement>
-export type LinkElemProps = React.HTMLProps<HTMLLinkElement>
+export type MetaElemProps = MetaHTMLAttributes<HTMLMetaElement>
+export type LinkElemProps = LinkHTMLAttributes<HTMLLinkElement>
 export type MetaElementsConfig = [name: MetaElemProps['name'], content: MetaElemProps['content'], other?: MetaElemProps][]
 export type LinkElementsConfig = [rel: LinkElemProps['rel'], href: LinkElemProps['href'], other?: LinkElemProps][]
 
@@ -41,33 +59,35 @@ export type LinkElementsConfig = [rel: LinkElemProps['rel'], href: LinkElemProps
  * renders only on the server side. Commonly used for implementing
  * server side rendering for `css-in-js` libraries.
  *
- * Resolution order
- * On the server:
- * 1. app.getInitialProps
- * 2. page.getInitialProps
- * 3. document.getInitialProps
- * 4. app.render
- * 5. page.render
- * 6. document.render
- *
- * On the server with error:
- * 1. document.getInitialProps
- * 2. app.render
- * 3. page.render
- * 4. document.render
- *
- * On the client
- * 1. app.getInitialProps
- * 2. page.getInitialProps
- * 3. app.render
- * 4. page.render
+ * @example
+ * > ## Resolution order
+ * >
+ * > ### Server-side
+ * > 1. [_App]{@link _App}.getInitialProps (if-exists)
+ * > 2. <PageComponent>.getInitialProps
+ * > 3. [_Document]{@link _Document}.getInitialProps
+ * > 4. [_App]{@link _App}.render
+ * > 5. <PageComponent>.render
+ * > 6. [_Document]{@link _Document}.render
+ * >
+ * > ### Server-side (w/ error)
+ * > 1. [_Document]{@link _Document}.getInitialProps
+ * > 2. [_App]{@link _App}.render
+ * > 3. <PageComponent>.render
+ * > 4. [_Document]{@link _Document}.render
+ * >
+ * > ### Client-side
+ * > 1. [_App]{@link _App}.getInitialProps (if-exists)
+ * > 2. <PageComponent>.getInitialProps
+ * > 3. [_App]{@link _App}.render
+ * > 4. <PageComponent>.render
  *
  * @exports
- * @class AppDocument
+ * @class _Document
  * @extends {NextDocument<P>}
  * @template P
  */
-class AppDocument<P = {}> extends NextDocument<P> {
+export default class _Document<P = AnyProps> extends NextDocument<P> {
 
   /**
    * Returns the context object with the addition of `renderPage`
@@ -78,7 +98,7 @@ class AppDocument<P = {}> extends NextDocument<P> {
    * @param {DocumentContext} ctx
    * @returns {InitPropsResponse}
    */
-  public static async getInitialProps(ctx: DocumentContext): InitPropsResponse {
+  static async getInitialProps(ctx: DocumentContext): InitPropsResponse {
     // Render app and page and get the context of the page with collected side effects.
     const sheets = new ServerStyleSheets()
     const originalRenderPage = ctx.renderPage
@@ -101,7 +121,7 @@ class AppDocument<P = {}> extends NextDocument<P> {
     let css = sheets.toString()
     // It might be undefined, e.g. after an error.
     if (css && process.env.NODE_ENV === 'production' && jssMinify.prefixer && jssMinify.cleanCSS) {
-      const result1 = await jssMinify.prefixer.process(css, { from: undefined })
+      const result1 = await jssMinify.prefixer.process(css, {from: undefined})
       css = result1.css
       css = jssMinify.cleanCSS.minify(css).styles
     }
@@ -110,12 +130,12 @@ class AppDocument<P = {}> extends NextDocument<P> {
       ...initialProps,
       // Styles fragment is rendered after the app and page rendering finish.
       styles: [
-        ...React.Children.toArray(initialProps.styles),
+        ...Children.toArray(initialProps.styles),
         // sheets.getStyleElement() // LEAVE FOR REFERENCE IN CASE OF ISSUE BELOW
         <style
           key="jss-server-side"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: css }}
+          dangerouslySetInnerHTML={{__html: css}}
           id="jss-server-side"
         />,
       ],
@@ -123,39 +143,41 @@ class AppDocument<P = {}> extends NextDocument<P> {
   }
 
   metaElements: MetaElementsConfig = [
-    ['theme-color', themes.console.palette.primary.main],
+    ['theme-color', consoleTheme.palette.primary.main],
     ['X-UA-Compatible', 'IE=edge'],
   ]
   linkElements: LinkElementsConfig = [
     ['shortcut icon', '/favicon.ico'],
     ['manifest', '/manifest.json'],
-    ['stylesheet', 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap'],
+    ['preconnect', 'https://fonts.googleapis.com'],
+    ['preconnect', 'https://fonts.gstatic.com', {crossOrigin: 'anonymous'}],
+    ['stylesheet', 'https://fonts.googleapis.com/css2?family=Raleway&display=swap'],
   ]
 
-  static makeMetaElem = ([name, content, { ...rest }]: MetaElementsConfig[number]) => (
+  makeMetaElem = ([name, content, {...rest}]: MetaElementsConfig[number]) => (
     <meta key={name + content} name={name} content={content} {...rest} />
   )
 
-  static makeLinkElem = ([rel, href, { ...rest }]: LinkElementsConfig[number]) => (
+  makeLinkElem = ([rel, href, {...rest}]: LinkElementsConfig[number]) => (
     <link key={href} rel={rel} href={href} {...rest} />
   )
 
+  /**
+   *
+   * @returns {JSX.Element}
+   */
   public render(): JSX.Element {
     return (
-      <>
-        <Html lang="en">
-          <Head>
-            {this.metaElements.map(AppDocument.makeMetaElem)}
-            {this.linkElements.map(AppDocument.makeLinkElem)}
-          </Head>
-          <body>
+      <Html lang="en">
+        <Head>
+          {this.metaElements.map(this.makeMetaElem)}
+          {this.linkElements.map(this.makeLinkElem)}
+        </Head>
+        <body>
           <Main />
           <NextScript />
-          </body>
-        </Html>
-      </>
+        </body>
+      </Html>
     )
   }
 }
-
-export default AppDocument

@@ -9,8 +9,8 @@
 import { ElementType, forwardRef, HTMLAttributes } from 'react'
 
 
-export interface ${NAME}Props extends HTMLAttributes<HTMLElement> {
-  component?: ElementType
+export interface ${NAME}Props<C extends React.ElementType = any> extends HTMLAttributes<C> {
+  component?: C
 }
 
 export const ${NAME} = forwardRef<any, ${NAME}Props>(

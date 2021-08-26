@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2021 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { mapObject } from '@aglyn/shared/util/helpers'
 import React from 'react'
 import { makeStyles, Theme, createStyles, WithStyles, withStyles } from '@material-ui/core/styles'
@@ -29,9 +46,8 @@ export default withStyles(styles, { name: 'Page:SignUp' })(
   withAppContext<Props & WithStyles<typeof styles>>(
     function SignUp(props) {
       const { app, classes } = props
-      const { getCurrentUser, signUpUser } = app
-      const currentUser = getCurrentUser()
-      // console.log('getCurrentUser()', currentUser)
+      const currentUser = app?.getCurrentUser()
+      // console.log('app?.getCurrentUser()', currentUser)
       const router = useRouter()
       if (currentUser) {
         router.push('/')
@@ -71,7 +87,7 @@ export default withStyles(styles, { name: 'Page:SignUp' })(
           return
         }
 
-        await signUpUser(
+        await app?.signUpUser(
           fields.email.value,
           fields.password.value,
           (user) => {
