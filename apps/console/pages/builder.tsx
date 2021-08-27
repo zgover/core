@@ -31,11 +31,10 @@ const Root = aglynComponent('root', {
   displayName: 'Root Element',
   title: 'Root element',
   icon: 'block',
-})(({children, innerRef, ...props}) => (
-  <span ref={innerRef} {...props}>{children}</span>
-))
+  disableInnerRef: true
+})('span')
 
-registerComponent(getApp(), {component: Root})
+registerComponent(getApp(), Root)
 
 export interface BuilderProps {}
 

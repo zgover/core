@@ -15,8 +15,29 @@
  * limitations under the License.
  */
 
+/** A type of null or undefined */
+export type NUN = null | undefined
+
+/** Construct a type from type of T or null */
+export type OrNull<T> = T | null
+
+/** Construct a type from type of T or undefined */
+export type OrUndef<T> = T | undefined
+
+/** Construct a type from type of T or null or undefined */
+export type OrNUN<T> = T | NUN
+
+/** Construct a type from type of T or never */
+export type OrNever<T> = T | never
+
+/** Construct a type from type of T or unknown */
+export type OrUnk<T> = T | unknown
+
+/** Construct a type from type of T or any */
+export type OrAny<T> = T | any
+
 /** A index signature for a object key  */
-export type PKey = PropertyKey
+export type PKey = string | number | symbol
 
 /** A index signature for a mapped object */
 export type MapKey = string | symbol
@@ -24,13 +45,25 @@ export type MapKey = string | symbol
 /** @alias MapKey */
 export type MKey = MapKey
 
+/** The index signature type of T */
+export type KeyOf<T> = keyof T
+
+/** The index value type of T  */
+export type IndexOf<T, K extends KeyOf<T> = KeyOf<T>> = T[K]
+
+/** From T, omit properties whose values are in union U */
+export type OmitIndexOfType<T, U> = {
+  [K in (IndexOf<T, KeyOf<T>> extends U ? never : KeyOf<T>)]: T[K]
+}
+
 /** Any type of object record with string index types */
 export type AnyProps = Record<string, unknown>
 
-/**
- * Dictionary collection with string index types (optionally specify value by setting T)
- */
-export type Dictionary<T = unknown> = Record<string, T>
+/** Plain old dictionary of key(K)-value(T) pairs with string signatures */
+export type KeyValueMap<K extends PKey = PKey, T = unknown> = Record<K, T>
+
+/** Dictionary collection with string index types (optionally specify value by setting T) */
+export type Dictionary<T = unknown> = KeyValueMap<string, T>
 
 /** Dictionary collection optionally specify values to T */
 export type EmptyObj<K extends keyof any = PropertyKey> = Record<K, never>
@@ -51,62 +84,62 @@ export type Conditional<LEFT, RIGHT, TRUE, FALSE = never> = LEFT extends RIGHT ?
 export type ConditionalNonDist<LEFT, RIGHT, TRUE, FALSE = never> = [LEFT] extends [RIGHT] ? TRUE : FALSE
 
 /** If X extends true then Y */
-export type IF<X, Y> = Conditional<X, true, Y>
+export type IfTrueElse<TRUE, ELSE> = Conditional<TRUE, true, ELSE>
 
-/** Plain old dictionary of key(K)-value(T) pairs with string signatures */
-export type KV<T = unknown, K extends string = string> = Record<K, T>
-
-/** The index signature type of T */
-export type KeyOf<T> = keyof T
-
-/** The index value type of T  */
-export type IndexOf<T, K extends KeyOf<T> = KeyOf<T>> = T[K]
+/** If X extends true then Y */
+export type IfTrueElseNonDist<TRUE, ELSE> = ConditionalNonDist<TRUE, true, ELSE>
 
 /** From T, make all top level keys mutable (removes readonly) */
-export type Mutable<T> = {
+export type MutableShallow<T> = {
   -readonly [P in keyof T]: T[P]
 }
+
 /** From T, make all keys mutable including nested objects/arrays (removes readonly) */
-export type DeeplyMutable<T> = {
-  -readonly [P in keyof T]: (T[P] extends ReadonlyArray<infer U> ? DeeplyMutable<U>[] : DeeplyMutable<T[P]>)
+export type MutableDeep<T> = {
+  -readonly [P in keyof T]: (T[P] extends ReadonlyArray<infer U> ? MutableDeep<U>[] : MutableDeep<T[P]>)
 }
 
 /** From T, require properties whose keys are in union K (make specific keys required) */
-export type PartRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
+export type MakeKeysRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
+
 /** From T, make properties partial whose keys are in union K (Make specific keys optional) */
-export type PartPartial<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+export type MakeKeysPartial<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 /** From T, extract keys whose types are required (excludes optional properties) (optionally narrow keys in union by specifying K) */
-export type RequiredKeysOnly<T, K extends keyof T = keyof T> = {
+export type KeyOfOnlyRequiredKeys<T, K extends keyof T = keyof T> = {
   [P in K]-?: (Pick<T, P> extends AnyObj ? never : P)
 }[K]
+
 /** From T, extract keys whose types are optional (excludes required properties) (optionally narrow keys in union by specifying K) */
-export type PartialKeysOnly<T, K extends keyof T = keyof T> = {
+export type KeyOfOnlyPartialKeys<T, K extends keyof T = keyof T> = {
   [P in K]-?: (Pick<T, P> extends AnyObj ? P : never)
 }[K]
 
 /** From T, pick a set of properties whose keys are in the union with required keys only, (optionally narrow results by specifying K) */
-export type PickRequiredOnly<T, K extends keyof T = keyof T> = Pick<T, {
+export type PickOnlyRequiredKeys<T, K extends keyof T = keyof T> = Pick<T, {
   [P in K]-?: (Pick<T, P> extends AnyObj ? never : P)
 }[K]>
+
 /** From T, pick a set of properties whose keys are in the union with partial keys only, (optionally narrow results by specifying K) */
-export type PickPartialOnly<T, K extends keyof T = keyof T> = Pick<T, {
+export type PickOnlyPartialKeys<T, K extends keyof T = keyof T> = Pick<T, {
   [P in K]-?: (Pick<T, P> extends AnyObj ? P : never)
 }[K]>
 
 /** From T, rename a property whose key is in the union K (old key) with that of U (new key)  */
-export type RenameKey<T, K extends keyof T, U extends string> = (Omit<T, K> & { [P in U]: T[K] })
+export type RenamedKey<T, Old extends keyof T, New extends PKey> = Omit<T, Old> & {
+  [P in New]: T[Old]
+}
 
 /** With L (left), spread properties with R (right) (e.g. [...L, ...R], {...L, ...R}) */
 export type Spreaded<L, R> = (
   /* With L (left), omit keys not in union with keys of R (right)*/
   Omit<L, keyof R>
   /* With R (right), omit keys in union with partial types*/
-  & Omit<R, PartialKeysOnly<R>>
+  & Omit<R, KeyOfOnlyPartialKeys<R>>
   /* With R (right), pick properties in union with optional types that do not exist in L (left) */
-  & Pick<R, Exclude<PartialKeysOnly<R>, keyof L>>
+  & Pick<R, Exclude<KeyOfOnlyPartialKeys<R>, keyof L>>
   /* With L (left), replace properties of the keys in union with the keys in R (right) excluding properties of R (right) with types in union with undefined */
-  & { [P in (PartialKeysOnly<R> & (keyof L extends (keyof L & keyof R) ? (PartialKeysOnly<R> & keyof L) : never))]: (L[P] | Exclude<R[P], undefined>) }
+  & { [P in (KeyOfOnlyPartialKeys<R> & (keyof L extends (keyof L & keyof R) ? (KeyOfOnlyPartialKeys<R> & keyof L) : never))]: (L[P] | Exclude<R[P], undefined>) }
   )
 
 /** Field property getters */

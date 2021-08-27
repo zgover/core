@@ -15,11 +15,16 @@
  * limitations under the License.
  */
 
-import { tools } from './tools'
+import { yes } from './yes'
 
 
-describe('tools', () => {
-  it('should work', () => {
-    expect(tools()).toEqual('tools')
-  })
-})
+/**
+ * Shortcut for !(...)
+ *
+ * @export
+ * @param {*} val
+ * @returns {boolean}
+ */
+export function fail(...val: Parameters<typeof Boolean>): boolean {
+  return !yes(...val)
+}

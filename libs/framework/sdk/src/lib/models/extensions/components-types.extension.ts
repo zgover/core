@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
-import { AglynExtensionInstance, AglynTypeFields, AglynUniqueId, PayloadData } from '../../types'
-import { RestrictFlag } from '../../constants'
-import { AnyProps } from '@aglyn/shared/util/types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { FormSchema, InnerRefProps } from '@aglyn/shared/ui/react'
-import { EXTENSION_TYPE, MODULE_TYPE } from '../../symbol'
-import '../../emitter'
+import { FormSchema, InnerRefProp } from '@aglyn/shared/ui/react'
+import { AnyProps } from '@aglyn/shared/util/types'
+import { ComponentClass, FunctionComponent } from 'react'
+import { RestrictFlag } from '../../constants'
 import { AglynEmitterPayload } from '../../emitter'
-import { ComponentClass, FunctionComponent, Ref } from 'react'
+import '../../emitter'
+import { EXTENSION_TYPE, MODULE_TYPE } from '../../symbol'
+import { AglynExtensionInstance, AglynTypeFields, AglynUniqueId, PayloadData } from '../../types'
 
 
 export type AglynComponentTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof EXTENSION_TYPE>
+
 export type PluginId = string
 export type SelfComponentId = string
 export type PluginNsComponentSep = '::'
@@ -37,6 +38,7 @@ export type PluginComponentIdTuple = [Pid, ScId]
 export type PluginComponentIdString = `${Pid}${PnCs}${ScId}`
 export type PluginComponentId = PluginComponentIdTuple | PluginComponentIdString
 export type ComponentId = SelfComponentId | PluginComponentId
+
 export type RegistryEntry = [id: ComponentId, component: AglynComponent]
 export type RegistryEntries = RegistryEntry[]
 export type RegistryKeys = ComponentId[]
@@ -56,7 +58,7 @@ export type AglynComponentElementType<P = any> =
   | AglynComponentFunctionType<P>
   | AglynComponentIntrinsicType<P>
 
-export type AglynComponent<P = any> = AglynComponentClassType<P & InnerRefProps<any>> & AglynComponentFields
+export type AglynComponent<P = any> = AglynComponentClassType<P & InnerRefProp<any>> & AglynComponentFields
 
 export type GetComponentPayload = PayloadData<{ componentId: string }>
 export type RegisterComponentPayload = PayloadData<{ component: AglynComponent }>
@@ -95,7 +97,7 @@ export interface AglynComponentOptions<P = any> {
   icon?: unknown
   propsSchema?: FormSchema
   defaultProps?: Partial<P>
-  resolveProps?: <T>(...args: T[]) => AnyProps
+  resolveProps?: (propsWithDefaults: P) => P
   disableActions?: boolean
   disableBadge?: boolean
   disableCopying?: boolean
@@ -106,9 +108,9 @@ export interface AglynComponentOptions<P = any> {
   disableOutline?: boolean
   disableRemoving?: boolean
   disableSelecting?: boolean
-  disableRef?: boolean
-  restrictChildren?: [type: RestrictFlag, ids: string[]]
-  restrictParents?: [type: RestrictFlag, ids: string[]]
+  disableInnerRef?: boolean
+  restrictChildren?: [type: RestrictFlag, cIds: ComponentId[]]
+  restrictParents?: [type: RestrictFlag, cIds: ComponentId[]]
 }
 
 export interface AglynComponentFields extends AglynUniqueId, AglynComponentTypeFields {

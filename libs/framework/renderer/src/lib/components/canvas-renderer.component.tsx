@@ -18,11 +18,11 @@
 import { forwardRef, HTMLAttributes } from 'react'
 import { AglynComponentData } from '@aglyn/framework/sdk'
 import ElementRendererComponent, { ElementRendererComponentProps } from './element-renderer.component'
-import { ComponentProp } from '@aglyn/shared/ui/react'
+import { OverrideableComponentProps } from '@aglyn/shared/ui/react'
 import ElementsComponent from './elements-renderer.component'
 
 
-export interface CanvasRendererComponentProps extends HTMLAttributes<HTMLElement>, ComponentProp {
+export interface CanvasRendererComponentProps extends HTMLAttributes<HTMLElement>, OverrideableComponentProps {
   elements?: AglynComponentData[]
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
 }

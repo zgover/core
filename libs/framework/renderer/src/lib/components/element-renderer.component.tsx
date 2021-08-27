@@ -16,14 +16,8 @@
  */
 
 import { ComponentType, ElementType, forwardRef, memo } from 'react'
-import {
-  AglynComponent,
-  AglynComponentData,
-  getApp,
-  getComponent,
-  handleResolveProps,
-} from '@aglyn/framework/sdk'
-import { _isArr, _isArrEmpty, _isStrT, _s, yes } from '@aglyn/shared/util/helpers'
+import { AglynComponentData, getApp, getComponent, handleResolveProps } from '@aglyn/framework/sdk'
+import { _isArr, _isArrEmpty, _s, yes } from '@aglyn/shared/util/helpers'
 import * as ReactIs from 'react-is'
 import ElementsComponent from './elements-renderer.component'
 import { AnyProps } from '@aglyn/shared/util/types'
@@ -44,7 +38,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
     const {children: content = null, ...ctorProps} = resolvedProps
     const ComponentCtor = (ReactIs.isValidElementType(ctor) ? ctor : 'div') as ElementType
     const haveChildren = yes(!_isArr(data?.children) || _isArrEmpty(data?.children))
-    const refProps = options?.disableRef ? {} : {innerRef: ref}
+    const refProps = options?.disableInnerRef ? {} : {innerRef: ref}
 
     return (
       <ComponentCtor {...refProps} {...ctorProps} {...rest}>

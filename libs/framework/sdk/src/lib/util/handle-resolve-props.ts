@@ -15,25 +15,27 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared/util/helpers'
+import { _isFnT, copy } from '@aglyn/shared/util/helpers'
+import { AglynComponentOptions } from '../models/extensions/components-types.extension'
 import { handlePropDefaults } from './handle-prop-defaults'
-import { AnyProps } from '@aglyn/shared/util/types'
-import { AglynComponent } from '../models/extensions/components-types.extension'
 
 
 /**
  * Merges properties of a resolving function with currents
- * @param {AnyProps} props
- * @param options
- * @param {ThisType<unknown>} thisArg
+ * @param elementDataProps
+ * @param componentOptions
+ * @param thisArg
  * @returns {any}
  */
-export function handleResolveProps(
-  props: AnyProps,
-  options: Pick<AglynComponent['options'], 'resolveProps' | 'defaultProps'>,
+export function handleResolveProps<P = any>(
+  elementDataProps: P,
+  componentOptions: AglynComponentOptions<P>,
   thisArg?: ThisType<unknown>,
-) {
-  const {resolveProps, defaultProps = {}} = {...options}
-  const mergedProps = handlePropDefaults(props, defaultProps)
-  return _isFnT(resolveProps) ? resolveProps.call(thisArg, mergedProps) : mergedProps
+): P {
+  const {resolveProps, defaultProps = {}} = {...componentOptions}
+  const _props = copy(elementDataProps as unknown) as P
+  const _defaults = copy(defaultProps) as P
+  const propsMergedDefaults = handlePropDefaults(_props, _defaults) as P
+  if (_isFnT(resolveProps)) return resolveProps.call(thisArg, propsMergedDefaults)
+  return propsMergedDefaults
 }

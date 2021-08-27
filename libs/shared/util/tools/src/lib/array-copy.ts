@@ -15,4 +15,18 @@
  * limitations under the License.
  */
 
-export type { Theme, ThemeOptions } from '@material-ui/core/styles'
+
+/**
+ * Shallow copy iterable or array like, shortcut for Array.from
+ * @param {Iterable<T> | ArrayLike<T>} iterable
+ * @param {(v: T, k: number) => U} callbackFn
+ * @param thisArg
+ * @returns {U[]}
+ */
+export function arrayCopy<T, U>(
+  iterable: Iterable<T> | ArrayLike<T>,
+  callbackFn?: (v: T, k: number) => U,
+  thisArg?: any
+): U[] {
+  return Array.from(iterable, callbackFn, thisArg)
+}

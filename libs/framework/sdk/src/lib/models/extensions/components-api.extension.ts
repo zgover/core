@@ -18,7 +18,7 @@
 import {
   AglynComponent,
   AglynComponentOptions,
-  AglynComponentsExtension,
+  AglynComponentsExtension, AglynComponentsPlugin,
   GetComponentPayload,
   RegisterComponentPayload,
   RegisterPluginPayload,
@@ -29,11 +29,11 @@ import {
 import { AglynAppInstance } from '../../types'
 import { AglynExtension } from '../../constants'
 import { _validateAppArg, getExtension } from '../../api'
-import { aglynComponentBuilderFactory, ComponentBuilder } from './components-component.extension'
+import { ComponentBuilder, elementRendererComponentBuilder } from '@aglyn/framework/renderer'
 
 
-export function aglynComponent<P = any>(componentId: SelfComponentId, options: AglynComponentOptions): ComponentBuilder<P> {
-  return aglynComponentBuilderFactory(componentId, options)
+export function aglynComponent<P = any>(componentId: SelfComponentId, options: AglynComponentOptions<P>): ComponentBuilder<P> {
+  return elementRendererComponentBuilder(componentId, options)
 }
 
 export function _getComponentsExtension(app: AglynAppInstance): AglynComponentsExtension {
@@ -49,18 +49,16 @@ export function getComponent<P>(app: AglynAppInstance, options: GetComponentPayl
   return _getComponentsExtension(app)?.getComponent(options)
 }
 
-export function registerComponent(app: AglynAppInstance, options: RegisterComponentPayload): void {
-  const ext = _getComponentsExtension(app)
-  console.log('ext', ext)
-  ext?.registerComponent(options)
+export function registerComponent<P>(app: AglynAppInstance, component: AglynComponent<P>): void {
+  _getComponentsExtension(app)?.registerComponent({ component })
 }
 
 export function unregisterComponent(app: AglynAppInstance, options: UnregisterComponentPayload): void {
   _getComponentsExtension(app)?.unregisterComponent(options)
 }
 
-export function registerComponentsPlugin(app: AglynAppInstance, options: RegisterPluginPayload): void {
-  _getComponentsExtension(app)?.registerComponentsPlugin(options)
+export function registerComponentsPlugin(app: AglynAppInstance, plugin: AglynComponentsPlugin): void {
+  _getComponentsExtension(app)?.registerComponentsPlugin({ plugin })
 }
 
 export function unregisterComponentsPlugin(app: AglynAppInstance, options: UnregisterPluginPayload): void {

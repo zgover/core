@@ -56,7 +56,7 @@ const styles = (theme: Theme) => createStyles({
   },
 })
 
-export type Props = CardProps & {
+export interface Props extends CardProps {
   header?: string
   actions?: CardActionsProps
   guttersX?: boolean
@@ -65,9 +65,10 @@ export type Props = CardProps & {
   HeaderProps?: CardHeaderProps
   ContentProps?: CardContentProps
   ActionProps?: CardActionsProps
+  classes?: CardProps['classes'] & WithStyles<typeof styles>['classes']
 }
 
-const WidgetCard = React.forwardRef<typeof Card, Props & WithStyles<typeof styles>>(
+const WidgetCard = React.forwardRef<any, Props & >(
   function WidgetCard(props, ref) {
     const {
       actions,

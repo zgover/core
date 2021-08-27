@@ -15,13 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  createTheme as createMuiTheme,
-  responsiveFontSizes,
-  Theme,
-  ThemeOptions,
-} from '@material-ui/core/styles'
-import '../mui-overrides'
+import { createTheme as createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '../mui'
 
 
 /**

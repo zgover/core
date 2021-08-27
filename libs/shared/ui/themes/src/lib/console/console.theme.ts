@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-import { Theme } from '../types'
+import { Theme } from '../mui'
 import { createTheme } from '../util/create-theme'
 import { consoleOptions } from './console.options'
-import '../mui-overrides'
 
 
 export const consoleTheme: Theme = createTheme(consoleOptions)

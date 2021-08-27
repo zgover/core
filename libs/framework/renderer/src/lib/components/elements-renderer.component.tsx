@@ -18,10 +18,10 @@
 import { forwardRef, Fragment, memo } from 'react'
 import { AglynComponentData } from '@aglyn/framework/sdk'
 import _ElementComponent, { ElementRendererComponentProps } from './element-renderer.component'
-import { ComponentProp } from '@aglyn/shared/ui/react'
+import { OverrideableComponentProps } from '@aglyn/shared/ui/react'
 
 
-export interface ElementsComponentProps extends ComponentProp {
+export interface ElementsComponentProps extends OverrideableComponentProps {
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
   children?: AglynComponentData[]
 }

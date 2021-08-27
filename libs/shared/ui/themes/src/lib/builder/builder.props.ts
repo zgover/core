@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../types'
+import { ThemeOptions } from '../mui'
 import { consoleProps } from '../console/console.props'
-import '../mui-overrides'
 
 
 export const builderProps: ThemeOptions['props'] = {

@@ -16,7 +16,6 @@
  */
 
 import { GridItems } from '@aglyn/shared/ui/react'
-import { _isArr, ln } from '@aglyn/shared/util/helpers'
 import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import MuiLink from '@material-ui/core/Link'
@@ -24,7 +23,6 @@ import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/s
 import Typography from '@material-ui/core/Typography'
 import clsx from 'clsx'
 import React, { ElementType, forwardRef, HTMLAttributes } from 'react'
-import BackgroundImage from '../components/BackgroundImage'
 import Link from '../components/Link'
 import { footerNavigation } from '../const'
 
@@ -79,26 +77,30 @@ const SiteFooterView = forwardRef<any, SiteFooterViewProps & WithStyles<typeof S
                         height={'auto'}
                         alt="aglyn logo"
                       />
-                      <br />
-                      <br />
+                      <br/>
+                      <br/>
                       <Box fontSize={16}><strong>Mailing Address</strong></Box>
-                      125 JOHNSTON LN<br />
-                      JARRELL, TX, 76537-0029<br />
-                      UNITED STATES<br />
-                      <br />
+                      125 JOHNSTON LN
+                      <br/>
+                      JARRELL, TX, 76537-0029
+                      <br/>
+                      UNITED STATES
+                      <br/>
+                      <br/>
                       Email: <MuiLink
                       href="mailto:info@aglyn.com"
                       children={'info@aglyn.com'}
-                    /><br />
+                    />
+                      <br/>
                     </>
                   ),
                 },
-                ...footerNavigation.map(({ items, ...item }, key) => ({
+                ...footerNavigation.map(({items, ...item}, key) => ({
                   xs: 12 as any, sm: 6 as any, md: 3 as any,
                   children: (
                     <>
                       <Typography variant="overline">
-                        <b children={item.children} />
+                        <b children={item.children}/>
                       </Typography>
                       <Typography component="ul">
                         {items.map((item, key) => (
@@ -127,4 +129,4 @@ SiteFooterView.defaultProps = {
   component: 'footer',
 }
 
-export default withStyles(SiteFooterStyles, { name: 'SiteFooterView' })(SiteFooterView)
+export default withStyles(SiteFooterStyles, {name: 'SiteFooterView'})(SiteFooterView)

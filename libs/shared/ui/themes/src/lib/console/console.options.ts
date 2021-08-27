@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../types'
+import { ThemeOptions } from '../mui'
 import { consolePalette } from './console.palette'
 import { consoleTypography } from './console.typography'
 import { consoleProps } from './console.props'
 import { consoleOverrides } from './console.overrides'
-import '../mui-overrides'
 
 
 export const consoleOptions: ThemeOptions = {

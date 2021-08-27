@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../types'
+import { ThemeOptions } from '../mui'
 import { consoleTypography } from '../console/console.typography'
-import '../mui-overrides'
 
 
 export const builderTypography: ThemeOptions['typography'] = {

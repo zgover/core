@@ -28,6 +28,6 @@ export * from './vendor/unique-identification'
 
 // TODO: Replace dependents with direct lib import and remove below re-exports
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-export * from '../../guards/src/lib/guards'
+export * from '../../guards/src'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-export * from '../../tools/src/lib/tools'
+export * from '../../tools/src'

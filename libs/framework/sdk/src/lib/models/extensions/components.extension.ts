@@ -39,7 +39,7 @@ import {
 import { AglynExtensionModel } from '../aglyn-extension.model'
 import { _isArr, _isUndOrNull } from '@aglyn/shared/util/guards'
 import { getStaticField } from '@aglyn/shared/util/tools'
-import { aglynComponentBuilderFactory, ComponentBuilder } from './components-component.extension'
+import { ComponentBuilder, elementRendererComponentBuilder } from '@aglyn/framework/renderer'
 
 
 const TAG = 'AglynComponentsExtensionModel'
@@ -98,7 +98,7 @@ export default class AglynComponentsExtensionModel extends AglynExtensionModel<C
     componentId: SelfComponentId,
     options: AglynComponentOptions,
   ): ComponentBuilder<P> => {
-    return aglynComponentBuilderFactory(componentId, options)
+    return elementRendererComponentBuilder(componentId, options)
   }
   public componentBuilderFactory = <P>(
     componentId: SelfComponentId,

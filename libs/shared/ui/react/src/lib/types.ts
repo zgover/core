@@ -20,10 +20,18 @@ import { ElementType, Ref } from 'react'
 
 export type InferElementTypeProps<T> = T extends ElementType<infer P> ? P : never
 
-export interface ComponentProp<T extends ElementType = any> {
-  component?: T
-} //& InferElementTypeProps<T>
+export type OverrideComponentProp<P = any> = { component?: ElementType<P> }
+export type OverrideComponentsProps<T extends OverrideComponentProp = any> =
+  [T] extends [{ component: infer P }]
+    ? InferElementTypeProps<P>
+    : never
+export type OverrideComponentPropPlusOverrideProps<T extends OverrideComponentProp = any> =
+  [T] extends [{ component: ElementType }]
+    ? OverrideComponentsProps<T> & Pick<T, 'component'>
+    : { component?: undefined }
 
-export interface InnerRefProps<T> {
+export type OverrideableComponentProps<P = any, T = OverrideComponentProp> = P & OverrideComponentPropPlusOverrideProps<T>
+
+export type InnerRefProp<T = unknown> = {
   innerRef?: Ref<T>
 }

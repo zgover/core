@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { mapObject } from '@aglyn/shared/util/helpers'
+import { remap } from '@aglyn/shared/util/tools'
 import React from 'react'
 import { makeStyles, Theme, createStyles, WithStyles, withStyles } from '@material-ui/core/styles'
 import { Button, Typography, Box } from '@material-ui/core'
@@ -68,10 +68,10 @@ export default withStyles(styles, { name: 'Page:SignUp' })(
       }
       const clearForm = () => {
         setFields(prev => {
-          return mapObject(prev, (value) => {
+          return remap(prev, (value) => {
             value.value = ''
             return value
-          }, { copy: true }) as any
+          })
         })
       }
 

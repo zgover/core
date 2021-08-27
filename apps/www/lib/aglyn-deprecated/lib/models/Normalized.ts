@@ -16,7 +16,14 @@
  */
 
 import { NormalizedData, NormalizedModel } from '../interfaces/normalized'
-import { _isNum, _isObj, deleteProperty, removeFromArray, reorderArray } from '@aglyn/shared/util/helpers'
+import {
+  _isNum,
+  _isObj,
+  arrayRemoveItem,
+  arrayReorder,
+  deleteProperty,
+} from '@aglyn/shared/util/helpers'
+
 
 type ID = string
 
@@ -34,7 +41,7 @@ type ID = string
 export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T, K> {
 
   static build<T, K extends ID>(): NormalizedData<T, K> {
-    return { allIds: [], byId: {} }
+    return {allIds: [], byId: {}}
   }
 
   public allIds: K[] = []
@@ -43,7 +50,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
   public get length(): number { return (this.allIds ?? []).length }
 
   constructor(public readonly props?: NormalizedData<T, K>) {
-    const { allIds, byId } = { ...props }
+    const {allIds, byId} = {...props}
     this.allIds = allIds ?? []
     this.byId = byId ?? {}
   }
@@ -99,8 +106,8 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
     const _items = [...items].map(i => _isObj(i) ? [i['id'], i] : [...i])
     const parsed = _items.reduce<NormalizedData<T, K>>((acc, [id, v]) => ({
       allIds: (acc?.allIds ?? []).concat(id),
-      byId: { ...acc?.byId, [id]: v }
-    }), { allIds: [], byId: {} })
+      byId: {...acc?.byId, [id]: v},
+    }), {allIds: [], byId: {}})
     return new this(parsed)
   }
 
@@ -115,7 +122,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
    * @memberof Normalized
    */
   public static remove<T extends NormalizedData<any, K>, K extends ID>(id: K, model: T): T {
-    model.allIds = removeFromArray(id, model.allIds)
+    model.allIds = arrayRemoveItem(id, model.allIds)
     model.byId = deleteProperty(model.byId, id)
     return model
   }
@@ -147,7 +154,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
     if (!isUpdate) {
       model.allIds.push(id)
     } else if (_isNum(index) && currentIndex !== index) {
-      model.allIds = reorderArray(model.allIds, currentIndex, index)
+      model.allIds = arrayReorder(model.allIds, currentIndex, index)
     }
 
     return model
@@ -173,7 +180,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
    * @memberof Normalized
    */
   public toJSON(): NormalizedData<T, K> {
-    return { allIds: this.allIds, byId: this.byId }
+    return {allIds: this.allIds, byId: this.byId}
   }
 
   /**

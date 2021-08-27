@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ComponentProp, ConfirmationProviderComponent } from '@aglyn/shared/ui/react'
+import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared/ui/react'
 import { builderTheme } from '@aglyn/shared/ui/themes'
 import { AglynComponentData } from '@aglyn/framework/sdk'
 import { CanvasRendererComponent } from '@aglyn/framework/renderer'
@@ -32,7 +32,7 @@ import { SnackbarProvider } from 'notistack'
 import { PanZoom } from 'react-easy-panzoom'
 
 
-export interface BuilderComponentProps extends ComponentProp {
+export interface BuilderComponentProps extends OverrideableComponentProps {
   elements?: AglynComponentData[]
   elementComponents: ElementDrawerContextProviderProps['elements']
 }

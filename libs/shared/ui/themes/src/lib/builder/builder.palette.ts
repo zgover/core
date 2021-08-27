@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../types'
+import { ThemeOptions } from '../mui'
 import { consolePalette } from '../console/console.palette'
-import '../mui-overrides'
 
 
 export const builderPalette: ThemeOptions['palette'] = {

@@ -21,7 +21,7 @@ import { useRouter } from 'next/router'
 import MuiLink, { LinkProps as MuiLinkProps } from '@material-ui/core/Link'
 import MuiButton, { ButtonProps as MuiButtonProps } from '@material-ui/core/Button'
 import NextLink, { NextLinkProps } from './NextLink'
-import { InnerRefProps } from '@aglyn/shared/ui/react'
+import { InnerRefProp } from '@aglyn/shared/ui/react'
 
 
 export type NextOnly = NextLinkProps
@@ -38,8 +38,8 @@ type MergedProps<T> = [T] extends [any]
 
 type MergedPropsWithInnerRef<T> = [T] extends [any]
   ? T extends { naked?: false, button: true }
-    ? T & InnerRefProps<HTMLButtonElement>
-    : T & InnerRefProps<HTMLAnchorElement>
+    ? T & InnerRefProp<HTMLButtonElement>
+    : T & InnerRefProp<HTMLAnchorElement>
   : never
 
 type LinkRefType<T> = [T] extends [any]

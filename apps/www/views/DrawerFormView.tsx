@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { _isStr } from '@aglyn/shared/util/guards'
-import { mapObject } from '@aglyn/shared/util/tools'
-import IconButton from '@material-ui/core/IconButton'
-import NavbarDrawer from '@aglyn/common/components/NavbarDrawer'
-import FieldSet from '../components/FieldSet'
-import { createStyles, fade, makeStyles, Theme } from '@material-ui/core/styles'
-import SvgPathIcon from '@aglyn/common/components/SvgPathIcon'
-import Container from '@material-ui/core/Container'
-import Typography from '@material-ui/core/Typography'
+import { NavbarDrawer, SvgPathIcon } from '@aglyn/shared/ui/react'
+import { _isStrT } from '@aglyn/shared/util/guards'
+import { remap } from '@aglyn/shared/util/tools'
 import { Box, Button } from '@material-ui/core'
+import Container from '@material-ui/core/Container'
+import IconButton from '@material-ui/core/IconButton'
 import LinearProgress from '@material-ui/core/LinearProgress'
-import { Fields } from 'forms'
+import { createStyles, fade, makeStyles, Theme } from '@material-ui/core/styles'
+import Typography from '@material-ui/core/Typography'
+import React from 'react'
+import FieldSet from '../components/FieldSet'
+import { Fields } from '../forms'
 
 
 const useStyles = makeStyles<Theme, Props>((theme) => createStyles({
@@ -82,7 +81,7 @@ export default function DrawerFormView(props: Props) {
       appBarLeft={
         <React.Fragment>
           <IconButton
-            children={<SvgPathIcon iconId="close" />}
+            children={<SvgPathIcon iconId="close"/>}
             className={classes.closeButton}
             color="default"
             edge="start"
@@ -111,14 +110,14 @@ export default function DrawerFormView(props: Props) {
       <div className={classes.wrapper}>
         {loading && (
           <React.Fragment>
-            <LinearProgress classes={{root: classes.loadingBar}} color="secondary" />
+            <LinearProgress classes={{root: classes.loadingBar}} color="secondary"/>
           </React.Fragment>
         )}
 
 
         <Container>
-          <br />
-          {error && (_isStr(error) ? error : 'Error loading...')}
+          <br/>
+          {error && (_isStrT(error) ? error : 'Error loading...')}
           {!error && (
             <React.Fragment>
               <Typography
@@ -129,7 +128,7 @@ export default function DrawerFormView(props: Props) {
                 children={id ?? '(none)'}
                 variant="subtitle1"
               />
-              <FieldSet fields={fields} loading={loading} onUpdate={onUpdate} />
+              <FieldSet fields={fields} loading={loading} onUpdate={onUpdate}/>
               <Box mt={2}>
                 <Typography
                   children={'JSON Output'}
@@ -142,7 +141,7 @@ export default function DrawerFormView(props: Props) {
                   px={1}
                 >
                   <pre>
-                    {JSON.stringify(mapObject(fields, f => f.value ?? '', {copy: true}), null, 2)}
+                    {JSON.stringify(remap(fields, f => f.value ?? ''), null, 2)}
                   </pre>
                 </Box>
               </Box>

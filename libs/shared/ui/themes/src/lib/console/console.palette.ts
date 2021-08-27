@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../types'
-import '../mui-overrides'
+import { ThemeOptions } from '../mui'
 
 
 /**

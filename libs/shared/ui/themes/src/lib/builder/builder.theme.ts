@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-import { Theme } from '../types'
+import { Theme } from '../mui'
 import { createTheme } from '../util/create-theme'
 import { builderOptions } from './builder.options'
-import '../mui-overrides'
 
 
 export const builderTheme: Theme = createTheme(builderOptions)

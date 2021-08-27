@@ -16,4 +16,4 @@
  */
 
 export * from './lib/themes'
-export * from './lib/types'
+export * from './lib/mui'

@@ -15,10 +15,55 @@
  * limitations under the License.
  */
 
-import { Palette, PaletteOptions } from '@material-ui/core/styles/createPalette'
+
+import type { Palette, PaletteOptions } from '@material-ui/core/styles/createPalette'
 
 
 declare module '@material-ui/core/styles/createPalette' {
+  /**
+   * START EXAMPLE – MODULE AUGMENTATION ↓
+   * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
+   * ```typescript
+   * // Add new property ↓
+   * declare module '@material-ui/core/styles/createMuiTheme' {
+   *   interface Theme {
+   *     status: {
+   *       danger: React.CSSProperties['color'],
+   *     }
+   *   }
+   *   interface ThemeOptions {
+   *     status: {
+   *       danger: React.CSSProperties['color']
+   *     }
+   *   }
+   * }
+   * const theme = createMuiTheme({
+   *   status: {
+   *     danger: '#e53e3e',
+   *   },
+   * })
+   *
+   * // Add to existing property (e.g., palette, typography) ↓
+   * declare module "@material-ui/core/styles/createPalette" {
+   *   interface Palette {
+   *     neutral: Palette['primary']
+   *   }
+   *   interface PaletteOptions {
+   *     neutral: PaletteOptions['primary']
+   *   }
+   * }
+   * const theme = createMuiTheme({
+   *   palette: {
+   *     neutral: {
+   *       main: '#5c6ac4',
+   *     },
+   *   },
+   * })
+   * ```
+   * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   * END EXAMPLE – MODULE AUGMENTATION ↑
+   */
+
   interface Palette {
     tertiary: Palette['primary']
     quaternary: Palette['primary']
@@ -29,49 +74,3 @@ declare module '@material-ui/core/styles/createPalette' {
     quaternary: PaletteOptions['primary']
   }
 }
-
-export {}
-
-/**
- * START EXAMPLE – MODULE AUGMENTATION ↓
- * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
- * ```typescript
- * // Add new property ↓
- * declare module '@material-ui/core/styles/createMuiTheme' {
- *   interface Theme {
- *     status: {
- *       danger: React.CSSProperties['color'],
- *     }
- *   }
- *   interface ThemeOptions {
- *     status: {
- *       danger: React.CSSProperties['color']
- *     }
- *   }
- * }
- * const theme = createMuiTheme({
- *   status: {
- *     danger: '#e53e3e',
- *   },
- * })
- *
- * // Add to existing property (e.g., palette, typography) ↓
- * declare module "@material-ui/core/styles/createPalette" {
- *   interface Palette {
- *     neutral: Palette['primary']
- *   }
- *   interface PaletteOptions {
- *     neutral: PaletteOptions['primary']
- *   }
- * }
- * const theme = createMuiTheme({
- *   palette: {
- *     neutral: {
- *       main: '#5c6ac4',
- *     },
- *   },
- * })
- * ```
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * END EXAMPLE – MODULE AUGMENTATION ↑
- */

@@ -16,7 +16,7 @@
  */
 
 import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared/ui/react'
-import { copyJson } from '@aglyn/shared/util/helpers'
+import { copy } from '@aglyn/shared/util/helpers'
 import { forwardRef, useCallback, useRef, useState } from 'react'
 import { ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/framework/renderer'
 import { useSelectionContext } from '../contexts/selection-context'
@@ -41,7 +41,7 @@ const BuilderElementRendererComponent = forwardRef<any, BuilderElementRendererCo
       console.log('is self', localRef.current)
       if (t && t === localRef.current) setEntered(t)
       else setEntered(null)
-      setRect(copyJson(t?.getBoundingClientRect()))
+      setRect(copy(t?.getBoundingClientRect()))
     }, [])
 
     const handleMouseLeave = useCallback((e) => {

@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../types'
 import { consoleOptions } from '../console/console.options'
-import { builderPalette } from './builder.palette'
-import { builderTypography } from './builder.typography'
-import { builderProps } from './builder.props'
+import { ThemeOptions } from '../mui'
 import { builderOverrides } from './builder.overrides'
-import '../mui-overrides'
+import { builderPalette } from './builder.palette'
+import { builderProps } from './builder.props'
+import { builderTypography } from './builder.typography'
 
 
 export const builderOptions: ThemeOptions = {

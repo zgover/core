@@ -21,3 +21,5 @@ export * from './lib/components/elements-renderer.component'
 export { default as ElementsRendererComponent } from './lib/components/elements-renderer.component'
 export * from './lib/components/canvas-renderer.component'
 export { default as CanvasRendererComponent } from './lib/components/canvas-renderer.component'
+
+export * from './lib/util/element-renderer-component-builder'

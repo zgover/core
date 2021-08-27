@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '@material-ui/core/styles'
-import '../mui-overrides'
+import { ThemeOptions } from '../mui'
 
 
 export const consoleProps: ThemeOptions['props'] = {

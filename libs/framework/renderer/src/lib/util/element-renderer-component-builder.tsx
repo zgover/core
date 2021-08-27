@@ -15,29 +15,31 @@
  * limitations under the License.
  */
 
-
 import {
   AglynComponent,
   AglynComponentElementType,
   AglynComponentOptions,
+  EXTENSION_TYPE,
+  MODULE_TYPE,
   SelfComponentId,
-} from './components-types.extension'
-import { getDisplayName } from '@aglyn/shared/util/tools'
+  TYPE_KIND,
+  TYPE_OF,
+} from '@aglyn/framework/sdk'
 import { Component } from 'react'
-import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../../symbol'
-import { InnerRefProps } from '@aglyn/shared/ui/react'
+import { InnerRefProp } from '@aglyn/shared/ui/react'
+import { getDisplayName } from '@aglyn/shared/util/tools'
 
 
 export type ComponentBuilder<P = any> = (element: AglynComponentElementType<P>) => AglynComponent<P>
 
-export function aglynComponentBuilderFactory<P = any>(
+export function elementRendererComponentBuilder<P = any>(
   componentId: SelfComponentId,
   options: AglynComponentOptions<P>,
 ): ComponentBuilder<P> {
   return function(element: AglynComponentElementType<P>): AglynComponent<P> {
     const Element = element
 
-    return class AglynComponent extends Component<P & InnerRefProps<any>> {
+    return class AglynComponent extends Component<P & InnerRefProp<any>> {
       static readonly [TYPE_OF] = MODULE_TYPE
       static readonly [TYPE_KIND] = EXTENSION_TYPE
       static readonly $id = componentId
@@ -52,7 +54,9 @@ export function aglynComponentBuilderFactory<P = any>(
       }
 
       public render() {
-        return <Element {...this.props} />
+        return (
+          <Element {...this.props} />
+        )
       }
     }
   }
