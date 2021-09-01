@@ -16,16 +16,13 @@
  */
 
 import { forwardRef, ReactNode } from 'react'
-
 import MuiTextField, { TextFieldProps as MuiTextFieldProps } from '@material-ui/core/TextField'
-
 import useFieldApi, { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-field-api'
-
 import { withGridItem } from '../field-hocs'
 import { validationMessage } from '../utils'
 
 
-export type FieldTextFieldProps = MuiTextFieldProps & UseFieldApiConfig & {
+export type FieldTextareaProps = MuiTextFieldProps & UseFieldApiConfig & {
   isReadOnly?: boolean
   isDisabled?: boolean
   isRequired?: boolean
@@ -34,7 +31,7 @@ export type FieldTextFieldProps = MuiTextFieldProps & UseFieldApiConfig & {
 }
 
 
-const FieldTextField = forwardRef<any, FieldTextFieldProps>(
+const FieldTextarea = forwardRef<any, FieldTextareaProps>(
   function  RefRenderFn(props, ref) {
     const {
       input,
@@ -65,12 +62,13 @@ const FieldTextField = forwardRef<any, FieldTextFieldProps>(
         placeholder={placeholder}
         required={isRequired}
         fullWidth
+        multiline
         {...rest}
       />
     )
   }
 )
 
-FieldTextField.displayName = 'FieldTextField'
+FieldTextarea.displayName = 'FieldTextarea'
 
-export default withGridItem(FieldTextField)
+export default withGridItem(FieldTextarea)

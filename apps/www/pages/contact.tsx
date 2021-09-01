@@ -15,13 +15,9 @@
  * limitations under the License.
  */
 
-import { GridItems } from '@aglyn/shared/ui/react'
-import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
-import TextField from '@data-driven-forms/mui-component-mapper/text-field'
-import Textarea from '@data-driven-forms/mui-component-mapper/textarea'
+import { componentMapper, GridItems } from '@aglyn/shared/ui/react'
 import FormTemplateRenderProps
   from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
-import componentTypes from '@data-driven-forms/react-form-renderer/component-types'
 import FormRenderer from '@data-driven-forms/react-form-renderer/form-renderer'
 import FormSpy from '@data-driven-forms/react-form-renderer/form-spy'
 import useFormApi from '@data-driven-forms/react-form-renderer/use-form-api'
@@ -39,33 +35,6 @@ import { DdfForms } from '../forms'
 import MainLayout from '../layouts/MainLayout'
 import SiteFooterView from '../views/SiteFooterView'
 
-
-const componentMapper = {
-  [componentTypes.TEXT_FIELD]: TextField,
-  [componentTypes.TEXTAREA]: Textarea,
-}
-
-
-const styles = (theme: Theme) => createStyles({
-  root: {
-    paddingTop: theme.mixins.toolbar.minHeight,
-    '& $h1': {
-      marginBottom: theme.spacing(4),
-    },
-    '& $h2': {
-      color: theme.palette.quaternary.main,
-      marginBottom: theme.spacing(4),
-    },
-  },
-  container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
-  },
-
-  // KEEP EMPTY
-  h1: {},
-  h2: {},
-})
 
 const FormTemplate = (props: FormTemplateRenderProps) => {
   const {formFields, schema} = props
@@ -139,8 +108,8 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
   )
 }
 
-function Contact(props: WithStyles<typeof styles>) {
-  const {classes} = props
+function Contact(props) {
+  const {} = props
 
   const handleSubmit = useCallback(async (values) => {
     return await fetch(`/api/h/f/${DdfForms.formIds.contact}`, {
@@ -160,11 +129,16 @@ function Contact(props: WithStyles<typeof styles>) {
       title={'Contact Us | Aglyn'}
       centerNavigationItems={mainNavigation}
       productName={productNames.www}
-      className={classes.root}
+      sx={{
+        pt: 56,
+      }}
     >
       <main>
         <Box py={12} bgcolor={'background.paper'}>
-          <Container maxWidth={'lg'} className={classes.container}>
+          <Container
+            maxWidth={'lg'}
+            sx={{py:4}}
+          >
             <GridItems
               alignItems="center"
               direction="column"
@@ -179,14 +153,19 @@ function Contact(props: WithStyles<typeof styles>) {
                         component={'h1'}
                         children={'Contact Us'}
                         align="center"
-                        className={classes.h1}
+                        sx={{
+                          mb: 4
+                        }}
                       />
                       <Typography
                         variant={'h4'}
                         component={'h2'}
                         children={'Looking for more information or need support? Complete the form below.'}
                         align="center"
-                        className={classes.h2}
+                        sx={{
+                          color: 'secondary.main',
+                          mb: 4
+                        }}
                       />
                     </>
                   ),
@@ -194,14 +173,14 @@ function Contact(props: WithStyles<typeof styles>) {
                 {
                   xs: 12, md: 9,
                   children: (
-                    <>
+                    <Container maxWidth="sm">
                       <FormRenderer
                         FormTemplate={FormTemplate}
                         componentMapper={componentMapper}
                         schema={DdfForms.ContactFormSchema}
                         onSubmit={handleSubmit}
                       />
-                    </>
+                    </Container>
                   ),
                 },
               ]}
@@ -214,4 +193,4 @@ function Contact(props: WithStyles<typeof styles>) {
   )
 }
 
-export default withStyles(styles, {name: 'Page:Contact'})(Contact)
+export default Contact

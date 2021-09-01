@@ -29,11 +29,11 @@ import { FormTemplateRenderProps } from '@data-driven-forms/react-form-renderer/
 import { SvgPathIcon } from '@aglyn/shared/ui/react'
 
 
-export type Props = FormTemplateRenderProps & {
+export interface GridFormTemplateProps extends FormTemplateRenderProps {
 
 }
 
-export const GridFormTemplate = forwardRef<any, Props>(
+export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(
   function RefRenderFn(props, ref) {
     const { formFields, schema } = props
     const { handleSubmit, onReset, onCancel, getState } = useFormApi()
@@ -77,3 +77,4 @@ export const GridFormTemplate = forwardRef<any, Props>(
   }
 )
 GridFormTemplate.displayName = 'GridFormTemplate'
+export default GridFormTemplate
