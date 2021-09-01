@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import { ComponentType, ElementType, forwardRef, memo } from 'react'
 import { AglynComponentData, getApp, getComponent, handleResolveProps } from '@aglyn/framework/sdk'
 import { _isArr, _isArrEmpty, _s, yes } from '@aglyn/shared/util/helpers'
+import { AnyProps } from '@aglyn/shared/util/types'
+import { ComponentType, ElementType, forwardRef } from 'react'
 import * as ReactIs from 'react-is'
 import ElementsComponent from './elements-renderer.component'
-import { AnyProps } from '@aglyn/shared/util/types'
 
 
 export interface ElementRendererComponentProps extends AnyProps {
@@ -38,7 +38,8 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
     const {children: content = null, ...ctorProps} = resolvedProps
     const ComponentCtor = (ReactIs.isValidElementType(ctor) ? ctor : 'div') as ElementType
     const haveChildren = yes(!_isArr(data?.children) || _isArrEmpty(data?.children))
-    const refProps = options?.disableInnerRef ? {} : {innerRef: ref}
+    const refProps = options?.disableRef ? {}
+      : options?.innerRef ? {innerRef: ref} : {ref: ref}
 
     return (
       <ComponentCtor {...refProps} {...ctorProps} {...rest}>
@@ -60,4 +61,4 @@ ElementRendererComponent.defaultProps = {
   elementRendererComponent: ElementRendererComponent,
 }
 
-export default memo(ElementRendererComponent)
+export default ElementRendererComponent

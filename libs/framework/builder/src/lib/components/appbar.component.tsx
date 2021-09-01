@@ -27,7 +27,9 @@ import { forwardRef, useCallback } from 'react'
 import { useElementDrawerContext } from '../contexts/element-drawer-context'
 
 
-const StyledFab = styled(Fab)({
+const StyledFab = styled(Fab, {
+  name: 'FabButton'
+})({
   position: 'absolute',
   zIndex: 1,
   top: -30,
@@ -36,18 +38,18 @@ const StyledFab = styled(Fab)({
   margin: '0 auto',
 })
 
-export const appBarComponentStyles = createStyles({
-  root: {
-    top: 'auto',
-    bottom: 0,
-  },
+const StyledAppBar = styled(AppBar, {
+  name: 'AppBar'
+})({
+  top: 'auto',
+  bottom: 0,
 })
 
-export interface AppBarComponentProps extends ExtendPropsOfWithStyles<Partial<AppBarProps>, typeof appBarComponentStyles> {}
+export interface AppBarComponentProps extends Partial<AppBarProps> {}
 
-const AppBarComponentRaw = forwardRef<any, AppBarComponentProps>(
+export const AppbarComponent = forwardRef<any, AppBarComponentProps>(
   function RefRenderFn(props, ref) {
-    const {classes, className, ...rest} = props
+    const {className, ...rest} = props
 
     const {elementDrawer} = useElementDrawerContext()
     const handleFabClick = useCallback(async () => {
@@ -66,9 +68,8 @@ const AppBarComponentRaw = forwardRef<any, AppBarComponentProps>(
     }, [elementDrawer])
 
     return (
-      <AppBar
+      <StyledAppBar
         ref={ref}
-        className={clsx(classes.root, className)}
         position="fixed"
         color="primary"
         {...rest}
@@ -92,16 +93,12 @@ const AppBarComponentRaw = forwardRef<any, AppBarComponentProps>(
             <SvgPathIcon iconId={'more'}/>
           </IconButton>
         </Toolbar>
-      </AppBar>
+      </StyledAppBar>
     )
   },
 )
 
-AppBarComponentRaw.displayName = 'AppBarComponent'
-AppBarComponentRaw.defaultProps = {}
+AppbarComponent.displayName = 'AppbarComponent'
+AppbarComponent.defaultProps = {}
 
-export const AppbarComponent = withStyles(
-  appBarComponentStyles,
-  {name: 'AppBarComponent'},
-)(AppBarComponentRaw)
 export default AppbarComponent

@@ -37,11 +37,10 @@ const BuilderElementRendererComponent = forwardRef<any, BuilderElementRendererCo
     const [clientRect, setRect] = useState(null)
 
     const handleMouseEnter = useCallback((e) => {
-      const t = e.target
-      console.log('is self', localRef.current)
-      if (t && t === localRef.current) setEntered(t)
+      const target = e.target
+      if (target && target === localRef.current) setEntered(target)
       else setEntered(null)
-      setRect(copy(t?.getBoundingClientRect()))
+      setRect(target?.getBoundingClientRect?.().toJSON?.())
     }, [])
 
     const handleMouseLeave = useCallback((e) => {

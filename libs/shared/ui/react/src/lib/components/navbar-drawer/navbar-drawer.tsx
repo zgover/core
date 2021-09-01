@@ -15,46 +15,66 @@
  * limitations under the License.
  */
 
-import { createStyles, withStyles, ExtendPropsOfWithStyles } from '@aglyn/shared/ui/themes'
+import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
 
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@material-ui/core/AppBar'
 import MuiDrawer, { DrawerProps as MuiDrawerProps } from '@material-ui/core/Drawer'
 import Toolbar, { ToolbarProps as MuiToolbarProps } from '@material-ui/core/Toolbar'
-
-import clsx from 'clsx'
-import { forwardRef, ReactNode, useRef, Ref } from 'react'
+import { forwardRef, ReactNode, Ref, useRef } from 'react'
 import useCombinedRefs from '../../hooks/use-combined-refs'
 import ElevationScroll from '../elevation-scroll/elevation-scroll'
 
 
-export const navbarDrawerStyles = (theme) => createStyles({
-  root: {},
-  menu: {},
-  appBar: {borderBottom: `1px solid ${theme.palette.divider}`},
-  paper: {
+const navbarDrawerClasses = generateUtilityClasses('AglynNavbarDrawer', [
+  'appBar',
+  'toolbar',
+  'left',
+  'right',
+  'content',
+])
+
+const StyledDrawer = styled(MuiDrawer, {
+  name: 'Drawer',
+})({
+  '& .MuiDrawer-paper': {
     width: 620,
     maxWidth: '100%',
   },
-  left: {
-    flexGrow: 1,
-    display: 'flex',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  right: {
-    display: 'flex',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  content: {
-    height: '100%',
-    width: '100%',
-    overflow: 'auto',
-  },
+})
+
+const StyledAppBar = styled(MuiAppBar, {
+  name: 'AppBar',
+})(({theme}) => ({
+  borderBottom: `1px solid ${theme.palette.divider}`,
+}))
+
+const Left = styled('div', {
+  name: 'Left',
+})({
+  flexGrow: 1,
+  display: 'flex',
+  alignItems: 'center',
+  position: 'relative',
+})
+
+const Right = styled('div', {
+  name: 'Right',
+})({
+  display: 'flex',
+  alignItems: 'center',
+  position: 'relative',
+})
+
+const Content = styled('div', {
+  name: 'Content',
+})({
+  height: '100%',
+  width: '100%',
+  overflow: 'auto',
 })
 
 /* eslint-disable-next-line */
-export interface NavbarDrawerProps extends ExtendPropsOfWithStyles<Partial<MuiDrawerProps>, typeof navbarDrawerStyles> {
+export interface NavbarDrawerProps extends Partial<MuiDrawerProps> {
   appBarLeft?: ReactNode
   appBarRight?: ReactNode
   innerContentRef?: Ref<HTMLDivElement>
@@ -62,15 +82,13 @@ export interface NavbarDrawerProps extends ExtendPropsOfWithStyles<Partial<MuiDr
   ToolbarProps?: Partial<MuiToolbarProps>
 }
 
-const NavbarDrawerRaw = forwardRef<any, NavbarDrawerProps>(
+export const NavbarDrawer = forwardRef<any, NavbarDrawerProps>(
   function RefRenderFn(props, ref) {
     const {
-      classes,
       children,
       innerContentRef,
       appBarLeft,
       appBarRight,
-      className,
       AppBarProps,
       ToolbarProps,
       ...rest
@@ -80,36 +98,33 @@ const NavbarDrawerRaw = forwardRef<any, NavbarDrawerProps>(
     const contentRef = useCombinedRefs(localContentRef, innerContentRef)
 
     return (
-      <MuiDrawer
+      <StyledDrawer
         ref={ref}
         anchor="right"
-        className={clsx(classes.root, className)}
-        classes={{paper: classes.paper}}
         {...rest}
       >
         <ElevationScroll target={localContentRef.current}>
-          <MuiAppBar
-            className={classes.appBar}
+          <StyledAppBar
             color="default"
             position="relative"
             variant="elevation"
+            className={navbarDrawerClasses.appBar}
             {...AppBarProps}
           >
-            <Toolbar {...ToolbarProps}>
-              <div className={classes.left}>{appBarLeft}</div>
-              <div className={classes.right}>{appBarRight}</div>
+            <Toolbar {...ToolbarProps} className={navbarDrawerClasses.toolbar}>
+              <Left className={navbarDrawerClasses.left}>{appBarLeft}</Left>
+              <Right className={navbarDrawerClasses.right}>{appBarRight}</Right>
             </Toolbar>
-          </MuiAppBar>
+          </StyledAppBar>
         </ElevationScroll>
-        <div ref={contentRef} className={classes.content}>
+        <Content ref={contentRef} className={navbarDrawerClasses.content}>
           {children}
-        </div>
-      </MuiDrawer>
+        </Content>
+      </StyledDrawer>
     )
   },
 )
 
-NavbarDrawerRaw.displayName = 'NavbarDrawer'
+NavbarDrawer.displayName = 'NavbarDrawer'
 
-export const NavbarDrawer = withStyles(navbarDrawerStyles, {name: 'NavbarDrawer'})(NavbarDrawerRaw)
 export default NavbarDrawer

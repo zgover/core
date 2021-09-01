@@ -25,76 +25,51 @@ import {
   NavbarDrawerProps,
   SvgPathIcon,
 } from '@aglyn/shared/ui/react'
-import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
+import { styled } from '@aglyn/shared/ui/themes'
 import { _isStrT } from '@aglyn/shared/util/helpers'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
 import FormControl from '@material-ui/core/FormControl'
 import IconButton from '@material-ui/core/IconButton'
 import Typography from '@material-ui/core/Typography'
-import clsx from 'clsx'
 import { forwardRef, Fragment, MouseEvent, useCallback } from 'react'
 import { ElementDrawerOptions } from '../contexts/element-drawer-context'
 
 
-export const styles = (theme: Theme) =>
-  createStyles({
-    title: {},
-    label: {},
-    icon: {},
-    root: {
-      '& $title': {fontSize: theme.typography.pxToRem(20)},
-      '&>$paper': {
-        margin: '0 auto',
-        height: '100%',
-        maxHeight: '100vh',
-        [theme.breakpoints.up('sm')]: {height: theme.breakpoints.values.sm},
-      },
-    },
-    paper: {
-      width: 480,
-      height: 480,
-      margin: '0 auto',
-    },
-    content: {
-      backgroundColor: theme.palette.background.default,
-      // padding: theme.spacing(2, 2, 2, 2),
-      overflow: 'auto',
-    },
-    closeButton: {marginRight: theme.spacing(2)},
-    deleteButton: {color: theme.palette.error.main},
-    gridList: {
-      padding: theme.spacing(2, 2, 2, 2),
-      overflowX: 'hidden',
-    },
-    gridListItem: {},
-    card: {
-      color: theme.palette.text.primary,
-      '& $label': {textTransform: 'uppercase'},
-      '& $icon': {color: theme.palette.text.secondary},
-    },
-    cardContent: {
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      textAlign: 'center',
-      flexDirection: 'column',
-      justifyContent: 'space-evenly',
-    },
-    actionArea: {
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      width: '100%',
-      height: '100%',
-    },
-
-    equalHeight: {
-      height: 0,
-      position: 'relative',
-      paddingTop: `${(3 / 4) * 100}%`, // 16:9
-    },
-  })
+const StyledGridList = styled(GridList, {
+  name: 'GridList',
+})(({theme}) => ({
+  padding: theme.spacing(2, 2, 2, 2),
+  overflowX: 'hidden',
+  '& .AglynGridList-itemContent': {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    textAlign: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
+  },
+}))
+const StyledNavbarDrawer = styled(NavbarDrawer, {
+  name: 'NavbarDrawer',
+})(({theme}) => ({
+  '& .MuiDrawer-content': {
+    backgroundColor: theme.palette.background.default,
+    // padding: theme.spacing(2, 2, 2, 2),
+    overflow: 'auto',
+  },
+  '& .MuiDrawer-paper': {
+    margin: '0 auto',
+    height: '100%',
+    maxHeight: '100vh',
+    [theme.breakpoints.up('sm')]: {height: theme.breakpoints.values.sm},
+  },
+  '& > .MuiDrawer-paper': {
+    width: theme.breakpoints.values.sm,
+    height: 480,
+    margin: '0 auto',
+  },
+}))
 
 export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> {
   options?: ElementDrawerOptions
@@ -104,10 +79,9 @@ export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> 
   onDelete?: { bivarianceHack<T>(event: MouseEvent<T>, data: unknown): void }['bivarianceHack']
 }
 
-const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & WithStyles<typeof styles>>(
+export const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps>(
   function RefRenderFn(props, ref) {
     const {
-      classes,
       className,
       options,
       onConfirm,
@@ -148,12 +122,17 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
       <Fragment>
         <IconButton
           children={<SvgPathIcon iconId="close"/>}
-          className={classes.closeButton}
           color="inherit"
           edge="start"
           onClick={handleDrawerCancel}
+          sx={{mr: 2}}
         />
-        <Typography children={title} className={classes.title} color="inherit" variant="h6"/>
+        <Typography
+          children={title}
+          color="inherit"
+          variant="h6"
+          sx={{fontSize: (theme) => theme.typography.pxToRem(20)}}
+        />
       </Fragment>
     )
 
@@ -180,11 +159,9 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
 
     const views = {
       'browse-site-components': (
-        <GridList
+        <StyledGridList
           GridContainerProps={{spacing: 2}}
           GridItemProps={{xs: 6, sm: 4}}
-          ListWrapperProps={{className: classes.gridList}}
-          classes={{itemContent: classes.cardContent}}
           renderItemContent={renderItemContent}
           items={items}
         />
@@ -202,10 +179,8 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
 
           <FormControl margin="none" fullWidth>
             <Button
-              className={classes.deleteButton}
-              component={Box}
               onClick={handleDeleteButtonClick}
-              mt={2}
+              sx={{mt: 2, color: 'error.main'}}
               fullWidth
             >
               Delete Element
@@ -216,23 +191,18 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
     }
 
     return (
-      <NavbarDrawer
+      <StyledNavbarDrawer
         ref={ref}
-        className={clsx(classes.root, className)}
         AppBarProps={{color: 'primary'}}
         anchor="bottom"
         appBarLeft={appBarLeft}
         appBarRight={appBarRight[type]}
-        classes={{
-          paper: classes.paper,
-          content: classes.content,
-        }}
         variant="temporary"
         onClose={handleDrawerCancel}
         {...rest}
       >
         {views[type]}
-      </NavbarDrawer>
+      </StyledNavbarDrawer>
     )
   },
 )
@@ -242,4 +212,4 @@ ComponentDrawerComponent.defaultProps = {
   elements: [],
 }
 
-export default withStyles(styles, {name: 'ComponentDrawerComponent'})(ComponentDrawerComponent)
+export default ComponentDrawerComponent

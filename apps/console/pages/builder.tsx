@@ -20,7 +20,6 @@ import {
   aglynComponent,
   getAllComponents,
   getApp,
-  getComponent,
   registerComponent,
 } from '@aglyn/framework/sdk'
 import { BuilderComponent } from '@aglyn/framework/builder'
@@ -31,7 +30,6 @@ const Root = aglynComponent('root', {
   displayName: 'Root Element',
   title: 'Root element',
   icon: 'block',
-  disableInnerRef: true
 })('span')
 
 registerComponent(getApp(), Root)

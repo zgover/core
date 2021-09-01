@@ -108,7 +108,8 @@ export interface AglynComponentOptions<P = any> {
   disableOutline?: boolean
   disableRemoving?: boolean
   disableSelecting?: boolean
-  disableInnerRef?: boolean
+  disableRef?: boolean
+  innerRef?: boolean
   restrictChildren?: [type: RestrictFlag, cIds: ComponentId[]]
   restrictParents?: [type: RestrictFlag, cIds: ComponentId[]]
 }

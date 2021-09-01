@@ -20,7 +20,7 @@ import { AglynComponentData } from '@aglyn/framework/sdk'
 import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared/ui/react'
 import { builderTheme, ThemeProvider } from '@aglyn/shared/ui/themes'
 import NoSsr from '@material-ui/core/NoSsr'
-import { SnackbarProvider } from 'notistack'
+// import { SnackbarProvider } from 'notistack'
 import { forwardRef, Fragment } from 'react'
 import { PanZoom } from 'react-easy-panzoom'
 import ElementDrawerContextProvider, { ElementDrawerContextProviderProps } from '../contexts/element-drawer-context.provider'
@@ -52,7 +52,7 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
         <ThemeProvider theme={builderTheme}>
           <Component ref={ref} id="aglyn:builder" {...rest}>
             <ElementsContextProvider elements={elements}>
-              <SnackbarProvider maxSnack={3}>
+              {/*<SnackbarProvider maxSnack={3}>*/}
                 <ConfirmationProviderComponent>
                   <SelectionContextProvider>
                     <ElementDrawerContextProvider elements={elementComponents}>
@@ -72,7 +72,7 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
                     </ElementDrawerContextProvider>
                   </SelectionContextProvider>
                 </ConfirmationProviderComponent>
-              </SnackbarProvider>
+              {/*</SnackbarProvider>*/}
             </ElementsContextProvider>
           </Component>
         </ThemeProvider>

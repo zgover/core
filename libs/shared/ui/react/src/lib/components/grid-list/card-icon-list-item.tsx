@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { createStyles, WithStyles, withStyles, Theme, ExtendPropsOfWithStyles } from '@aglyn/shared/ui/themes'
+import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
 import Card, { CardProps as MuiCardProps } from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import Typography from '@material-ui/core/Typography'
@@ -24,46 +24,56 @@ import { forwardRef, MouseEvent, ReactNode, useCallback } from 'react'
 import { Item } from './grid-list'
 
 
-export const cardIconListItemStyles = (theme: Theme) => createStyles({
-  selected: {},
-  root: {
-    '&$selected $actionArea': {
-      backgroundColor: theme.palette.action.selected,
+const cardClasses = generateUtilityClasses('AglynCardIconListItem', [
+  'actionArea',
+  'selected',
+])
+
+const StyledCard = styled(Card, {
+  name: 'Card',
+  slot: 'Root',
+})(({theme}) => ({
+  [`&.${cardClasses.selected}`]: {
+    [`& .${cardClasses.actionArea}`]: {
+      // backgroundColor: theme.palette.action.selected,
+      backgroundColor: theme.palette.error.main,
       // backgroundColor: emphasize(theme.palette.action.selected, 0.12),
       // color: theme.palette.getContrastText(emphasize(theme.palette.action.selected, 0.12))
     },
   },
-  actionArea: {
-    height: 0,
-    position: 'relative',
-    paddingTop: `${(3 / 4) * 100}%`, // 16:9
-  },
-  wrapper: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    width: '100%',
-    height: '100%',
-  },
-  content: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    textAlign: 'center',
-    flexDirection: 'column',
-    justifyContent: 'space-evenly',
-    padding: theme.spacing(0.5),
-  },
-  label: {
-    ...theme.typography.subtitle2,
-    lineHeight: 1.43,
-    letterSpacing: theme.typography.subtitle2.letterSpacing,
-    fontSize: theme.typography.pxToRem(10),
-    textTransform: 'uppercase',
-  },
-})
+}))
 
-export interface CardIconListItemProps extends ExtendPropsOfWithStyles<Partial<MuiCardProps>, typeof cardIconListItemStyles> {
+const StyledActionArea = styled(CardActionArea, {
+  name: 'ActionArea',
+})(({theme}) => ({
+  height: 0,
+  position: 'relative',
+  paddingTop: `${(3 / 4) * 100}%`, // 16:9
+}))
+
+const StyledWrapper = styled('div', {
+  name: 'Wrapper',
+})(({theme}) => ({
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  width: '100%',
+  height: '100%',
+}))
+
+const StyledContent = styled('div', {
+  name: 'Content',
+})(({theme}) => ({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  textAlign: 'center',
+  flexDirection: 'column',
+  justifyContent: 'space-evenly',
+  padding: theme.spacing(0.5),
+}))
+
+export interface CardIconListItemProps extends Partial<MuiCardProps> {
   item: Item
   preview: ReactNode
   label: ReactNode
@@ -71,55 +81,60 @@ export interface CardIconListItemProps extends ExtendPropsOfWithStyles<Partial<M
   onActionClick?: { bivarianceHack<T>(event: MouseEvent<T>, selection: unknown): void; }['bivarianceHack']
 }
 
-const CardIconListItemRaw = forwardRef<any, CardIconListItemProps>(
+export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
   function RefRenderFn(props, ref) {
     const {
-            classes,
-            className,
-            selected,
-            item,
-            label,
-            onActionClick,
-            preview,
-            ...rest
-          } = props
+      className,
+      selected,
+      item,
+      label,
+      onActionClick,
+      preview,
+      ...rest
+    } = props
     const isSelected = Boolean(selected)
-    const elemClassName = clsx(classes.root, {
-      [classes.selected]: isSelected,
-    }, className)
     const handleClick = useCallback((e) => {
       onActionClick && onActionClick(e, item)
     }, [item, onActionClick])
     return (
-      <Card ref={ref} className={elemClassName} {...rest}>
-        <CardActionArea
-          className={classes.actionArea}
+      <StyledCard
+        ref={ref}
+        className={clsx({
+          [cardClasses.selected]: isSelected,
+        }, className)}
+        {...rest}
+      >
+        <StyledActionArea
           disabled={isSelected}
           onClick={handleClick}
+          className={cardClasses.actionArea}
         >
-          <div className={classes.wrapper}>
-            <div className={classes.content}>
+          <StyledWrapper>
+            <StyledContent>
               <span>{preview}</span>
               {label && (
                 <Typography
-                  className={classes.label}
                   component="span"
                   display="block"
                   variant="subtitle2"
+                  sx={{
+                    lineHeight: 1.43,
+                    fontSize: theme => theme.typography.pxToRem(10),
+                    textTransform: 'uppercase',
+                  }}
                 >
                   {label}
                 </Typography>
               )}
-            </div>
-          </div>
-        </CardActionArea>
-      </Card>
+            </StyledContent>
+          </StyledWrapper>
+        </StyledActionArea>
+      </StyledCard>
     )
   },
 )
 
-CardIconListItemRaw.displayName = 'CardIconListItem'
-CardIconListItemRaw.defaultProps = {}
+CardIconListItem.displayName = 'CardIconListItem'
+CardIconListItem.defaultProps = {}
 
-export const CardIconListItem = withStyles(cardIconListItemStyles, {name: 'CardIconListItem'})(CardIconListItemRaw)
 export default CardIconListItem

@@ -25,7 +25,7 @@ export {
   CreateEmotionCacheOptions,
   EmotionCache,
   EmotionServer,
-  ThemeProviderProps,
+  ThemeProviderProps as EmotionThemeProviderProps,
   withEmotionCache,
 }
 

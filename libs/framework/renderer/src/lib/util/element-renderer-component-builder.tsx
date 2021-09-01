@@ -25,9 +25,8 @@ import {
   TYPE_KIND,
   TYPE_OF,
 } from '@aglyn/framework/sdk'
-import { Component } from 'react'
-import { InnerRefProp } from '@aglyn/shared/ui/react'
 import { getDisplayName } from '@aglyn/shared/util/tools'
+import { Component, Ref } from 'react'
 
 
 export type ComponentBuilder<P = any> = (element: AglynComponentElementType<P>) => AglynComponent<P>
@@ -38,15 +37,16 @@ export function elementRendererComponentBuilder<P = any>(
 ): ComponentBuilder<P> {
   return function(element: AglynComponentElementType<P>): AglynComponent<P> {
     const Element = element
+    const displayName = `AglynComponent[id: ${componentId}, displayName: ${getDisplayName(element)}]`
 
-    return class AglynComponent extends Component<P & InnerRefProp<any>> {
+    return class AglynComponent extends Component<P> {
       static readonly [TYPE_OF] = MODULE_TYPE
       static readonly [TYPE_KIND] = EXTENSION_TYPE
       static readonly $id = componentId
-      static readonly displayName = `AglynComponent[id: ${componentId}, displayName: ${getDisplayName(element)}]`
+      static readonly displayName = displayName
       static readonly options = {displayName: componentId, ...options}
       static readonly defaultProps: Partial<P> = {...options?.defaultProps}
-      public innerRef
+      public innerRef: Ref<any>
 
       constructor(props) {
         super(props)
