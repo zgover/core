@@ -134,8 +134,8 @@ export namespace ConsolePalette {
       contrastText: '#FFFFFF',
     },
     success: {
-      light: '#81C784',
       main: '#4CAF50',
+      light: '#81C784',
       dark: '#388E3C',
       contrastText: '#000000DE',
     },

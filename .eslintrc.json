@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nrwl/nx"],
+  "plugins": ["@nrwl/nx", "eslint-plugin-tsdoc"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -110,7 +110,8 @@
         "@typescript-eslint/no-var-requires": "off",
         "no-fallthrough": "off",
         "react/no-children-prop": "off",
-        "react-hooks/rules-of-hooks": "off"
+        "react-hooks/rules-of-hooks": "off",
+        "tsdoc/syntax": "warn"
       }
     },
     {
