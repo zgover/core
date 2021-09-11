@@ -62,7 +62,7 @@ const metaElements: MakeMetaElementsConfig = [
 ]
 const linkElements: MakeLinkElementsConfig = []
 
-function AppWrapperRaw(props: PropsWithChildren<{}>) {
+function AppWrapperRaw(props) {
   const {children} = props
 
   useEffect(() => {
@@ -99,13 +99,23 @@ function AppWrapperRaw(props: PropsWithChildren<{}>) {
           </CurrentUserProviderComponent>
         </AppContextProvider>
       </div>
+      {isProduction ? /* HubSpot Embed Code */ (
+        <script
+          type="text/javascript"
+          id="hs-script-loader"
+          async
+          defer
+          src="//js.hs-scripts.com/20566719.js"
+        />
+      ) : null}
+
     </Wrapper>
   )
 }
 AppWrapperRaw.displayName = 'AppWrapper'
 const AppWrapper = withTheme({
   theme: consoleTheme,
-  cssBaseline: true
+  cssBaseline: true,
 })(AppWrapperRaw)
 
 // Client-side cache, shared for the whole session of the user in the browser.

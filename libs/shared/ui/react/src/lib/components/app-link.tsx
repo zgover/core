@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
+import { generateUtilityClasses } from '@aglyn/shared/ui/themes'
 import { _isObj } from '@aglyn/shared/util/guards'
+import { yes } from '@aglyn/shared/util/tools'
 import { Conditional } from '@aglyn/shared/util/types'
 import MuiButton, { ButtonProps as MuiButtonProps } from '@mui/material/Button'
 import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link'
@@ -49,6 +51,14 @@ export type AppLinkProps<T extends LinkType = 'default'> = CommonProps &
     Conditional<T, 'button', ButtonTruncated,
       Conditional<T, 'text', TextTruncated, TruncatedProps>>>
 
+const classKey = generateUtilityClasses('AppLink', [
+  'disabled',
+  'active',
+  'typeNaked',
+  'typeButton',
+  'typeText',
+])
+
 /**
  * A Material-UI styled version of a "composed" Next.js Link.
  *
@@ -74,16 +84,17 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
     const isCurrentPath = router.pathname === pathname
     const elemClassName = clsx(
       {
-        ['AppLink-active']: isCurrentPath,
-        ['AppLink-typeNaked']: linkType === 'naked',
-        ['AppLink-typeButton']: linkType === 'button',
-        ['AppLink-typeText']: linkType === 'text',
+        [classKey.active]: isCurrentPath,
+        [classKey.disabled]: yes(rest['disabled']),
+        [classKey.typeNaked]: linkType === 'naked',
+        [classKey.typeButton]: linkType === 'button',
+        [classKey.typeText]: linkType === 'text',
       },
       className,
     )
 
-    switch (linkType) {
-      case 'naked':
+    switch (true) {
+      case  linkType === 'naked':
         return (
           <NextLink
             ref={ref}
@@ -92,7 +103,7 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
             {...rest as NakedBaseProps}
           />
         )
-      case 'button':
+      case linkType === 'button':
         return (
           <MuiButton
             ref={ref}
@@ -102,7 +113,7 @@ export const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(
             {...rest as ButtonBaseProps}
           />
         )
-      case 'text':
+      case linkType === 'text':
       case undefined:
       default:
         return (
