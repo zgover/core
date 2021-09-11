@@ -16,10 +16,10 @@
  */
 
 import { alpha, styled } from '@aglyn/shared/ui/themes'
-import MuiBackdrop, { BackdropProps as MuiBackdropProps } from '@material-ui/core/Backdrop'
-import CircularProgress from '@material-ui/core/CircularProgress'
-import LinearProgress from '@material-ui/core/LinearProgress'
-import Typography from '@material-ui/core/Typography'
+import MuiBackdrop, { BackdropProps as MuiBackdropProps } from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+import LinearProgress from '@mui/material/LinearProgress'
+import Typography from '@mui/material/Typography'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { withAppLoader, WithAppLoaderProps } from '../contexts/app-loader-context'
@@ -55,7 +55,7 @@ const AppLoaderOverlayView = React.forwardRef<any, AppLoaderOverlayProps>(
       appLoader,
       ...rest
     } = props
-    const isOpen = Boolean(open || appLoader.isLoading)
+    const isOpen = Boolean(open || appLoader?.isLoading)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
     useEffect(() => {

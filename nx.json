@@ -31,20 +31,20 @@
       "tags": ["scope:app", "scope:app:console"],
       "implicitDependencies": ["console"]
     },
-    "framework-builder": {
-      "tags": ["scope:lib", "scope:lib:framework", "scope:lib:framework:feature"],
+    "sdk-builder": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:builder"],
       "implicitDependencies": []
     },
-    "framework-plugins-material": {
-      "tags": ["scope:lib", "scope:lib:framework", "scope:lib:framework:plugin"],
+    "sdk-framework": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:framework"],
       "implicitDependencies": []
     },
-    "framework-renderer": {
-      "tags": ["scope:lib", "scope:lib:framework", "scope:lib:framework:feature"],
+    "sdk-plugins-material": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:plugin"],
       "implicitDependencies": []
     },
-    "framework-sdk": {
-      "tags": ["scope:lib", "scope:lib:framework", "scope:lib:framework:sdk"],
+    "sdk-renderer": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:renderer"],
       "implicitDependencies": []
     },
     "shared-data-mdi": {

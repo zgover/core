@@ -31,5 +31,29 @@ export const consoleOverrides: ThemeOptions['components'] = {
     // color: 'inherit', // Default color to inherit
     styleOverrides: {root: {padding: 8}},
   },
+  MuiLink: {
+    styleOverrides: {
+      root: {
+        '&[disabled]': {
+          pointerEvents: 'none',
+          color: 'var(--text-disabled)',
+          textDecoration: 'none',
+          filter: 'grayscale(1) opacity(0.65)',
+        },
+      },
+    },
+  },
+  MuiButton: {
+    styleOverrides: {
+      root: {
+        '&a[disabled]': {
+          pointerEvents: 'none',
+          color: 'var(--text-disabled)',
+          textDecoration: 'none',
+          filter: 'grayscale(1) opacity(0.65)',
+        },
+      },
+    },
+  },
 }
 export default consoleOverrides

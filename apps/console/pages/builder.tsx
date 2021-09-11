@@ -15,47 +15,62 @@
  * limitations under the License.
  */
 
-import { BuilderComponent } from '@aglyn/framework/builder'
-import { createElementComponent } from '@aglyn/framework/renderer'
+import { BuilderComponent } from '@aglyn/sdk/builder'
 import {
   AglynComponentData,
   getAllComponentsValues,
   getApp,
   registerComponent,
-} from '@aglyn/framework/sdk'
+} from '@aglyn/sdk/framework'
+import { createElementComponent } from '@aglyn/sdk/renderer'
 import { useCallback, useMemo, useState } from 'react'
 import { samplePageData } from '../constants/sample-data'
 
 
-registerComponent(getApp(), createElementComponent('root', {
-  displayName: 'Root Element',
-  title: 'Root element',
-  icon: 'block',
-})('span'))
+registerComponent(
+  getApp(),
+  createElementComponent('root', {
+    displayName: 'Root Element',
+    title: 'Root element',
+    icon: 'block',
+  })('span'),
+)
 
-registerComponent(getApp(), createElementComponent('root1', {
-  displayName: 'Root Element',
-  title: 'Root element',
-  icon: 'block',
-})('span'))
+registerComponent(
+  getApp(),
+  createElementComponent('root1', {
+    displayName: 'Root Element',
+    title: 'Root element',
+    icon: 'block',
+  })('span'),
+)
 
-registerComponent(getApp(), createElementComponent('root2', {
-  displayName: 'Root Element',
-  title: 'Root element',
-  icon: 'block',
-})('span'))
+registerComponent(
+  getApp(),
+  createElementComponent('root2', {
+    displayName: 'Root Element',
+    title: 'Root element',
+    icon: 'block',
+  })('span'),
+)
 
-registerComponent(getApp(), createElementComponent('root3', {
-  displayName: 'Root Element',
-  title: 'Root element',
-  icon: 'block',
-})('span'))
+registerComponent(
+  getApp(),
+  createElementComponent('root3', {
+    displayName: 'Root Element',
+    title: 'Root element',
+    icon: 'block',
+  })('span'),
+)
 
-registerComponent(getApp(), createElementComponent('root4', {
-  displayName: 'Root Element',
-  title: 'Root element',
-  icon: 'block',
-})('span'))
+registerComponent(
+  getApp(),
+  createElementComponent('root4', {
+    displayName: 'Root Element',
+    title: 'Root element',
+    icon: 'block',
+  })('span'),
+)
 
 function Builder(props) {
   if (typeof document !== 'undefined') {
@@ -63,15 +78,12 @@ function Builder(props) {
   }
 
   const [elements, setElements] = useState<AglynComponentData[]>(samplePageData)
-  const elementComponents = useMemo(() => (
-    getAllComponentsValues(getApp())
-  ), [])
+  const elementComponents = useMemo(() => getAllComponentsValues(getApp()), [])
 
   const handleUpdateElements = useCallback((elements: AglynComponentData[], prevElements) => {
     console.log('handleUpdateElements', elements, prevElements)
     setElements(elements)
   }, [])
-
 
   return (
     <BuilderComponent
