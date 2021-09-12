@@ -17,7 +17,7 @@
 
 import { SvgPathIcon } from '@aglyn/shared/ui/react'
 import { createUid } from '@aglyn/shared/util/helpers'
-import { _s, remap } from '@aglyn/shared/util/tools'
+import { _s, objectRemap } from '@aglyn/shared/util/tools'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/router'
 import { useSnackbar } from 'notistack'
@@ -202,7 +202,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
     }
   }, [documentId, documents])
 
-  const mappedFields = remap(fields, (value => ({
+  const mappedFields = objectRemap(fields, (value => ({
     ...value, value: activeDocument?.data[value.id] ?? value.value,
   })))
 

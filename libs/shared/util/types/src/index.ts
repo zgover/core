@@ -16,4 +16,5 @@
  */
 
 export * from './lib/base'
+export * from './lib/jsx'
 export * from './lib/lifecycle'

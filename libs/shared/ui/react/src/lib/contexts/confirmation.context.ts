@@ -15,33 +15,33 @@
  * limitations under the License.
  */
 
+import { noop } from '@aglyn/shared/util/tools'
+import { JSXNode } from '@aglyn/shared/util/types'
 import { ButtonProps } from '@mui/material/Button'
 import { DialogProps } from '@mui/material/Dialog'
-import { DialogContentTextProps } from '@mui/material/DialogContentText'
-import { DialogTitleProps } from '@mui/material/DialogTitle'
-import { createContext, useContext } from 'react'
+import { Context, createContext, useContext } from 'react'
 
 
-export interface ConfirmationOptions {
-  cancellationText?: ButtonProps['children']
-  confirmationText?: ButtonProps['children']
+export type ConfirmationContextConfig = {
+  cancellationText?: JSXNode
+  confirmationText?: JSXNode
   cancellationButtonProps?: Partial<ButtonProps>
   confirmationButtonProps?: Partial<ButtonProps>
   dialogProps?: Partial<DialogProps>
-  title?: DialogTitleProps['children']
-  description?: DialogContentTextProps['children']
+  title?: JSXNode
+  description?: JSXNode
 }
-
-export type ConfirmFn = (options?: ConfirmationOptions) => Promise<unknown>
-
-export interface ConfirmationContextType {
-  confirm: ConfirmFn
+export type ConfirmFunctionOptions = ConfirmationContextConfig
+export type ConfirmFunction = <T>(options?: ConfirmFunctionOptions) => Promise<T>
+export type ConfirmationContextType = {
+  confirm: ConfirmFunction
 }
+export type ConfirmationContext = Context<ConfirmationContextType>
 
-export type UseConfirmationType = () => ConfirmationContextType
-
-
-export const DEFAULT_OPTIONS: ConfirmationOptions = {
+export const DEFAULT_CONTEXT_VALUE: ConfirmationContextType = {
+  confirm: noop() as any,
+}
+export const DEFAULT_CONTEXT_CONFIG: ConfirmationContextConfig = {
   title: 'Are you sure?',
   description: '',
   confirmationText: 'OK',
@@ -50,33 +50,37 @@ export const DEFAULT_OPTIONS: ConfirmationOptions = {
   confirmationButtonProps: {},
   cancellationButtonProps: {},
 }
-export const buildOptions = (defaultOptions, options) => {
+
+export const buildConfirmationContextConfig = (defaultConfig, config) => {
   const dialogProps = {
-    ...(defaultOptions.dialogProps || DEFAULT_OPTIONS.dialogProps),
-    ...(options.dialogProps || {}),
+    ...(defaultConfig.dialogProps || DEFAULT_CONTEXT_CONFIG.dialogProps),
+    ...(config.dialogProps || {}),
   }
   const confirmationButtonProps = {
-    ...(defaultOptions.confirmationButtonProps || DEFAULT_OPTIONS.confirmationButtonProps),
-    ...(options.confirmationButtonProps || {}),
+    ...(defaultConfig.confirmationButtonProps || DEFAULT_CONTEXT_CONFIG.confirmationButtonProps),
+    ...(config.confirmationButtonProps || {}),
   }
   const cancellationButtonProps = {
-    ...(defaultOptions.cancellationButtonProps || DEFAULT_OPTIONS.cancellationButtonProps),
-    ...(options.cancellationButtonProps || {}),
+    ...(defaultConfig.cancellationButtonProps || DEFAULT_CONTEXT_CONFIG.cancellationButtonProps),
+    ...(config.cancellationButtonProps || {}),
   }
 
   return {
-    ...DEFAULT_OPTIONS,
-    ...defaultOptions,
-    ...options,
+    ...DEFAULT_CONTEXT_CONFIG,
+    ...defaultConfig,
+    ...config,
     dialogProps,
     confirmationButtonProps,
     cancellationButtonProps,
   }
 }
 
-export const ConfirmationContext = createContext<ConfirmationContextType>(null)
+export const ConfirmationContext: ConfirmationContext = createContext<ConfirmationContextType>(
+  DEFAULT_CONTEXT_VALUE,
+)
 ConfirmationContext.displayName = 'ConfirmationContext'
-export const useConfirmationContext: UseConfirmationType = () => {
+
+export function useConfirmationContext(): ConfirmationContextType {
   return useContext(ConfirmationContext)
 }
 

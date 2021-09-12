@@ -37,7 +37,7 @@ export type RemapOutput<T extends RemapTarget<K, V>, K extends PKey, V, U = V, O
  * @param {ThisType<T>} thisArg
  * @returns {RemapOutput<typeof target, K, V, U, typeof options>}
  */
-export function remap<K extends PKey, V, U = V, T = unknown>(
+export function objectRemap<K extends PKey, V, U = V, T = unknown>(
   target: RemapTarget<K, V>,
   callbackFn: RemapCallback<K, V, U>,
   options?: RemapOptions,
@@ -59,3 +59,5 @@ export function remap<K extends PKey, V, U = V, T = unknown>(
   }
   return _target
 }
+
+export default objectRemap

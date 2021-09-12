@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getIcon, Icon, IconKeys } from '@aglyn/shared/data/mdi'
+import { getIcon, IconData, IconId } from '@aglyn/shared/data/mdi'
 import { _isStrT } from '@aglyn/shared/util/guards'
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@mui/material/SvgIcon'
 import { createSvgIcon } from '@mui/material/utils'
@@ -26,7 +26,7 @@ import { SvgPathData, svgPathElement } from './svg-path'
 export { createSvgIcon }
 
 
-export type IconId = IconKeys
+export type IconId = IconId
 export type Path = SvgPathData | JSX.Element
 
 /**
@@ -57,12 +57,12 @@ export function createSvgPathIcon(displayName: string, path: SvgPathIconProps['p
  * @param iconId
  * @param failover
  */
-export function getMdiIconPathData(iconId: IconKeys, failover?: Icon): string {
+export function getMdiIconPathData(iconId: IconId, failover?: IconData): string {
   return getIcon(iconId, failover)?.['path']
 }
 
 export interface SvgPathIconProps extends Partial<Omit<MuiSvgIconProps, 'path'>> {
-  iconId?: IconKeys
+  iconId?: IconId
   path?: Path
 }
 

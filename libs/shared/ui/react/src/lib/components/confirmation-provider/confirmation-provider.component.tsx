@@ -16,17 +16,21 @@
  */
 
 import { ElementType, Fragment, MouseEventHandler, ReactNode, useCallback, useState } from 'react'
+import {
+  buildConfirmationContextConfig,
+  ConfirmationContext,
+  ConfirmationContextConfig, ConfirmFunction,
+  DEFAULT_CONTEXT_CONFIG,
+} from '../../contexts/confirmation.context'
 import DialogConfirm from '../dialog-confirm/dialog-confirm'
-import { ConfirmationContext, ConfirmationOptions } from '../../contexts/confirmation.context'
-import { DEFAULT_OPTIONS, buildOptions } from '../../contexts/confirmation.context'
 
 
 export interface ConfirmationProviderComponentProps {
-  defaultOptions?: ConfirmationOptions
+  defaultOptions?: ConfirmationContextConfig
   children?: ReactNode
   component: ElementType<{
     open: boolean
-    options: ConfirmationOptions
+    options: ConfirmationContextConfig
     onClose: MouseEventHandler<unknown>
     onCancel: MouseEventHandler<unknown>
     onConfirm: MouseEventHandler<unknown>
@@ -34,14 +38,14 @@ export interface ConfirmationProviderComponentProps {
 }
 
 export function ConfirmationProviderComponent(props: ConfirmationProviderComponentProps) {
-  const { children, defaultOptions = {}, component: Component } = props
-  const [options, setOptions] = useState({ ...DEFAULT_OPTIONS, ...defaultOptions })
+  const {children, defaultOptions = {}, component: Component} = props
+  const [options, setOptions] = useState({...DEFAULT_CONTEXT_CONFIG, ...defaultOptions})
   const [resolveReject, setResolveReject] = useState([])
   const [resolve, reject] = resolveReject
 
-  const confirm = useCallback((options: ConfirmationOptions = {}) => {
+  const confirm = useCallback<ConfirmFunction>((options: ConfirmationContextConfig = {}) => {
     return new Promise((resolve, reject) => {
-      setOptions(buildOptions(defaultOptions, options))
+      setOptions(buildConfirmationContextConfig(defaultOptions, options))
       setResolveReject([resolve, reject])
     })
   }, [defaultOptions])
@@ -62,7 +66,7 @@ export function ConfirmationProviderComponent(props: ConfirmationProviderCompone
 
   return (
     <Fragment>
-      <ConfirmationContext.Provider value={{ confirm }}>
+      <ConfirmationContext.Provider value={{confirm}}>
         {children}
       </ConfirmationContext.Provider>
       <Component

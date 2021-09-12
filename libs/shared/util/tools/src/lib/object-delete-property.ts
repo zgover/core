@@ -15,11 +15,20 @@
  * limitations under the License.
  */
 
-import { mdiIcons } from './mdi-icons'
-
-
-describe('mdiIcons', () => {
-  it('should work', () => {
-    expect(mdiIcons()).toEqual('mdi-icons')
-  })
-})
+/**
+ *
+ *
+ * @export
+ * @template T
+ * @template K
+ * @param {Readonly<T>} obj
+ * @param {K} key
+ * @param {{ copy: boolean }} [options]
+ * @returns {T}
+ */
+export function objectDeleteProperty<T, K extends keyof T>(obj: T, key: K, options?: { copy: boolean }): Omit<T, K> {
+  const {copy = false} = options ?? {}
+  const _obj = copy ? {...obj} : obj
+  delete _obj[key]
+  return _obj
+}

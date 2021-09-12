@@ -16,7 +16,7 @@
  */
 
 import { AglynComponentData, SelfComponentId } from '@aglyn/sdk/framework'
-import { deepMergeMany } from '@aglyn/shared/util/helpers'
+import { objectDeepMergeMany } from '@aglyn/shared/util/helpers'
 import { createElementDataId } from './create-element-data-id'
 
 export const ELEMENT_DEFAULTS = {
@@ -27,7 +27,7 @@ export function createElementData(
   componentId: SelfComponentId,
   data?: Omit<AglynComponentData, '$id' | 'component'>
 ): AglynComponentData {
-  return deepMergeMany([
+  return objectDeepMergeMany([
     { ...ELEMENT_DEFAULTS },
     {
       $id: createElementDataId(),

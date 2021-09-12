@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { deepMerge } from '@aglyn/shared/util/helpers'
+import { objectDeepMerge } from '@aglyn/shared/util/helpers'
 
 export type HandlePropsOptions = {
   clone?: boolean
@@ -46,7 +46,7 @@ export function handleElementPropDefaults<T1, T2>(
   defaults: Partial<T2>,
   options?: HandlePropsOptions
 ): T1 & T2 {
-  return deepMerge(defaults, props, options)
+  return objectDeepMerge(defaults, props, options)
 }
 
 export default handleElementPropDefaults

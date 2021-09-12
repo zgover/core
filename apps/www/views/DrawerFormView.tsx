@@ -18,7 +18,7 @@
 import { NavbarDrawer, NavbarDrawerProps, SvgPathIcon } from '@aglyn/shared/ui/react'
 import { alpha, createStyles, ExtendPropsOfWithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import { _isStrT } from '@aglyn/shared/util/guards'
-import { remap } from '@aglyn/shared/util/tools'
+import { objectRemap } from '@aglyn/shared/util/tools'
 import { Box, Button } from '@mui/material'
 import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
@@ -145,7 +145,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(
                     px={1}
                   >
                   <pre>
-                    {JSON.stringify(remap(fields, f => f.value ?? ''), null, 2)}
+                    {JSON.stringify(objectRemap(fields, f => f.value ?? ''), null, 2)}
                   </pre>
                   </Box>
                 </Box>

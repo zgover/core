@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
-export function mdiIcons(): string {
-  return 'mdi-icons'
-}
+import { getIcon } from './icons'
+
+
+describe('mdiIcons', () => {
+  it('should work', () => {
+    expect(getIcon('')).toEqual('mdi-icons')
+  })
+})

@@ -23,7 +23,7 @@ import {
 import {
   arrayRemoveItem,
   arrayReorder,
-  deleteProperty,
+  objectDeleteProperty,
 } from '@aglyn/shared/util/tools'
 
 
@@ -125,7 +125,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
    */
   public static remove<T extends NormalizedData<any, K>, K extends ID>(id: K, model: T): T {
     model.allIds = arrayRemoveItem(id, model.allIds)
-    model.byId = deleteProperty(model.byId, id)
+    model.byId = objectDeleteProperty(model.byId, id)
     return model
   }
 

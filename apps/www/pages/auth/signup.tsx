@@ -17,7 +17,7 @@
 
 import { AppLink } from '@aglyn/shared/ui/react'
 import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
-import { remap } from '@aglyn/shared/util/tools'
+import { objectRemap } from '@aglyn/shared/util/tools'
 import { Box, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -68,7 +68,7 @@ export default withStyles(styles, {name: 'Page:SignUp'})(
       }
       const clearForm = () => {
         setFields(prev => {
-          return remap(prev, (value) => {
+          return objectRemap(prev, (value) => {
             value.value = ''
             return value
           })

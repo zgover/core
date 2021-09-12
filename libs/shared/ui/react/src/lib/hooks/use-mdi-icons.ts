@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import { useCallback, useMemo, useState } from 'react'
-
-import { Icons, icons as mdiIcons } from '@aglyn/shared/data/mdi'
+import { icons as mdiIcons, IconsNormalized } from '@aglyn/shared/data/mdi'
 
 import { _isArr } from '@aglyn/shared/util/guards'
 import { SearchFuzzy } from '@aglyn/shared/util/helpers'
+import { useCallback, useMemo, useState } from 'react'
 
 
 export type MdiIcon = {
@@ -34,7 +33,7 @@ export type FilterOpts = {
 }
 export type ApplyFilterFn = (query: string) => void
 export type ClearFilterFn = () => void
-export type UseMdiIconsReturn = [MdiIcon[], { applyFilter: ApplyFilterFn; clearFilter: ClearFilterFn }, Icons]
+export type UseMdiIconsReturn = [MdiIcon[], { applyFilter: ApplyFilterFn; clearFilter: ClearFilterFn }, IconsNormalized]
 
 export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
   const allIds = Array.from(mdiIcons.iconIds)

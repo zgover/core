@@ -32,11 +32,11 @@ export function handleElementResolveProps<P = any>(
   componentOptions: AglynComponentOptions<P>,
   thisArg?: ThisType<unknown>
 ): P {
-  const { resolveProps, defaultProps = {} } = { ...componentOptions }
+  const { propsResolver, propsDefaults = {} } = { ...componentOptions }
   const _props = copy({ ...elementDataProps } as unknown) as P
-  const _defaults = copy({ ...defaultProps }) as P
+  const _defaults = copy({ ...propsDefaults }) as P
   const propsMergedDefaults = handleElementPropDefaults(_props, _defaults) as P
-  if (_isFnT(resolveProps)) return resolveProps.call(thisArg, propsMergedDefaults)
+  if (_isFnT(propsResolver)) return propsResolver.call(thisArg, propsMergedDefaults)
   return propsMergedDefaults
 }
 export default handleElementResolveProps

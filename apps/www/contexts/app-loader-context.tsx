@@ -22,7 +22,7 @@ import {
 } from '@aglyn/shared/ui/react'
 import { _ln } from '@aglyn/shared/util/guards'
 import { createUid } from '@aglyn/shared/util/helpers'
-import { noopFactory } from '@aglyn/shared/util/tools'
+import { noop } from '@aglyn/shared/util/tools'
 import { ConditionalNonDist } from '@aglyn/shared/util/types'
 import { createContext, PropsWithChildren, useContext, useState } from 'react'
 
@@ -45,8 +45,8 @@ export type AppLoaderContextType = {
 export const APP_LOADER_CONTEXT_DEFAULT_VALUE: AppLoaderContextType = {
   queues: [],
   isLoading: false,
-  queueLoading: noopFactory() as any,
-  checkLoading: noopFactory() as any,
+  queueLoading: noop() as any,
+  checkLoading: noop() as any,
 }
 
 export const AppLoader = createContext<AppLoaderContextType>(

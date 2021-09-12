@@ -171,37 +171,43 @@ Provides auth, data-store, analytics and more.
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-## Nx Monorepo
+## Monorepo source files
 
-`apps/*` contain sub packages for the purpose of serving and rendering.
-`libs/*` contain sub packages for purpose of providing components, logic, utils, etc.
+### Source files: apps
 
-### Basic usage
+* `apps/*` directory contains packages for the sole purpose of rendering/serving
 
-#### Serving
+### Libraries
+
+* `libs/*` directory contains packages for grouping utilities, features, services, ui components,
+  logic etc.,
+
+## Basic usage
+
+### Serving
 
 - Run `nx serve <app-name>` for a dev server. Navigate to http://localhost:4200/. The app will
   automatically reload if you change any of the source files. Use the `--prod` flag for a production
   environment.
 
-#### Building
+### Building
 
 - Run `nx build <app-name>` to build the project. The build artifacts will be stored in the `dist/`
   directory. Use the `--prod` flag for a production build.
 
-##### Unit testing
+#### Unit testing
 
 - Run `nx test <app-name>` to execute the unit tests via [Jest](https://jestjs.io).
 - Run `nx affected:test` to execute the unit tests affected by a change.
 
-##### End-to-end (e2e) testing
+#### End-to-end (e2e) testing
 
 - Run `ng e2e <app-name>` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
 - Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
 
-### Scaffolding
+## Scaffolding
 
-#### Applications
+### Applications
 
 When using Nx monorepo, you can create multiple applications and libraries in the same workspace.
 
@@ -212,7 +218,7 @@ When using Nx monorepo, you can create multiple applications and libraries in th
 _**@See** Nx documentation for more
 app [community plugins](https://nx.dev/community#community-plugin-list) and commands_
 
-#### Libraries
+### Libraries
 
 Libraries are shareable across libraries and applications. They can be imported from `@aglyn/mylib`.
 
@@ -223,13 +229,13 @@ Libraries are shareable across libraries and applications. They can be imported 
 _**@See** Nx documentation for more
 library [community plugins](https://nx.dev/community#community-plugin-list) and commands_
 
-#### App or library modules and components
+### App or library modules and components
 
 - Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
 
-### Updating
+## Updating
 
-#### Move or rename application and libraries
+### Move or rename application and libraries
 
 To streamline the refactoring process Nx provides workspace commands to move and/or rename project
 applications and libraries.
@@ -241,7 +247,7 @@ applications and libraries.
 *Make sure to provide the Nx project name and not the actual directory (@See [nx.json](./nx.json)
 for registered project name), followed by its _new_ directory
 
-#### Nx build framework
+### Nx build framework
 
 1. Run `nx migrate latest` to pull the most recent version of Nx, it will generate a new files
    named `migrations.json`in the root directory. Double check the contents and make sure changes are
@@ -254,7 +260,7 @@ for registered project name), followed by its _new_ directory
 _@See More info detailed on
 the [Nx documentation](https://nx.dev/latest/react/core-concepts/updating-nx)_
 
-#### Version and changelog
+### Version and changelog
 
 Package version bump and changelog automation with [SemVer](https://semver.org/)
 and [ConventionalCommits](https://www.conventionalcommits.org/en/v1.0.0/)
@@ -267,12 +273,37 @@ and [ConventionalCommits](https://www.conventionalcommits.org/en/v1.0.0/)
 _**@See** [`@jscutlery/semver`](https://github.com/jscutlery/semver) Nx plugin repository for full
 list of commands and options._
 
-### Visualizing dependencies
+## Visualizing dependencies
 
 Nx can generate a dependency tree graph
 
 - Run `nx dep-graph` to see a diagram of the dependencies of your projects.
 
+
+<hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+## Environment files
+
+### What other .env files can be used?
+
+*Note: this feature is available with react-scripts@1.0.0 and higher.*
+
+- `.env`: Default.
+- `.env.local`: Local overrides. This file is loaded for all environments except test.
+- `.env.development`, `.env.test`, `.env.production`: Environment-specific settings.
+- `.env.development.local`, `.env.test.local`, `.env.production.local`: Local overrides of
+  environment-specific settings.
+
+#### Files on the left have more priority than files on the right:
+
+- `npm start`: `.env.development.local`, `.env.development`, `.env.local`, `.env`
+- `npm run build`: `.env.production.local`, `.env.production`, `.env.local`, `.env`
+- `npm test`: `.env.test.local`, `.env.test`, `.env` (note `.env.local` is missing)
+
+These variables will act as the defaults if the machine does not explicitly set them. Please refer
+to the [dotenv documentation](https://github.com/motdotla/dotenv) for more details.
+
+[Source](https://create-react-app.dev/docs/adding-custom-environment-variables)
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 

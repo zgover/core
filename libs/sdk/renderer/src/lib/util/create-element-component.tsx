@@ -28,25 +28,26 @@ import {
 import { styled } from '@aglyn/shared/ui/themes'
 import { Component, Ref } from 'react'
 
+
 export type ComponentBuilder<P = any> = (element: AglynComponentElementType<P>) => AglynComponent<P>
 
 export function createElementComponent<P = any>(
   componentId: SelfComponentId,
-  options: AglynComponentOptions<P>
+  options: AglynComponentOptions<P>,
 ): ComponentBuilder<P> {
-  return function (element: AglynComponentElementType<P>): AglynComponent<P> {
+  return function(element: AglynComponentElementType<P>): AglynComponent<P> {
     const displayName = `AglynComponent($id: ${componentId})`
     const Element = options?.disableStyled
       ? element
-      : styled(element as any, { name: displayName })({})
+      : styled(element as any, {name: displayName})({})
 
     return class AglynComponent extends Component<P> {
       static readonly [TYPE_OF] = MODULE_TYPE
       static readonly [TYPE_KIND] = EXTENSION_TYPE
       static readonly $id = componentId
       static readonly displayName = displayName
-      static readonly options = { displayName: componentId, ...options }
-      static readonly defaultProps: Partial<P> = { ...options?.defaultProps }
+      static readonly options = {displayName: componentId, ...options}
+      static readonly defaultProps: Partial<P> = {...options?.propsDefaults}
       public innerRef: Ref<any>
 
       constructor(props) {

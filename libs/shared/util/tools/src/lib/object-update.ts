@@ -16,19 +16,17 @@
  */
 
 /**
- *
+ * Shortcut for Object.assign({}, target, ...otherTargets)
  *
  * @export
  * @template T
- * @template K
- * @param {Readonly<T>} obj
- * @param {K} key
- * @param {{ copy: boolean }} [options]
- * @returns {T}
+ * @template U
+ * @param {T} target
+ * @param {...U[]} source
+ * @returns {(T & U)}
  */
-export function deleteProperty<T, K extends keyof T>(obj: T, key: K, options?: { copy: boolean }): Omit<T, K> {
-  const {copy = false} = options ?? {}
-  const _obj = copy ? {...obj} : obj
-  delete _obj[key]
-  return _obj
+export function objectUpdate<T, U>(target: T, ...source: U[]): T & U {
+  // Encapsulate the idea of passing a new object as the first parameter
+  // to Object.assign to ensure we correctly copy data instead of mutating
+  return Object.assign({}, target, ...source)
 }
