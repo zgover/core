@@ -24,8 +24,8 @@
  * @param {(Iterable<T> | ArrayLike<T>)} val
  * @returns {number}
  */
-export function len<T>(val: Iterable<T> | ArrayLike<T>): number {
-  if (val) {
+export function length<T>(val: Iterable<T> | ArrayLike<T>): number {
+  if (val && objectH) {
     return val['length'] ?? 0
   }
   return 0

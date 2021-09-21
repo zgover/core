@@ -16,7 +16,7 @@
  */
 
 import { _hasKey, _isStrT } from '@aglyn/shared/util/guards'
-import { len } from '@aglyn/shared/util/tools'
+import { length } from '@aglyn/shared/util/tools'
 import { Schema as DdfSchema } from '@data-driven-forms/react-form-renderer'
 import validation from '@data-driven-forms/react-form-renderer/validation'
 import { ValidationOptions } from '@data-driven-forms/react-form-renderer/validation/validation'
@@ -33,18 +33,20 @@ export const validateField = (field: Fields.FieldT, value: any): Fields.FieldT =
 
   if (current.status === Fields.FieldStatus.NONE) {
     current.status |= Fields.FieldStatus.TOUCHED
-  } else if (current.status & Fields.FieldStatus.VALID) {
+  }
+  else if (current.status & Fields.FieldStatus.VALID) {
     current.status ^= Fields.FieldStatus.VALID
-  } else if (current.status & Fields.FieldStatus.ERROR) {
+  }
+  else if (current.status & Fields.FieldStatus.ERROR) {
     current.status ^= Fields.FieldStatus.ERROR
   }
 
   let isValid = true
   const validators = current.validators ?? []
 
-  if (len(validators)) {
+  if (length(validators)) {
     let i = 0
-    while (i < len(validators)) {
+    while (i < length(validators)) {
       let {regex, errorMessage} = validators[i++]
       if (!validateRegex(value, regex)) {
         current.errorMessage = errorMessage
@@ -52,7 +54,8 @@ export const validateField = (field: Fields.FieldT, value: any): Fields.FieldT =
         break
       }
     }
-  } else if (current.required) {
+  }
+  else if (current.required) {
     isValid = Boolean(value)
     current.errorMessage = 'Field is required'
   }

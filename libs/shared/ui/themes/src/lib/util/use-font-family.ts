@@ -1,6 +1,3 @@
-import { systemFont } from '../constants'
-
-
 /**
  * @license
  * Copyright 2021 Aglyn LLC
@@ -17,6 +14,8 @@ import { systemFont } from '../constants'
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { systemFont } from '../constants'
 
 
 export function useFontFamily(family: string): string {

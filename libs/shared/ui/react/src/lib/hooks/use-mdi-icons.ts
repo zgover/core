@@ -18,7 +18,7 @@
 import { icons as mdiIcons, IconsNormalized } from '@aglyn/shared/data/mdi'
 
 import { _isArr } from '@aglyn/shared/util/guards'
-import { SearchFuzzy } from '@aglyn/shared/util/helpers'
+import { FindWithFuzzy } from '@aglyn/shared/util/helpers'
 import { useCallback, useMemo, useState } from 'react'
 
 
@@ -60,7 +60,7 @@ const defaultKeys = ['id', 'name', 'aliases']
 export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIconsReturn {
   const allIcons = useMemoizedMdiIcons()
   const options = {keys: opts?.keys ?? defaultKeys}
-  const fuzzy = new SearchFuzzy(allIcons, options)
+  const fuzzy = new FindWithFuzzy(allIcons, options)
   const searchItems = (query: string) => fuzzy.search(query ?? '').map((i) => i.item)
   const [query, setQuery] = useState(initialQuery ?? '')
   const filteredIcons = useMemo<MdiIcon[]>(() => {

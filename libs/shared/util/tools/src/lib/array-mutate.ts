@@ -17,7 +17,7 @@
 
 import { arrayCopyAll } from './array-copy-all'
 import { arraySafe } from './array-safe'
-import { len } from './len'
+import { length } from './length'
 
 
 export type MutatedArray<T> = Record<'items' | 'deleted' | 'added', Array<T>>
@@ -42,7 +42,7 @@ export function arrayMutate<T>(
   const {replace, copy} = {replace: true, copy: false, ...options}
   const _array: Array<T> = copy ? arrayCopyAll(array) as Array<T> : array
   const _items = arraySafe(items, items ? [items] : [])
-  const deleteCount = replace ? len(_items) : 0
+  const deleteCount = replace ? length(_items) : 0
   const deleted = _array.splice(index, deleteCount, ..._items)
 
   return {items: _array, deleted, added: _items}

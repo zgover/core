@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { len } from '@aglyn/shared/util/tools'
+import { length } from '@aglyn/shared/util/tools'
 import { AnyObj } from '@aglyn/shared/util/types'
 
 
@@ -247,8 +247,8 @@ export function _ln<T>(
   operator: '>' | '<' | '=' | '==' | '===' | '<=' | '>=' = '===',
 ): boolean {
   if (leftValue) {
-    const left = _isNum(leftValue) ? leftValue : len(leftValue)
-    const right = _isNum(rightValue) ? rightValue : len(rightValue)
+    const left = _isNum(leftValue) ? leftValue : length(leftValue)
+    const right = _isNum(rightValue) ? rightValue : length(rightValue)
     switch (operator) {
       case '=':
       case '===':
