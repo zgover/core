@@ -125,6 +125,28 @@
         }
       }
     },
+    "sdk-extensions-components": {
+      "root": "libs/sdk/extensions/components",
+      "sourceRoot": "libs/sdk/extensions/components/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/sdk/extensions/components/**/*.{ts,tsx,js,jsx}"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/sdk/extensions/components"],
+          "options": {
+            "jestConfig": "libs/sdk/extensions/components/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
     "sdk-framework": {
       "root": "libs/sdk/framework",
       "sourceRoot": "libs/sdk/framework/src",

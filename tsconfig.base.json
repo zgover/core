@@ -28,6 +28,7 @@
     "baseUrl": ".",
     "paths": {
       "@aglyn/sdk/builder": ["libs/sdk/builder/src/index.ts"],
+      "@aglyn/sdk/extensions/components": ["libs/sdk/extensions/components/src/index.ts"],
       "@aglyn/sdk/framework": ["libs/sdk/framework/src/index.ts"],
       "@aglyn/sdk/plugins/material": ["libs/sdk/plugins/material/src/index.ts"],
       "@aglyn/sdk/renderer": ["libs/sdk/renderer/src/index.ts"],

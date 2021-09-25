@@ -114,6 +114,7 @@
     "@nrwl/web": "12.9.0",
     "@nrwl/workspace": "12.9.0",
     "@testing-library/react": "11.2.5",
+    "@testing-library/react-hooks": "7.0.1",
     "@types/change-case": "^2.3.1",
     "@types/deep-equal": "^1.0.1",
     "@types/deepmerge": "^2.2.0",

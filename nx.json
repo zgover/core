@@ -35,6 +35,9 @@
       "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:builder"],
       "implicitDependencies": []
     },
+    "sdk-extensions-components": {
+      "tags": []
+    },
     "sdk-framework": {
       "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:framework"],
       "implicitDependencies": []

@@ -15,15 +15,21 @@
  * limitations under the License.
  */
 
+import {
+  AglynEmitterPayload,
+  AglynExtensionInstance,
+  AglynTypeFields,
+  AglynUniqueId,
+  EXTENSION_TYPE,
+  MODULE_TYPE,
+  PayloadData,
+  RestrictFlag,
+} from '@aglyn/sdk/framework'
+import '@aglyn/sdk/framework'
 import { IconId as MdiIconId } from '@aglyn/shared/data/mdi'
 import { FormSchema, InnerRefProp } from '@aglyn/shared/ui/react'
 import { AnyProps, JSXIntrinsicElement, JSXNode, ResolveProps } from '@aglyn/shared/util/types'
 import { ComponentClass, FunctionComponent } from 'react'
-import { RestrictFlag } from '../../constants'
-import { AglynEmitterPayload } from '../../emitter'
-import '../../emitter'
-import { EXTENSION_TYPE, MODULE_TYPE } from '../../symbol'
-import { AglynExtensionInstance, AglynTypeFields, AglynUniqueId, PayloadData } from '../../types'
 
 
 export type AglynComponentTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof EXTENSION_TYPE>
@@ -99,6 +105,7 @@ export interface AglynModuleEventParams
   [AglynComponentEventFlag.COMPONENTS_PLUGIN_REGISTER]: RegisterPluginPayload
   [AglynComponentEventFlag.COMPONENTS_PLUGIN_UNREGISTER]: UnregisterPluginPayload
 }
+
 
 export namespace ComponentOptions {
   export type Essential = {

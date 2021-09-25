@@ -29,6 +29,3 @@ export * from './lib/util/aglyn-is'
 
 export * from './lib/models/aglyn-base.model'
 export * from './lib/models/aglyn-extension.model'
-
-export * from './lib/models/extensions/components-api.extension'
-export * from './lib/models/extensions/components-types.extension'

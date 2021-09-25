@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
-import { _validateAppArg, getExtension } from '../../api'
-import { AglynExtension } from '../../constants'
-import { AglynAppInstance } from '../../types'
+import {
+  _validateAppArg,
+  AglynAppInstance,
+  AglynExtension,
+  getExtension,
+} from '@aglyn/sdk/framework'
+
 import {
   AglynComponent,
   AglynComponentsExtension,
@@ -30,9 +34,10 @@ import {
   UnregisterPluginPayload,
 } from './components-types.extension'
 
+
 export function _getComponentsExtension(app: AglynAppInstance): AglynComponentsExtension {
   _validateAppArg(app)
-  return getExtension<AglynComponentsExtension>(app, { name: AglynExtension.COMPONENTS })
+  return getExtension<AglynComponentsExtension>(app, {name: AglynExtension.COMPONENTS})
 }
 
 export function getAllComponents(app: AglynAppInstance): ComponentsRegistryEntries {
@@ -49,32 +54,32 @@ export function getAllComponentsKeys(app: AglynAppInstance): ComponentsRegistryK
 
 export function getComponent<P>(
   app: AglynAppInstance,
-  options: GetComponentPayload
+  options: GetComponentPayload,
 ): AglynComponent<P> {
   return _getComponentsExtension(app)?.getComponent(options)
 }
 
 export function registerComponent<P>(app: AglynAppInstance, component: AglynComponent<P>): void {
-  _getComponentsExtension(app)?.registerComponent({ component })
+  _getComponentsExtension(app)?.registerComponent({component})
 }
 
 export function unregisterComponent(
   app: AglynAppInstance,
-  options: UnregisterComponentPayload
+  options: UnregisterComponentPayload,
 ): void {
   _getComponentsExtension(app)?.unregisterComponent(options)
 }
 
 export function registerComponentsPlugin(
   app: AglynAppInstance,
-  plugin: AglynComponentsPlugin
+  plugin: AglynComponentsPlugin,
 ): void {
-  _getComponentsExtension(app)?.registerComponentsPlugin({ plugin })
+  _getComponentsExtension(app)?.registerComponentsPlugin({plugin})
 }
 
 export function unregisterComponentsPlugin(
   app: AglynAppInstance,
-  options: UnregisterPluginPayload
+  options: UnregisterPluginPayload,
 ): void {
   _getComponentsExtension(app)?.unregisterComponentsPlugin(options)
 }
