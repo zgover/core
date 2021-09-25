@@ -60,30 +60,36 @@ organizations. Easing maintenance and minimizing work required by expensive engi
 * WWW
   * URL: [https://aglyn.com/](https://aglyn.com/)
   * Workspace name: `www`
-  * Directory: [./apps/www](`./apps/www`)
+  * Directory: [apps/www](`apps/www`)
 * Console
   * URL: TBD
   * Workspace name: `console`
-  * Directory: [./apps/console](`./apps/console`)
+  * Directory: [apps/console](`apps/console`)
 
 ### SDK libraries
 
 * Framework (core)
-  * NodeJS import: `@aglyn/sdk/framework`
-  * Workspace name: `sdk-framework`
-  * Directory: [./libs/sdk/framework](`./libs/sdk/framework`)
-* Builder
-  * NodeJS import: `@aglyn/sdk/builder`
-  * Workspace name: `sdk-builder`
-  * Directory: [./libs/sdk/builder](`./libs/sdk/builder`)
-* Renderer
-  * NodeJS import: `@aglyn/sdk/renderer`
-  * Workspace name: `sdk-renderer`
-  * Directory: [./libs/sdk/renderer](`./libs/sdk/renderer`)
-* Plugin: Material
-  * NodeJS import: `@aglyn/sdk/plugins/material`
-  * Workspace name: `sdk-plugins-material`
-  * Directory: [./libs/sdk/plugins/material](`./libs/sdk/plugins/material`)
+  * NodeJS import: `@aglyn/framework`
+  * Workspace name: `framework`
+  * Directory: [libs/framework](`libs/framework`)
+  
+* Extension: Components
+  * NodeJS import: `@aglyn/extension-components`
+  * Workspace name: `extension-components`
+  * Directory: [libs/extension/components](`libs/extension/components`)
+* Extension: Mui
+  * NodeJS import: `@aglyn/extension-mui`
+  * Workspace name: `extension-mui`
+  * Directory: [libs/extension/mui](`libs/extension/mui`)
+  
+* UI: Builder
+  * NodeJS import: `@aglyn/ui-builder`
+  * Workspace name: `ui-builder`
+  * Directory: [libs/ui/builder](`libs/ui/builder`)
+* UI: Renderer
+  * NodeJS import: `@aglyn/ui-renderer`
+  * Workspace name: `ui-renderer`
+  * Directory: [libs/ui/renderer](`libs/ui/renderer`)
 
 
 ### Shared libraries
@@ -93,60 +99,60 @@ organizations. Easing maintenance and minimizing work required by expensive engi
 * MDI
   * NodeJS import: `@aglyn/shared/data/mdi`
   * Workspace name: `shared-data-mdi`
-  * Directory: [./libs/shared/data/mdi](`./libs/shared/data/mdi`)
+  * Directory: [libs/shared/data/mdi](`libs/shared/data/mdi`)
 
 #### Type: feature
 
 * Emitter
   * NodeJS import: `@aglyn/shared/feature/emitter`
   * Workspace name: `shared-feature-emitter`
-  * Directory: [./libs/shared/feature/emitter](`./libs/shared/feature/emitter`)
+  * Directory: [libs/shared/feature/emitter](`libs/shared/feature/emitter`)
 * Logger
   * NodeJS import: `@aglyn/shared/feature/logger`
   * Workspace name: `shared-feature-logger`
-  * Directory: [./libs/shared/feature/logger](`./libs/shared/feature/logger`)
+  * Directory: [libs/shared/feature/logger](`libs/shared/feature/logger`)
 * Timestamp
   * NodeJS import: `@aglyn/shared/feature/timestamp`
   * Workspace name: `shared-feature-timestamp`
-  * Directory: [./libs/shared/feature/timestamp](`./libs/shared/feature/timestamp`)
+  * Directory: [libs/shared/feature/timestamp](`libs/shared/feature/timestamp`)
 
 #### Type: ui
 
 * React components
   * NodeJS import: `@aglyn/shared/ui/react`
   * Workspace name: `shared-ui-react`
-  * Directory: [./libs/shared/ui/react](`./libs/shared/ui/react`)
+  * Directory: [libs/shared/ui/react](`libs/shared/ui/react`)
 * Themes
   * NodeJS import: `@aglyn/shared/ui/themes`
   * Workspace name: `shared-ui-themes`
-  * Directory: [./libs/shared/ui/themes](`./libs/shared/ui/themes`)
+  * Directory: [libs/shared/ui/themes](`libs/shared/ui/themes`)
 
 #### Type: util
 
 * Dom
   * NodeJS import: `@aglyn/shared/util/dom`
   * Workspace name: `shared-util-dom`
-  * Directory: [./libs/shared/util/dom](`./libs/shared/util/dom`)
+  * Directory: [libs/shared/util/dom](`libs/shared/util/dom`)
 * Errors
   * NodeJS import: `@aglyn/shared/util/errors`
   * Workspace name: `shared-util-errors`
-  * Directory: [./libs/shared/util/errors](`./libs/shared/util/errors`)
+  * Directory: [libs/shared/util/errors](`libs/shared/util/errors`)
 * Guards
   * NodeJS import: `@aglyn/shared/util/guards`
   * Workspace name: `shared-util-guards`
-  * Directory: [./libs/shared/util/guards](`./libs/shared/util/guards`)
+  * Directory: [libs/shared/util/guards](`libs/shared/util/guards`)
 * Helpers
   * NodeJS import: `@aglyn/shared/util/helpers`
   * Workspace name: `shared-util-helpers`
-  * Directory: [./libs/shared/util/helpers](`./libs/shared/util/helpers`)
+  * Directory: [libs/shared/util/helpers](`libs/shared/util/helpers`)
 * Tools
   * NodeJS import: `@aglyn/shared/util/tools`
   * Workspace name: `shared-util-tools`
-  * Directory: [./libs/shared/util/tools](`./libs/shared/util/tools`)
+  * Directory: [libs/shared/util/tools](`libs/shared/util/tools`)
 * Types
   * NodeJS import: `@aglyn/shared/util/types`
   * Workspace name: `shared-util-types`
-  * Directory: [./libs/shared/util/types](`./libs/shared/util/types`)
+  * Directory: [libs/shared/util/types](`libs/shared/util/types`)
 
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->

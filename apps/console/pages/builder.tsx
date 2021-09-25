@@ -15,17 +15,16 @@
  * limitations under the License.
  */
 
-import { BuilderComponent } from '@aglyn/sdk/builder'
+import { BuilderComponent } from '@aglyn/ui-builder'
 import {
   AglynComponentData,
   getAllComponentsValues,
   getApp,
   registerComponent,
-} from '@aglyn/sdk/framework'
-import { createElementComponent } from '@aglyn/sdk/renderer'
+} from '@aglyn/data-framework'
+import { createElementComponent } from '@aglyn/ui-renderer'
 import { useCallback, useMemo, useState } from 'react'
 import { samplePageData } from '../constants/sample-data'
-
 
 registerComponent(
   getApp(),
@@ -33,7 +32,7 @@ registerComponent(
     displayName: 'Root Element',
     title: 'Root element',
     icon: 'block',
-  })('span'),
+  })('span')
 )
 
 registerComponent(
@@ -42,7 +41,7 @@ registerComponent(
     displayName: 'Root Element',
     title: 'Root element',
     icon: 'block',
-  })('span'),
+  })('span')
 )
 
 registerComponent(
@@ -51,7 +50,7 @@ registerComponent(
     displayName: 'Root Element',
     title: 'Root element',
     icon: 'block',
-  })('span'),
+  })('span')
 )
 
 registerComponent(
@@ -60,7 +59,7 @@ registerComponent(
     displayName: 'Root Element',
     title: 'Root element',
     icon: 'block',
-  })('span'),
+  })('span')
 )
 
 registerComponent(
@@ -69,7 +68,7 @@ registerComponent(
     displayName: 'Root Element',
     title: 'Root element',
     icon: 'block',
-  })('span'),
+  })('span')
 )
 
 function Builder(props) {

@@ -64,26 +64,26 @@
                 ]
               },
               {
-                "sourceTag": "scope:lib:sdk:builder",
+                "sourceTag": "scope:lib:sdk:ui-builder",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:sdk:builder",
+                  "scope:lib:sdk:ui-builder",
                   "scope:lib:sdk:framework",
-                  "scope:lib:sdk:renderer",
+                  "scope:lib:sdk:ui-renderer",
                   "scope:lib:shared"
                 ]
               },
               {
-                "sourceTag": "scope:lib:sdk:renderer",
+                "sourceTag": "scope:lib:sdk:ui-renderer",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:sdk:renderer",
+                  "scope:lib:sdk:ui-renderer",
                   "scope:lib:sdk:framework",
                   "scope:lib:shared"
                 ]
               },
               {
-                "sourceTag": "scope:lib:sdk:plugin",
+                "sourceTag": "scope:lib:sdk:extension",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:sdk:plugin",
+                  "scope:lib:sdk:extension",
                   "scope:lib"
                 ]
               },

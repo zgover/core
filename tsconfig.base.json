@@ -27,15 +27,13 @@
     "strictBindCallApply": true,
     "baseUrl": ".",
     "paths": {
-      "@aglyn/sdk/builder": ["libs/sdk/builder/src/index.ts"],
-      "@aglyn/sdk/extensions/components": ["libs/sdk/extensions/components/src/index.ts"],
-      "@aglyn/sdk/framework": ["libs/sdk/framework/src/index.ts"],
-      "@aglyn/sdk/plugins/material": ["libs/sdk/plugins/material/src/index.ts"],
-      "@aglyn/sdk/renderer": ["libs/sdk/renderer/src/index.ts"],
+      "@aglyn/data-components": ["libs/data/components/src/index.ts"],
+      "@aglyn/data-framework": ["libs/data/framework/src/index.ts"],
+      "@aglyn/feature-mui-plugin": ["libs/feature/mui-plugin/src/index.ts"],
+      "@aglyn/shared-util-emitter": ["libs/shared/util/emitter/src/index.ts"],
+      "@aglyn/shared-util-logger": ["libs/shared/util/logger/src/index.ts"],
+      "@aglyn/shared-util-timestamp": ["libs/shared/util/timestamp/src/index.ts"],
       "@aglyn/shared/data/mdi": ["libs/shared/data/mdi/src/index.ts"],
-      "@aglyn/shared/feature/emitter": ["libs/shared/feature/emitter/src/index.ts"],
-      "@aglyn/shared/feature/logger": ["libs/shared/feature/logger/src/index.ts"],
-      "@aglyn/shared/feature/timestamp": ["libs/shared/feature/timestamp/src/index.ts"],
       "@aglyn/shared/ui/react": ["libs/shared/ui/react/src/index.ts"],
       "@aglyn/shared/ui/themes": ["libs/shared/ui/themes/src/index.ts"],
       "@aglyn/shared/util/dom": ["libs/shared/util/dom/src/index.ts"],
@@ -43,7 +41,9 @@
       "@aglyn/shared/util/guards": ["libs/shared/util/guards/src/index.ts"],
       "@aglyn/shared/util/helpers": ["libs/shared/util/helpers/src/index.ts"],
       "@aglyn/shared/util/tools": ["libs/shared/util/tools/src/index.ts"],
-      "@aglyn/shared/util/types": ["libs/shared/util/types/src/index.ts"]
+      "@aglyn/shared/util/types": ["libs/shared/util/types/src/index.ts"],
+      "@aglyn/ui-builder": ["libs/ui/builder/src/index.ts"],
+      "@aglyn/ui-renderer": ["libs/ui/renderer/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

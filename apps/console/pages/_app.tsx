@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AglynExtension, initializeApp } from '@aglyn/sdk/framework'
+import { AglynExtension, initializeApp } from '@aglyn/data-framework'
 import {
   makeLinkElements,
   MakeLinkElementsConfig,

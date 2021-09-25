@@ -31,39 +31,20 @@
       "tags": ["scope:app", "scope:app:console"],
       "implicitDependencies": ["console"]
     },
-    "sdk-builder": {
-      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:builder"],
+    "data-components": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:extension"],
       "implicitDependencies": []
     },
-    "sdk-extensions-components": {
-      "tags": []
-    },
-    "sdk-framework": {
+    "data-framework": {
       "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:framework"],
       "implicitDependencies": []
     },
-    "sdk-plugins-material": {
-      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:plugin"],
-      "implicitDependencies": []
-    },
-    "sdk-renderer": {
-      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:renderer"],
+    "feature-mui-plugin": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:extension"],
       "implicitDependencies": []
     },
     "shared-data-mdi": {
       "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:data"],
-      "implicitDependencies": []
-    },
-    "shared-feature-emitter": {
-      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:feature", "scope:lib:emitter"],
-      "implicitDependencies": []
-    },
-    "shared-feature-logger": {
-      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:feature", "scope:lib:logger"],
-      "implicitDependencies": []
-    },
-    "shared-feature-timestamp": {
-      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:feature", "scope:lib:timestamp"],
       "implicitDependencies": []
     },
     "shared-ui-react": {
@@ -78,6 +59,10 @@
       "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:util"],
       "implicitDependencies": []
     },
+    "shared-util-emitter": {
+      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:feature", "scope:lib:emitter"],
+      "implicitDependencies": []
+    },
     "shared-util-errors": {
       "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:util", "scope:lib:error"],
       "implicitDependencies": []
@@ -90,12 +75,28 @@
       "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:util"],
       "implicitDependencies": []
     },
+    "shared-util-logger": {
+      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:feature", "scope:lib:logger"],
+      "implicitDependencies": []
+    },
+    "shared-util-timestamp": {
+      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:feature", "scope:lib:timestamp"],
+      "implicitDependencies": []
+    },
     "shared-util-tools": {
       "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:util"],
       "implicitDependencies": []
     },
     "shared-util-types": {
       "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:util"],
+      "implicitDependencies": []
+    },
+    "ui-builder": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:ui-builder"],
+      "implicitDependencies": []
+    },
+    "ui-renderer": {
+      "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:ui-renderer"],
       "implicitDependencies": []
     },
     "www": {
