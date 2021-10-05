@@ -39,12 +39,14 @@ export const ElementRendererComponent = forwardRef<any, ElementRendererComponent
     // TODO: move to context consumer
     const component = getComponent(getApp(), {componentId: _s(elementData?.component)})
     const ctor = component
-    const options = component?.options
+    const options = {...component?.options}
     const resolvedProps = handleElementResolveProps(elementData?.props, options, ctor)
     const {children: content = null, ...ctorProps} = resolvedProps
     const ComponentCtor = (ReactIs.isValidElementType(ctor) ? ctor : 'div') as ElementType
     const haveChildren = yes(!_isArr(elementData?.children) || _isArrEmpty(elementData?.children))
-    const refProps = options?.disableRef ? {} : options?.innerRef ? {innerRef: ref} : {ref: ref}
+    const refProps = !options.elementRef?.disable
+      ? options.elementRef?.innerRef ? {innerRef: ref} : {ref: ref}
+      : undefined
 
     return (
       <ComponentCtor {...refProps} {...ctorProps} {...rest}>

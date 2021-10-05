@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AglynComponentOptions } from '@aglyn/data-framework'
+import { AglynComponentOptions } from '@aglyn/data-components'
 import { _isFnT } from '@aglyn/shared-util-guards'
 import { copy } from '@aglyn/shared-util-tools'
 import { handleElementPropDefaults } from './handle-element-prop-defaults'
@@ -37,7 +37,7 @@ export function handleElementResolveProps<P = any>(
   const _props = copy({...elementDataProps} as unknown) as P
   const _defaults = copy({...propsDefaults}) as P
   const propsMergedDefaults = handleElementPropDefaults(_props, _defaults) as P
-  if (_isFnT(propsResolver)) return propsResolver.call(thisArg, propsMergedDefaults)
+  if (_isFnT(propsResolver)) return propsResolver.call(thisArg, propsMergedDefaults) as P
   return propsMergedDefaults
 }
 export default handleElementResolveProps

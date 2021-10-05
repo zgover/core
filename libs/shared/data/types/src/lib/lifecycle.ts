@@ -30,11 +30,11 @@ export interface LifecycleObserver {
   /**
    * Should be invoked once immediately after instantiation
    */
-  onInit(...args: unknown[]): unknown
+  onInit?(...args: unknown[]): unknown
   /**
    * Should be invoked once as last step before garbage collection
    */
-  onDestroy(...args: unknown[]): unknown
+  onDestroy?(...args: unknown[]): unknown
 }
 
 export interface LoadableObserver extends LifecycleObserver {

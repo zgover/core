@@ -20,8 +20,6 @@ export const _apps: AglynAppsMap = new Map()
 export const _extensionControllers: AglynExtensionsControllersMap = new Map()
 export const _commandControllers: AglynCommandsControllersMap = new Map()
 export const _modules = {
-  extensions: [
-    () => require('../../../extensions/components/src/lib/components.extension').default,
-  ],
+  extensions: [],
   commands: [],
 }

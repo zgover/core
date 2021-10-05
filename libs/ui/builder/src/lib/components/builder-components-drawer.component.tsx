@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AglynComponent } from '@aglyn/data-framework'
+import { AglynComponent } from '@aglyn/data-components'
 import {
   CardIconListItem,
   componentMapper,

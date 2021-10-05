@@ -1,4 +1,4 @@
-# shared-util-emitter
+# @aglyn/shared-util-emitter
 
 This library was generated with [Nx](https://nx.dev).
 

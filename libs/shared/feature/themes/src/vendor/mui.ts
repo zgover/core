@@ -108,6 +108,7 @@ import {
 import { ClassKeyInferable } from '@mui/styles/withStyles'
 import { ShapeOptions, Spacing, SpacingOptions } from '@mui/system'
 
+
 export * as JSS from 'jss'
 export { default as jssRtl } from 'jss-rtl'
 
@@ -190,18 +191,16 @@ declare module '@mui/material/styles' {
     }
   }
 
-  type ExtendPropsOfWithStyles<
-    P extends { classes?: ClassNameMap<string> },
+  type ExtendPropsOfWithStyles<P extends { classes?: ClassNameMap<string> },
     StylesType extends ClassKeyInferable<any, any>,
-    IncludeTheme extends boolean | undefined = false
-  > = P & WithStyles<StylesType, IncludeTheme>
+    IncludeTheme extends boolean | undefined = false> = P & WithStyles<StylesType, IncludeTheme>
 }
 
 declare module '@mui/styles' {
   interface DefaultTheme extends Theme {}
 }
 
-export {
+export type {
   BaseCSSProperties,
   BaseCreateCSSProperties,
   Breakpoint,
@@ -230,7 +229,6 @@ export {
   PaletteColorOptions,
   PaletteOptions,
   // ResponsiveFontSizesOptions,
-  ServerStyleSheets,
   // Shadows,
   SimplePaletteColorOptions,
   ShapeOptions,
@@ -240,17 +238,13 @@ export {
   StyleRulesCallback,
   StyledComponent,
   StyledComponentProps,
-  StyledEngineProvider,
   StyledProps,
   Styles,
-  StylesContext,
   StylesOptions,
-  StylesProvider,
   StylesProviderProps,
   Theme,
   ThemeOfStyles,
   ThemeOptions,
-  ThemeProvider,
   ThemeProviderProps,
   ThemeWithProps,
   ThemedComponentProps,
@@ -269,6 +263,14 @@ export {
   WithThemeCreatorOption,
   // ZIndex,
   // ZIndexOptions,
+}
+
+export {
+  ServerStyleSheets,
+  StyledEngineProvider,
+  StylesContext,
+  StylesProvider,
+  ThemeProvider,
   alpha,
   createStyles,
   createTheme,

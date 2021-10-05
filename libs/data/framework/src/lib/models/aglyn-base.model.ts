@@ -1,10 +1,3 @@
-import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { getStaticField } from '@aglyn/shared-util-tools'
-import { Dictionary } from '@aglyn/shared-data-types'
-import { AglynEmitter } from '../emitter'
-import { AglynError } from '../error'
-import { AglynBaseModelInstance, AglynLogger } from '../types'
-
 /**
  * @license
  * Copyright 2021 Aglyn LLC
@@ -21,6 +14,13 @@ import { AglynBaseModelInstance, AglynLogger } from '../types'
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { Timestamp } from '@aglyn/shared-util-timestamp'
+import { getStaticField } from '@aglyn/shared-util-tools'
+import { Dictionary } from '@aglyn/shared-data-types'
+import { AglynEmitter } from '../emitter'
+import { AglynError } from '../error'
+import { AglynBaseModelInstance, AglynLogger } from '../types'
 
 const TAG = 'AglynBaseModel'
 
@@ -68,6 +68,4 @@ export abstract class AglynBaseModel implements AglynBaseModelInstance {
       created: this.#created,
     }
   }
-  public onInit = (...args: unknown[]): void => {}
-  public onDestroy = (...args: unknown[]): void => {}
 }

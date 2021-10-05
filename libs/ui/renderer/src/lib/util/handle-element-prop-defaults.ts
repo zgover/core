@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { objectDeepMerge } from '@aglyn/shared-util-helpers'
+import { objectDeepMerge } from '@aglyn/shared-util-vendor'
 
 export type HandlePropsOptions = {
   clone?: boolean

@@ -1,4 +1,4 @@
-# shared-feature-themes
+# @aglyn/shared-feature-themes
 
 This library was generated with [Nx](https://nx.dev).
 

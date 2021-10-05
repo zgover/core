@@ -18,7 +18,7 @@ import { EventEmitter2 } from 'eventemitter2'
 import mitt from 'mitt'
 
 export * from 'mitt'
-export {
+export type {
   event,
   eventNS,
   ConstructorOptions,

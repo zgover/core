@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { AglynExtension, initializeApp } from '@aglyn/data-framework'
+import { ComponentsExtension } from '@aglyn/data-components'
+import { initializeApp } from '@aglyn/data-framework'
 import {
   makeLinkElements,
   MakeLinkElementsConfig,
@@ -33,7 +34,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { AppProps as NextAppProps } from 'next/app'
 import Head from 'next/head'
 import { Fragment, useEffect } from 'react'
-import { APP } from '../../www/const'
+import { APP } from '../const'
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
@@ -45,9 +46,7 @@ const linkElements: MakeLinkElementsConfig = []
 
 try {
   initializeApp({
-    extensions: {
-      [AglynExtension.COMPONENTS]: true,
-    },
+    extensions: [ComponentsExtension],
   })
 } catch (e) {
   console.error(e, 'initialize aglyn app')

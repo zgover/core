@@ -28,11 +28,11 @@ export function createElementData(
   data?: Omit<AglynComponentData, '$id' | 'component'>
 ): AglynComponentData {
   return objectDeepMergeMany([
-    { ...ELEMENT_DEFAULTS },
+    {...ELEMENT_DEFAULTS},
     {
       $id: createElementDataId(),
       component: componentId,
     },
-    { ...data },
-  ])
+    {...data},
+  ]) as AglynComponentData
 }

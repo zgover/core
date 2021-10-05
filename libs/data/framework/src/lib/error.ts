@@ -16,7 +16,7 @@
  */
 
 import { ErrorTagMessages, NsErrorFactory } from '@aglyn/shared-util-errors'
-import { IndexOf } from '@aglyn/shared-util-types'
+import { IndexOf } from '@aglyn/shared-data-types'
 import { PayloadData, PayloadParams } from './types'
 
 

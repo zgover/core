@@ -19,7 +19,10 @@ import createCache, { Options } from '@emotion/cache'
 import { CacheProvider, EmotionCache } from '@emotion/react'
 import createInstance, { EmotionServer } from '@emotion/server/create-instance'
 
-export { CacheProvider, EmotionCache, EmotionServer }
+export type {
+  EmotionCache, EmotionServer
+}
+export { CacheProvider }
 
 export type CreateEmotionCacheOptions = Options
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getIcon, IconData, IconId } from '@aglyn/shared-data-mdi'
+import { getIcon, IconData, IconId as MdiIconId  } from '@aglyn/shared-data-mdi'
 import { _isStrT } from '@aglyn/shared-util-guards'
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@mui/material/SvgIcon'
 import { createSvgIcon } from '@mui/material/utils'
@@ -24,7 +24,7 @@ import { SvgPathData, svgPathElement } from './svg-path'
 
 export { createSvgIcon }
 
-export type IconId = IconId
+export type IconId = MdiIconId
 export type Path = SvgPathData | JSX.Element
 
 /**

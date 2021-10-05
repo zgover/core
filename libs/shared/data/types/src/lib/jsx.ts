@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+import type { Component } from 'react'
+
+
 export type JSXKey = string | number
 
 export type JSXText = string | symbol
@@ -32,26 +35,27 @@ export type JSXIntrinsicElementMap<P = any> = {
 export type JSXElementFunctionComponent<P> = (props: P) => JSXElement | null
 export type JSXElementClassComponent<P> = new (props: P) => JSXElementClass
 export type JSXElementConstructor<P> = JSXElementFunctionComponent<P> | JSXElementClassComponent<P>
-export type JSXIntrinsicElement<P = any> = JSXIntrinsicElementMap<P>[keyof JSXIntrinsicElementMap]
+export type JSXIntrinsicElement<P = any> = JSXIntrinsicElementMap<P>[keyof JSXIntrinsicElements]
+export type JSXElementType<P = any> =
+  JSXIntrinsicElement<P>
+  | JSXElementConstructor<P>
 
 interface JSXNodeArray extends Array<JSXNode> {}
 
-export interface JSXElementBase<
-  P = any,
-  T extends string | JSXElementConstructor<any> = string | JSXElementConstructor<any>
-> {
+export interface JSXElementBase<P = any,
+  T extends string | JSXElementConstructor<any> = string | JSXElementConstructor<any>> {
   type: T
   props: P
   key: JSXKey | null
 }
 
-export interface JSXElementClassBase<P = {}, S = {}> {
+export interface JSXElementClassBase<P = {}, S = {}> extends Component<P, S> {
   context: unknown
   setState<K extends keyof S>(
     state:
       | ((prevState: Readonly<S>, props: Readonly<P>) => Pick<S, K> | S | null)
       | (Pick<S, K> | S | null),
-    callback?: () => void
+    callback?: () => void,
   ): void
   forceUpdate(callback?: () => void): void
   render(): JSXNode
@@ -65,9 +69,11 @@ interface JSXPortal extends JSXElementBase {
 }
 
 export interface JSXElement extends JSXElementBase {}
+
 export interface JSXElementClass extends JSXElementClassBase {}
 
 export interface JSXElementAttributesProperty extends JSX.ElementAttributesProperty {}
+
 export interface JSXElementChildrenAttribute extends JSX.ElementChildrenAttribute {}
 
 export interface ResolveProps<P = any> {

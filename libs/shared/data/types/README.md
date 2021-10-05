@@ -1,4 +1,4 @@
-# shared-data-types
+# @aglyn/shared-data-types
 
 This library was generated with [Nx](https://nx.dev).
 

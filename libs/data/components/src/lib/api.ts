@@ -16,11 +16,12 @@
  */
 
 import {
-  _validateAppArg,
   AglynAppInstance,
   AglynExtension,
-  getExtension,
+  getExtension, IAglynExtension,
+  validateAppArg,
 } from '@aglyn/data-framework'
+import { OrUndef } from '@aglyn/shared-data-types'
 
 import {
   AglynComponent,
@@ -35,8 +36,11 @@ import {
 } from './types'
 
 
+export const ComponentsExtension: () => Promise<IAglynExtension> = () =>
+  import('./models/aglyn-components-extension-model').then(m => m.default)
+
 export function _getComponentsExtension(app: AglynAppInstance): AglynComponentsExtension {
-  _validateAppArg(app)
+  validateAppArg(app)
   return getExtension<AglynComponentsExtension>(app, {name: AglynExtension.COMPONENTS})
 }
 
@@ -55,7 +59,7 @@ export function getAllComponentsKeys(app: AglynAppInstance): ComponentsRegistryK
 export function getComponent<P>(
   app: AglynAppInstance,
   options: GetComponentPayload,
-): AglynComponent<P> {
+): OrUndef<AglynComponent<P>> {
   return _getComponentsExtension(app)?.getComponent(options)
 }
 

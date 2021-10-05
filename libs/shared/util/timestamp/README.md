@@ -1,4 +1,4 @@
-# shared-util-timestamp
+# @aglyn/shared-util-timestamp
 
 This library was generated with [Nx](https://nx.dev).
 

@@ -1,6 +1,8 @@
-# Logger Helper
+# @aglyn/shared-util-logger
 
-###### @aglyn/shared-util-logger
+---
+
+# Logger Helper
 
 This library was generated with [Nx](https://nx.dev).
 
@@ -38,7 +40,7 @@ Each `Logger` instance supports 5 log functions each to be used in a specific in
 Each log will be formatted in the following manner:
 
 ```typescript
-`[${new Date()}]  ${COMPONENT_NAME}: ${...args}`
+`"[${new Date()}] ${COMPONENT_NAME}: ${...args}"`
 ```
 
 ## Running unit tests

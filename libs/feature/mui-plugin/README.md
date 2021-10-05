@@ -1,4 +1,4 @@
-# @aglyn/sdk-ext-material
+# @aglyn/feature-mui-plugin
 
 This library was generated with [Nx](https://nx.dev).
 

@@ -1,3 +1,3 @@
-# @aglyn/sdk-ext-components
+# @aglyn/data-components
 
 Provides framework to build component elements

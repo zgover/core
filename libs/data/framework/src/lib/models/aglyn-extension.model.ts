@@ -25,8 +25,8 @@ const TAG = 'AglynExtensionModel'
 
 export abstract class AglynExtensionModel<T = any>
   extends AglynBaseModel
-  implements AglynExtensionInstance
-{
+  implements AglynExtensionInstance {
+
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly [TYPE_OF]: number | symbol = MODULE_TYPE
   public static readonly [TYPE_KIND]: number | symbol = EXTENSION_TYPE
@@ -65,6 +65,9 @@ export abstract class AglynExtensionModel<T = any>
   public getName = (): string => {
     return this.$id
   }
+  public static getName = (): string => {
+    return getStaticField('$id', this)
+  }
   public getOptions = (): AglynExtensionOptions => {
     return this.#options
   }
@@ -86,4 +89,6 @@ export abstract class AglynExtensionModel<T = any>
       [TYPE_KIND]: getStaticField(TYPE_KIND, this),
     }
   }
+  public abstract onInit(app: AglynAppInstance): void
+  public abstract onDestroy(app: AglynAppInstance): void
 }

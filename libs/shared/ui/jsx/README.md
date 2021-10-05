@@ -1,4 +1,4 @@
-# ui-common
+# @aglyn/shared-ui-jsx
 
 This library was generated with [Nx](https://nx.dev).
 

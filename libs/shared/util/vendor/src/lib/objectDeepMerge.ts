@@ -3,7 +3,8 @@ import objectDeepMerge, {
   Options as ObjectDeepMergeOptions,
 } from 'deepmerge'
 
-export { objectDeepMerge, objectDeepMergeMany, ObjectDeepMergeOptions }
+export type {ObjectDeepMergeOptions }
+export { objectDeepMerge, objectDeepMergeMany }
 
 // export function objectDeepMerge<T>(x: Partial<T>, y: Partial<T>, options?: DeepMergeOptions): T
 // export function objectDeepMerge<T1, T2>(x: Partial<T1>, y: Partial<T2>, options?: DeepMergeOptions): T1 & T2

@@ -1,4 +1,4 @@
-# shared-data-mdi
+# @aglyn/shared-data-mdi
 
 This library was generated with [Nx](https://nx.dev).
 

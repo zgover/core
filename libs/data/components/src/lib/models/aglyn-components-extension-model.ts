@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { AglynAppInstance, AglynExtensionModel } from '@aglyn/sdk/framework'
+import { AglynAppInstance, AglynExtensionModel } from '@aglyn/data-framework'
+import { OrUndef } from '@aglyn/shared-data-types'
 import { _isArr, _isUndOrNull } from '@aglyn/shared-util-guards'
 import { getStaticField } from '@aglyn/shared-util-tools'
 
@@ -37,7 +38,7 @@ import {
   SelfComponentId,
   UnregisterComponentPayload,
   UnregisterPluginPayload,
-} from './types'
+} from '../../lib/types'
 
 
 const TAG = 'AglynComponentsExtensionModel'
@@ -52,13 +53,11 @@ export default class AglynComponentsExtensionModel
     plugins: new Map(),
     components: new Map(),
   }
-  public onDestroy = (app: AglynAppInstance): this => {
+  public onDestroy: (app: AglynAppInstance) => void = (app: AglynAppInstance): void => {
     this.listeners.forEach(([flag, method]) => app.getEmitter().off(flag, method))
-    return this
   }
-  public onInit = (app: AglynAppInstance): this => {
+  public onInit: (app: AglynAppInstance) => void = (app: AglynAppInstance): void => {
     this.listeners.forEach(([flag, method]) => app.getEmitter().on(flag, method))
-    return this
   }
   public toJSON = () => {
     return {
@@ -71,37 +70,34 @@ export default class AglynComponentsExtensionModel
   /**
    * Match any text possibly following a plugin ID
    * TRUE:
-   *  `aa:bb::cc:dd` -> match = "cc:dd"
-   *  `aa::cc:dd` -> match = "cc:dd"
-   *  `aa::cc` -> match = "cc"
-   *  `cc` -> match = "cc"
+   *  * __`aa:bb::cc:dd`__ matches = "cc:dd"
+   *  * __`aa::cc:dd`__ matches = "cc:dd"
+   *  * __`aa::cc`__ matches = "cc"
+   *  * __`cc`__ matches = "cc"
    *
    * FALSE:
-   *  `aa:bb::cc::dd`
-   *  `::cc:dd`
-   *  `::cc`
-   *  `aa::`
+   *  * __`aa:bb::cc::dd`__
+   *  * __`::cc:dd`__
+   *  * __`::cc`__
+   *  * __`aa::`__
    *
-   * @type {RegExp}
    */
-  public static readonly componentIdMatcher =
-    /^(?:(?:(?:[^:]+:)+)?[^:]+)(?::{2})?((?:(?:[^:]+:)+)?[^:]+)$/g
+  public static readonly componentIdMatcher: RegExp = /^(?:(?:(?:[^:]+:)+)?[^:]+)(?::{2})?((?:(?:[^:]+:)+)?[^:]+)$/g
   /**
    * Match any text always prefixing a plugin ID
    * TRUE:
-   *  `aa:bb::cc:dd` -> match = "aa:bb"
-   *  `aa::cc:dd` -> match = "aa"
-   *  `aa::cc` -> match = "aa"
+   *  * __`aa:bb::cc:dd`__ matches = "aa:bb"
+   *  * __`aa::cc:dd`__ matches = "aa"
+   *  * __`aa::cc`__ matches = "aa"
    *
    * FALSE:
-   *  `aa:bb::cc::dd`
-   *  `::cc:dd`
-   *  `::cc`
-   *  `aa::`
+   *  * __`aa:bb::cc::dd`__
+   *  * __`::cc:dd`__
+   *  * __`::cc`__
+   *  * __`aa::`__
    *
-   * @type {RegExp}
    */
-  public static readonly pluginIdMatcher = /^((?:(?:[^:]+:)+)?[^:]+)(?::{2})(?:(?:[^:]+:)+)?[^:]+$/g
+  public static readonly pluginIdMatcher: RegExp = /^((?:(?:[^:]+:)+)?[^:]+)(?::{2})(?:(?:[^:]+:)+)?[^:]+$/g
   public static readonly pluginSeparator = '::'
   //end: not private (readonly)
   //start: constructor
@@ -119,7 +115,7 @@ export default class AglynComponentsExtensionModel
   public getAllComponentsValues = (): ComponentsRegistryValues => {
     return this._componentValues()
   }
-  public getComponent = (payload: GetComponentPayload): AglynComponent => {
+  public getComponent = (payload: GetComponentPayload): OrUndef<AglynComponent> => {
     const {componentId} = payload
     return this.context?.components?.get(this._decodeId(componentId))
   }
@@ -128,7 +124,9 @@ export default class AglynComponentsExtensionModel
     const [pId, cId] = this._getDecodedId(component?.$id)
     if (cId) {
       this.context?.components?.set(this._decodeId([pId, cId]), component)
-      this.context?.plugins?.get(pId)?.components?.set(cId, component)
+      if (pId) {
+        this.context?.plugins?.get(pId)?.components?.set(cId, component)
+      }
     }
     return this
   }
@@ -147,11 +145,13 @@ export default class AglynComponentsExtensionModel
     const [pId, cId] = this._getDecodedId(componentId)
     if (cId) {
       this.context?.components?.delete(this._decodeId([pId, cId]))
-      this.context?.plugins?.get(pId)?.components?.delete(cId)
+      if (pId) {
+        this.context?.plugins?.get(pId)?.components?.delete(cId)
+      }
     }
     return this
   }
-  public unregisterComponentsPlugin = (payload: UnregisterPluginPayload): this => {
+  public unregisterComponentsPlugin: (payload: UnregisterPluginPayload) => this = (payload: UnregisterPluginPayload): this => {
     const {pluginId} = payload
     this.context?.plugins.get(pluginId)?.components?.forEach((component) => {
       this.context?.components?.delete(this._decodeId([pluginId, component?.$id]))
@@ -159,7 +159,7 @@ export default class AglynComponentsExtensionModel
     this.context?.plugins.delete(pluginId)
     return this
   }
-  private listeners: [AglynComponentEventFlag, (...args: unknown[]) => unknown][] = [
+  private listeners: [AglynComponentEventFlag, (...args: any[]) => unknown][] = [
     [AglynComponentEventFlag.COMPONENT_REGISTER, this.registerComponent],
     [AglynComponentEventFlag.COMPONENT_UNREGISTER, this.unregisterComponent],
     [AglynComponentEventFlag.COMPONENTS_PLUGIN_REGISTER, this.registerComponentsPlugin],
@@ -185,14 +185,14 @@ export default class AglynComponentsExtensionModel
   protected _componentValues = (): AglynComponent[] => {
     return [...this.context?.components?.values()]
   }
-  protected _decodeComponentId = (id: ComponentId): SelfComponentId => {
+  protected _decodeComponentId = (id: ComponentId): OrUndef<SelfComponentId> => {
     const _id = this._decodeId(id)
     return (_id.match(getStaticField('componentIdMatcher', this)) ?? [])[0]
   }
   protected _getDecodedId = (id: ComponentId): PluginComponentIdTuple => {
     return [this._decodePluginId(id), this._decodeComponentId(id)]
   }
-  protected _decodePluginId = (id: ComponentId): PluginId => {
+  protected _decodePluginId = (id: ComponentId): OrUndef<PluginId> => {
     const _id = this._decodeId(id)
     return (_id.match(getStaticField('pluginIdMatcher', this)) ?? [])[0]
   }

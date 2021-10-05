@@ -5,7 +5,7 @@
     "explainFiles": true,
     "sourceMap": true,
     "declaration": false,
-    "declarationMap": true,
+    "declarationMap": false,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

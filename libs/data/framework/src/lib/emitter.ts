@@ -47,6 +47,8 @@ export enum AglynModuleEventFlag {
   EXTENSION_UNLOAD = 'module:extension:unload',
 }
 
+export type EventPayload<T, K extends keyof T = keyof T> = Record<K, T[K]>
+
 export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmitterPayload> {
   [AglynAppEventFlag.APP_CREATED]: PayloadData<{ app: AglynAppInstance }>
   [AglynAppEventFlag.BEFORE_DELETE_APP]: PayloadData<{ app: AglynAppInstance }>
@@ -73,9 +75,10 @@ export interface AglynModuleEventPayload extends Record<AglynModuleEventFlag, Ag
   [AglynModuleEventFlag.COMMAND_TRIGGER]: PayloadData<{ commandId: string }>
 }
 
-export type AglynEventPayloads = AglynAppEventPayload &
-  AglynModuleEventPayload &
-  Record<string, AglynEmitterPayload>
+export type AglynEventPayloads =
+  EventPayload<AglynAppEventPayload>
+  & EventPayload<AglynModuleEventPayload>
+  & Record<string, AglynEmitterPayload>
 export type AglynEmitterPayload = PayloadData<Dictionary>
 export type AglynEmitter = Emitter<AglynEventPayloads>
 

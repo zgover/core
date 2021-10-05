@@ -111,7 +111,7 @@
         "no-fallthrough": "off",
         "react/no-children-prop": "off",
         "react-hooks/rules-of-hooks": "off",
-        "tsdoc/syntax": "warn"
+        "tsdoc/syntax": ["warn", {}]
       }
     },
     {

@@ -53,130 +53,205 @@ organizations. Easing maintenance and minimizing work required by expensive engi
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-## Monorepo packages
+## Monorepo sources
 
-**Library types**
+There are many different types of libraries in a workspace. In order to maintain a certain sense of
+order, we recommend having a small number of types, such as the below four (4) types of libraries.
 
-Library Types There are many different types of libraries in a workspace. In order to maintain a
-certain sense of order, we recommend having a small number of types, such as the below four (4)
-types of libraries.
+### Library Types
 
-_Feature libraries:_
+#### Feature
 
 Developers should consider feature libraries as libraries that implement smart UI (with access to
 data sources) for specific business use cases or pages in an application.
 
-_UI libraries:_
+#### UI
 
 A UI library contains only presentational components (also called "dumb" components).
 
-_Data-access libraries:_
+#### Data-access
 
 A data-access library contains code for interacting with a back-end system. It also includes all the
 code related to state management.
 
-_Utility libraries:_
+#### Utility
 
 A utility library contains low-level utilities used by many libraries and applications.
 
+### Directory and file structure
+
+```
+@aglyn/
+├─ apps/
+│  ├─ 🌐 console
+│  └─ 🌐 www
+│
+├─ libs/
+│  ├─ data/
+│  │  ├─ 📚 components
+│  │  └─ 📚 framework
+│  │
+│  ├─ feature/
+│  │  ├─ 📚 mui-plugin
+│  │
+│  ├─ ui/
+│  │  ├─ 📚 builder
+│  │  └─ 📚 renderer
+│  │
+│  ├─ shared/
+│  │  ├─ data/
+│  │  │  ├─ 📚 mdi
+│  │  │  └─ 📚 types
+│  │  │
+│  │  ├─ feature/
+│  │  │  └─ 📚 themes
+│  │  │
+│  │  ├─ ui/
+│  │  │  └─ 📚 jsx
+│  │  │
+│  │  ├─ util/
+│  │  │  ├─ 📚 dom
+│  │  │  ├─ 📚 emitter
+│  │  │  ├─ 📚 errors
+│  │  │  ├─ 📚 guards
+│  │  │  ├─ 📚 logger
+│  │  │  ├─ 📚 timestamp
+│  │  │  ├─ 📚 tools
+│  │  │  └─ 📚 vendor
+│  │  │
+└──┴──┴────────────────────
+```
+
+<!--
+```
+root
+│   README.md
+│   file001.txt    
+│
+└───folder1
+│   │   file011.txt
+│   │   file012.txt
+│   │
+│   └───subfolder1
+│       │   file111.txt
+│       │   file112.txt
+│       │   ...
+│   
+└───folder2
+   │   file021.txt
+   │   file022.txt
+```
+-->
+
+
 ### Apps
 
-* WWW
+###### Monorepo package type
+
+* **WWW**
   * URL: [https://aglyn.com/](https://aglyn.com/)
   * Workspace name: `www`
-  * Directory: [apps/www](`apps/www`)
-* Console
+  * Directory: [apps/www](apps/www)
+* **Console**
   * URL: TBD
   * Workspace name: `console`
-  * Directory: [apps/console](`apps/console`)
+  * Directory: [apps/console](apps/console)
 
-### SDK libraries
+### Core SDK
 
-* Framework (core)
-  * NodeJS import: `@aglyn/framework`
-  * Workspace name: `framework`
-  * Directory: [libs/framework](`libs/framework`)
+###### Monorepo package type
 
-* Extension: Components
-  * NodeJS import: `@aglyn/extension-components`
-  * Workspace name: `extension-components`
-  * Directory: [libs/extension/components](`libs/extension/components`)
-* Extension: Mui
-  * NodeJS import: `@aglyn/extension-mui`
-  * Workspace name: `extension-mui`
-  * Directory: [libs/extension/mui](`libs/extension/mui`)
+#### Data-access
 
-* UI: Builder
+* **Framework (core)**
+  * NodeJS import: `@aglyn/data-framework`
+  * Workspace name: `data-framework`
+  * Directory: [libs/data/framework](libs/data/framework)
+
+* **Extension: Components**
+  * NodeJS import: `@aglyn/data-components`
+  * Workspace name: `data-components`
+  * Directory: [libs/data/components](libs/data/components)
+* **Feature: Components Extensions Mui Plugin**
+  * NodeJS import: `@aglyn/feature-mui-plugin`
+  * Workspace name: `feature-mui-plugin`
+  * Directory: [libs/feature/mui-plugin](libs/feature/mui-plugin)
+
+#### UI
+
+* **Builder**
   * NodeJS import: `@aglyn/ui-builder`
   * Workspace name: `ui-builder`
-  * Directory: [libs/ui/builder](`libs/ui/builder`)
-* UI: Renderer
+  * Directory: [libs/ui/builder](libs/ui/builder)
+* **Renderer**
   * NodeJS import: `@aglyn/ui-renderer`
   * Workspace name: `ui-renderer`
-  * Directory: [libs/ui/renderer](`libs/ui/renderer`)
+  * Directory: [libs/ui/renderer](libs/ui/renderer)
 
 
-### Shared libraries
+### Kind: Shared libraries
 
-#### Type: _data_
+###### Monorepo package type
 
-* MDI
+#### Data-access
+
+* **MDI**
   * NodeJS import: `@aglyn/shared-data-mdi`
   * Workspace name: `shared-data-mdi`
-  * Directory: [libs/shared/data/mdi](`libs/shared/data/mdi`)
-* Types
+  * Directory: [libs/shared/data/mdi](libs/shared/data/mdi)
+* **Types**
   * NodeJS import: `@aglyn/shared-data-types`
   * Workspace name: `shared-data-types`
-  * Directory: [libs/shared/util/types](`libs/shared/data/types`)
+  * Directory: [libs/shared/util/types](libs/shared/data/types)
 
-#### Type: _feature_
+#### Feature
 
-* Themes
+* **Themes**
   * NodeJS import: `@aglyn/shared-feature-themes`
   * Workspace name: `shared-feature-themes`
-  * Directory: [libs/shared/feature/themes](`libs/shared/feature/themes`)
+  * Directory: [libs/shared/feature/themes](libs/shared/feature/themes)
 
-#### Type: _ui_
+#### UI
 
-* React components
+* **React components**
   * NodeJS import: `@aglyn/shared-ui-jsx`
   * Workspace name: `shared-ui-jsx`
-  * Directory: [libs/shared/ui/jsx](`libs/shared/ui/jsx`)
+  * Directory: [libs/shared/ui/jsx](libs/shared/ui/jsx)
 
-#### Type: _util_
+#### Utility
 
-* Dom
+* **Dom**
   * NodeJS import: `@aglyn/shared-util-dom`
   * Workspace name: `shared-util-dom`
-  * Directory: [libs/shared/util/dom](`libs/shared/util/dom`)
-* Emitter
+  * Directory: [libs/shared/util/dom](libs/shared/util/dom)
+* **Emitter**
   * NodeJS import: `@aglyn/shared-util-emitter`
   * Workspace name: `shared-util-emitter`
-  * Directory: [libs/shared/util/emitter](`libs/shared/util/emitter`)
-* Errors
+  * Directory: [libs/shared/util/emitter](libs/shared/util/emitter)
+* **Errors**
   * NodeJS import: `@aglyn/shared-util-errors`
   * Workspace name: `shared-util-errors`
-  * Directory: [libs/shared/util/errors](`libs/shared/util/errors`)
-* Guards
+  * Directory: [libs/shared/util/errors](libs/shared/util/errors)
+* **Guards**
   * NodeJS import: `@aglyn/shared-util-guards`
   * Workspace name: `shared-util-guards`
-  * Directory: [libs/shared/util/guards](`libs/shared/util/guards`)
-* Helpers
-  * NodeJS import: `@aglyn/shared-util-helpers`
-  * Workspace name: `shared-util-helpers`
-  * Directory: [libs/shared/util/helpers](`libs/shared/util/helpers`)
-* Logger
+  * Directory: [libs/shared/util/guards](libs/shared/util/guards)
+* **Helpers**
+  * NodeJS import: `@aglyn/shared-util-vendor`
+  * Workspace name: `shared-util-vendor`
+  * Directory: [libs/shared/util/vendors](libs/shared/util/vendor)
+* **Logger**
   * NodeJS import: `@aglyn/shared-util-logger`
   * Workspace name: `shared-util-logger`
-  * Directory: [libs/shared/util/logger](`libs/shared/util/logger`)
-* Timestamp
+  * Directory: [libs/shared/util/logger](libs/shared/util/logger)
+* **Timestamp**
   * NodeJS import: `@aglyn/shared-util-timestamp`
   * Workspace name: `shared-util-timestamp`
-  * Directory: [libs/shared/util/timestamp](`libs/shared/util/timestamp`)
-* Tools
+  * Directory: [libs/shared/util/timestamp](libs/shared/util/timestamp)
+* **Tools**
   * NodeJS import: `@aglyn/shared-util-tools`
   * Workspace name: `shared-util-tools`
-  * Directory: [libs/shared/util/tools](`libs/shared/util/tools`)
+  * Directory: [libs/shared/util/tools](libs/shared/util/tools)
 
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -387,6 +462,6 @@ to [git trailer format](https://git-scm.com/docs/git-interpret-trailers).
 
 ## License
 
-[Apache–2.0](./LICENSE)
+[Apache–2.0](LICENSE)
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->

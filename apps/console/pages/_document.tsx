@@ -27,6 +27,7 @@ import {
   makeMetaElements,
   MakeMetaElementsConfig,
 } from '@aglyn/shared-ui-jsx'
+import { getDisplayName } from '@aglyn/shared-util-tools'
 import crypto from 'crypto'
 import Document from 'next/document'
 import NextDocument, {
@@ -128,9 +129,14 @@ class _Document<P extends _DocumentProps> extends Document<P> {
 
     ctx.renderPage = () =>
       originalRenderPage({
-        enhanceApp: (App: any) => (props) => (
-          <App emotionCache={cache} {...props} />
-        ),
+        enhanceApp: (App: any) => {
+          const displayName = `EnhancedApp(${getDisplayName(App)})`
+          const component = (props) => (
+            <App emotionCache={cache} {...props} />
+          )
+          component.displayName = displayName
+          return component
+        },
       })
 
     const initialProps = await NextDocument.getInitialProps(ctx)
@@ -162,7 +168,7 @@ class _Document<P extends _DocumentProps> extends Document<P> {
       NextScript.getInlineScriptSource(this.props),
     )}`
     if (isProduction) {
-      csp = `default-src \'self\' aglyn.com *.aglyn.com' ${cspHashOf(
+      csp = `default-src 'self' aglyn.com *.aglyn.com' ${cspHashOf(
         NextScript.getInlineScriptSource(this.props),
       )}`
     }
