@@ -17,10 +17,11 @@
 
 import {
   createElementComponent,
-  loader as componentsExtension, registerBundle,
+  loader as componentsExtension,
+  registerBundle,
   registerComponent,
-} from '@aglyn/data-components'
-import { initializeApp } from '@aglyn/data-framework'
+} from '@aglyn/core-data-components'
+import { initializeApp } from '@aglyn/core-data-framework'
 import {
   CacheProvider,
   consoleTheme,
@@ -38,7 +39,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { AppProps as NextAppProps } from 'next/app'
 import Head from 'next/head'
 import { Fragment, useEffect } from 'react'
-import { bundle as muiBundle } from '@aglyn/feature-mui-bundle'
+import { bundle as muiBundle } from '@aglyn/addon-ui-mui-bundle'
 import { APP } from '../const'
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -49,61 +50,77 @@ const metaElements: MakeMetaElementsConfig = [
 ]
 const linkElements: MakeLinkElementsConfig = []
 
-
-const c1 = createElementComponent({
-  componentId: 'root',
-  metadata: {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  },
-}, 'span')
-
-const c2 = createElementComponent({
-  componentId: 'root1',
-  metadata: {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  },
-}, 'span')
-
-const c3 = createElementComponent({
-  componentId: 'root2',
-  metadata: {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  },
-}, 'span')
-
-const c4 = createElementComponent({
-  componentId: 'root3',
-  metadata: {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  },
-}, 'span')
-
-const c5 = createElementComponent({
-  componentId: 'root4',
-  metadata: {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  },
-  templates: [
-    {
-      id: 'root4:1',
-      componentId: 'root4',
-      title: 'Root 4',
-      props: {
-        children: 'First Root4',
-      },
+const c1 = createElementComponent(
+  {
+    componentId: 'root',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+      icon: 'block',
     },
-  ],
-}, 'span')
+  },
+  'span'
+)
+
+const c2 = createElementComponent(
+  {
+    componentId: 'root1',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+      icon: 'block',
+    },
+  },
+  'span'
+)
+
+const c3 = createElementComponent(
+  {
+    componentId: 'root2',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+      icon: 'block',
+    },
+  },
+  'span'
+)
+
+const c4 = createElementComponent(
+  {
+    componentId: 'root3',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+      icon: 'block',
+    },
+  },
+  'span'
+)
+
+const c5 = createElementComponent(
+  {
+    componentId: 'root4',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+      icon: 'block',
+    },
+    templates: [
+      {
+        id: 'root4:1',
+        title: 'Root 4',
+        data: {
+          componentId: 'root4',
+          props: {
+            children: 'First Root4',
+          },
+        },
+      },
+    ],
+  },
+  'span'
+)
 const components = [c1, c2, c3, c4, c5]
 
 try {
@@ -113,13 +130,12 @@ try {
 
   components.forEach((i) => registerComponent(app, i))
   registerBundle(app, muiBundle)
-}
-catch (e) {
+} catch (e) {
   console.error(e, 'initialize aglyn app')
 }
 
 function AppWrapperRaw(props) {
-  const {children} = props
+  const { children } = props
   const Wrapper = isProduction ? Fragment : Fragment // StrictMode
 
   useEffect(() => {
@@ -135,7 +151,7 @@ function AppWrapperRaw(props) {
         {makeMetaElements(metaElements)}
         {makeLinkElements(linkElements)}
       </Head>
-      <CssBaseline/>
+      <CssBaseline />
       <div className="app">
         <main>{children}</main>
       </div>
@@ -143,7 +159,7 @@ function AppWrapperRaw(props) {
   )
 }
 AppWrapperRaw.displayName = 'AppWrapper'
-const AppWrapper = withTheme({theme: consoleTheme})(AppWrapperRaw)
+const AppWrapper = withTheme({ theme: consoleTheme })(AppWrapperRaw)
 
 const previewProduction = false
 const isProduction = process.env.NODE_ENV === 'production' || previewProduction
@@ -185,7 +201,7 @@ export interface _AppProps extends NextAppProps {
  * @returns {JSX.Element}
  */
 function _App(props: _AppProps) {
-  const {Component, emotionCache = clientSideEmotionCache, pageProps} = props
+  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   return (
     <CacheProvider value={emotionCache}>
@@ -196,7 +212,7 @@ function _App(props: _AppProps) {
   )
 }
 _App.displayName = '_App'
-_App.getInitialProps = async ({ctx, Component}) => {
+_App.getInitialProps = async ({ ctx, Component }) => {
   let pageProps = {}
 
   if (Component.getInitialProps) {
@@ -235,6 +251,6 @@ For detailed information please visit 'https://aglyn.com' or you may send an
 email to 'info@aglyn.com'.
 – Aglyn Engineering Team
 `,
-    'font-family:monospace;color:#E040FB;font-size:12px;',
+    'font-family:monospace;color:#E040FB;font-size:12px;'
   )
 }

@@ -27,9 +27,11 @@
     "strictBindCallApply": true,
     "baseUrl": ".",
     "paths": {
-      "@aglyn/data-components": ["libs/data/components/src/index.ts"],
-      "@aglyn/data-framework": ["libs/data/framework/src/index.ts"],
-      "@aglyn/feature-mui-bundle": ["libs/feature/mui-bundle/src/index.ts"],
+      "@aglyn/addon-ui-mui-bundle": ["libs/addon/ui/mui-bundle/src/index.ts"],
+      "@aglyn/core-data-components": ["libs/core/data/components/src/index.ts"],
+      "@aglyn/core-data-framework": ["libs/core/data/framework/src/index.ts"],
+      "@aglyn/feature-builder": ["libs/feature/builder/src/index.ts"],
+      "@aglyn/feature-renderer": ["libs/feature/renderer/src/index.ts"],
       "@aglyn/shared-data-mdi": ["libs/shared/data/mdi/src/index.ts"],
       "@aglyn/shared-data-types": ["libs/shared/data/types/src/index.ts"],
       "@aglyn/shared-feature-themes": ["libs/shared/feature/themes/src/index.ts"],
@@ -41,9 +43,7 @@
       "@aglyn/shared-util-logger": ["libs/shared/util/logger/src/index.ts"],
       "@aglyn/shared-util-timestamp": ["libs/shared/util/timestamp/src/index.ts"],
       "@aglyn/shared-util-tools": ["libs/shared/util/tools/src/index.ts"],
-      "@aglyn/shared-util-vendor": ["libs/shared/util/vendor/src/index.ts"],
-      "@aglyn/ui-builder": ["libs/ui/builder/src/index.ts"],
-      "@aglyn/ui-renderer": ["libs/ui/renderer/src/index.ts"]
+      "@aglyn/shared-util-vendor": ["libs/shared/util/vendor/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

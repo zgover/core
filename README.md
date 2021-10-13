@@ -94,7 +94,7 @@ A utility library contains low-level utilities used by many libraries and applic
 │  ├─ feature/
 │  │  ├─ 📚 mui-bundle
 │  │
-│  ├─ ui/
+│  ├─ feature/
 │  │  ├─ 📚 builder
 │  │  └─ 📚 renderer
 │  │
@@ -164,29 +164,30 @@ root
 #### Data-access
 
 * **Framework (core)**
-  * NodeJS import: `@aglyn/data-framework`
-  * Workspace name: `data-framework`
-  * Directory: [libs/data/framework](libs/data/framework)
+  * NodeJS import: `@aglyn/core-data-framework`
+  * Workspace name: `core-data-framework`
+  * Directory: [libs/core/data/framework](libs/core/data/framework)
 
 * **Extension: Components**
-  * NodeJS import: `@aglyn/data-components`
-  * Workspace name: `data-components`
-  * Directory: [libs/data/components](libs/data/components)
+  * NodeJS import: `@aglyn/core-data-components`
+  * Workspace name: `core-data-components`
+  * Directory: [libs/core/data/components](libs/core/data/components)
+
 * **Feature: Components Extensions Mui Plugin**
-  * NodeJS import: `@aglyn/feature-mui-bundle`
-  * Workspace name: `feature-mui-bundle`
-  * Directory: [libs/feature/mui-bundle](libs/feature/mui-plugin)
+  * NodeJS import: `@aglyn/addon-ui-mui-bundle`
+  * Workspace name: `addon-ui-mui-bundle`
+  * Directory: [libs/addon/ui/mui-bundle](libs/addon/ui/mui-bundle)
 
 #### UI
 
 * **Builder**
-  * NodeJS import: `@aglyn/ui-builder`
-  * Workspace name: `ui-builder`
-  * Directory: [libs/ui/builder](libs/ui/builder)
+  * NodeJS import: `@aglyn/feature-builder`
+  * Workspace name: `feature-builder`
+  * Directory: [libs/feature/builder](libs/feature/builder)
 * **Renderer**
-  * NodeJS import: `@aglyn/ui-renderer`
-  * Workspace name: `ui-renderer`
-  * Directory: [libs/ui/renderer](libs/ui/renderer)
+  * NodeJS import: `@aglyn/feature-renderer`
+  * Workspace name: `feature-renderer`
+  * Directory: [libs/feature/renderer](libs/feature/renderer)
 
 
 ### Kind: Shared libraries

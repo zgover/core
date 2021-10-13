@@ -36,19 +36,19 @@
   - apps/console/**/*
 
 'SDK: Framework':
-  - libs/data/framework/*
-  - libs/data/framework/**/*
+  - libs/core/data/framework/*
+  - libs/core/data/framework/**/*
 
 'SDK: Extension':
-  - libs/data/*
-  - libs/data/**/*
-  - !libs/data/framework/*
-  - !libs/data/framework/**/*
+  - libs/core/data/*
+  - libs/core/data/**/*
+  - !libs/core/data/framework/*
+  - !libs/core/ata/framework/**/*
 
 'View: Renderer':
-  - libs/ui/renderer/*
-  - libs/ui/renderer/**/*
+  - libs/core/feature/renderer/*
+  - libs/core/feature/renderer/**/*
 
 'View: Builder':
-  - libs/ui/builder/*
-  - libs/ui/builder/**/*
+  - libs/core/feature/builder/*
+  - libs/core/feature/builder/**/*

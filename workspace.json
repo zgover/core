@@ -18,6 +18,28 @@
     }
   },
   "projects": {
+    "addon-ui-mui-bundle": {
+      "root": "libs/addon/ui/mui-bundle",
+      "sourceRoot": "libs/addon/ui/mui-bundle/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/addon/ui/mui-bundle/**/*.{ts,tsx,js,jsx}"]
+          },
+          "outputs": ["{options.outputFile}"]
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/addon/ui/mui-bundle"],
+          "options": {
+            "jestConfig": "libs/addon/ui/mui-bundle/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
     "console": {
       "root": "apps/console",
       "sourceRoot": "apps/console",
@@ -103,45 +125,45 @@
         }
       }
     },
-    "data-components": {
-      "root": "libs/data/components",
-      "sourceRoot": "libs/data/components/src",
+    "core-data-components": {
+      "root": "libs/core/data/components",
+      "sourceRoot": "libs/core/data/components/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["libs/data/components/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["libs/core/data/components/**/*.{ts,tsx,js,jsx}"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/data/components"],
+          "outputs": ["coverage/libs/core/data/components"],
           "options": {
-            "jestConfig": "libs/data/components/jest.config.js",
+            "jestConfig": "libs/core/data/components/jest.config.js",
             "passWithNoTests": true
           }
         }
       }
     },
-    "data-framework": {
-      "root": "libs/data/framework",
-      "sourceRoot": "libs/data/framework/src",
+    "core-data-framework": {
+      "root": "libs/core/data/framework",
+      "sourceRoot": "libs/core/data/framework/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/data/framework/**/*.ts"]
+            "lintFilePatterns": ["libs/core/data/framework/**/*.ts"]
           },
           "outputs": ["{options.outputFile}"]
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/data/framework"],
+          "outputs": ["coverage/libs/core/data/framework"],
           "options": {
-            "jestConfig": "libs/data/framework/jest.config.js",
+            "jestConfig": "libs/core/data/framework/jest.config.js",
             "passWithNoTests": true
           }
         },
@@ -153,23 +175,45 @@
         }
       }
     },
-    "feature-mui-bundle": {
-      "root": "libs/feature/mui-bundle",
-      "sourceRoot": "libs/feature/mui-bundle/src",
+    "feature-builder": {
+      "root": "libs/feature/builder",
+      "sourceRoot": "libs/feature/builder/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/feature/mui-bundle/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["libs/feature/builder/**/*.{ts,tsx,js,jsx}"]
           },
           "outputs": ["{options.outputFile}"]
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/feature/mui-bundle"],
+          "outputs": ["coverage/libs/feature/builder"],
           "options": {
-            "jestConfig": "libs/feature/mui-bundle/jest.config.js",
+            "jestConfig": "libs/feature/builder/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "feature-renderer": {
+      "root": "libs/feature/renderer",
+      "sourceRoot": "libs/feature/renderer/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/feature/renderer/**/*.{ts,tsx,js,jsx}"]
+          },
+          "outputs": ["{options.outputFile}"]
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/feature/renderer"],
+          "options": {
+            "jestConfig": "libs/feature/renderer/jest.config.js",
             "passWithNoTests": true
           }
         }
@@ -434,50 +478,6 @@
           "outputs": ["coverage/libs/shared/util/vendor"],
           "options": {
             "jestConfig": "libs/shared/util/vendor/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
-    "ui-builder": {
-      "root": "libs/ui/builder",
-      "sourceRoot": "libs/ui/builder/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/ui/builder/**/*.{ts,tsx,js,jsx}"]
-          },
-          "outputs": ["{options.outputFile}"]
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/ui/builder"],
-          "options": {
-            "jestConfig": "libs/ui/builder/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
-    "ui-renderer": {
-      "root": "libs/ui/renderer",
-      "sourceRoot": "libs/ui/renderer/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/ui/renderer/**/*.{ts,tsx,js,jsx}"]
-          },
-          "outputs": ["{options.outputFile}"]
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/ui/renderer"],
-          "options": {
-            "jestConfig": "libs/ui/renderer/jest.config.js",
             "passWithNoTests": true
           }
         }

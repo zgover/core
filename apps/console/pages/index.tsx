@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
-import { getApp } from '@aglyn/data-framework'
+import { getApp } from '@aglyn/core-data-framework'
 import { GridButtons, SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import styled from '@emotion/styled'
 import React from 'react'
 
+
 const StyledPage = styled.div`
-  .page {
+  .page
+  {
   }
 `
 
@@ -37,7 +39,7 @@ export function Index() {
     <StyledPage>
       <h2>Resources &amp; Tools</h2>
       <p>Thank you for using and showing some ♥ for Nx.</p>
-      <SvgPathIcon iconId={'bug'} />
+      <SvgPathIcon iconId={'bug'}/>
       <GridButtons
         items={[
           {
