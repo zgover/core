@@ -36,14 +36,14 @@ import {
   RegisterComponentPayload,
   UnregisterBundlePayload,
   UnregisterComponentPayload,
-} from '../aglyn-components.types'
+} from '../types'
 
-const TAG = 'AglynComponentsExtension'
 
-export default class AglynComponentsExtension
+const TAG = 'ComponentsExtension'
+
+export default class ComponentsExtension
   extends AglynExtensionModel<ComponentsRegistry>
-  implements IAglynComponentsExtension
-{
+  implements IAglynComponentsExtension {
   //start: overrides
   public static readonly $id: string = 'components'
   public static readonly [Symbol.toStringTag]: string = TAG
@@ -71,7 +71,7 @@ export default class AglynComponentsExtension
 
   //start: constructor
   constructor(app: IAglynApp) {
-    super(app, { autoload: true })
+    super(app, {autoload: true})
   }
   //end: constructor
 
@@ -91,26 +91,26 @@ export default class AglynComponentsExtension
   }
 
   public getComponent = (payload: GetComponentPayload): OrUndef<IAglynComponentElement> => {
-    const { componentId, bundleId = undefined } = payload
+    const {componentId, bundleId = undefined} = payload
     if (bundleId) {
       return this.context.components?.get(`${componentId}:${bundleId}`)
     }
     return this.context.components?.get(componentId)
   }
   public getComponentSchema = (payload: GetComponentPayload): OrUndef<IAglynComponentSchema> => {
-    const { componentId, bundleId } = payload
+    const {componentId, bundleId} = payload
     if (bundleId) {
       return this.context.schemas?.get(`${componentId}:${bundleId}`)
     }
     return this.context.schemas?.get(componentId)
   }
   public getBundle(payload: GetBundlePayload): OrUndef<IAglynComponentsBundle> {
-    const { bundleId } = payload
+    const {bundleId} = payload
     return this.context.bundles.get(bundleId)
   }
 
   public registerComponent = (payload: RegisterComponentPayload): this => {
-    const { component, schema } = payload
+    const {component, schema} = payload
     const componentId = component.componentId
     const bundleId = component.bundleId || undefined
 
@@ -122,7 +122,8 @@ export default class AglynComponentsExtension
       this.context.components.set(`${componentId}:${bundleId}`, component)
       this.context.schemas.set(`${componentId}:${bundleId}`, schema)
       bundle.components.push(componentId)
-    } else {
+    }
+    else {
       this.context.components.set(componentId, component)
       this.context.schemas.set(componentId, schema)
     }
@@ -135,17 +136,17 @@ export default class AglynComponentsExtension
     return this
   }
   public registerBundle = (payload: RegisterBundlePayload): this => {
-    const { bundle, components } = payload
+    const {bundle, components} = payload
     const bundleId = bundle.bundleId
     this.context.bundles.set(bundleId, bundle)
-    components.forEach(({ schema, component }) => {
-      this.registerComponent({ schema, component })
+    components.forEach(({schema, component}) => {
+      this.registerComponent({schema, component})
     })
     return this
   }
 
   public unregisterComponent = (payload: UnregisterComponentPayload): this => {
-    const { componentId, bundleId = undefined } = payload
+    const {componentId, bundleId = undefined} = payload
     if (bundleId) {
       const bundle = this.context.bundles.get(bundleId)
       if (!bundle) {
@@ -158,7 +159,8 @@ export default class AglynComponentsExtension
       this.context.schemas.delete(`${componentId}:${bundleId}`)
       bundle.components = bundle.components.filter((i) => i !== componentId)
       this.context.bundles.set(bundleId, bundle)
-    } else {
+    }
+    else {
       this.context.schemas.get(componentId)?.templates?.forEach((i) => {
         this.context.templates.delete(i.id)
       })
@@ -168,13 +170,13 @@ export default class AglynComponentsExtension
     return this
   }
   public unregisterBundle(payload: UnregisterBundlePayload): this {
-    const { bundleId } = payload
+    const {bundleId} = payload
     const bundle = this.context.bundles.get(bundleId)
     if (!bundle) {
       throw new Error(`No bundle exists with ID ${bundleId}.`)
     }
     bundle.components.forEach((componentId) => {
-      this.unregisterComponent({ componentId, bundleId })
+      this.unregisterComponent({componentId, bundleId})
     })
     this.context.bundles.delete(bundleId)
     return this
@@ -204,4 +206,4 @@ export default class AglynComponentsExtension
   //end: not public
 }
 
-export { AglynComponentsExtension }
+export { ComponentsExtension }

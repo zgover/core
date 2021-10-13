@@ -21,9 +21,7 @@ import { AGLYN_EMITTER, AglynAppEventFlag, AglynModuleEventFlag } from '../const
 import { DEFAULT_ENTRY_NAME } from '../constants/enums'
 import { AGLYN_ERROR } from '../constants/error'
 import { AGLYN_LOGGER } from '../constants/logger'
-import { AGLYN_PLATFORM } from '../constants/platform'
 import { APP_TYPE, TYPE_OF } from '../constants/symbol'
-import { SDK_VERSION } from '../constants/version'
 import { AglynBaseModel } from '../models/aglyn-base.model'
 import {
   AglynAppOptions,
@@ -37,13 +35,12 @@ import {
 import { AglynCommandController } from './aglyn-command.controller'
 import { AglynExtensionController } from './aglyn-extension.controller'
 
+
 const TAG = 'AglynApp'
 
 export class AglynAppController extends AglynBaseModel implements IAglynApp {
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly [TYPE_OF]: number | symbol = APP_TYPE
-  public static readonly platform: AglynPlatform = AGLYN_PLATFORM
-  public static readonly version: AglynVersion = SDK_VERSION
   public readonly AglynAppCommandController = AglynCommandController
   public readonly AglynAppExtensionController = AglynExtensionController
   readonly #options: AglynAppOptions = null
@@ -54,10 +51,10 @@ export class AglynAppController extends AglynBaseModel implements IAglynApp {
   public get [TYPE_OF]() {
     return getStaticField(TYPE_OF, this)
   }
-  public get platform(): IAglynExtensionController {
+  public get platform(): AglynPlatform {
     return getStaticField('platform', this)
   }
-  public get version(): IAglynExtensionController {
+  public get version(): AglynVersion {
     return getStaticField('version', this)
   }
   public get commands(): IAglynCommandController {
@@ -68,7 +65,7 @@ export class AglynAppController extends AglynBaseModel implements IAglynApp {
   }
   constructor(options: AglynAppOptions) {
     super()
-    this.#options = { ...options }
+    this.#options = {...options}
     this.#name = this.#options.name ?? DEFAULT_ENTRY_NAME
     this.#initialize()
   }
@@ -77,13 +74,13 @@ export class AglynAppController extends AglynBaseModel implements IAglynApp {
     this.setEmitter(AGLYN_EMITTER)
     this.setLogger(AGLYN_LOGGER)
 
-    this.#commandController = new this.AglynAppCommandController({ app: this })
-    this.#extensionController = new this.AglynAppExtensionController({ app: this })
+    this.#commandController = new this.AglynAppCommandController({app: this})
+    this.#extensionController = new this.AglynAppExtensionController({app: this})
     _commandControllers.set(this.#name, this.#commandController)
     _extensionControllers.set(this.#name, this.#extensionController)
 
-    this.getLogger().debug(AglynAppEventFlag.APP_CREATED, { app: this })
-    this.getEmitter().emit(AglynAppEventFlag.APP_CREATED, { app: this })
+    this.getLogger().debug(AglynAppEventFlag.APP_CREATED, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_CREATED, {app: this})
   }
   public toString = (): string => {
     return `${TAG}(name: '${name}')`
@@ -98,15 +95,15 @@ export class AglynAppController extends AglynBaseModel implements IAglynApp {
   public onInit = (): void => {
     this.#commandController.onInit()
     this.#extensionController.onInit()
-    this.getLogger().debug(AglynAppEventFlag.APP_LOADED, { appName: this.#name })
-    this.getEmitter().emit(AglynAppEventFlag.APP_LOADED, { appName: this.#name })
+    this.getLogger().debug(AglynAppEventFlag.APP_LOADED, {appName: this.#name})
+    this.getEmitter().emit(AglynAppEventFlag.APP_LOADED, {appName: this.#name})
   }
   public onDestroy = (): void => {
     this.#extensionController.unloadAllExtensions()
     this.#commandController.onDestroy()
     this.#extensionController.onDestroy()
-    this.getLogger().debug(AglynAppEventFlag.APP_UNLOADED, { appName: this.#name })
-    this.getEmitter().emit(AglynAppEventFlag.APP_UNLOADED, { appName: this.#name })
+    this.getLogger().debug(AglynAppEventFlag.APP_UNLOADED, {appName: this.#name})
+    this.getEmitter().emit(AglynAppEventFlag.APP_UNLOADED, {appName: this.#name})
   }
   public getName = (): string => {
     return this.#name
@@ -128,7 +125,7 @@ export class AglynAppController extends AglynBaseModel implements IAglynApp {
     return this
   }
   public effect = (data: AglynEffectType<AglynModuleEventFlag>) => {
-    const { type, payload } = data
+    const {type, payload} = data
     this.getEmitter().emit(type, payload as any)
   }
 }

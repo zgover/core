@@ -16,13 +16,12 @@
  */
 
 export * from './api'
-export * from './constants/enums'
 export * from './constants/emitter'
+export * from './constants/enums'
 export * from './constants/error'
 export * from './constants/logger'
 export * from './constants/platform'
 export * from './constants/symbol'
-export * from './types'
 export * from './constants/version'
 
 export * from './util/aglyn-is'

@@ -15,4 +15,5 @@
  * limitations under the License.
  */
 
-export * from './lib'
+
+export * from './components'

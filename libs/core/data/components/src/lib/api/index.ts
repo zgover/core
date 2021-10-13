@@ -1,4 +1,4 @@
 export const aglynExtensionComonentsModule = () =>
-  import('../models/aglyn-components.extension').then((m) => m.AglynComponentsExtension)
+  import('../models/components.extension').then((m) => m.ComponentsExtension)
 
 export * from './api'

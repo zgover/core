@@ -40,7 +40,7 @@ import {
   RegisterComponentPayload,
   UnregisterBundlePayload,
   UnregisterComponentPayload,
-} from '../aglyn-components.types'
+} from '../types'
 
 
 export function _getComponentsExtension(app: IAglynApp): IAglynComponentsExtension {
