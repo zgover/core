@@ -37,11 +37,11 @@ import type {
   IAglynComponentsBundle,
   IAglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
-import { validateAppArg } from './app.api'
+import { _validateAppArg } from './app.api'
 
 
 export function _getComponentsController(app: AglynAppController): AglynComponentsController {
-  validateAppArg(app)
+  _validateAppArg(app)
   return _componentsControllers.get(app.getName())
 }
 

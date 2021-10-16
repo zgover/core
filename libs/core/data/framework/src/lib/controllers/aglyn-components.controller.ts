@@ -27,6 +27,7 @@ import { FormSchema, InnerRefProp } from '@aglyn/shared-ui-jsx'
 import { _isArr } from '@aglyn/shared-util-guards'
 import { ComponentClass, FunctionComponent } from 'react'
 import {
+  AglynAppEventFlag,
   AglynModuleActionFlag,
   GetBundlePayload,
   GetComponentPayload,
@@ -251,9 +252,8 @@ export class AglynComponentsController extends AglynBaseModel {
   public getAllComponentsValues = (): ComponentsRegistryValues => {
     return this._componentValues()
   }
-
   public getTemplateBlocks = (): AglynComponentElementTemplateData[] => {
-    return [...this._templateValues()]
+    return this._templateValues()
   }
 
   public getComponent = (payload: GetComponentPayload): OrUndef<IAglynComponentElement> => {
@@ -297,8 +297,9 @@ export class AglynComponentsController extends AglynBaseModel {
       schema.templates.forEach((i) => {
         this.context.templates.set(i.id, i)
       })
-      return this
     }
+    this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMPONENT, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMPONENT, {componentId, bundleId})
     return this
   }
   public registerBundle = (payload: RegisterBundlePayload): this => {
@@ -308,6 +309,8 @@ export class AglynComponentsController extends AglynBaseModel {
     components.forEach(({schema, component}) => {
       this.registerComponent({schema, component})
     })
+    this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMPONENT_BUNDLE, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMPONENT_BUNDLE, {bundleId})
     return this
   }
 
@@ -333,6 +336,8 @@ export class AglynComponentsController extends AglynBaseModel {
       this.context.schemas.delete(componentId)
       this.context.components.delete(componentId)
     }
+    this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMPONENT, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMPONENT, {componentId, bundleId})
     return this
   }
   public unregisterBundle(payload: UnregisterBundlePayload): this {
@@ -345,6 +350,8 @@ export class AglynComponentsController extends AglynBaseModel {
       this.unregisterComponent({componentId, bundleId})
     })
     this.context.bundles.delete(bundleId)
+    this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMPONENT_BUNDLE, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMPONENT_BUNDLE, {bundleId})
     return this
   }
 

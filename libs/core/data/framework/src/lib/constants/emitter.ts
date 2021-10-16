@@ -47,6 +47,11 @@ export enum AglynAppEventFlag {
   REGISTERED_COMMAND = 'event:registered-command',
   UNREGISTERED_COMMAND = 'event:unregistered-command',
   TRIGGERED_COMMAND = 'event:triggered-command',
+
+  REGISTERED_COMPONENT = 'event:registered-component',
+  UNREGISTERED_COMPONENT = 'event:unregistered-component',
+  REGISTERED_COMPONENT_BUNDLE = 'event:registered-component-bundle',
+  UNREGISTERED_COMPONENT_BUNDLE = 'event:unregistered-component-bundle',
 }
 
 export enum AglynModuleActionFlag {
@@ -59,12 +64,12 @@ export enum AglynModuleActionFlag {
   COMMAND_ACTION_UNREGISTER = 'module:command:unregister',
   COMMAND_TRIGGER = 'module:command:trigger',
 
-  COMPONENT_GET = 'module:extension:components:get-component',
-  COMPONENTS_GET = 'module:extension:components:get-components',
-  COMPONENT_REGISTER = 'module:extension:components:register-component',
-  COMPONENT_UNREGISTER = 'module:extension:components:unregister-component',
-  COMPONENTS_BUNDLE_REGISTER = 'module:extension:components:register-components-bundle',
-  COMPONENTS_BUNDLE_UNREGISTER = 'module:extension:components:unregister-components-bundle',
+  COMPONENT_GET = 'module:components:get-component',
+  COMPONENTS_GET = 'module:components:get-components',
+  COMPONENT_REGISTER = 'module:components:register-component',
+  COMPONENT_UNREGISTER = 'module:components:unregister-component',
+  COMPONENTS_BUNDLE_REGISTER = 'module:components:register-components-bundle',
+  COMPONENTS_BUNDLE_UNREGISTER = 'module:components:unregister-components-bundle',
 }
 
 export type EventPayload<T, K extends keyof T = keyof T> = Record<K, T[K]>
@@ -114,6 +119,11 @@ export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmi
   [AglynAppEventFlag.REGISTERED_COMMAND]: PayloadData<{ commandId: string }>
   [AglynAppEventFlag.UNREGISTERED_COMMAND]: PayloadData<{ commandId: string }>
   [AglynAppEventFlag.TRIGGERED_COMMAND]: PayloadData<{ commandId: string }>
+
+  [AglynAppEventFlag.REGISTERED_COMPONENT]: PayloadData<{ componentId: ComponentId, bundleId?: BundleId }>
+  [AglynAppEventFlag.UNREGISTERED_COMPONENT]: PayloadData<{ componentId: ComponentId, bundleId?: BundleId }>
+  [AglynAppEventFlag.REGISTERED_COMPONENT_BUNDLE]: PayloadData<{ bundleId: BundleId }>
+  [AglynAppEventFlag.UNREGISTERED_COMPONENT_BUNDLE]: PayloadData<{ bundleId: BundleId }>
 }
 
 export interface AglynModuleActionPayload extends Record<AglynModuleActionFlag, AglynEmitterPayload> {

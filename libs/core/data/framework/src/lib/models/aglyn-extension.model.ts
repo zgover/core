@@ -42,14 +42,19 @@ export interface AglynExtension<T = any>
 }
 
 export abstract class AglynExtension<T = any> extends AglynBaseModel {
+
   public static readonly [Symbol.toStringTag]: string = TAG
+
   public static readonly [TYPE_OF]: number | symbol = MODULE_TYPE
   public static readonly [TYPE_KIND]: number | symbol = EXTENSION_TYPE
+
   public static readonly $id: string = null
+
   readonly #options: AglynExtensionOptions = null
   protected app: AglynAppController
   protected context?: T = null
   #lifecycle?: OrNull<LifecycleFlag> = null
+
   public get $id() {
     return getStaticField('$id', this)
   }
@@ -77,6 +82,19 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
     this.setEmitter(this.app.getEmitter())
     this.setLogger(this.app.getLogger())
   }
+
+  public toString = (): string => {
+    return `${TAG}(name: '${this.$id}')`
+  }
+  public toJSON = () => {
+    return {
+      ...super.toJSON(),
+      name: this.$id,
+      [TYPE_OF]: getStaticField(TYPE_OF, this),
+      [TYPE_KIND]: getStaticField(TYPE_KIND, this),
+    }
+  }
+
   public getName = (): string => {
     return this.$id
   }
@@ -92,17 +110,6 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
   public setContext = (value: T): this => {
     this.context = value
     return this
-  }
-  public toString = (): string => {
-    return `${TAG}(name: '${this.$id}')`
-  }
-  public toJSON = () => {
-    return {
-      ...super.toJSON(),
-      name: this.$id,
-      [TYPE_OF]: getStaticField(TYPE_OF, this),
-      [TYPE_KIND]: getStaticField(TYPE_KIND, this),
-    }
   }
   public onInit(app: AglynAppController): void {
     throw new Error('You must implement `onInit`')

@@ -18,8 +18,9 @@
 import { Dictionary, LifecycleObserver, Serializable, StringLike } from '@aglyn/shared-data-types'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { getStaticField } from '@aglyn/shared-util-tools'
-import { AglynEmitter } from '../constants/emitter'
-import { AglynError } from '../constants/error'
+import { AGLYN_EMITTER, AglynEmitter } from '../constants/emitter'
+import { AGLYN_ERROR, AglynError } from '../constants/error'
+import { AGLYN_LOGGER } from '../constants/logger'
 import { AglynLogger } from '../types'
 
 
@@ -36,17 +37,34 @@ export interface AglynBaseModel extends StringLike, Serializable, LifecycleObser
 }
 
 export abstract class AglynBaseModel {
+
   public static readonly [Symbol.toStringTag]: string = TAG
+
   readonly #created: Timestamp
   #errorFactory: AglynError
   #emitter: AglynEmitter
   #logger: AglynLogger
+
   public get [Symbol.toStringTag](): string {
     return getStaticField(Symbol.toStringTag, this)
   }
+
   protected constructor() {
     this.#created = Timestamp.now()
+    this.#initialize()
   }
+  #initialize() {
+  }
+
+  public toString = (): string => {
+    return getStaticField(Symbol.toStringTag, this)
+  }
+  public toJSON = (): Dictionary => {
+    return {
+      created: this.#created,
+    }
+  }
+
   public getCreatedAt = (): Timestamp => {
     return this.#created
   }
@@ -70,14 +88,6 @@ export abstract class AglynBaseModel {
   public setLogger = (value: AglynLogger): this => {
     this.#logger = value
     return this
-  }
-  public toString = (): string => {
-    return getStaticField(Symbol.toStringTag, this)
-  }
-  public toJSON = (): Dictionary => {
-    return {
-      created: this.#created,
-    }
   }
 }
 

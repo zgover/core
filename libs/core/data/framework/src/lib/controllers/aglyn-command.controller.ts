@@ -24,13 +24,7 @@ import {
 import { COMMAND_TYPE, MODULE_TYPE } from '../constants/symbol'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynBaseModel } from '../models/aglyn-base.model'
-import {
-  AglynCommander,
-  AglynCommandParams,
-  AglynRegisters,
-  AglynTypeFields,
-  AglynUniqueId,
-} from '../types'
+import { AglynCommander, AglynCommandParams, AglynTypeFields, AglynUniqueId } from '../types'
 
 
 const TAG = 'AglynCommandController'

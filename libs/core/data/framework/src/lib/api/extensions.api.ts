@@ -20,11 +20,11 @@ import { AglynModuleActionFlag, AglynModuleActionPayload } from '../constants/em
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynExtensionController } from '../controllers/aglyn-extension.controller'
 import { AglynExtension } from '../models/aglyn-extension.model'
-import { validateAppArg } from './app.api'
+import { _validateAppArg } from './app.api'
 
 
 export function _getExtensionController(app: AglynAppController): AglynExtensionController {
-  validateAppArg(app)
+  _validateAppArg(app)
   return _extensionControllers.get(app.getName())
 }
 export function getExtension<T extends AglynExtension>(app: AglynAppController, data: { name: string }): T {

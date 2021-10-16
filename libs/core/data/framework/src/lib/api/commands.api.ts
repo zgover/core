@@ -19,11 +19,11 @@ import { _commandControllers } from '../constants/_internal'
 import { AglynModuleActionFlag, AglynModuleActionPayload } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynCommandController } from '../controllers/aglyn-command.controller'
-import { validateAppArg } from './app.api'
+import { _validateAppArg } from './app.api'
 
 
 export function _getCommandController(app: AglynAppController): AglynCommandController {
-  validateAppArg(app)
+  _validateAppArg(app)
   return _commandControllers.get(app.getName())
 }
 export function registerCommand(
