@@ -24,6 +24,3 @@ export * from './contexts/element-components-context'
 export * from './contexts/element-components-context-provider'
 export * from './contexts/elements-context-provider'
 export * from './contexts/elements-context'
-
-export * from './util/create-element-data'
-export * from './util/create-element-data-id'

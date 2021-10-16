@@ -28,14 +28,14 @@ import {
 } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import type {
+  AglynComponentElement,
   AglynComponentElementTemplateData,
+  AglynComponentsBundle,
+  AglynComponentSchema,
   AglynComponentsController,
   ComponentsRegistryEntry,
   ComponentsRegistryKeys,
   ComponentsRegistryValues,
-  IAglynComponentElement,
-  IAglynComponentsBundle,
-  IAglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
 import { _validateAppArg } from './app.api'
 
@@ -65,21 +65,21 @@ export function getTemplateBlocks(app: AglynAppController): AglynComponentElemen
 export function getComponent<P>(
   app: AglynAppController,
   payload: GetComponentPayload,
-): OrUndef<IAglynComponentElement<P>> {
+): OrUndef<AglynComponentElement<P>> {
   return _getComponentsController(app)?.getComponent(payload)
 }
 
 export function getComponentSchema(
   app: AglynAppController,
   payload: GetComponentSchemaPayload,
-): OrUndef<IAglynComponentSchema> {
+): OrUndef<AglynComponentSchema> {
   return _getComponentsController(app)?.getComponentSchema(payload)
 }
 
 export function getBundle(
   app: AglynAppController,
   payload: GetBundlePayload,
-): OrUndef<IAglynComponentsBundle> {
+): OrUndef<AglynComponentsBundle> {
   return _getComponentsController(app)?.getBundle(payload)
 }
 

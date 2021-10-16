@@ -26,7 +26,7 @@ import { AGLYN_ERROR, AglynErrorEventFlag } from '../constants/error'
  *   the SDK makes a logging call.
  * @param options - the logger options to pass to `Logger.setUserLogHandler()`
  */
-export function onLog(callbackFn: LogCallback | null, options?: LogOptions): void {
+export function setUserLogHandler(callbackFn: LogCallback | null, options?: LogOptions): void {
   if (!_isNull(callbackFn) && !_isFnT(callbackFn)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_LOG_ARG, undefined)
   }

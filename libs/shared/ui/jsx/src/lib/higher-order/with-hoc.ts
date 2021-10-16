@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
+import { MKey } from '@aglyn/shared-data-types'
 import { _isFnT } from '@aglyn/shared-util-guards'
 import { getDisplayName } from '@aglyn/shared-util-tools'
-import { MKey } from '@aglyn/shared-data-types'
 import { ComponentType, createElement } from 'react'
+
 
 /** Merge props for WithHoc utility functions */
 export type WithHocProps<P, N extends MKey, T> = P & { [K in N]: T }
@@ -38,16 +39,16 @@ export type WithHocFnBuilder = {
 
 function withHocFactoryBuilderImpl<P, T, U extends MKey>(
   value: T | { (props: P): T },
-  injectedPropName: U
+  injectedPropName: U,
 ) {
   return function withHocFactory(
     Component: WithHocComponent<P, U, T>,
-    overrideInjectedPropName?: U
+    overrideInjectedPropName?: U,
   ): ComponentType<P> {
-    let propName = overrideInjectedPropName ?? injectedPropName
+    const propName = overrideInjectedPropName || injectedPropName
     function WithHocFactory(props: P) {
       const _value = _isFnT(value) ? value(props) : value
-      const mergedProps = { ...props, [propName]: _value } as P & { [K in U]: T }
+      const mergedProps = {...props, [propName]: _value} as P & { [K in U]: T }
       return createElement(Component, mergedProps)
     }
     WithHocFactory.displayName = `WithHocFactory(${getDisplayName(Component)})`

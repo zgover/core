@@ -26,6 +26,7 @@ import { AGLYN_LOGGER } from '../constants/logger'
 import { AglynAppController, AglynAppOptions } from '../controllers/aglyn-app.controller'
 import { AglynExtensionLoader } from '../controllers/aglyn-extension.controller'
 import { isAppModule, isExtension } from '../util/aglyn-is'
+import { setLogLevel } from './logger.api'
 
 
 export function getAllApps(): AglynAppController[] {
@@ -61,6 +62,9 @@ export function initializeApp(options: AglynAppOptions = {}): AglynAppController
   }
   if (_apps.has(name)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.DUPLICATE_APP, {appName: name})
+  }
+  if (opts.logLevel) {
+    setLogLevel(opts.logLevel)
   }
   const app: AglynAppController = new AglynAppController(opts)
   _apps.set(name, app)

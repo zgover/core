@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
-import { createElementData, useElementsContext } from '@aglyn/feature-renderer'
+import { createElementData } from '@aglyn/core-data-framework'
+import { useElementsContext } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import TreeItem from '@mui/lab/TreeItem'
 import TreeView from '@mui/lab/TreeView'
 import AppBar, { AppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import ButtonGroup from '@mui/material/ButtonGroup'
 import Divider from '@mui/material/Divider'
 import Drawer from '@mui/material/Drawer'
 import Fab from '@mui/material/Fab'
@@ -228,6 +227,9 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
           </Drawer>
 
           <Box sx={{flexGrow: 1, p: 3}}>
+            <Box sx={{bgcolor: 'backgrounds.paper'}}>
+
+            </Box>
             {children}
           </Box>
         </Box>

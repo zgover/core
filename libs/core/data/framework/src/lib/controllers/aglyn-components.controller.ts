@@ -72,20 +72,20 @@ export type HierarchyRestriction = [
 ]
 
 export type ComponentsRegistryKeys = (ComponentId | [ComponentId, BundleId])[]
-export type ComponentsRegistryValues = IAglynComponentElement[]
+export type ComponentsRegistryValues = AglynComponentElement[]
 export type ComponentsRegistryEntry = [
   cId: ComponentId | [ComponentId, BundleId],
-  cmp: IAglynComponentElement
+  cmp: AglynComponentElement
 ]
 
 export interface ComponentsRegistry {
-  bundles: Map<BundleId, IAglynComponentsBundle>
-  components: Map<ComponentId | [ComponentId, BundleId], IAglynComponentElement>
-  schemas: Map<ComponentId | [ComponentId, BundleId], IAglynComponentSchema>
+  bundles: Map<BundleId, AglynComponentsBundle>
+  components: Map<ComponentId | [ComponentId, BundleId], AglynComponentElement>
+  schemas: Map<ComponentId | [ComponentId, BundleId], AglynComponentSchema>
   templates: Map<string, AglynComponentElementTemplateData>
 }
 
-export interface IAglynComponentsBundle {
+export interface AglynComponentsBundle {
   readonly bundleId: BundleId
   metadata?: {
     displayName: string
@@ -95,7 +95,7 @@ export interface IAglynComponentsBundle {
   components: ComponentId[]
 }
 
-export interface IAglynComponentElement<P = any>
+export interface AglynComponentElement<P = any>
   extends AglynComponentClassElement<P & InnerRefProp> {
   readonly [TYPE_OF]: typeof MODULE_TYPE
   readonly [TYPE_KIND]: typeof EXTENSION_TYPE
@@ -103,7 +103,7 @@ export interface IAglynComponentElement<P = any>
   bundleId?: BundleId
 }
 
-export interface IAglynComponentSchema<P = any> {
+export interface AglynComponentSchema<P = any> {
   componentId: ComponentId
   bundleId?: BundleId
 
@@ -176,9 +176,9 @@ export interface AglynComponentsController extends AglynBaseModel {
 
   getTemplateBlocks(): AglynComponentElementTemplateData[]
 
-  getComponent(payload: GetComponentPayload): OrUndef<IAglynComponentElement>
-  getComponentSchema(payload: GetComponentSchemaPayload): OrUndef<IAglynComponentSchema>
-  getBundle(payload: GetBundlePayload): OrUndef<IAglynComponentsBundle>
+  getComponent(payload: GetComponentPayload): OrUndef<AglynComponentElement>
+  getComponentSchema(payload: GetComponentSchemaPayload): OrUndef<AglynComponentSchema>
+  getBundle(payload: GetBundlePayload): OrUndef<AglynComponentsBundle>
 
   registerComponent(payload: RegisterComponentPayload): this
   registerBundle(payload: RegisterBundlePayload): this
@@ -256,21 +256,21 @@ export class AglynComponentsController extends AglynBaseModel {
     return this._templateValues()
   }
 
-  public getComponent = (payload: GetComponentPayload): OrUndef<IAglynComponentElement> => {
+  public getComponent = (payload: GetComponentPayload): OrUndef<AglynComponentElement> => {
     const {componentId, bundleId = undefined} = payload
     if (bundleId) {
       return this.context.components?.get(`${componentId}:${bundleId}`)
     }
     return this.context.components?.get(componentId)
   }
-  public getComponentSchema = (payload: GetComponentPayload): OrUndef<IAglynComponentSchema> => {
+  public getComponentSchema = (payload: GetComponentPayload): OrUndef<AglynComponentSchema> => {
     const {componentId, bundleId} = payload
     if (bundleId) {
       return this.context.schemas?.get(`${componentId}:${bundleId}`)
     }
     return this.context.schemas?.get(componentId)
   }
-  public getBundle(payload: GetBundlePayload): OrUndef<IAglynComponentsBundle> {
+  public getBundle(payload: GetBundlePayload): OrUndef<AglynComponentsBundle> {
     const {bundleId} = payload
     return this.context.bundles.get(bundleId)
   }

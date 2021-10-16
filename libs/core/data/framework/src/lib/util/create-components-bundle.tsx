@@ -16,11 +16,11 @@
  */
 
 import { RegisterBundlePayload, RegisterComponentPayload } from '../constants/emitter'
-import { IAglynComponentsBundle } from '../controllers/aglyn-components.controller'
+import { AglynComponentsBundle } from '../controllers/aglyn-components.controller'
 
 
 export function createComponentsBundle(
-  bundle: Omit<IAglynComponentsBundle, 'components'>,
+  bundle: Omit<AglynComponentsBundle, 'components'>,
   components: RegisterComponentPayload[],
 ): RegisterBundlePayload {
   const _components = [...components].map((i) => {

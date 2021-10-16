@@ -16,9 +16,9 @@
  */
 
 import {
+  AglynComponentSchema,
   ComponentId,
   createElementComponent,
-  IAglynComponentSchema,
 } from '@aglyn/core-data-framework'
 import { ListItemText } from '@mui/material'
 
@@ -26,10 +26,10 @@ import { ListItemText } from '@mui/material'
 export const loader = () => import('@mui/material/ListItemText').then((i) => i.default)
 export const componentId: ComponentId = 'list-item-text'
 export const bundleId: ComponentId = 'mui'
-export const metadata: IAglynComponentSchema['metadata'] = {
+export const metadata: AglynComponentSchema['metadata'] = {
   displayName: 'List Item Text',
 }
-export const templates: IAglynComponentSchema['templates'] = [
+export const templates: AglynComponentSchema['templates'] = [
   {
     id: 'mui:list-item-text',
     title: 'List Item Text',

@@ -19,7 +19,7 @@ import {
   AglynComponentElementData,
   AglynComponentElementTemplateData,
   TemplateSubElementData,
-} from '@aglyn/core-data-framework'
+} from '../controllers/aglyn-components.controller'
 import { objectDeepMergeMany } from '@aglyn/shared-util-vendor'
 import { createElementDataId } from './create-element-data-id'
 
@@ -47,3 +47,4 @@ export function createElementData(
     mapTemplate(data),
   ]) as AglynComponentElementData
 }
+export default createElementData

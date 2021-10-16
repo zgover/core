@@ -23,12 +23,12 @@ import { RegisterComponentPayload } from '../constants/emitter'
 import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
 import {
   AglynComponentElementType,
-  IAglynComponentSchema,
+  AglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
 
 
 export function createElementComponent(
-  schema: IAglynComponentSchema,
+  schema: AglynComponentSchema,
   component: AglynComponentElementType,
 ): RegisterComponentPayload {
   const {componentId, bundleId, renderFlags} = schema

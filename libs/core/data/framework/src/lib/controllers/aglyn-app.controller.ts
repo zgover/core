@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { LogLevel, LogLevelString } from '@aglyn/shared-util-logger'
 import { getStaticField, yes } from '@aglyn/shared-util-tools'
 import {
   _commandControllers,
@@ -36,6 +37,7 @@ import { AglynExtensionController, AglynExtensionLoader } from './aglyn-extensio
 const TAG = 'AglynAppController'
 
 export type AglynAppOptions = AglynNamed & {
+  logLevel?: LogLevelString
   extensions?: AglynExtensionLoader[]
 }
 

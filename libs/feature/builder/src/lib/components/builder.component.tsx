@@ -22,7 +22,7 @@ import {
   ElementsContextProvider,
   ElementsContextProviderProps,
 } from '@aglyn/feature-renderer'
-import { builderTheme, withTheme } from '@aglyn/shared-feature-themes'
+import { builderTheme, consoleTheme, withTheme } from '@aglyn/shared-feature-themes'
 import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
 import Box from '@mui/material/Box'
 import NoSsr from '@mui/material/NoSsr'
@@ -91,6 +91,6 @@ BuilderComponentRaw.defaultProps = {
   elements: [],
 }
 
-export const BuilderComponent = withTheme({theme: builderTheme})(BuilderComponentRaw)
+export const BuilderComponent = withTheme({theme: consoleTheme})(BuilderComponentRaw)
 
 export default BuilderComponent

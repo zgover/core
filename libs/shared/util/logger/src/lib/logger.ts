@@ -253,7 +253,7 @@ export const defaultLogHandler: LogHandler = (instance, logType, ...args): void 
   const now = new Date().toISOString()
   const method = ConsoleMethodKey[logType as keyof typeof ConsoleMethodKey]
   if (method) {
-    console[method as 'log' | 'info' | 'warn' | 'error'](`[${now}]  ${instance.name}:`, ...args)
+    console[method as 'log' | 'info' | 'warn' | 'error'](`[${now}]  ${instance.name}`, ...args)
   } else {
     throw new Error(`Attempted to log a message with an invalid logType (value: ${logType})`)
   }

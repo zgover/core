@@ -124,6 +124,7 @@ const components = [c1, c2, c3, c4, c5]
 
 try {
   const app = initializeApp({
+    logLevel: 'debug',
     extensions: [],
   })
 

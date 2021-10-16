@@ -46,12 +46,12 @@ export const defaultFailover: IconData = {
 
 export function getIcon<K extends IconId>(id: K, failover: IconData = defaultFailover): IconData {
   if (!id) {
-    console.info('No icon id provided, falling back.')
+    console.warn('No icon id provided, falling back.')
     return failover
   }
   let icon = icons.byIconId[id]
   if (!icon) {
-    for (let iconId of icons.iconIds) {
+    for (const iconId of icons.iconIds) {
       // Search aliases
       if (_hasProperty(id, icons.byIconId[iconId]?.alias ?? {})) {
         icon = icons.byIconId[iconId]
@@ -59,7 +59,7 @@ export function getIcon<K extends IconId>(id: K, failover: IconData = defaultFai
       }
     }
     if (!icon) {
-      console.warn(`No icon exists with id(${id}), falling back`)
+      console.error(`No icon exists with id(${id}), falling back`)
       return failover
     }
   }

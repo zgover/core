@@ -28,6 +28,8 @@ export * from './constants/version'
 export * from './util/aglyn-is'
 export * from './util/create-components-bundle'
 export * from './util/create-element-component'
+export * from './util/create-element-data'
+export * from './util/create-element-data-id'
 
 export * from './types'
 
@@ -55,12 +57,12 @@ export type {
   AglynCommandHandler,
 } from './controllers/aglyn-command.controller'
 export type {
-  IAglynComponentsBundle,
-  IAglynComponentSchema,
+  AglynComponentsBundle,
+  AglynComponentSchema,
   BundleId,
   ComponentId,
   AglynComponentsTypeFields,
-  IAglynComponentElement,
+  AglynComponentElement,
   AglynComponentElementTemplateData,
   ComponentsRegistryEntry,
   ComponentsRegistryKeys,

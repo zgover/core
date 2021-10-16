@@ -22,11 +22,11 @@ import { Emitter } from 'mitt'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynCommandHandler, AglynCommandResolver } from '../controllers/aglyn-command.controller'
 import {
+  AglynComponentElement,
+  AglynComponentsBundle,
+  AglynComponentSchema,
   BundleId,
   ComponentId,
-  IAglynComponentElement,
-  IAglynComponentsBundle,
-  IAglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
 import type { AglynExtension } from '../models/aglyn-extension.model'
 import { PayloadData } from '../types'
@@ -94,11 +94,11 @@ export type GetBundlePayload = PayloadData<{
   bundleId: string
 }>
 export type RegisterComponentPayload<P = any> = PayloadData<{
-  schema: IAglynComponentSchema<P>
-  component: IAglynComponentElement<P>
+  schema: AglynComponentSchema<P>
+  component: AglynComponentElement<P>
 }>
 export type RegisterBundlePayload = PayloadData<{
-  bundle: IAglynComponentsBundle
+  bundle: AglynComponentsBundle
   components: RegisterComponentPayload[]
 }>
 export type UnregisterComponentPayload = PayloadData<{
