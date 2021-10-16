@@ -16,7 +16,8 @@
  */
 
 
-import { Dictionary } from '@aglyn/shared-data-types'
+import { AnyProps, Dictionary } from '@aglyn/shared-data-types'
+import { StyledElement } from '@aglyn/shared-feature-themes'
 import { EmitterFn } from '@aglyn/shared-util-emitter'
 import { Emitter } from 'mitt'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
@@ -95,7 +96,7 @@ export type GetComponentSchemaPayload = PayloadData<{
 export type GetBundlePayload = PayloadData<{
   bundleId: string
 }>
-export type RegisterComponentPayload<P = any> = PayloadData<{
+export type RegisterComponentPayload<P extends AnyProps = any> = PayloadData<{
   schema: AglynComponentSchema<P>
   component: AglynComponentElement<P>
 }>

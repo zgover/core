@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { createElementData } from '@aglyn/core-data-framework'
+import { createComponentElementData } from '@aglyn/core-data-framework'
 import { useElementsContext } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
@@ -68,7 +68,7 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
       .then((data: any) => {
         if (data) {
           const prevElements = Array.from(elements)
-          const newElements = [...elements, createElementData(data)]
+          const newElements = [...elements, createComponentElementData(data)]
           console.log('prev newElement', newElements, prevElements)
           updateElements && updateElements(newElements, prevElements)
         }

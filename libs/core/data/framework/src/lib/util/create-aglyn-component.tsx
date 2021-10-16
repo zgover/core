@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { JSXElementType } from '@aglyn/shared-data-types'
-import { styled as hocStyled } from '@aglyn/shared-feature-themes'
+import { styled } from '@aglyn/shared-feature-themes'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { Component, Ref } from 'react'
 import { RegisterComponentPayload } from '../constants/emitter'
@@ -27,16 +26,18 @@ import {
 } from '../controllers/aglyn-components.controller'
 
 
-export function createElementComponent(
+export function createAglynComponent(
   schema: AglynComponentSchema,
   component: AglynComponentElementType,
 ): RegisterComponentPayload {
   const {componentId, bundleId, renderFlags} = schema
-  const {styled} = {...renderFlags}
-  const displayName = getDisplayName(component, componentId)
-  const ComponentElement: JSXElementType = styled?.disable
-    ? component
-    : hocStyled(component as any, {name: displayName})({})
+  const {emotionStyled} = {...renderFlags}
+  const cDisplayName = getDisplayName(component, componentId)
+  const displayName = `AglynComponent(${cDisplayName})`
+  const ComponentElement = emotionStyled?.disable ? component : styled(component as any, {
+    name: cDisplayName,
+    ...emotionStyled?.options,
+  })({})
 
   class AglynComponent extends Component<any> {
     public static readonly displayName = displayName
@@ -46,11 +47,11 @@ export function createElementComponent(
     public static readonly [TYPE_OF] = MODULE_TYPE
     public static readonly [TYPE_KIND] = EXTENSION_TYPE
 
-    public elemRef: Ref<any>
+    public innerRef?: Ref<any> = null
 
     constructor(props: any) {
       super(props)
-      this.elemRef = props.innerRef
+      this.innerRef = props.innerRef
     }
 
     public render() {
@@ -58,8 +59,9 @@ export function createElementComponent(
     }
   }
 
+
   return {
-    schema,
+    schema: {...schema},
     component: AglynComponent,
   }
 }

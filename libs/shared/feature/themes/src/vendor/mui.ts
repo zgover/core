@@ -85,7 +85,6 @@ import {
   jssPreset,
   makeStyles,
   ServerStyleSheets,
-  StyledComponent,
   StyledProps,
   StyleRules,
   StyleRulesCallback,
@@ -106,8 +105,20 @@ import {
   WithThemeCreatorOption,
 } from '@mui/styles'
 import { ClassKeyInferable } from '@mui/styles/withStyles'
-import { ShapeOptions, Spacing, SpacingOptions } from '@mui/system'
+import type {
+  FilteringStyledOptions,
+  MuiStyledOptions,
+  ShapeOptions,
+  Spacing,
+  SpacingOptions,
+  StyledComponent,
+  SxProps,
+} from '@mui/system'
+import type { ElementType } from 'react'
 
+
+type StyledOptions<P = any, FP extends keyof P = keyof P> = FilteringStyledOptions<P, FP> & MuiStyledOptions
+type StyledElement = StyledComponent<Pick<any, string | number | symbol> & { theme?: Theme; as?: ElementType<any>; sx?: SxProps<Theme>; }, any, Theme>
 
 export * as JSS from 'jss'
 export { default as jssRtl } from 'jss-rtl'
@@ -225,6 +236,7 @@ declare module '@mui/styles' {
 }
 
 export type {
+  StyledOptions, StyledElement,
   BaseCSSProperties,
   BaseCreateCSSProperties,
   Breakpoint,

@@ -26,10 +26,10 @@ export * from './constants/symbol'
 export * from './constants/version'
 
 export * from './util/aglyn-is'
+export * from './util/create-aglyn-component'
+export * from './util/create-component-element-data'
+export * from './util/create-component-element-id'
 export * from './util/create-components-bundle'
-export * from './util/create-element-component'
-export * from './util/create-element-data'
-export * from './util/create-element-data-id'
 
 export * from './types'
 

@@ -17,9 +17,10 @@
 
 import { createUid } from '@aglyn/shared-util-vendor'
 
+
 export const ELEMENT_ID_LENGTH = 10
 
-export function createElementDataId() {
+export function createComponentElementId() {
   return createUid(ELEMENT_ID_LENGTH)
 }
-export default createElementDataId
+export default createComponentElementId

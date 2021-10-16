@@ -15,12 +15,17 @@
  * limitations under the License.
  */
 
-import createCache, { Options } from '@emotion/cache'
-import { CacheProvider, EmotionCache } from '@emotion/react'
-import createInstance, { EmotionServer } from '@emotion/server/create-instance'
+import type { Options } from '@emotion/cache'
+import createCache from '@emotion/cache'
+import type { EmotionCache } from '@emotion/react'
+import { CacheProvider } from '@emotion/react'
+import type { EmotionServer } from '@emotion/server/create-instance'
+import createInstance from '@emotion/server/create-instance'
+
 
 export type {
-  EmotionCache, EmotionServer
+  EmotionCache,
+  EmotionServer,
 }
 export { CacheProvider }
 

@@ -18,7 +18,7 @@
 import {
   AglynComponentSchema,
   ComponentId,
-  createElementComponent,
+  createAglynComponent,
 } from '@aglyn/core-data-framework'
 import { ListItemText } from '@mui/material'
 
@@ -44,7 +44,7 @@ export const templates: AglynComponentSchema['templates'] = [
   },
 ]
 
-export const component = createElementComponent(
+export const component = createAglynComponent(
  {
    componentId,
    bundleId,

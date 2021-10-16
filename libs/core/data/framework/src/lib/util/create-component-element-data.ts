@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
+import { objectDeepMergeMany } from '@aglyn/shared-util-vendor'
 import {
   AglynComponentElementData,
   AglynComponentElementTemplateData,
   TemplateSubElementData,
 } from '../controllers/aglyn-components.controller'
-import { objectDeepMergeMany } from '@aglyn/shared-util-vendor'
-import { createElementDataId } from './create-element-data-id'
+import { createComponentElementId } from './create-component-element-id'
 
 
 export const ELEMENT_DEFAULTS: Partial<AglynComponentElementData> = {
@@ -29,7 +29,7 @@ export const ELEMENT_DEFAULTS: Partial<AglynComponentElementData> = {
   elements: [],
 }
 
-export function createElementData(
+export function createComponentElementData(
   template: AglynComponentElementTemplateData,
 ): AglynComponentElementData {
   const {data} = template
@@ -37,7 +37,7 @@ export function createElementData(
   function mapTemplate(data: TemplateSubElementData): AglynComponentElementData {
     return {
       ...data,
-      $id: createElementDataId(),
+      $id: createComponentElementId(),
       elements: [...(data.elements ?? [])].map((data) => mapTemplate(data)),
     }
   }
@@ -47,4 +47,4 @@ export function createElementData(
     mapTemplate(data),
   ]) as AglynComponentElementData
 }
-export default createElementData
+export default createComponentElementData

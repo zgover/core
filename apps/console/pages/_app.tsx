@@ -17,7 +17,7 @@
 
 import { bundle as muiBundle } from '@aglyn/addon-ui-mui-bundle'
 import {
-  createElementComponent,
+  createAglynComponent,
   initializeApp,
   registerBundle,
   registerComponent,
@@ -49,7 +49,7 @@ const metaElements: MakeMetaElementsConfig = [
 ]
 const linkElements: MakeLinkElementsConfig = []
 
-const c1 = createElementComponent(
+const c1 = createAglynComponent(
   {
     componentId: 'root',
     metadata: {
@@ -61,7 +61,7 @@ const c1 = createElementComponent(
   'span',
 )
 
-const c2 = createElementComponent(
+const c2 = createAglynComponent(
   {
     componentId: 'root1',
     metadata: {
@@ -73,7 +73,7 @@ const c2 = createElementComponent(
   'span',
 )
 
-const c3 = createElementComponent(
+const c3 = createAglynComponent(
   {
     componentId: 'root2',
     metadata: {
@@ -85,7 +85,7 @@ const c3 = createElementComponent(
   'span',
 )
 
-const c4 = createElementComponent(
+const c4 = createAglynComponent(
   {
     componentId: 'root3',
     metadata: {
@@ -97,7 +97,7 @@ const c4 = createElementComponent(
   'span',
 )
 
-const c5 = createElementComponent(
+const c5 = createAglynComponent(
   {
     componentId: 'root4',
     metadata: {

@@ -23,6 +23,7 @@ import {
   OrUndef,
   ResolveProps,
 } from '@aglyn/shared-data-types'
+import { StyledOptions } from '@aglyn/shared-feature-themes'
 import { FormSchema, InnerRefProp } from '@aglyn/shared-ui-jsx'
 import { _isArr } from '@aglyn/shared-util-guards'
 import { ComponentClass, FunctionComponent } from 'react'
@@ -55,10 +56,10 @@ const TAG = 'ComponentsExtension'
 export type AglynComponentsTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMPONENTS_TYPE>
 
 
-export type AglynComponentClassElement<P = any> = ComponentClass<P>
-export type AglynComponentFunctionElement<P = any> = FunctionComponent<P>
-export type AglynComponentIntrinsicElement<P = any> = JSXIntrinsicElement<P>
-export type AglynComponentElementType<P = any> =
+export type AglynComponentClassElement<P extends AnyProps = any> = ComponentClass<P>
+export type AglynComponentFunctionElement<P extends AnyProps = any> = FunctionComponent<P>
+export type AglynComponentIntrinsicElement<P extends AnyProps = any> = JSXIntrinsicElement<P>
+export type AglynComponentElementType<P extends AnyProps = any> =
   | AglynComponentClassElement<P>
   | AglynComponentFunctionElement<P>
   | AglynComponentIntrinsicElement<P>
@@ -95,7 +96,7 @@ export interface AglynComponentsBundle {
   components: ComponentId[]
 }
 
-export interface AglynComponentElement<P = any>
+export interface AglynComponentElement<P extends AnyProps = any>
   extends AglynComponentClassElement<P & InnerRefProp> {
   readonly [TYPE_OF]: typeof MODULE_TYPE
   readonly [TYPE_KIND]: typeof EXTENSION_TYPE
@@ -135,10 +136,13 @@ export interface AglynComponentSchema<P extends AnyProps = any> {
       restrictChildren?: HierarchyRestriction
       restrictParent?: HierarchyRestriction
     }
-    styled?: { disable?: boolean }
     elementRef?: { disable?: boolean; innerRef?: boolean }
     propsSchema?: FormSchema
     resolveProps?: ResolveProps<AglynComponentElementData<P>>
+    emotionStyled?: {
+      disable?: boolean
+      options?: StyledOptions<P>
+    }
   }
 
   templates?: AglynComponentElementTemplateData<P>[]
