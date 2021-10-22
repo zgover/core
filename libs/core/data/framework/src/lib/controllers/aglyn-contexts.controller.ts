@@ -22,7 +22,7 @@ import AglynBaseModel from '../models/aglyn-base.model'
 export type AglynContextType<T = any> = Dictionary<T> | Array<T>
 
 export interface AglynContextsController extends AglynBaseModel {
-  getContext<T>(props: {name: string}): AglynContextType<T>
-  setContext<T>(props: {name: string, data: AglynContextType<T>}): this
-  deleteContext(props: {name: string}): this
+  getContext<T>(props: { name: string }): AglynContextType<T>
+  setContext<T>(props: { name: string, data: AglynContextType<T> }): this
+  deleteContext(props: { name: string }): this
 }
