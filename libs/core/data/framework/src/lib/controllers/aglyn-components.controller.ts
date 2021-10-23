@@ -46,7 +46,7 @@ import {
   TYPE_OF,
 } from '../constants/symbol'
 import { AglynModuleEffectListener, AglynModuleModel } from '../models/aglyn-module.model'
-import { AglynTypeFields } from '../types'
+import { AglynTypeFields, BundleUId, ComponentId } from '../types'
 import { isAglynComponentElement } from '../util/aglyn-is'
 
 
@@ -60,26 +60,19 @@ export type AglynComponentElementType<P extends AnyProps = any> =
   | AglynComponentFunctionElement<P>
   | AglynComponentIntrinsicElement<P>
 
-export type AppUUN = string
-export type ExtensionUUN = string
-export type BundleUId = string
-export type ComponentId = string
-export type CommandUId = string
-export type ContextStoreUid = string
 
-
-export const enum LinealDirectiveFlag {
-  LIMIT_TO = 16,
-  DISALLOW = 24,
+export enum ComponentsLinealDirectiveFlag {
+  LIMIT_TO = 0x01,
+  DISALLOW = 0x02,
 }
 
 export type LinealComponent = ComponentId
 export type LinealComponentOfBundle = [bundleId: BundleUId, componentId: ComponentId]
-export type LinealBundle = [bundleId: BundleUId]
+export type ComponentsLinealBundle = [bundleId: BundleUId]
 
-export type LinealOrder<T extends LinealDirectiveFlag = LinealDirectiveFlag> = [
+export type ComponentsLinealOrder<T extends ComponentsLinealDirectiveFlag = ComponentsLinealDirectiveFlag> = [
   type: T,
-  definition: (LinealComponent | LinealComponentOfBundle | LinealBundle)[]
+  definition: (LinealComponent | LinealComponentOfBundle | ComponentsLinealBundle)[]
 ]
 
 export type ComponentsRegistryKeys = (ComponentId | [ComponentId, BundleUId])[]
@@ -138,8 +131,8 @@ export interface AglynComponentBuilderFlags {
 
 export interface AglynComponentRenderFlags<P extends AnyProps = any> {
   hierarchy?: {
-    restrictChildren?: LinealOrder
-    restrictParent?: LinealOrder
+    restrictChildren?: ComponentsLinealOrder
+    restrictParent?: ComponentsLinealOrder
   }
   elementRef?: { disable?: boolean; innerRef?: boolean }
   propsSchema?: FormSchema

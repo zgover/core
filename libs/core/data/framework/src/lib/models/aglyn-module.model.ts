@@ -63,6 +63,16 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
   protected constructor(options: O) {
     super(options)
     this.app = options.app
+    this.#setup()
+  }
+  #setup() {
+    // Replace error factory with child namespace if not overridden
+    if (!this.options.errorFactory) {
+      const errorFactory = this.getErrorFactory()?.childFactory(this.moduleName)
+      if (errorFactory) {
+        this.setErrorFactory(errorFactory)
+      }
+    }
   }
 
   public aglynOnInit(app?: AglynAppController): void {

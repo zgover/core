@@ -71,6 +71,9 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public get options(): O {
     return this.#options
   }
+  public get errorFactory(): AglynErrorFactory {
+    return this.#errorFactory
+  }
   public get logger(): AglynLogger {
     return this.#logger
   }

@@ -41,16 +41,15 @@ export * from './api/logger.api'
 // 👇
 
 export * from './constants/emitter'
-export * from './constants/enums'
 export * from './constants/error'
+export * from './constants/lifecycle'
 export * from './constants/logger'
 export * from './constants/platform'
 export * from './constants/symbol'
 export * from './constants/version'
 
 // 👇 ENUMS
-export { AglynCommandFlag } from './controllers/aglyn-commands.controller'
-export { LinealDirectiveFlag } from './controllers/aglyn-components.controller'
+export { ComponentsLinealDirectiveFlag } from './controllers/aglyn-components.controller'
 
 
 //    __  ______________   _____
@@ -81,6 +80,7 @@ export {
 export {
   AglynModuleModelOptions,
   AglynModuleEffectListener,
+  AglynModuleTypeFields,
   AglynModuleModelT,
   AglynModuleModel,
 } from './models/aglyn-module.model'
@@ -124,15 +124,12 @@ export type {
   AglynCommandListener,
   AglynCommandResolverTypeFields,
   AglynCommandListenerTypeFields,
-  AglynCommandParams,
   AglynCommandsControllerT,
   AglynCommandsController,
 } from './controllers/aglyn-commands.controller'
 export type {
   AglynComponentsBundle,
   AglynComponentSchema,
-  BundleUId,
-  ComponentId,
   AglynComponentsTypeFields,
   AglynComponentElement,
   AglynComponentElementTemplateData,
@@ -144,7 +141,7 @@ export type {
   AglynComponentElementType,
   AglynComponentFunctionElement,
   AglynComponentIntrinsicElement,
-  LinealOrder,
+  ComponentsLinealOrder,
   TemplateSubElementData,
   AglynComponentsControllerT,
   AglynComponentsController,

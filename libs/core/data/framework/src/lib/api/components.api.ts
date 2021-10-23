@@ -58,7 +58,9 @@ export function getAllComponentsKeys(app: AglynAppController): ComponentsRegistr
   return _getComponentsController(app)?.getAllComponentsKeys()
 }
 
-export function getAllComponentsTemplateValues(app: AglynAppController): AglynComponentElementTemplateData[] {
+export function getAllComponentsTemplateValues(
+  app: AglynAppController,
+): AglynComponentElementTemplateData[] {
   return _getComponentsController(app)?.getAllComponentsTemplateValues()
 }
 
@@ -83,18 +85,30 @@ export function getBundle(
   return _getComponentsController(app)?.getBundle(payload)
 }
 
-export function registerComponent(app: AglynAppController, payload: ComponentRegisterPayload): void {
+export function registerComponent(
+  app: AglynAppController,
+  payload: ComponentRegisterPayload,
+): void {
   _getComponentsController(app)?.registerComponent(payload)
 }
 
-export function registerBundle(app: AglynAppController, payload: ComponentsBundleRegisterPayload): void {
+export function registerBundle(
+  app: AglynAppController,
+  payload: ComponentsBundleRegisterPayload,
+): void {
   _getComponentsController(app)?.registerBundle(payload)
 }
 
-export function unregisterComponent(app: AglynAppController, payload: ComponentUnregisterPayload): void {
+export function unregisterComponent(
+  app: AglynAppController,
+  payload: ComponentUnregisterPayload,
+): void {
   _getComponentsController(app)?.unregisterComponent(payload)
 }
 
-export function unregisterBundle(app: AglynAppController, payload: ComponentsBundleUnregisterPayload): void {
+export function unregisterBundle(
+  app: AglynAppController,
+  payload: ComponentsBundleUnregisterPayload,
+): void {
   _getComponentsController(app)?.unregisterBundle(payload)
 }

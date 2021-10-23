@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import { _commandControllers } from '../constants/_internal'
+import { _commandsControllers } from '../constants/_internal'
 import {
-  CommandRegisterListener,
-  CommandRegisterResolver,
+  CommandRegisterListenerPayload,
+  CommandRemoveResolverPayload,
+  CommandsSetResolverPayload,
   CommandTriggerPayload,
-  CommandUnregisterListener,
-  CommandUnregisterResolver,
+  CommandUnregisterListenerPayload,
 } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynCommandsController } from '../controllers/aglyn-commands.controller'
@@ -30,13 +30,13 @@ import { _validateAppArg } from './app.api'
 
 export function _getCommandController(app: AglynAppController): AglynCommandsController {
   _validateAppArg(app)
-  return _commandControllers.get(app.getName())
+  return _commandsControllers.get(app.getName())
 }
 
 
 export function setCommandResolver(
   app: AglynAppController,
-  data: CommandRegisterResolver,
+  data: CommandsSetResolverPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.setResolver(data)
@@ -44,7 +44,7 @@ export function setCommandResolver(
 
 export function removeCommandResolver(
   app: AglynAppController,
-  data: CommandUnregisterResolver,
+  data: CommandRemoveResolverPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.removeResolver(data)
@@ -52,7 +52,7 @@ export function removeCommandResolver(
 
 export function registerCommandListener(
   app: AglynAppController,
-  data: CommandRegisterListener,
+  data: CommandRegisterListenerPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.registerListener(data)
@@ -60,7 +60,7 @@ export function registerCommandListener(
 
 export function unregisterCommandListener(
   app: AglynAppController,
-  data: CommandUnregisterListener,
+  data: CommandUnregisterListenerPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.unregisterListener(data)

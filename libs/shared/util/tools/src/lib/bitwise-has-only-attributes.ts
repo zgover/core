@@ -15,18 +15,8 @@
  * limitations under the License.
  */
 
-export const DEFAULT_ENTRY_NAME = '[DEFAULT]'
 
-export enum AglynLifecycleFlag {
-  UNREGISTERED = 0b0000,
-  REGISTERING = 0b0001,
-  REGISTERED = 0b0010,
-  INITIALIZING = 0b0011,
-  INITIALIZED = 0b0100,
-  LOADING = 0b0101,
-  LOADED = 0b0110,
-  UNLOADING = 0b0111,
-  UNLOADED = 0b1000,
-  DESTROYING = 0b1001,
-  DESTROYED = 0b1010,
+export function bitwiseHasOnlyAttributes(value: number, attr: number): value is (typeof attr) {
+  return Boolean(value === attr)
 }
+export default bitwiseHasOnlyAttributes

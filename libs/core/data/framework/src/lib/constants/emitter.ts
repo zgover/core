@@ -15,49 +15,51 @@
  * limitations under the License.
  */
 
-
-import { AnyProps, Dictionary } from '@aglyn/shared-data-types'
+import type { AnyProps, Dictionary } from '@aglyn/shared-data-types'
 import { EmitterFn } from '@aglyn/shared-util-emitter'
 import type {
   createEffect as createEffectorEffect,
   createEvent as createEffectorEvent,
 } from 'effector'
-import { Emitter } from 'mitt'
-import {
+import type {
   AglynCommandListener,
   AglynCommandResolver,
 } from '../controllers/aglyn-commands.controller'
-import {
+import type {
   AglynComponentElement,
   AglynComponentsBundle,
   AglynComponentSchema,
+} from '../controllers/aglyn-components.controller'
+import type { ContextStore, ContextStoreOptions } from '../controllers/aglyn-contexts.controller'
+import type { AglynExtension } from '../models/aglyn-extension.model'
+import type {
   AppUUN,
   BundleUId,
   CommandUId,
   ComponentId,
   ContextStoreUid,
   ExtensionUUN,
-} from '../controllers/aglyn-components.controller'
-import { ContextStore, ContextStoreOptions } from '../controllers/aglyn-contexts.controller'
-import type { AglynExtension } from '../models/aglyn-extension.model'
-import { PayloadData } from '../types'
+  PayloadData,
+} from '../types'
 
 
 export enum AglynAppEventFlag {
   APP_CREATING = 'event:app:creating', // 1
   APP_CREATED = 'event:app:created', // 2
   APP_INITIALIZING = 'event:app:initializing', // 3
-  APP_INITIALIZING_MODULE = 'event:app:initializing-module', // 4
-  APP_INITIALIZED_MODULE = 'event:app:initialized-module', // 5
   APP_INITIALIZED = 'event:app:initialized', // 6
   APP_DESTROYING = 'event:app:destroying', // 7
-  APP_DESTROYING_MODULE = 'event:app:destroying-module', // 8
-  APP_DESTROYED_MODULE = 'event:app:destroyed-module', // 9
   APP_DESTROYED = 'event:app:destroyed', // 10
   APP_DELETING = 'event:app:deleting', // 11
   APP_DELETED = 'event:app:deleted', // 12
 
+  APP_MODULE_INITIALIZING = 'event:module:initializing', // 4
+  APP_MODULE_INITIALIZED = 'event:module:initialized', // 5
+  APP_MODULE_DESTROYING = 'event:module:destroying', // 8
+  APP_MODULE_DESTROYED = 'event:module:destroyed', // 9
+
   EXTENSION_REGISTERED = 'event:extensions:registered-extension',
+  EXTENSION_INITIALIZING = 'event:extensions:initializing-extension',
   EXTENSION_INITIALIZED = 'event:extensions:initialized-extension',
   EXTENSION_LOADING = 'event:extensions:loading-extension',
   EXTENSION_LOADED = 'event:extensions:loaded-extension',
@@ -66,12 +68,14 @@ export enum AglynAppEventFlag {
   EXTENSION_DESTROYING = 'event:extensions:destroying-extension',
   EXTENSION_DESTROYED = 'event:extensions:destroyed-extension',
 
-  COMMAND_REGISTERED_RESOLVER = 'event:commands:registered-resolver',
-  COMMAND_REGISTERED_LISTENER = 'event:commands:registered-listener',
-  COMMAND_UNREGISTERED_RESOLVER = 'event:commands:unregistered-resolver',
-  COMMAND_UNREGISTERED_LISTENER = 'event:commands:unregistered-listener',
-  COMMAND_TRIGGERED_RESOLVER = 'event:commands:triggered-resolver',
-  COMMAND_TRIGGERED_LISTENER = 'event:commands:triggered-listener',
+  COMMAND_RESOLVER_SET = 'event:commands:set-resolver',
+  COMMAND_LISTENER_REGISTERED = 'event:commands:registered-listener',
+  COMMAND_RESOLVER_REMOVED = 'event:commands:unregistered-resolver',
+  COMMAND_LISTENER_UNREGISTERED = 'event:commands:unregistered-listener',
+  COMMAND_RESOLVER_TRIGGERING = 'event:commands:triggering-resolver',
+  COMMAND_RESOLVER_TRIGGERED = 'event:commands:triggered-resolver',
+  COMMAND_LISTENERS_TRIGGERING = 'event:commands:triggering-listeners',
+  COMMAND_LISTENERS_TRIGGERED = 'event:commands:triggered-listeners',
 
   COMPONENT_REGISTERING = 'event:components:registering-component',
   COMPONENT_REGISTERED = 'event:components:registered-component',
@@ -87,17 +91,18 @@ export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmi
   [AglynAppEventFlag.APP_CREATING]: PayloadData<{ appName: AppUUN }>
   [AglynAppEventFlag.APP_CREATED]: PayloadData<{ appName: AppUUN }>
   [AglynAppEventFlag.APP_INITIALIZING]: PayloadData<{ appName: AppUUN }>
-  [AglynAppEventFlag.APP_INITIALIZING_MODULE]: PayloadData<{ moduleName: string }>
-  [AglynAppEventFlag.APP_INITIALIZED_MODULE]: PayloadData<{ moduleName: string }>
+  [AglynAppEventFlag.APP_MODULE_INITIALIZING]: PayloadData<{ moduleName: string }>
+  [AglynAppEventFlag.APP_MODULE_INITIALIZED]: PayloadData<{ moduleName: string }>
   [AglynAppEventFlag.APP_INITIALIZED]: PayloadData<{ appName: AppUUN }>
   [AglynAppEventFlag.APP_DESTROYING]: PayloadData<{ appName: AppUUN }>
-  [AglynAppEventFlag.APP_DESTROYING_MODULE]: PayloadData<{ moduleName: string }>
-  [AglynAppEventFlag.APP_DESTROYED_MODULE]: PayloadData<{ moduleName: string }>
+  [AglynAppEventFlag.APP_MODULE_DESTROYING]: PayloadData<{ moduleName: string }>
+  [AglynAppEventFlag.APP_MODULE_DESTROYED]: PayloadData<{ moduleName: string }>
   [AglynAppEventFlag.APP_DESTROYED]: PayloadData<{ appName: AppUUN }>
   [AglynAppEventFlag.APP_DELETING]: PayloadData<{ appName: AppUUN }>
   [AglynAppEventFlag.APP_DELETED]: PayloadData<{ appName: AppUUN }>
 
   [AglynAppEventFlag.EXTENSION_REGISTERED]: PayloadData<{ extensionName: ExtensionUUN }>
+  [AglynAppEventFlag.EXTENSION_INITIALIZING]: PayloadData<{ extensionName: ExtensionUUN }>
   [AglynAppEventFlag.EXTENSION_INITIALIZED]: PayloadData<{ extensionName: ExtensionUUN }>
   [AglynAppEventFlag.EXTENSION_LOADING]: PayloadData<{ extensionName: ExtensionUUN }>
   [AglynAppEventFlag.EXTENSION_LOADED]: PayloadData<{ extensionName: ExtensionUUN }>
@@ -106,12 +111,14 @@ export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmi
   [AglynAppEventFlag.EXTENSION_DESTROYING]: PayloadData<{ extensionName: ExtensionUUN }>
   [AglynAppEventFlag.EXTENSION_DESTROYED]: PayloadData<{ extensionName: ExtensionUUN }>
 
-  [AglynAppEventFlag.COMMAND_TRIGGERED_RESOLVER]: PayloadData<{ commandId: CommandUId }>
-  [AglynAppEventFlag.COMMAND_REGISTERED_RESOLVER]: PayloadData<{ commandId: CommandUId }>
-  [AglynAppEventFlag.COMMAND_UNREGISTERED_RESOLVER]: PayloadData<{ commandId: CommandUId }>
-  [AglynAppEventFlag.COMMAND_TRIGGERED_LISTENER]: PayloadData<{ commandId: CommandUId }>
-  [AglynAppEventFlag.COMMAND_REGISTERED_LISTENER]: PayloadData<{ commandId: CommandUId }>
-  [AglynAppEventFlag.COMMAND_UNREGISTERED_LISTENER]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_RESOLVER_TRIGGERING]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_RESOLVER_TRIGGERED]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_RESOLVER_SET]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_RESOLVER_REMOVED]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_LISTENERS_TRIGGERING]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_LISTENERS_TRIGGERED]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_LISTENER_REGISTERED]: PayloadData<{ commandId: CommandUId }>
+  [AglynAppEventFlag.COMMAND_LISTENER_UNREGISTERED]: PayloadData<{ commandId: CommandUId }>
 
   [AglynAppEventFlag.COMPONENT_REGISTERING]: PayloadData<{ componentId: ComponentId, bundleId?: BundleUId }>
   [AglynAppEventFlag.COMPONENT_REGISTERED]: PayloadData<{ componentId: ComponentId, bundleId?: BundleUId }>
@@ -136,11 +143,11 @@ export enum AglynAppEffectFlag {
   CONTEXTS_SET_STORE = 'effect:contexts:set-store',
   CONTEXTS_DELETE_STORE = 'effect:contexts:delete-store',
 
-  COMMAND_ACTION_REGISTER_RESOLVER = 'effect:command:register-resolver',
-  COMMAND_ACTION_UNREGISTER_RESOLVER = 'effect:command:unregister-resolver',
-  COMMAND_ACTION_REGISTER_LISTENER = 'effect:command:register-listener',
-  COMMAND_ACTION_UNREGISTER_LISTENER = 'effect:command:unregister-listener',
-  COMMAND_TRIGGER = 'effect:command:trigger',
+  COMMANDS_RESOLVER_SET = 'effect:command:register-resolver',
+  COMMANDS_RESOLVER_REMOVE = 'effect:command:unregister-resolver',
+  COMMANDS_LISTENER_REGISTER = 'effect:command:register-listener',
+  COMMANDS_LISTENER_UNREGISTER = 'effect:command:unregister-listener',
+  COMMANDS_TRIGGER = 'effect:command:trigger',
 
   COMPONENT_GET = 'effect:components:get-component',
   COMPONENT_SCHEMA_GET = 'effect:components:get-component-schema',
@@ -153,6 +160,7 @@ export enum AglynAppEffectFlag {
 }
 
 export type ExtensionRegisterPayload = PayloadData<{ extension: AglynExtension }>
+export type ExtensionInitializePayload = PayloadData<{ extension: AglynExtension }>
 export type ExtensionDestroyPayload = PayloadData<{ extensionName: ExtensionUUN }>
 export type ExtensionLoadPayload = PayloadData<{ extensionName: ExtensionUUN }>
 export type ExtensionUnloadPayload = PayloadData<{ extensionName: ExtensionUUN }>
@@ -175,10 +183,10 @@ export type ComponentUnregisterPayload = PayloadData<{ componentId: ComponentId,
 export type ComponentsBundleRegisterPayload = PayloadData<{ bundle: Omit<AglynComponentsBundle, 'componentIds'>, components: ComponentRegisterPayload[] }>
 export type ComponentsBundleUnregisterPayload = PayloadData<{ bundleId: BundleUId }>
 
-export type CommandRegisterResolver = PayloadData<{ commandId?: CommandUId, resolver: AglynCommandResolver }>
-export type CommandUnregisterResolver = PayloadData<{ commandId: CommandUId }>
-export type CommandRegisterListener = PayloadData<{ commandId?: CommandUId, listener: AglynCommandListener }>
-export type CommandUnregisterListener = PayloadData<{ commandId?: CommandUId, listener: AglynCommandListener }>
+export type CommandsSetResolverPayload = PayloadData<{ commandId?: CommandUId, resolver: AglynCommandResolver }>
+export type CommandRemoveResolverPayload = PayloadData<{ commandId: CommandUId }>
+export type CommandRegisterListenerPayload = PayloadData<{ commandId?: CommandUId, listener: AglynCommandListener }>
+export type CommandUnregisterListenerPayload = PayloadData<{ commandId?: CommandUId, listener: AglynCommandListener }>
 export type CommandTriggerPayload = PayloadData<{ commandId: CommandUId } & Dictionary>
 
 export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, AglynEmitterPayload> {
@@ -194,11 +202,11 @@ export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, Agl
   [AglynAppEffectFlag.CONTEXTS_SET_STORE]: ContextsSetStorePayload
   [AglynAppEffectFlag.CONTEXTS_DELETE_STORE]: ContextsDeleteStorePayload
 
-  [AglynAppEffectFlag.COMMAND_ACTION_REGISTER_RESOLVER]: CommandRegisterResolver
-  [AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_RESOLVER]: CommandUnregisterResolver
-  [AglynAppEffectFlag.COMMAND_ACTION_REGISTER_LISTENER]: CommandRegisterListener
-  [AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_LISTENER]: CommandUnregisterListener
-  [AglynAppEffectFlag.COMMAND_TRIGGER]: CommandTriggerPayload
+  [AglynAppEffectFlag.COMMANDS_RESOLVER_SET]: CommandsSetResolverPayload
+  [AglynAppEffectFlag.COMMANDS_RESOLVER_REMOVE]: CommandRemoveResolverPayload
+  [AglynAppEffectFlag.COMMANDS_LISTENER_REGISTER]: CommandRegisterListenerPayload
+  [AglynAppEffectFlag.COMMANDS_LISTENER_UNREGISTER]: CommandUnregisterListenerPayload
+  [AglynAppEffectFlag.COMMANDS_TRIGGER]: CommandTriggerPayload
 
   [AglynAppEffectFlag.COMPONENT_GET]: ComponentGetPayload
   [AglynAppEffectFlag.COMPONENT_SCHEMA_GET]: ComponentSchemaGetPayload
@@ -215,6 +223,6 @@ export type AglynEventPayloads = EventPayload<AglynAppEventPayload> &
   EventPayload<AglynModuleEffectPayload> &
   Record<string, AglynEmitterPayload>
 export type AglynEmitterPayload = PayloadData<Dictionary>
-export type AglynEmitter = Emitter<AglynEventPayloads>
+export type AglynEmitter = EmitterFn<AglynEventPayloads>
 
 export const AGLYN_EMITTER: AglynEmitter = EmitterFn()

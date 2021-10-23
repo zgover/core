@@ -79,3 +79,10 @@ export interface AglynLoadableObserver<T1 = any, T2 = any> extends AglynLifecycl
    */
   aglynOnUnload?(props?: T2): void
 }
+
+export type AppUUN = string
+export type ExtensionUUN = string
+export type BundleUId = string
+export type ComponentId = string
+export type CommandUId = string
+export type ContextStoreUid = string

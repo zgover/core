@@ -22,18 +22,18 @@ import {
   AglynAppEffectFlag,
   AglynAppEventFlag,
   ExtensionDestroyPayload,
+  ExtensionInitializePayload,
   ExtensionLoadPayload,
   ExtensionRegisterPayload,
   ExtensionUnloadPayload,
 } from '../constants/emitter'
-import { AglynLifecycleFlag } from '../constants/enums'
+import { AglynLifecycleFlag } from '../constants/lifecycle'
 import { EXTENSION_TYPE, MODULE_TYPE } from '../constants/symbol'
 import type { AglynExtension } from '../models/aglyn-extension.model'
 import { AglynExtensionT } from '../models/aglyn-extension.model'
 import { AglynModuleEffectListener, AglynModuleModel } from '../models/aglyn-module.model'
-import { AglynExtensionMap, AglynTypeFields } from '../types'
+import { AglynExtensionMap, AglynTypeFields, ExtensionUUN } from '../types'
 import { isAglynExtension } from '../util/aglyn-is'
-import { ExtensionUUN } from './aglyn-components.controller'
 
 
 export type AglynExtensionTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof EXTENSION_TYPE>
@@ -101,12 +101,27 @@ export class AglynExtensionsController extends AglynModuleModel {
 
   public registerExtension = (payload: ExtensionRegisterPayload): void => {
     const {extension} = payload
-    if (isAglynExtension(extension) && extension.extensionName) {
-      const extensionName = extension.extensionName
+    const extensionName = extension?.extensionName
+    if (extensionName && isAglynExtension(extension)) {
+      extension.lifecycle = AglynLifecycleFlag.REGISTERING
+      this.getLogger().debug(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
+      this.getEmitter().emit(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
       this.extensions.set(extensionName, extension as AglynExtension)
       extension.lifecycle = AglynLifecycleFlag.REGISTERED
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
       this.getEmitter().emit(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
+    }
+    else {
+      // TODO: throw errorFactory error
+    }
+  }
+  public initializeExtension = (payload: ExtensionInitializePayload): void => {
+    const {extension} = payload
+    const extensionName = extension?.extensionName
+    if (extensionName && isAglynExtension(extension)) {
+      extension.lifecycle = AglynLifecycleFlag.INITIALIZING
+      this.getLogger().debug(AglynAppEventFlag.EXTENSION_INITIALIZING, {extensionName})
+      this.getEmitter().emit(AglynAppEventFlag.EXTENSION_INITIALIZING, {extensionName})
       extension.aglynOnInit?.(this.app)
       extension.lifecycle = AglynLifecycleFlag.INITIALIZED
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_INITIALIZED, {extensionName})

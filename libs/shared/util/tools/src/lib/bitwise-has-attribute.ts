@@ -14,27 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { EventEmitter2 } from 'eventemitter2'
-import mitt, { Emitter as MittEmitterFn } from 'mitt'
 
 
-export * from 'mitt'
-export type {
-  event,
-  eventNS,
-  ConstructorOptions,
-  ListenerFn,
-  EventAndListener,
-  WaitForOptions,
-  CancelablePromise,
-  OnceOptions,
-  ListenToOptions,
-  GeneralEventEmitter,
-  OnOptions,
-  Listener,
-} from 'eventemitter2'
-
-export class Emitter extends EventEmitter2 {}
-
-export type EmitterFn<Events extends Record<string | symbol, unknown>> = MittEmitterFn<Events>
-export const EmitterFn = mitt
+export function bitwiseHasAttribute(value: number, attr: number): value is (typeof value & typeof attr) {
+  return Boolean(value & attr)
+}
+export default bitwiseHasAttribute

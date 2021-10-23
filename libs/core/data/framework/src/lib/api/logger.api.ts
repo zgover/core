@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-import { _isFnT, _isNull } from '@aglyn/shared-util-guards'
 import { Logger, LogHandler, LogLevelString } from '@aglyn/shared-util-logger'
-import { AGLYN_ERROR, AglynErrorEventFlag } from '../constants/error'
 import { AGLYN_LOGGER, AglynLogger } from '../constants/logger'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { _validateAppArg } from './app.api'
@@ -41,9 +39,6 @@ export function setUserLogHandler(
   ctx: AglynAppController | AglynLogger | null,
   logHandler: LogHandler,
 ): void {
-  if (!_isNull(logHandler) && !_isFnT(logHandler)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_LOG_ARG, undefined)
-  }
   if (ctx instanceof AglynAppController) {
     _validateAppArg(ctx)
     ctx.getLogger().userLogHandler = logHandler

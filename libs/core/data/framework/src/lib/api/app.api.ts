@@ -18,9 +18,8 @@
 import { MutableShallow } from '@aglyn/shared-data-types'
 import { _isCtor, _isStrEmpty } from '@aglyn/shared-util-guards'
 import { trim } from '@aglyn/shared-util-tools'
-import { _apps } from '../constants/_internal'
+import { _apps, DEFAULT_ENTRY_NAME } from '../constants/_internal'
 import { AGLYN_EMITTER, AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
-import { DEFAULT_ENTRY_NAME } from '../constants/enums'
 import { AGLYN_ERROR, AglynErrorEventFlag } from '../constants/error'
 import { AGLYN_LOGGER } from '../constants/logger'
 import { AglynAppController, AglynAppOptions } from '../controllers/aglyn-app.controller'
@@ -35,7 +34,7 @@ export function getAllApps(): AglynAppController[] {
 export function getApp(name: string = DEFAULT_ENTRY_NAME): AglynAppController {
   const app = _apps.get(name)
   if (!app) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.NO_APP, {appName: name})
+    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_NONE, {appName: name})
   }
   return _apps.get(name)
 }
@@ -52,17 +51,17 @@ export function deleteApp(app: AglynAppController): void {
   AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETED, {appName})
 }
 
-export function initializeApp(options: AglynAppOptions = {}): AglynAppController {
-  const opts: AglynAppOptions = {...options}
+export function initializeApp(opts: AglynAppOptions = {}): AglynAppController {
+  const options: AglynAppOptions = {...opts}
   const appName: string = trim(opts.name || DEFAULT_ENTRY_NAME)
-  const extensions = opts.extensions || []
+  const extensions = options.extensions || []
   if (_isStrEmpty(appName)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.BAD_APP_NAME, {appName})
+    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_NAME, {appName})
   }
   if (_apps.has(appName)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.DUPLICATE_APP, {appName})
+    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_EXISTS, {appName})
   }
-  const app: AglynAppController = new AglynAppController(opts)
+  const app: AglynAppController = new AglynAppController(options)
   _apps.set(appName, app)
 
   app.aglynOnInit()
@@ -73,7 +72,7 @@ export function initializeApp(options: AglynAppOptions = {}): AglynAppController
 
 export function _validateAppArg(app: AglynAppController): void {
   if (!(app as AglynAppController) || !(app instanceof AglynAppController)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_APP_ARG, {appName: app?.getName?.()})
+    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_INSTANCE, {appName: app?.getName?.()})
   }
   if (app['deleted']) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_DELETED, {appName: app?.getName?.()})
@@ -87,10 +86,10 @@ export function _loadAppExtensions(data: { app: AglynAppController, extensions: 
     console.log('loader', loader(), extensions)
     const module = loader()
     if (!module) {
-      throw AGLYN_ERROR.create(AglynErrorEventFlag.NO_MODULE, undefined)
+      throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER, undefined)
     }
     if (!isAglynModule(module) || !isAglynExtension(module) || !_isCtor(module)) {
-      throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_MODULE_ARG, {
+      throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE, {
         moduleName: module?.['name'] ?? 'unknown',
         appName: app.getName() ?? DEFAULT_ENTRY_NAME,
       })

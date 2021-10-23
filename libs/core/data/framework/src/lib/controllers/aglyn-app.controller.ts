@@ -17,13 +17,13 @@
 
 import { getStaticField, yes } from '@aglyn/shared-util-tools'
 import {
-  _commandControllers,
+  _commandsControllers,
   _componentsControllers,
   _contextsControllers,
-  _extensionControllers,
+  _extensionsControllers,
+  DEFAULT_ENTRY_NAME,
 } from '../constants/_internal'
 import { AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
-import { DEFAULT_ENTRY_NAME } from '../constants/enums'
 import { TYPE_OF } from '../constants/symbol'
 import { AglynBaseModel, AglynBaseModelOptions } from '../models/aglyn-base.model'
 import { AglynNamed, Payload } from '../types'
@@ -71,9 +71,9 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   public readonly CommandController: AglynCommandsControllerT = AglynCommandsController
   public readonly ComponentsController: AglynComponentsControllerT = AglynComponentsController
 
-  #extensionController: AglynExtensionsController = null
+  #extensionsController: AglynExtensionsController = null
   #contextsController: AglynContextsController = null
-  #commandController: AglynCommandsController = null
+  #commandsController: AglynCommandsController = null
   #componentsController: AglynComponentsController = null
 
   readonly #name: string = null
@@ -83,13 +83,13 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
     return getStaticField(TYPE_OF, this)
   }
   public get extensions(): AglynExtensionsController {
-    return this.#extensionController
+    return this.#extensionsController
   }
   public get contexts(): AglynContextsController {
     return this.#contextsController
   }
   public get commands(): AglynCommandsController {
-    return this.#commandController
+    return this.#commandsController
   }
   public get components(): AglynComponentsController {
     return this.#componentsController
@@ -113,56 +113,69 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
     this.getEmitter().emit(AglynAppEventFlag.APP_CREATED, {appName: this.#name})
   }
   #setupAppModules(): void {
-    this.#contextsController = new this.ContextsController({app: this})
-    _contextsControllers.set(this.#name, this.#contextsController)
-
-    this.#commandController = new this.CommandController({app: this})
-    _commandControllers.set(this.#name, this.#commandController)
-
-    this.#componentsController = new this.ComponentsController({app: this})
-    _componentsControllers.set(this.#name, this.#componentsController)
-
-    this.#extensionController = new this.ExtensionController({app: this})
-    _extensionControllers.set(this.#name, this.#extensionController)
+    _contextsControllers.set(
+      this.#name,
+      this.#contextsController = new this.ContextsController({
+        app: this,
+      }),
+    )
+    _commandsControllers.set(
+      this.#name,
+      this.#commandsController = new this.CommandController({
+        app: this,
+      }),
+    )
+    _componentsControllers.set(
+      this.#name,
+      this.#componentsController = new this.ComponentsController({
+        app: this,
+      }),
+    )
+    _extensionsControllers.set(
+      this.#name,
+      this.#extensionsController = new this.ExtensionController({
+        app: this,
+      }),
+    )
   }
   #initializeAppModules(): void {
     const modules = [
       // Load internal modules before extensions
       this.#contextsController,
-      this.#commandController,
+      this.#commandsController,
       this.#componentsController,
 
       // Last step
-      this.#extensionController,
+      this.#extensionsController,
     ]
 
     modules.forEach((mod) => {
       const moduleName = mod.moduleName
-      this.getLogger().debug(AglynAppEventFlag.APP_INITIALIZING_MODULE, {moduleName})
-      this.getEmitter().emit(AglynAppEventFlag.APP_INITIALIZING_MODULE, {moduleName})
+      this.getLogger().debug(AglynAppEventFlag.APP_MODULE_INITIALIZING, {moduleName})
+      this.getEmitter().emit(AglynAppEventFlag.APP_MODULE_INITIALIZING, {moduleName})
       mod.aglynOnInit(this)
-      this.getLogger().debug(AglynAppEventFlag.APP_INITIALIZED_MODULE, {moduleName})
-      this.getEmitter().emit(AglynAppEventFlag.APP_INITIALIZED_MODULE, {moduleName})
+      this.getLogger().debug(AglynAppEventFlag.APP_MODULE_INITIALIZED, {moduleName})
+      this.getEmitter().emit(AglynAppEventFlag.APP_MODULE_INITIALIZED, {moduleName})
     })
   }
   #destroyAppModules(): void {
     const modules = [
       // Destroy extensions before internal modules
-      this.#extensionController,
+      this.#extensionsController,
 
       // Then destroy internal modules
       this.#contextsController,
-      this.#commandController,
+      this.#commandsController,
       this.#componentsController,
     ]
 
     modules.forEach((mod) => {
       const moduleName = mod.moduleName
-      this.getLogger().debug(AglynAppEventFlag.APP_DESTROYING_MODULE, {moduleName})
-      this.getEmitter().emit(AglynAppEventFlag.APP_DESTROYING_MODULE, {moduleName})
+      this.getLogger().debug(AglynAppEventFlag.APP_MODULE_DESTROYING, {moduleName})
+      this.getEmitter().emit(AglynAppEventFlag.APP_MODULE_DESTROYING, {moduleName})
       mod.aglynOnInit(this)
-      this.getLogger().debug(AglynAppEventFlag.APP_DESTROYED_MODULE, {moduleName})
-      this.getEmitter().emit(AglynAppEventFlag.APP_DESTROYED_MODULE, {moduleName})
+      this.getLogger().debug(AglynAppEventFlag.APP_MODULE_DESTROYED, {moduleName})
+      this.getEmitter().emit(AglynAppEventFlag.APP_MODULE_DESTROYED, {moduleName})
     })
   }
 
@@ -198,13 +211,13 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
     return this.#name
   }
   public getExtensionsController = (): AglynExtensionsController => {
-    return this.#extensionController
+    return this.#extensionsController
   }
   public getContextsController = (): AglynContextsController => {
     return this.#contextsController
   }
   public getCommandsController = (): AglynCommandsController => {
-    return this.#commandController
+    return this.#commandsController
   }
   public getComponentsController = (): AglynComponentsController => {
     return this.#componentsController

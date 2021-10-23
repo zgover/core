@@ -15,15 +15,13 @@
  * limitations under the License.
  */
 
-import { OrNull } from '@aglyn/shared-data-types'
 import { getStaticField } from '@aglyn/shared-util-tools'
-import { AglynLifecycleFlag } from '../constants/enums'
 import { AglynErrorEventFlag } from '../constants/error'
+import { AglynLifecycleFlag, nextLifecycleIsValid } from '../constants/lifecycle'
 import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import type { ExtensionUUN } from '../controllers/aglyn-components.controller'
 import type { AglynExtensionTypeFields } from '../controllers/aglyn-extensions.controller'
-import type { AglynLoadableObserver } from '../types'
+import type { AglynLoadableObserver, ExtensionUUN } from '../types'
 import { AglynModuleModel, AglynModuleModelOptions } from './aglyn-module.model'
 
 
@@ -55,7 +53,7 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
   public readonly moduleName: string = `${MODULE_NAME}:${this.extensionName || 'unknown'}`
 
   protected context?: T = null
-  #lifecycle?: OrNull<AglynLifecycleFlag> = AglynLifecycleFlag.UNREGISTERED
+  #lifecycle?: AglynLifecycleFlag[] = [AglynLifecycleFlag.UNREGISTERED]
 
   public get [TYPE_OF](): number | symbol {
     return getStaticField(TYPE_OF, this)
@@ -67,16 +65,22 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
   public get extensionName() {
     return getStaticField('extensionName', this)
   }
-  public get lifecycle(): OrNull<AglynLifecycleFlag> {
-    return this.#lifecycle
+  public get lifecycleHistory(): AglynLifecycleFlag[] {
+    return [...this.#lifecycle]
+  }
+  public get lifecycle(): AglynLifecycleFlag {
+    return this.#lifecycle.slice(-1)[0]
   }
   public set lifecycle(value: AglynLifecycleFlag) {
-    this.#lifecycle = value
+    if (!nextLifecycleIsValid(this.lifecycle, value)) {
+      // TODO: throw errorFactory error
+      throw new Error(`Inappropriate lifecycle '${value}' following '${this.lifecycle}'`)
+    }
+    this.#lifecycle.push(value)
   }
 
   protected constructor(options: O) {
     super(options)
-    this.moduleName = `extension:${this.extensionName}`
   }
 
   public toString = (): string => {
@@ -95,12 +99,12 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
     super.aglynOnInit(app)
   }
   public aglynOnLoad(app: AglynAppController): void {
-    throw this.getErrorFactory().create(AglynErrorEventFlag.EXTENSION_MISSING_MEMBER_METHOD, {
+    throw this.getErrorFactory().create(AglynErrorEventFlag.MODULE_MISSING_MEMBER, {
       extensionName: this.extensionName, memberMethod: 'aglynOnLoad',
     })
   }
   public aglynOnUnload(app: AglynAppController): void {
-    throw this.getErrorFactory().create(AglynErrorEventFlag.EXTENSION_MISSING_MEMBER_METHOD, {
+    throw this.getErrorFactory().create(AglynErrorEventFlag.MODULE_MISSING_MEMBER, {
       extensionName: this.extensionName, memberMethod: 'aglynOnUnload',
     })
   }
