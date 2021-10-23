@@ -23,12 +23,12 @@ import type { AglynAppController } from '../controllers/aglyn-app.controller'
 import { ExtensionUUN } from '../controllers/aglyn-components.controller'
 import { AglynExtensionTypeFields } from '../controllers/aglyn-extension.controller'
 import { AglynLifecycleFlag, AglynLoadableObserver } from '../types'
-import { AglynBaseModel } from './aglyn-base.model'
+import { AglynBaseModel, AglynBaseModelOptions } from './aglyn-base.model'
 
 
 const TAG = 'AglynExtension'
 
-export type AglynExtensionOptions = {
+export interface AglynExtensionOptions extends AglynBaseModelOptions {
   autoload?: boolean
 }
 
@@ -73,7 +73,7 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
   }
 
   protected constructor(app: AglynAppController, options: AglynExtensionOptions) {
-    super()
+    super(options)
     this.#options = {...options}
     this.app = app
     this.#setup()

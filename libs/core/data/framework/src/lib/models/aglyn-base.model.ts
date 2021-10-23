@@ -16,11 +16,12 @@
  */
 
 import { Dictionary, Serializable, StringLike } from '@aglyn/shared-data-types'
+import { LogLevelString } from '@aglyn/shared-util-logger'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { getStaticField } from '@aglyn/shared-util-tools'
-import { AglynEmitter } from '../constants/emitter'
-import { AglynError } from '../constants/error'
-import { AglynLogger } from '../constants/logger'
+import { AGLYN_EMITTER, AglynEmitter } from '../constants/emitter'
+import { AGLYN_ERROR, AglynErrorFactory } from '../constants/error'
+import { AGLYN_LOGGER, AglynLogger } from '../constants/logger'
 import { AGLYN_PLATFORM, AglynPlatform } from '../constants/platform'
 import { AglynVersion, SDK_VERSION } from '../constants/version'
 import { AglynLifecycleObserver } from '../types'
@@ -28,14 +29,22 @@ import { AglynLifecycleObserver } from '../types'
 
 const TAG = 'AglynBaseModel'
 
+export interface AglynBaseModelOptions {
+  logLevel?: LogLevelString
+  errorFactory?: AglynErrorFactory
+  emitter?: AglynEmitter
+  logger?: AglynLogger
+}
+
 export interface AglynBaseModel extends StringLike, Serializable, AglynLifecycleObserver {
   getCreatedAt(): Timestamp
-  getErrorFactory(): AglynError
-  setErrorFactory(value: AglynError): this
+  getErrorFactory(): AglynErrorFactory
+  setErrorFactory(value: AglynErrorFactory): this
   getEmitter(): AglynEmitter
   setEmitter(value: AglynEmitter): this
   getLogger(): AglynLogger
   setLogger(value: AglynLogger): this
+  getOptions(): AglynBaseModelOptions
 }
 
 export abstract class AglynBaseModel {
@@ -44,8 +53,9 @@ export abstract class AglynBaseModel {
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly sdkVersion: AglynVersion = SDK_VERSION
 
+  readonly #options: AglynBaseModelOptions = null
   readonly #created: Timestamp
-  #errorFactory: AglynError
+  #errorFactory: AglynErrorFactory
   #emitter: AglynEmitter
   #logger: AglynLogger
 
@@ -65,29 +75,33 @@ export abstract class AglynBaseModel {
     return this.#emitter
   }
 
-  protected constructor() {
+  protected constructor(options: AglynBaseModelOptions) {
+    this.#options = {...options}
+    this.#errorFactory = this.#options.errorFactory || AGLYN_ERROR
+    this.#emitter = this.#options.emitter || AGLYN_EMITTER
+    this.#logger = this.#options.logger || AGLYN_LOGGER
     this.#created = Timestamp.now()
-    this.#setup()
-  }
-  #setup() {
   }
 
-  public toString = (): string => {
+  public toString(): string {
     return getStaticField(Symbol.toStringTag, this)
   }
-  public toJSON = (): Dictionary => {
+  public toJSON(): Dictionary {
     return {
       created: this.#created,
     }
   }
 
+  public getOptions = (): AglynBaseModelOptions => {
+    return this.#options
+  }
   public getCreatedAt = (): Timestamp => {
     return this.#created
   }
-  public getErrorFactory = (): AglynError => {
+  public getErrorFactory = (): AglynErrorFactory => {
     return this.#errorFactory
   }
-  public setErrorFactory = (value: AglynError): this => {
+  public setErrorFactory = (value: AglynErrorFactory): this => {
     this.#errorFactory = value
     return this
   }

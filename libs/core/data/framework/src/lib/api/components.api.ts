@@ -18,13 +18,13 @@
 import { OrUndef } from '@aglyn/shared-data-types'
 import { _componentsControllers } from '../constants/_internal'
 import {
-  GetBundlePayload,
-  GetComponentPayload,
-  GetComponentSchemaPayload,
-  RegisterBundlePayload,
-  RegisterComponentPayload,
-  UnregisterBundlePayload,
-  UnregisterComponentPayload,
+  ComponentGetPayload,
+  ComponentRegisterPayload,
+  ComponentsBundleGetPayload,
+  ComponentsBundleRegisterPayload,
+  ComponentsBundleUnregisterPayload,
+  ComponentSchemaGetPayload,
+  ComponentUnregisterPayload,
 } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import type {
@@ -64,37 +64,37 @@ export function getAllComponentsTemplateValues(app: AglynAppController): AglynCo
 
 export function getComponent<P>(
   app: AglynAppController,
-  payload: GetComponentPayload,
+  payload: ComponentGetPayload,
 ): OrUndef<AglynComponentElement<P>> {
   return _getComponentsController(app)?.getComponent(payload)
 }
 
 export function getComponentSchema(
   app: AglynAppController,
-  payload: GetComponentSchemaPayload,
+  payload: ComponentSchemaGetPayload,
 ): OrUndef<AglynComponentSchema> {
   return _getComponentsController(app)?.getComponentSchema(payload)
 }
 
 export function getBundle(
   app: AglynAppController,
-  payload: GetBundlePayload,
+  payload: ComponentsBundleGetPayload,
 ): OrUndef<AglynComponentsBundle> {
   return _getComponentsController(app)?.getBundle(payload)
 }
 
-export function registerComponent(app: AglynAppController, payload: RegisterComponentPayload): void {
+export function registerComponent(app: AglynAppController, payload: ComponentRegisterPayload): void {
   _getComponentsController(app)?.registerComponent(payload)
 }
 
-export function registerBundle(app: AglynAppController, payload: RegisterBundlePayload): void {
+export function registerBundle(app: AglynAppController, payload: ComponentsBundleRegisterPayload): void {
   _getComponentsController(app)?.registerBundle(payload)
 }
 
-export function unregisterComponent(app: AglynAppController, payload: UnregisterComponentPayload): void {
+export function unregisterComponent(app: AglynAppController, payload: ComponentUnregisterPayload): void {
   _getComponentsController(app)?.unregisterComponent(payload)
 }
 
-export function unregisterBundle(app: AglynAppController, payload: UnregisterBundlePayload): void {
+export function unregisterBundle(app: AglynAppController, payload: ComponentsBundleUnregisterPayload): void {
   _getComponentsController(app)?.unregisterBundle(payload)
 }

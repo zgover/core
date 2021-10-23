@@ -30,13 +30,13 @@ import { ComponentClass, FunctionComponent } from 'react'
 import {
   AglynAppEffectFlag,
   AglynAppEventFlag,
-  GetBundlePayload,
-  GetComponentPayload,
-  GetComponentSchemaPayload,
-  RegisterBundlePayload,
-  RegisterComponentPayload,
-  UnregisterBundlePayload,
-  UnregisterComponentPayload,
+  ComponentGetPayload,
+  ComponentRegisterPayload,
+  ComponentsBundleGetPayload,
+  ComponentsBundleRegisterPayload,
+  ComponentsBundleUnregisterPayload,
+  ComponentSchemaGetPayload,
+  ComponentUnregisterPayload,
 } from '../constants/emitter'
 import {
   COMPONENT_ELEMENT_TYPE,
@@ -45,8 +45,10 @@ import {
   TYPE_KIND,
   TYPE_OF,
 } from '../constants/symbol'
-import { AglynAppController } from '../controllers/aglyn-app.controller'
-import { AglynBaseModel } from '../models/aglyn-base.model'
+import {
+  AglynAppModuleEffectListener,
+  AglynModuleBaseModel,
+} from '../models/aglyn-module-base.model'
 import { AglynTypeFields } from '../types'
 import { isAglynComponentElement } from '../util/aglyn-is'
 
@@ -68,6 +70,7 @@ export type ExtensionUUN = string
 export type BundleUId = string
 export type ComponentId = string
 export type CommandUId = string
+export type ContextStoreUid = string
 
 
 export const enum LinealDirectiveFlag {
@@ -194,28 +197,27 @@ export interface TemplateSubElementData<P extends AnyProps = any> {
   props?: AnyProps
 }
 
-export interface AglynComponentsController extends AglynBaseModel {
+export interface AglynComponentsController extends AglynModuleBaseModel {
   getAllComponents(): ComponentsRegistryEntry[]
   getAllComponentsKeys(): ComponentsRegistryKeys
   getAllComponentsValues(): ComponentsRegistryValues
   getAllComponentsTemplateValues(): AglynComponentElementTemplateData[]
 
-  getComponent(payload: GetComponentPayload): OrUndef<AglynComponentElement>
-  getComponentSchema(payload: GetComponentSchemaPayload): OrUndef<AglynComponentSchema>
-  getBundle(payload: GetBundlePayload): OrUndef<AglynComponentsBundle>
+  getComponent(payload: ComponentGetPayload): OrUndef<AglynComponentElement>
+  getComponentSchema(payload: ComponentSchemaGetPayload): OrUndef<AglynComponentSchema>
+  getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynComponentsBundle>
 
-  registerComponent(payload: RegisterComponentPayload): this
-  registerBundle(payload: RegisterBundlePayload): this
+  registerComponent(payload: ComponentRegisterPayload): this
+  registerBundle(payload: ComponentsBundleRegisterPayload): this
 
-  unregisterComponent(payload: UnregisterComponentPayload): this
-  unregisterBundle(payload: UnregisterBundlePayload): this
+  unregisterComponent(payload: ComponentUnregisterPayload): this
+  unregisterBundle(payload: ComponentsBundleUnregisterPayload): this
 }
 
-export class AglynComponentsController extends AglynBaseModel {
+export class AglynComponentsController extends AglynModuleBaseModel {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
-  protected app: AglynAppController
   protected context: ComponentsRegistry = {
     bundles: new Map(),
     components: new Map(),
@@ -223,29 +225,12 @@ export class AglynComponentsController extends AglynBaseModel {
     templates: new Map(),
   }
 
-  constructor(props: { app: AglynAppController }) {
-    super()
-    const {app} = props
-    this.app = app
-    this.#setup()
-  }
-  #setup() {
-    this.setErrorFactory(this.app.getErrorFactory())
-    this.setEmitter(this.app.getEmitter())
-    this.setLogger(this.app.getLogger())
-  }
+  constructor(options) {super(options)}
 
-  public aglynOnInit = (): void => {
-    this.listeners.forEach(([flag, method]) => this.app.getEmitter().on(flag, method))
-  }
-  public aglynOnDestroy = (): void => {
-    this.listeners.forEach(([flag, method]) => this.app.getEmitter().off(flag, method))
-  }
-
-  public toString = (): string => {
+  public toString(): string {
     return `${TAG}(app: '${this.app.getName()}')`
   }
-  public toJSON = () => {
+  public toJSON() {
     return {
       ...super.toJSON(),
       componentIds: this.context.components?.keys(),
@@ -280,7 +265,7 @@ export class AglynComponentsController extends AglynBaseModel {
     return this._templateValues()
   }
 
-  public getComponent = (payload: GetComponentPayload): OrUndef<AglynComponentElement> => {
+  public getComponent = (payload: ComponentGetPayload): OrUndef<AglynComponentElement> => {
     const {componentId, bundleId = undefined} = payload
     const key = this.buildMapKey({bundleId, componentId})
     if (bundleId) {
@@ -288,7 +273,7 @@ export class AglynComponentsController extends AglynBaseModel {
     }
     return this.context.components?.get(key)
   }
-  public getComponentSchema = (payload: GetComponentPayload): OrUndef<AglynComponentSchema> => {
+  public getComponentSchema = (payload: ComponentGetPayload): OrUndef<AglynComponentSchema> => {
     const {componentId, bundleId} = payload
     const key = this.buildMapKey({bundleId, componentId})
     if (bundleId) {
@@ -296,7 +281,7 @@ export class AglynComponentsController extends AglynBaseModel {
     }
     return this.context.schemas?.get(key)
   }
-  public getBundle(payload: GetBundlePayload): OrUndef<AglynComponentsBundle> {
+  public getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynComponentsBundle> {
     const {bundleId} = payload
     return this.context.bundles.get(bundleId)
   }
@@ -305,7 +290,7 @@ export class AglynComponentsController extends AglynBaseModel {
     return bundleId ? `${bundleId}:${componentId}` : componentId
   }
 
-  public registerComponent = (payload: RegisterComponentPayload): this => {
+  public registerComponent = (payload: ComponentRegisterPayload): this => {
     const {component, schema} = payload
     const componentId = schema.componentId
     const bundleId = schema.bundleId || undefined
@@ -316,8 +301,8 @@ export class AglynComponentsController extends AglynBaseModel {
       // TODO: throw errorFactory error
     }
 
-    this.getLogger().debug(AglynAppEventFlag.REGISTERING_COMPONENT, {componentId, bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.REGISTERING_COMPONENT, {componentId, bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_REGISTERING, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_REGISTERING, {componentId, bundleId})
 
     if (bundleId) {
       const bundle = this.context.bundles.get(bundleId)
@@ -340,37 +325,38 @@ export class AglynComponentsController extends AglynBaseModel {
         this.context.templates.set(i.id, i)
       })
     }
-    this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMPONENT, {componentId, bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMPONENT, {componentId, bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_REGISTERED, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_REGISTERED, {componentId, bundleId})
     return this
   }
-  public registerBundle = (payload: RegisterBundlePayload): this => {
+  public registerBundle = (payload: ComponentsBundleRegisterPayload): this => {
     const {bundle, components} = payload
     const _bundle: AglynComponentsBundle = {...bundle, componentIds: []}
     const bundleId: BundleUId = _bundle.bundleId
-    this.getLogger().debug(AglynAppEventFlag.REGISTERING_COMPONENT_BUNDLE, {bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.REGISTERING_COMPONENT_BUNDLE, {bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_BUNDLE_REGISTERING, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_BUNDLE_REGISTERING, {bundleId})
     this.context.bundles.set(bundleId, _bundle)
     ;([...components]).forEach(({schema, component}) => {
       schema.bundleId = bundleId
       this.registerComponent({schema, component})
     })
-    this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMPONENT_BUNDLE, {bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMPONENT_BUNDLE, {bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_BUNDLE_REGISTERED, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_BUNDLE_REGISTERED, {bundleId})
     return this
   }
 
-  public unregisterComponent = (payload: UnregisterComponentPayload): this => {
+  public unregisterComponent = (payload: ComponentUnregisterPayload): this => {
     const {componentId, bundleId = undefined} = payload
     const key = this.buildMapKey({bundleId, componentId})
 
-    this.getLogger().debug(AglynAppEventFlag.UNREGISTERING_COMPONENT, {componentId, bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERING_COMPONENT, {componentId, bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_UNREGISTERING, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_UNREGISTERING, {componentId, bundleId})
 
     if (bundleId) {
       const bundle = this.context.bundles.get(bundleId)
       if (!bundle) {
         throw new Error(`No bundle exists with ID ${bundleId}.`)
+        // TODO: throw errorFactory error
       }
       this.context.schemas.get(key)?.templates?.forEach((i) => {
         this.context.templates.delete(i.id)
@@ -387,31 +373,36 @@ export class AglynComponentsController extends AglynBaseModel {
       this.context.schemas.delete(componentId)
       this.context.components.delete(componentId)
     }
-    this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMPONENT, {componentId, bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMPONENT, {componentId, bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_UNREGISTERED, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_UNREGISTERED, {componentId, bundleId})
     return this
   }
-  public unregisterBundle(payload: UnregisterBundlePayload): this {
+  public unregisterBundle(payload: ComponentsBundleUnregisterPayload): this {
     const {bundleId} = payload
     const bundle = this.context.bundles.get(bundleId)
     if (!bundle) {
       throw new Error(`No bundle exists with ID ${bundleId}.`)
+      // TODO: throw errorFactory error
     }
 
-    this.getLogger().debug(AglynAppEventFlag.UNREGISTERING_COMPONENT_BUNDLE, {bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERING_COMPONENT_BUNDLE, {bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_BUNDLE_UNREGISTERING, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_BUNDLE_UNREGISTERING, {bundleId})
 
     bundle.componentIds.forEach((componentId) => {
       this.unregisterComponent({componentId, bundleId})
     })
     this.context.bundles.delete(bundleId)
-    this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMPONENT_BUNDLE, {bundleId})
-    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMPONENT_BUNDLE, {bundleId})
+    this.getLogger().debug(AglynAppEventFlag.COMPONENT_BUNDLE_UNREGISTERED, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.COMPONENT_BUNDLE_UNREGISTERED, {bundleId})
     return this
   }
 
 
-  private listeners: [AglynAppEffectFlag, (...args: any[]) => unknown][] = [
+  protected listeners: AglynAppModuleEffectListener<any>[] = [
+    [AglynAppEffectFlag.COMPONENT_GET, this.getComponent],
+    [AglynAppEffectFlag.COMPONENT_SCHEMA_GET, this.getComponentSchema],
+    [AglynAppEffectFlag.COMPONENTS_GET, this.getAllComponents],
+    [AglynAppEffectFlag.COMPONENTS_BUNDLE_GET, this.getBundle],
     [AglynAppEffectFlag.COMPONENT_REGISTER, this.registerComponent],
     [AglynAppEffectFlag.COMPONENT_UNREGISTER, this.unregisterComponent],
     [AglynAppEffectFlag.COMPONENTS_BUNDLE_REGISTER, this.registerBundle],
@@ -419,4 +410,5 @@ export class AglynComponentsController extends AglynBaseModel {
   ]
 }
 
+export type AglynComponentsControllerT = typeof AglynComponentsController
 export default AglynComponentsController

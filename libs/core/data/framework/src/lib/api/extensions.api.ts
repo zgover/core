@@ -16,7 +16,7 @@
  */
 
 import { _extensionControllers } from '../constants/_internal'
-import { AglynAppEffectFlag, AglynModuleActionPayload } from '../constants/emitter'
+import { AglynAppEffectFlag, AglynModuleEffectPayload } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynExtensionController } from '../controllers/aglyn-extension.controller'
 import { AglynExtension } from '../models/aglyn-extension.model'
@@ -38,28 +38,28 @@ export function getExtensions(app: AglynAppController): AglynExtension[] {
 }
 export function registerExtension(
   app: AglynAppController,
-  data: AglynModuleActionPayload[AglynAppEffectFlag.EXTENSION_REGISTER],
+  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_REGISTER],
 ): void {
   const extensionController = _getExtensionController(app)
   extensionController.registerExtension(data)
 }
 export function unregisterExtension(
   app: AglynAppController,
-  data: AglynModuleActionPayload[AglynAppEffectFlag.EXTENSION_DESTROY],
+  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_DESTROY],
 ): void {
   const extensionController = _getExtensionController(app)
   extensionController.destroyExtension(data)
 }
 export function loadExtension(
   app: AglynAppController,
-  data: AglynModuleActionPayload[AglynAppEffectFlag.EXTENSION_LOAD],
+  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_LOAD],
 ) {
   const extensionController = _getExtensionController(app)
   extensionController.loadExtension(data)
 }
 export function unloadExtension(
   app: AglynAppController,
-  data: AglynModuleActionPayload[AglynAppEffectFlag.EXTENSION_UNLOAD],
+  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_UNLOAD],
 ) {
   const extensionController = _getExtensionController(app)
   extensionController.loadExtension(data)

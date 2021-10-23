@@ -18,7 +18,7 @@
 import { styled } from '@aglyn/shared-feature-themes'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { Component, Ref } from 'react'
-import { RegisterComponentPayload } from '../constants/emitter'
+import { ComponentRegisterPayload } from '../constants/emitter'
 import { COMPONENT_ELEMENT_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
 import {
   AglynComponentElementType,
@@ -27,9 +27,9 @@ import {
 
 
 export function createAglynComponentElement(
-  schema: AglynComponentSchema,
-  component: AglynComponentElementType,
-): RegisterComponentPayload {
+ schema: AglynComponentSchema,
+ component: AglynComponentElementType,
+): ComponentRegisterPayload {
   const {componentId, bundleId, renderFlags} = schema
   const {emotionStyled} = {...renderFlags}
 
@@ -37,12 +37,12 @@ export function createAglynComponentElement(
   const displayName = `AglynComponent(${cDisplayName})`
 
   const ComponentElement =
-    !emotionStyled?.disable
-      ? styled(component as any, {
-        name: cDisplayName,
-        ...emotionStyled?.options,
-      })({})
-      : component
+   !emotionStyled?.disable
+    ? styled(component as any, {
+      name: cDisplayName,
+      ...emotionStyled?.options,
+    })({})
+    : component
 
   class AglynComponent extends Component<any> {
     public static readonly displayName = displayName

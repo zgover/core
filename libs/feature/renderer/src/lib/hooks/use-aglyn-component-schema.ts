@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
+import type { AglynComponentSchema, ComponentSchemaGetPayload } from '@aglyn/core-data-framework'
 import { getComponentSchema } from '@aglyn/core-data-framework'
-import type { AglynComponentSchema, GetComponentSchemaPayload } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/feature-renderer'
 import { useMemo } from 'react'
 
-export function useAglynComponentSchema(payload: GetComponentSchemaPayload): AglynComponentSchema {
+
+export function useAglynComponentSchema(payload: ComponentSchemaGetPayload): AglynComponentSchema {
   const {getApp} = useAglynAppContext()
   const schema = getComponentSchema(getApp(), payload)
   return useMemo(() => {

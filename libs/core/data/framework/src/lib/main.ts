@@ -33,30 +33,50 @@ export * from './util/create-components-bundle'
 
 export * from './types'
 
-export * from './models/aglyn-base.model'
+export {
+  AglynBaseModelOptions,
+  AglynBaseModel,
+} from './models/aglyn-base.model'
 export {
   AglynExtensionOptions,
   AglynExtensionT,
   AglynExtension,
 } from './models/aglyn-extension.model'
+export {
+  AglynModuleBaseModelOptions,
+  AglynAppModuleEffectListener,
+  AglynModuleBaseModelT,
+  AglynModuleBaseModel,
+} from './models/aglyn-module-base.model'
 
 export type {
   AglynAppOptions,
   AglynEffectOptions,
+  AglynAppControllerT,
   AglynAppController,
 } from './controllers/aglyn-app.controller'
 export type {
   AglynExtensionTypeFields,
   AglynExtensionLoader,
+  AglynExtensionControllerT,
   AglynExtensionController,
 } from './controllers/aglyn-extension.controller'
-
+export type {
+  ContextStore,
+  CreateStoreOptions,
+  DeleteStoreOptions,
+  GetStoreOptions,
+  SetStoreOptions,
+  AglynContextsControllerT,
+  AglynContextsController,
+} from './controllers/aglyn-contexts.controller'
 export type {
   AglynCommandResolver,
   AglynCommandListener,
   AglynCommandResolverTypeFields,
   AglynCommandListenerTypeFields,
   AglynCommandParams,
+  AglynCommandControllerT,
   AglynCommandController,
 } from './controllers/aglyn-command.controller'
 export { AglynCommandFlag } from './controllers/aglyn-command.controller'
@@ -78,6 +98,7 @@ export type {
   AglynComponentIntrinsicElement,
   LinealOrder,
   TemplateSubElementData,
+  AglynComponentsControllerT,
   AglynComponentsController,
 } from './controllers/aglyn-components.controller'
 export { LinealDirectiveFlag } from './controllers/aglyn-components.controller'

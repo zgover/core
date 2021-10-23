@@ -44,8 +44,8 @@ export function getApp(name: string = DEFAULT_ENTRY_NAME): AglynAppController {
 export function deleteApp(app: AglynAppController): void {
   _validateAppArg(app)
   const name = app.getName()
-  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_ON_DELETE, {app})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_ON_DELETE, {app})
+  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETING, {app})
+  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETING, {app})
   app.aglynOnDestroy?.()
   _apps.delete(name)
   ;(app as MutableShallow<AglynAppController>)['deleted'] = true

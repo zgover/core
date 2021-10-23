@@ -18,9 +18,9 @@
 import {
   AglynComponentsBundle,
   BundleUId,
+  ComponentRegisterPayload,
+  ComponentsBundleRegisterPayload,
   createComponentsBundle,
-  RegisterBundlePayload,
-  RegisterComponentPayload,
 } from '@aglyn/core-data-framework'
 
 import button from './button'
@@ -35,9 +35,9 @@ export const metadata: AglynComponentsBundle['metadata'] = {
   description: 'Material-UI view components',
   icon: 'view-array',
 }
-export const components: RegisterComponentPayload[] = [button, list, listItem, listItemText]
+export const components: ComponentRegisterPayload[] = [button, list, listItem, listItemText]
 
-export const bundle: RegisterBundlePayload = createComponentsBundle(
+export const bundle: ComponentsBundleRegisterPayload = createComponentsBundle(
   {
     bundleId,
     metadata,

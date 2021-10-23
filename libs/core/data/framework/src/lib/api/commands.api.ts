@@ -16,7 +16,7 @@
  */
 
 import { _commandControllers } from '../constants/_internal'
-import { AglynAppEffectFlag, AglynModuleActionPayload } from '../constants/emitter'
+import { AglynAppEffectFlag, AglynModuleEffectPayload } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynCommandController } from '../controllers/aglyn-command.controller'
 import { _validateAppArg } from './app.api'
@@ -28,21 +28,21 @@ export function _getCommandController(app: AglynAppController): AglynCommandCont
 }
 export function registerCommand(
   app: AglynAppController,
-  data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_REGISTER],
+  data: AglynModuleEffectPayload[AglynAppEffectFlag.COMMAND_ACTION_REGISTER],
 ): void {
   const commandController = _getCommandController(app)
   commandController.registerAction(data)
 }
 export function unregisterAction(
   app: AglynAppController,
-  data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER],
+  data: AglynModuleEffectPayload[AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER],
 ): void {
   const commandController = _getCommandController(app)
   commandController.unregisterAction(data)
 }
 export function triggerCommand(
   app: AglynAppController,
-  data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_TRIGGER],
+  data: AglynModuleEffectPayload[AglynAppEffectFlag.COMMAND_TRIGGER],
 ): void {
   const commandController = _getCommandController(app)
   commandController.trigger(data)

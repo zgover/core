@@ -67,9 +67,9 @@ export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof Ag
 
 export type AglynErrorParams = PayloadParams<AglynErrorEventParams>
 export type AglynErrorEventType = IndexOf<typeof AglynErrorEventFlag>
-export type AglynError = NsErrorFactory<AglynErrorEventFlag, AglynErrorParams>
+export type AglynErrorFactory = NsErrorFactory<AglynErrorEventFlag, AglynErrorParams>
 
-export const AGLYN_ERROR: AglynError = new NsErrorFactory(
+export const AGLYN_ERROR: AglynErrorFactory = new NsErrorFactory(
   'sdk',
   'AglynApp',
   AglynErrorEventMessageTemplates,
