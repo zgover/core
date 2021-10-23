@@ -45,10 +45,7 @@ import {
   TYPE_KIND,
   TYPE_OF,
 } from '../constants/symbol'
-import {
-  AglynAppModuleEffectListener,
-  AglynModuleBaseModel,
-} from '../models/aglyn-module-base.model'
+import { AglynModuleEffectListener, AglynModuleModel } from '../models/aglyn-module.model'
 import { AglynTypeFields } from '../types'
 import { isAglynComponentElement } from '../util/aglyn-is'
 
@@ -197,7 +194,7 @@ export interface TemplateSubElementData<P extends AnyProps = any> {
   props?: AnyProps
 }
 
-export interface AglynComponentsController extends AglynModuleBaseModel {
+export interface AglynComponentsController extends AglynModuleModel {
   getAllComponents(): ComponentsRegistryEntry[]
   getAllComponentsKeys(): ComponentsRegistryKeys
   getAllComponentsValues(): ComponentsRegistryValues
@@ -214,7 +211,7 @@ export interface AglynComponentsController extends AglynModuleBaseModel {
   unregisterBundle(payload: ComponentsBundleUnregisterPayload): this
 }
 
-export class AglynComponentsController extends AglynModuleBaseModel {
+export class AglynComponentsController extends AglynModuleModel {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
@@ -398,7 +395,7 @@ export class AglynComponentsController extends AglynModuleBaseModel {
   }
 
 
-  protected listeners: AglynAppModuleEffectListener<any>[] = [
+  protected listeners: AglynModuleEffectListener<any>[] = [
     [AglynAppEffectFlag.COMPONENT_GET, this.getComponent],
     [AglynAppEffectFlag.COMPONENT_SCHEMA_GET, this.getComponentSchema],
     [AglynAppEffectFlag.COMPONENTS_GET, this.getAllComponents],

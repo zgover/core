@@ -36,24 +36,24 @@ export interface AglynBaseModelOptions {
   logger?: AglynLogger
 }
 
-export interface AglynBaseModel extends StringLike, Serializable, AglynLifecycleObserver {
+export interface AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> extends StringLike, Serializable, AglynLifecycleObserver {
   getCreatedAt(): Timestamp
+  getOptions(): O
   getErrorFactory(): AglynErrorFactory
   setErrorFactory(value: AglynErrorFactory): this
   getEmitter(): AglynEmitter
   setEmitter(value: AglynEmitter): this
   getLogger(): AglynLogger
   setLogger(value: AglynLogger): this
-  getOptions(): AglynBaseModelOptions
 }
 
-export abstract class AglynBaseModel {
+export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly sdkVersion: AglynVersion = SDK_VERSION
 
-  readonly #options: AglynBaseModelOptions = null
+  readonly #options: O = null
   readonly #created: Timestamp
   #errorFactory: AglynErrorFactory
   #emitter: AglynEmitter
@@ -68,7 +68,7 @@ export abstract class AglynBaseModel {
   public get sdkVersion(): AglynVersion {
     return getStaticField('sdkVersion', this)
   }
-  public get options(): AglynBaseModelOptions {
+  public get options(): O {
     return this.#options
   }
   public get logger(): AglynLogger {
@@ -78,7 +78,7 @@ export abstract class AglynBaseModel {
     return this.#emitter
   }
 
-  protected constructor(options: AglynBaseModelOptions) {
+  protected constructor(options: O) {
     this.#options = {...options}
     this.#created = Timestamp.now()
     this.#setup()
@@ -102,7 +102,7 @@ export abstract class AglynBaseModel {
     }
   }
 
-  public getOptions = (): AglynBaseModelOptions => {
+  public getOptions = (): O => {
     return this.#options
   }
   public getCreatedAt = (): Timestamp => {

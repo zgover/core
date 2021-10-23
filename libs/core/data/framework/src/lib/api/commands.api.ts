@@ -16,7 +16,13 @@
  */
 
 import { _commandControllers } from '../constants/_internal'
-import { AglynAppEffectFlag, AglynModuleEffectPayload } from '../constants/emitter'
+import {
+  CommandRegisterListener,
+  CommandRegisterResolver,
+  CommandTriggerPayload,
+  CommandUnregisterListener,
+  CommandUnregisterResolver,
+} from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynCommandController } from '../controllers/aglyn-command.controller'
 import { _validateAppArg } from './app.api'
@@ -26,23 +32,43 @@ export function _getCommandController(app: AglynAppController): AglynCommandCont
   _validateAppArg(app)
   return _commandControllers.get(app.getName())
 }
-export function registerCommand(
+
+
+export function setCommandResolver(
   app: AglynAppController,
-  data: AglynModuleEffectPayload[AglynAppEffectFlag.COMMAND_ACTION_REGISTER],
+  data: CommandRegisterResolver,
 ): void {
   const commandController = _getCommandController(app)
-  commandController.registerAction(data)
+  commandController.setResolver(data)
 }
-export function unregisterAction(
+
+export function removeCommandResolver(
   app: AglynAppController,
-  data: AglynModuleEffectPayload[AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER],
+  data: CommandUnregisterResolver,
 ): void {
   const commandController = _getCommandController(app)
-  commandController.unregisterAction(data)
+  commandController.removeResolver(data)
 }
+
+export function registerCommandListener(
+  app: AglynAppController,
+  data: CommandRegisterListener,
+): void {
+  const commandController = _getCommandController(app)
+  commandController.registerListener(data)
+}
+
+export function unregisterCommandListener(
+  app: AglynAppController,
+  data: CommandUnregisterListener,
+): void {
+  const commandController = _getCommandController(app)
+  commandController.unregisterListener(data)
+}
+
 export function triggerCommand(
   app: AglynAppController,
-  data: AglynModuleEffectPayload[AglynAppEffectFlag.COMMAND_TRIGGER],
+  data: CommandTriggerPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.trigger(data)

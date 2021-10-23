@@ -17,32 +17,34 @@
 
 import { OrNull } from '@aglyn/shared-data-types'
 import { getStaticField } from '@aglyn/shared-util-tools'
+import { AglynLifecycleFlag } from '../constants/enums'
 import { AglynErrorEventFlag } from '../constants/error'
 import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import { ExtensionUUN } from '../controllers/aglyn-components.controller'
-import { AglynExtensionTypeFields } from '../controllers/aglyn-extension.controller'
-import { AglynLifecycleFlag, AglynLoadableObserver } from '../types'
-import { AglynBaseModel, AglynBaseModelOptions } from './aglyn-base.model'
+import type { ExtensionUUN } from '../controllers/aglyn-components.controller'
+import type { AglynExtensionTypeFields } from '../controllers/aglyn-extension.controller'
+import type { AglynLoadableObserver } from '../types'
+import type { AglynBaseModelOptions } from './aglyn-base.model'
+import { AglynModuleModel } from './aglyn-module.model'
 
 
 const TAG = 'AglynExtension'
 
 export interface AglynExtensionOptions extends AglynBaseModelOptions {
   autoload?: boolean
+  app: AglynAppController
 }
 
-export interface AglynExtension<T = any>
-  extends AglynBaseModel,
-    AglynLoadableObserver<AglynAppController>,
-    AglynExtensionTypeFields {
+export interface AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
+  extends AglynModuleModel<O>,
+    AglynExtensionTypeFields,
+    AglynLoadableObserver<AglynAppController, AglynAppController> {
   getExtensionName(): string
-  getOptions(): AglynExtensionOptions
   getContext(): T
   setContext(value: T): this
 }
 
-export abstract class AglynExtension<T = any> extends AglynBaseModel {
+export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModel<O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
@@ -51,17 +53,16 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
 
   public static readonly extensionName: string = null
 
-  readonly #options: AglynExtensionOptions = null
-  protected app: AglynAppController
   protected context?: T = null
   #lifecycle?: OrNull<AglynLifecycleFlag> = AglynLifecycleFlag.UNREGISTERED
 
-  public get [TYPE_OF]() {
+  public get [TYPE_OF](): number | symbol {
     return getStaticField(TYPE_OF, this)
   }
-  public get [TYPE_KIND]() {
+  public get [TYPE_KIND](): number | symbol {
     return getStaticField(TYPE_KIND, this)
   }
+
   public get extensionName() {
     return getStaticField('extensionName', this)
   }
@@ -72,16 +73,8 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
     this.#lifecycle = value
   }
 
-  protected constructor(app: AglynAppController, options: AglynExtensionOptions) {
+  protected constructor(options: O) {
     super(options)
-    this.#options = {...options}
-    this.app = app
-    this.#setup()
-  }
-  #setup() {
-    this.setErrorFactory(this.app.getErrorFactory())
-    this.setEmitter(this.app.getEmitter())
-    this.setLogger(this.app.getLogger())
   }
 
   public toString = (): string => {
@@ -96,22 +89,22 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
     }
   }
 
-  public aglynOnInit(_: AglynAppController): void {
+  public aglynOnInit(app: AglynAppController): void {
     throw this.getErrorFactory().create(AglynErrorEventFlag.EXTENSION_MISSING_MEMBER_METHOD, {
       extensionName: this.extensionName, memberMethod: 'getErrorFactory',
     })
   }
-  public aglynOnLoad(_: AglynAppController): void {
+  public aglynOnLoad(app: AglynAppController): void {
     throw this.getErrorFactory().create(AglynErrorEventFlag.EXTENSION_MISSING_MEMBER_METHOD, {
       extensionName: this.extensionName, memberMethod: 'aglynOnLoad',
     })
   }
-  public aglynOnUnload(_: AglynAppController): void {
+  public aglynOnUnload(app: AglynAppController): void {
     throw this.getErrorFactory().create(AglynErrorEventFlag.EXTENSION_MISSING_MEMBER_METHOD, {
       extensionName: this.extensionName, memberMethod: 'aglynOnUnload',
     })
   }
-  public aglynOnDestroy(_: AglynAppController): void {
+  public aglynOnDestroy(app: AglynAppController): void {
     throw this.getErrorFactory().create(AglynErrorEventFlag.EXTENSION_MISSING_MEMBER_METHOD, {
       extensionName: this.extensionName, memberMethod: 'aglynOnDestroy',
     })
@@ -122,9 +115,6 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
   }
   public static getExtensionName = (): ExtensionUUN => {
     return getStaticField('extensionName', this)
-  }
-  public getOptions = (): AglynExtensionOptions => {
-    return this.#options
   }
   public getContext = (): T => {
     return this.context

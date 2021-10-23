@@ -17,6 +17,12 @@
 
 export const DEFAULT_ENTRY_NAME = '[DEFAULT]'
 
-export enum AglynExtensionFlag {
-  COMPONENTS = 'components',
+export enum AglynLifecycleFlag {
+  UNREGISTERED = 0b0000,
+  REGISTERED = 0b0010,
+  INITIALIZED = 0b0100,
+  LOADING = 0b1000,
+  LOADED = 0b1010,
+  UNLOADED = 0b1100,
+  DESTROYED = 0b1110,
 }

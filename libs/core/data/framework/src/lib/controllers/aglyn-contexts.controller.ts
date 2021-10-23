@@ -15,14 +15,6 @@
  * limitations under the License.
  */
 
-import {
-  AglynAppEffectFlag,
-  AglynModuleBaseModelOptions,
-  ContextsCreateStorePayload,
-  ContextsDeleteStorePayload,
-  ContextsGetStorePayload,
-  ContextsSetStorePayload,
-} from '@aglyn/core-data-framework'
 import { KeyValueMap } from '@aglyn/shared-data-types'
 import { _hasProperty, _isObj } from '@aglyn/shared-util-guards'
 import { getProperty } from '@aglyn/shared-util-tools'
@@ -34,9 +26,19 @@ import {
   Store as EffectorStore,
 } from 'effector'
 import {
-  AglynAppModuleEffectListener,
-  AglynModuleBaseModel,
-} from '../models/aglyn-module-base.model'
+  AglynAppEffectFlag,
+  ContextsCreateEffectPayload,
+  ContextsCreateEventPayload,
+  ContextsCreateStorePayload,
+  ContextsDeleteStorePayload,
+  ContextsGetStorePayload,
+  ContextsSetStorePayload,
+} from '../constants/emitter'
+import {
+  AglynModuleEffectListener,
+  AglynModuleModel,
+  AglynModuleModelOptions,
+} from '../models/aglyn-module.model'
 import { ContextStoreUid } from './aglyn-components.controller'
 
 
@@ -48,8 +50,8 @@ export interface ContextStore<T> extends EffectorStore<T> {
 
 }
 
-export type CreateEvent = typeof createEffectorEvent
-export type CreateEffect = typeof createEffectorEffect
+export type ContextEvent = ReturnType<typeof createEffectorEvent>
+export type ContextEffect = ReturnType<typeof createEffectorEffect>
 
 export type ContextStoreOptions<T> = {
   name?: string
@@ -58,32 +60,30 @@ export type ContextStoreOptions<T> = {
   serialize?: 'ignore'
 }
 
-export interface AglynContextsController extends AglynModuleBaseModel {
-  getStore<T>(props: ContextsGetStorePayload): ContextStore<T>
-  setStore<T>(props: ContextsSetStorePayload<T>): this
-  createStore<T>(data: ContextsCreateStorePayload<T>): ContextStore<T>
-  deleteStore(props: ContextsDeleteStorePayload): this
-  createEvent(...args: Parameters<CreateEvent>): ReturnType<CreateEvent>
-  createEffect(...args: Parameters<CreateEffect>): ReturnType<CreateEffect>
+export interface AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> {
+  getStore<T>(payload: ContextsGetStorePayload): ContextStore<T>
+  setStore<T>(payload: ContextsSetStorePayload<T>): this
+  createStore<T>(payload: ContextsCreateStorePayload<T>): ContextStore<T>
+  deleteStore(payload: ContextsDeleteStorePayload): this
+  createEvent(payload: ContextsCreateEventPayload): ContextEvent
+  createEffect(payload: ContextsCreateEffectPayload): ContextEffect
 }
 
-export interface AglynContextsControllerOptions extends AglynModuleBaseModelOptions {
+export interface AglynContextsControllerOptions extends AglynModuleModelOptions {
   defaultStores: KeyValueMap<ContextStoreUid, { defaultState: any, options?: ContextStoreOptions<any> }>
 }
 
 const TAG = 'AglynContextsController'
 
-export class AglynContextsController extends AglynModuleBaseModel {
+export class AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
-  #options: AglynContextsControllerOptions = null
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()
 
   constructor(options) {
     super(options)
-    this.#options = {...options}
     this.#setup()
   }
   #setup() {
@@ -91,7 +91,7 @@ export class AglynContextsController extends AglynModuleBaseModel {
     this.#setupDefaultStores()
   }
   #setupDefaultStores(): void {
-    const defaultStores = this.#options.defaultStores
+    const defaultStores = this.options.defaultStores
     if (defaultStores && _isObj(defaultStores)) {
       for (const storeId in defaultStores) {
         if (_hasProperty(storeId, defaultStores)) {
@@ -113,25 +113,24 @@ export class AglynContextsController extends AglynModuleBaseModel {
     }
   }
 
-  public getOptions = (): AglynContextsControllerOptions => {
-    return this.#options
+  public createEvent = (payload: ContextsCreateEventPayload): ContextEvent => {
+    const {options} = payload
+    return this.#domain.createEvent(...options)
   }
-  public createEvent = (...args: Parameters<CreateEvent>): ReturnType<CreateEvent> => {
-    return this.#domain.createEvent(...args)
+  public createEffect = (payload: ContextsCreateEffectPayload): ContextEffect => {
+    const {options} = payload
+    return this.#domain.createEffect(...options)
   }
-  public createEffect = (...args: Parameters<CreateEffect>): ReturnType<CreateEffect> => {
-    return this.#domain.createEffect(...args)
-  }
-  public createStore = <T>(data: ContextsCreateStorePayload<T>): ContextStore<T> => {
-    const {options, defaultState} = data
+  public createStore = <T>(payload: ContextsCreateStorePayload<T>): ContextStore<T> => {
+    const {options, defaultState} = payload
     return this.#domain.createStore(defaultState, options)
   }
-  public getStore = <T>(data: ContextsGetStorePayload): ContextStore<T> => {
-    const {storeId} = data
+  public getStore = <T>(payload: ContextsGetStorePayload): ContextStore<T> => {
+    const {storeId} = payload
     return this.#stores.get(storeId)
   }
-  public setStore = <T>(data: ContextsSetStorePayload<T>): this => {
-    const {storeId, store} = data
+  public setStore = <T>(payload: ContextsSetStorePayload<T>): this => {
+    const {storeId, store} = payload
     if (storeId && store) {
       this.#stores.set(storeId, store)
     }
@@ -140,14 +139,16 @@ export class AglynContextsController extends AglynModuleBaseModel {
     }
     return this
   }
-  public deleteStore = (data: ContextsDeleteStorePayload): this => {
-    const {storeId} = data
+  public deleteStore = (payload: ContextsDeleteStorePayload): this => {
+    const {storeId} = payload
     this.#stores.delete(storeId)
     return this
   }
 
-  protected listeners: AglynAppModuleEffectListener<any>[] = [
+  protected listeners: AglynModuleEffectListener<any>[] = [
     [AglynAppEffectFlag.CONTEXTS_CREATE_STORE, this.createStore],
+    [AglynAppEffectFlag.CONTEXTS_CREATE_EVENT, this.createEvent],
+    [AglynAppEffectFlag.CONTEXTS_CREATE_EFFECT, this.createEffect],
     [AglynAppEffectFlag.CONTEXTS_GET_STORE, this.getStore],
     [AglynAppEffectFlag.CONTEXTS_SET_STORE, this.setStore],
     [AglynAppEffectFlag.CONTEXTS_DELETE_STORE, this.deleteStore],

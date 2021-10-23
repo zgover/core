@@ -18,6 +18,7 @@
 
 import { AnyProps, Dictionary } from '@aglyn/shared-data-types'
 import { EmitterFn } from '@aglyn/shared-util-emitter'
+import type { createEffect as createEffectorEffect, createEvent as createEffectorEvent } from 'effector'
 import { Emitter } from 'mitt'
 import { AglynCommandListener, AglynCommandResolver } from '../controllers/aglyn-command.controller'
 import {
@@ -115,6 +116,8 @@ export enum AglynAppEffectFlag {
   EXTENSION_DESTROY = 'effect:extension:destroy',
 
   CONTEXTS_CREATE_STORE = 'effect:contexts:create-store',
+  CONTEXTS_CREATE_EVENT = 'effect:contexts:create-event',
+  CONTEXTS_CREATE_EFFECT = 'effect:contexts:create-effect',
   CONTEXTS_GET_STORE = 'effect:contexts:get-store',
   CONTEXTS_SET_STORE = 'effect:contexts:set-store',
   CONTEXTS_DELETE_STORE = 'effect:contexts:delete-store',
@@ -140,7 +143,11 @@ export type ExtensionDestroyPayload = PayloadData<{ extensionName: ExtensionUUN 
 export type ExtensionLoadPayload = PayloadData<{ extensionName: ExtensionUUN }>
 export type ExtensionUnloadPayload = PayloadData<{ extensionName: ExtensionUUN }>
 
+export type CreateEventOptions = { options: Parameters<typeof createEffectorEvent> }
+export type CreateEffectOptions = { options: Parameters<typeof createEffectorEffect> }
 export type ContextsCreateStorePayload<T = any> = PayloadData<{ defaultState: T, options?: ContextStoreOptions<T> }>
+export type ContextsCreateEventPayload = PayloadData<CreateEventOptions>
+export type ContextsCreateEffectPayload = PayloadData<CreateEffectOptions>
 export type ContextsGetStorePayload = PayloadData<{ storeId: ContextStoreUid }>
 export type ContextsSetStorePayload<T = any> = PayloadData<{ storeId: ContextStoreUid, store: ContextStore<T> }>
 export type ContextsDeleteStorePayload = PayloadData<{ storeId: ContextStoreUid }>
@@ -167,6 +174,8 @@ export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, Agl
   [AglynAppEffectFlag.EXTENSION_UNLOAD]: ExtensionUnloadPayload
 
   [AglynAppEffectFlag.CONTEXTS_CREATE_STORE]: ContextsCreateStorePayload
+  [AglynAppEffectFlag.CONTEXTS_CREATE_EVENT]: ContextsCreateEventPayload
+  [AglynAppEffectFlag.CONTEXTS_CREATE_EFFECT]: ContextsCreateEffectPayload
   [AglynAppEffectFlag.CONTEXTS_GET_STORE]: ContextsGetStorePayload
   [AglynAppEffectFlag.CONTEXTS_SET_STORE]: ContextsSetStorePayload
   [AglynAppEffectFlag.CONTEXTS_DELETE_STORE]: ContextsDeleteStorePayload

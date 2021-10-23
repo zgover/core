@@ -50,9 +50,8 @@ export interface AglynEffectOptions<T, U = unknown> extends Payload<U> {
   type: T
 }
 
-export interface AglynAppController extends AglynBaseModel {
+export interface AglynAppController extends AglynBaseModel<AglynAppOptions> {
   getName(): string
-  getOptions(): AglynAppOptions
   isDeleted(): boolean
 
   getExtensionsController(): AglynExtensionController
@@ -63,7 +62,7 @@ export interface AglynAppController extends AglynBaseModel {
   effect(data: AglynEffectOptions<AglynAppEffectFlag>): this
 }
 
-export class AglynAppController extends AglynBaseModel {
+export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
@@ -77,7 +76,6 @@ export class AglynAppController extends AglynBaseModel {
   #commandController: AglynCommandController = null
   #componentsController: AglynComponentsController = null
 
-  readonly #options: AglynAppOptions = null
   readonly #name: string = null
   #isDeleted = false
 
@@ -99,8 +97,7 @@ export class AglynAppController extends AglynBaseModel {
 
   constructor(options: AglynAppOptions) {
     super(options)
-    this.#options = {...options}
-    this.#name = this.#options.name || DEFAULT_ENTRY_NAME
+    this.#name = options.name || DEFAULT_ENTRY_NAME
     this.#setup()
   }
   #setup() {
@@ -169,15 +166,11 @@ export class AglynAppController extends AglynBaseModel {
     return {
       ...super.toJSON(),
       name: this.#name,
-      options: this.#options,
     }
   }
 
   public getName = (): string => {
     return this.#name
-  }
-  public getOptions = (): AglynAppOptions => {
-    return this.#options
   }
   public getExtensionsController = (): AglynExtensionController => {
     return this.#extensionController
