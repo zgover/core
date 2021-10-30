@@ -23,9 +23,8 @@ import { useMemo } from 'react'
 
 export function useAglynComponent(payload: ComponentSchemaGetPayload): AglynComponentElement {
   const {getApp} = useAglynAppContext()
-  const component = getComponent(getApp(), payload)
   return useMemo(() => {
-    return component
-  }, [component])
+    return getComponent(getApp(), payload)
+  }, [getApp, payload])
 }
 export default useAglynComponent

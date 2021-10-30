@@ -64,6 +64,8 @@ export * from './util/create-aglyn-component-element'
 export * from './util/create-component-element-data'
 export * from './util/create-component-element-id'
 export * from './util/create-components-bundle'
+export * from './util/denormalize-component-element-data'
+export * from './util/normalize-component-element-data'
 
 
 //     __  _______  ____  ________   _____
@@ -138,11 +140,14 @@ export type {
   ComponentsRegistryValues,
   AglynComponentClassElement,
   AglynComponentElementData,
+  AglynComponentElementDataNormalized,
+  AglynComponentElementDataNormalizedMap,
   AglynComponentElementType,
   AglynComponentFunctionElement,
   AglynComponentIntrinsicElement,
   ComponentsLinealOrder,
   TemplateSubElementData,
+  AglynCommandsControllerOptions,
   AglynComponentsControllerT,
   AglynComponentsController,
 } from './controllers/aglyn-components.controller'

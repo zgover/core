@@ -52,10 +52,11 @@ export interface BuilderToolbarComponentProps extends Partial<AppBarProps> {}
 
 export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentProps>(
   function RefRenderFn(props, ref) {
-    const {className, children, ...rest} = props
+    const {children, ...rest} = props
 
     const {elementDrawer} = useElementDrawerContext()
-    const {elements, updateElements} = useElementsContext()
+    const {elements, addElement} = useElementsContext()
+    // const { } = useSelectionContext()
     const handleFabClick = useCallback(async () => {
       const option = await elementDrawer({
         title: 'Add New Element',
@@ -67,10 +68,12 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
       })
       .then((data: any) => {
         if (data) {
-          const prevElements = Array.from(elements)
-          const newElements = [...elements, createComponentElementData(data)]
-          console.log('prev newElement', newElements, prevElements)
-          updateElements && updateElements(newElements, prevElements)
+          console.log('then newElement', data)
+          addElement && addElement({
+            position: 0,
+            parentId: '__root__',
+            element: createComponentElementData(data),
+          })
         }
       })
       .catch((error) => {
@@ -78,7 +81,7 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
       })
 
       console.warn('async choice', option)
-    }, [elementDrawer, elements, updateElements])
+    }, [elementDrawer, elements, addElement])
 
     return (
       <StyledWrapper ref={ref} {...rest}>

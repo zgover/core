@@ -16,12 +16,14 @@
  */
 
 import { AglynComponentElementData } from '@aglyn/core-data-framework'
-import { styled } from '@aglyn/shared-feature-themes'
+import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
 import { ButtonProps } from '@mui/material/Button'
 import { DialogProps } from '@mui/material/Dialog'
 import { DialogContentTextProps } from '@mui/material/DialogContentText'
 import { DialogTitleProps } from '@mui/material/DialogTitle'
+import clsx from 'clsx'
 import { forwardRef, Fragment, HTMLAttributes } from 'react'
+
 
 export interface SelectionComponentOptions {
   cancellationText?: ButtonProps['children']
@@ -32,7 +34,7 @@ export interface SelectionComponentOptions {
   title?: DialogTitleProps['children']
   description?: DialogContentTextProps['children']
   clientRect?: DOMRect
-  elementData?: AglynComponentElementData
+  $id?: AglynComponentElementData
 }
 
 export interface SelectionComponentProps extends HTMLAttributes<HTMLDivElement> {
@@ -43,30 +45,45 @@ export interface SelectionComponentProps extends HTMLAttributes<HTMLDivElement> 
   onClose?: ButtonProps['onClick']
 }
 
-const SelectionRoot = styled('div', {name: 'SelectionRoot'})(({ theme }) => ({
+const classKeys = generateUtilityClasses('SelectionRoot', [
+  'selected',
+])
+
+const SelectionRoot = styled('div', {name: 'SelectionRoot'})(({theme}) => ({
   outlineWidth: 2,
   outlineOffset: -2,
   outlineColor: theme.palette.quaternary.main,
   outlineStyle: 'solid',
   pointerEvents: 'none',
   position: 'absolute',
+  visibility: 'hidden',
+  transition: theme.transitions.create(['visibility', 'width', 'height', 'left', 'right', 'top', 'bottom'], {
+    duration: theme.transitions.duration.short,
+    easing: theme.transitions.easing.easeInOut,
+  }),
+  [`&.${classKeys.selected}`]: {
+    visibility: 'visible'
+  }
 }))
 
-export const SelectionComponent = forwardRef<any, SelectionComponentProps>(function RefRenderFn(
-  props,
-  ref
-) {
-  const { open, options, onCancel, onConfirm, onClose, children, ...rest } = props
-  return (
-    <Fragment>
-      {open ? (
-        <SelectionRoot ref={ref} {...rest} style={{ ...options.clientRect }}>
-          {children}
-        </SelectionRoot>
-      ) : null}
-    </Fragment>
-  )
-})
+export const SelectionComponent = forwardRef<any, SelectionComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {open, options, onCancel, onConfirm, onClose, children, ...rest} = props
+    const className = clsx({
+      [classKeys.selected]: Boolean(open)
+    })
+    return (
+      <SelectionRoot
+        ref={ref}
+        style={{...options.clientRect}}
+        className={className}
+        {...rest}
+      >
+        {children}
+      </SelectionRoot>
+    )
+  }
+)
 
 SelectionComponent.displayName = 'SelectionComponent'
 SelectionComponent.defaultProps = {

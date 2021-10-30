@@ -84,5 +84,6 @@ export type AppUUN = string
 export type ExtensionUUN = string
 export type BundleUId = string
 export type ComponentId = string
+export type ElementId = string
 export type CommandUId = string
 export type ContextStoreUid = string

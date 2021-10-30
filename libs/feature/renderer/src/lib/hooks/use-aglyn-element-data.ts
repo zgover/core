@@ -15,19 +15,25 @@
  * limitations under the License.
  */
 
-import type { AglynComponentSchema, ComponentSchemaGetPayload } from '@aglyn/core-data-framework'
-import { BundleUId, CommandUId, getComponentSchema } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/feature-renderer'
+import type { ElementId } from '@aglyn/core-data-framework'
+import { AglynComponentElementDataNormalized, getContextStore } from '@aglyn/core-data-framework'
+import type { AnyProps } from '@aglyn/shared-data-types'
+import { useStoreMap } from 'effector-react'
 import { useMemo } from 'react'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 
-export function useAglynComponentSchema(
-  componentId: CommandUId,
-  bundleId?: BundleUId
-): AglynComponentSchema {
+export function useAglynElementData<P extends AnyProps>(
+  $id: ElementId,
+): AglynComponentElementDataNormalized {
   const {getApp} = useAglynAppContext()
+  const store = getContextStore(getApp(), {storeId: 'elements-normalized'})
+  const elementData = useStoreMap(store, (elements) => {
+    return elements[$id]
+  })
+
   return useMemo(() => {
-    return getComponentSchema(getApp(), {componentId, bundleId})
-  }, [getApp, componentId, bundleId])
+    return elementData
+  }, [$id, getApp])
 }
-export default useAglynComponentSchema
+export default useAglynElementData

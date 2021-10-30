@@ -49,8 +49,6 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
   ref,
 ) {
   const {
-    elements,
-    onUpdateElements,
     noSsr,
     appName,
     ...rest
@@ -65,7 +63,7 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
     <Wrapper>
       <AglynAppContext.Provider value={{getApp}}>
         <ElementComponentsContextProvider>
-          <ElementsContextProvider elements={elements} onUpdateElements={onUpdateElements}>
+          <ElementsContextProvider>
             {/*<SnackbarProvider maxSnack={3}>*/}
             <ConfirmationProviderComponent>
               <HoverContextProvider>

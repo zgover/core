@@ -40,6 +40,9 @@ import {
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
 import { ContextStoreUid } from '../types'
+import denormalizeComponentElementData from '../util/denormalize-component-element-data'
+import { normalizeComponentElementData } from '../util/normalize-component-element-data'
+import { AglynComponentElementData } from './aglyn-components.controller'
 
 
 export interface ContextDomain extends EffectorDomain {
@@ -71,6 +74,7 @@ export interface AglynContextsController extends AglynModuleModel<AglynContextsC
 
 export interface AglynContextsControllerOptions extends AglynModuleModelOptions {
   defaultStores: KeyValueMap<ContextStoreUid, { defaultState: any, options?: ContextStoreOptions<any> }>
+  defaultElements: AglynComponentElementData[]
 }
 
 const TAG = 'AglynContexts'
@@ -91,7 +95,21 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
   }
   #setup() {
     this.#domain = createEffectorDomain(this.app.getName())
+    this.#setupInternalStores()
     this.#setupDefaultStores()
+  }
+  #setupInternalStores(): void {
+    const normalizedElementsStore = this.createStore({
+        defaultState: normalizeComponentElementData(this.options.defaultElements || [], '__root__'),
+        options: {sid: 'elements'},
+      },
+    )
+    const denormalizedElementsStore = normalizedElementsStore.map((elements) => {
+      return denormalizeComponentElementData(elements, '__root__')
+    })
+
+    this.setStore({store: normalizedElementsStore, storeId: 'elements-normalized'})
+    this.setStore({store: denormalizedElementsStore, storeId: 'elements-denormalized'})
   }
   #setupDefaultStores(): void {
     const defaultStores = this.options.defaultStores

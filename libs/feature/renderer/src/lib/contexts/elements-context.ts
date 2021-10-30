@@ -17,6 +17,7 @@
 
 import { AglynComponentElementData } from '@aglyn/core-data-framework'
 import { createContext, useContext } from 'react'
+import { AddElementPayload } from './elements-context-provider'
 
 
 export type UseElementsContextType = () => ElementsContextType
@@ -27,6 +28,7 @@ export interface ElementsContextType {
     prevElements: AglynComponentElementData[],
     newElements: AglynComponentElementData[],
   ) => void
+  addElement?: (payload: AddElementPayload) => void
 }
 
 export const DEFAULT_ELEMENTS_CONTEXT: ElementsContextType = {

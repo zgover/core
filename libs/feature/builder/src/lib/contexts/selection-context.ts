@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import { AglynComponentElementData } from '@aglyn/core-data-framework'
 import { createContext, useContext } from 'react'
 
 
 export interface SelectionOptions {
   clientRect?: DOMRect
-  elementData?: AglynComponentElementData
+  $id?: string
 }
 
 export type SelectFn = (options?: SelectionOptions) => Promise<unknown>
@@ -35,7 +34,7 @@ export type UseSelectionType = () => SelectionContextType
 
 export const DEFAULT_OPTIONS: SelectionOptions = {
   clientRect: null,
-  elementData: null,
+  $id: null,
 }
 
 export const buildOptions = (defaultOptions, options) => {

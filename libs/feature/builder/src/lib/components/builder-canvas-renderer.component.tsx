@@ -67,16 +67,12 @@ const ZoomControlContainer = styled('div', {name: 'ZoomControlContainer'})(({the
 }))
 
 export interface BuilderCanvasRendererComponentProps extends HTMLAttributes<HTMLDivElement> {
-  // canvasRendererComponent?: ComponentType<CanvasRendererComponentProps>
+
 }
 
 export const BuilderCanvasRendererComponent = forwardRef<any, BuilderCanvasRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const {
-      // canvasRendererComponent,
-      ...rest
-    } = props
-    // const CanvasComponent = canvasRendererComponent || CanvasRendererComponent
+    const {...rest} = props
 
     const panRef = useRef<any>()
 
@@ -110,15 +106,10 @@ export const BuilderCanvasRendererComponent = forwardRef<any, BuilderCanvasRende
           ref={panRef}
         >
           <CanvasFrame>
-            <ElementsContext.Consumer>
-              {({elements}) => (
-                <CanvasRendererComponent
-                  id="aglyn:canvas"
-                  elements={elements}
-                  elementRendererComponent={BuilderElementRendererComponent}
-                />
-              )}
-            </ElementsContext.Consumer>
+            <CanvasRendererComponent
+              id="aglyn:canvas"
+              elementRendererComponent={BuilderElementRendererComponent}
+            />
           </CanvasFrame>
         </CanvasPanner>
 

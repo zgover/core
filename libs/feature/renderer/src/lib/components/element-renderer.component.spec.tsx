@@ -19,9 +19,10 @@ import { render } from '@testing-library/react'
 
 import { ElementRendererComponent } from './element-renderer.component'
 
+
 describe('ElementRendererComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<ElementRendererComponent elementData={null} />)
+    const {baseElement} = render(<ElementRendererComponent $id={null}/>)
     expect(baseElement).toBeTruthy()
   })
 })

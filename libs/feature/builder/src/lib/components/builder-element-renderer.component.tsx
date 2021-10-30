@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import { ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/feature-renderer'
-import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared-ui-jsx'
-import { forwardRef, memo, useCallback, useRef } from 'react'
+import { useAglynElementData, ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/feature-renderer'
+import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { forwardRef, memo, useCallback } from 'react'
 import { useHoverContext } from '../contexts/hover-context'
 import { useSelectionContext } from '../contexts/selection-context'
 
@@ -28,48 +28,48 @@ export interface BuilderElementRendererComponentProps extends ElementRendererCom
 
 const BuilderElementRendererComponentRaw = forwardRef<any,
   BuilderElementRendererComponentProps>(function RefRenderFn(props, ref) {
-  const {elementData, elementRendererComponent, ...rest} = props
+  const {$id, elementRendererComponent, ...rest} = props
   const {hover, close: closeHover} = useHoverContext()
   const {select} = useSelectionContext()
   const {confirm} = useConfirmationContext()
 
-  const handleMouseEnter = useCallback((e) => {
+  const handleMouseOver = useCallback((e) => {
     e.stopPropagation()
-    const target = e.target
+    const target = e.currentTarget
     const clientRect = target?.getBoundingClientRect?.().toJSON?.()
     if (target && clientRect) {
-      hover({clientRect, elementData})
+      hover({clientRect, $id})
     }
-  }, [elementData])
+  }, [$id])
 
   const handleMouseLeave = useCallback((e) => {
     e.stopPropagation()
     closeHover()
   }, [])
 
-  const handleClick = useCallback(
-    (e) => {
-      e.stopPropagation()
-      const target = e.target
-      const clientRect = target?.getBoundingClientRect?.().toJSON?.()
-      select({clientRect, elementData})
-      confirm({title: 'clicked'})
-    },
-    [elementData],
-  )
+  const handleClick = useCallback((e) => {
+    e.stopPropagation()
+    const target = e.currentTarget
+    const clientRect = target?.getBoundingClientRect?.().toJSON?.()
+    select({clientRect, $id})
+    confirm({title: 'clicked'})
+  }, [$id])
+
+  const {componentId, bundleId} = useAglynElementData($id)
 
   return (
     <ElementRendererComponent
       ref={ref}
+      $id={$id}
       elementRendererComponent={elementRendererComponent ?? BuilderElementRendererComponent}
-      elementData={elementData}
-      data-aglyn-element-id={elementData?.$id}
-      data-aglyn-component-id={elementData?.componentId}
-      data-aglyn-bundle-id={elementData?.bundleId}
-      {...rest}
+      data-aglyn-element-id={$id}
+      data-aglyn-component-id={componentId}
+      data-aglyn-bundle-id={bundleId}
       onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
+      onMouseOver={handleMouseOver}
+      // onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      {...rest}
     />
   )
 })

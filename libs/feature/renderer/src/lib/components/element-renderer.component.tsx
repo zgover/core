@@ -15,47 +15,36 @@
  * limitations under the License.
  */
 
-import { AglynComponentElementData } from '@aglyn/core-data-framework'
-import { AnyProps } from '@aglyn/shared-data-types'
+import { ComponentId } from '@aglyn/core-data-framework'
 import { ReactIs } from '@aglyn/shared-ui-jsx'
-import { _isArrEmpty, _isFnT } from '@aglyn/shared-util-guards'
-import { yes } from '@aglyn/shared-util-tools'
-import { deepEqual } from '@aglyn/shared-util-vendor'
-import { ComponentType, forwardRef, memo } from 'react'
-import useAglynComponent from '../hooks/use-aglyn-component'
-import useAglynComponentSchema from '../hooks/use-aglyn-component-schema'
+import { _isArrEmpty } from '@aglyn/shared-util-guards'
+import { ComponentType, forwardRef, HTMLAttributes } from 'react'
+import { ElementDataProps, withElementData } from '../hooks/with-element-data'
 import { ElementsRendererComponent } from './elements-renderer.component'
 
 
-export interface ElementRendererComponentProps extends AnyProps {
-  elementData: AglynComponentElementData
+// eslint-disable-next-line @typescript-eslint/ban-types
+export interface ElementRendererComponentProps extends HTMLAttributes<HTMLElement> {
+  $id: ComponentId
   elementRendererComponent?: ComponentType<ElementRendererComponentProps>
 }
 
-const ElementRendererComponentRaw = forwardRef<any, ElementRendererComponentProps>(
+const ElementRendererComponentRaw = forwardRef<any, ElementDataProps & ElementRendererComponentProps>(
   function RefRenderFn(_props, ref) {
     const {
+      $id,
+      elemProps,
       elementData,
+      component: Component,
       elementRendererComponent: elementRendererComponentProp,
-      children: childrenProp,
+      children,
       ...rest
     } = _props
 
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
-    const {componentId, bundleId} = elementData
-    const Component = useAglynComponent({componentId, bundleId})
-    const schema = useAglynComponentSchema({componentId, bundleId})
-    const resolveProps = schema?.renderFlags?.resolveProps
-    const {children, ...elemProps}: AnyProps = (_isFnT(resolveProps)
-      ? resolveProps.call(undefined, elementData)
-      : elementData.props) || {}
-    const innerRef = yes(
-      !schema?.renderFlags?.elementRef?.disable
-      && schema?.renderFlags?.elementRef?.innerRef,
-    ) ? {innerRef: ref} : {}
 
     return ReactIs.isValidElementType(Component) ? (
-      <Component ref={ref} {...elemProps} {...innerRef} {...rest}>
+      <Component ref={ref} {...elemProps} {...rest}>
         {!_isArrEmpty(elementData.elements || []) ? (
           <ElementsRendererComponent
             elementRendererComponent={elementRendererComponent}
@@ -63,20 +52,16 @@ const ElementRendererComponentRaw = forwardRef<any, ElementRendererComponentProp
           />
         ) : null}
         {children}
-        {childrenProp}
       </Component>
-    ) : (<>'Error loading element component'</>)
+    ) : (<>Error loading element component</>)
   },
 )
 
 ElementRendererComponentRaw.displayName = 'ElementRendererComponent'
 ElementRendererComponentRaw.defaultProps = {
-  elementData: {},
   children: null,
 }
 
-export const ElementRendererComponent = memo(ElementRendererComponentRaw, (prev, next) => {
-  return deepEqual(next.elementData, prev.elementData)
-})
+export const ElementRendererComponent = withElementData(ElementRendererComponentRaw)
 
 export default ElementRendererComponent

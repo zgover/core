@@ -128,9 +128,8 @@ try {
     logLevel: 'debug',
     modulesOptions: {
       contexts: {
-        defaultStores: {
-          elements: {defaultState: samplePageData}
-        }
+        defaultElements: samplePageData,
+        defaultStores: {},
       }
     },
   })

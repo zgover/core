@@ -20,6 +20,7 @@ import {
   AnyProps,
   JSXIntrinsicElement,
   JSXNode,
+  KeyValueMap,
   OrUndef,
   ResolveProps,
 } from '@aglyn/shared-data-types'
@@ -50,7 +51,7 @@ import {
   AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import { AglynTypeFields, BundleUId, ComponentId } from '../types'
+import { AglynTypeFields, BundleUId, ComponentId, ElementId } from '../types'
 import { isAglynComponentElement } from '../util/aglyn-is'
 
 
@@ -140,7 +141,7 @@ export interface AglynComponentRenderFlags<P extends AnyProps = any> {
   }
   elementRef?: { disable?: boolean; innerRef?: boolean }
   propsSchema?: FormSchema
-  resolveProps?: ResolveProps<AglynComponentElementData<P>>
+  resolveProps?: ResolveProps<AglynComponentElementDataNormalized<P>>
   emotionStyled?: {
     disable?: boolean
     options?: StyledOptions<P>
@@ -165,7 +166,7 @@ export interface AglynComponentSchema<P extends AnyProps = any> {
 }
 
 export interface AglynComponentElementData<P extends AnyProps = any> {
-  readonly $id: string
+  readonly $id: ComponentId
   readonly componentId: ComponentId
   readonly bundleId?: BundleUId
   displayName?: string
@@ -174,8 +175,15 @@ export interface AglynComponentElementData<P extends AnyProps = any> {
   elements?: AglynComponentElementData<P>[]
 }
 
+export interface AglynComponentElementDataNormalized<P extends AnyProps = any> extends Omit<AglynComponentElementData<P>, 'elements'> {
+  elements?: ElementId[]
+  parentId?: ElementId
+}
+
+export type AglynComponentElementDataNormalizedMap = KeyValueMap<'__root__' | ComponentId, AglynComponentElementDataNormalized>
+
 export interface AglynComponentElementTemplateData<P extends AnyProps = any> {
-  readonly id: string
+  readonly id: ComponentId
   title: string
   description?: string
   icon?: string

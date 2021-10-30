@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 
-import { AglynComponentElementData } from '@aglyn/core-data-framework'
+import { AglynComponentElementData, getContextStore } from '@aglyn/core-data-framework'
 import { OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
+import { createApi } from 'effector'
+import { useStoreMap } from 'effector-react'
 import { forwardRef, HTMLAttributes } from 'react'
 import Box from '@mui/material/Box'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
 import {
   ElementRendererComponent,
   ElementRendererComponentProps,
@@ -29,7 +32,6 @@ import { ElementsRendererComponent } from './elements-renderer.component'
 export interface CanvasRendererComponentProps
   extends HTMLAttributes<HTMLElement>,
     OverrideableComponentProps {
-  elements?: AglynComponentElementData[]
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
 }
 
@@ -37,11 +39,15 @@ export const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentPr
   function RefRenderFn(props, ref) {
     const {
       elementRendererComponent: elementRendererComponentProp,
-      elements,
       children,
       ...rest
     } = props
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
+    const {getApp} = useAglynAppContext()
+    const store = getContextStore(getApp(), {storeId: 'elements-normalized'})
+    const elements = useStoreMap(store, (elements) => {
+      return elements['__root__'].elements
+    })
     return (
       <Box ref={ref} {...rest}>
         <ElementsRendererComponent
@@ -57,7 +63,6 @@ export const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentPr
 CanvasRendererComponent.displayName = 'CanvasRendererComponent'
 CanvasRendererComponent.defaultProps = {
   component: 'div',
-  elements: [],
 }
 
 export default CanvasRendererComponent

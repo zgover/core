@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AglynComponentElementData } from '@aglyn/core-data-framework'
+import { ComponentId } from '@aglyn/core-data-framework'
 import { OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
 import { forwardRef, Fragment, memo } from 'react'
 import {
@@ -26,7 +26,7 @@ import {
 
 export interface ElementsComponentProps extends OverrideableComponentProps {
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
-  elements?: AglynComponentElementData[]
+  elements?: ComponentId[]
 }
 
 const ElementsRendererComponentRaw = forwardRef<any, ElementsComponentProps>(
@@ -41,10 +41,10 @@ const ElementsRendererComponentRaw = forwardRef<any, ElementsComponentProps>(
     const ElementRendererComponentProp = elementRendererComponent || ElementRendererComponent
     return (
       <Component ref={ref} {...rest}>
-        {elements.map((data, i) => (
+        {elements.map(($id, i) => (
           <ElementRendererComponentProp
-            key={data?.$id ?? i}
-            elementData={data}
+            key={$id ?? i}
+            $id={$id}
             elementRendererComponent={ElementRendererComponentProp}
           />
         ))}
@@ -57,8 +57,9 @@ const ElementsRendererComponentRaw = forwardRef<any, ElementsComponentProps>(
 ElementsRendererComponentRaw.displayName = 'ElementsComponent'
 ElementsRendererComponentRaw.defaultProps = {
   component: Fragment,
-  children: [],
+  children: null,
+  elements: [],
 }
 
-export const ElementsRendererComponent = memo(ElementsRendererComponentRaw)
+export const ElementsRendererComponent = ElementsRendererComponentRaw
 export default ElementsRendererComponent

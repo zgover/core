@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
+import type { AglynComponentElementTemplateData } from '@aglyn/core-data-framework'
+import { getAllComponentsTemplateValues } from '@aglyn/core-data-framework'
+import { useMemo } from 'react'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import { AnyProps } from '@aglyn/shared-data-types'
 
-import BuilderElementRendererComponent from './builder-element-renderer.component'
 
-describe('BuilderElementRendererComponent', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<BuilderElementRendererComponent />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export function useAglynComponentTemplateBlocks<P extends AnyProps>(): AglynComponentElementTemplateData<P>[] {
+  const {getApp} = useAglynAppContext()
+  return useMemo(() => {
+    return getAllComponentsTemplateValues(getApp())
+  }, [getApp])
+}
+export default useAglynComponentTemplateBlocks

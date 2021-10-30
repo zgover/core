@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-import { ElementType, Fragment, MouseEventHandler, ReactNode, useCallback, useState } from 'react'
+import {
+  ElementType,
+  Fragment,
+  memo,
+  MouseEventHandler,
+  ReactNode,
+  useCallback, useMemo,
+  useState,
+} from 'react'
 import { SelectionComponent } from '../components/selection.component'
 import {
   buildOptions,
@@ -37,11 +45,10 @@ export interface SelectionContextProviderProps {
   }>
 }
 
-export function SelectionContextProvider(props: SelectionContextProviderProps) {
-  const {children, defaultOptions = {}, component: Component} = props
+function SelectionContextProviderRaw(props: SelectionContextProviderProps) {
+  const {children, defaultOptions, component: Component} = props
   const [options, setOptions] = useState({...DEFAULT_OPTIONS, ...defaultOptions})
-  const [resolveReject, setResolveReject] = useState([])
-  const [resolve, reject] = resolveReject
+  const [resolveReject, setResolveReject] = useState(() => [])
 
   const select = useCallback(
     (options: SelectionOptions) => {
@@ -59,20 +66,28 @@ export function SelectionContextProvider(props: SelectionContextProviderProps) {
   }, [])
 
   const cancel = useCallback(() => {
+    const [, reject] = resolveReject
     reject()
     close()
-  }, [reject, close])
+  }, [resolveReject])
 
   const confirm = useCallback(() => {
+    const [resolve] = resolveReject
     resolve()
     close()
-  }, [resolve, close])
+  }, [resolveReject])
 
-  return (
-    <Fragment>
+  const child = useMemo(() => {
+    return (
       <SelectionContext.Provider value={{select, close}}>
         {children}
       </SelectionContext.Provider>
+    )
+  }, [children, select, close])
+
+  return (
+    <Fragment>
+      {child}
       <Component
         open={resolveReject.length === 2}
         options={options}
@@ -83,8 +98,12 @@ export function SelectionContextProvider(props: SelectionContextProviderProps) {
     </Fragment>
   )
 }
-SelectionContextProvider.displayName = 'SelectionContextProvider'
-SelectionContextProvider.defaultProps = {
+SelectionContextProviderRaw.displayName = 'SelectionContextProvider'
+SelectionContextProviderRaw.defaultProps = {
   component: SelectionComponent,
+  defaultOptions: {},
 }
+
+export const SelectionContextProvider = memo(SelectionContextProviderRaw)
+
 export default SelectionContextProvider

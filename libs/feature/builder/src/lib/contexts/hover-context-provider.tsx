@@ -16,13 +16,18 @@
  */
 
 import {
-  buildOptions,
-  DEFAULT_OPTIONS,
-  HoverContext,
-  HoverOptions,
-} from './hover-context'
-import { ElementType, Fragment, MouseEventHandler, ReactNode, useCallback, useState } from 'react'
+  ElementType,
+  Fragment,
+  memo,
+  MouseEventHandler,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import { HoverComponent } from '../components/hover.component'
+import { buildOptions, DEFAULT_OPTIONS, HoverContext, HoverOptions } from './hover-context'
+
 
 export interface HoverContextProviderProps {
   defaultOptions?: HoverOptions
@@ -36,21 +41,20 @@ export interface HoverContextProviderProps {
   }>
 }
 
-export function HoverContextProvider(props: HoverContextProviderProps) {
-  const { children, defaultOptions = {}, component: Component } = props
-  const [options, setOptions] = useState(()=>({ ...DEFAULT_OPTIONS, ...defaultOptions }))
-  const [resolveReject, setResolveReject] = useState(()=>[])
-  const open = resolveReject.length === 2
+function HoverContextProviderRaw(props: HoverContextProviderProps) {
+  const {children, defaultOptions, component: Component} = props
+  const [options, setOptions] = useState({...DEFAULT_OPTIONS, ...defaultOptions})
+  const [resolveReject, setResolveReject] = useState(() => [])
 
   const hover = useCallback(
     (options: HoverOptions) => {
-      const opts = { ...options }
+      const opts = {...options}
       return new Promise((resolve, reject) => {
         setOptions(buildOptions(defaultOptions, opts))
         setResolveReject([resolve, reject])
       })
     },
-    [defaultOptions]
+    [defaultOptions],
   )
 
   const close = useCallback(() => {
@@ -69,13 +73,19 @@ export function HoverContextProvider(props: HoverContextProviderProps) {
     close()
   }, [resolveReject])
 
-  return (
-    <Fragment>
-      <HoverContext.Provider value={{ hover, close }}>
+  const child = useMemo(() => {
+    return (
+      <HoverContext.Provider value={{hover, close}}>
         {children}
       </HoverContext.Provider>
+    )
+  }, [children, hover, close])
+
+  return (
+    <Fragment>
+      {child}
       <Component
-        open={open}
+        open={resolveReject.length === 2}
         options={options}
         onClose={close}
         onCancel={cancel}
@@ -84,8 +94,12 @@ export function HoverContextProvider(props: HoverContextProviderProps) {
     </Fragment>
   )
 }
-HoverContextProvider.displayName = 'HoverContextProvider'
-HoverContextProvider.defaultProps = {
+
+HoverContextProviderRaw.displayName = 'HoverContextProvider'
+HoverContextProviderRaw.defaultProps = {
   component: HoverComponent,
+  defaultOptions: {},
 }
+
+export const HoverContextProvider = memo(HoverContextProviderRaw)
 export default HoverContextProvider

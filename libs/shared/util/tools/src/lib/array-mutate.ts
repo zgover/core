@@ -39,7 +39,7 @@ export function arrayMutate<T>(
   items?: T | Array<T>,
   options?: { replace?: boolean; copy?: boolean },
 ): MutatedArray<T> {
-  const {replace, copy} = {replace: true, copy: false, ...options}
+  const {replace, copy} = {replace: false, copy: false, ...options}
   const _array: Array<T> = copy ? arrayCopyAll(array) as Array<T> : array
   const _items = arraySafe(items, items ? [items] : [])
   const deleteCount = replace ? length(_items) : 0

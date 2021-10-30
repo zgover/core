@@ -16,11 +16,12 @@
  */
 
 import { AglynComponentElementData } from '@aglyn/core-data-framework'
-import { styled } from '@aglyn/shared-feature-themes'
+import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
 import { ButtonProps } from '@mui/material/Button'
 import { DialogProps } from '@mui/material/Dialog'
 import { DialogContentTextProps } from '@mui/material/DialogContentText'
 import { DialogTitleProps } from '@mui/material/DialogTitle'
+import clsx from 'clsx'
 import { forwardRef, Fragment, HTMLAttributes } from 'react'
 
 
@@ -33,7 +34,7 @@ export interface HoverComponentOptions {
   title?: DialogTitleProps['children']
   description?: DialogContentTextProps['children']
   clientRect?: DOMRect
-  elementData?: AglynComponentElementData
+  $id?: AglynComponentElementData
 }
 
 export interface HoverComponentProps extends HTMLAttributes<HTMLDivElement> {
@@ -44,6 +45,10 @@ export interface HoverComponentProps extends HTMLAttributes<HTMLDivElement> {
   onClose?: ButtonProps['onClick']
 }
 
+const classKeys = generateUtilityClasses('HoverRoot', [
+  'hover',
+])
+
 const HoverRoot = styled('div', {name: 'HoverRoot'})(({theme}) => ({
   outlineWidth: 2,
   outlineOffset: 0,
@@ -51,27 +56,34 @@ const HoverRoot = styled('div', {name: 'HoverRoot'})(({theme}) => ({
   outlineStyle: 'dashed',
   position: 'absolute',
   pointerEvents: 'none',
-  transition: theme.transitions.create(['width', 'height', 'left', 'right', 'top', 'bottom'], {
+  visibility: 'hidden',
+  transition: theme.transitions.create(['visibility', 'width', 'height', 'left', 'right', 'top', 'bottom'], {
     duration: theme.transitions.duration.short,
     easing: theme.transitions.easing.easeInOut,
   }),
+  [`&.${classKeys.hover}`]: {
+    visibility: 'visible'
+  }
 }))
 
-export const HoverComponent = forwardRef<any, HoverComponentProps>(function RefRenderFn(
-  props,
-  ref,
-) {
-  const {open, options, onCancel, onConfirm, onClose, children, ...rest} = props
-  return (
-    <Fragment>
-      {open ? (
-        <HoverRoot ref={ref} {...rest} style={{...options.clientRect}}>
-          {children}
-        </HoverRoot>
-      ) : null}
-    </Fragment>
-  )
-})
+export const HoverComponent = forwardRef<any, HoverComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {open, options, onCancel, onConfirm, onClose, children, ...rest} = props
+    const className = clsx({
+      [classKeys.hover]: Boolean(open)
+    })
+    return (
+      <HoverRoot
+        ref={ref}
+        style={{...options.clientRect}}
+        className={className}
+        {...rest}
+      >
+        {children}
+      </HoverRoot>
+    )
+  }
+)
 
 HoverComponent.displayName = 'HoverComponent'
 HoverComponent.defaultProps = {
