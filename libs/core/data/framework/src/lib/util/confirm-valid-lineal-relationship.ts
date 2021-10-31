@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
-import { _isArr, _isNum } from '@aglyn/shared-util-guards'
+import { _isArr, _isArrEmpty, _isNum } from '@aglyn/shared-util-guards'
 import {
   AglynComponentRenderFlags,
   ComponentsLinealDirectiveFlag,
-  ComponentsLinealOrder,
+  ComponentsLinealOrder, LinealDefinition,
 } from '../controllers/aglyn-components.controller'
 import { BundleUId, ComponentId } from '../types'
 
 
 export enum InvalidLinealRelationFlag {
-  DISALLOW = ComponentsLinealDirectiveFlag.DISALLOW,
-  LIMIT_TO = ComponentsLinealDirectiveFlag.LIMIT_TO,
+  DISALLOW = 0x01,
+  LIMIT_TO = 0x02,
 
   ITEM = 0x03,
   PARENT = 0x04,
@@ -62,40 +62,42 @@ function validateLinealOrder(
   governor: typeof InvalidLinealRelationFlag.ITEM | typeof InvalidLinealRelationFlag.PARENT,
 ) {
   const [directiveType, directiveDefinition] = linealOrder
-  const definitionList = (!_isArr(directiveDefinition)
-    ? [[undefined, directiveDefinition]]
-    : directiveDefinition)
+  const definition = _isArr(directiveDefinition)
+    ? {components: directiveDefinition}
+    : {...directiveDefinition}
 
-  for (const def of definitionList) {
-    const definition = _isArr(def) ? def : [undefined, def]
-
-    // Throw is disallowed
-    if (directiveType === ComponentsLinealDirectiveFlag.DISALLOW) {
-      for (const [bundleIdDef, componentIdDef] of definition) {
-        if (_isNum(componentId) && _isNum(componentIdDef) && componentIdDef === componentId) {
-          throw InvalidLinealRelationFlag.DISALLOW_COMPONENT | governor
-        }
-        if (_isNum(bundleId) && _isNum(bundleIdDef) && bundleIdDef === bundleId) {
-          throw InvalidLinealRelationFlag.DISALLOW_BUNDLE | governor
-        }
-      }
+  // Throw is disallowed
+  if (directiveType === ComponentsLinealDirectiveFlag.DISALLOW) {
+    if (definition?.components?.some((cid) => cid === componentId)) {
+      throw InvalidLinealRelationFlag.DISALLOW_COMPONENT | governor
     }
-
-    // Throw if limited to range and missing
-    if (directiveType === ComponentsLinealDirectiveFlag.LIMIT_TO) {
-
-
-      // const hitComponent = !definition.some(([[bundleIdDef, componentIdDef]]) =>)
-      //
-      // if (_isNum(componentId) && !hit) {
-      //   throw InvalidLinealRelationFlag.LIMIT_TO_COMPONENT | context
-      // }
-      // if (_isNum(bundleId) && _isNum(bundleIdDef) && bundleIdDef === bundleId) {
-      //   throw InvalidLinealRelationFlag.LIMIT_TO_BUNDLE | context
-      // }
+    if (definition?.bundles?.some((bid) => bid === bundleId)) {
+      throw InvalidLinealRelationFlag.DISALLOW_BUNDLE | governor
     }
-
   }
+
+  // Throw if limited to range and missing
+  if (directiveType === ComponentsLinealDirectiveFlag.LIMIT_TO) {
+    if (
+      _isArr(definition?.components)
+      && (
+        _isArrEmpty(definition?.components)
+        || !definition?.components?.some((cid) => cid === componentId)
+      )
+    ) {
+      throw InvalidLinealRelationFlag.DISALLOW_COMPONENT | governor
+    }
+    if (
+      _isArr(definition?.bundles)
+      && (
+        _isArrEmpty(definition?.bundles)
+        || !definition?.bundles?.some((bid) => bid === bundleId)
+      )
+    ) {
+      throw InvalidLinealRelationFlag.DISALLOW_BUNDLE | governor
+    }
+  }
+
 }
 
 export interface ConfirmValidLinealRelationshipOptions {

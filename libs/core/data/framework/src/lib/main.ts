@@ -60,6 +60,7 @@ export { ComponentsLinealDirectiveFlag } from './controllers/aglyn-components.co
 // 👇
 
 export * from './util/aglyn-is'
+export * from './util/confirm-valid-lineal-relationship'
 export * from './util/create-aglyn-component-element'
 export * from './util/create-component-element-data'
 export * from './util/create-component-element-id'
@@ -151,6 +152,7 @@ export type {
   AglynComponentElementType,
   AglynComponentFunctionElement,
   AglynComponentIntrinsicElement,
+  LinealDefinition,
   ComponentsLinealOrder,
   TemplateSubElementData,
   AglynComponentsControllerOptions,

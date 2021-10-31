@@ -71,13 +71,15 @@ export enum ComponentsLinealDirectiveFlag {
   DISALLOW = 0x02,
 }
 
-export type LinealComponent = ComponentId
 export type LinealComponentOfBundle = [bundleId: BundleUId, componentId: ComponentId]
 export type ComponentsLinealBundle = [bundleId: BundleUId]
+export type LinealDefinition = ComponentId[]
+  | { bundles?: BundleUId[], components: ComponentId[] }
+  | { bundles: BundleUId[], components?: ComponentId[] }
 
 export type ComponentsLinealOrder<T extends ComponentsLinealDirectiveFlag = ComponentsLinealDirectiveFlag> = [
   directiveType: T,
-  directiveDefinition: (LinealComponent | LinealComponentOfBundle | ComponentsLinealBundle)[] | LinealComponent
+  directiveDefinition: LinealDefinition
 ]
 
 export type ComponentsRegistryKeys = (ComponentId | [ComponentId, BundleUId])[]
