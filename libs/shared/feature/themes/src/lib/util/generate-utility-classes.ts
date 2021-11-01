@@ -24,6 +24,7 @@ const globalStateClassesMapping: Record<string, string> = {
   expanded: 'Aglyn-expanded',
   focused: 'Aglyn-focused',
   focusVisible: 'Aglyn-focusVisible',
+  hovered: 'Aglyn-hovered',
   required: 'Aglyn-required',
   selected: 'Aglyn-selected',
   wrapper: 'Aglyn-wrapper',

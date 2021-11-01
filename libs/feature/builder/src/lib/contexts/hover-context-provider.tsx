@@ -15,91 +15,104 @@
  * limitations under the License.
  */
 
-import {
-  ElementType,
-  Fragment,
-  memo,
-  MouseEventHandler,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react'
+import { ElementType, Fragment, memo, ReactNode, useCallback, useMemo, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
-import { HoverComponent } from '../components/hover.component'
+import { HoverComponent, HoverComponentProps } from '../components/hover.component'
 import { buildOptions, DEFAULT_OPTIONS, HoverContext, HoverOptions } from './hover-context'
-import { SelectionOptions } from './selection-context'
 
 
 export interface HoverContextProviderProps {
-  defaultOptions?: HoverOptions
+  defaultOptions?: Partial<HoverOptions>
   children?: ReactNode
-  component: ElementType<{
-    open: boolean
-    options: HoverOptions
-    onClose: MouseEventHandler<unknown>
-    onCancel: MouseEventHandler<unknown>
-    onConfirm: MouseEventHandler<unknown>
-  }>
+  component: ElementType<HoverComponentProps>
 }
+
+type ResolveReject<T = any> = [] | [
+  resolve: (value: T | PromiseLike<T>) => void,
+  reject: (reason?: any) => void
+]
 
 function HoverContextProviderRaw(props: HoverContextProviderProps) {
   const {children, defaultOptions, component: Component} = props
-  const [options, setOptions] = useState({...DEFAULT_OPTIONS, ...defaultOptions})
-  const [resolveReject, setResolveReject] = useState(() => [])
+  const [selectedOptions, setSelectedOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS, ...defaultOptions})
+  const [selectedResolveReject, setSelectedResolveReject] = useState<ResolveReject>(() => [])
+  const [hoveredOptions, setHoveredOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS, ...defaultOptions})
+  const [hoveredResolveReject, setHoveredResolveReject] = useState<ResolveReject>(() => [])
 
-  const debounceHover = useDebouncedCallback(
-    (opts: SelectionOptions) => {
-      return new Promise((resolve, reject) => {
-        setOptions(buildOptions(defaultOptions, opts || {}))
-        setResolveReject([resolve, reject])
-      })
-    },
-    200,
-  )
-  const debounceClose = useDebouncedCallback(
-    () => setResolveReject([]),
-    200
-  )
+  const handleHover = useDebouncedCallback((opts: HoverOptions) => {
+    setHoveredOptions(buildOptions(defaultOptions, opts || {}))
+    return new Promise((resolve, reject) => {
+      setHoveredResolveReject([resolve, reject])
+    })
+  }, 200)
 
-  const hover = useCallback((opts: HoverOptions) => {
-    return debounceHover(opts)
-  }, [defaultOptions])
+  const handleSelect = (opts: HoverOptions) => {
+    setSelectedOptions(buildOptions(defaultOptions, opts || {}))
+    return new Promise((resolve, reject) => {
+      setSelectedResolveReject([resolve, reject])
+    })
+  }
 
-  const close = useCallback(() => {
-    debounceClose()
+  const handleUnhover = useDebouncedCallback(() => {
+    return setHoveredResolveReject([])
+  }, 200)
+
+  const handleDeselect = () => {
+    return setSelectedResolveReject([])
+  }
+
+  const hoverOpen = useCallback((opts: HoverOptions) => {
+    return handleHover(opts)
   }, [])
 
-  const cancel = useCallback(() => {
-    const [, reject] = resolveReject
-    reject()
-    close()
-  }, [resolveReject])
+  const hoverSelect = useCallback((event?: Element, opts?: HoverOptions) => {
+    return handleSelect(opts)
+  }, [])
 
-  const confirm = useCallback(() => {
-    const [resolve] = resolveReject
-    resolve()
-    close()
-  }, [resolveReject])
+  const hoverClose = useCallback((event?: Element) => {
+    handleUnhover()
+  }, [])
+
+  const hoverDeselect = useCallback((event?: Element) => {
+    handleDeselect()
+  }, [])
 
   const child = useMemo(() => {
     return (
-      <HoverContext.Provider value={{hover, close}}>
+      <HoverContext.Provider value={{hoverOpen, hoverSelect, hoverClose, hoverDeselect}}>
         {children}
       </HoverContext.Provider>
     )
-  }, [children, hover, close])
+  }, [children, hoverOpen, hoverSelect, hoverClose, hoverDeselect])
+
+  const childSelected = useMemo(() => {
+    return (
+      <Component
+        open={selectedResolveReject.length === 2}
+        options={selectedOptions}
+        onClose={hoverDeselect}
+        select
+      />
+    )
+  }, [selectedResolveReject, selectedOptions, hoverDeselect])
+
+  const childHovered = useMemo(() => {
+    return (
+      <Component
+        open={hoveredResolveReject.length === 2}
+        options={hoveredOptions}
+        onClose={hoverClose}
+        hover
+      />
+    )
+  }, [hoveredResolveReject, hoveredOptions, hoverClose])
+
 
   return (
     <Fragment>
       {child}
-      <Component
-        open={resolveReject.length === 2}
-        options={options}
-        onClose={close}
-        onCancel={cancel}
-        onConfirm={confirm}
-      />
+      {childSelected}
+      {childHovered}
     </Fragment>
   )
 }

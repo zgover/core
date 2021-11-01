@@ -15,62 +15,58 @@
  * limitations under the License.
  */
 
-import { AglynComponentElementData } from '@aglyn/core-data-framework'
 import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
-import { ButtonProps } from '@mui/material/Button'
-import { DialogProps } from '@mui/material/Dialog'
-import { DialogContentTextProps } from '@mui/material/DialogContentText'
-import { DialogTitleProps } from '@mui/material/DialogTitle'
 import clsx from 'clsx'
-import { forwardRef, Fragment, HTMLAttributes } from 'react'
+import { forwardRef, HTMLAttributes } from 'react'
+import { HoverOptions } from '../contexts/hover-context'
 
-
-export interface HoverComponentOptions {
-  cancellationText?: ButtonProps['children']
-  confirmationText?: ButtonProps['children']
-  cancellationButtonProps?: Partial<ButtonProps>
-  confirmationButtonProps?: Partial<ButtonProps>
-  dialogProps?: Partial<DialogProps>
-  title?: DialogTitleProps['children']
-  description?: DialogContentTextProps['children']
-  clientRect?: DOMRect
-  $id?: AglynComponentElementData
-}
 
 export interface HoverComponentProps extends HTMLAttributes<HTMLDivElement> {
-  options?: HoverComponentOptions
+  options?: HoverOptions
   open?: boolean
-  onConfirm?: ButtonProps['onClick']
-  onCancel?: ButtonProps['onClick']
-  onClose?: ButtonProps['onClick']
+  onClose?: (event?: Element) => void
+  hover?: boolean
+  select?: boolean
 }
 
 const classKeys = generateUtilityClasses('HoverRoot', [
-  'hover',
+  'open',
+  'hovered',
+  'focused',
 ])
 
 const HoverRoot = styled('div', {name: 'HoverRoot'})(({theme}) => ({
-  outlineWidth: 2,
-  outlineOffset: 0,
-  outlineColor: theme.palette.secondary.light,
-  outlineStyle: 'dashed',
-  position: 'absolute',
   pointerEvents: 'none',
+  position: 'absolute',
   visibility: 'hidden',
   transition: theme.transitions.create(['visibility', 'width', 'height', 'left', 'right', 'top', 'bottom'], {
     duration: theme.transitions.duration.short,
     easing: theme.transitions.easing.easeInOut,
   }),
-  [`&.${classKeys.hover}`]: {
-    visibility: 'visible'
-  }
+  [`&.${classKeys.open}`]: {
+    visibility: 'visible',
+  },
+  [`&.${classKeys.hovered}`]: {
+    outlineWidth: 2,
+    outlineOffset: 0,
+    outlineColor: theme.palette.secondary.light,
+    outlineStyle: 'dashed',
+  },
+  [`&.${classKeys.focused}`]: {
+    outlineWidth: 2,
+    outlineOffset: -2,
+    outlineColor: theme.palette.quaternary.main,
+    outlineStyle: 'solid',
+  },
 }))
 
 export const HoverComponent = forwardRef<any, HoverComponentProps>(
   function RefRenderFn(props, ref) {
-    const {open, options, onCancel, onConfirm, onClose, children, ...rest} = props
+    const {open, options, onClose, children, hover, select, ...rest} = props
     const className = clsx({
-      [classKeys.hover]: Boolean(open)
+      [classKeys.open]: Boolean(open),
+      [classKeys.hovered]: Boolean(hover),
+      [classKeys.focused]: Boolean(select),
     })
     return (
       <HoverRoot
@@ -82,12 +78,17 @@ export const HoverComponent = forwardRef<any, HoverComponentProps>(
         {children}
       </HoverRoot>
     )
-  }
+  },
 )
 
 HoverComponent.displayName = 'HoverComponent'
 HoverComponent.defaultProps = {
-  options: {},
+  options: {
+    $id: '__root__',
+    clientRect: {
+      left: 0, top: 0, right: 0, bottom: 0, x: 0, y: 0,
+    } as any,
+  },
 }
 
 export default HoverComponent

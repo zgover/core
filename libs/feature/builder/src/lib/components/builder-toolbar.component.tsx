@@ -57,7 +57,7 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
 
     const {elementDrawer} = useElementDrawerContext()
     const {elements, api: {addElement}} = useAglynElementsStoreWithApi()
-    const { $id: selectedId } = useSelectionContext()
+    const { $id: selectedId }: any = useSelectionContext() || {}
     const handleFabClick = useCallback(async () => {
       const option = await elementDrawer({
         title: 'Add New Element',

@@ -16,29 +16,40 @@
  */
 
 import { _isFnT } from '@aglyn/shared-util-guards'
-import { MutableRefObject, Ref, useCallback } from 'react'
+import { MutableRefObject, Ref, RefCallback, useCallback } from 'react'
 
-/**
- * Assign a React ref object, could be a RefCallback or RefObject
- * @param ref
- * @param value
- */
-export function assignRefValue<T>(ref: Ref<T>, value: any) {
-  return !ref ? null : _isFnT(ref) ? ref(value) : ((ref as MutableRefObject<T>).current = value)
+
+function isRefCallback<T>(val): val is RefCallback<T> {
+  return _isFnT(val)
 }
 
 /**
- * Combines many refs into one. Useful for combining many ref hooks
- * @param refs
+ * Assign a React ref object, could be a RefCallback or RefObject
+ * @param {React.Ref<T>} ref- RefCallback or RefObject or null, to assign value
+ * @param {T} value - new ref value
+ * @returns {Ref<T>} - the same passed ref
  */
-export function useCombinedRefs<T>(...refs: Ref<T>[]): Ref<T> {
-  return useCallback(
-    (element: T) => {
-      refs.forEach((ref) => assignRefValue(ref, element))
-      return element
-    },
-    [refs]
-  )
+export function assignRefValue<T>(ref: Ref<T>, value: T): Ref<T> {
+  if (!ref) return null
+  if (isRefCallback(ref)) {
+    ref(value)
+  }
+  else {
+    (ref as MutableRefObject<T>).current = value
+  }
+  return ref
+}
+
+/**
+ * Combines multiple RefCallback|RefObject into one.
+ * @param {React.Ref<T>} refs - 1 or more refs to be assigned
+ * @returns {React.RefCallback<T>} - callback to pass to elem ref prop
+ */
+export function useCombinedRefs<T>(...refs: Ref<T>[]): RefCallback<T> {
+  return useCallback((element: T) => {
+    refs.forEach((ref) => assignRefValue(ref, element))
+    return element
+  }, [refs])
 }
 
 export default useCombinedRefs

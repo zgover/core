@@ -19,15 +19,15 @@ import { createContext, useContext } from 'react'
 
 
 export interface HoverOptions {
-  clientRect?: DOMRect
-  $id?: string
+  $id: string
+  clientRect: DOMRect
 }
 
-export type HoverFn = (options?: HoverOptions) => Promise<unknown>
-
 export interface HoverContextType {
-  hover: HoverFn
-  close: () => void
+  hoverOpen: (options?: HoverOptions) => Promise<unknown>
+  hoverSelect: (event?: Element, options?: HoverOptions) => Promise<unknown>
+  hoverClose: (event?: Element) => void
+  hoverDeselect: (event?: Element) => void
 }
 
 export type UseHoverType = () => HoverContextType

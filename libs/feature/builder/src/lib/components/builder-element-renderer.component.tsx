@@ -20,10 +20,9 @@ import {
   ElementRendererComponentProps,
   useAglynElementData,
 } from '@aglyn/feature-renderer'
-import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
-import { forwardRef, useCallback } from 'react'
+import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { forwardRef, useCallback, useRef } from 'react'
 import { useHoverContext } from '../contexts/hover-context'
-import { useSelectionContext } from '../contexts/selection-context'
 
 
 export interface BuilderElementRendererComponentProps extends ElementRendererComponentProps {
@@ -33,43 +32,51 @@ export interface BuilderElementRendererComponentProps extends ElementRendererCom
 const BuilderElementRendererComponentRaw = forwardRef<any, BuilderElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {$id, ...rest} = props
-    const {hover, close: closeHover} = useHoverContext()
-    const {select, close: deselect} = useSelectionContext()
+    const {hoverOpen, hoverClose, hoverSelect, hoverDeselect} = useHoverContext()
     const {confirm} = useConfirmationContext()
+    const localRef = useRef()
 
     const handleMouseOver = useCallback((e) => {
       e.stopPropagation()
       const target = e.currentTarget
       const clientRect = target?.getBoundingClientRect?.().toJSON?.()
       if (target && clientRect) {
-        hover({clientRect, $id})
+        hoverOpen({clientRect, $id})
       }
-    }, [$id, hover])
+      else {
+        hoverClose(e)
+      }
+    }, [hoverOpen, hoverClose, $id])
 
     const handleMouseLeave = useCallback((e) => {
       e.stopPropagation()
-      closeHover()
-    }, [closeHover])
+      hoverClose(e)
+    }, [hoverClose, $id])
 
     const handleMouseDown = useCallback((e) => {
       e.stopPropagation()
       const target = e.currentTarget
       const clientRect = target?.getBoundingClientRect?.().toJSON?.()
-      select({clientRect, $id})
+      if (target && clientRect) {
+        hoverSelect(e, {clientRect, $id})
+      }
+      else {
+        hoverDeselect(e)
+      }
       confirm({title: 'clicked'})
-    }, [$id])
+    }, [hoverSelect, hoverDeselect, $id])
 
     const {componentId, bundleId} = useAglynElementData($id)
 
     return (
       <ElementRendererComponent
-        ref={ref}
+        ref={useCombinedRefs(ref, localRef)}
         $id={$id}
         data-aglyn-element-id={$id}
         data-aglyn-component-id={componentId}
         data-aglyn-bundle-id={bundleId}
         onMouseOver={handleMouseOver}
-        onMouseLeave={handleMouseLeave}
+        onMouseOut={handleMouseLeave}
         onMouseDown={handleMouseDown}
         elementRendererComponent={BuilderElementRendererComponent}
         {...rest}

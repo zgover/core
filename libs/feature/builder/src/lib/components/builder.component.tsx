@@ -67,7 +67,6 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
             {/*<SnackbarProvider maxSnack={3}>*/}
             <ConfirmationProviderComponent>
               <HoverContextProvider>
-                <SelectionContextProvider>
                   <ComponentsDrawerContextProvider>
                     <Box ref={ref} id="aglyn:builder" {...rest}>
                       <BuilderToolbarComponent id="aglyn:builder-toolbar">
@@ -76,7 +75,6 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
 
                     </Box>
                   </ComponentsDrawerContextProvider>
-                </SelectionContextProvider>
               </HoverContextProvider>
             </ConfirmationProviderComponent>
             {/*</SnackbarProvider>*/}
