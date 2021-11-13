@@ -17,7 +17,9 @@
 
 import { NormalizedData, NormalizedModel } from '@aglyn/shared-data-types'
 import { _isNum, _isObj } from '@aglyn/shared-util-guards'
-import { arrayRemoveItem, arrayReorder, objectDeleteProperty } from '@aglyn/shared-util-tools'
+import { arrayRemoveItem } from './array-remove-item'
+import { arrayReorder } from './array-reorder'
+import { objectDeleteProperty } from './object-delete-property'
 
 
 type ID = string

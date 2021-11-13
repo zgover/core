@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import { FormTemplateRenderProps } from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
 
 import FormSpy from '@data-driven-forms/react-form-renderer/form-spy'
@@ -26,16 +25,18 @@ import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
 import { forwardRef } from 'react'
+import { SvgPathIcon } from '../components/svg-path-icon'
+
 
 export interface GridFormTemplateProps extends FormTemplateRenderProps {}
 
 export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { formFields, schema } = props
-  const { handleSubmit, onReset, onCancel, getState } = useFormApi()
-  const { submitting, valid, pristine } = getState()
+  const {formFields, schema} = props
+  const {handleSubmit, onReset, onCancel, getState} = useFormApi()
+  const {submitting, valid, pristine} = getState()
   return (
     <form ref={ref} onSubmit={handleSubmit} noValidate>
       {schema.title}
@@ -49,8 +50,8 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(function 
               <Button
                 color="secondary"
                 disabled={submitting || !valid}
-                startIcon={<SvgPathIcon iconId="content-save" />}
-                style={{ marginRight: 8 }}
+                startIcon={<SvgPathIcon iconId="content-save"/>}
+                style={{marginRight: 8}}
                 type="submit"
                 variant="contained"
                 fullWidth

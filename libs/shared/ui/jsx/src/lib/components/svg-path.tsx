@@ -16,10 +16,12 @@
  */
 
 import { forwardRef, SVGAttributes, useMemo } from 'react'
-import { PropsWithInnerRef } from '../../types'
+import { PropsWithInnerRef } from '../types'
+
 
 export type SvgPathData = SvgPathProps['d']
 export type SvgPassProps = PropsWithInnerRef<SvgPathProps, SVGPathElement>
+
 /* eslint-disable-next-line */
 export interface SvgPathProps extends SVGAttributes<SVGPathElement> {}
 
@@ -32,7 +34,7 @@ SvgPath.displayName = 'SvgPath'
 export default SvgPath
 
 export function svgPathElement(d: SvgPathData, passProps?: SvgPassProps) {
-  const { innerRef, ...rest } = { ...passProps }
+  const {innerRef, ...rest} = {...passProps}
   return <SvgPath d={d} ref={innerRef} {...rest} />
 }
 

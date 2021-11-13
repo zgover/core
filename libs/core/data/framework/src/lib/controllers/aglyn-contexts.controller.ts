@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Dictionary, KeyValueMap } from '@aglyn/shared-data-types'
+import { KeyValueMap } from '@aglyn/shared-data-types'
 import { _hasProperty, _isArr, _isArrEmpty, _isObj } from '@aglyn/shared-util-guards'
 import { arrayAddAtIndex, getProperty } from '@aglyn/shared-util-tools'
 import {
@@ -43,7 +43,7 @@ import {
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
 import { ContextStoreUid, ElementId } from '../types'
-import denormalizeComponentElementData from '../util/denormalize-component-element-data'
+import { denormalizeComponentElementData } from '../util/denormalize-component-element-data'
 import { normalizeComponentElementData } from '../util/normalize-component-element-data'
 import {
   AglynComponentElementData,

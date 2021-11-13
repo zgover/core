@@ -61,7 +61,7 @@ organizations. Easing maintenance and minimizing work required by expensive engi
 
 [![linkedin aglyn company](https://img.shields.io/badge/LinkedIn-Company_Page-0A66C2?logo=linkedin&style=for-the-badge&cacheSeconds=maxAge&color=0A66C2&logoColor=0A66C2&labelColor=F1F1F1)](https://www.linkedin.com/company/aglyn/ "LinkedIn company Aglyn (https://www.linkedin.com/company/aglyn/)")
 [![aglyn github organization](https://img.shields.io/badge/GitHub-Organization_Page-000000?style=for-the-badge&cacheSeconds=maxAge&labelColor=F1F1F1&color=404C5C&cacheSeconds=maxAge&logoHeight=40&logo=github&logoColor=000000)](https://aglyn.com/ "Aglyn visit GitHub organization")
-
+[![twitter aglyn official](https://img.shields.io/badge/Twitter-@AglynOfficial-1d9bf0?logo=twitter&style=for-the-badge&cacheSeconds=maxAge&color=1d9bf0&logoColor=1d9bf0&labelColor=F1F1F1)](https://www.linkedin.com/company/aglyn/ "Twitter Aglyn page (https://twitter.com/AglynOfficial)")
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 

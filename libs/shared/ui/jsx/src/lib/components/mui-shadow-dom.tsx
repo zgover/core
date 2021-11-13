@@ -22,9 +22,9 @@ import { jssPreset, StylesProvider } from '@aglyn/shared-feature-themes'
 import { create } from 'jss'
 import rtl from 'jss-rtl'
 import React, { HTMLProps, PropsWithChildren, useState } from 'react'
-import useCombinedRefs from '../../hooks/use-combined-refs'
+import useCombinedRefs from '../hooks/use-combined-refs'
 
-import { createShadowDomProxy } from '../shadow-dom/shadow-dom' /* eslint-disable-next-line */
+import { createShadowDomProxy } from './shadow-dom' /* eslint-disable-next-line */
 
 /* eslint-disable-next-line */
 export interface MuiShadowDomProps {}

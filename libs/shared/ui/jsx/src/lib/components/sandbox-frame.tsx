@@ -32,7 +32,7 @@ import React, {
 } from 'react'
 import ReactFrameComponent, { FrameComponentProps } from 'react-frame-component'
 
-import useCombinedRefs from '../../hooks/use-combined-refs'
+import useCombinedRefs from '../hooks/use-combined-refs'
 
 
 export type SandboxFrameDocument = HTMLIFrameElement['contentDocument']

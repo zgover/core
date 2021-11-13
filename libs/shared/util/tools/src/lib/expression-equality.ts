@@ -16,27 +16,32 @@
  */
 
 import { ComparisonOperator } from '@aglyn/shared-data-types'
-import { expressionEquality } from '@aglyn/shared-util-tools'
-import { _isNum } from './_is-num'
 
 
-/**
- * Checks if the parameter has length greater than 0 or second parameter
- * @param leftOperand
- * @param rightOperand
- * @param operator
- */
-export function _isLength<T>(
-  leftOperand: Iterable<T> | ArrayLike<T> | number,
-  rightOperand: Iterable<T> | ArrayLike<T> | number,
+export function expressionEquality(
+  leftOperand: unknown,
+  rightOperand: unknown,
   operator: ComparisonOperator = '===',
 ): boolean {
-  if (leftOperand) {
-    const left = _isNum(leftOperand) ? leftOperand : leftOperand['length'] || 0
-    const right = _isNum(rightOperand) ? rightOperand : rightOperand['length'] || 0
-    return expressionEquality(left, right, operator)
+  const left = leftOperand
+  const right = rightOperand
+
+  switch (operator) {
+    case '===':
+      return left === right
+    case '==':
+      // noinspection EqualityComparisonWithCoercionJS
+      return left == right
+    case '<':
+      return left < right
+    case '<=':
+      return left <= right
+    case '>=':
+      return left >= right
+    case '>':
+    default:
+      return left > right
   }
-  return false
 }
 
-export default _isLength
+export default expressionEquality

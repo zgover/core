@@ -22,8 +22,8 @@ import MuiDrawer, { DrawerProps as MuiDrawerProps } from '@mui/material/Drawer'
 import Toolbar, { ToolbarProps as MuiToolbarProps } from '@mui/material/Toolbar'
 import clsx from 'clsx'
 import { forwardRef, ReactNode, Ref, useRef } from 'react'
-import useCombinedRefs from '../../hooks/use-combined-refs'
-import ElevationScroll from '../elevation-scroll/elevation-scroll'
+import useCombinedRefs from '../hooks/use-combined-refs'
+import ElevationScroll from './elevation-scroll'
 
 
 const classKeys = generateUtilityClasses('AglynNavbarDrawer', [

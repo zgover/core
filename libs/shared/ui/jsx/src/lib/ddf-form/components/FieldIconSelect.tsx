@@ -21,7 +21,6 @@ import {
   makeStyles,
   Theme,
 } from '@aglyn/shared-feature-themes'
-import { CardIconListItem, GridList, MdiIcon, SvgPathIcon, useMdiIcons } from '@aglyn/shared-ui-jsx'
 
 import useFieldApi from '@data-driven-forms/react-form-renderer/use-field-api'
 import { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-field-api/use-field-api'
@@ -34,6 +33,10 @@ import Typography from '@mui/material/Typography'
 
 import clsx from 'clsx'
 import { forwardRef, Fragment, HTMLProps, useCallback, useState } from 'react'
+import { CardIconListItem } from '../../components/card-icon-list-item'
+import { GridList } from '../../components/grid-list'
+import { SvgPathIcon } from '../../components/svg-path-icon'
+import { MdiIcon, useMdiIcons } from '../../hooks/use-mdi-icons'
 
 import { withGridItem } from '../field-hocs'
 import { validationMessage } from '../utils'

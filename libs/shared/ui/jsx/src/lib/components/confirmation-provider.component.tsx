@@ -30,8 +30,8 @@ import {
   ConfirmationContextConfig,
   ConfirmFunction,
   DEFAULT_CONTEXT_CONFIG,
-} from '../../contexts/confirmation.context'
-import DialogConfirm from '../dialog-confirm/dialog-confirm'
+} from '../contexts/confirmation.context'
+import DialogConfirm from './dialog-confirm'
 
 
 export interface ConfirmationProviderComponentProps {

@@ -30,7 +30,7 @@ import { AppUUN, Payload } from '../types'
 import { AglynCommandsController, AglynCommandsControllerT } from './aglyn-commands.controller'
 import {
   AglynComponentsController,
-  AglynCommandsControllerOptions,
+  AglynComponentsControllerOptions,
   AglynComponentsControllerT,
 } from './aglyn-components.controller'
 import {
@@ -51,7 +51,7 @@ export interface AglynAppOptions extends AglynBaseModelOptions {
     contexts?: Omit<AglynContextsControllerOptions, 'app'>
     extensions?: Omit<AglynExtensionsControllerOptions, 'app'>
     commands?: Omit<AglynExtensionsControllerOptions, 'app'>
-    components?: Omit<AglynCommandsControllerOptions, 'app'>
+    components?: Omit<AglynComponentsControllerOptions, 'app'>
   }
 }
 

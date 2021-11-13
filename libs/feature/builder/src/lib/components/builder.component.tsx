@@ -15,17 +15,11 @@
  * limitations under the License.
  */
 
-import {
-  AglynAppController,
-  AglynComponentElementData,
-  AppUUN,
-  getApp,
-} from '@aglyn/core-data-framework'
+import { AppUUN, getApp } from '@aglyn/core-data-framework'
 import {
   AglynAppContext,
   ElementComponentsContextProvider,
   ElementsContextProvider,
-  ElementsContextProviderProps,
 } from '@aglyn/feature-renderer'
 import { consoleTheme, withTheme } from '@aglyn/shared-feature-themes'
 import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
@@ -34,7 +28,6 @@ import NoSsr from '@mui/material/NoSsr'
 import { forwardRef, Fragment, useCallback } from 'react'
 import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
 import HoverContextProvider from '../contexts/hover-context-provider'
-import SelectionContextProvider from '../contexts/selection-context-provider'
 import { BuilderCanvasRendererComponent } from './builder-canvas-renderer.component'
 import { BuilderToolbarComponent } from './builder-toolbar.component'
 
@@ -67,14 +60,14 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
             {/*<SnackbarProvider maxSnack={3}>*/}
             <ConfirmationProviderComponent>
               <HoverContextProvider>
-                  <ComponentsDrawerContextProvider>
-                    <Box ref={ref} id="aglyn:builder" {...rest}>
-                      <BuilderToolbarComponent id="aglyn:builder-toolbar">
-                        <BuilderCanvasRendererComponent/>
-                      </BuilderToolbarComponent>
+                <ComponentsDrawerContextProvider>
+                  <Box ref={ref} id="aglyn:builder" {...rest}>
+                    <BuilderToolbarComponent id="aglyn:builder-toolbar">
+                      <BuilderCanvasRendererComponent/>
+                    </BuilderToolbarComponent>
 
-                    </Box>
-                  </ComponentsDrawerContextProvider>
+                  </Box>
+                </ComponentsDrawerContextProvider>
               </HoverContextProvider>
             </ConfirmationProviderComponent>
             {/*</SnackbarProvider>*/}
