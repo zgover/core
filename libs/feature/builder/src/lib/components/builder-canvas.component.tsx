@@ -26,12 +26,12 @@ const BuilderCanvasContainer = styled('div', {name: 'BuilderCanvasContainer'})((
   width: '100%',
   backgroundColor: theme.palette.background.default,
   backgroundImage: [
-    `linear-gradient(to right, ${alpha(theme.palette.divider, 0.07)} 1px, transparent 1px)`,
-    `linear-gradient(to bottom, ${alpha(theme.palette.divider, 0.07)} 1px, transparent 1px)`,
+    `radial-gradient(circle, ${alpha(theme.palette.tertiary.main, 0.28)} 0.086em, rgba(0,0,0,0) 1px)`,
+    // `linear-gradient(to bottom, ${alpha(theme.palette.divider, 0.07)} 1px, transparent 1px)`,
   ].join(','),
   backgroundSize: [
-    '10px',
-    '10px',
+    '30px',
+    '30px',
   ].join(' '),
   overflowY: 'hidden',
   overflowX: 'auto',
@@ -42,6 +42,8 @@ const BuilderCanvasPanner = styled(ZoomablePanningComponent, {name: 'BuilderCanv
   padding: theme.spacing(3),
   height: '100%',
   width: theme.breakpoints.values.lg,
+  marginLeft: 'auto',
+  marginRight: 'auto',
   ['& > div']: {
     flexGrow: 1,
     display: 'flex',

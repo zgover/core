@@ -127,9 +127,8 @@ try {
   const app = initializeApp({
     logLevel: 'debug',
     modulesOptions: {
-      contexts: {
+      canvas: {
         defaultElements: samplePageData,
-        defaultStores: {},
       }
     },
   })

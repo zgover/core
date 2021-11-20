@@ -26,7 +26,7 @@ const BuilderFrameContainer = styled('div', {name: 'BuilderFrameContainer'})(({t
   height: '100%',
   width: '100%',
   background: theme.palette.background.paper,
-  boxShadow: theme.shadows[1],
+  border: `0.3em solid ${theme.palette.grey[200]}`,
 }))
 
 export interface BuilderFrameComponentProps extends HTMLAttributes<HTMLDivElement> {

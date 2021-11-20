@@ -28,17 +28,17 @@ import { ChangeEvent, EventHandler, forwardRef, HTMLAttributes, useCallback } fr
 
 const ZoomControlContainer = styled('div', {name: 'ZoomControlContainer'})(({theme}) => ({
   position: 'absolute',
-  bottom: theme.spacing(2),
+  bottom: theme.spacing(1),
   zIndex: theme.zIndex.appBar,
-  opacity: 0.5,
+  opacity: 0.32,
   transition: theme.transitions.create(['opacity','filter'], {
-    duration: theme.transitions.duration.short,
+    easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
   ['&:hover']: {
     opacity: 1,
     transition: theme.transitions.create(['opacity', 'filter'], {
-      duration: theme.transitions.duration.short,
+      easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
@@ -136,7 +136,7 @@ export const BuilderZoomControlsComponent = forwardRef<any, BuilderZoomControlsC
 
     return (
       <ZoomControlContainer ref={ref} {...rest}>
-        <ButtonGroup variant="contained" color="quaternary" aria-label="zoom controls">
+        <ButtonGroup variant="contained" color="primary" aria-label="zoom controls">
 
           {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
             <Tooltip key={id} {...tooltipProps}>

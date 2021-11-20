@@ -243,7 +243,7 @@ export interface MainLayoutProps {
   tabBarTitle?: string
   centerNavigationItems?: Array<any>
   breadcrumbItems?: BreadcrumbsProps['items']
-  navTabItems?: (TabProps & AppLinkProps<'text'> & { iconId: string })[]
+  navTabItems?: (TabProps & AppLinkProps<'text'> & { iconIds: string })[]
   quickActionMenus?: QuickActionsMenuItem[]
   productName?: string
   footerNavItems?: GridButtonsProps['items']
@@ -343,7 +343,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
               >
                 {tabBarTitle && <TabBarTitle children={tabBarTitle} />}
                 {navTabItems &&
-                navTabItems.map(({iconId, ...item}, i) => (
+                navTabItems.map(({iconIds, ...item}, i) => (
                   <StyledTab
                     key={item.id ?? item['key'] ?? i}
                     // disableRipple

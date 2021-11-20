@@ -15,8 +15,14 @@
  * limitations under the License.
  */
 
-import { createComponentElementData } from '@aglyn/core-data-framework'
-import { useAglynElementsStoreWithApi } from '@aglyn/feature-renderer'
+import {
+  createComponentElementData,
+  getBuilderStore,
+  InteractionModeFlag,
+  setBuilderFlag,
+  setBuilderPanels,
+} from '@aglyn/core-data-framework'
+import { useAglynAppContext, useAglynElementsStoreWithApi } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import AppBar, { AppBarProps } from '@mui/material/AppBar'
@@ -28,13 +34,53 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
-import { forwardRef, useCallback } from 'react'
+import { useStoreMap } from 'effector-react'
+import { forwardRef, memo, MouseEvent, useCallback } from 'react'
+import useAglynElementHistory from '../../../../renderer/src/lib/hooks/use-aglyn-elements-history'
 import { useElementDrawerContext } from '../contexts/element-drawer-context'
 import { useSelectionContext } from '../contexts/selection-context'
 
 
 const StyledModifyAppBar = styled(AppBar, {name: 'StyledModifyAppBar'})({
   top: 0,
+})
+
+const HistoryControls = memo(() => {
+  const {undo, redo, past, future} = useAglynElementHistory()
+
+  const handleUndoClick = useCallback(() => {
+    undo()
+  }, [undo])
+  const handleRedoClick = useCallback(() => {
+    redo()
+  }, [redo])
+
+  return (
+    <Stack direction="row" spacing={0.25}>
+      <Tooltip title={'Undo (⌘Z)'}>
+        <span>
+          <IconButton
+            aria-label="undo action"
+            onClick={handleUndoClick}
+            disabled={past <= 0}
+          >
+            <SvgPathIcon fontSize="small" iconIds={'undo'} />
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip title={'Redo (⌘Y)'}>
+        <span>
+          <IconButton
+            aria-label="redo action"
+            onClick={handleRedoClick}
+            disabled={future <= 0}
+          >
+            <SvgPathIcon fontSize="small" iconIds={'redo'} />
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Stack>
+  )
 })
 
 export interface BuilderToolbarComponentProps extends Partial<AppBarProps> {}
@@ -73,6 +119,45 @@ export const BuilderAppbarModifyComponent = forwardRef<any, BuilderToolbarCompon
       console.warn('async choice', option)
     }, [selectedId, elementDrawer, elements, addElement])
 
+    const {getApp} = useAglynAppContext()
+    const interactMode = useStoreMap(
+      getBuilderStore(getApp(), {store: 'flags'}),
+      (flags) => {
+        return flags.interactMode
+      },
+    )
+    const handleInteractModeClick = useCallback((event: MouseEvent<HTMLElement>, value: any) => {
+      setBuilderFlag(getApp(), {
+        flag: 'interactMode',
+        value: InteractionModeFlag[InteractionModeFlag[value]],
+      })
+    }, [])
+
+    const {openPanels} = useStoreMap(
+      getBuilderStore(getApp(), {store: 'panels'}),
+      (panels) => {
+        const openPanels = []
+        ;(['left', 'bottom', 'right']).map((panel) => {
+          if (panels[panel]?.toggled) {
+            openPanels.push(panel)
+          }
+        })
+        console.log('panels', panels)
+        return {
+          ...panels,
+          openPanels,
+        }
+      },
+    )
+    const handlePanelToggle = useCallback((event: MouseEvent<HTMLElement>, value: ('left' | 'bottom' | 'right')[]) => {
+      const openPanels = [...value]
+      setBuilderPanels(getApp(), {
+        left: {toggled: openPanels.some((i) => i === 'left')},
+        bottom: {toggled: openPanels.some((i) => i === 'bottom')},
+        right: {toggled: openPanels.some((i) => i === 'right')},
+      })
+    }, [])
+
     return (
       <StyledModifyAppBar
         ref={ref}
@@ -90,44 +175,29 @@ export const BuilderAppbarModifyComponent = forwardRef<any, BuilderToolbarCompon
               edge="start"
               onClick={handleFabClick}
             >
-              <SvgPathIcon fontSize="small" iconIds={'add'} />
+              <SvgPathIcon fontSize="small" iconIds={'shape-square-rounded-plus'} />
             </IconButton>
           </Tooltip>
 
           <Box sx={{mx: 0.25}} />
 
-          <Stack direction="row" spacing={0.25}>
-            <Tooltip title={'Undo (⌘Z)'}>
-              <span>
-                <IconButton
-                  aria-label="undo action"
-                >
-                  <SvgPathIcon fontSize="small" iconIds={'undo'} />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title={'Redo (⌘Y)'}>
-              <span>
-                <IconButton
-                  aria-label="redo action"
-                  disabled
-                >
-                  <SvgPathIcon fontSize="small" iconIds={'redo'} />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Stack>
+          <HistoryControls />
 
           <Box sx={{flexGrow: 1}} />
 
           <Stack direction="row" spacing={1}>
-            <ToggleButtonGroup size="small" value={['1']} exclusive>
-              <ToggleButton value="1">
+            <ToggleButtonGroup
+              size="small"
+              value={interactMode}
+              onChange={handleInteractModeClick}
+              exclusive
+            >
+              <ToggleButton value={InteractionModeFlag.SELECT}>
                 <Tooltip title={'Direct selection'}>
                   <SvgPathIcon fontSize="inherit" iconIds={'cursor-default'} />
                 </Tooltip>
               </ToggleButton>
-              <ToggleButton value="2">
+              <ToggleButton value={InteractionModeFlag.REARRANGE}>
                 <Tooltip title={'Rearrange'}>
                   <SvgPathIcon fontSize="inherit" iconIds={'cursor-move'} />
                 </Tooltip>
@@ -138,22 +208,26 @@ export const BuilderAppbarModifyComponent = forwardRef<any, BuilderToolbarCompon
           <Box sx={{mx: 1}} />
 
           <Stack direction="row" spacing={1}>
-            <ToggleButtonGroup size="small" value={['1']}>
-              <Tooltip title={'Left panel'}>
-                <ToggleButton value="1">
+            <ToggleButtonGroup
+              size="small"
+              value={openPanels}
+              onChange={handlePanelToggle}
+            >
+              <ToggleButton value="left">
+                <Tooltip title={'Left panel'}>
                   <SvgPathIcon fontSize="inherit" iconIds={'dock-left'} />
-                </ToggleButton>
-              </Tooltip>
-              <Tooltip title={'Bottom panel'}>
-                <ToggleButton value="2">
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="bottom">
+                <Tooltip title={'Bottom panel'}>
                   <SvgPathIcon fontSize="inherit" iconIds={'dock-bottom'} />
-                </ToggleButton>
-              </Tooltip>
-              <Tooltip title={'Right panel'}>
-                <ToggleButton value="3">
+                </Tooltip>
+              </ToggleButton>
+              <ToggleButton value="right">
+                <Tooltip title={'Right panel'}>
                   <SvgPathIcon fontSize="inherit" iconIds={'dock-right'} />
-                </ToggleButton>
-              </Tooltip>
+                </Tooltip>
+              </ToggleButton>
             </ToggleButtonGroup>
           </Stack>
 

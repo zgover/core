@@ -15,20 +15,26 @@
  * limitations under the License.
  */
 
-import type { AglynComponentElementDataNormalized, ElementId } from '@aglyn/core-data-framework'
-import { getCanvasNormalizedElementsStore } from '@aglyn/core-data-framework'
-import type { AnyProps } from '@aglyn/shared-data-types'
+import {
+  getCanvasApiEvents,
+  getCanvasNormalizedElementsStore,
+  getCanvasStore,
+} from '@aglyn/core-data-framework'
 import { useStoreMap } from 'effector-react'
+import { useMemo } from 'react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 
-export function useAglynElementData<P extends AnyProps>(
-  $id: ElementId,
-): AglynComponentElementDataNormalized<P> {
+export function useAglynElementHistory() {
   const {getApp} = useAglynAppContext()
-  const store = getCanvasNormalizedElementsStore(getApp())
-
-  return useStoreMap(store, (store) => store[$id])
-
+  const app = getApp()
+  const store = getCanvasStore(app)
+  const {undo, redo} = getCanvasApiEvents(app)
+  const {past, future} = useStoreMap(store, (state) => {
+    return {past: state.past.length, future: state.future.length}
+  })
+  return useMemo(() => ({
+    undo, redo, past, future
+  }), [undo, redo, past, future])
 }
-export default useAglynElementData
+export default useAglynElementHistory

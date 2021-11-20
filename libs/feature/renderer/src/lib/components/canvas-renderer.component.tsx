@@ -21,6 +21,7 @@ import Box from '@mui/material/Box'
 import { useStoreMap } from 'effector-react'
 import { forwardRef, HTMLAttributes } from 'react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import { useAglynElementData } from '../hooks/use-aglyn-element-data'
 import {
   ElementRendererComponent,
   ElementRendererComponentProps,
@@ -42,15 +43,11 @@ export const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentPr
       ...rest
     } = props
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
-    const {getApp} = useAglynAppContext()
-    const store = getContextStore(getApp(), {storeId: 'elements'})
-    const elements = useStoreMap(store, (elements) => {
-      return elements['present']['__root__'].elements
-    })
+    const element = useAglynElementData('__root__')
     return (
       <Box ref={ref} {...rest}>
         <ElementsRendererComponent
-          elements={elements}
+          elements={element.elements}
           elementRendererComponent={elementRendererComponent}
         />
         {children}

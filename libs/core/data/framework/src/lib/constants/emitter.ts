@@ -21,6 +21,11 @@ import type {
   createEffect as createEffectorEffect,
   createEvent as createEffectorEvent,
 } from 'effector'
+import {
+  BuilderContextStores,
+  BuilderFlagState,
+  BuilderPanelsState,
+} from '../controllers/aglyn-builder.controller'
 import type {
   AglynCommandListener,
   AglynCommandResolver,
@@ -29,6 +34,10 @@ import type {
   AglynComponentElement,
   AglynComponentsBundle,
   AglynComponentSchema,
+} from '../controllers/aglyn-components.controller'
+import {
+  AglynComponentElementData,
+  AglynComponentElementDataNormalizedMap,
 } from '../controllers/aglyn-components.controller'
 import type { ContextStore, ContextStoreOptions } from '../controllers/aglyn-contexts.controller'
 import { AglynExtensionLoader } from '../controllers/aglyn-extensions.controller'
@@ -42,6 +51,7 @@ import type {
   ExtensionUUN,
   PayloadData,
 } from '../types'
+import { ElementId } from '../types'
 
 
 export enum AglynAppEventFlag {
@@ -161,7 +171,11 @@ export enum AglynAppEffectFlag {
   COMPONENTS_BUNDLE_REGISTER = 'effect:components:register-components-bundle',
   COMPONENTS_BUNDLE_UNREGISTER = 'effect:components:unregister-components-bundle',
 
-  BUILDER_ = 'effect:command:trigger',
+  BUILDER_GET_STORE = 'effect:builder:get-store',
+  BUILDER_SET_FLAG = 'effect:builder:set-flag',
+  BUILDER_SET_PANEL = 'effect:builder:set-panel',
+  BUILDER_OPEN_PANEL = 'effect:builder:open-panel',
+  BUILDER_CLOSE_PANEL = 'effect:builder:close-panel',
 }
 
 export type ExtensionHandleLoaderPayload = PayloadData<{ loader: AglynExtensionLoader, options?: Partial<AglynExtensionOptions> }>
@@ -194,6 +208,22 @@ export type CommandRegisterListenerPayload = PayloadData<{ commandId?: CommandUI
 export type CommandUnregisterListenerPayload = PayloadData<{ commandId?: CommandUId, listener: AglynCommandListener }>
 export type CommandTriggerPayload = PayloadData<{ commandId: CommandUId } & Dictionary>
 
+export type BuilderGetStorePayload<K extends keyof BuilderContextStores = any> = PayloadData<{ store: K }>
+export type BuilderFlagInteractModePayload<K extends keyof BuilderFlagState = any> = PayloadData<{ flag: K, value: BuilderFlagState[K] }>
+export type BuilderSetPanelPayload = PayloadData<Partial<BuilderPanelsState>>
+export type BuilderOpenPanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
+export type BuilderClosePanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
+
+export type CanvasUndoPayload = PayloadData<any>
+export type CanvasRedoPayload = PayloadData<any>
+export type CanvasGetStorePayload = PayloadData<any>
+export type CanvasSetElementsPayload = PayloadData<{ elements: AglynComponentElementDataNormalizedMap }>
+export type CanvasGetElementsNormalizedPayload = PayloadData<any>
+export type CanvasGetElementsDenormalizedPayload = PayloadData<any>
+export type CanvasGetApiEventsPayload = PayloadData<any>
+export type CanvasAddElementPayload = PayloadData<{ parentId: ElementId, position: number, element: AglynComponentElementData }>
+export type CanvasGetElementPayload = PayloadData<{ $id: ElementId }>
+
 export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, AglynEmitterPayload> {
   [AglynAppEffectFlag.EXTENSION_REGISTER]: ExtensionRegisterPayload
   [AglynAppEffectFlag.EXTENSION_INITIALIZE]: ExtensionInitializePayload
@@ -223,6 +253,12 @@ export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, Agl
   [AglynAppEffectFlag.COMPONENT_UNREGISTER]: ComponentUnregisterPayload
   [AglynAppEffectFlag.COMPONENTS_BUNDLE_REGISTER]: ComponentsBundleRegisterPayload
   [AglynAppEffectFlag.COMPONENTS_BUNDLE_UNREGISTER]: ComponentsBundleUnregisterPayload
+
+  [AglynAppEffectFlag.BUILDER_GET_STORE]: BuilderGetStorePayload
+  [AglynAppEffectFlag.BUILDER_SET_FLAG]: BuilderFlagInteractModePayload
+  [AglynAppEffectFlag.BUILDER_SET_PANEL]: BuilderSetPanelPayload
+  [AglynAppEffectFlag.BUILDER_OPEN_PANEL]: BuilderOpenPanelPayload
+  [AglynAppEffectFlag.BUILDER_CLOSE_PANEL]: BuilderClosePanelPayload
 }
 
 export type EventPayload<T, K extends keyof T = keyof T> = Record<K, T[K]>

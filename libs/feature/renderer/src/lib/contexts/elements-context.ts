@@ -28,7 +28,7 @@ export interface ElementsContextType extends ElementsDataStoreApi {
 export const DEFAULT_ELEMENTS_CONTEXT: ElementsContextType = {
   elements: {},
   addElement: (() => {}) as any,
-  updateElements: (() => {}) as any,
+  setElements: (() => {}) as any,
   undo: (() => {}) as any,
   redo: (() => {}) as any,
 }

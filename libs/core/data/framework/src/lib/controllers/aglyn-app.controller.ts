@@ -17,6 +17,8 @@
 
 import { getStaticField, yes } from '@aglyn/shared-util-tools'
 import {
+  _builderControllers,
+  _canvasControllers,
   _commandsControllers,
   _componentsControllers,
   _contextsControllers,
@@ -27,6 +29,16 @@ import { AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
 import { TYPE_OF } from '../constants/symbol'
 import { AglynBaseModel, AglynBaseModelOptions } from '../models/aglyn-base.model'
 import { AppUUN, Payload } from '../types'
+import {
+  AglynBuilderController,
+  AglynBuilderControllerOptions,
+  AglynBuilderControllerT,
+} from './aglyn-builder.controller'
+import {
+  AglynCanvasController,
+  AglynCanvasControllerOptions,
+  AglynCanvasControllerT,
+} from './aglyn-canvas.controller'
 import { AglynCommandsController, AglynCommandsControllerT } from './aglyn-commands.controller'
 import {
   AglynComponentsController,
@@ -52,6 +64,8 @@ export interface AglynAppOptions extends AglynBaseModelOptions {
     extensions?: Omit<AglynExtensionsControllerOptions, 'app'>
     commands?: Omit<AglynExtensionsControllerOptions, 'app'>
     components?: Omit<AglynComponentsControllerOptions, 'app'>
+    canvas?: Omit<AglynCanvasControllerOptions, 'app'>
+    builder?: Omit<AglynBuilderControllerOptions, 'app'>
   }
 }
 
@@ -81,11 +95,15 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   public readonly ContextsController: AglynContextsControllerT = AglynContextsController
   public readonly CommandController: AglynCommandsControllerT = AglynCommandsController
   public readonly ComponentsController: AglynComponentsControllerT = AglynComponentsController
+  public readonly CanvasController: AglynCanvasControllerT = AglynCanvasController
+  public readonly BuilderController: AglynBuilderControllerT = AglynBuilderController
 
   #extensionsController: AglynExtensionsController = null
   #contextsController: AglynContextsController = null
   #commandsController: AglynCommandsController = null
   #componentsController: AglynComponentsController = null
+  #canvasController: AglynCanvasController = null
+  #builderController: AglynBuilderController = null
 
   readonly #name: string = null
   #isDeleted = false
@@ -104,6 +122,12 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   }
   public get components(): AglynComponentsController {
     return this.#componentsController
+  }
+  public get canvas(): AglynCanvasController {
+    return this.#canvasController
+  }
+  public get builder(): AglynBuilderController {
+    return this.#builderController
   }
   public get deleted(): boolean {
     return this.#isDeleted
@@ -142,6 +166,20 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
       this.#name,
       this.#componentsController = new this.ComponentsController({
         ...this.options.modulesOptions?.components,
+        app: this,
+      }),
+    )
+    _canvasControllers.set(
+      this.#name,
+      this.#canvasController = new this.CanvasController({
+        ...this.options.modulesOptions?.canvas,
+        app: this,
+      }),
+    )
+    _builderControllers.set(
+      this.#name,
+      this.#builderController = new this.BuilderController({
+        ...this.options.modulesOptions?.builder,
         app: this,
       }),
     )

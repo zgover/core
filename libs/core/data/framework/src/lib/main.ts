@@ -26,6 +26,8 @@ export * from './types'
 // 👇
 
 export * from './api/app.api'
+export * from './api/builder.api'
+export * from './api/canvas.api'
 export * from './api/commands.api'
 export * from './api/components.api'
 export * from './api/contexts.api'
@@ -118,10 +120,6 @@ export type {
   ContextDomain,
   ContextEvent,
   ContextEffect,
-  ElementsDataStore,
-  ElementsDataStoreApi,
-  AddElementPayload,
-  UpdateElementsPayload,
   ContextStoreOptions,
   AglynContextsControllerOptions,
   AglynContextsControllerT,
@@ -159,3 +157,21 @@ export type {
   AglynComponentsControllerT,
   AglynComponentsController,
 } from './controllers/aglyn-components.controller'
+export type {
+  ElementsDataStore,
+  ElementsDataStoreApi,
+  AglynCanvasControllerOptions,
+  AglynCanvasControllerT,
+  AglynCanvasController
+} from './controllers/aglyn-canvas.controller'
+export type {
+  BuilderPanelsState,
+  BuilderFlagState,
+  BuilderCanvasState,
+  BuilderDndState,
+  CommActionData,
+  BuilderContextStores,
+  AglynBuilderControllerOptions,
+  AglynBuilderControllerT,
+  AglynBuilderController,
+} from './controllers/aglyn-builder.controller'

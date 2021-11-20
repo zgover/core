@@ -53,25 +53,20 @@ function HoverContextProviderRaw(props: HoverContextProviderProps) {
     })
   }
 
-  const handleUnhover = useDebouncedCallback(() => {
-    return setHoveredResolveReject([])
-  }, 200)
-
-  const handleDeselect = () => {
-    return setSelectedResolveReject([])
-  }
+  const handleUnhover = useDebouncedCallback(() => setHoveredResolveReject([]), 200)
+  const handleDeselect = () => setSelectedResolveReject([])
 
   const hoverOpen = useCallback((opts: HoverOptions) => {
     return handleHover(opts)
-  }, [])
+  }, [handleHover])
 
   const hoverSelect = useCallback((event?: Element, opts?: HoverOptions) => {
     return handleSelect(opts)
-  }, [])
+  }, [handleSelect])
 
   const hoverClose = useCallback((event?: Element) => {
     handleUnhover()
-  }, [])
+  }, [handleUnhover])
 
   const hoverDeselect = useCallback((event?: Element) => {
     handleDeselect()

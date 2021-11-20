@@ -16,7 +16,6 @@
  */
 import { Shadows } from '../../vendor/mui'
 
-export const consoleShadows: Shadows = {
 
-}
+export const consoleShadows: Shadows = {}
 export default consoleShadows

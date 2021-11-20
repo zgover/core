@@ -75,7 +75,6 @@ export const BuilderEditorComponent = forwardRef<any, BuilderEditorComponentProp
           <BuilderToolboxLeftComponent
             id="aglyn:builder-toolbox-left"
             aria-label="builder toolbox left"
-            open
           />
           <BuilderViewportComponent
             id="aglyn:builder-viewport"

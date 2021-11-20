@@ -43,7 +43,7 @@ export const BuilderAppbarGlobalComponent = forwardRef<any, BuilderAppBarCompone
         {...rest}
       >
         <Toolbar>
-          <AglynSvgAppIcon sx={{ml: -1, mr: 0.75}} fontSize="large" />
+          <AglynSvgAppIcon sx={{ml: -1.5, mr: 1}} fontSize="large" />
           <Typography variant="h4">
             Besigner
           </Typography>

@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { getBuilderStore } from '@aglyn/core-data-framework'
+import { useAglynAppContext } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import { _isEqualitySameType } from '@aglyn/shared-util-guards'
@@ -23,6 +25,7 @@ import TreeView from '@mui/lab/TreeView'
 import Box from '@mui/material/Box'
 import Drawer, { DrawerProps } from '@mui/material/Drawer'
 import Toolbar from '@mui/material/Toolbar'
+import { useStoreMap } from 'effector-react'
 import { forwardRef, HTMLAttributes } from 'react'
 
 
@@ -71,8 +74,13 @@ export interface BuilderToolboxLeftComponentProps extends ExtraProps<HTMLAttribu
 
 export const BuilderToolboxLeftComponent = forwardRef<any, BuilderToolboxLeftComponentProps>(
   function RefRenderFn(props, ref) {
-    const {children, drawerWidth, DrawerProps, open, ...rest} = props
+    const {children, drawerWidth, DrawerProps, ...rest} = props
 
+    const {getApp} = useAglynAppContext()
+    const open = useStoreMap(
+      getBuilderStore(getApp(), {store: 'panels'}),
+      (panels) => Boolean(panels?.left?.toggled)
+    )
     return (
       <BuilderToolboxContainer
         ref={ref}
@@ -109,8 +117,8 @@ export const BuilderToolboxLeftComponent = forwardRef<any, BuilderToolboxLeftCom
             </TreeView>
           </Box>
 
-          {children}
         </StyledDrawer>
+        {children}
       </BuilderToolboxContainer>
     )
   },

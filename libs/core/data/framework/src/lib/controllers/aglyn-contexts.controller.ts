@@ -16,15 +16,13 @@
  */
 
 import { KeyValueMap } from '@aglyn/shared-data-types'
-import { _hasProperty, _isArr, _isArrEmpty, _isObj } from '@aglyn/shared-util-guards'
-import { arrayAddAtIndex, getProperty } from '@aglyn/shared-util-tools'
+import { _hasProperty, _isObj } from '@aglyn/shared-util-guards'
+import { getProperty } from '@aglyn/shared-util-tools'
 import {
-  createApi,
   createDomain as createEffectorDomain,
   createEffect as createEffectorEffect,
   createEvent as createEffectorEvent,
   Domain as EffectorDomain,
-  Event as EffectorEvent,
   Store as EffectorStore,
 } from 'effector'
 import {
@@ -42,13 +40,8 @@ import {
   AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import { ContextStoreUid, ElementId } from '../types'
-import { denormalizeComponentElementData } from '../util/denormalize-component-element-data'
-import { normalizeComponentElementData } from '../util/normalize-component-element-data'
-import {
-  AglynComponentElementData,
-  AglynComponentElementDataNormalizedMap,
-} from './aglyn-components.controller'
+import { ContextStoreUid } from '../types'
+import { AglynComponentElementData } from './aglyn-components.controller'
 
 
 export interface ContextDomain extends EffectorDomain {
@@ -69,26 +62,6 @@ export type ContextStoreOptions<T> = {
   serialize?: 'ignore'
 }
 
-export type ElementsDataStore = {
-  past: AglynComponentElementDataNormalizedMap[]
-  present: AglynComponentElementDataNormalizedMap
-  future: AglynComponentElementDataNormalizedMap[]
-}
-
-export interface ElementsDataStoreApi {
-  addElement: EffectorEvent<AddElementPayload>
-  updateElements: EffectorEvent<UpdateElementsPayload>
-  undo: EffectorEvent<any>
-  redo: EffectorEvent<any>
-}
-
-export type AddElementPayload = {
-  parentId: ElementId,
-  position: number,
-  element: AglynComponentElementData
-}
-export type UpdateElementsPayload = AglynComponentElementDataNormalizedMap
-
 export interface AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> {
   getStore<T>(payload: ContextsGetStorePayload): ContextStore<T>
   getStoreApi<T, K extends keyof T = keyof T>(payload: ContextsGetStoreApiPayload): T
@@ -101,7 +74,6 @@ export interface AglynContextsController extends AglynModuleModel<AglynContextsC
 
 export interface AglynContextsControllerOptions extends AglynModuleModelOptions {
   defaultStores: KeyValueMap<ContextStoreUid, { defaultState: any, options?: ContextStoreOptions<any> }>
-  defaultElements: AglynComponentElementData[]
 }
 
 const TAG = 'AglynContexts'
@@ -116,92 +88,17 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()
 
+  public get domain(): ContextDomain {
+    return this.#domain
+  }
+
   constructor(options) {
     super(options)
     this.#setup()
   }
   #setup() {
     this.#domain = createEffectorDomain(this.app.getName())
-    this.#setupInternalStores()
     this.#setupDefaultStores()
-  }
-  #setupInternalStores(): void {
-    const normalizedElementsStore = this.createStore({
-        defaultState: {
-          past: [] as AglynComponentElementDataNormalizedMap[],
-          present: normalizeComponentElementData(this.options.defaultElements || [], '__root__'),
-          future: [] as AglynComponentElementDataNormalizedMap[],
-        } as ElementsDataStore,
-        options: {sid: 'elements'},
-      },
-    )
-
-    const elementHelpers = createApi(normalizedElementsStore, {
-      undo: (state, _) => {
-        const past = state.past
-        const present = state.present
-        const future = state.future
-
-        if (_isArr(past) && !_isArrEmpty(past)) {
-          future.unshift(present)
-          return {
-            past: past,
-            present: past.shift(),
-            future: future,
-          }
-        }
-      },
-      redo: (state, _) => {
-        const past = state.past
-        const present = state.present
-        const future = state.future
-
-        if (_isArr(future) && !_isArrEmpty(future)) {
-          past.push(present)
-          return {
-            past: past,
-            present: future.shift(),
-            future: future,
-          }
-        }
-      },
-      addElement: (state, payload: AddElementPayload) => {
-        state.past.push(state.present)
-
-        const {element, parentId, position} = payload
-        const newData = normalizeComponentElementData(element, parentId)
-        const present = {
-          ...state.present,
-          ...newData,
-          [parentId]: {
-            ...state.present[parentId],
-            elements: arrayAddAtIndex(
-              position,
-              state.present[parentId].elements || [],
-              newData[parentId]?.elements || [],
-              {copy: true},
-            ).items,
-          },
-        }
-
-        return {past: state.past, present, future: []}
-      },
-      // updateElement: (state, _) => {
-      //
-      // },
-      updateElements: (state, payload: AglynComponentElementDataNormalizedMap) => {
-        state.past.push(state.present)
-        return {past: state.past, present: payload, future: []}
-      },
-    })
-
-    const denormalizedElementsStore = normalizedElementsStore.map((elements) => {
-      return denormalizeComponentElementData(elements.present, '__root__')
-    })
-
-    this.setStore({store: normalizedElementsStore, storeId: 'elements'})
-    this.setStore({store: elementHelpers, storeId: 'elements:api'})
-    this.setStore({store: denormalizedElementsStore, storeId: 'elements:denormalized'})
   }
   #setupDefaultStores(): void {
     const defaultStores = this.options.defaultStores

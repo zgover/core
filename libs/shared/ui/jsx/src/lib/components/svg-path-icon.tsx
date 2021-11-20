@@ -20,7 +20,7 @@ import { _isArr, _isStrT } from '@aglyn/shared-util-guards'
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@mui/material/SvgIcon'
 import { createSvgIcon } from '@mui/material/utils'
 import { forwardRef, useMemo } from 'react'
-import SvgPath, { SvgPathData } from './svg-path'
+import { SvgPath, SvgPathData } from './svg-path'
 
 
 export { createSvgIcon }
@@ -59,10 +59,10 @@ export const SvgPathIcon = forwardRef<any, SvgPathIconProps>(function RefRenderF
     const iconIdArray: IconId[] = _isStrT(iconIds) || _isArr(iconIds)
       ? _isStrT(iconIds) ? [iconIds] : iconIds
       : null
-    return iconIdArray ? getIconPathData(iconIdArray).map((iconPath, index) => (
+    return iconIdArray || (!pathsProp && !children) ? getIconPathData(iconIdArray ?? [null]).map((iconPath, index) => (
       <SvgPath key={index} d={iconPath} />
     )) : null
-  }, [iconIds])
+  }, [iconIds, pathsProp])
 
   const pathsPaths = useMemo(() => {
     const pathsArray = _isStrT(pathsProp) || _isArr(pathsProp)

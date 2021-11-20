@@ -38,7 +38,7 @@ const CanvasShadow = styled('div', {name: 'CanvasShadow'})(({theme}) => ({
   left: 0, right: 0, top: 0, bottom: 0,
   position: 'absolute',
   zIndex: theme.zIndex.appBar - 1,
-  boxShadow: theme.insetShadows[2],
+  boxShadow: theme.insetShadows[3],
   backgroundColor: 'transparent',
   pointerEvents: 'none',
 }))
