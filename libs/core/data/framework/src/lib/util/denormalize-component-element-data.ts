@@ -29,7 +29,7 @@ const denormalizeData = (
   flatMap: AglynComponentElementDataNormalizedMap = {},
   elemData: AglynComponentElementData[] = [],
 ): AglynComponentElementData => {
-  const {elements, parentId: _, ...rest} = element
+  const {elements, ...rest} = element
 
   return {
     ...rest,

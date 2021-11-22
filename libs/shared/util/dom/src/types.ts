@@ -14,13 +14,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { getNodeWindow } from '@aglyn/shared-util-dom'
 
 
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export type VisualViewport = EventTarget & {
+  width: number,
+  height: number,
+  offsetLeft: number,
+  offsetTop: number,
+  scale: number,
 }
 
-export default getElementComputedStyle
+export type Rect = {
+  width: number
+  height: number
+  x: number
+  y: number
+}
+
+export type ElementOffsets = {
+  y: number
+  x: number
+}
+
+export type ClientRectObject = {
+  x: number
+  y: number
+  top: number
+  left: number
+  right: number
+  bottom: number
+  width: number
+  height: number
+}
+
+export type VirtualElement = {
+  getBoundingClientRect: () => ClientRect | DOMRect,
+  contextElement?: Element,
+}
+
+export type Coordinates = {
+  x: number;
+  y: number;
+}

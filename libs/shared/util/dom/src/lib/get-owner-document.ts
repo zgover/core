@@ -14,19 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  isElementHTMLElement,
+  isElementWindow,
+  isNodeDocument,
+  isNodeObject,
+} from '@aglyn/shared-util-dom'
 
 
-import { getWindow } from './get-window'
-
-
-export function getWindowScroll(node: Node | Window) {
-  const win = getWindow(node)
-  const scrollLeft = win['pageXOffset']
-  const scrollTop = win['pageYOffset']
-
-  return {
-    scrollLeft,
-    scrollTop,
+export function getOwnerDocument(target: Event['target']): Document {
+  if (!target) {
+    return document
   }
+
+  if (isElementWindow(target)) {
+    return target.document
+  }
+
+  if (!isNodeObject(target)) {
+    return document
+  }
+
+  if (isNodeDocument(target)) {
+    return target
+  }
+
+  if (isElementHTMLElement(target)) {
+    return target.ownerDocument
+  }
+
+  return document
 }
-export default getWindowScroll
+export default getOwnerDocument

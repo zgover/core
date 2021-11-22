@@ -17,7 +17,7 @@
 
 import { _canvasControllers } from '../constants/_internal'
 import {
-  CanvasAddElementPayload, CanvasDeleteElementPayload,
+  CanvasAddElementPayload, CanvasDeleteElementPayload, CanvasDuplicateElementPayload,
   CanvasGetApiEventsPayload,
   CanvasGetElementsDenormalizedPayload,
   CanvasGetElementsNormalizedPayload,
@@ -131,6 +131,14 @@ export function moveCanvasElement(
 ) {
   const canvasController = _getCanvasController(app)
   return canvasController.moveElement(payload)
+}
+
+export function duplicateCanvasElement(
+  app: AglynAppController,
+  payload: CanvasDuplicateElementPayload,
+) {
+  const canvasController = _getCanvasController(app)
+  return canvasController.duplicateElement(payload)
 }
 
 // export function getCanvasElement(

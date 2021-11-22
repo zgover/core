@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { Rect, ClientRectObject } from './types';
+import type { ClientRectObject, Rect } from '../types'
 
 
 export function elementRectToClientRect(rect: Rect): ClientRectObject {
@@ -25,6 +25,6 @@ export function elementRectToClientRect(rect: Rect): ClientRectObject {
     top: rect.y,
     right: rect.x + rect.width,
     bottom: rect.y + rect.height,
-  };
+  }
 }
 export default elementRectToClientRect

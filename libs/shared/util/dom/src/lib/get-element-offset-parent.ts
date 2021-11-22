@@ -16,16 +16,16 @@
  */
 
 
-import { isHTMLElement, isTableElement } from './element-is-instanceof'
 import { getElementComputedStyle } from './get-element-computed-style'
 import { getElementNodeName } from './get-element-node-name'
 import { getElementParentNode } from './get-element-parent-node'
-import { getWindow } from './get-window'
+import { getNodeWindow } from './get-node-window'
+import { isElementHTMLElement, isNodeTableElement } from './guards/node-is'
 
 
 function getTrueOffsetParent(element: Element): Element {
   if (
-    !isHTMLElement(element) ||
+    !isElementHTMLElement(element) ||
     // https://github.com/popperjs/popper-core/issues/837
     getElementComputedStyle(element).position === 'fixed'
   ) {
@@ -41,7 +41,7 @@ function getContainingBlock(element: Element) {
   const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') !== -1
   const isIE = navigator.userAgent.indexOf('Trident') !== -1
 
-  if (isIE && isHTMLElement(element)) {
+  if (isIE && isElementHTMLElement(element)) {
     // In IE 9, 10 and 11 fixed elements containing block is always established by the viewport
     const elementCss = getElementComputedStyle(element)
     if (elementCss.position === 'fixed') {
@@ -52,7 +52,7 @@ function getContainingBlock(element: Element) {
   let currentNode = getElementParentNode(element)
 
   while (
-    isHTMLElement(currentNode) &&
+    isElementHTMLElement(currentNode) &&
     ['html', 'body'].indexOf(getElementNodeName(currentNode)) < 0
     ) {
     const css = getElementComputedStyle(currentNode as Element)
@@ -78,27 +78,31 @@ function getContainingBlock(element: Element) {
   return null
 }
 
+function getElementPosition(element: Element): string {
+  return getElementComputedStyle(element).position
+}
+
 // Gets the closest ancestor positioned element. Handles some edge cases,
 // such as table ancestors and cross browser bugs.
 export function getElementOffsetParent(element: Element) {
-  const window = getWindow(element)
+  const window = getNodeWindow(element)
+  const isStaticPos = (el) => getElementPosition(el) === 'static'
+
 
   let offsetParent = getTrueOffsetParent(element)
-
   while (
     offsetParent &&
-    isTableElement(offsetParent) &&
-    getElementComputedStyle(offsetParent).position === 'static'
+    isNodeTableElement(offsetParent) &&
+    isStaticPos(offsetParent)
     ) {
     offsetParent = getTrueOffsetParent(offsetParent)
   }
 
-  if (
-    offsetParent &&
-    (getElementNodeName(offsetParent) === 'html' ||
-      (getElementNodeName(offsetParent) === 'body' &&
-        getElementComputedStyle(offsetParent).position === 'static'))
-  ) {
+  const nodeName = getElementNodeName(offsetParent),
+    isHtmlEl = nodeName === 'html',
+    isBodyElem = nodeName === 'body'
+
+  if (offsetParent && isHtmlEl || (isBodyElem && isStaticPos(offsetParent))) {
     return window
   }
 

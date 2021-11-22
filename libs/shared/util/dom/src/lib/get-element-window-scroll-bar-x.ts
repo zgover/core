@@ -18,10 +18,10 @@
 
 import { getElementClientRectBounding } from './get-element-client-rect-bounding'
 import { getElementDocumentElement } from './get-element-document-element'
-import { getWindowScroll } from './get-window-scroll'
+import { getNodeWindowScroll } from './get-node-window-scroll'
 
 
-export function getWindowScrollBarX(element: Element): number {
+export function getElementWindowScrollBarX(element: Element): number {
   // If <html> has a CSS width greater than the viewport, then this will be
   // incorrect for RTL.
   // Popper 1 is broken in this case and never had a bug report so let's assume
@@ -31,7 +31,7 @@ export function getWindowScrollBarX(element: Element): number {
   // this (e.g. Edge 2019, IE11, Safari)
   return (
     getElementClientRectBounding(getElementDocumentElement(element)).left +
-    getWindowScroll(element).scrollLeft
+    getNodeWindowScroll(element).scrollLeft
   )
 }
-export default getWindowScrollBarX
+export default getElementWindowScrollBarX

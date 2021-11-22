@@ -16,17 +16,17 @@
  */
 
 
+import type { Rect } from '../types'
 import { getElementComputedStyle } from './get-element-computed-style'
 import { getElementDocumentElement } from './get-element-document-element'
-import { getWindowScroll } from './get-window-scroll'
-import { getWindowScrollBarX } from './get-window-scroll-bar-x'
-import type { Rect } from './types'
+import { getElementWindowScrollBarX } from './get-element-window-scroll-bar-x'
+import { getNodeWindowScroll } from './get-node-window-scroll'
 
 // Gets the entire size of the scrollable document area, even extending outside
 // of the `<html>` and `<body>` rect bounds if horizontally scrollable
 export function getElementDocumentElementRect(element: HTMLElement): Rect {
   const html = getElementDocumentElement(element)
-  const winScroll = getWindowScroll(element)
+  const winScroll = getNodeWindowScroll(element)
   const body = element.ownerDocument?.body
 
   const width = Math.max(
@@ -42,7 +42,7 @@ export function getElementDocumentElementRect(element: HTMLElement): Rect {
     body ? body.clientHeight : 0,
   )
 
-  let x = -winScroll.scrollLeft + getWindowScrollBarX(element)
+  let x = -winScroll.scrollLeft + getElementWindowScrollBarX(element)
   const y = -winScroll.scrollTop
 
   if (getElementComputedStyle(body || html).direction === 'rtl') {

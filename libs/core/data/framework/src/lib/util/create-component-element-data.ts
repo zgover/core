@@ -38,7 +38,7 @@ export const ELEMENT_DEFAULTS: Partial<AglynComponentElementData> = {
 }
 
 export function createComponentElementData(
-  template?: AglynComponentElementTemplateData,
+  template?: AglynComponentElementTemplateData | {data: AglynComponentElementData},
 ): AglynComponentElementData {
   const {data} = {...template}
 

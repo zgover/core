@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import { isShadowRoot } from './element-is-instanceof'
 import { getElementDocumentElement } from './get-element-document-element'
 import { getElementNodeName } from './get-element-node-name'
+import { isNodeShadowRoot } from './guards/node-is'
 
 
 export function getElementParentNode(element: Node | ShadowRoot): Node {
@@ -30,7 +30,7 @@ export function getElementParentNode(element: Node | ShadowRoot): Node {
     element['assignedSlot'] || // step into the shadow DOM of the parent of a slotted node
     element.parentNode || // DOM Element
     (
-      isShadowRoot(element) ? element.host : null) // ShadowDom
+      isNodeShadowRoot(element) ? element.host : null) // ShadowDom
     || getElementDocumentElement(element as Element, // fallback
     )
   )

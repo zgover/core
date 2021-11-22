@@ -16,11 +16,11 @@
  */
 
 
-import type { VisualViewport } from './types'
-import { isScrollParent } from './element-is-instanceof'
+import type { VisualViewport } from '../types'
 import { getElementParentNode } from './get-element-parent-node'
 import { getElementScrollParent } from './get-element-scroll-parent'
-import { getWindow } from './get-window'
+import { getNodeWindow } from './get-node-window'
+import { isElementScrollParentElement } from './guards/node-is'
 
 /*
  given a DOM element, return the list of all scroll parents, up the list of ancesors
@@ -34,11 +34,11 @@ export function getElementListScrollParents(
 ): Array<Element | Window | VisualViewport> {
   const scrollParent = getElementScrollParent(element)
   const isBody = scrollParent === element.ownerDocument?.body
-  const win = getWindow(scrollParent)
+  const win = getNodeWindow(scrollParent)
   const target = isBody
     ? [win].concat(
       win.visualViewport || [] as any,
-      isScrollParent(scrollParent) ? scrollParent : [] as any,
+      isElementScrollParentElement(scrollParent) ? scrollParent : [] as any,
     )
     : scrollParent
   const updatedList = list.concat(target)

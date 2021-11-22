@@ -17,12 +17,12 @@
 
 
 import { getElementDocumentElement } from './get-element-document-element'
-import { getWindow } from './get-window'
-import { getWindowScrollBarX } from './get-window-scroll-bar-x'
+import { getElementWindowScrollBarX } from './get-element-window-scroll-bar-x'
+import { getNodeWindow } from './get-node-window'
 
 
 export function getElementViewportRect(element: Element) {
-  const win = getWindow(element)
+  const win = getNodeWindow(element)
   const html = getElementDocumentElement(element)
   const visualViewport = win.visualViewport
 
@@ -59,7 +59,7 @@ export function getElementViewportRect(element: Element) {
   return {
     width,
     height,
-    x: x + getWindowScrollBarX(element),
+    x: x + getElementWindowScrollBarX(element),
     y,
   }
 }

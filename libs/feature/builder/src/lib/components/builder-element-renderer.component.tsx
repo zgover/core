@@ -17,13 +17,14 @@
 
 import { InteractionModeFlag } from '@aglyn/core-data-framework'
 import {
+  useAglynComponentSchema,
   ElementRendererComponent,
   ElementRendererComponentProps,
   useAglynBuilderStore,
   useAglynElementData,
 } from '@aglyn/feature-renderer'
 import { useCombinedRefs } from '@aglyn/shared-ui-jsx'
-import { getElementClientRectBounding, getElementPosition } from '@aglyn/shared-util-dom'
+import { getElementClientRectBounding } from '@aglyn/shared-util-dom'
 import { CSS } from '@aglyn/shared-util-tools'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import Portal from '@mui/material/Portal'
@@ -41,6 +42,7 @@ const BuilderElementRendererComponentRaw = forwardRef<any, BuilderElementRendere
     const localRef = useRef()
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
+    const componentSchema = useAglynComponentSchema(componentId, bundleId)
     const {hoverOpen, hoverClose, hoverSelect, hoverDeselect} = useHoverContext()
     const interactMode = useAglynBuilderStore('flags', 'interactMode')
     const rearrangeEnabled = interactMode === InteractionModeFlag.REARRANGE
@@ -49,12 +51,16 @@ const BuilderElementRendererComponentRaw = forwardRef<any, BuilderElementRendere
 
     const {setNodeRef: dropRef, isOver, active, over} = useDroppable({
       id: $id,
-      data: {},
+      data: {
+        componentId, bundleId,
+        hierarchy: componentSchema?.renderFlags?.hierarchy
+      },
     })
     const {setNodeRef: dragRef, listeners, attributes, transform, isDragging} = useDraggable({
       id: $id,
       data: {
-        index: props.index,
+        componentId, bundleId,
+        hierarchy: componentSchema?.renderFlags?.hierarchy
       },
     })
     const {onPointerDown, ...dragListeners} = listeners

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { deleteCanvasElement } from '@aglyn/core-data-framework'
+import { deleteCanvasElement, duplicateCanvasElement } from '@aglyn/core-data-framework'
 import { useAglynAppContext, useAglynElementLabel } from '@aglyn/feature-renderer'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import {
@@ -191,6 +191,7 @@ export const HoverComponent = forwardRef<any, HoverComponentProps>(
 
     const {confirm} = useConfirmationContext()
     const {getApp} = useAglynAppContext()
+
     const handleDeleteButtonClick = useCallback((e: ChangeEvent<unknown>) => {
       confirm({
         title: 'Are you sure?',
@@ -210,11 +211,9 @@ export const HoverComponent = forwardRef<any, HoverComponentProps>(
       })
     }, [$id, onClose])
 
-    const handleZoomDecrease = useCallback((e: ChangeEvent<unknown>) => {
-      // if (_isFnT()) {
-      //   // onZoomDecrease(e)
-      // }
-    }, [])
+    const handleDuplicateButtonClick = useCallback((e: ChangeEvent<unknown>) => {
+      duplicateCanvasElement(getApp(), {$id})
+    }, [$id])
 
     const handleZoomIncrease = useCallback((e: ChangeEvent<unknown>) => {
       // if (_isFnT()) {
@@ -240,35 +239,19 @@ export const HoverComponent = forwardRef<any, HoverComponentProps>(
         },
       },
       {
-        id: 'decrease-zoom',
+        id: 'duplicate-element',
         tooltipProps: {
-          title: 'Decrease zoom (⌘-)',
+          title: 'Duplicate',
         },
         srOnlyProps: {
-          children: 'Decrease zoom (⌘-)',
+          children: 'Duplicate',
         },
         buttonProps: {
-          // disabled: yes(disableZoomDecreaseButton),
-          onClick: handleZoomDecrease,
+          // disabled: yes(disableZoomResetButton),
+          onClick: handleDuplicateButtonClick,
         },
         svgPathIconProps: {
-          iconIds: 'magnify-minus',
-        },
-      },
-      {
-        id: 'increase-zoom',
-        tooltipProps: {
-          title: 'Increase zoom (⌘+)',
-        },
-        srOnlyProps: {
-          children: 'Increase zoom (⌘+)',
-        },
-        buttonProps: {
-          // disabled: yes(disableZoomIncreaseButton),
-          onClick: handleZoomIncrease,
-        },
-        svgPathIconProps: {
-          iconIds: 'magnify-plus',
+          iconIds: 'content-duplicate',
         },
       },
     ]

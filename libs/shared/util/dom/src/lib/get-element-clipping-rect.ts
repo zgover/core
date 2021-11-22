@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { isElement, isHTMLElement } from './element-is-instanceof'
+import { Boundary, RootBoundary, viewport } from '../enums'
+import { ClientRectObject } from '../types'
 import { elementRectToClientRect } from './element-rect-to-client-rect'
-import { Boundary, RootBoundary, viewport } from './enums'
-import getElementClientRectBoundingInner from './get-element-client-rect-bounding-inner'
+import { getElementClientRectBoundingInner } from './get-element-client-rect-bounding-inner'
 import { getElementDocumentElement } from './get-element-document-element'
 import { getElementDocumentElementRect } from './get-element-document-element-rect'
 import { getElementListScrollParents } from './get-element-list-scroll-parents'
@@ -26,8 +26,8 @@ import { getElementNodeName } from './get-element-node-name'
 import { getElementOffsetParent } from './get-element-offset-parent'
 import { getElementParentNode } from './get-element-parent-node'
 import { getElementViewportRect } from './get-element-viewport-rect'
-import { parentElementContainsChildElement } from './parent-element-contains-child-element'
-import { ClientRectObject } from './types'
+import { parentElementContainsChildElement } from './guards/event-is'
+import { isElementHTMLElement, isNodeElement } from './guards/node-is'
 
 
 function getClientRectFromMixedType(
@@ -36,7 +36,7 @@ function getClientRectFromMixedType(
 ): ClientRectObject {
   return clippingParent === viewport
     ? elementRectToClientRect(getElementViewportRect(element))
-    : isHTMLElement(clippingParent)
+    : isElementHTMLElement(clippingParent as Element)
       ? getElementClientRectBoundingInner(clippingParent as Element)
       : elementRectToClientRect(getElementDocumentElementRect(getElementDocumentElement(element)))
 }
@@ -48,18 +48,18 @@ function getElementClippingParents(element: Element): Array<Element> {
   const canEscapeClipping =
     ['absolute', 'fixed'].indexOf(getComputedStyle(element).position) >= 0
   const clipperElement =
-    canEscapeClipping && isHTMLElement(element)
+    canEscapeClipping && isElementHTMLElement(element)
       ? getElementOffsetParent(element)
       : element
 
-  if (!isElement(clipperElement)) {
+  if (!isNodeElement(clipperElement)) {
     return []
   }
 
   // $FlowFixMe[incompatible-return]: https://github.com/facebook/flow/issues/1414
   return clippingParents.filter(
     (clippingParent) =>
-      isElement(clippingParent) &&
+      isNodeElement(clippingParent) &&
       parentElementContainsChildElement(clippingParent as Element, clipperElement as Element) &&
       getElementNodeName(clippingParent as Element) !== 'body',
   ) as Element[]

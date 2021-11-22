@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
+import { _isArrEmpty } from '@aglyn/shared-util-guards'
+import { arrayAddAtIndex } from '@aglyn/shared-util-tools'
+import { createApi, Event as EffectorEvent } from 'effector'
 import {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
   CanvasGetApiEventsPayload,
   CanvasGetElementPayload,
   CanvasGetElementsDenormalizedPayload,
@@ -28,23 +32,20 @@ import {
   CanvasSetElementsPayload,
   CanvasUndoPayload,
   CanvasUpdateElementPayload,
-  ContextDomain,
-  ContextStore,
-} from '@aglyn/core-data-framework'
-import { _isArrEmpty } from '@aglyn/shared-util-guards'
-import { arrayAddAtIndex } from '@aglyn/shared-util-tools'
-import { createApi, Event as EffectorEvent } from 'effector'
+} from '../constants/emitter'
 import {
   AglynModuleEffectListener,
   AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
+import { createComponentElementData } from '../util/create-component-element-data'
 import { denormalizeComponentElementData } from '../util/denormalize-component-element-data'
 import { normalizeComponentElementData } from '../util/normalize-component-element-data'
 import {
   AglynComponentElementData,
   AglynComponentElementDataNormalizedMap,
 } from './aglyn-components.controller'
+import { ContextDomain, ContextStore } from './aglyn-contexts.controller'
 
 
 export type ElementsDataStore = {
@@ -61,6 +62,7 @@ export interface ElementsDataStoreApi {
   updateElement: EffectorEvent<CanvasUpdateElementPayload>
   deleteElement: EffectorEvent<CanvasDeleteElementPayload>
   moveElement: EffectorEvent<CanvasMoveElementPayload>
+  duplicateElement: EffectorEvent<CanvasDuplicateElementPayload>
 }
 
 
@@ -81,6 +83,7 @@ export interface AglynCanvasController extends AglynModuleModel<AglynCanvasContr
   updateElement(payload: CanvasUpdateElementPayload)
   deleteElement(payload: CanvasDeleteElementPayload)
   moveElement(payload: CanvasMoveElementPayload)
+  duplicateElement(payload: CanvasDuplicateElementPayload)
 }
 
 const MAX_HISTORY = 20
@@ -124,121 +127,156 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
       return denormalizeComponentElementData(elements.present, '__root__')
     })
 
+    const undo = (state: ElementsDataStore) => {
+      if (!_isArrEmpty(state.past)) {
+        return {
+          past: state.past.slice(1),
+          present: state.past.slice(0, 1)[0],
+          future: [state.present, ...state.future],
+        }
+      }
+    }
+
+    const redo = (state: ElementsDataStore) => {
+      if (!_isArrEmpty(state.future)) {
+        return {
+          past: [state.present, ...state.past],
+          present: state.future.slice(0, 1)[0],
+          future: state.future.slice(1),
+        }
+      }
+    }
+
+    const setElements = (state: ElementsDataStore, payload: CanvasSetElementsPayload) => {
+      const {elements} = payload
+      return {
+        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+        present: elements,
+        future: [],
+      }
+    }
+
+    const addElement = (state: ElementsDataStore, payload: CanvasAddElementPayload) => {
+      const {element, parentId, position} = payload
+      const newData = normalizeComponentElementData(element, parentId)
+      const present = {
+        ...state.present,
+        ...newData,
+        [parentId]: {
+          ...state.present[parentId],
+          elements: arrayAddAtIndex(
+            position,
+            state.present[parentId]?.elements || [],
+            newData[parentId]?.elements || [],
+            {copy: true},
+          ).items,
+        },
+      }
+
+      return {
+        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+        present,
+        future: [],
+      }
+    }
+
+    const updateElement = (state: ElementsDataStore, payload: CanvasUpdateElementPayload) => {
+      const {element} = payload
+      const present = {
+        ...state.present,
+        [element.$id]: {
+          ...state.present[element.$id],
+          ...element,
+        },
+      }
+
+      return {
+        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+        present,
+        future: [],
+      }
+    }
+
+    const moveElement = (state: ElementsDataStore, payload: CanvasMoveElementPayload) => {
+      const {$id, position, parentId} = payload
+      const current = state.present[$id]
+      const present = {
+        ...state.present,
+        [$id]: {
+          ...state.present[$id],
+          parentId: parentId,
+        },
+        [parentId]: {
+          ...state.present[parentId],
+          elements: arrayAddAtIndex(
+            position,
+            state.present[parentId].elements || [],
+            $id,
+            {copy: true},
+          ).items,
+        },
+        [current.parentId]: {
+          ...state.present[current.parentId],
+          elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
+        },
+      }
+
+      return {
+        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+        present,
+        future: [],
+      }
+    }
+
+    const duplicateElement = (state: ElementsDataStore, payload: CanvasDuplicateElementPayload) => {
+      const {$id} = payload
+      const element = state.present[$id]
+      const parentElements = denormalizeComponentElementData(state.present, element.parentId)
+      let position = parentElements.length - 1
+      const denormalizedElement = parentElements.find((i, index) => {
+        if (i.$id === $id) {
+          position = index
+          console.log('denormalizedElement', i)
+          return true
+        }
+        return false
+      })
+      const newElement = createComponentElementData({data: denormalizedElement})
+      return addElement(state, {
+        element: newElement,
+        parentId: element.parentId,
+        position: position + 1,
+      })
+    }
+
+    const deleteElement = (state: ElementsDataStore, payload: CanvasDeleteElementPayload) => {
+      const {$id} = payload
+      const current = state.present[$id]
+      const present = {
+        ...state.present,
+        [current.parentId]: {
+          ...state.present[current.parentId],
+          elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
+        },
+      }
+      delete present[$id]
+
+      return {
+        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+        present,
+        future: [],
+      }
+    }
+
     this.#events = createApi(this.#context, {
-      undo: (state) => {
-        if (!_isArrEmpty(state.past)) {
-          return {
-            past: state.past.slice(1),
-            present: state.past.slice(0, 1)[0],
-            future: [state.present, ...state.future],
-          }
-        }
-      },
-      redo: (state) => {
-        if (!_isArrEmpty(state.future)) {
-          return {
-            past: [state.present, ...state.past],
-            present: state.future.slice(0, 1)[0],
-            future: state.future.slice(1),
-          }
-        }
-      },
-      setElements: (state, payload: CanvasSetElementsPayload) => {
-        const {elements} = payload
-        return {
-          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-          present: elements,
-          future: [],
-        }
-      },
-      addElement: (state, payload: CanvasAddElementPayload) => {
-        const {element, parentId, position} = payload
-        const newData = normalizeComponentElementData(element, parentId)
-        const present = {
-          ...state.present,
-          ...newData,
-          [parentId]: {
-            ...state.present[parentId],
-            elements: arrayAddAtIndex(
-              position,
-              state.present[parentId].elements || [],
-              newData[parentId]?.elements || [],
-              {copy: true},
-            ).items,
-          },
-        }
-
-        return {
-          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-          present,
-          future: [],
-        }
-      },
-      updateElement: (state, payload: CanvasUpdateElementPayload) => {
-        const {element} = payload
-        const present = {
-          ...state.present,
-          [element.$id]: {
-            ...state.present[element.$id],
-            ...element,
-          },
-        }
-
-        return {
-          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-          present,
-          future: [],
-        }
-      },
-      deleteElement: (state, payload: CanvasDeleteElementPayload) => {
-        const {$id} = payload
-        const current = state.present[$id]
-        const present = {
-          ...state.present,
-          [current.parentId]: {
-            ...state.present[current.parentId],
-            elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
-          },
-        }
-        delete present[$id]
-
-        return {
-          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-          present,
-          future: [],
-        }
-      },
-      moveElement: (state, payload: CanvasMoveElementPayload) => {
-        const {$id, position, parentId} = payload
-        const current = state.present[$id]
-        const present = {
-          ...state.present,
-          [$id]: {
-            ...state.present[$id],
-            parentId: parentId,
-          },
-          [parentId]: {
-            ...state.present[parentId],
-            elements: arrayAddAtIndex(
-              position,
-              state.present[parentId].elements || [],
-              $id,
-              {copy: true},
-            ).items,
-          },
-          [current.parentId]: {
-            ...state.present[current.parentId],
-            elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
-          },
-        }
-        delete present[$id]
-
-        return {
-          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-          present,
-          future: [],
-        }
-      },
+      undo,
+      redo,
+      setElements,
+      addElement,
+      updateElement,
+      deleteElement,
+      moveElement,
+      duplicateElement,
     })
   }
 
@@ -284,6 +322,10 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
   public moveElement(payload: CanvasMoveElementPayload) {
     return this.#events.deleteElement(payload)
+  }
+
+  public duplicateElement(payload: CanvasDuplicateElementPayload) {
+    return this.#events.duplicateElement(payload)
   }
 
 

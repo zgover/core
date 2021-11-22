@@ -16,39 +16,17 @@
  */
 
 
-export type VisualViewport = EventTarget & {
-  width: number,
-  height: number,
-  offsetLeft: number,
-  offsetTop: number,
-  scale: number,
-}
+import { getNodeWindow } from './get-node-window'
 
 
-export type Rect = {
-  width: number
-  height: number
-  x: number
-  y: number
-}
+export function getNodeWindowScroll(node: Node | Window) {
+  const win = getNodeWindow(node)
+  const scrollLeft = win['pageXOffset']
+  const scrollTop = win['pageYOffset']
 
-export type ElementOffsets = {
-  y: number
-  x: number
+  return {
+    scrollLeft,
+    scrollTop,
+  }
 }
-
-export type ClientRectObject = {
-  x: number
-  y: number
-  top: number
-  left: number
-  right: number
-  bottom: number
-  width: number
-  height: number
-}
-
-export type VirtualElement = {
-  getBoundingClientRect: () => ClientRect | DOMRect,
-  contextElement?: Element,
-}
+export default getNodeWindowScroll

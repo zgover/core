@@ -18,10 +18,11 @@
 import {
   BuilderSetCanvasHoveredPayload,
   BuilderSetCanvasSelectedPayload,
+  confirmValidLinealRelationship,
   setBuilderCanvasHovered,
   setBuilderCanvasSelected,
 } from '@aglyn/core-data-framework'
-import { useAglynBuilderStore, useAglynAppContext } from '@aglyn/feature-renderer'
+import { useAglynAppContext, useAglynBuilderStore } from '@aglyn/feature-renderer'
 import { useDndMonitor } from '@dnd-kit/core'
 import { DragOverEvent } from '@dnd-kit/core/dist/types'
 import Box from '@mui/material/Box'
@@ -109,13 +110,13 @@ function HoverContextProviderRaw(props: HoverContextProviderProps) {
     )
   }, [children, state])
 
-  const [over, setOver] = useState<DragOverEvent>(null)
+  const [over, setOver] = useState<DragOverEvent & {canDrop: boolean}>(null)
 
   useDndMonitor({
     onDragStart(event) {},
     onDragMove(event) {},
     onDragOver(event) {
-      setOver(event)
+      setOver({...event, canDrop: confirmValidLinealRelationship({item: {...event.active}, parent: {...event.over}})})
       console.log('event on drag over', event)
     },
     onDragEnd(event) {
@@ -175,7 +176,7 @@ function HoverContextProviderRaw(props: HoverContextProviderProps) {
               position: 'absolute',
               display: 'block',
               pointerEvents: 'none',
-              bgcolor: 'blue',
+              bgcolor: over.canDrop ? 'blue' : 'red',
               opacity: 0.25,
               // mt: -11.5,
             }}

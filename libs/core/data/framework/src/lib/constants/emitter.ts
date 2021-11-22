@@ -228,6 +228,7 @@ export type CanvasGetElementPayload = PayloadData<{ $id: ElementId }>
 export type CanvasUpdateElementPayload = PayloadData<{ element: AglynComponentElementDataNormalized }>
 export type CanvasDeleteElementPayload = PayloadData<{ $id: ElementId }>
 export type CanvasMoveElementPayload = PayloadData<{ $id: ElementId, parentId: ElementId, position: number }>
+export type CanvasDuplicateElementPayload = PayloadData<{ $id: ElementId }>
 
 export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, AglynEmitterPayload> {
   [AglynAppEffectFlag.EXTENSION_REGISTER]: ExtensionRegisterPayload

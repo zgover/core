@@ -16,9 +16,9 @@
  */
 
 
-import { isHTMLElement, isScrollParent } from './element-is-instanceof'
 import { getElementNodeName } from './get-element-node-name'
 import { getElementParentNode } from './get-element-parent-node'
+import { isElementHTMLElement, isElementScrollParentElement } from './guards/node-is'
 
 
 export function getElementScrollParent(node: Node): HTMLElement {
@@ -27,7 +27,7 @@ export function getElementScrollParent(node: Node): HTMLElement {
     return node.ownerDocument.body
   }
 
-  if (isHTMLElement(node) && isScrollParent(node as HTMLElement)) {
+  if (isElementHTMLElement(node) && isElementScrollParentElement(node as HTMLElement)) {
     return node as HTMLElement
   }
 

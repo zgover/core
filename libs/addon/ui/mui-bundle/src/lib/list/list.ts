@@ -17,8 +17,8 @@
 
 import {
   AglynComponentElementTemplateData,
-  AglynComponentSchema,
-  ComponentId,
+  AglynComponentSchema, BundleUId,
+  ComponentId, ComponentsLinealDirectiveFlag,
   createAglynComponentElement,
 } from '@aglyn/core-data-framework'
 import { List } from '@mui/material'
@@ -30,6 +30,11 @@ export const bundleId: ComponentId = 'mui'
 export const metadata: AglynComponentSchema['metadata'] = {
   displayName: 'List',
   icon: 'format-list-text',
+}
+export const renderFlags: AglynComponentSchema['renderFlags'] = {
+  hierarchy: {
+    restrictChildren: [ComponentsLinealDirectiveFlag.LIMIT_TO, { components: ['list']}]
+  }
 }
 export const templates: AglynComponentElementTemplateData[] = [
   {
@@ -79,6 +84,7 @@ export const component = createAglynComponentElement(
     bundleId,
     metadata,
     templates,
+    renderFlags,
   },
   List,
 )

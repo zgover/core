@@ -15,17 +15,22 @@
  * limitations under the License.
  */
 
+import { isElementWindow, isNodeObject } from './guards/node-is'
 
-export function getWindow(node?: Node | Window): Window {
-  if (node == null) {
-    return window as Window
+
+export function getNodeWindow(target?: Event['target']): typeof window {
+  if (!target) {
+    return window
   }
 
-  if (node.toString() !== '[object Window]') {
-    const ownerDocument = node['ownerDocument']
-    return ownerDocument ? ownerDocument.defaultView || window : window
+  if (isElementWindow(target)) {
+    return target
   }
 
-  return node as Window
+  if (!isNodeObject(target)) {
+    return window
+  }
+
+  return target.ownerDocument?.defaultView ?? window
 }
-export default getWindow
+export default getNodeWindow

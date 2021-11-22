@@ -14,8 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { isShadowRoot } from '@aglyn/shared-util-dom'
+import { getNodeWindow, isNodeShadowRoot } from '@aglyn/shared-util-dom'
 
+
+export function eventHasViewportRelativeCoordinates(
+  event: Event,
+): event is Event & Pick<PointerEvent, 'clientX' | 'clientY'> {
+  return 'clientX' in event && 'clientY' in event
+}
+
+export function isEventKeyboardEvent(
+  event: Event | undefined | null,
+): event is KeyboardEvent {
+  if (!event) {
+    return false
+  }
+
+  const {KeyboardEvent} = getNodeWindow(event.target)
+
+  return KeyboardEvent && event instanceof KeyboardEvent
+}
+
+
+export function isEventTouchEvent(
+  event: Event | undefined | null,
+): event is TouchEvent {
+  if (!event) {
+    return false
+  }
+
+  const {TouchEvent} = getNodeWindow(event.target)
+
+  return TouchEvent && event instanceof TouchEvent
+}
 
 export function parentElementContainsChildElement(parent: Element, child: Element) {
   const rootNode = child.getRootNode && child.getRootNode()
@@ -25,7 +56,7 @@ export function parentElementContainsChildElement(parent: Element, child: Elemen
     return true
   }
   // then fallback to custom implementation with Shadow DOM support
-  else if (rootNode && isShadowRoot(rootNode)) {
+  else if (rootNode && isNodeShadowRoot(rootNode)) {
     let next = child
     do {
       if (next && parent.isSameNode(next)) {
@@ -39,4 +70,3 @@ export function parentElementContainsChildElement(parent: Element, child: Elemen
   // Give up, the result is false
   return false
 }
-export default parentElementContainsChildElement

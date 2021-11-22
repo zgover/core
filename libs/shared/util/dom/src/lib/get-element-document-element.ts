@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isElement } from './element-is-instanceof'
+import { isNodeElement } from './guards/node-is'
 
 
 export function getElementDocumentElement(
@@ -24,7 +24,7 @@ export function getElementDocumentElement(
   // $FlowFixMe[incompatible-return]: assume body is always available
   return (
     (
-      isElement(element) ? element['ownerDocument'] : element['document']
+      isNodeElement(element) ? element['ownerDocument'] : element['document']
     ) || window.document
   ).documentElement
 }
