@@ -15,26 +15,32 @@
  * limitations under the License.
  */
 
+import { _isArr } from '@aglyn/shared-util-guards'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ComponentType } from 'react'
 import { Theme, ThemeProvider } from '../../vendor/mui'
 
+
 export type WithThemeOptions = {
-  theme: Theme
-  cssBaseline?: boolean
+  theme: Theme | [lightTheme: Theme, darkTheme: Theme]
+  disableCssBaseline?: boolean
 }
 
 export function withTheme(options: WithThemeOptions) {
-  const { theme, cssBaseline } = { ...options }
-  return function <P>(Component: ComponentType<P>) {
+  const {theme, disableCssBaseline} = {...options}
+  const [lightTheme, darkTheme] = _isArr(theme) ? theme : [theme]
+
+  return function WithTheme<P>(Component: ComponentType<P>) {
     const displayName = `WithTheme(${getDisplayName(Component)})`
 
-    function WithTheme(props: P) {
+    function WithTheme(props: P & { themeType?: 'light' | 'dark' }) {
+      const {themeType, ...rest} = props
+      const activeTheme = themeType === 'dark' ? darkTheme : lightTheme
       return (
-        <ThemeProvider theme={theme}>
-          {cssBaseline ? <CssBaseline /> : null}
-          <Component {...props} />
+        <ThemeProvider theme={activeTheme}>
+          {!disableCssBaseline ? <CssBaseline /> : null}
+          <Component {...rest as P} />
         </ThemeProvider>
       )
     }

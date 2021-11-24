@@ -30,19 +30,21 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import Portal from '@mui/material/Portal'
 import { forwardRef, Fragment, MouseEvent, useCallback, useRef } from 'react'
 import { ActivityContext, useHoverContext } from '../contexts/hover-context'
+import { useBuilderElementAttributes } from '../hooks/use-builder-element-attributes'
 
 
 export interface ElementRendererComponentProps extends DefaultElementRendererComponentProps {
   [prop: string]: any
 }
 
-const ElementRendererComponentRaw = forwardRef<any, ElementRendererComponentProps>(
+const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {$id, ...rest} = props
     const localRef = useRef()
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const componentSchema = useAglynComponentSchema(componentId, bundleId)
+    const elementAttributes = useBuilderElementAttributes({$id, componentId, bundleId})
     const {hoverOpen, hoverClose, hoverSelect, hoverDeselect} = useHoverContext()
     const interactMode = useAglynBuilderStore('flags', 'interactMode')
     const rearrangeEnabled = interactMode === InteractionModeFlag.REARRANGE
@@ -126,21 +128,21 @@ const ElementRendererComponentRaw = forwardRef<any, ElementRendererComponentProp
       }
     }, [rearrangeEnabled, selectEnabled])
 
-    // console.log('setNodeRef isOver isDragging', isOver, active, over)
+    // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    // console.log('element attributes', elementAttributes)
+
 
     return (
       <Fragment>
         <DefaultElementRendererComponent
           ref={useCombinedRefs(ref, localRef, dropRef, dragRef)}
           $id={$id}
-          data-aglyn-element-id={$id}
-          data-aglyn-component-id={componentId}
-          data-aglyn-bundle-id={bundleId}
           elementRendererComponent={ElementRendererComponent}
           style={style}
           onMouseOver={handleMouseOver}
           onMouseOut={handleMouseLeave}
           onPointerDown={handlePointerDown}
+          {...elementAttributes}
           {...dragListeners}
           {...rest}
         />
@@ -156,8 +158,8 @@ const ElementRendererComponentRaw = forwardRef<any, ElementRendererComponentProp
   },
 )
 
-ElementRendererComponentRaw.displayName = 'ElementRendererComponent'
-ElementRendererComponentRaw.defaultProps = {}
+ElementRendererComponent.displayName = 'ElementRendererComponent'
+ElementRendererComponent.defaultProps = {}
 
-export const ElementRendererComponent = ElementRendererComponentRaw
+export { ElementRendererComponent }
 export default ElementRendererComponent

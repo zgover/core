@@ -37,11 +37,11 @@ import {
   useState,
 } from 'react'
 import { HoverComponent, HoverComponentProps } from '../components/hover.component'
-import { ActivityContext, HoverContext, HoverOptions } from './hover-context'
+import { ActivityContext, HoverContext, HoveredOptions } from './hover-context'
 
 
 export interface HoverContextProviderProps {
-  defaultOptions?: Partial<HoverOptions>
+  defaultOptions?: Partial<HoveredOptions>
   children?: ReactNode
   component: ElementType<HoverComponentProps>
 }
@@ -54,11 +54,11 @@ type ResolveReject<T = any> = [] | [
 function HoverContextProviderRaw(props: HoverContextProviderProps) {
   const {children, defaultOptions, component: Component} = props
 
-  // const [selectedOptions, setSelectedOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS,
+  // const [selectedOptions, setSelectedOptions] = useState<HoveredOptions>({...DEFAULT_OPTIONS,
   // ...defaultOptions})
   // const [selectedResolveReject, setSelectedResolveReject] = useState<ResolveReject>(() => [])
 
-  // const [hoveredOptions, setHoveredOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS,
+  // const [hoveredOptions, setHoveredOptions] = useState<HoveredOptions>({...DEFAULT_OPTIONS,
   // ...defaultOptions})
   // const [hoveredResolveReject, setHoveredResolveReject] = useState<ResolveReject>(() => [])
 
@@ -110,7 +110,7 @@ function HoverContextProviderRaw(props: HoverContextProviderProps) {
     )
   }, [children, state])
 
-  const [over, setOver] = useState<DragOverEvent & {canDrop: boolean}>(null)
+  const [over, setOver] = useState<DragOverEvent & { canDrop: boolean }>(null)
 
   useDndMonitor({
     onDragStart(event) {},

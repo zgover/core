@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-import { _isStrEmpty, _isStrT } from '@aglyn/shared-util-guards'
-import pkg from '../../../../../../../package.json'
+import { _isArrEmpty } from '@aglyn/shared-util-guards'
+import { ModificationHistoryState } from '../types'
 
 
-export type AglynVersion = string
-export let SDK_VERSION = String(pkg.version ?? 'N/A')
-
-export const PRODUCTION = process.env.NODE_ENV === 'production'
-export const DEVELOPMENT = process.env.NODE_ENV === 'development'
-export const PREVIEW = process.env.NODE_ENV === 'preview'
-
-export function setVersion(version: string): void {
-  if (!_isStrT(version) || _isStrEmpty(version)) {
-    throw new Error('invalid version')
+export const handleModificationHistoryUndo = <S>(
+  state: ModificationHistoryState<S>
+): ModificationHistoryState<S> => {
+  if (!_isArrEmpty(state.past)) {
+    return {
+      past: state.past.slice(1),
+      present: state.past.slice(0, 1)[0],
+      future: [state.present, ...state.future],
+    }
   }
-  SDK_VERSION = version
+  return state
 }
+export default handleModificationHistoryUndo

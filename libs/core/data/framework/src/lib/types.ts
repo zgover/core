@@ -16,6 +16,7 @@
  */
 
 import { Dictionary, Implements, KeyValueMap } from '@aglyn/shared-data-types'
+import { ELEMENT_ROOT_ID } from './constants/_internal'
 import { SYMBOL_TYPE, TYPE_KIND, TYPE_OF } from './constants/symbol'
 import {
   AglynComponentElementDataDenormalized,
@@ -93,5 +94,18 @@ export type ElementId = string
 export type CommandUId = string
 export type ContextStoreUid = string
 
-export type AglynComponentElementDataNormalizedMap = KeyValueMap<'__root__' | ComponentId, AglynComponentElementDataNormalized>
+export type AglynComponentElementDataNormalizedMap = KeyValueMap<ComponentId, AglynComponentElementDataNormalized>
 export type AglynComponentElementDataNormalizedArray = AglynComponentElementDataDenormalized<any>[]
+
+export type AglynComponentElementHierarchy<$ID extends ElementId = null> =
+  $ID extends ElementId ? (
+    | [root: ELEMENT_ROOT_ID, $id: $ID]
+    | [root: ELEMENT_ROOT_ID, ...parentIds: ElementId[], $id: $ID]
+    ) : [root: ELEMENT_ROOT_ID]
+
+
+export interface ModificationHistoryState<T> {
+  past: [previous?: T, ...more: T[]],
+  present: T
+  future: [next?: T, ...more: T[]],
+}

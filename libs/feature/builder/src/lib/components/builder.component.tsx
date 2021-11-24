@@ -22,13 +22,10 @@ import {
   ElementsContextProvider,
 } from '@aglyn/feature-renderer'
 import { OverrideableComponentProps } from '@aglyn/shared-data-types'
-import { consoleTheme, withTheme } from '@aglyn/shared-feature-themes'
-import { ConfirmationProviderComponent } from '@aglyn/shared-ui-jsx'
 import { DndContext } from '@dnd-kit/core'
 import NoSsr from '@mui/material/NoSsr'
 import { forwardRef, Fragment, useCallback } from 'react'
-import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
-import EditorComponent from './editor.component'
+import { EditorComponent } from './editor.component'
 
 
 export interface BuilderComponentProps extends OverrideableComponentProps {
@@ -36,57 +33,44 @@ export interface BuilderComponentProps extends OverrideableComponentProps {
   appName?: AppUUN
 }
 
-const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefRenderFn(
-  props,
-  ref,
-) {
-  const {
-    noSsr,
-    appName,
-    ...rest
-  } = props
-  const Wrapper = noSsr ? NoSsr : Fragment
-  const appCallback = useCallback(() => getApp(appName), [appName])
-  if (typeof document !== 'undefined') {
-    console.log('page:/builder app', appCallback())
-  }
+const BuilderComponent = forwardRef<any, BuilderComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {
+      noSsr,
+      appName,
+      ...rest
+    } = props
+    const Wrapper = noSsr ? NoSsr : Fragment
+    const appCallback = useCallback(() => getApp(appName), [appName])
+    if (typeof document !== 'undefined') {
+      console.log('page:/builder app', appCallback())
+    }
 
-  const handleDragStart = useCallback((...args) => {
-    console.log('drag start', ...args)
-  }, [])
-  const handleDragEnd = useCallback((...args) => {
-    console.log('drag end', ...args)
-  }, [])
+    const handleDragStart = useCallback((...args) => {
+      console.log('drag start', ...args)
+    }, [])
+    const handleDragEnd = useCallback((...args) => {
+      console.log('drag end', ...args)
+    }, [])
 
-  return (
-    <Wrapper>
-      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <AglynAppContext.Provider value={{getApp}}>
-          <ElementComponentsContextProvider>
-            <ElementsContextProvider>
-              {/*<SnackbarProvider maxSnack={3}>*/}
-              <ConfirmationProviderComponent>
-                <ComponentsDrawerContextProvider>
+    return (
+      <Wrapper>
+        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <AglynAppContext.Provider value={{getApp}}>
+            <ElementComponentsContextProvider>
+              <ElementsContextProvider>
+                <EditorComponent ref={ref} {...rest} />
+              </ElementsContextProvider>
+            </ElementComponentsContextProvider>
+          </AglynAppContext.Provider>
+        </DndContext>
+      </Wrapper>
+    )
+  },
+)
 
-                  <EditorComponent
-                    ref={ref}
-                    {...rest}
-                  />
+BuilderComponent.displayName = 'BuilderComponent'
+BuilderComponent.defaultProps = {}
 
-                </ComponentsDrawerContextProvider>
-              </ConfirmationProviderComponent>
-              {/*</SnackbarProvider>*/}
-            </ElementsContextProvider>
-          </ElementComponentsContextProvider>
-        </AglynAppContext.Provider>
-      </DndContext>
-    </Wrapper>
-  )
-})
-
-BuilderComponentRaw.displayName = 'BuilderComponent'
-BuilderComponentRaw.defaultProps = {}
-
-export const BuilderComponent = withTheme({theme: consoleTheme})(BuilderComponentRaw)
-
+export { BuilderComponent }
 export default BuilderComponent

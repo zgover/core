@@ -22,25 +22,34 @@ import { useStoreMap } from 'effector-react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 
+export type UseAglynElementData<P extends AnyProps, K extends keyof AglynComponentElementDataNormalized<P>> =
+  Conditional<K,
+    keyof AglynComponentElementDataNormalized<P>,
+    AglynComponentElementDataNormalized<P>[K],
+    AglynComponentElementDataNormalized<P>>
+
 export function useAglynElementData<P extends AnyProps>(
-  $id: ElementId
+  $id: ElementId,
 ): AglynComponentElementDataNormalized<P>
 export function useAglynElementData<P extends AnyProps, K extends keyof AglynComponentElementDataNormalized<P> = null>(
-  $id: ElementId, key: K
+  $id: ElementId, key: K,
 ): AglynComponentElementDataNormalized<P>[K]
 export function useAglynElementData<P extends AnyProps, K extends keyof AglynComponentElementDataNormalized<P> = null>(
-  $id: ElementId, key?: K
-): Conditional<K, keyof AglynComponentElementDataNormalized<P>, AglynComponentElementDataNormalized<P>[K], AglynComponentElementDataNormalized<P>> {
+  $id: ElementId, key?: K,
+): UseAglynElementData<P, K> {
   const {getApp} = useAglynAppContext()
   const store = getCanvasNormalizedElementsStore(getApp())
 
-
-  return useStoreMap(store, (store) => {
-    if (!key) {
-      return store[$id]
-    }
-    return store[$id]?.[key]
-  }) as Conditional<K, keyof AglynComponentElementDataNormalized<P>, AglynComponentElementDataNormalized<P>[K], AglynComponentElementDataNormalized<P>>
+  return useStoreMap({
+    store,
+    keys: [$id, key],
+    fn: (store, [$id, key]) => {
+      if (!key) {
+        return store[$id]
+      }
+      return store[$id]?.[key]
+    },
+  }) as UseAglynElementData<P, K>
 
 }
 export default useAglynElementData

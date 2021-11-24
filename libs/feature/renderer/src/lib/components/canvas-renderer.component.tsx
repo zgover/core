@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { ELEMENT_ROOT_ID } from '@aglyn/core-data-framework'
 import { OverrideableComponentProps } from '@aglyn/shared-data-types'
 import Box from '@mui/material/Box'
 import { forwardRef, HTMLAttributes } from 'react'
@@ -40,7 +41,7 @@ export const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentPr
       ...rest
     } = props
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
-    const elements = useAglynElementData('__root__', 'elements')
+    const elements = useAglynElementData(ELEMENT_ROOT_ID, 'elements')
     return (
       <Box ref={ref} {...rest}>
         <ElementsRendererComponent

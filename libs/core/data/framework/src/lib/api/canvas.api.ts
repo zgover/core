@@ -17,26 +17,23 @@
 
 import { _canvasControllers } from '../constants/_internal'
 import {
-  CanvasAddElementPayload, CanvasDeleteElementPayload, CanvasDuplicateElementPayload,
+  CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
   CanvasGetApiEventsPayload,
   CanvasGetElementsDenormalizedPayload,
   CanvasGetElementsNormalizedPayload,
-  CanvasGetStorePayload, CanvasMoveElementPayload,
+  CanvasGetStorePayload,
+  CanvasMoveElementPayload,
   CanvasRedoPayload,
   CanvasSetElementsPayload,
-  CanvasUndoPayload, CanvasUpdateElementPayload,
+  CanvasUndoPayload,
+  CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import type { AglynCanvasController } from '../controllers/aglyn-canvas.controller'
 import { _validateAppArg } from './app.api'
 
-
-export {
-  InteractionModeFlag,
-  BuilderActiveViewFlag,
-  DndDragSourceTypeFlag,
-  DndDropLinealTypeFlag,
-} from '../controllers/aglyn-builder.controller'
 
 export function _getCanvasController(app: AglynAppController): AglynCanvasController {
   _validateAppArg(app)

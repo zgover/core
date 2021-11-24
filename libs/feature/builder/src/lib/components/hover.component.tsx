@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { deleteCanvasElement, duplicateCanvasElement } from '@aglyn/core-data-framework'
+import {
+  deleteCanvasElement,
+  duplicateCanvasElement,
+  ELEMENT_ROOT_ID,
+} from '@aglyn/core-data-framework'
 import { useAglynAppContext, useAglynElementLabel } from '@aglyn/feature-renderer'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import {
@@ -34,7 +38,7 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
 import { ChangeEvent, forwardRef, HTMLAttributes, SyntheticEvent, useCallback, useRef } from 'react'
-import { HoverOptions } from '../contexts/hover-context'
+import { HoveredOptions } from '../contexts/hover-context'
 import { useAddElementCallback } from '../hooks/use-add-element-callback'
 
 
@@ -117,7 +121,7 @@ const Popper = styled(MuiPopper, {name: 'AglynPopper'})<PopperProps>(({theme}) =
 
 
 export interface HoverComponentProps extends HTMLAttributes<HTMLDivElement> {
-  options?: HoverOptions
+  options?: HoveredOptions
   open?: boolean
   onClose?: (event?: SyntheticEvent) => void
   variant?: 'hovered' | 'selected'
@@ -168,7 +172,7 @@ export const HoverComponent = forwardRef<any, HoverComponentProps>(
       anchorEl,
       ...rest
     } = props
-    const selected = Boolean(variant === 'selected')
+    const selected = variant === 'selected'
     const className = clsx({
       [classKeys.open]: Boolean(open),
       [classKeys.hovered]: !selected,
@@ -223,8 +227,8 @@ export const HoverComponent = forwardRef<any, HoverComponentProps>(
 
     const handleAddElementClick = useAddElementCallback({
       drawerOptions: {
-        type: 'edit-element-traits'
-      }
+        type: 'edit-element-traits',
+      },
     })
 
     const buttons = [
@@ -375,7 +379,7 @@ export const HoverComponent = forwardRef<any, HoverComponentProps>(
 HoverComponent.displayName = 'HoverComponent'
 HoverComponent.defaultProps = {
   options: {
-    $id: '__root__',
+    $id: ELEMENT_ROOT_ID,
     position: {
       // x: 0, y: 0,
     } as any,

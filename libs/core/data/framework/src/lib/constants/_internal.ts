@@ -15,17 +15,21 @@
  * limitations under the License.
  */
 
-import type { AglynCanvasController } from '../controllers/aglyn-canvas.controller'
-import type { AppUUN } from '../types'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import type { AglynCommandsController } from '../controllers/aglyn-commands.controller'
-import type { AglynComponentsController} from '../controllers/aglyn-components.controller'
-import type { AglynContextsController } from '../controllers/aglyn-contexts.controller'
 import type { AglynBuilderController } from '../controllers/aglyn-builder.controller'
+import type { AglynCanvasController } from '../controllers/aglyn-canvas.controller'
+import type { AglynCommandsController } from '../controllers/aglyn-commands.controller'
+import type { AglynComponentsController } from '../controllers/aglyn-components.controller'
+import type { AglynContextsController } from '../controllers/aglyn-contexts.controller'
 import type { AglynExtensionsController } from '../controllers/aglyn-extensions.controller'
+import type { AppUUN } from '../types'
 
 
 export const DEFAULT_ENTRY_NAME = '[DEFAULT]'
+export type DEFAULT_ENTRY_NAME = typeof DEFAULT_ENTRY_NAME
+
+export const ELEMENT_ROOT_ID = '_@_'
+export type ELEMENT_ROOT_ID = typeof ELEMENT_ROOT_ID
 
 export const _apps: Map<AppUUN, AglynAppController> = new Map()
 export const _extensionsControllers: Map<AppUUN, AglynExtensionsController> = new Map()

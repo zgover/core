@@ -15,14 +15,21 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { render } from '@testing-library/react'
+import { getBuilderStore } from '@aglyn/core-data-framework'
+import { useAglynAppContext } from '@aglyn/feature-renderer'
+import { useStoreMap } from 'effector-react'
+import { useMemo } from 'react'
 
-import NavbarDrawer from './navbar-drawer'
 
-describe('NavbarDrawer', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<NavbarDrawer />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export interface UseBuilderHovered {
+
+}
+
+export const useCanvasHovered = (opts?: UseBuilderHovered) => {
+  const {getApp} = useAglynAppContext(),
+    store = getBuilderStore(getApp(), {store: 'canvas'})
+
+  return useStoreMap(store, (store) => store?.hovered)
+}
+
+export default useCanvasHovered

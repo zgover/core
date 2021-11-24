@@ -15,20 +15,25 @@
  * limitations under the License.
  */
 
-import { _isStrEmpty, _isStrT } from '@aglyn/shared-util-guards'
-import pkg from '../../../../../../../package.json'
+export enum InteractionModeFlag {
+  SELECT = 0x1,
+  REARRANGE = 0x2,
+  PREVIEW = 0x3,
+}
 
+export enum BuilderActiveViewFlag {
+  PANEL_LEFT = 0x1,
+  PANEL_RIGHT = 0x2,
+  PANEL_BOTTOM = 0x3,
+}
 
-export type AglynVersion = string
-export let SDK_VERSION = String(pkg.version ?? 'N/A')
+export enum DndDragSourceTypeFlag {
+  CANVAS_ELEMENT = 0x1,
+  COMPONENT_TEMPLATE = 0x2,
+}
 
-export const PRODUCTION = process.env.NODE_ENV === 'production'
-export const DEVELOPMENT = process.env.NODE_ENV === 'development'
-export const PREVIEW = process.env.NODE_ENV === 'preview'
-
-export function setVersion(version: string): void {
-  if (!_isStrT(version) || _isStrEmpty(version)) {
-    throw new Error('invalid version')
-  }
-  SDK_VERSION = version
+export enum DndDropLinealTypeFlag {
+  ACTIVITY_ELEMENT_BEFORE = 0x1,
+  ACTIVITY_ELEMENT_INSIDE = 0x2,
+  ACTIVITY_ELEMENT_AFTER = 0x3,
 }

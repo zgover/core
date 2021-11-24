@@ -26,8 +26,8 @@ import {
   FormSchema,
   GridFormTemplate,
   GridList as JsxGridList,
-  NavbarDrawer as JsxNavbarDrawer,
-  NavbarDrawerProps,
+  NavigationDrawer as JsxNavbarDrawer,
+  NavigationDrawerProps,
   SvgPathIcon,
 } from '@aglyn/shared-ui-jsx'
 import { _isStrT } from '@aglyn/shared-util-guards'
@@ -85,7 +85,7 @@ export interface ComponentsDrawerOptionsProps extends ElementDrawerOptions {
   selectedElementProps?: AnyProps
 }
 
-export interface ComponentsDrawerComponentProps extends Partial<NavbarDrawerProps> {
+export interface ComponentsDrawerComponentProps extends Partial<NavigationDrawerProps> {
   options?: ComponentsDrawerOptionsProps
   items?: AglynComponentElementTemplateData[]
   onCancel?: { bivarianceHack<T>(event: MouseEvent<T>, reason: 'canceled'): void }['bivarianceHack']

@@ -24,7 +24,7 @@ import {
 } from '@aglyn/core-data-framework'
 import {
   CacheProvider,
-  consoleTheme,
+  consoleThemeLight,
   createEmotionCache,
   EmotionCache,
   withTheme,
@@ -129,7 +129,7 @@ try {
     modulesOptions: {
       canvas: {
         defaultElements: samplePageData,
-      }
+      },
     },
   })
 
@@ -157,7 +157,7 @@ function AppWrapperRaw(props) {
         {makeMetaElements(metaElements)}
         {makeLinkElements(linkElements)}
       </Head>
-      <CssBaseline/>
+      <CssBaseline />
       <div className="app">
         <main>{children}</main>
       </div>
@@ -165,7 +165,7 @@ function AppWrapperRaw(props) {
   )
 }
 AppWrapperRaw.displayName = 'AppWrapper'
-const AppWrapper = withTheme({theme: consoleTheme})(AppWrapperRaw)
+const AppWrapper = withTheme({theme: consoleThemeLight})(AppWrapperRaw)
 
 const previewProduction = false
 const isProduction = process.env.NODE_ENV === 'production' || previewProduction

@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import { NavbarDrawer, NavbarDrawerProps, SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import {
   alpha,
   createStyles,
   ExtendPropsOfWithStyles,
   withStyles,
 } from '@aglyn/shared-feature-themes'
+import { NavigationDrawer, NavigationDrawerProps, SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import { _isStrT } from '@aglyn/shared-util-guards'
 import { objectRemap } from '@aglyn/shared-util-tools'
 import { Box, Button } from '@mui/material'
@@ -33,11 +33,12 @@ import React, { forwardRef } from 'react'
 import FieldSet from '../components/FieldSet'
 import { Fields } from '../forms'
 
+
 export const drawerFormViewStyles = (theme) =>
   createStyles({
-    closeButton: { marginRight: theme.spacing(2) },
-    pt2: { paddingTop: theme.spacing(2) },
-    wrapper: { position: 'relative' },
+    closeButton: {marginRight: theme.spacing(2)},
+    pt2: {paddingTop: theme.spacing(2)},
+    wrapper: {position: 'relative'},
     loadingBar: {
       position: 'absolute',
       backgroundColor: alpha(theme.palette.primary.main, 0.86),
@@ -50,7 +51,7 @@ export const drawerFormViewStyles = (theme) =>
 export type FormVariant = 'creating' | 'updating'
 
 export interface DrawerFormViewProps
-  extends ExtendPropsOfWithStyles<Partial<NavbarDrawerProps>, typeof drawerFormViewStyles> {
+  extends ExtendPropsOfWithStyles<Partial<NavigationDrawerProps>, typeof drawerFormViewStyles> {
   id: string
   fields: Fields.FieldGroup
   label: string
@@ -84,7 +85,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
   const actionLabel = isCreating ? 'Create' : 'Update'
 
   return (
-    <NavbarDrawer
+    <NavigationDrawer
       ref={ref}
       appBarLeft={
         <React.Fragment>
@@ -119,7 +120,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
       <div className={classes.wrapper}>
         {loading && (
           <React.Fragment>
-            <LinearProgress classes={{ root: classes.loadingBar }} color="secondary" />
+            <LinearProgress classes={{root: classes.loadingBar}} color="secondary" />
           </React.Fragment>
         )}
 
@@ -138,7 +139,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
                     {JSON.stringify(
                       objectRemap(fields, (f) => f.value ?? ''),
                       null,
-                      2
+                      2,
                     )}
                   </pre>
                 </Box>
@@ -147,8 +148,8 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
           )}
         </Container>
       </div>
-    </NavbarDrawer>
+    </NavigationDrawer>
   )
 })
 
-export default withStyles(drawerFormViewStyles, { name: 'DrawerFormView' })(DrawerFormView)
+export default withStyles(drawerFormViewStyles, {name: 'DrawerFormView'})(DrawerFormView)

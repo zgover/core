@@ -33,35 +33,17 @@ import { ClientRectObject } from '@aglyn/shared-util-dom'
 import { LogLevelString } from '@aglyn/shared-util-logger'
 import { createApi } from 'effector'
 import {
+  BuilderActiveViewFlag,
+  DndDragSourceTypeFlag,
+  DndDropLinealTypeFlag,
+  InteractionModeFlag,
+} from '../constants/builder'
+import {
   AglynModuleEffectListener,
   AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
 import { ContextStore } from './aglyn-contexts.controller'
-
-
-export enum InteractionModeFlag {
-  SELECT = 0x1,
-  REARRANGE = 0x2,
-  PREVIEW = 0x3,
-}
-
-export enum BuilderActiveViewFlag {
-  PANEL_LEFT = 0x1,
-  PANEL_RIGHT = 0x2,
-  PANEL_BOTTOM = 0x3,
-}
-
-export enum DndDragSourceTypeFlag {
-  CANVAS_ELEMENT = 0x1,
-  COMPONENT_TEMPLATE = 0x2,
-}
-
-export enum DndDropLinealTypeFlag {
-  ACTIVITY_ELEMENT_BEFORE = 0x1,
-  ACTIVITY_ELEMENT_INSIDE = 0x2,
-  ACTIVITY_ELEMENT_AFTER = 0x3,
-}
 
 
 export interface CommActionData {
@@ -78,9 +60,17 @@ export interface BuilderFlagState {
   activeView?: BuilderActiveViewFlag
 }
 
+export interface BuilderCanvasSelectedElement extends CommActionData {
+  hierarchy?: ElementId[]
+}
+
+export interface BuilderCanvasHoveredElement extends CommActionData {
+  hierarchy?: ElementId[]
+}
+
 export interface BuilderCanvasState {
-  selected?: CommActionData
-  hovered?: CommActionData
+  selected?: BuilderCanvasSelectedElement
+  hovered?: BuilderCanvasHoveredElement
 }
 
 export interface BuilderPanelsState {

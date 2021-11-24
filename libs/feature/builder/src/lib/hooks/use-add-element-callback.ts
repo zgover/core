@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { createComponentElementData } from '@aglyn/core-data-framework'
+import { createComponentElementData, ELEMENT_ROOT_ID } from '@aglyn/core-data-framework'
 import {
   useAglynBuilderStore,
   useAglynCanvasApiEvents,
@@ -50,12 +50,6 @@ export function useAddElementCallback(options?: UseAddElementCallbackOptions): A
   const {renderFlags} = useAglynComponentSchema(componentId, bundleId) || {}
   const edit = drawerOptions?.type === 'edit-element-traits'
 
-  console.log('==============')
-  console.log('selectedId', selectedId)
-  console.log('props', props)
-  console.log('componentId', componentId)
-  console.log('renderFlags', renderFlags)
-
   return useCallback(async () => {
     const option = await elementDrawer({
       title: 'Add New Element',
@@ -78,7 +72,7 @@ export function useAddElementCallback(options?: UseAddElementCallbackOptions): A
         else {
           addElement({
             position: pos,
-            parentId: selectedParentId || '__root__',
+            parentId: selectedParentId || ELEMENT_ROOT_ID,
             element: createComponentElementData(data),
           })
         }

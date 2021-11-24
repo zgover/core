@@ -17,7 +17,7 @@
 
 import { ReactNode, useMemo } from 'react'
 import { useAglynComponentTemplateBlocks } from '../hooks/use-aglyn-component-templates'
-import { ElementComponentsContext } from './element-components-context'
+import { AglynComponentsContext } from './aglyn-components-context'
 
 
 export interface ElementComponentsContextProviderProps {
@@ -33,9 +33,9 @@ export function ElementComponentsContextProvider(props: ElementComponentsContext
 
 
   return (
-    <ElementComponentsContext.Provider value={ctx}>
+    <AglynComponentsContext.Provider value={ctx}>
       {children}
-    </ElementComponentsContext.Provider>
+    </AglynComponentsContext.Provider>
   )
 }
 ElementComponentsContextProvider.displayName = 'ElementComponentsContextProvider'

@@ -28,6 +28,7 @@ import { StyledOptions } from '@aglyn/shared-feature-themes'
 import { FormSchema } from '@aglyn/shared-ui-jsx'
 import { _isArr } from '@aglyn/shared-util-guards'
 import { ComponentClass, FunctionComponent } from 'react'
+import { ComponentsLinealDirectiveFlag } from '../constants/components'
 import {
   AglynAppEffectFlag,
   AglynAppEventFlag,
@@ -65,11 +66,6 @@ export type AglynComponentElementType<P extends AnyProps = any> =
   | AglynComponentFunctionElement<P>
   | AglynComponentIntrinsicElement<P>
 
-
-export enum ComponentsLinealDirectiveFlag {
-  LIMIT_TO = 0x01,
-  DISALLOW = 0x02,
-}
 
 export type LinealDefinition = ComponentId[]
   | { bundles?: BundleUId[], components: ComponentId[] }

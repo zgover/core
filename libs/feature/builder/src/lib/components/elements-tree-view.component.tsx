@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import { ElementId, setBuilderCanvasSelected } from '@aglyn/core-data-framework'
+import { ELEMENT_ROOT_ID, ElementId, setBuilderCanvasSelected } from '@aglyn/core-data-framework'
 import {
   useAglynAppContext,
-  useAglynBuilderStore,
-  useAglynCanvasElementsNormalized,
+  useAglynCanvasElementHierarchy,
   useAglynComponentSchema,
   useAglynElementData,
   useAglynElementLabel,
@@ -29,7 +28,8 @@ import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import { _isStrT } from '@aglyn/shared-util-guards'
 import MuiTreeItem, { TreeItemProps } from '@mui/lab/TreeItem'
 import MuiTreeView, { SingleSelectTreeViewProps } from '@mui/lab/TreeView'
-import { forwardRef, Fragment, ReactNode, useCallback } from 'react'
+import { forwardRef, Fragment, ReactNode, useCallback, useMemo } from 'react'
+import useCanvasSelected from '../hooks/use-builder-selected'
 
 
 const ScrollableTreeView = styled(MuiTreeView, {name: 'ScrollableTreeView'})({
@@ -94,41 +94,27 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     } = props
 
     const {getApp} = useAglynAppContext()
-    const elements = useAglynElementData('__root__', 'elements')
-    const selectedOptions = useAglynBuilderStore('canvas', 'selected')
-    const selectedId = selectedOptions?.$id
-    const defaultExpanded = useAglynCanvasElementsNormalized((state) => {
-      const getElement = ($id: ElementId) => state[$id]
-      const defaultExpanded = []
+    const elements = useAglynElementData(ELEMENT_ROOT_ID, 'elements')
+    const selected = useCanvasSelected()
+    const selectedId = selected?.$id
+    const selectedIdHierarchy = useAglynCanvasElementHierarchy(selectedId)
 
-      if (selectedId) {
-        let parentId: ElementId = `${selectedId}`
-
-        while (!parentId || parentId !== '__root__') {
-          defaultExpanded.splice(0, 0, `${parentId}`)
-          const lastId = defaultExpanded[0]
-          parentId = getElement(lastId)?.parentId
-        }
-      }
-      console.log('defaultExpanded', defaultExpanded)
-      return defaultExpanded
-    })
+    console.log('selectedIdHierarchy', selectedId, selected, selectedIdHierarchy)
+    const defaultExpanded = useMemo(() => (
+      selectedIdHierarchy.filter((id) => id !== ELEMENT_ROOT_ID)
+    ), [selectedIdHierarchy])
     const handleTreeItemSelect = useCallback((e, $id) => {
       console.log('$id', $id)
-      setBuilderCanvasSelected(getApp(), {
-        selected: {
-          $id,
-        },
-      })
-    }, [selectedOptions])
+      setBuilderCanvasSelected(getApp(), {selected: {$id}})
+    }, [])
 
     return (
       <ScrollableTreeView
         ref={ref}
         aria-label="canvas elements navigator"
         onNodeSelect={handleTreeItemSelect}
-        selected={selectedId}
-        defaultExpanded={defaultExpanded}
+        selected={selectedId ?? ''}
+        expanded={defaultExpanded}
         defaultCollapseIcon={<SvgPathIcon iconIds={'chevron-down'} />}
         defaultExpandIcon={<SvgPathIcon iconIds={'chevron-right'} />}
         {...rest}

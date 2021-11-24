@@ -15,20 +15,15 @@
  * limitations under the License.
  */
 
-import { _isStrEmpty, _isStrT } from '@aglyn/shared-util-guards'
-import pkg from '../../../../../../../package.json'
+import { render } from '@testing-library/react'
+import React from 'react'
+
+import NavigationDrawer from './navigation-drawer'
 
 
-export type AglynVersion = string
-export let SDK_VERSION = String(pkg.version ?? 'N/A')
-
-export const PRODUCTION = process.env.NODE_ENV === 'production'
-export const DEVELOPMENT = process.env.NODE_ENV === 'development'
-export const PREVIEW = process.env.NODE_ENV === 'preview'
-
-export function setVersion(version: string): void {
-  if (!_isStrT(version) || _isStrEmpty(version)) {
-    throw new Error('invalid version')
-  }
-  SDK_VERSION = version
-}
+describe('NavigationDrawer', () => {
+  it('should render successfully', () => {
+    const {baseElement} = render(<NavigationDrawer />)
+    expect(baseElement).toBeTruthy()
+  })
+})

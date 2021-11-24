@@ -42,6 +42,9 @@ export * from './api/logger.api'
 // \____/\____/_/ |_//____//_/ /_/  |_/_/ |_/ /_/  /____/
 // 👇
 
+export * from './constants/_internal'
+export * from './constants/components'
+export * from './constants/builder'
 export * from './constants/emitter'
 export * from './constants/error'
 export * from './constants/lifecycle'
@@ -49,9 +52,6 @@ export * from './constants/logger'
 export * from './constants/platform'
 export * from './constants/symbol'
 export * from './constants/version'
-
-// 👇 ENUMS
-export { ComponentsLinealDirectiveFlag } from './controllers/aglyn-components.controller'
 
 
 //    __  ______________   _____
@@ -65,9 +65,15 @@ export * from './util/aglyn-is'
 export * from './util/confirm-valid-lineal-relationship'
 export * from './util/create-aglyn-component-element'
 export * from './util/create-component-element-data'
+export * from './util/create-component-element-data-copy'
 export * from './util/create-component-element-id'
 export * from './util/create-components-bundle'
+export * from './util/delete-component-element'
 export * from './util/denormalize-component-element-data'
+export * from './util/get-component-element-hierarchy'
+export * from './util/handle-modification-history-change'
+export * from './util/handle-modification-history-redo'
+export * from './util/handle-modification-history-undo'
 export * from './util/normalize-component-element-data'
 
 
@@ -79,20 +85,20 @@ export * from './util/normalize-component-element-data'
 // 👇
 
 export {
-  AglynBaseModelOptions,
   AglynBaseModel,
+  AglynBaseModelOptions,
 } from './models/aglyn-base.model'
 export {
-  AglynModuleModelOptions,
   AglynModuleEffectListener,
-  AglynModuleTypeFields,
-  AglynModuleModelT,
   AglynModuleModel,
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  AglynModuleTypeFields,
 } from './models/aglyn-module.model'
 export {
+  AglynExtension,
   AglynExtensionOptions,
   AglynExtensionT,
-  AglynExtension,
 } from './models/aglyn-extension.model'
 
 
@@ -104,74 +110,84 @@ export {
 // 👇 TYPES ONLY
 
 export type {
+  AglynAppController,
+  AglynAppControllerT,
   AglynAppOptions,
   AglynEffectOptions,
-  AglynAppControllerT,
-  AglynAppController,
 } from './controllers/aglyn-app.controller'
 export type {
-  AglynExtensionTypeFields,
   AglynExtensionLoader,
-  AglynExtensionsControllerT,
+  AglynExtensionTypeFields,
   AglynExtensionsController,
+  AglynExtensionsControllerT,
 } from './controllers/aglyn-extensions.controller'
 export type {
-  ContextStore,
-  ContextDomain,
-  ContextEvent,
-  ContextEffect,
-  ContextStoreOptions,
+  AglynContextsController,
   AglynContextsControllerOptions,
   AglynContextsControllerT,
-  AglynContextsController,
+  ContextDomain,
+  ContextEffect,
+  ContextEvent,
+  ContextStore,
+  ContextStoreOptions,
 } from './controllers/aglyn-contexts.controller'
 export type {
-  AglynCommandResolver,
   AglynCommandListener,
-  AglynCommandResolverTypeFields,
   AglynCommandListenerTypeFields,
+  AglynCommandResolver,
+  AglynCommandResolverTypeFields,
+  AglynCommandsController,
   AglynCommandsControllerOptions,
   AglynCommandsControllerT,
-  AglynCommandsController,
 } from './controllers/aglyn-commands.controller'
 export type {
-  AglynComponentsBundle,
-  AglynComponentSchema,
-  AglynComponentsTypeFields,
-  AglynComponentElement,
-  AglynComponentElementTemplateData,
-  ComponentsRegistryEntry,
-  ComponentsRegistryKeys,
-  ComponentsRegistryValues,
+  AglynComponentBuilderFlags,
   AglynComponentClassElement,
+  AglynComponentElement,
+  AglynComponentElementData,
   AglynComponentElementDataDenormalized,
   AglynComponentElementDataNormalized,
+  AglynComponentElementTemplateData,
   AglynComponentElementType,
   AglynComponentFunctionElement,
   AglynComponentIntrinsicElement,
-  LinealDefinition,
-  ComponentsLinealOrder,
-  TemplateSubElementData,
+  AglynComponentMetadata,
+  AglynComponentRenderFlags,
+  AglynComponentSchema,
+  AglynComponentsBundle,
+  AglynComponentsController,
   AglynComponentsControllerOptions,
   AglynComponentsControllerT,
-  AglynComponentsController,
+  AglynComponentsTypeFields,
+  ComponentsLinealOrder,
+  ComponentsRegistryContext,
+  ComponentsRegistryEntry,
+  ComponentsRegistryKeys,
+  ComponentsRegistryValues,
+  InstanceBundles,
+  InstanceComponents,
+  InstanceSchemas,
+  InstanceTemplates,
+  LinealDefinition,
+  TemplateSubElementData,
 } from './controllers/aglyn-components.controller'
 export type {
-  ElementsDataStore,
-  ElementsDataStoreApi,
+  AglynCanvasController,
   AglynCanvasControllerOptions,
   AglynCanvasControllerT,
-  AglynCanvasController,
+  ElementsDataStore,
+  ElementsDataStoreApi,
 } from './controllers/aglyn-canvas.controller'
 export type {
-  BuilderPanelsState,
-  BuilderFlagState,
-  BuilderCanvasState,
-  BuilderDndState,
-  CommActionData,
-  BuilderContextStores,
+  AglynBuilderController,
   AglynBuilderControllerOptions,
   AglynBuilderControllerT,
-  AglynBuilderController,
+  BuilderCanvasHoveredElement,
+  BuilderCanvasSelectedElement,
+  BuilderCanvasState,
+  BuilderContextStores,
+  BuilderDndState,
+  BuilderFlagState,
+  BuilderPanelsState,
+  CommActionData,
 } from './controllers/aglyn-builder.controller'
-export { AglynComponentElementDataNormalizedMap } from './types'

@@ -34,13 +34,6 @@ import type { ContextStore } from '../controllers/aglyn-contexts.controller'
 import { _validateAppArg } from './app.api'
 
 
-export {
-  InteractionModeFlag,
-  BuilderActiveViewFlag,
-  DndDragSourceTypeFlag,
-  DndDropLinealTypeFlag,
-} from '../controllers/aglyn-builder.controller'
-
 export function _getBuilderController(app: AglynAppController): AglynBuilderController {
   _validateAppArg(app)
   return _builderControllers.get(app.getName())

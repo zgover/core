@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { _isArr, _isArrEmpty, _isNum } from '@aglyn/shared-util-guards'
+import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
+import { ComponentsLinealDirectiveFlag } from '../constants/components'
 import {
   AglynComponentRenderFlags,
-  ComponentsLinealDirectiveFlag,
-  ComponentsLinealOrder, LinealDefinition,
+  ComponentsLinealOrder,
 } from '../controllers/aglyn-components.controller'
 import { BundleUId, ComponentId } from '../types'
 

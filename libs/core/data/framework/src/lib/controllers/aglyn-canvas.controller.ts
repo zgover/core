@@ -19,6 +19,7 @@ import { _isArrEmpty } from '@aglyn/shared-util-guards'
 import { arrayAddAtIndex } from '@aglyn/shared-util-tools'
 import { objectDeepMerge } from '@aglyn/shared-util-vendor'
 import { createApi, Event as EffectorEvent } from 'effector'
+import { ELEMENT_ROOT_ID } from '../constants/_internal'
 import {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,
@@ -39,9 +40,16 @@ import {
   AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import { AglynComponentElementDataNormalizedMap } from '../types'
-import { createComponentElementData } from '../util/create-component-element-data'
+import {
+  AglynComponentElementDataNormalizedArray,
+  AglynComponentElementDataNormalizedMap,
+} from '../types'
+import { createComponentElementDataCopy } from '../util/create-component-element-data-copy'
+import { deleteComponentElement } from '../util/delete-component-element'
 import { denormalizeComponentElementData } from '../util/denormalize-component-element-data'
+import handleModificationHistoryChange from '../util/handle-modification-history-change'
+import handleModificationHistoryRedo from '../util/handle-modification-history-redo'
+import handleModificationHistoryUndo from '../util/handle-modification-history-undo'
 import { normalizeComponentElementData } from '../util/normalize-component-element-data'
 import { AglynComponentElementDataDenormalized } from './aglyn-components.controller'
 import { ContextDomain, ContextStore } from './aglyn-contexts.controller'
@@ -85,7 +93,7 @@ export interface AglynCanvasController extends AglynModuleModel<AglynCanvasContr
   duplicateElement(payload: CanvasDuplicateElementPayload)
 }
 
-const MAX_HISTORY = 20
+
 const TAG = 'AglynCanvas'
 const MODULE_NAME = 'canvas'
 
@@ -98,14 +106,14 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   #domain: ContextDomain = null
   #context: ContextStore<ElementsDataStore> = null
   #events: ElementsDataStoreApi = null
-  #normalizedElementsStore: ContextStore<ElementsDataStore['present']> = null
+  #normalizedElementsStore: ContextStore<AglynComponentElementDataNormalizedMap> = null
   #denormalizedElementsStore: ContextStore<AglynComponentElementDataDenormalized[]> = null
 
   public get domain(): ContextDomain {return this.#domain}
   public get events(): ElementsDataStoreApi {return this.#events}
   public get context(): ContextStore<ElementsDataStore> {return this.#context}
-  public get normalizedElementsStore(): ContextStore<ElementsDataStore['present']> {return this.#normalizedElementsStore}
-  public get denormalizedElementsStore(): ContextStore<AglynComponentElementDataDenormalized[]> {return this.#denormalizedElementsStore}
+  public get normalizedElementsStore(): ContextStore<AglynComponentElementDataNormalizedMap> {return this.#normalizedElementsStore}
+  public get denormalizedElementsStore(): ContextStore<AglynComponentElementDataNormalizedArray> {return this.#denormalizedElementsStore}
 
   constructor(options) {
     super(options)
@@ -116,43 +124,31 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
     this.#context = this.#domain.createStore<ElementsDataStore>({
       past: [] as AglynComponentElementDataNormalizedMap[],
-      present: normalizeComponentElementData(this.options.defaultElements || [], '__root__'),
+      present: normalizeComponentElementData(this.options.defaultElements || [], ELEMENT_ROOT_ID),
       future: [] as AglynComponentElementDataNormalizedMap[],
     })
     this.#normalizedElementsStore = this.#context.map((elements) => {
       return elements.present
     })
     this.#denormalizedElementsStore = this.#context.map((elements) => {
-      return denormalizeComponentElementData(elements.present, '__root__')
+      return denormalizeComponentElementData(elements.present, ELEMENT_ROOT_ID)
     })
 
     const undo = (state: ElementsDataStore) => {
       if (!_isArrEmpty(state.past)) {
-        return {
-          past: state.past.slice(1),
-          present: state.past.slice(0, 1)[0],
-          future: [state.present, ...state.future],
-        }
+        return handleModificationHistoryUndo(state)
       }
     }
 
     const redo = (state: ElementsDataStore) => {
       if (!_isArrEmpty(state.future)) {
-        return {
-          past: [state.present, ...state.past],
-          present: state.future.slice(0, 1)[0],
-          future: state.future.slice(1),
-        }
+        return handleModificationHistoryRedo(state)
       }
     }
 
     const setElements = (state: ElementsDataStore, payload: CanvasSetElementsPayload) => {
       const {elements} = payload
-      return {
-        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-        present: elements,
-        future: [],
-      }
+      return handleModificationHistoryChange(state, elements)
     }
 
     const addElement = (state: ElementsDataStore, payload: CanvasAddElementPayload) => {
@@ -172,11 +168,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
         },
       }
 
-      return {
-        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-        present,
-        future: [],
-      }
+      return handleModificationHistoryChange(state, present)
     }
 
     const updateElement = (state: ElementsDataStore, payload: CanvasUpdateElementPayload) => {
@@ -189,11 +181,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
         },
       }
 
-      return {
-        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-        present,
-        future: [],
-      }
+      return handleModificationHistoryChange(state, present)
     }
 
     const moveElement = (state: ElementsDataStore, payload: CanvasMoveElementPayload) => {
@@ -220,51 +208,25 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
         },
       }
 
-      return {
-        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-        present,
-        future: [],
-      }
+      return handleModificationHistoryChange(state, present)
     }
 
     const duplicateElement = (state: ElementsDataStore, payload: CanvasDuplicateElementPayload) => {
       const {$id} = payload
       const element = state.present[$id]
-      const parentElements = denormalizeComponentElementData(state.present, element.parentId)
-      let position = parentElements.length - 1
-      const denormalizedElement = parentElements.find((i, index) => {
-        if (i.$id === $id) {
-          position = index
-          console.log('denormalizedElement', i)
-          return true
-        }
-        return false
-      })
-      const newElement = createComponentElementData({data: denormalizedElement})
+      const parent = state.present[element?.parentId]
+      const position = (parent?.elements ?? []).indexOf($id)
+      const elementCopy = createComponentElementDataCopy($id, state.present)
       return addElement(state, {
-        element: newElement,
-        parentId: element.parentId,
+        element: elementCopy,
+        parentId: elementCopy.parentId,
         position: position + 1,
       })
     }
 
     const deleteElement = (state: ElementsDataStore, payload: CanvasDeleteElementPayload) => {
       const {$id} = payload
-      const current = state.present[$id]
-      const present = {
-        ...state.present,
-        [current.parentId]: {
-          ...state.present[current.parentId],
-          elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
-        },
-      }
-      delete present[$id]
-
-      return {
-        past: [state.present, ...state.past].slice(0, MAX_HISTORY),
-        present,
-        future: [],
-      }
+      return handleModificationHistoryChange(state, deleteComponentElement($id, state.present))
     }
 
     this.#events = createApi(this.#context, {

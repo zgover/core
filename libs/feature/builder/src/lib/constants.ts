@@ -18,3 +18,15 @@
 
 
 export const DEFAULT_LEFT_DRAWER_WIDTH = 240
+
+
+export const ELEMENT_ATTRIBUTE_PREFIX = 'data-aglyn-'
+export type ELEMENT_ATTRIBUTE_PREFIX = typeof ELEMENT_ATTRIBUTE_PREFIX
+export const ElementAttribute = {
+  ELEMENT_ID: 'element-id',
+  COMPONENT_ID: 'component-id',
+  BUNDLE_ID: 'bundle-id',
+  SELECTED: 'selected',
+  HOVERED: 'hovered',
+}
+export type ElementAttribute = typeof ElementAttribute

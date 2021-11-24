@@ -28,16 +28,20 @@ export function useAglynBuilderStore<K1 extends keyof BuilderContextStores, K2 e
   store: K1, key: K2,
 ): BuilderContextStores[K1][K2]
 export function useAglynBuilderStore<K1 extends keyof BuilderContextStores, K2 extends keyof BuilderContextStores[K1] = null>(
-  store: K1, key?: K2,
+  storeName: K1, key?: K2,
 ): Conditional<K2, keyof BuilderContextStores[K1], BuilderContextStores[K1][K2], keyof BuilderContextStores[K1]> {
   const {getApp} = useAglynAppContext()
   const app = getApp()
-  const _store = getBuilderStore(app, {store})
-  return useStoreMap(_store, (store) => {
-    if (key) {
-      return store?.[key]
+  const store = getBuilderStore(app, {store: storeName})
+  return useStoreMap({
+    store,
+    keys: [storeName, key],
+    fn: (store, [_, key]) => {
+      if (key) {
+        return store?.[key]
+      }
+      return store
     }
-    return store
   }) as Conditional<K2, keyof BuilderContextStores[K1], BuilderContextStores[K1][K2], keyof BuilderContextStores[K1]>
 }
 export default useAglynBuilderStore

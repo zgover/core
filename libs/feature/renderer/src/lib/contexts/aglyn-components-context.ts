@@ -19,22 +19,22 @@ import { AglynComponentElementTemplateData } from '@aglyn/core-data-framework'
 import { createContext, useContext } from 'react'
 
 
-export type UseElementComponentsContextType = () => ElementComponentsContextType
+export type UseElementComponentsContextType = () => AglynComponentsContextType
 
-export interface ElementComponentsContextType {
+export interface AglynComponentsContextType {
   templateBlocks: AglynComponentElementTemplateData[]
 }
 
-export const DEFAULT_ELEMENT_COMPONENTS_CONTEXT: ElementComponentsContextType = {
+export const DEFAULT_COMPONENTS_CONTEXT: AglynComponentsContextType = {
   templateBlocks: [],
 }
-export const ElementComponentsContext = createContext<ElementComponentsContextType>(
-  DEFAULT_ELEMENT_COMPONENTS_CONTEXT,
+export const AglynComponentsContext = createContext<AglynComponentsContextType>(
+  DEFAULT_COMPONENTS_CONTEXT,
 )
-ElementComponentsContext.displayName = 'ElementComponentsContext'
+AglynComponentsContext.displayName = 'AglynComponentsContext'
 
-export const useElementComponentsContext: UseElementComponentsContextType = () => {
-  return useContext(ElementComponentsContext)
+export const useAglynComponentsContext: UseElementComponentsContextType = () => {
+  return useContext(AglynComponentsContext)
 }
 
-export default ElementComponentsContext
+export default AglynComponentsContext

@@ -20,7 +20,7 @@ import { createResponsiveTheme } from '../util/create-responsive-theme'
 import { consoleOptions, consoleOptionsDark } from './console.options'
 
 
-export const consoleTheme: Theme = createResponsiveTheme({
+export const consoleThemeLight: Theme = createResponsiveTheme({
   themeOptions: {...consoleOptions},
 })
 export const consoleThemeDark: Theme = createResponsiveTheme({
@@ -28,16 +28,16 @@ export const consoleThemeDark: Theme = createResponsiveTheme({
 })
 export const getConsoleTheme = (mode: 'light' | 'dark' = 'light') => {
   const theme = {
-    light: consoleTheme,
+    light: consoleThemeLight,
     dark: consoleThemeDark,
   }
   return theme[mode]
 }
 export const getConsoleMetaThemeColor = (mode: 'light' | 'dark' = 'light') => {
   const themeColor = {
-    light: consoleTheme.palette.secondary.main,
+    light: consoleThemeLight.palette.secondary.main,
     dark: consoleThemeDark.palette.primary.main,
   }
   return themeColor[mode]
 }
-export default consoleTheme
+export default consoleThemeLight

@@ -30,8 +30,8 @@ export interface IsEqualitySameTypeOptions {
 }
 
 type IsEqualitySameTypeRestParams<T, U extends T> =
-  | [...U[]]
-  | [...U[], IsEqualitySameTypeOptions]
+  | [...possibilities: U[]]
+  | [...possibilities: U[], options: IsEqualitySameTypeOptions]
 
 export function _isEqualitySameType<T, U extends T>(
   value: T,
@@ -52,7 +52,7 @@ export function _isEqualitySameType<T, U extends T>(
       truthiness: Equality.DEFAULT,
       ..._withOptions ? _lastItem : undefined,
     }
-  if(!_withOptions){
+  if (!_withOptions) {
     possibilities.push(_lastItem as U)
   }
   return possibilities.some((possibility) => {

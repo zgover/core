@@ -17,6 +17,8 @@
 
 
 import {
+  BuilderCanvasHoveredElement,
+  BuilderCanvasSelectedElement,
   BuilderSetCanvasHoveredPayload,
   BuilderSetCanvasSelectedPayload,
   CommActionData,
@@ -24,12 +26,14 @@ import {
 import { createContext, RefObject, SyntheticEvent, useContext } from 'react'
 
 
-export interface HoverOptions extends CommActionData {
+export interface HoveredOptions extends BuilderCanvasHoveredElement {
+}
+export interface SelectedOptions extends BuilderCanvasSelectedElement {
 }
 
 export interface HoverContextType {
-  selectedOptions?: HoverOptions
-  hoveredOptions?: HoverOptions
+  selectedOptions?: SelectedOptions
+  hoveredOptions?: HoveredOptions
   hoverOpen: (event: SyntheticEvent, opts: BuilderSetCanvasHoveredPayload) => void
   hoverSelect: (event: SyntheticEvent, opts: BuilderSetCanvasSelectedPayload) => void
   hoverClose: (event: SyntheticEvent) => void
@@ -38,13 +42,8 @@ export interface HoverContextType {
 
 export type UseHoverType = () => HoverContextType
 
-export const DEFAULT_OPTIONS: HoverOptions = {
-  $id: null,
-}
-
 export const buildOptions = (defaultOptions, options) => {
   return {
-    ...DEFAULT_OPTIONS,
     ...defaultOptions,
     ...options,
   }

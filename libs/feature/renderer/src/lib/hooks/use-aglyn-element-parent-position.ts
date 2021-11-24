@@ -16,6 +16,7 @@
  */
 
 import type { ElementId } from '@aglyn/core-data-framework'
+import { ELEMENT_ROOT_ID } from '@aglyn/core-data-framework'
 import { useMemo } from 'react'
 import { useAglynElementData } from './use-aglyn-element-data'
 
@@ -24,12 +25,12 @@ export function useAglynElementParentPosition(
   $id: ElementId,
 ): { index: number, parentId: ElementId, parentElements: ElementId[] } {
   const parentId = useAglynElementData($id, 'parentId') || null
-  const parentElements = useAglynElementData(parentId || '__root__', 'elements') || []
+  const parentElements = useAglynElementData(parentId || ELEMENT_ROOT_ID, 'elements') || []
 
   return useMemo(() => ({
     index: (parentElements || []).indexOf($id),
     parentId: parentId,
-    parentElements: parentElements
+    parentElements: parentElements,
   }), [parentElements, parentId, $id])
 
 }

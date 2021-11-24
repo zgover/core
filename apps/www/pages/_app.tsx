@@ -16,18 +16,18 @@
  */
 
 import {
+  CacheProvider,
+  consoleThemeLight,
+  createEmotionCache,
+  EmotionCache,
+  withTheme,
+} from '@aglyn/shared-feature-themes'
+import {
   makeLinkElements,
   MakeLinkElementsConfig,
   makeMetaElements,
   MakeMetaElementsConfig,
 } from '@aglyn/shared-ui-jsx'
-import {
-  CacheProvider,
-  consoleTheme,
-  createEmotionCache,
-  EmotionCache,
-  withTheme,
-} from '@aglyn/shared-feature-themes'
 import { AppProps as NextAppProps } from 'next/app'
 import Head from 'next/head'
 import { Fragment, useEffect } from 'react'
@@ -37,6 +37,7 @@ import { AppLoaderProviderComponent } from '../contexts/app-loader-context'
 import { CurrentUserProviderComponent } from '../contexts/current-user-context'
 import * as AppController from '../lib/aglyn-deprecated'
 import AppLoaderOverlayView from '../views/AppLoaderOverlayView'
+
 
 declare function require(moduleNames: string[], onLoad: (...args: any[]) => void): void
 const previewProduction = false
@@ -49,9 +50,9 @@ if (typeof window !== 'undefined') {
       ...(isProduction
         ? {}
         : {
-            authEmulator: 'http://localhost:9099/',
-            firestoreEmulator: { host: 'localhost', port: 8080 },
-          }),
+          authEmulator: 'http://localhost:9099/',
+          firestoreEmulator: {host: 'localhost', port: 8080},
+        }),
     }
     app = withAppController.withAppController(appOptions)
   })
@@ -64,7 +65,7 @@ const metaElements: MakeMetaElementsConfig = [
 const linkElements: MakeLinkElementsConfig = []
 
 function AppWrapperRaw(props) {
-  const { children } = props
+  const {children} = props
 
   useEffect(() => {
     // Remove the server-side injected CSS.
@@ -112,8 +113,8 @@ function AppWrapperRaw(props) {
 }
 AppWrapperRaw.displayName = 'AppWrapper'
 const AppWrapper = withTheme({
-  theme: consoleTheme,
-  cssBaseline: true,
+  theme: consoleThemeLight,
+  disableCssBaseline: true,
 })(AppWrapperRaw)
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -156,7 +157,7 @@ export interface _AppProps extends NextAppProps {
  * @returns {JSX.Element}
  */
 function _App(props: _AppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const {Component, emotionCache = clientSideEmotionCache, pageProps} = props
 
   return (
     <CacheProvider value={emotionCache}>
@@ -167,7 +168,7 @@ function _App(props: _AppProps) {
   )
 }
 _App.displayName = '_App'
-_App.getInitialProps = async ({ ctx, Component }) => {
+_App.getInitialProps = async ({ctx, Component}) => {
   let pageProps = {}
 
   if (Component.getInitialProps) {
@@ -206,6 +207,6 @@ For detailed information please visit 'https://aglyn.com' or you may send an
 email to 'info@aglyn.com'.
 – Aglyn Engineering Team
 `,
-    'font-family:monospace;color:#E040FB;font-size:12px;'
+    'font-family:monospace;color:#E040FB;font-size:12px;',
   )
 }

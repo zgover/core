@@ -22,10 +22,11 @@ import type {
   createEvent as createEffectorEvent,
 } from 'effector'
 import {
+  BuilderCanvasHoveredElement,
+  BuilderCanvasSelectedElement,
   BuilderContextStores,
   BuilderFlagState,
   BuilderPanelsState,
-  CommActionData,
 } from '../controllers/aglyn-builder.controller'
 import type {
   AglynCommandListener,
@@ -215,8 +216,8 @@ export type BuilderFlagInteractModePayload<K extends keyof BuilderFlagState = an
 export type BuilderSetPanelPayload = PayloadData<Partial<BuilderPanelsState>>
 export type BuilderOpenPanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
 export type BuilderClosePanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
-export type BuilderSetCanvasSelectedPayload = PayloadData<{ selected: CommActionData }>
-export type BuilderSetCanvasHoveredPayload = PayloadData<{ hovered: CommActionData }>
+export type BuilderSetCanvasSelectedPayload = PayloadData<{ selected: BuilderCanvasSelectedElement }>
+export type BuilderSetCanvasHoveredPayload = PayloadData<{ hovered: BuilderCanvasHoveredElement }>
 
 export type CanvasUndoPayload = PayloadData<any>
 export type CanvasRedoPayload = PayloadData<any>

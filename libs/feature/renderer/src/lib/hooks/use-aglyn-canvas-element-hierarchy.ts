@@ -16,30 +16,27 @@
  */
 
 import {
-  AglynComponentElementDataNormalizedMap,
+  AglynComponentElementHierarchy,
+  ElementId,
   getCanvasNormalizedElementsStore,
+  getComponentElementHierarchy,
 } from '@aglyn/core-data-framework'
-import { _isFnT } from '@aglyn/shared-util-guards'
 import { useStoreMap } from 'effector-react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 
-export function useAglynCanvasElementsNormalized(): AglynComponentElementDataNormalizedMap
-export function useAglynCanvasElementsNormalized<Result>(
-  callbackFn: (state: AglynComponentElementDataNormalizedMap) => Result,
-): Result
-export function useAglynCanvasElementsNormalized<Result>(
-  callbackFn?: (state: AglynComponentElementDataNormalizedMap) => Result,
-): Result | AglynComponentElementDataNormalizedMap {
+export const useAglynCanvasElementHierarchy = (
+  $id: ElementId | null,
+): AglynComponentElementHierarchy<typeof $id> => {
   const {getApp} = useAglynAppContext()
   const app = getApp()
   const store = getCanvasNormalizedElementsStore(app)
+
   return useStoreMap({
     store,
-    keys: [callbackFn],
-    fn: ((state, [callbackFn]) => {
-      return _isFnT(callbackFn) ? callbackFn(state) as Result : state
-    })
+    keys: [$id],
+    fn: (state, [$id]) => {
+      return getComponentElementHierarchy($id, state)
+    },
   })
 }
-export default useAglynCanvasElementsNormalized
