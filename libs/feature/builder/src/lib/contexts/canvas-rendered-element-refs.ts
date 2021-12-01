@@ -20,17 +20,17 @@ import { createContext, RefObject, useContext } from 'react'
 
 
 export interface CanvasRenderedElementRefs {
-  elements: { [$id: ElementId]: Element }
-  getElement($id: ElementId): RefObject<Element>
-  setElement($id: ElementId, ref: RefObject<Element>): void
-  deleteElement($id: ElementId): void
+  // elementRefs: RefObject<{ [$id: ElementId]: RefObject<Element> }>
+  getElementRef: ($id: ElementId) => RefObject<Element>
+  setElementRef: ($id: ElementId, ref: RefObject<Element>) => void
+  deleteElementRef: ($id: ElementId) => void
 }
 
 export const CanvasRenderedElementRefsContext = createContext<CanvasRenderedElementRefs>({
-  elements: {},
-  getElement(){return {current: null}},
-  setElement(){},
-  deleteElement(){},
+  // elementRefs: {current: {}},
+  getElementRef() {return {current: null}},
+  setElementRef() {},
+  deleteElementRef() {},
 })
 CanvasRenderedElementRefsContext.displayName = 'CanvasRenderedElementRefsContext'
 

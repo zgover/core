@@ -20,7 +20,6 @@ import {
   AnyProps,
   InnerRefProp,
   JSXIntrinsicElement,
-  JSXNode,
   OrUndef,
   ResolveProps,
 } from '@aglyn/shared-data-types'
@@ -119,7 +118,7 @@ export interface AglynComponentMetadata {
   title?: string
   subtitle?: string
   description?: string
-  icon?: MdiIconId | JSXNode
+  iconIds?: MdiIconId
 }
 
 export interface AglynComponentBuilderFlags {
@@ -174,7 +173,7 @@ export interface AglynComponentElementTemplateData<P extends AnyProps = any> {
   readonly id: TemplateId
   title: string
   description?: string
-  icon?: string
+  iconIds?: MdiIconId
   data: TemplateSubElementData<P>
 }
 

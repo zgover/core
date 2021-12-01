@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { ELEMENT_ROOT_ID, ElementId, setBuilderCanvasSelected } from '@aglyn/core-data-framework'
+import {
+  DEFAULT_COMPONENT_ICON_ID,
+  ELEMENT_ROOT_ID,
+  ElementId,
+  setBuilderCanvasSelected,
+} from '@aglyn/core-data-framework'
 import {
   useAglynAppContext,
   useAglynCanvasElementHierarchy,
@@ -25,11 +30,10 @@ import {
 } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
-import { _isStrT } from '@aglyn/shared-util-guards'
 import MuiTreeItem, { TreeItemProps } from '@mui/lab/TreeItem'
 import MuiTreeView, { SingleSelectTreeViewProps } from '@mui/lab/TreeView'
-import { forwardRef, Fragment, ReactNode, useCallback, useMemo } from 'react'
-import useCanvasSelected from '../hooks/use-builder-selected'
+import { forwardRef, Fragment, useCallback, useMemo } from 'react'
+import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
 
 const ScrollableTreeView = styled(MuiTreeView, {name: 'ScrollableTreeView'})({
@@ -49,7 +53,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const label = useAglynElementLabel($id)
-    const icon = useAglynComponentSchema(componentId, bundleId)?.metadata?.icon
+    const iconIds = useAglynComponentSchema(componentId, bundleId)?.metadata?.iconIds
     return (
       <>
         <MuiTreeItem
@@ -57,19 +61,11 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
           nodeId={$id}
           label={(
             <Fragment>
-              {(
-                <Fragment>
-                  {_isStrT(icon) ? (
-                    <SvgPathIcon
-                      sx={{fontSize: '0.8em', ml: -0.25, mr: 0.75}}
-                      color="inherit"
-                      iconIds={icon}
-                    />
-                  ) : (
-                    icon
-                  )}
-                </Fragment>
-              ) as ReactNode}
+              <SvgPathIcon
+                sx={{fontSize: '0.8em', ml: -0.25, mr: 0.75}}
+                color="inherit"
+                iconIds={iconIds || DEFAULT_COMPONENT_ICON_ID}
+              />
               {label}
             </Fragment>
           )}
@@ -97,7 +93,7 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
 
     const {getApp} = useAglynAppContext()
     const elements = useAglynElementData(ELEMENT_ROOT_ID, 'elements')
-    const selected = useCanvasSelected()
+    const selected = useAglynCanvasSelected()
     const selectedId = selected?.$id
     const selectedIdHierarchy = useAglynCanvasElementHierarchy(selectedId)
 

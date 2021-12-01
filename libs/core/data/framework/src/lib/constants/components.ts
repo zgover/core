@@ -22,6 +22,8 @@ export enum ComponentsLinealDirectiveFlag {
   DISALLOW = 0x02,
 }
 
+export const DEFAULT_COMPONENT_ICON_ID = 'cube-outline'
+
 export const DEFAULT_PROPS_FORM_SCHEMA = {
   fields: [
     {

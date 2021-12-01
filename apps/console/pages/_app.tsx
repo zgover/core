@@ -56,7 +56,6 @@ const c1 = createAglynComponentElement(
     metadata: {
       displayName: 'Root Element',
       title: 'Root element',
-      icon: 'block',
     },
   },
   'span',
@@ -68,7 +67,6 @@ const c2 = createAglynComponentElement(
     metadata: {
       displayName: 'Root Element',
       title: 'Root element',
-      icon: 'block',
     },
   },
   'span',
@@ -80,7 +78,6 @@ const c3 = createAglynComponentElement(
     metadata: {
       displayName: 'Root Element',
       title: 'Root element',
-      icon: 'block',
     },
   },
   'span',
@@ -92,7 +89,6 @@ const c4 = createAglynComponentElement(
     metadata: {
       displayName: 'Root Element',
       title: 'Root element',
-      icon: 'block',
     },
   },
   'span',
@@ -104,7 +100,6 @@ const c5 = createAglynComponentElement(
     metadata: {
       displayName: 'Root Element',
       title: 'Root element',
-      icon: 'block',
     },
     templates: [
       {

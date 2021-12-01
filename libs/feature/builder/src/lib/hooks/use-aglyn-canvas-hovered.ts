@@ -18,18 +18,17 @@
 import { getBuilderStore } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/feature-renderer'
 import { useStoreMap } from 'effector-react'
-import { useMemo } from 'react'
 
 
-export interface UseBuilderHovered {
+export interface UseAglynCanvasHovered {
 
 }
 
-export const useCanvasHovered = (opts?: UseBuilderHovered) => {
+export const useAglynCanvasHovered = (opts?: UseAglynCanvasHovered) => {
   const {getApp} = useAglynAppContext(),
     store = getBuilderStore(getApp(), {store: 'canvas'})
 
   return useStoreMap(store, (store) => store?.hovered)
 }
 
-export default useCanvasHovered
+export default useAglynCanvasHovered

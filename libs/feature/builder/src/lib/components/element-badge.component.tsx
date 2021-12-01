@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { deleteCanvasElement, duplicateCanvasElement, ElementId } from '@aglyn/core-data-framework'
+import {
+  deleteCanvasElement,
+  duplicateCanvasElement,
+  ElementId,
+  setBuilderPanels,
+} from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/feature-renderer'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import {
@@ -29,6 +34,7 @@ import Button, { ButtonProps } from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import MuiPopper, { PopperProps as MuiPopperProps } from '@mui/material/Popper'
 import Tooltip from '@mui/material/Tooltip'
+import Zoom from '@mui/material/Zoom'
 import { ChangeEvent, forwardRef, memo, useCallback, useState } from 'react'
 
 
@@ -37,20 +43,20 @@ const classKeys = generateComponentClassKeys('AglynElementBadge', [
 ])
 
 export interface ElementBadgePopperProps extends MuiPopperProps {
-  arrow?: boolean
+  disableArrow?: boolean
 }
 
 const ElementBadgePopper = styled(MuiPopper, {
   name: 'AglynElementBadge',
-  shouldForwardProp: (prop) => prop !== 'arrow',
-})<ElementBadgePopperProps>(({theme, arrow}) => ({
+  shouldForwardProp: (prop) => prop !== 'disableArrow',
+})<ElementBadgePopperProps>(({theme, disableArrow}) => ({
   zIndex: 1,
   '& > div': {
     position: 'relative',
   },
   '&[data-popper-placement*="bottom"]': {
     '& > div': {
-      marginTop: arrow ? 2 : 0,
+      marginTop: !disableArrow ? 2 : 0,
     },
     [`& .${classKeys.arrow}`]: {
       top: 0,
@@ -66,7 +72,7 @@ const ElementBadgePopper = styled(MuiPopper, {
   },
   '&[data-popper-placement*="top"]': {
     '& > div': {
-      marginBottom: arrow ? 2 : 0,
+      marginBottom: !disableArrow ? 2 : 0,
     },
     [`& .${classKeys.arrow}`]: {
       bottom: 0,
@@ -82,7 +88,7 @@ const ElementBadgePopper = styled(MuiPopper, {
   },
   '&[data-popper-placement*="right"]': {
     '& > div': {
-      marginLeft: arrow ? 2 : 0,
+      marginLeft: !disableArrow ? 2 : 0,
     },
     [`& .${classKeys.arrow}`]: {
       left: 0,
@@ -97,7 +103,7 @@ const ElementBadgePopper = styled(MuiPopper, {
   },
   '&[data-popper-placement*="left"]': {
     '& > div': {
-      marginRight: arrow ? 2 : 0,
+      marginRight: !disableArrow ? 2 : 0,
     },
     [`& .${classKeys.arrow}`]: {
       right: 0,
@@ -120,7 +126,7 @@ const ElementBadgeComponentRaw = forwardRef<any, ElementBadgeComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       $id,
-      arrow,
+      disableArrow,
       ...rest
     } = props
 
@@ -155,12 +161,39 @@ const ElementBadgeComponentRaw = forwardRef<any, ElementBadgeComponentProps>(
     const handleDuplicateButtonClick = useCallback((e: ChangeEvent<unknown>) => {
       duplicateCanvasElement(getApp(), {$id})
     }, [$id])
+    const handleModifyButtonClick = useCallback((e: ChangeEvent<unknown>) => {
+      setBuilderPanels(getApp(), {right: {toggled: true}})
+    }, [$id])
 
-    // const handleAddElementClick = useAddElementCallback({
-    //   drawerOptions: {
-    //     type: 'edit-element-traits',
-    //   },
-    // })
+    const modifiers = [
+      {
+        name: 'flip',
+        enabled: true,
+        options: {
+          altBoundary: true,
+          rootBoundary: 'document',
+          padding: 8,
+        },
+      },
+      {
+        name: 'preventOverflow',
+        enabled: true,
+        options: {
+          altAxis: false,
+          altBoundary: true,
+          tether: true,
+          rootBoundary: 'document',
+          padding: 8,
+        },
+      },
+      {
+        name: 'arrow',
+        enabled: !disableArrow,
+        options: {
+          element: arrowRef,
+        },
+      },
+    ]
 
     const buttons = [
       {
@@ -206,7 +239,7 @@ const ElementBadgeComponentRaw = forwardRef<any, ElementBadgeComponentProps>(
         },
         buttonProps: {
           // disabled: yes(disableZoomResetButton),
-          // onClick: handleAddElementClick,
+          onClick: handleModifyButtonClick,
         },
         svgPathIconProps: {
           iconIds: 'pencil',
@@ -219,66 +252,40 @@ const ElementBadgeComponentRaw = forwardRef<any, ElementBadgeComponentProps>(
       <ElementBadgePopper
         ref={ref}
         placement="top"
-        disablePortal
+        disableArrow={disableArrow}
+        modifiers={modifiers}
         // keepMounted
-        arrow={arrow}
-        modifiers={[
-          {
-            name: 'flip',
-            enabled: true,
-            options: {
-              altBoundary: true,
-              rootBoundary: 'document',
-              padding: 8,
-            },
-          },
-          {
-            name: 'preventOverflow',
-            enabled: true,
-            options: {
-              altAxis: false,
-              altBoundary: true,
-              tether: true,
-              rootBoundary: 'document',
-              padding: 8,
-            },
-          },
-          {
-            name: 'arrow',
-            enabled: arrow,
-            options: {
-              element: arrowRef,
-            },
-          },
-        ]}
+        disablePortal
+        transition
         {...rest}
       >
-        <div>
+        {({TransitionProps}) => (
+          <Zoom {...TransitionProps} >
+            <div>
+              {!disableArrow && (
+                <PopperArrowComponent ref={setArrowRef} className={classKeys.arrow} />
+              )}
 
-          {arrow && <PopperArrowComponent ref={setArrowRef} className={classKeys.arrow} />}
-
-          <ButtonGroup variant="contained" color="primary" aria-label="element controls">
-
-            {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
-              <Tooltip key={id} {...tooltipProps}>
-                <Button {...buttonProps}>
-                  <SvgPathIcon fontSize="small" {...svgPathIconProps} />
-                  <SrOnlyComponent component="span" {...srOnlyProps} />
-                </Button>
-              </Tooltip>
-            ))}
-
-          </ButtonGroup>
-        </div>
+              <ButtonGroup variant="contained" color="primary" aria-label="element controls">
+                {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
+                  <Tooltip key={id} {...tooltipProps}>
+                    <Button {...buttonProps}>
+                      <SvgPathIcon fontSize="small" {...svgPathIconProps} />
+                      <SrOnlyComponent component="span" {...srOnlyProps} />
+                    </Button>
+                  </Tooltip>
+                ))}
+              </ButtonGroup>
+            </div>
+          </Zoom>
+        )}
       </ElementBadgePopper>
     )
   },
 )
 
 ElementBadgeComponentRaw.displayName = 'ElementBadgeComponent'
-ElementBadgeComponentRaw.defaultProps = {
-  arrow: false,
-}
+ElementBadgeComponentRaw.defaultProps = {}
 
 export const ElementBadgeComponent = memo(ElementBadgeComponentRaw)
 export default ElementBadgeComponent

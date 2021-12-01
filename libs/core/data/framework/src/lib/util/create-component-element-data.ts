@@ -32,15 +32,19 @@ function traverseComponentTemplate(data: TemplateSubElementData): AglynComponent
   }
 }
 
+export type CreateComponentElementDataOptions =
+  | AglynComponentElementTemplateData
+  | { data: AglynComponentElementDataDenormalized }
+
 export const ELEMENT_DEFAULTS: Partial<AglynComponentElementDataDenormalized> = {
   props: {},
   elements: [],
 }
 
 export function createComponentElementData(
-  template?: AglynComponentElementTemplateData | { data: AglynComponentElementDataDenormalized },
+  options?: CreateComponentElementDataOptions,
 ): AglynComponentElementDataDenormalized {
-  const {data} = {...template}
+  const {data} = {...options}
 
   return objectDeepMergeMany([
     {...ELEMENT_DEFAULTS},

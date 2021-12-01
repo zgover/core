@@ -16,77 +16,76 @@
  */
 
 import { createComponentElementData, ELEMENT_ROOT_ID } from '@aglyn/core-data-framework'
-import {
-  useAglynBuilderStore,
-  useAglynCanvasApiEvents,
-  useAglynComponentSchema,
-  useAglynElementData,
-  useAglynElementParentPosition,
-} from '@aglyn/feature-renderer'
-import { useCallback } from 'react'
+import { useAglynCanvasApiEvents, useAglynElementParentPosition } from '@aglyn/feature-renderer'
+import { SyntheticEvent, useCallback } from 'react'
 import { ElementDrawerOptions, useElementDrawerContext } from '../contexts/element-drawer-context'
+import useAglynCanvasSelected from './use-aglyn-canvas-selected'
 
 
-export interface UseAddElementCallbackOptions {
-  onComplete?: (response: unknown) => void
-  onError?: (error: unknown) => void
+export interface UseAddElementCallbackOptions<E extends SyntheticEvent<any> = SyntheticEvent<any>> {
+  onComplete?: (event: E | null, response: unknown) => void
+  onError?: (event: E | null, error: unknown) => void
   drawerOptions?: ElementDrawerOptions
 }
 
-export type AddElementCallback = () => void
+export type AddElementCallback<E extends SyntheticEvent<any> = SyntheticEvent<any>> = {
+  bivarianceHack(event: E | null, options?: UseAddElementCallbackOptions): void
+}['bivarianceHack']
 
-export function useAddElementCallback(options?: UseAddElementCallbackOptions): AddElementCallback {
+export function useAddElementCallback<E extends SyntheticEvent<any>>(
+  options?: UseAddElementCallbackOptions,
+): AddElementCallback<E> {
+
   const {onComplete, onError, drawerOptions} = {...options}
   const {elementDrawer} = useElementDrawerContext()
-  const {addElement, updateElement} = useAglynCanvasApiEvents()
-  const {$id: selectedId} = useAglynBuilderStore('canvas', 'selected') || {}
-  const {
-    parentId: selectedParentId,
-    index: selectedIndex,
-    parentElements: selectedParentElements,
-  } = useAglynElementParentPosition(selectedId) || {}
-  const parentElementsLength = selectedParentElements.length
-  const {props, componentId, bundleId} = useAglynElementData(selectedId) || {}
-  const {renderFlags} = useAglynComponentSchema(componentId, bundleId) || {}
-  const edit = drawerOptions?.type === 'edit-element-traits'
+  const {addElement} = useAglynCanvasApiEvents()
+  const {$id} = useAglynCanvasSelected() || {}
+  const {parentId, index, parentElements} = useAglynElementParentPosition($id) || {}
+  const siblingCount = parentElements.length
 
-  return useCallback(async () => {
-    const option = await elementDrawer({
+  return useCallback(async (e, options) => {
+
+
+    await elementDrawer({
       title: 'Add New Element',
-      ...(edit ? {
-        propsSchema: {...renderFlags?.propsSchema},
-        selectedElementProps: {...props},
-      } : {}),
       ...drawerOptions,
+      ...options?.drawerOptions,
     })
+
     .then((res: any) => {
       const data = res?.option?.data
       if (data) {
-        const pos = (selectedIndex === -1 ? parentElementsLength : selectedIndex + 1)
-        console.log('then newElement', selectedIndex, pos, data)
-
-
-        if (edit) {
-          updateElement({element: {$id: selectedId, props: {...data}}})
+        const newElement = {
+          index: (index === -1 ? siblingCount : index + 1),
+          parentId: parentId || ELEMENT_ROOT_ID,
+          element: createComponentElementData(data),
         }
-        else {
-          addElement({
-            position: pos,
-            parentId: selectedParentId || ELEMENT_ROOT_ID,
-            element: createComponentElementData(data),
-          })
-        }
-
+        console.log('addElement', newElement)
+        addElement(newElement)
       }
-      onComplete && onComplete(res)
+      else {
+        console.warn('Invalid data returned for addElement callback', data)
+      }
+      onComplete && onComplete(e, res)
+      options?.onComplete && options?.onComplete(e, res)
     })
+
     .catch((error) => {
       console.error(error)
-      onError && onError(error)
+      onError && onError(e, error)
+      options?.onError && options?.onError(e, error)
     })
 
-    console.warn('async choice', option)
-  }, [drawerOptions, props, renderFlags, selectedId, elementDrawer, addElement, parentElementsLength, selectedParentId, selectedIndex])
+  }, [
+    elementDrawer,
+    addElement,
+    siblingCount,
+    parentId,
+    index,
+    onComplete,
+    onError,
+    drawerOptions,
+  ])
 }
 
 export default useAddElementCallback

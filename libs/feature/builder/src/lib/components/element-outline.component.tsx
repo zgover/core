@@ -34,19 +34,19 @@ const classKeys = generateComponentClassKeys('AglynElementOutlineComponent', [
 
 export interface AglynElementOutlineProps extends BoxProps {
   type?: 'hovered' | 'selected'
-  open?: boolean
 }
 
 export const AglynElementOutline = styled(
   forwardRef<any, AglynElementOutlineProps>(
     function RefRenderFn(props, ref) {
-      const {className: classNameProp, type, open, ...rest} = props
+      const {className: classNameProp, type, ...rest} = props
       const className = clsx({
-        [classKeys.open]: Boolean(open),
         [classKeys.hovered]: type === 'hovered' || !type,
         [classKeys.selected]: type === 'selected',
       }, classNameProp)
-      return <Box ref={ref} className={className} {...rest} />
+      return (
+        <Box ref={ref} className={className} {...rest} />
+      )
     },
   ),
   {
@@ -55,17 +55,13 @@ export const AglynElementOutline = styled(
 )(({theme}) => ({
   pointerEvents: 'none',
   position: 'absolute',
+  overflow: 'hidden',
   left: 0, top: 0, right: 0, bottom: 0,
-  marginLeft: -2, marginTop: -2,
-  visibility: 'hidden',
+  marginLeft: -2, marginTop: -3,
   transition: theme.transitions.create(['width', 'height'], {
     duration: theme.transitions.duration.short,
     easing: theme.transitions.easing.easeInOut,
   }),
-  overflow: 'hidden',
-  [`&.${classKeys.open}`]: {
-    visibility: 'visible',
-  },
   [`&.${classKeys.hovered}`]: {
     outlineWidth: 3,
     outlineOffset: -2,
@@ -82,10 +78,11 @@ export const AglynElementOutline = styled(
 
 export interface ElementOutlineComponentProps extends Partial<MuiPopperProps> {
   $id: ElementId
-  anchorRef?: RefObject<any>
   isOver?: boolean
   isDragging?: boolean
   type?: AglynElementOutlineProps['type']
+  badgeable?: boolean
+  onGetElementRef: ($id: ElementId) => RefObject<Element>
 }
 
 
@@ -93,13 +90,15 @@ const ElementOutlineComponent = forwardRef<any, ElementOutlineComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       $id,
-      anchorRef,
       isOver,
       isDragging,
       type,
+      badgeable,
+      onGetElementRef,
       ...rest
     } = props
 
+    const anchorRef = onGetElementRef($id)
     const [outlineRef, setOutlineRef] = useState(null)
 
     const isTypeSelect = type === 'selected'
@@ -123,6 +122,29 @@ const ElementOutlineComponent = forwardRef<any, ElementOutlineComponentProps>(
       }
     }, [anchorRef?.current])
 
+    const modifiers = [
+      {
+        name: 'flip',
+        enabled: false,
+        options: {
+          altBoundary: false,
+          rootBoundary: 'viewport',
+          padding: 0,
+        },
+      },
+      {
+        name: 'preventOverflow',
+        enabled: false,
+        options: {
+          altAxis: false,
+          altBoundary: false,
+          tether: true,
+          rootBoundary: 'viewport',
+          padding: 0,
+        },
+      },
+    ]
+
 
     return (
       <MuiPopper
@@ -130,45 +152,24 @@ const ElementOutlineComponent = forwardRef<any, ElementOutlineComponentProps>(
         open={outlineOpen}
         anchorEl={anchorRef?.current}
         placement="top-start"
+        modifiers={modifiers}
         keepMounted
         disablePortal
-        modifiers={[
-          {
-            name: 'flip',
-            enabled: false,
-            options: {
-              altBoundary: false,
-              rootBoundary: 'viewport',
-              padding: 0,
-            },
-          },
-          {
-            name: 'preventOverflow',
-            enabled: false,
-            options: {
-              altAxis: false,
-              altBoundary: false,
-              tether: true,
-              rootBoundary: 'viewport',
-              padding: 0,
-            },
-          },
-        ]}
         {...rest}
       >
         <AglynElementOutline
+          data-aglyn-element-outline={type}
           style={{width, height}}
           ref={setOutlineRef}
           type={outlineType}
-          open
         />
 
-        {isTypeSelect && (
+        {badgeable && (
           <ElementBadgeComponent
-            anchorEl={outlineRef}
+            data-aglyn-element-badge={type}
+            anchorEl={anchorRef?.current}
             open={badgeOpen}
             $id={$id}
-            arrow
           />
         )}
       </MuiPopper>
@@ -176,7 +177,9 @@ const ElementOutlineComponent = forwardRef<any, ElementOutlineComponentProps>(
   },
 )
 ElementOutlineComponent.displayName = 'ElementOutlineComponent'
-ElementOutlineComponent.defaultProps = {}
+ElementOutlineComponent.defaultProps = {
+  type: 'hovered',
+}
 
 export { ElementOutlineComponent }
 export default ElementOutlineComponent

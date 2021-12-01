@@ -226,11 +226,11 @@ export type CanvasSetElementsPayload = PayloadData<{ elements: AglynComponentEle
 export type CanvasGetElementsNormalizedPayload = PayloadData<any>
 export type CanvasGetElementsDenormalizedPayload = PayloadData<any>
 export type CanvasGetApiEventsPayload = PayloadData<any>
-export type CanvasAddElementPayload = PayloadData<{ parentId: ElementId, position: number, element: AglynComponentElementDataDenormalized }>
+export type CanvasAddElementPayload = PayloadData<{ parentId: ElementId, index: number, element: AglynComponentElementDataDenormalized }>
 export type CanvasGetElementPayload = PayloadData<{ $id: ElementId }>
 export type CanvasUpdateElementPayload = PayloadData<{ element: Partial<AglynComponentElementDataNormalized> }>
 export type CanvasDeleteElementPayload = PayloadData<{ $id: ElementId }>
-export type CanvasMoveElementPayload = PayloadData<{ $id: ElementId, parentId: ElementId, position: number }>
+export type CanvasMoveElementPayload = PayloadData<{ $id: ElementId, parentId: ElementId, index: number }>
 export type CanvasDuplicateElementPayload = PayloadData<{ $id: ElementId }>
 
 export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, AglynEmitterPayload> {

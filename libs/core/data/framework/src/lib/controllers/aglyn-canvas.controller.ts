@@ -152,7 +152,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     }
 
     const addElement = (state: ElementsDataStore, payload: CanvasAddElementPayload) => {
-      const {element, parentId, position} = payload
+      const {element, parentId, index} = payload
       const newData = normalizeComponentElementData(element, parentId)
       const present = {
         ...state.present,
@@ -160,7 +160,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
         [parentId]: {
           ...state.present[parentId],
           elements: arrayAddAtIndex(
-            position,
+            index,
             state.present[parentId]?.elements || [],
             newData[parentId]?.elements || [],
             {copy: true},
@@ -185,7 +185,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     }
 
     const moveElement = (state: ElementsDataStore, payload: CanvasMoveElementPayload) => {
-      const {$id, position, parentId} = payload
+      const {$id, index, parentId} = payload
       const current = state.present[$id]
       const present = {
         ...state.present,
@@ -196,7 +196,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
         [parentId]: {
           ...state.present[parentId],
           elements: arrayAddAtIndex(
-            position,
+            index,
             state.present[parentId].elements || [],
             $id,
             {copy: true},
@@ -220,7 +220,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
       return addElement(state, {
         element: elementCopy,
         parentId: elementCopy.parentId,
-        position: position + 1,
+        index: position + 1,
       })
     }
 

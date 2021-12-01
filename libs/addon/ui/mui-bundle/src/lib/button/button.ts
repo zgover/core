@@ -18,6 +18,7 @@
 import type {
   AglynComponentElementTemplateData,
   AglynComponentSchema,
+  BundleUId,
   ComponentId,
 } from '@aglyn/core-data-framework'
 import { createAglynComponentElement } from '@aglyn/core-data-framework'
@@ -27,7 +28,7 @@ import Button from '@mui/material/Button'
 
 export const loader = () => import('@mui/material/Button').then((i) => i.default)
 export const componentId: ComponentId = 'button'
-export const bundleId: ComponentId = 'mui'
+export const bundleId: BundleUId = 'mui'
 export const metadata: AglynComponentSchema['metadata'] = {
   displayName: 'Button',
 }

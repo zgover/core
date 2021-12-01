@@ -20,39 +20,34 @@ import { styled } from '@aglyn/shared-feature-themes'
 import { forwardRef, HTMLAttributes } from 'react'
 import { CanvasRenderedElementRefsConsumer } from '../contexts/canvas-rendered-element-refs'
 import { HoverContextProvider } from '../contexts/hover-context-provider'
-import { useCanvasHovered } from '../hooks/use-builder-hovered'
-import { useCanvasSelected } from '../hooks/use-builder-selected'
+import { useAglynCanvasHovered } from '../hooks/use-aglyn-canvas-hovered'
+import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
 import { ElementOutlineComponent } from './element-outline.component'
 import { ElementRendererComponent } from './element-renderer.component'
 
 
 const Toolbox = (props) => {
-  const selected = useCanvasSelected()
+  const selected = useAglynCanvasSelected()
   const selectedId = selected?.$id
-  const hovered = useCanvasHovered()
+  const hovered = useAglynCanvasHovered()
   const hoveredId = hovered?.$id
 
   return (
     <CanvasRenderedElementRefsConsumer>
-      {({getElement}) => (
+      {({getElementRef}) => (
         <>
           <ElementOutlineComponent
             key="hovered"
             type="hovered"
-            anchorRef={getElement(hoveredId)}
-            // isDragging={isDragging}
-            // isOver={isOver}
-            data-aglyn-element-outline={hoveredId ? `hover:${hoveredId}` : undefined}
+            onGetElementRef={getElementRef}
             $id={hoveredId}
           />
           <ElementOutlineComponent
             key="selected"
             type="selected"
-            anchorRef={getElement(selectedId)}
-            // isDragging={isDragging}
-            // isOver={isOver}
-            data-aglyn-element-outline={selectedId ? `selected:${selectedId}` : undefined}
+            onGetElementRef={getElementRef}
             $id={selectedId}
+            badgeable
           />
         </>
       )}

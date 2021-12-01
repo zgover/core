@@ -161,12 +161,12 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
       }
     }, [rearrangeEnabled, selectEnabled])
 
-    const {setElement, deleteElement} = useCanvasRenderedElementRefs()
+    const {setElementRef, deleteElementRef} = useCanvasRenderedElementRefs()
 
     useLayoutEffect(() => {
-      setElement($id, localRef)
+      setElementRef($id, localRef)
       return () => {
-        deleteElement($id)
+        deleteElementRef($id)
       }
     }, [])
 

@@ -29,6 +29,25 @@ import { ElementsTreeViewComponent } from './elements-tree-view.component'
 import ToolboxDrawerComponent, { ToolboxDrawerComponentProps } from './toolbox-drawer.component'
 
 
+const ElementsTree = () => {
+
+  const handleAddElementClick = useAddElementCallback()
+  return (
+    <>
+      <Box sx={{px: 0.5, pb: 1, pt: 1}}>
+        <Button
+          color="secondary"
+          startIcon={<SvgPathIcon fontSize="inherit" iconIds="plus" />}
+          onClick={handleAddElementClick}
+        >
+          Add Element
+        </Button>
+      </Box>
+      <ElementsTreeViewComponent />
+    </>
+  )
+}
+
 export interface ToolboxLeftComponentProps extends ToolboxDrawerComponentProps {
 }
 
@@ -40,16 +59,19 @@ export const ToolboxLeftComponent = forwardRef<any, ToolboxLeftComponentProps>(
       ...rest
     } = props
 
-    const handleAddElementClick = useAddElementCallback()
     const panel = useAglynBuilderStore('panels', 'left')
     const {toggled, drawerWidth = drawerWidthProp} = panel || {}
     const open = Boolean(toggled)
-
     const [activeView, setActiveView] = useState(() => 'elements-tree')
-    const handleTabChange = useCallback((e, newValue) => {
-      setActiveView(newValue)
-    }, [])
+    const handleTabChange = useCallback((e, newValue) => setActiveView(newValue), [])
 
+    const panels = [
+      {
+        $id: 'elements-tree',
+        iconIds: 'file-tree',
+        component: ElementsTree,
+      },
+    ]
 
     return (
       <ToolboxDrawerComponent
@@ -68,30 +90,16 @@ export const ToolboxLeftComponent = forwardRef<any, ToolboxLeftComponentProps>(
               indicatorColor="secondary"
               textColor="primary"
             >
-              <MuiTab
-                value="elements-tree"
-                icon={<SvgPathIcon iconIds="file-tree" />}
-              />
+              {panels.map(({$id, iconIds}) => (
+                <MuiTab key={$id} value={$id} icon={<SvgPathIcon iconIds={iconIds} />} />
+              ))}
             </MuiTabList>
           </Box>
-
-          <MuiTabPanel
-            value="elements-tree"
-            sx={{p: 0, overflow: 'auto'}}
-          >
-            <Box
-              sx={{px: 0.5, pb: 1, pt: 1}}
-            >
-              <Button
-                color="secondary"
-                startIcon={<SvgPathIcon fontSize="inherit" iconIds="plus" />}
-                onClick={handleAddElementClick}
-              >
-                Add Element
-              </Button>
-            </Box>
-            <ElementsTreeViewComponent />
-          </MuiTabPanel>
+          {panels.map(({$id, component: Component}) => (
+            <MuiTabPanel key={$id} value={$id} sx={{p: 0, overflow: 'auto'}}>
+              <Component />
+            </MuiTabPanel>
+          ))}
         </MuiTabContext>
 
         {children}

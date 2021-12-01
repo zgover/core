@@ -18,18 +18,17 @@
 import { getBuilderStore } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/feature-renderer'
 import { useStoreMap } from 'effector-react'
-import { useMemo } from 'react'
 
 
-export interface UseBuilderSelected {
+export interface UseAglynCanvasSelected {
 
 }
 
-export const useCanvasSelected = (opts?: UseBuilderSelected) => {
+export const useAglynCanvasSelected = (opts?: UseAglynCanvasSelected) => {
   const {getApp} = useAglynAppContext(),
     store = getBuilderStore(getApp(), {store: 'canvas'})
 
   return useStoreMap(store, (store) => store?.selected)
 }
 
-export default useCanvasSelected
+export default useAglynCanvasSelected

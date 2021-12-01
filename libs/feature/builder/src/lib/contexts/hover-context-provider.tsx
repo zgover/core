@@ -18,7 +18,7 @@
 import { ElementId } from '@aglyn/core-data-framework'
 // import { useDndMonitor } from '@dnd-kit/core'
 // import { DragOverEvent } from '@dnd-kit/core/dist/types'
-import { ReactNode, RefObject, useRef } from 'react'
+import { ReactNode, RefObject, useRef, useState } from 'react'
 import {
   CanvasRenderedElementRefs,
   CanvasRenderedElementRefsProvider,
@@ -31,18 +31,18 @@ export interface HoverContextProviderProps {
 
 function HoverContextProviderRaw(props: HoverContextProviderProps) {
   const {children} = props
-  const elementRefs = useRef<CanvasRenderedElementRefs>({
-    elements: {},
-    getElement($id: ElementId) {
-      return elementRefs.current.elements[$id]
+  const elementRefs = useRef<{ [$id: ElementId]: RefObject<Element> }>({})
+  const [context] = useState<CanvasRenderedElementRefs>(() => ({
+    getElementRef: ($id: ElementId): RefObject<Element> => {
+      return elementRefs.current[$id]
     },
-    deleteElement($id: ElementId): void {
-      delete elementRefs.current.elements[$id]
+    deleteElementRef: ($id: ElementId): void => {
+      delete elementRefs.current[$id]
     },
-    setElement($id: ElementId, ref: RefObject<Element>): void {
-      elementRefs.current.elements[$id] = ref
+    setElementRef: ($id: ElementId, ref: RefObject<Element>): void => {
+      elementRefs.current[$id] = ref
     },
-  })
+  }))
 
   // useDndMonitor({
   //   onDragStart(event) {},
@@ -55,7 +55,7 @@ function HoverContextProviderRaw(props: HoverContextProviderProps) {
   // console.log('selectedOptions selectedOpen', selectedOptions, selectedOpen, hoveredOpen)
 
   return (
-    <CanvasRenderedElementRefsProvider value={elementRefs.current}>
+    <CanvasRenderedElementRefsProvider value={context}>
       {children}
     </CanvasRenderedElementRefsProvider>
   )

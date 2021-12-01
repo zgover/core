@@ -34,6 +34,55 @@ import { useComponentFormSchema } from '../hooks/use-component-form-schema'
 import { ToolboxDrawerComponent, ToolboxDrawerComponentProps } from './toolbox-drawer.component'
 
 
+const ElementInfo = () => {
+  return (
+    <Box px={2} py={2} width={1}>
+    </Box>
+  )
+}
+
+const PropsForm = () => {
+
+  const {getApp} = useAglynAppContext()
+  const {addElement, updateElement} = useAglynCanvasApiEvents()
+  const {$id} = useAglynBuilderStore('canvas', 'selected') || {}
+  const {props: elemProps, componentId, bundleId} = useAglynElementData($id) || {}
+  const formSchema = useComponentFormSchema({componentId, bundleId})
+
+  const handleElementSave = useCallback((values) => {
+    updateElement({element: {$id, props: {...values}}})
+  }, [$id])
+  const handleDrawerClose = useCallback((e, reason) => {
+
+  }, [])
+  const handleDeleteButtonClick = useCallback((e) => {
+
+  }, [])
+
+  return (
+    <Box px={2} py={2} width={1}>
+      <FormRenderer
+        FormTemplate={GridFormTemplate}
+        componentMapper={componentMapper}
+        onCancel={handleDrawerClose}
+        onSubmit={handleElementSave}
+        initialValues={elemProps}
+        schema={formSchema}
+      />
+
+      <FormControl margin="none" fullWidth>
+        <Button
+          onClick={handleDeleteButtonClick}
+          sx={{mt: 2, color: 'error.main'}}
+          fullWidth
+        >
+          Delete Element
+        </Button>
+      </FormControl>
+    </Box>
+  )
+}
+
 export interface ToolboxRightComponentProps extends ToolboxDrawerComponentProps {
 }
 
@@ -51,22 +100,18 @@ export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>
     const [activeView, setActiveView] = useState(() => 'element-form')
     const handleTabChange = useCallback((e, val) => setActiveView(val), [])
 
-
-    const {getApp} = useAglynAppContext()
-    const {addElement, updateElement} = useAglynCanvasApiEvents()
-    const {$id} = useAglynBuilderStore('canvas', 'selected') || {}
-    const {props: elemProps, componentId, bundleId} = useAglynElementData($id) || {}
-    const formSchema = useComponentFormSchema({componentId, bundleId})
-
-    const handleElementSave = useCallback((values) => {
-      updateElement({element: {$id, props: {...values}}})
-    }, [$id])
-    const handleDrawerClose = useCallback((e, reason) => {
-
-    }, [])
-    const handleDeleteButtonClick = useCallback((e) => {
-
-    }, [])
+    const panels = [
+      {
+        $id: 'element-form',
+        iconIds: 'order-bool-descending-variant',
+        component: PropsForm,
+      },
+      {
+        $id: 'element-information',
+        iconIds: 'information-variant',
+        component: ElementInfo,
+      },
+    ]
 
 
     return (
@@ -86,50 +131,16 @@ export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>
               indicatorColor="secondary"
               textColor="primary"
             >
-              <MuiTab
-                value="element-information"
-                icon={<SvgPathIcon iconIds="information-variant" />}
-              />
-              <MuiTab
-                value="element-form"
-                icon={<SvgPathIcon iconIds="order-bool-descending-variant" />}
-              />
+              {panels.map(({$id, iconIds}) => (
+                <MuiTab key={$id} value={$id} icon={<SvgPathIcon iconIds={iconIds} />} />
+              ))}
             </MuiTabList>
           </Box>
-
-          <MuiTabPanel
-            value="element-information"
-            sx={{p: 0, overflow: 'auto'}}
-          >
-            <Box px={2} py={2} width={1}>
-            </Box>
-          </MuiTabPanel>
-
-          <MuiTabPanel
-            value="element-form"
-            sx={{p: 0, overflow: 'auto'}}
-          >
-            <Box px={2} py={2} width={1}>
-              <FormRenderer
-                FormTemplate={GridFormTemplate}
-                componentMapper={componentMapper}
-                onCancel={handleDrawerClose}
-                onSubmit={handleElementSave}
-                initialValues={elemProps}
-                schema={formSchema}
-              />
-
-              <FormControl margin="none" fullWidth>
-                <Button
-                  onClick={handleDeleteButtonClick}
-                  sx={{mt: 2, color: 'error.main'}}
-                  fullWidth
-                >
-                  Delete Element
-                </Button>
-              </FormControl>
-            </Box>
-          </MuiTabPanel>
+          {panels.map(({$id, component: Component}) => (
+            <MuiTabPanel key={$id} value={$id} sx={{p: 0, overflow: 'auto'}}>
+              <Component />
+            </MuiTabPanel>
+          ))}
         </MuiTabContext>
 
         {children}
