@@ -22,7 +22,7 @@ import { CanvasRenderedElementRefsConsumer } from '../contexts/canvas-rendered-e
 import { HoverContextProvider } from '../contexts/hover-context-provider'
 import { useAglynCanvasHovered } from '../hooks/use-aglyn-canvas-hovered'
 import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
-import { ElementOutlineComponent } from './element-outline.component'
+import { ElementCanvasPopperComponent } from './element-canvas-popper.component'
 import { ElementRendererComponent } from './element-renderer.component'
 
 
@@ -36,15 +36,15 @@ const Toolbox = (props) => {
     <CanvasRenderedElementRefsConsumer>
       {({getElementRef}) => (
         <>
-          <ElementOutlineComponent
+          <ElementCanvasPopperComponent
             key="hovered"
-            type="hovered"
+            variant="hovered"
             onGetElementRef={getElementRef}
             $id={hoveredId}
           />
-          <ElementOutlineComponent
+          <ElementCanvasPopperComponent
             key="selected"
-            type="selected"
+            variant="selected"
             onGetElementRef={getElementRef}
             $id={selectedId}
             badgeable
@@ -56,7 +56,7 @@ const Toolbox = (props) => {
 }
 
 
-const ViewportFrame = styled('div', {name: 'ViewportFrame'})(({theme}) => ({
+const ViewportFrame = styled('div', {name: 'AglynViewportFrame'})(({theme}) => ({
   flexGrow: 1,
   minHeight: '100%',
   width: '100%',

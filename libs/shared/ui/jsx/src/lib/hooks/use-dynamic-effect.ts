@@ -15,13 +15,10 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { render } from '@testing-library/react'
-import SelectionContextProvider from './selection-context-provider'
+import { useEffect, useLayoutEffect} from 'react'
 
-describe('SelectionContextProvider', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<SelectionContextProvider />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export const useDynamicEffect = typeof window !== 'undefined'
+  ? useLayoutEffect
+  : useEffect
+
+export default useDynamicEffect

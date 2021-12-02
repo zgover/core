@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { createComponentElementData, ELEMENT_ROOT_ID } from '@aglyn/core-data-framework'
+import { CANVAS_ROOT_ELEMENT_ID, createComponentElementData } from '@aglyn/core-data-framework'
 import { useAglynCanvasApiEvents, useAglynElementParentPosition } from '@aglyn/feature-renderer'
 import { SyntheticEvent, useCallback } from 'react'
 import { ElementDrawerOptions, useElementDrawerContext } from '../contexts/element-drawer-context'
@@ -43,10 +43,10 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
   const {parentId, index, parentElements} = useAglynElementParentPosition($id) || {}
   const siblingCount = parentElements.length
 
-  return useCallback(async (e, options) => {
+  return useCallback((e, options) => {
 
 
-    await elementDrawer({
+    elementDrawer({
       title: 'Add New Element',
       ...drawerOptions,
       ...options?.drawerOptions,
@@ -57,7 +57,7 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
       if (data) {
         const newElement = {
           index: (index === -1 ? siblingCount : index + 1),
-          parentId: parentId || ELEMENT_ROOT_ID,
+          parentId: parentId || CANVAS_ROOT_ELEMENT_ID,
           element: createComponentElementData(data),
         }
         console.log('addElement', newElement)

@@ -59,14 +59,14 @@ export type OmitIndexOfType<T, U> = {
 /** From T, omit properties in union with 'K' "distributively" for union types */
 export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never
 
-/** Any type of object record with string index types */
-export type AnyProps = Record<string, unknown>
-
 /** Plain old dictionary of key(K)-value(T) pairs with string signatures */
 export type KeyValueMap<K extends PKey = PKey, T = unknown> = Record<K, T>
 
 /** Dictionary collection with string index types (optionally specify value by setting T) */
 export type Dictionary<T = unknown> = KeyValueMap<string, T>
+
+/** Any type of object record with string index types */
+export type AnyProps = Record<string, unknown>
 
 /** Dictionary collection optionally specify values to T */
 export type EmptyObj<K extends keyof any = keyof any> = Record<K, never>

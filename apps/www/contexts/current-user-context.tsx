@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ComponentWithInjectedProp, withContext } from '@aglyn/shared-ui-jsx'
+import { ComponentWithInjectedProp, createHocWithContextConsumer } from '@aglyn/shared-ui-jsx'
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
 import { FbUser } from '../lib/aglyn-deprecated'
 import { AppContextType, withAppContext } from './app-context'
@@ -88,7 +88,7 @@ export const CurrentUserProviderComponent = withAppContext(CurrentUserProviderCo
 export function withCurrentUserContext<P>(
   Component: ComponentWithInjectedProp<P, CurrentUserContextConsumer, 'currentUserContext'>
 ) {
-  return withContext(CurrentUserContextConsumer, 'currentUserContext')(Component)
+  return createHocWithContextConsumer(CurrentUserContextConsumer, 'currentUserContext')(Component)
 }
 
 // Custom hook that shorthands the context!

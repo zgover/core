@@ -17,6 +17,6 @@
 
 import { SpacingOptions } from '../../vendor/mui'
 
-export const consoleSpacing: SpacingOptions = 10
+export const consoleSpacing: SpacingOptions = 8
 
 export default consoleSpacing

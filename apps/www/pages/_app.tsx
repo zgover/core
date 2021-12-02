@@ -206,7 +206,8 @@ Hello there, Friend! 👋
 For detailed information please visit 'https://aglyn.com' or you may send an
 email to 'info@aglyn.com'.
 – Aglyn Engineering Team
+
 `,
-    'font-family:monospace;color:#E040FB;font-size:12px;',
+    'font-family:"Courier New",monospace;color:#E040FB;font-size:12px;',
   )
 }

@@ -15,24 +15,17 @@
  * limitations under the License.
  */
 
-import {
-  consoleThemeDark,
-  consoleThemeLight,
-  styled,
-  withTheme,
-} from '@aglyn/shared-feature-themes'
-import { ConfirmationProviderComponent } from '@aglyn/shared-ui-jsx'
+import { styled } from '@aglyn/shared-feature-themes'
 import Stack, { StackProps } from '@mui/material/Stack'
 import { forwardRef } from 'react'
-import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
 import { AppBarGlobalComponent } from './app-bar-global.component'
 import { AppBarModifyComponent } from './app-bar-modify.component'
 import { ToolboxLeftComponent } from './toolbox-left.component'
-import ToolboxRightComponent from './toolbox-right.component'
+import { ToolboxRightComponent } from './toolbox-right.component'
 import { ViewportRootComponent } from './viewport-root.component'
 
 
-const Editor = styled(Stack, {name: 'Editor'})({
+const Editor = styled(Stack, {name: 'AglynEditor'})({
   position: 'absolute',
   left: 0, right: 0, top: 0, bottom: 0,
   height: '100%', width: '100%',
@@ -48,75 +41,66 @@ const EditorComponentRaw = forwardRef<any, EditorComponentProps>(
     const {children, ...rest} = props
 
     return (
-      <>
-        {/*<SnackbarProvider maxSnack={3}>*/}
-        <ConfirmationProviderComponent>
-          <ComponentsDrawerContextProvider>
 
-            <Editor
-              ref={ref}
-              id="aglyn:builder"
-              direction="column"
-              alignContent="stretch"
-              alignItems="stretch"
-              spacing={0}
-              {...rest}
-            >
-              <Stack
-                direction="column"
-                justifyContent="flex-start"
-                alignItems="stretch"
-                spacing={0}
-                sx={{
-                  zIndex: 1,
-                }}
-              >
-                <AppBarGlobalComponent
-                  id="aglyn:builder-appbar-global"
-                  aria-label="builder application toolbar global"
-                />
-                <AppBarModifyComponent
-                  id="aglyn:builder-appbar-modify"
-                  aria-label="builder application modifier toolbar"
-                />
-              </Stack>
+      <Editor
+        ref={ref}
+        id="aglyn:builder"
+        direction="column"
+        alignContent="stretch"
+        alignItems="stretch"
+        spacing={0}
+        {...rest}
+      >
+        <Stack
+          direction="column"
+          justifyContent="flex-start"
+          alignItems="stretch"
+          spacing={0}
+          sx={{
+            zIndex: 1,
+          }}
+        >
+          <AppBarGlobalComponent
+            id="aglyn:builder-appbar-global"
+            aria-label="builder application toolbar global"
+          />
+          <AppBarModifyComponent
+            id="aglyn:builder-appbar-modify"
+            aria-label="builder application modifier toolbar"
+          />
+        </Stack>
 
-              <Stack
-                direction="row"
-                alignItems="stretch"
-                flexGrow={1}
-                spacing={0}
-                sx={{
-                  overflow: 'hidden',
-                  zIndex: 0,
-                }}
-              >
-                <ToolboxLeftComponent
-                  id="aglyn:builder-toolbox-left"
-                  aria-label="builder toolbox left"
-                />
+        <Stack
+          direction="row"
+          alignItems="stretch"
+          flexGrow={1}
+          spacing={0}
+          sx={{
+            overflow: 'hidden',
+            zIndex: 0,
+          }}
+        >
+          <ToolboxLeftComponent
+            id="aglyn:builder-toolbox-left"
+            aria-label="builder toolbox left"
+          />
 
-                <ViewportRootComponent
-                  id="aglyn:builder-viewport"
-                  aria-label="builder viewport"
-                  direction="column"
-                  alignItems="center"
-                  spacing={0}
-                />
+          <ViewportRootComponent
+            id="aglyn:builder-viewport"
+            aria-label="builder viewport"
+            direction="column"
+            alignItems="center"
+            spacing={0}
+          />
 
-                <ToolboxRightComponent
-                  id="aglyn:builder-toolbox-right"
-                  aria-label="builder toolbox right"
-                />
-              </Stack>
+          <ToolboxRightComponent
+            id="aglyn:builder-toolbox-right"
+            aria-label="builder toolbox right"
+          />
+        </Stack>
 
-              {children}
-            </Editor>
-
-          </ComponentsDrawerContextProvider>
-        </ConfirmationProviderComponent>
-        {/*</SnackbarProvider>*/}
-      </>
+        {children}
+      </Editor>
     )
   },
 )
@@ -124,7 +108,5 @@ const EditorComponentRaw = forwardRef<any, EditorComponentProps>(
 EditorComponentRaw.displayName = 'EditorComponent'
 EditorComponentRaw.defaultProps = {}
 
-export const EditorComponent = withTheme({
-  theme: [consoleThemeLight, consoleThemeDark],
-})(EditorComponentRaw)
+export const EditorComponent = EditorComponentRaw
 export default EditorComponent

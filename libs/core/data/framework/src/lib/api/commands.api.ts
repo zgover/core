@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _commandsControllers } from '../constants/_internal'
+import { _INTERNAL_COMMANDS_ } from '../constants/_internal'
 import {
   CommandRegisterListenerPayload,
   CommandRemoveResolverPayload,
@@ -30,7 +30,7 @@ import { _validateAppArg } from './app.api'
 
 export function _getCommandController(app: AglynAppController): AglynCommandsController {
   _validateAppArg(app)
-  return _commandsControllers.get(app.getName())
+  return _INTERNAL_COMMANDS_.get(app.getName())
 }
 
 

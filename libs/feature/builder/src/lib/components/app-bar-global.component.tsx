@@ -18,7 +18,6 @@
 import { styled } from '@aglyn/shared-feature-themes'
 import { AglynSvgAppIcon } from '@aglyn/shared-ui-jsx'
 import AppBar, { AppBarProps } from '@mui/material/AppBar'
-import Divider from '@mui/material/Divider'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { forwardRef } from 'react'
@@ -49,7 +48,6 @@ export const AppBarGlobalComponent = forwardRef<any, AppBarGlobalComponentProps>
           </Typography>
           {children}
         </Toolbar>
-        <Divider />
       </StyledGlobalAppBar>
     )
   },

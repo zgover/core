@@ -37,15 +37,15 @@ export interface AglynExtension<T = any, O extends AglynExtensionOptions = Aglyn
 }
 
 const TAG = 'AglynExtension'
-const MODULE_NAME = 'extensions/model'
+const MODULE_NAME = 'extensions.model'
 
 export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModel<O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly [TYPE_KIND]: number | symbol = EXTENSION_TYPE
   public static readonly extensionName: string = 'unknown'
-  public static get childNs(): string {return `${MODULE_NAME}/${this.extensionName}`}
-  public static get moduleName(): string {return `${MODULE_NAME}/${this.extensionName}`}
+  public static get namespace(): string {return `${MODULE_NAME}::${this.extensionName}`}
+  public static get moduleName(): string {return `${MODULE_NAME}::${this.extensionName}`}
 
   protected context?: T = null
   #lifecycle?: AglynLifecycleFlag[] = [AglynLifecycleFlag.UNREGISTERED]
@@ -67,8 +67,8 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
     this.#lifecycle.push(value)
   }
 
-  protected constructor(options: O) {
-    super(options)
+  protected constructor(app: AglynAppController, options: O) {
+    super(app, options)
   }
 
   public toString = (): string => {

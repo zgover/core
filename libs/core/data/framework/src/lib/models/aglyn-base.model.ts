@@ -46,11 +46,12 @@ export interface AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModel
 }
 
 const TAG = 'AglynBaseModel'
+const MODULE_NAME = 'model'
 
 export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly childNs: string = null
+  public static readonly namespace: string = MODULE_NAME
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly sdkVersion: AglynVersion = SDK_VERSION
 
@@ -63,8 +64,8 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public get [Symbol.toStringTag](): string {
     return getStaticField(Symbol.toStringTag, this)
   }
-  public get childNs(): string {
-    return getStaticField('childNs', this)
+  public get namespace(): string {
+    return getStaticField('namespace', this)
   }
   public get platform(): AglynPlatform {
     return getStaticField('platform', this)
@@ -91,10 +92,10 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
     this.#setup()
   }
   #setup() {
-    const childNs = this.childNs
+    const namespace = this.namespace
 
     const errorFactory = this.#options.errorFactory || AGLYN_ERROR
-    this.#errorFactory = !childNs ? errorFactory : errorFactory.childFactory(childNs)
+    this.#errorFactory = !namespace ? errorFactory : errorFactory.childFactory(namespace)
 
     this.#emitter = this.#options.emitter || AGLYN_EMITTER
 
@@ -108,7 +109,7 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   }
   public toJSON(): Dictionary {
     return {
-      childNs: this.childNs,
+      namespace: this.namespace,
       created: this.#created,
       sdkVersion: this.sdkVersion,
       platform: this.platform,

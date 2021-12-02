@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _builderControllers } from '../constants/_internal'
+import { _INTERNAL_BUILDERS_ } from '../constants/_internal'
 import type {
   BuilderClosePanelPayload,
   BuilderFlagInteractModePayload,
@@ -36,7 +36,7 @@ import { _validateAppArg } from './app.api'
 
 export function _getBuilderController(app: AglynAppController): AglynBuilderController {
   _validateAppArg(app)
-  return _builderControllers.get(app.getName())
+  return _INTERNAL_BUILDERS_.get(app.getName())
 }
 
 export function getBuilderStore<K extends keyof BuilderContextStores>(

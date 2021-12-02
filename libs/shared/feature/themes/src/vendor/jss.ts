@@ -15,14 +15,5 @@
  * limitations under the License.
  */
 
-import { AglynAppController } from '@aglyn/core-data-framework'
-import { createContext, useContext } from 'react'
-
-
-export type IAglynAppContext = { getApp(): AglynAppController }
-export const AglynAppContext = createContext<IAglynAppContext>({
-  getApp: () => undefined,
-})
-export const useAglynAppContext = () => {
-  return useContext(AglynAppContext)
-}
+export * as JSS from 'jss'
+export { default as jssRtl } from 'jss-rtl'

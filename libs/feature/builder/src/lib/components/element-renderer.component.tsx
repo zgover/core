@@ -29,11 +29,11 @@ import {
   useAglynElementData,
 } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
-import { useCombinedRefs } from '@aglyn/shared-ui-jsx'
+import { useCombinedRefs, useDynamicEffect } from '@aglyn/shared-ui-jsx'
 import { CSS } from '@aglyn/shared-util-tools'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import Box, { BoxProps } from '@mui/material/Box'
-import { forwardRef, Fragment, MouseEvent, useCallback, useLayoutEffect, useRef } from 'react'
+import { forwardRef, MouseEvent, useCallback, useRef } from 'react'
 import { useCanvasRenderedElementRefs } from '../contexts/canvas-rendered-element-refs'
 import { useBuilderElementAttributes } from '../hooks/use-builder-element-attributes'
 
@@ -163,7 +163,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
 
     const {setElementRef, deleteElementRef} = useCanvasRenderedElementRefs()
 
-    useLayoutEffect(() => {
+    useDynamicEffect(() => {
       setElementRef($id, localRef)
       return () => {
         deleteElementRef($id)
@@ -175,21 +175,19 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
     // console.log('element attributes', elementAttributes)
 
     return (
-      <Fragment>
-        <DefaultElementRendererComponent
-          ref={useCombinedRefs(ref, localRef, dropRef, dragRef)}
-          // component={}
-          $id={$id}
-          elementRendererComponent={ElementRendererComponent}
-          style={style}
-          onMouseOver={handleMouseOver}
-          onMouseOut={handleMouseLeave}
-          onPointerDown={handlePointerDown}
-          {...elementAttributes}
-          {...dragListeners}
-          {...rest}
-        />
-      </Fragment>
+      <DefaultElementRendererComponent
+        ref={useCombinedRefs(ref, localRef, dropRef, dragRef)}
+        // component={}
+        $id={$id}
+        elementRendererComponent={ElementRendererComponent}
+        style={style}
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseLeave}
+        onPointerDown={handlePointerDown}
+        {...elementAttributes}
+        {...dragListeners}
+        {...rest}
+      />
     )
   },
 )

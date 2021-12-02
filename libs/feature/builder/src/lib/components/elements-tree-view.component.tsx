@@ -16,9 +16,10 @@
  */
 
 import {
+  CANVAS_ROOT_ELEMENT_ID,
   DEFAULT_COMPONENT_ICON_ID,
-  ELEMENT_ROOT_ID,
   ElementId,
+  setBuilderCanvasHovered,
   setBuilderCanvasSelected,
 } from '@aglyn/core-data-framework'
 import {
@@ -36,10 +37,22 @@ import { forwardRef, Fragment, useCallback, useMemo } from 'react'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
 
-const ScrollableTreeView = styled(MuiTreeView, {name: 'ScrollableTreeView'})({
+const TreeItemIcon = styled(SvgPathIcon, {
+  name: 'AglynTreeItemIcon',
+})(({theme}) => ({
+  fontSize: theme.typography.pxToRem(20),
+  marginLeft: theme.spacing(-0.25),
+  marginRight: theme.spacing(0.35),
+  marginBottom: theme.spacing(-0.5),
+  padding: theme.spacing(0.26),
+  borderRadius: '50%',
+  backgroundColor: theme.palette.tertiary.light,
+  border: `1px solid ${theme.palette.tertiary.main}`,
+  color: theme.palette.tertiary.contrastText,
+}))
+const ScrollableTreeView = styled(MuiTreeView, {name: 'AglynScrollableTreeView'})({
   overflow: 'auto',
   flexGrow: 1,
-  maxWidth: 400,
 })
 
 interface ElementsTreeItemComponentProps extends Partial<TreeItemProps> {
@@ -61,11 +74,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
           nodeId={$id}
           label={(
             <Fragment>
-              <SvgPathIcon
-                sx={{fontSize: '0.8em', ml: -0.25, mr: 0.75}}
-                color="inherit"
-                iconIds={iconIds || DEFAULT_COMPONENT_ICON_ID}
-              />
+              <TreeItemIcon iconIds={iconIds || DEFAULT_COMPONENT_ICON_ID} />
               {label}
             </Fragment>
           )}
@@ -92,17 +101,21 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     } = props
 
     const {getApp} = useAglynAppContext()
-    const elements = useAglynElementData(ELEMENT_ROOT_ID, 'elements')
+    const elements = useAglynElementData(CANVAS_ROOT_ELEMENT_ID, 'elements')
     const selected = useAglynCanvasSelected()
     const selectedId = selected?.$id
     const selectedIdHierarchy = useAglynCanvasElementHierarchy(selectedId)
 
     const defaultExpanded = useMemo(() => (
-      selectedIdHierarchy.filter((id) => id !== ELEMENT_ROOT_ID)
+      selectedIdHierarchy.filter((id) => id !== CANVAS_ROOT_ELEMENT_ID)
     ), [selectedIdHierarchy])
     const handleTreeItemSelect = useCallback((e, $id) => {
-      console.log('$id', $id)
+      console.log('handleTreeItemSelect $id', $id)
       setBuilderCanvasSelected(getApp(), {selected: {$id}})
+    }, [])
+    const handleTreeItemFocus = useCallback((e, $id) => {
+      console.log('handleTreeItemFocus $id', $id)
+      setBuilderCanvasHovered(getApp(), {hovered: {$id}})
     }, [])
 
     return (
@@ -110,6 +123,7 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
         ref={ref}
         aria-label="canvas elements navigator"
         onNodeSelect={handleTreeItemSelect}
+        onNodeFocus={handleTreeItemFocus}
         selected={selectedId ?? ''}
         expanded={defaultExpanded}
         defaultCollapseIcon={<SvgPathIcon iconIds={'chevron-down'} />}

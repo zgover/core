@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-export * from './vendor/mui'
 export * from './vendor/emotion'
+export * from './vendor/jss'
+export * from './vendor/mui'
 
 export * from './lib/builder-theme'
 export * from './lib/console-theme'

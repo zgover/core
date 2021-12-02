@@ -17,6 +17,7 @@
 
 import { ElementId, getBuilderStore } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/feature-renderer'
+import { deepEqual } from '@aglyn/shared-util-vendor'
 import { useStoreMap } from 'effector-react'
 
 
@@ -26,6 +27,10 @@ export interface UseBuilderElementInteractionActivity {
   isChildSelected: boolean
   isChildHovered: boolean
 }
+
+const checkHierarchy = (v: string[], $id: ElementId) => (v || [])?.some(
+  (id, i, a) => id === $id && i !== a.length - 1,
+)
 
 export const useBuilderElementInteractionActivity = (
   $id: ElementId,
@@ -37,22 +42,24 @@ export const useBuilderElementInteractionActivity = (
     store,
     keys: [$id],
     fn(state, [$id]) {
-      const checkHierarchy = (v: string[], $id: ElementId) => v?.some(
-        (id, i, a) => id === $id && i !== a.length - 1,
-      )
-      const isSelfSelected = $id && state?.selected?.$id === $id,
-        isSelfHovered = $id && state?.hovered?.$id === $id,
-        isChildSelected = $id && checkHierarchy(state?.selected?.hierarchy, $id),
-        isChildHovered = $id && checkHierarchy(state?.hovered?.hierarchy, $id)
+      const selected = state?.selected,
+        hovered = state?.hovered
 
-      return ({
-        isSelfSelected,
-        isSelfHovered,
-        isChildSelected,
-        isChildHovered,
-      })
+      const isSelfSelected = $id && selected?.$id === $id,
+        isSelfHovered = $id && hovered?.$id === $id,
+        isChildSelected = $id && checkHierarchy(selected?.hierarchy, $id),
+        isChildHovered = $id && checkHierarchy(hovered?.hierarchy, $id)
+
+      return {
+        isSelfSelected: Boolean(isSelfSelected),
+        isSelfHovered: Boolean(isSelfHovered),
+        isChildSelected: Boolean(isChildSelected),
+        isChildHovered: Boolean(isChildHovered),
+      }
     },
-
+    updateFilter(newValue, prevValue) {
+      return !deepEqual(newValue, prevValue, {strict: true})
+    },
   })
 }
 

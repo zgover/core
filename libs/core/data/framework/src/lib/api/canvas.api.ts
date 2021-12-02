@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _canvasControllers } from '../constants/_internal'
+import { _INTERNAL_CANVAS_ } from '../constants/_internal'
 import {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,
@@ -37,7 +37,7 @@ import { _validateAppArg } from './app.api'
 
 export function _getCanvasController(app: AglynAppController): AglynCanvasController {
   _validateAppArg(app)
-  return _canvasControllers.get(app.getName())
+  return _INTERNAL_CANVAS_.get(app.getName())
 }
 
 

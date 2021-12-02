@@ -53,6 +53,7 @@ import {
 } from '../models/aglyn-module.model'
 import { AglynTypeFields, BundleUId, ComponentId, ElementId, TemplateId } from '../types'
 import { isAglynComponentElement } from '../util/aglyn-is'
+import { AglynAppController } from './aglyn-app.controller'
 
 
 export type AglynComponentsTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMPONENT_ELEMENT_TYPE>
@@ -230,7 +231,7 @@ const MODULE_NAME = 'components'
 export class AglynComponentsController extends AglynModuleModel<AglynComponentsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly childNs: string = MODULE_NAME
+  public static readonly namespace: string = MODULE_NAME
   public static readonly moduleName: string = MODULE_NAME
 
   #context: ComponentsRegistryContext = {
@@ -245,7 +246,9 @@ export class AglynComponentsController extends AglynModuleModel<AglynComponentsC
   public get schemas(): InstanceSchemas {return this.#context.schemas}
   public get templates(): InstanceTemplates {return this.#context.templates}
 
-  constructor(options) {super(options)}
+  constructor(app: AglynAppController, options: AglynComponentsControllerOptions) {
+    super(app, options)
+  }
 
   public toJSON() {
     return {

@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
+import { getApp } from '@aglyn/core-data-framework'
 import { BuilderComponent } from '@aglyn/feature-builder'
 
 
 function Builder(props) {
 
+  if (typeof document !== 'undefined') {
+    console.log('page:/builder app', getApp())
+  }
   return (
-    <BuilderComponent noSsr />
+    <BuilderComponent />
   )
 }
 

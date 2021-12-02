@@ -16,6 +16,7 @@
  */
 
 import {
+  AglynAppController,
   BuilderClosePanelPayload,
   BuilderFlagInteractModePayload,
   BuilderGetStorePayload,
@@ -29,7 +30,6 @@ import {
   ElementId,
   TemplateId,
 } from '@aglyn/core-data-framework'
-import { ClientRectObject } from '@aglyn/shared-util-dom'
 import { LogLevelString } from '@aglyn/shared-util-logger'
 import { createApi } from 'effector'
 import {
@@ -48,9 +48,9 @@ import { ContextStore } from './aglyn-contexts.controller'
 
 export interface CommActionData {
   $id?: ElementId
-  componentId?: ComponentId
-  bundleId?: BundleUId
-  position?: ClientRectObject
+  // componentId?: ComponentId
+  // bundleId?: BundleUId
+  // position?: ClientRectObject
 }
 
 export interface BuilderFlagState {
@@ -85,6 +85,7 @@ export interface BuilderPanelsState {
   right?: {
     drawerWidth?: number
     toggled?: boolean,
+    tab?: string
   }
 }
 
@@ -153,7 +154,7 @@ const MODULE_NAME = 'builder'
 export class AglynBuilderController extends AglynModuleModel<AglynBuilderControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly childNs: string = MODULE_NAME
+  public static readonly namespace: string = MODULE_NAME
   public static readonly moduleName: string = MODULE_NAME
 
   #context: BuilderContext = {
@@ -173,8 +174,8 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
   public get panels(): ContextStore<BuilderPanelsState> {return this.#context.stores.panels}
   public get dnd(): ContextStore<BuilderDndState> {return this.#context.stores.dnd}
 
-  constructor(options) {
-    super(options)
+  constructor(app: AglynAppController, options: AglynBuilderControllerOptions) {
+    super(app, options)
     this.#setup()
   }
   #setup() {

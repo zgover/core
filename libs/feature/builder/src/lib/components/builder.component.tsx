@@ -15,25 +15,27 @@
  * limitations under the License.
  */
 
-import { AppUUN, getApp } from '@aglyn/core-data-framework'
+import { AppUUN } from '@aglyn/core-data-framework'
 import {
-  AglynAppContext,
+  AglynAppContextComponent,
   ElementComponentsContextProvider,
   ElementsContextProvider,
 } from '@aglyn/feature-renderer'
-import { OverrideableComponentProps } from '@aglyn/shared-data-types'
+import { consoleThemeDark, consoleThemeLight, withTheme } from '@aglyn/shared-feature-themes'
+import { ConfirmationProviderComponent } from '@aglyn/shared-ui-jsx'
 import { DndContext } from '@dnd-kit/core'
 import NoSsr from '@mui/material/NoSsr'
 import { forwardRef, Fragment, useCallback } from 'react'
-import { EditorComponent } from './editor.component'
+import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
+import { EditorComponent, EditorComponentProps } from './editor.component'
 
 
-export interface BuilderComponentProps extends OverrideableComponentProps {
+export interface BuilderComponentProps extends EditorComponentProps {
   noSsr?: boolean
   appName?: AppUUN
 }
 
-const BuilderComponent = forwardRef<any, BuilderComponentProps>(
+const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       noSsr,
@@ -41,10 +43,6 @@ const BuilderComponent = forwardRef<any, BuilderComponentProps>(
       ...rest
     } = props
     const Wrapper = noSsr ? NoSsr : Fragment
-    const appCallback = useCallback(() => getApp(appName), [appName])
-    if (typeof document !== 'undefined') {
-      console.log('page:/builder app', appCallback())
-    }
 
     const handleDragStart = useCallback((...args) => {
       console.log('drag start', ...args)
@@ -55,22 +53,30 @@ const BuilderComponent = forwardRef<any, BuilderComponentProps>(
 
     return (
       <Wrapper>
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <AglynAppContext.Provider value={{getApp}}>
+        <AglynAppContextComponent appName={appName}>
+          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <ElementComponentsContextProvider>
               <ElementsContextProvider>
-                <EditorComponent ref={ref} {...rest} />
+                <ConfirmationProviderComponent>
+                  <ComponentsDrawerContextProvider>
+                    {/*<SnackbarProvider maxSnack={3}>*/}
+                    <EditorComponent ref={ref} {...rest} />
+                    {/*</SnackbarProvider>*/}
+                  </ComponentsDrawerContextProvider>
+                </ConfirmationProviderComponent>
               </ElementsContextProvider>
             </ElementComponentsContextProvider>
-          </AglynAppContext.Provider>
-        </DndContext>
+          </DndContext>
+        </AglynAppContextComponent>
       </Wrapper>
     )
   },
 )
 
-BuilderComponent.displayName = 'BuilderComponent'
-BuilderComponent.defaultProps = {}
+BuilderComponentRaw.displayName = 'BuilderComponent'
+BuilderComponentRaw.defaultProps = {}
 
-export { BuilderComponent }
+export const BuilderComponent = withTheme({
+  theme: [consoleThemeLight, consoleThemeDark],
+})(BuilderComponentRaw)
 export default BuilderComponent

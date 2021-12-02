@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-import { Dictionary } from '@aglyn/shared-data-types'
-import { Event as EffectorEvent } from 'effector'
-import { _contextsControllers } from '../constants/_internal'
+import { _INTERNAL_CONTEXTS_ } from '../constants/_internal'
 import {
   ContextsCreateEffectPayload,
   ContextsCreateEventPayload,
@@ -34,7 +32,7 @@ import { _validateAppArg } from './app.api'
 
 export function _getContextsController(app: AglynAppController): AglynContextsController {
   _validateAppArg(app)
-  return _contextsControllers.get(app.getName())
+  return _INTERNAL_CONTEXTS_.get(app.getName())
 }
 
 

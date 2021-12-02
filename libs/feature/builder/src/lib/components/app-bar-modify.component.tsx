@@ -100,28 +100,17 @@ export const AppBarModifyComponent = forwardRef<any, AppBarModifyComponentProps>
       })
     }, [])
 
-    const {openPanels} = useStoreMap(
+    const openPanels = useStoreMap(
       getBuilderStore(getApp(), {store: 'panels'}),
       (panels) => {
-        const openPanels = []
-        ;(['left', 'bottom', 'right']).map((panel) => {
-          if (panels[panel]?.toggled) {
-            openPanels.push(panel)
-          }
-        })
-        console.log('panels', panels)
-        return {
-          ...panels,
-          openPanels,
-        }
+        return ['left', 'bottom', 'right'].filter(i => Boolean(panels[i]?.toggled))
       },
     )
     const handlePanelToggle = useCallback((event: MouseEvent<HTMLElement>, value: ('left' | 'bottom' | 'right')[]) => {
-      const openPanels = [...value]
       setBuilderPanels(getApp(), {
-        left: {toggled: openPanels.some((i) => i === 'left')},
-        bottom: {toggled: openPanels.some((i) => i === 'bottom')},
-        right: {toggled: openPanels.some((i) => i === 'right')},
+        left: {toggled: value.indexOf('left') >= 0},
+        bottom: {toggled: value.indexOf('bottom') >= 0},
+        right: {toggled: value.indexOf('right') >= 0},
       })
     }, [])
 

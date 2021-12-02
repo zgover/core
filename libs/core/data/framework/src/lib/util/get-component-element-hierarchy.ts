@@ -16,7 +16,7 @@
  */
 
 import { yes } from '@aglyn/shared-util-tools'
-import { ELEMENT_ROOT_ID } from '../constants/_internal'
+import { CANVAS_ROOT_ELEMENT_ID } from '../constants/_internal'
 import {
   AglynComponentElementDataNormalizedMap,
   AglynComponentElementHierarchy,
@@ -27,11 +27,11 @@ import {
 export const getComponentElementHierarchy = (
   $id: ElementId, elements: AglynComponentElementDataNormalizedMap,
 ): AglynComponentElementHierarchy<typeof $id> => {
-  const hierarchy = [ELEMENT_ROOT_ID]
+  const hierarchy = [CANVAS_ROOT_ELEMENT_ID]
 
   let currentId: ElementId = $id
-  while (yes(currentId) && currentId !== ELEMENT_ROOT_ID) {
-    hierarchy.splice(1, 0, String(currentId))
+  while (yes(currentId) && currentId !== CANVAS_ROOT_ELEMENT_ID) {
+    hierarchy.splice(1, 0, currentId)
     currentId = elements[currentId]?.parentId
   }
 

@@ -26,7 +26,7 @@ export * from './lib/components/menu'
 export * from './lib/components/mui-shadow-dom'
 export * from './lib/components/navigation-drawer'
 export * from './lib/components/next-link'
-export * from './lib/components/popper-arrow.component'
+export * from './lib/components/popper-styled.component'
 export * from './lib/components/ruler-guides.component'
 export * from './lib/components/sandbox-frame'
 export * from './lib/components/shadow-dom'
@@ -39,10 +39,11 @@ export * from './lib/components/zoomable-panning-component'
 
 export * from './lib/contexts/confirmation.context'
 
-export * from './lib/hooks/use-element-position'
 export * from './lib/hooks/use-client-rect'
 export * from './lib/hooks/use-combined-refs'
+export * from './lib/hooks/use-dynamic-effect'
 export * from './lib/hooks/use-effect-post-mount'
+export * from './lib/hooks/use-element-position'
 export * from './lib/hooks/use-intersection-observer'
 export * from './lib/hooks/use-interval'
 export * from './lib/hooks/use-mdi-icons'
@@ -56,12 +57,10 @@ export * from './lib/hooks/use-timeout-delay'
 
 export * from './lib/const/svg-icons'
 
-export * from './lib/types'
-
 export * from './lib/ddf-form'
 
-export * from './lib/higher-order/with-hoc'
-export * from './lib/higher-order/with-context'
+export * from './lib/hocs/with-hoc'
+export * from './lib/hocs/create-hoc-with-context-consumer'
 
 export * from './lib/utils/make-link-elements'
 export * from './lib/utils/make-meta-elements'

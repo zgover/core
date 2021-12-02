@@ -17,14 +17,13 @@
 
 import { BundleUId, ComponentId, ElementId } from '@aglyn/core-data-framework'
 import { ElementAttribute } from '@aglyn/feature-builder'
-import { useMemo } from 'react'
 import { useBuilderElementInteractionActivity } from './use-builder-element-interaction-activity'
 
 
 function computeActivityValue(self: boolean, child: boolean) {
   if (child) return 'child'
   if (self) return 'self'
-  return false
+  return 'false'
 }
 
 export interface UseBuilderElementAttributesOptions {
@@ -46,27 +45,18 @@ export const useBuilderElementAttributes = (opts: UseBuilderElementAttributesOpt
     isChildSelected,
     isChildHovered,
   } = useBuilderElementInteractionActivity($id)
+  const selected = computeActivityValue(isSelfSelected, isChildSelected)
+  const hovered = computeActivityValue(isSelfHovered, isChildHovered)
 
-  return useMemo(() => {
-    const selected = computeActivityValue(isSelfSelected, false)
-    const hovered = computeActivityValue(isSelfHovered, false)
+  const attributes = {
+    [ElementAttribute.ELEMENT_ID]: `${$id}`,
+    [ElementAttribute.COMPONENT_ID]: `${componentId}`,
+    [ElementAttribute.BUNDLE_ID]: bundleId,
+    [ElementAttribute.SELECTED]: selected,
+    [ElementAttribute.HOVERED]: hovered,
+  }
 
-    return ({
-      [ElementAttribute.ELEMENT_ID]: $id,
-      [ElementAttribute.COMPONENT_ID]: componentId,
-      [ElementAttribute.BUNDLE_ID]: bundleId,
-      [ElementAttribute.SELECTED]: selected,
-      [ElementAttribute.HOVERED]: hovered,
-    })
-  }, [
-    $id,
-    componentId,
-    bundleId,
-    isSelfSelected,
-    isSelfHovered,
-    isChildSelected,
-    isChildHovered,
-  ])
+  return attributes
 }
 
 export default useBuilderElementAttributes

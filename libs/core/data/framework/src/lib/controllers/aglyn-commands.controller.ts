@@ -25,7 +25,7 @@ import {
   CommandRemoveResolverPayload,
   CommandsSetResolverPayload,
   CommandTriggerPayload,
-  CommandUnregisterListenerPayload, ExtensionHandleLoaderPayload,
+  CommandUnregisterListenerPayload,
 } from '../constants/emitter'
 import type { COMMAND_LISTENER_TYPE, COMMAND_RESOLVER_TYPE, MODULE_TYPE } from '../constants/symbol'
 import {
@@ -34,6 +34,7 @@ import {
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
 import type { AglynTypeFields, CommandUId } from '../types'
+import { AglynAppController } from './aglyn-app.controller'
 
 
 export type AglynCommandResolverTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMMAND_RESOLVER_TYPE>
@@ -71,7 +72,7 @@ const MODULE_NAME = 'commands'
 export class AglynCommandsController extends AglynModuleModel<AglynCommandsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly childNs: string = MODULE_NAME
+  public static readonly namespace: string = MODULE_NAME
   public static readonly moduleName: string = MODULE_NAME
 
   #commander: AglynCommander = EmitterFn()
@@ -84,7 +85,9 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
     return this.#resolvers
   }
 
-  constructor(options) {super(options)}
+  constructor(app: AglynAppController, options: AglynCommandsControllerOptions) {
+    super(app, options)
+  }
 
   public toJSON() {
     return {

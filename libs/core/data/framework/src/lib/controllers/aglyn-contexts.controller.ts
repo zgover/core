@@ -41,6 +41,7 @@ import {
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
 import { ContextStoreUid } from '../types'
+import { AglynAppController } from './aglyn-app.controller'
 
 
 export interface ContextDomain extends EffectorDomain {
@@ -82,7 +83,7 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly moduleName: string = MODULE_NAME
-  public static readonly childNs: string = MODULE_NAME
+  public static readonly namespace: string = MODULE_NAME
 
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()
@@ -91,8 +92,8 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
     return this.#domain
   }
 
-  constructor(options) {
-    super(options)
+  constructor(app: AglynAppController, options: AglynContextsControllerOptions) {
+    super(app, options)
     this.#setup()
   }
   #setup() {

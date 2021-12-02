@@ -16,7 +16,7 @@
  */
 
 import { AnyProps, OrUndef } from '@aglyn/shared-data-types'
-import { _componentsControllers } from '../constants/_internal'
+import { _INTERNAL_COMPONENTS_ } from '../constants/_internal'
 import {
   ComponentGetPayload,
   ComponentRegisterPayload,
@@ -42,7 +42,7 @@ import { _validateAppArg } from './app.api'
 
 export function _getComponentsController(app: AglynAppController): AglynComponentsController {
   _validateAppArg(app)
-  return _componentsControllers.get(app.getName())
+  return _INTERNAL_COMPONENTS_.get(app.getName())
 }
 
 

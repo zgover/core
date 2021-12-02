@@ -15,57 +15,45 @@
  * limitations under the License.
  */
 
-import { getStaticField, yes } from '@aglyn/shared-util-tools'
+import { yes } from '@aglyn/shared-util-tools'
 import {
-  _builderControllers,
-  _canvasControllers,
-  _commandsControllers,
-  _componentsControllers,
-  _contextsControllers,
-  _extensionsControllers,
-  DEFAULT_ENTRY_NAME,
+  _INTERNAL_BUILDERS_,
+  _INTERNAL_CANVAS_,
+  _INTERNAL_COMMANDS_,
+  _INTERNAL_COMPONENTS_,
+  _INTERNAL_CONTEXTS_,
+  _INTERNAL_EXTENSIONS_,
+  DEFAULT_APP_UUN,
 } from '../constants/_internal'
 import { AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
-import { TYPE_OF } from '../constants/symbol'
 import { AglynBaseModel, AglynBaseModelOptions } from '../models/aglyn-base.model'
 import { AppUUN, Payload } from '../types'
-import {
-  AglynBuilderController,
-  AglynBuilderControllerOptions,
-  AglynBuilderControllerT,
-} from './aglyn-builder.controller'
-import {
-  AglynCanvasController,
-  AglynCanvasControllerOptions,
-  AglynCanvasControllerT,
-} from './aglyn-canvas.controller'
-import { AglynCommandsController, AglynCommandsControllerT } from './aglyn-commands.controller'
+import { AglynBuilderController, AglynBuilderControllerOptions } from './aglyn-builder.controller'
+import { AglynCanvasController, AglynCanvasControllerOptions } from './aglyn-canvas.controller'
+import { AglynCommandsController } from './aglyn-commands.controller'
 import {
   AglynComponentsController,
   AglynComponentsControllerOptions,
-  AglynComponentsControllerT,
 } from './aglyn-components.controller'
 import {
   AglynContextsController,
   AglynContextsControllerOptions,
-  AglynContextsControllerT,
 } from './aglyn-contexts.controller'
 import {
   AglynExtensionsController,
   AglynExtensionsControllerOptions,
-  AglynExtensionsControllerT,
 } from './aglyn-extensions.controller'
 
 
 export interface AglynAppOptions extends AglynBaseModelOptions {
   appName?: AppUUN
   modulesOptions?: {
-    contexts?: Omit<AglynContextsControllerOptions, 'app'>
-    extensions?: Omit<AglynExtensionsControllerOptions, 'app'>
-    commands?: Omit<AglynExtensionsControllerOptions, 'app'>
-    components?: Omit<AglynComponentsControllerOptions, 'app'>
-    canvas?: Omit<AglynCanvasControllerOptions, 'app'>
-    builder?: Omit<AglynBuilderControllerOptions, 'app'>
+    contexts?: AglynContextsControllerOptions
+    extensions?: AglynExtensionsControllerOptions
+    commands?: AglynExtensionsControllerOptions
+    components?: AglynComponentsControllerOptions
+    canvas?: AglynCanvasControllerOptions
+    builder?: AglynBuilderControllerOptions
   }
 }
 
@@ -91,12 +79,7 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
-  public readonly ExtensionController: AglynExtensionsControllerT = AglynExtensionsController
-  public readonly ContextsController: AglynContextsControllerT = AglynContextsController
-  public readonly CommandController: AglynCommandsControllerT = AglynCommandsController
-  public readonly ComponentsController: AglynComponentsControllerT = AglynComponentsController
-  public readonly CanvasController: AglynCanvasControllerT = AglynCanvasController
-  public readonly BuilderController: AglynBuilderControllerT = AglynBuilderController
+  readonly #name: string = null
 
   #extensionsController: AglynExtensionsController = null
   #contextsController: AglynContextsController = null
@@ -104,13 +87,8 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   #componentsController: AglynComponentsController = null
   #canvasController: AglynCanvasController = null
   #builderController: AglynBuilderController = null
-
-  readonly #name: string = null
   #isDeleted = false
 
-  public get [TYPE_OF]() {
-    return getStaticField(TYPE_OF, this)
-  }
   public get extensions(): AglynExtensionsController {
     return this.#extensionsController
   }
@@ -134,8 +112,8 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   }
 
   constructor(options: AglynAppOptions) {
-    super(options)
-    this.#name = options.appName || DEFAULT_ENTRY_NAME
+    super({...options})
+    this.#name = options.appName || DEFAULT_APP_UUN
     this.#setup()
   }
   #setup() {
@@ -148,46 +126,40 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
     this.getEmitter().emit(AglynAppEventFlag.APP_CREATED, {appName: this.#name})
   }
   #setupAppModules(): void {
-    _contextsControllers.set(
+    _INTERNAL_CONTEXTS_.set(
       this.#name,
-      this.#contextsController = new this.ContextsController({
+      this.#contextsController = new AglynContextsController(this, {
         ...this.options.modulesOptions?.contexts,
-        app: this,
       }),
     )
-    _commandsControllers.set(
+    _INTERNAL_COMMANDS_.set(
       this.#name,
-      this.#commandsController = new this.CommandController({
+      this.#commandsController = new AglynCommandsController(this, {
         ...this.options.modulesOptions?.commands,
-        app: this,
       }),
     )
-    _componentsControllers.set(
+    _INTERNAL_COMPONENTS_.set(
       this.#name,
-      this.#componentsController = new this.ComponentsController({
+      this.#componentsController = new AglynComponentsController(this, {
         ...this.options.modulesOptions?.components,
-        app: this,
       }),
     )
-    _canvasControllers.set(
+    _INTERNAL_CANVAS_.set(
       this.#name,
-      this.#canvasController = new this.CanvasController({
+      this.#canvasController = new AglynCanvasController(this, {
         ...this.options.modulesOptions?.canvas,
-        app: this,
       }),
     )
-    _builderControllers.set(
+    _INTERNAL_BUILDERS_.set(
       this.#name,
-      this.#builderController = new this.BuilderController({
+      this.#builderController = new AglynBuilderController(this, {
         ...this.options.modulesOptions?.builder,
-        app: this,
       }),
     )
-    _extensionsControllers.set(
+    _INTERNAL_EXTENSIONS_.set(
       this.#name,
-      this.#extensionsController = new this.ExtensionController({
+      this.#extensionsController = new AglynExtensionsController(this, {
         ...this.options.modulesOptions?.extensions,
-        app: this,
       }),
     )
   }

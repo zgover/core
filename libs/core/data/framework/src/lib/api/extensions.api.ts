@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _extensionsControllers } from '../constants/_internal'
+import { _INTERNAL_EXTENSIONS_ } from '../constants/_internal'
 import { AglynAppEffectFlag, AglynModuleEffectPayload } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynExtensionsController } from '../controllers/aglyn-extensions.controller'
@@ -25,7 +25,7 @@ import { _validateAppArg } from './app.api'
 
 export function _getExtensionController(app: AglynAppController): AglynExtensionsController {
   _validateAppArg(app)
-  return _extensionsControllers.get(app.getName())
+  return _INTERNAL_EXTENSIONS_.get(app.getName())
 }
 
 

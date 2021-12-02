@@ -19,7 +19,7 @@ import { _isArrEmpty } from '@aglyn/shared-util-guards'
 import { arrayAddAtIndex } from '@aglyn/shared-util-tools'
 import { objectDeepMerge } from '@aglyn/shared-util-vendor'
 import { createApi, Event as EffectorEvent } from 'effector'
-import { ELEMENT_ROOT_ID } from '../constants/_internal'
+import { CANVAS_ROOT_ELEMENT_ID } from '../constants/_internal'
 import {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,
@@ -51,6 +51,7 @@ import handleModificationHistoryChange from '../util/handle-modification-history
 import handleModificationHistoryRedo from '../util/handle-modification-history-redo'
 import handleModificationHistoryUndo from '../util/handle-modification-history-undo'
 import { normalizeComponentElementData } from '../util/normalize-component-element-data'
+import { AglynAppController } from './aglyn-app.controller'
 import { AglynComponentElementDataDenormalized } from './aglyn-components.controller'
 import { ContextDomain, ContextStore } from './aglyn-contexts.controller'
 
@@ -74,7 +75,7 @@ export interface ElementsDataStoreApi {
 
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
-  defaultElements: AglynComponentElementDataDenormalized[]
+  initialElements: AglynComponentElementDataDenormalized[]
 }
 
 export interface AglynCanvasController extends AglynModuleModel<AglynCanvasControllerOptions> {
@@ -101,7 +102,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly moduleName: string = MODULE_NAME
-  public static readonly childNs: string = MODULE_NAME
+  public static readonly namespace: string = MODULE_NAME
 
   #domain: ContextDomain = null
   #context: ContextStore<ElementsDataStore> = null
@@ -115,8 +116,8 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   public get normalizedElementsStore(): ContextStore<AglynComponentElementDataNormalizedMap> {return this.#normalizedElementsStore}
   public get denormalizedElementsStore(): ContextStore<AglynComponentElementDataNormalizedArray> {return this.#denormalizedElementsStore}
 
-  constructor(options) {
-    super(options)
+  constructor(app: AglynAppController, options: AglynCanvasControllerOptions) {
+    super(app, options)
     this.#setup()
   }
   #setup() {
@@ -124,14 +125,14 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
     this.#context = this.#domain.createStore<ElementsDataStore>({
       past: [] as AglynComponentElementDataNormalizedMap[],
-      present: normalizeComponentElementData(this.options.defaultElements || [], ELEMENT_ROOT_ID),
+      present: normalizeComponentElementData(this.options.initialElements || [], CANVAS_ROOT_ELEMENT_ID),
       future: [] as AglynComponentElementDataNormalizedMap[],
     })
     this.#normalizedElementsStore = this.#context.map((elements) => {
       return elements.present
     })
     this.#denormalizedElementsStore = this.#context.map((elements) => {
-      return denormalizeComponentElementData(elements.present, ELEMENT_ROOT_ID)
+      return denormalizeComponentElementData(elements.present, CANVAS_ROOT_ELEMENT_ID)
     })
 
     const undo = (state: ElementsDataStore) => {

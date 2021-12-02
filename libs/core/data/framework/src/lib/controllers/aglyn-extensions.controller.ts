@@ -17,7 +17,6 @@
 
 import type { MutableShallow } from '@aglyn/shared-data-types'
 import { _isCtor } from '@aglyn/shared-util-guards'
-import { DEFAULT_ENTRY_NAME } from '../constants/_internal'
 import {
   AglynAppEffectFlag,
   AglynAppEventFlag,
@@ -39,6 +38,7 @@ import {
 } from '../models/aglyn-module.model'
 import type { AglynExtensionMap, AglynTypeFields, ExtensionUUN } from '../types'
 import { isAglynExtension, isAglynModule } from '../util/aglyn-is'
+import { AglynAppController } from './aglyn-app.controller'
 
 
 export type AglynExtensionTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof EXTENSION_TYPE>
@@ -65,13 +65,13 @@ const MODULE_NAME = 'extensions'
 export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly childNs: string = MODULE_NAME
+  public static readonly namespace: string = MODULE_NAME
   public static readonly moduleName: string = MODULE_NAME
 
   protected extensions: AglynExtensionMap = new Map()
 
-  constructor(options) {
-    super(options)
+  constructor(app: AglynAppController, options: AglynExtensionsControllerOptions) {
+    super(app, options)
     this.#setup()
   }
   #setup() {

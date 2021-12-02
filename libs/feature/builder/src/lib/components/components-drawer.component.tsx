@@ -38,8 +38,15 @@ import { ElementDrawerOptions } from '../contexts/element-drawer-context'
 
 
 const ItemSvgIcon = styled(SvgPathIcon, {
-  name: 'ItemSvgIcon',
-})({fontSize: '4.17em'})
+  name: 'AglynItemSvgIcon',
+})(({theme}) => ({
+  fontSize: theme.typography.pxToRem(64),
+  padding: theme.spacing(1.5),
+  borderRadius: '50%',
+  backgroundColor: theme.palette.tertiary.light,
+  border: `1px solid ${theme.palette.tertiary.main}`,
+  color: theme.palette.tertiary.contrastText,
+}))
 const AppBarTitle = styled(Typography, {
   name: 'AppBarTitle',
 })(({theme}) => ({fontSize: theme.typography.pxToRem(20)}))

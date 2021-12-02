@@ -21,7 +21,7 @@ import { forwardRef, HTMLAttributes, Ref } from 'react'
 import { ViewportFrameComponent } from './viewport-frame.component'
 
 
-const ViewportCanvas = styled('div', {name: 'ViewportCanvas'})(({theme}) => ({
+const ViewportCanvas = styled('div', {name: 'AglynViewportCanvas'})(({theme}) => ({
   flexGrow: 1,
   minHeight: '100%',
   width: '100%',
@@ -40,7 +40,7 @@ const ViewportCanvas = styled('div', {name: 'ViewportCanvas'})(({theme}) => ({
   // display: 'flex',
 }))
 
-const ViewportCanvasArtboard = styled('div', {name: 'ViewportCanvasArtboard'})(({theme}) => ({
+const CanvasArtboard = styled('div', {name: 'AglynCanvasArtboard'})(({theme}) => ({
   overflow: 'hidden',
   minHeight: '100%',
   width: theme.breakpoints.values.lg,
@@ -52,7 +52,7 @@ const ViewportCanvasArtboard = styled('div', {name: 'ViewportCanvasArtboard'})((
   // overflow: 'hidden',
 }))
 
-const ViewportCanvasPanner = styled(ZoomablePanningComponent, {name: 'ViewportCanvasPanner'})(({theme}) => ({
+const ArtboardPanner = styled(ZoomablePanningComponent, {name: 'AglynArtboardPanner'})(({theme}) => ({
   overflow: 'hidden',
   padding: theme.spacing(3),
   height: '100%',
@@ -78,7 +78,7 @@ export const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentPr
     return (
       <ViewportCanvas ref={ref} {...rest}>
 
-        <ViewportCanvasArtboard>
+        <CanvasArtboard>
           {/*<ViewportCanvasPanner*/}
           {/*  {...{ref: pannerRef} as any}*/}
           {/*  disableScrollZoom*/}
@@ -91,7 +91,7 @@ export const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentPr
           <ViewportFrameComponent />
           {children}
           {/*</ViewportCanvasPanner>*/}
-        </ViewportCanvasArtboard>
+        </CanvasArtboard>
 
 
         {/*<RulerComponent*/}

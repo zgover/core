@@ -109,7 +109,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
       GridListProps,
       ...rest
     } = useFieldApi(props as UseFieldApiConfig)
-    const classes = useStyles({classes: classesProp})
+
     const invalidMessage = validationMessage(meta, validateOnMount)
     const helpText =
       invalidMessage ||
