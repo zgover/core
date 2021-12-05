@@ -16,7 +16,7 @@
  */
 
 import { FT, lbl, NormalizedData } from '@aglyn/shared-data-types'
-import { Item as GridItemProps } from '@aglyn/shared-ui-jsx'
+import { GridListItemData as GridItemProps } from '@aglyn/shared-ui-jsx'
 import MuiButton from '@mui/material/Button'
 import MuiTextField from '@mui/material/TextField'
 import FieldArrayComponent from '../components/FieldArray'

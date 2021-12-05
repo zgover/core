@@ -68,6 +68,7 @@ const FieldTextField = forwardRef<any, FieldTextFieldProps>(function RefRenderFn
       label={label}
       placeholder={placeholder}
       required={isRequired}
+      size="small"
       fullWidth
       {...rest}
     />

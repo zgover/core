@@ -16,7 +16,7 @@
  */
 
 import { styled } from '@aglyn/shared-feature-themes'
-import { AglynSvgAppIcon } from '@aglyn/shared-ui-jsx'
+import { AglynSvgAppIcon, BesignerSvgLogo } from '@aglyn/shared-ui-jsx'
 import AppBar, { AppBarProps } from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
@@ -37,8 +37,8 @@ export const AppBarGlobalComponent = forwardRef<any, AppBarGlobalComponentProps>
     return (
       <GlobalAppBar ref={ref} position="static" color="inherit" elevation={0} {...rest}>
         <Toolbar>
-          <AglynSvgAppIcon sx={{ ml: -1.5, mr: 1 }} fontSize="large" />
-          <Typography variant="h4">besigner</Typography>
+          <AglynSvgAppIcon sx={{ml: -1.5, mr: 0.5}} fontSize="large" />
+          <BesignerSvgLogo sx={{width:'auto'}} fontSize="medium" />
           {children}
         </Toolbar>
       </GlobalAppBar>

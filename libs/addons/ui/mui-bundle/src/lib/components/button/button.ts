@@ -19,14 +19,14 @@ import type { AglynComponentSchema, ComponentId } from '@aglyn/core-data-framewo
 import { ComponentsLinealDirectiveFlag, PropertyEditorFieldFlag } from '@aglyn/core-data-framework'
 import { aglynElementComponent, dynamicLoader } from '@aglyn/core-feature-renderer'
 import Button, { ButtonProps } from '@mui/material/Button'
-import { BUNDLE_ID } from '../constants'
-import { schema as listItemSchema } from '../list-item/list-item'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { BUNDLE_ID } from '../../constants'
+import { schema as listItemSchema } from '../list-item'
+import { generateTemplateId } from '../../utils/generate-template-id'
 
 
 const ID: ComponentId = 'button'
 
-export const loader = Button//dynamicLoader(() => import('@mui/material/Button'))
+export const loader = dynamicLoader(() => import('@mui/material/Button'))
 export const schema: AglynComponentSchema<ButtonProps> = {
   componentId: ID,
   bundleId: BUNDLE_ID,
@@ -76,6 +76,6 @@ export const schema: AglynComponentSchema<ButtonProps> = {
     },
   ],
 }
-export const component = aglynElementComponent(schema, loader)
 
+export const component = aglynElementComponent(schema, Button)
 export default component

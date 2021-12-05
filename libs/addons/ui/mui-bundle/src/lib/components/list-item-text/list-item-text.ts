@@ -18,13 +18,13 @@
 import type { AglynComponentSchema, ComponentId } from '@aglyn/core-data-framework'
 import { aglynElementComponent, dynamicLoader } from '@aglyn/core-feature-renderer'
 import ListItemText, { ListItemTextProps } from '@mui/material/ListItemText'
-import { BUNDLE_ID } from '../constants'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { BUNDLE_ID } from '../../constants'
+import { generateTemplateId } from '../../utils/generate-template-id'
 
 
 const ID: ComponentId = 'list-item-text'
 
-export const loader = ListItemText//dynamicLoader(() => import('@mui/material/ListItemText'))
+export const loader = dynamicLoader(() => import('@mui/material/ListItemText'))
 export const schema: AglynComponentSchema<ListItemTextProps> = {
   componentId: ID,
   bundleId: BUNDLE_ID,
@@ -48,6 +48,6 @@ export const schema: AglynComponentSchema<ListItemTextProps> = {
     },
   ],
 }
-export const component = aglynElementComponent(schema, loader)
+export const component = aglynElementComponent(schema, ListItemText)
 
 export default component

@@ -16,7 +16,7 @@
  */
 
 import { yes } from '@aglyn/shared-util-tools'
-import { CANVAS_ROOT_ELEMENT_ID } from '../constants/_internal'
+import { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
 import {
   AglynComponentElementDataNormalizedMap,
   AglynComponentElementHierarchy,

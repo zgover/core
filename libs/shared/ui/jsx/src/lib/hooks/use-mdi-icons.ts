@@ -33,11 +33,11 @@ export type FilterOpts = {
 }
 export type ApplyFilterFn = (query: string) => void
 export type ClearFilterFn = () => void
-export type UseMdiIconsReturn = [
-  MdiIcon[],
-  { applyFilter: ApplyFilterFn; clearFilter: ClearFilterFn },
-  IconsNormalized
-]
+export type FilterHelpers = {
+  applyFilter: ApplyFilterFn
+  clearFilter: ClearFilterFn
+}
+export type UseMdiIconsReturn = [MdiIcon[], FilterHelpers, IconsNormalized]
 
 export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
   const allIds = Array.from(mdiIcons.iconIds)
@@ -60,21 +60,25 @@ export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
 }
 
 const defaultKeys = ['id', 'name', 'aliases']
+const searchItems = (fuzzy, query: string) => fuzzy.search(query ?? '').map((i) => i.item)
 
 export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIconsReturn {
   const allIcons = useMemoizedMdiIcons()
-  const options = {keys: opts?.keys ?? defaultKeys}
-  const fuzzy = new FindWithFuzzy(allIcons, options)
-  const searchItems = (query: string) => fuzzy.search(query ?? '').map((i) => i.item)
-  const [query, setQuery] = useState(initialQuery ?? '')
-  const filteredIcons = useMemo<MdiIcon[]>(() => {
-    return query ? searchItems(query) : allIcons
-  }, [query, allIcons])
-
+  const options = {keys: defaultKeys, ...opts}
+  const icons = useMemo(() => mdiIcons, [])
+  const [query, setQuery] = useState(() => initialQuery ?? '')
   const applyFilter: ApplyFilterFn = useCallback((query: string) => setQuery(query), [])
   const clearFilter: ClearFilterFn = useCallback(() => setQuery(''), [])
+  const helpers = useMemo(() => ({applyFilter, clearFilter}), [applyFilter, clearFilter])
+  const filteredIcons = useMemo<MdiIcon[]>(() => {
+    const fuzzy = new FindWithFuzzy(allIcons, options)
+    return query ? searchItems(fuzzy, query) : allIcons
+  }, [query, options, allIcons])
 
-  return useMemo(() => [filteredIcons, {applyFilter, clearFilter}, mdiIcons], [filteredIcons])
+  return useMemo(
+    () => [filteredIcons, helpers, icons],
+    [filteredIcons, helpers, icons]
+  )
 }
 
 export default useMdiIcons

@@ -19,7 +19,7 @@ import { _isArrEmpty } from '@aglyn/shared-util-guards'
 import { arrayAddAtIndex } from '@aglyn/shared-util-tools'
 import { objectDeepMerge } from '@aglyn/shared-util-vendor'
 import { createApi, Event as EffectorEvent } from 'effector'
-import { CANVAS_ROOT_ELEMENT_ID } from '../constants/_internal'
+import { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
 import {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,

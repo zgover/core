@@ -57,7 +57,7 @@ export type OmitIndexOfType<T, U> = {
 }
 
 /** From T, omit properties in union with 'K' "distributively" for union types */
-export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never
+export type DistributiveOmit<T, K extends PKey> = T extends any ? Omit<T, K> : never
 
 /** Plain old dictionary of key(K)-value(T) pairs with string signatures */
 export type KeyValueMap<K extends PKey = PKey, T = unknown> = Record<K, T>
@@ -69,13 +69,13 @@ export type Dictionary<T = unknown> = KeyValueMap<string, T>
 export type AnyProps = Partial<Record<string, unknown>>
 
 /** Dictionary collection optionally specify values to T */
-export type EmptyObj<K extends keyof any = keyof any> = Record<K, never>
+export type EmptyObj<K extends PKey = PKey> = Record<K, never>
 
 /** Type safe object "{}" record (optionally specify index type) */
-export type AnyObj<K extends keyof any = keyof any> = Record<K, unknown>
+export type AnyObj<K extends PKey = PKey> = Record<K, unknown>
 
 /** Record with only readonly properties */
-export type ReadonlyRecord<K extends keyof any, T> = { [P in K]: T }
+export type ReadonlyRecord<K extends PKey, T> = { [P in K]: T }
 
 /** Response value, Promise or Promise-Like value  */
 export type ValueOrPromise<T> = T extends Promise<unknown> ? T : T | PromiseLike<T>

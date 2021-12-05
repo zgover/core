@@ -15,8 +15,13 @@
  * limitations under the License.
  */
 
-import { duplicateCanvasElement, ElementId, setBesignerPanels } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
+import {
+  duplicateCanvasElement,
+  ElementId, isRootElementId,
+  setBesignerCanvasSelected,
+  setBesignerPanels,
+} from '@aglyn/core-data-framework'
+import { useAglynAppContext, useAglynElementData } from '@aglyn/core-feature-renderer'
 import {
   PopperStyledArrowComponent,
   PopperStyledComponent,
@@ -45,25 +50,32 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(fu
 
   const {getApp} = useAglynAppContext()
   const deleteElementCallback = useDeleteElementCallback({$id})
+  const parentId = useAglynElementData($id, 'parentId') || null
 
-  const handleDeleteButtonClick = useCallback(
+  const handleDeleteClick = useCallback(
     (e: ChangeEvent<unknown>) => {
       deleteElementCallback(e)
     },
     [deleteElementCallback],
   )
 
-  const handleDuplicateButtonClick = useCallback(
+  const handleDuplicateClick = useCallback(
     (e: ChangeEvent<unknown>) => {
       duplicateCanvasElement(getApp(), {$id})
     },
     [$id],
   )
-  const handleModifyButtonClick = useCallback(
+  const handleModifyClick = useCallback(
     (e: ChangeEvent<unknown>) => {
-      setBesignerPanels(getApp(), {right: {toggled: true, tab: 'element-modify'}})
+      setBesignerPanels(getApp(), {right: {toggled: true, tab: 'element-props-form'}})
     },
     [$id],
+  )
+  const handleSelectParentClick = useCallback(
+    (e: ChangeEvent<unknown>) => {
+      setBesignerCanvasSelected(getApp(), {selected: {$id: parentId}})
+    },
+    [parentId],
   )
 
   const buttons = [
@@ -73,11 +85,11 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(fu
         title: 'Delete',
       },
       srOnlyProps: {
-        children: 'Delete',
+        children: 'delete',
       },
       buttonProps: {
         // disabled: yes(disableZoomResetButton),
-        onClick: handleDeleteButtonClick,
+        onClick: handleDeleteClick,
       } as ButtonProps,
       svgPathIconProps: {
         iconIds: 'delete-outline',
@@ -90,11 +102,11 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(fu
         title: 'Duplicate',
       },
       srOnlyProps: {
-        children: 'Duplicate',
+        children: 'duplicate',
       },
       buttonProps: {
         // disabled: yes(disableZoomResetButton),
-        onClick: handleDuplicateButtonClick,
+        onClick: handleDuplicateClick,
       },
       svgPathIconProps: {
         iconIds: 'content-duplicate',
@@ -106,17 +118,33 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(fu
         title: 'Modify',
       },
       srOnlyProps: {
-        children: 'Modify',
+        children: 'modify',
       },
       buttonProps: {
         // disabled: yes(disableZoomResetButton),
-        onClick: handleModifyButtonClick,
+        onClick: handleModifyClick,
       },
       svgPathIconProps: {
         iconIds: 'pencil',
       },
     },
-  ]
+    (parentId && !isRootElementId(parentId)) ? ({
+      id: 'select-parent',
+      tooltipProps: {
+        title: 'Select parent',
+      },
+      srOnlyProps: {
+        children: 'select parent',
+      },
+      buttonProps: {
+        disabled: !parentId || isRootElementId(parentId),
+        onClick: handleSelectParentClick,
+      },
+      svgPathIconProps: {
+        iconIds: 'arrow-up-left',
+      },
+    }) : null
+  ].filter(Boolean)
 
   return (
     <ButtonGroup

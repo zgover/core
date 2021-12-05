@@ -41,5 +41,11 @@ export const DEFAULT_PROPS_FORM_SCHEMA = {
       label: 'Display name',
       // variant: 'outlined',
     },
+    {
+      name: 'iconIds',
+      component: PropertyEditorFieldFlag.ICON_SELECT,
+      label: 'Icon',
+      // variant: 'outlined',
+    },
   ],
 }

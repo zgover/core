@@ -43,6 +43,7 @@ export * from './api/logger.api'
 // 👇
 
 export * from './constants/_internal'
+export * from './constants/canvas'
 export * from './constants/components'
 export * from './constants/besigner'
 export * from './constants/emitter'
@@ -74,6 +75,7 @@ export * from './util/get-component-element-hierarchy'
 export * from './util/handle-modification-history-change'
 export * from './util/handle-modification-history-redo'
 export * from './util/handle-modification-history-undo'
+export * from './util/is-root-element-id'
 export * from './util/normalize-component-element-data'
 
 

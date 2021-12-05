@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
+import { getIcon, defaultIconFailover } from '@aglyn/shared-data-mdi'
 import {
   createStyles,
   generateComponentClassKeys,
-  makeStyles,
+  makeStyles, styled,
   Theme,
 } from '@aglyn/shared-feature-themes'
 
 import useFieldApi from '@data-driven-forms/react-form-renderer/use-field-api'
 import { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-field-api/use-field-api'
+import { Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
 import Collapse from '@mui/material/Collapse'
@@ -32,7 +34,7 @@ import MuiTextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 import clsx from 'clsx'
-import { forwardRef, Fragment, HTMLProps, useCallback, useState } from 'react'
+import { forwardRef, Fragment, HTMLProps, useCallback, useMemo, useState } from 'react'
 import { CardIconListItem } from '../../components/card-icon-list-item'
 import { GridList } from '../../components/grid-list'
 import { SvgPathIcon } from '../../components/svg-path-icon'
@@ -42,6 +44,7 @@ import { withGridItem } from '../field-hocs'
 import { validationMessage } from '../utils'
 
 
+const iconUnset = {...defaultIconFailover, id: '', name: '(none)'}
 const classKeys = generateComponentClassKeys('AglynFieldIconSelect', [
   'root',
   'button',
@@ -56,16 +59,11 @@ const classKeys = generateComponentClassKeys('AglynFieldIconSelect', [
   'gridList',
 ])
 
-const useStyles = makeStyles((theme: Theme) => createStyles({
-  root: {},
-  button: {},
-  icon: {},
-  label: {},
-  selected: {},
-  opener: {},
-  preview: {'& $button': {fontSize: theme.typography.pxToRem(38)}},
-  collapse: {height: 412},
-  collapseInner: {
+const StyledCollapse = styled(Collapse)(({theme}) => ({
+  ['& .MuiCollapse-wrapper']: {
+    height: 412
+  },
+  ['& .MuiCollapse-wrapperInner']: {
     paddingTop: theme.spacing(1),
     display: 'flex',
     flexDirection: 'column',
@@ -73,16 +71,17 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     flexShrink: 0,
     alignSelf: 'stretch',
   },
-  gridListWrapper: {
-    height: '100%',
-    marginTop: theme.spacing(1),
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
-  },
-  gridList: {
+}))
+
+const GridListWrapper = styled('div')(({theme}) => ({
+  height: '100%',
+  marginTop: theme.spacing(1),
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.shape.borderRadius,
+  [`& .${classKeys.gridList}`]: {
     padding: theme.spacing(1),
     // overflowX: 'hidden',
-  },
+  }
 }))
 
 export interface FieldIconSelectProps extends HTMLProps<HTMLDivElement> {
@@ -93,7 +92,6 @@ export interface FieldIconSelectProps extends HTMLProps<HTMLDivElement> {
 const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
   function RefRenderFn(props, ref) {
     const {
-      classes: classesProp,
       className,
       input,
       isReadOnly,
@@ -116,11 +114,24 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
       ((meta.touched || validateOnMount) && meta.warning) ||
       helperText ||
       description
-    const value = input.value
+    const currentValue = input.value
+    const currentIcon = useMemo(() => {
+      console.log('currentValue', currentValue)
+      return currentValue
+        ? getIcon(currentValue, {failoverIcon: iconUnset})
+        : iconUnset
+    }, [currentValue])
     const [open, setOpen] = useState(false)
-    const [selected, setSelected] = useState(value)
-    const [icons, {applyFilter}, allIcons] = useMdiIcons()
-    const selectedIsSame = value === selected
+    const [icons, {applyFilter}] = useMdiIcons()
+    const [selected, setSelected] = useState(() => currentValue)
+    const selectedIcon = useMemo(() => {
+      console.log('selected', selected)
+      return selected
+        ? getIcon(selected, {failoverIcon: iconUnset})
+        : iconUnset
+    }, [selected])
+    const selectedIsSame = (item) => item.id === selected
+
 
     const handleButtonClick = useCallback(() => {
       setOpen((prev) => !prev)
@@ -130,88 +141,71 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
       setOpen((prev) => !prev)
     }, [selected])
     const handleFilterChange = useCallback((e) => {
-      const value = e.currentTarget.value
-      applyFilter(value)
+      const target = e.currentTarget
+      if (target) {applyFilter(target.value)}
     }, [])
     const handleItemClick = useCallback((e, item: MdiIcon) => {
       setSelected(item.id)
     }, [])
-    const renderItemContent = useCallback(
-      (item) => {
-        const isSelected = item.id === selected
-        return (
+    const renderItemContent = useCallback((item) => {
+      return (
+        <Tooltip title={item.name}>
           <CardIconListItem
             item={item}
-            label={item.name}
             onActionClick={handleItemClick}
             preview={<SvgPathIcon iconIds={item.id} />}
-            selected={isSelected}
+            selected={selectedIsSame(item)}
           />
-        )
-      },
-      [selected, handleItemClick],
-    )
+        </Tooltip>
+      )
+    }, [handleItemClick])
 
     return (
       <Fragment>
-        <Grid ref={ref} className={clsx(classes.root, className)} container>
-          <Grid spacing={2} container item>
-            <Grid className={classes.preview} item>
-              <ButtonBase className={classes.button} onClick={handleButtonClick} disableRipple>
-                <SvgPathIcon className={classes.iconIds} fontSize="inherit" iconIds={value} />
+        <Grid ref={ref} container>
+          <Grid spacing={2} alignItems={"center"} container item>
+            <Grid item>
+              <ButtonBase
+                onClick={handleButtonClick}
+                disableRipple
+                sx={(theme) => ({fontSize: theme.typography.pxToRem(38)})}
+                title={currentIcon.name || 'Choose icon'}
+              >
+                <SvgPathIcon fontSize="inherit" iconIds={currentValue} />
               </ButtonBase>
             </Grid>
             <Grid item sm>
-              <Typography component="div" variant="body1">
-                {label}
-              </Typography>
-              <ButtonBase
-                className={clsx(classes.button, classes.opener)}
+              {/*<Typography component="div" variant="body1">*/}
+              {/*  {label}*/}
+              {/*</Typography>*/}
+              <Button
                 onClick={handleButtonClick}
+                variant="outlined"
+                color="inherit"
+                size="small"
+                endIcon={<SvgPathIcon iconIds={open ? 'chevron-up' : 'chevron-down'} />}
+                fullWidth
                 disableRipple
               >
-                <span>
-                  Choose icon: <b>{(allIcons.byIconId[value] ?? {}).name ?? '(none)'}</b>
-                </span>
-                <SvgPathIcon
-                  className={classes.iconIds}
-                  iconIds={open ? 'chevron-up' : 'chevron-down'}
-                />
-              </ButtonBase>
+                {currentValue ? label : `${label}: ${currentIcon.name}`}
+              </Button>
             </Grid>
           </Grid>
           <Grid xs={12} item>
-            <Collapse
-              classes={{wrapperInner: classes.collapseInner, wrapper: classes.collapse}}
-              in={open}
-            >
+            <StyledCollapse in={open}>
               <Grid alignItems="center" spacing={2} container>
                 <Grid xs={12} item>
                   <MuiTextField
                     onChange={handleFilterChange}
                     placeholder="Search icons..."
-                    size={'small'}
+                    size="small"
                     fullWidth
                   />
                 </Grid>
                 <Grid item xs>
                   <Typography component="div" variant="body2">
-                    Selected icon: <b>{(allIcons.byIconId[selected] ?? {}).name ?? '(none)'}</b>
+                    Selected icon: <b>{selectedIcon.name}</b>
                   </Typography>
-
-                  {/* <MuiTextField
-                   ref={ref}
-                   {...input}
-                   disabled={isDisabled}
-                   error={Boolean(invalidMessage)}
-                   helperText={helpText}
-                   inputProps={{ readOnly: isReadOnly, ...inputProps }}
-                   label={label}
-                   placeholder={placeholder}
-                   required={isRequired}
-                   fullWidth
-                   {...rest}
-                   /> */}
                 </Grid>
                 <Grid item>
                   <Button color="secondary" onClick={handleChooseButtonClick} variant="contained">
@@ -220,17 +214,17 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
                 </Grid>
               </Grid>
 
-              <div className={classes.gridListWrapper}>
+              <GridListWrapper>
                 <GridList
                   GridContainerProps={{spacing: 2}}
                   GridItemProps={{xs: 6, sm: 3}}
-                  ListWrapperProps={{className: classes.gridList}}
+                  ListWrapperProps={{className: classKeys.gridList}}
                   items={icons}
                   renderItemContent={renderItemContent}
                   {...GridListProps}
                 />
-              </div>
-            </Collapse>
+              </GridListWrapper>
+            </StyledCollapse>
           </Grid>
         </Grid>
       </Fragment>

@@ -22,11 +22,11 @@ import {
 } from '@aglyn/core-data-framework'
 
 
-import button from './button'
+import button from './components/button'
 import { BUNDLE_ID } from './constants'
-import list from './list'
-import listItem from './list-item'
-import listItemText from './list-item-text'
+import list from './components/list'
+import listItem from './components/list-item'
+import listItemText from './components/list-item-text'
 
 
 export const schema = {

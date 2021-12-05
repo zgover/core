@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
+import { AnyProps, EmptyObj, MapKey, PKey } from '@aglyn/shared-data-types'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import Card from '@mui/material/Card'
 import Grid, { GridProps as MuiGridProps } from '@mui/material/Grid'
 import clsx from 'clsx'
-import { forwardRef, HTMLAttributes, HTMLProps, ReactNode, useCallback, useMemo } from 'react'
+import { forwardRef, HTMLAttributes, HTMLProps, memo, ReactNode, useCallback, useMemo } from 'react'
 import { VirtuosoGrid, VirtuosoGridHandle, VirtuosoGridProps } from 'react-virtuoso'
 
 
@@ -30,15 +31,8 @@ const classKey = generateComponentClassKeys('AglynGridList', [
   'gridItem',
 ])
 
-const ItemWrapper = styled('div', {
-  name: 'ItemWrapper',
-})({
-  height: 0,
-  position: 'relative',
-  paddingTop: `${(3 / 4) * 100}%`, // 16:9
-})
 const ItemContent = styled(Card, {
-  name: 'ItemContent',
+  name: 'AglynGridListItemContent',
 })({
   position: 'absolute',
   left: 0,
@@ -50,15 +44,33 @@ const ItemContent = styled(Card, {
   flexDirection: 'column',
   justifyContent: 'space-evenly',
 })
+const ItemDisplacement = styled('div', {
+  name: 'AglynGridListItemDisplacement',
+})({
+  height: 0,
+  position: 'relative',
+  paddingTop: `${(3 / 4) * 100}%`, // 4:3
+})
+const ItemWrapper = styled(forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  function RefRenderFn(props, ref) {
+    const {children, className, ...rest} = props
+    return (
+      <ItemDisplacement ref={ref} className={clsx(classKey.itemWrapper, className)} {...rest}>
+        <ItemContent className={classKey.itemContent}>
+          {children}
+        </ItemContent>
+      </ItemDisplacement>
+    )
+  },
+), {
+  name: 'AglynItemWrapper',
+})({})
 
-export interface Item {
-  id: string | number | symbol
-  [prop: string]: any
-}
+export type GridListItemData<P = any> = { id: MapKey } & P
 
 /* eslint-disable-next-line */
 export interface GridListProps extends Partial<VirtuosoGridProps> {
-  items?: Item[]
+  items?: GridListItemData[]
   renderItemContent?: (
     item: GridListProps['items'][number],
     index: number,
@@ -69,78 +81,83 @@ export interface GridListProps extends Partial<VirtuosoGridProps> {
   ListWrapperProps?: HTMLProps<HTMLDivElement>
 }
 
-export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(function RefRenderFn(
-  props,
-  ref,
-) {
-  const {items, renderItemContent, ListWrapperProps, GridContainerProps, GridItemProps, ...rest} =
-    props
-  const computeItemKey = useCallback((index: number) => items[index].id as any, [items])
+export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
+  function RefRenderFn(props, ref) {
+    const {
+      items,
+      renderItemContent,
+      ListWrapperProps,
+      GridContainerProps,
+      GridItemProps,
+      components,
+      ...rest
+    } = props
 
-  const GridContainer = useMemo(
-    () =>
-      forwardRef<any, MuiGridProps>(function RefRenderFn(props, ref) {
+    const computeItemKey = useCallback((index: number) => {
+      return items[index].id
+    }, [items])
+
+    const GridContainer = useMemo(() => forwardRef<any, MuiGridProps>(
+      function RefRenderFn({className, ...props}, ref) {
         const {className: gridClassName, ...restGridProps} = GridContainerProps
-        const {className, ...rest} = props
-        const elemClassName = clsx(classKey.gridContainer, gridClassName, className)
         return (
           <div {...ListWrapperProps}>
-            <Grid ref={ref} container className={elemClassName} {...restGridProps} {...rest} />
+            <Grid
+              ref={ref}
+              className={clsx(classKey.gridContainer, gridClassName, className)}
+              container
+              {...restGridProps}
+              {...props}
+            />
           </div>
         )
-      }),
-    [ListWrapperProps, GridContainerProps],
-  )
+      }
+    ), [ListWrapperProps, GridContainerProps])
 
-  const GridItem = useMemo(() => {
-    const Component = forwardRef<any, MuiGridProps>(function RefRenderFn(itemProps, ref) {
-      const {className: gridClassName, ...restGridProps} = GridItemProps
-      const {className, ...rest} = itemProps
-      const elemClassName = clsx(classKey.gridItem, gridClassName, className)
-      return <Grid ref={ref} item className={elemClassName} {...restGridProps} {...rest} />
-    })
-    Component.displayName = 'GridItem'
-    return Component
-  }, [GridItemProps])
+    const GridItem = useMemo(() => {
+      const Component = forwardRef<any, MuiGridProps>(
+        function RefRenderFn(itemProps, ref) {
+          const {className: gridClassName, ...restGridProps} = GridItemProps
+          const {className, ...rest} = itemProps
+          return (
+            <Grid
+              ref={ref}
+              className={clsx(classKey.gridItem, gridClassName, className)}
+              item
+              {...restGridProps}
+              {...rest}
+            />
+          )
+        }
+      )
+      Component.displayName = 'GridItem'
+      return Component
+    }, [GridItemProps])
 
-  const MemoizedItemContent = useMemo(() => {
-    const Component = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-      function RefRenderFn(props, ref) {
-        const {children, className, ...rest} = props
-        const elemClassName = clsx(classKey.itemWrapper, className)
-        return (
-          <ItemWrapper ref={ref} className={elemClassName} {...rest}>
-            <ItemContent className={classKey.itemContent}>{children}</ItemContent>
-          </ItemWrapper>
-        )
-      },
+    const handleItemContent = useCallback((index) => {
+      return (
+        <ItemWrapper>
+          {renderItemContent(items[index], index, items)}
+        </ItemWrapper>
+      )
+    }, [renderItemContent])
+
+    return (
+      <VirtuosoGrid
+        ref={ref}
+        computeItemKey={computeItemKey}
+        itemContent={handleItemContent}
+        totalCount={items.length}
+        components={{
+          Item: GridItem,
+          List: GridContainer,
+          ...components,
+        }}
+        {...rest}
+      />
     )
-    Component.displayName = 'MemoizedItemContent'
-    return Component
-  }, [classKey])
-
-  const itemContent = useCallback(
-    (index) => (
-      <MemoizedItemContent>{renderItemContent(items[index], index, items)}</MemoizedItemContent>
-    ),
-    [renderItemContent],
-  )
-
-  return (
-    <VirtuosoGrid
-      ref={ref}
-      computeItemKey={computeItemKey}
-      itemContent={itemContent}
-      totalCount={items.length}
-      {...rest}
-      components={{
-        Item: GridItem,
-        List: GridContainer,
-        ...rest.components,
-      }}
-    />
-  )
-})
+  }
+)
 
 GridList.displayName = 'GridList'
 GridList.defaultProps = {

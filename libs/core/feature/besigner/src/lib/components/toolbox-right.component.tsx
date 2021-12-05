@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
+import { setBesignerPanels } from '@aglyn/core-data-framework'
 import {
+  useAglynAppContext,
   useAglynBesignerStore,
   useAglynCanvasApiEvents,
   useAglynComponentSchema,
@@ -23,6 +25,7 @@ import {
 } from '@aglyn/core-feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { componentMapper, FormRenderer, GridFormTemplate, SvgPathIcon } from '@aglyn/shared-ui-jsx'
+import { _isEqualitySameType } from '@aglyn/shared-util-guards'
 import MuiTabContext from '@mui/lab/TabContext'
 import MuiTabList from '@mui/lab/TabList'
 import MuiTabPanel from '@mui/lab/TabPanel'
@@ -32,7 +35,7 @@ import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import MuiTab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
-import { forwardRef, Fragment, useCallback, useState } from 'react'
+import { forwardRef, Fragment, memo, useCallback, useState } from 'react'
 import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
 import { useComponentFormSchema } from '../hooks/use-component-form-schema'
 import { ToolboxDrawerComponent, ToolboxDrawerComponentProps } from './toolbox-drawer.component'
@@ -50,9 +53,23 @@ const DividerSpacer = styled(Divider, {
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(2),
 }))
-
-const ElementInfo = (props) => {
+const TabPanel = memo(({panel: {component: Component, value}}: any) => {
   const {$id} = useAglynCanvasSelected() || {}
+
+  return (
+    <MuiTabPanel value={value} sx={{p: 0, overflow: 'auto'}}>
+      {$id ? (<Component $id={$id} />) : (
+        <TabPanelInner>
+          <Typography variant="subtitle1" component="div" align="center">
+            No element selected...
+          </Typography>
+        </TabPanelInner>
+      )}
+    </MuiTabPanel>
+  )
+})
+
+const ElementInfo = memo(({$id, ...props}: any) => {
   const {componentId, bundleId, parentId} = useAglynElementData($id) || {}
   const {metadata} = useAglynComponentSchema(componentId, bundleId) || {}
   const {displayName, title, subtitle, description} = metadata || {}
@@ -113,70 +130,72 @@ const ElementInfo = (props) => {
   ]
   return (
     <TabPanelInner {...props}>
-      {$id ? (
-        <>
-          {details.map(({id, label, items}) => (
+      {details.map(({id, label, items}) => (
+        <Fragment key={id}>
+          <Typography variant="subtitle1" component="div" sx={{mb: 2}}>
+            {label}
+          </Typography>
+          {items.map(({id, label, value}) => (
             <Fragment key={id}>
-              <Typography variant="subtitle1" component="div" sx={{mb: 2}}>
-                {label}
+              <Typography variant="caption" component="div" sx={{textTransform: 'uppercase'}}>
+                <b>{label}:</b>
               </Typography>
-              {items.map(({id, label, value}) => (
-                <Fragment key={id}>
-                  <Typography variant="caption" component="div" sx={{textTransform: 'uppercase'}}>
-                    <b>{label}:</b>
-                  </Typography>
-                  <Typography variant="body1" component="div" gutterBottom>
-                    {value || <i>{failoverText}</i>}
-                  </Typography>
-                </Fragment>
-              ))}
-              <DividerSpacer variant="middle" />
+              <Typography variant="body1" component="div" gutterBottom>
+                {value || <i>{failoverText}</i>}
+              </Typography>
             </Fragment>
           ))}
-        </>
-      ) : (
-        <Typography variant="subtitle1" component="div" align="center">
-          No element selected...
-        </Typography>
-      )}
+          <DividerSpacer variant="middle" />
+        </Fragment>
+      ))}
     </TabPanelInner>
   )
-}
-
-const PropsForm = (props) => {
-  const {addElement, updateElement} = useAglynCanvasApiEvents()
-  const {$id} = useAglynCanvasSelected() || {}
+})
+const PropsForm = memo(({$id, ...props}: any) => {
+  const {updateElement, deleteElement} = useAglynCanvasApiEvents()
   const {props: elemProps, componentId, bundleId} = useAglynElementData($id) || {}
   const formSchema = useComponentFormSchema({componentId, bundleId})
 
-  const handleElementSave = useCallback(
-    (values) => {
-      updateElement({element: {$id, props: {...values}}})
-    },
-    [$id],
-  )
-  const handleDrawerClose = useCallback((e, reason) => {}, [])
-  const handleDeleteButtonClick = useCallback((e) => {}, [])
+  const handleFormCancel = useCallback((e, reason) => {}, [])
+  const handleElementSave = useCallback((values) => {
+    updateElement({element: {$id, props: {...values}}})
+  }, [$id])
+  const handleDeleteElement = useCallback((e) => {
+    deleteElement({$id})
+  }, [$id])
 
   return (
     <TabPanelInner {...props}>
       <FormRenderer
         FormTemplate={GridFormTemplate}
         componentMapper={componentMapper}
-        onCancel={handleDrawerClose}
+        onCancel={handleFormCancel}
         onSubmit={handleElementSave}
         initialValues={elemProps}
         schema={formSchema}
       />
 
       <FormControl margin="none" fullWidth>
-        <Button onClick={handleDeleteButtonClick} sx={{mt: 2, color: 'error.main'}} fullWidth>
+        <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
           Delete Element
         </Button>
       </FormControl>
     </TabPanelInner>
   )
-}
+})
+
+const panels = [
+  {
+    value: 'element-information',
+    iconIds: 'information-variant',
+    component: ElementInfo,
+  },
+  {
+    value: 'element-props-form',
+    iconIds: 'order-bool-descending-variant',
+    component: PropsForm,
+  },
+]
 
 export interface ToolboxRightComponentProps extends ToolboxDrawerComponentProps {}
 
@@ -184,34 +203,24 @@ export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>
   function RefRenderFn(props, ref) {
     const {children, drawerWidth: drawerWidthProp, ...rest} = props
 
+    const {getApp} = useAglynAppContext()
     const panel = useAglynBesignerStore('panels', 'right')
     const {toggled, tab, drawerWidth = drawerWidthProp} = panel || {}
-    const open = Boolean(toggled)
-    const [activeView, setActiveView] = useState(() => tab ?? 'element-props-form')
-    const handleTabChange = useCallback((e, val) => setActiveView(val), [])
-
-    const panels = [
-      {
-        $id: 'element-information',
-        iconIds: 'information-variant',
-        component: ElementInfo,
-      },
-      {
-        $id: 'element-props-form',
-        iconIds: 'order-bool-descending-variant',
-        component: PropsForm,
-      },
-    ]
+    const value = tab && _isEqualitySameType(tab, ...panels.map((i) => i.value))
+      ? tab : 'element-information'
+    const handleTabChange = useCallback((e, val) => {
+      setBesignerPanels(getApp(), {right: {tab: val}})
+    }, [])
 
     return (
       <ToolboxDrawerComponent
         ref={ref}
         drawerWidth={drawerWidth}
-        open={open}
+        open={toggled}
         anchor="right"
         {...rest}
       >
-        <MuiTabContext value={activeView}>
+        <MuiTabContext value={value}>
           <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
             <MuiTabList
               onChange={handleTabChange}
@@ -219,16 +228,12 @@ export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>
               indicatorColor="secondary"
               textColor="primary"
             >
-              {panels.map(({$id, iconIds}) => (
-                <MuiTab key={$id} value={$id} icon={<SvgPathIcon iconIds={iconIds} />} />
+              {panels.map(({value, iconIds}) => (
+                <MuiTab key={value} value={value} icon={<SvgPathIcon iconIds={iconIds} />} />
               ))}
             </MuiTabList>
           </Box>
-          {panels.map(({$id, component: Component}) => (
-            <MuiTabPanel key={$id} value={$id} sx={{p: 0, overflow: 'auto'}}>
-              <Component />
-            </MuiTabPanel>
-          ))}
+          {panels.map((panel) => <TabPanel key={panel.value} panel={panel} />)}
         </MuiTabContext>
 
         {children}

@@ -65,6 +65,7 @@ const FieldTextarea = forwardRef<any, FieldTextareaProps>(function RefRenderFn(p
       label={label}
       placeholder={placeholder}
       required={isRequired}
+      size="small"
       fullWidth
       multiline
       {...rest}

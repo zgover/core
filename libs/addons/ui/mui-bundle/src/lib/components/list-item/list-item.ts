@@ -15,31 +15,35 @@
  * limitations under the License.
  */
 
-import type { AglynComponentSchema, ComponentId } from '@aglyn/core-data-framework'
-import { ComponentsLinealDirectiveFlag } from '@aglyn/core-data-framework'
+import {
+  AglynComponentSchema,
+  ComponentId,
+  ComponentsLinealDirectiveFlag,
+} from '@aglyn/core-data-framework'
 import { aglynElementComponent, dynamicLoader } from '@aglyn/core-feature-renderer'
-import List, { ListProps } from '@mui/material/List'
-import { BUNDLE_ID } from '../constants'
-import { schema as listItemSchema } from '../list-item'
-import { generateTemplateId } from '../utils/generate-template-id'
+
+import ListItem, { ListItemProps } from '@mui/material/ListItem'
+import { BUNDLE_ID } from '../../constants'
+import { schema as listItemTextSchema } from '../list-item-text'
+import { generateTemplateId } from '../../utils/generate-template-id'
 
 
-const ID: ComponentId = 'list'
+const ID: ComponentId = 'list-item'
 
-export const loader = List//dynamicLoader(() => import('@mui/material/List'))
-export const schema: AglynComponentSchema<ListProps> = {
+export const loader = dynamicLoader(() => import('@mui/material/ListItem'))
+export const schema: AglynComponentSchema<ListItemProps> = {
   componentId: ID,
-  bundleId: 'mui',
+  bundleId: BUNDLE_ID,
   metadata: {
-    displayName: 'List',
-    iconIds: 'format-list-bulleted-square',
+    displayName: 'List Item',
+    iconIds: 'format-list-text',
     iconColor: '#2196f3',
   },
   renderFlags: {
     hierarchy: {
       restrictChildren: [
         ComponentsLinealDirectiveFlag.LIMIT_TO, {
-          components: [listItemSchema.componentId],
+          components: [listItemTextSchema.componentId],
         },
       ],
     },
@@ -47,20 +51,19 @@ export const schema: AglynComponentSchema<ListProps> = {
   templates: [
     {
       id: generateTemplateId(ID),
-      label: 'List',
-      iconIds: 'format-list-bulleted-square',
+      label: 'List Item',
+      iconIds: 'format-list-text',
       iconColor: '#2196f3',
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,
         elements: [
-          listItemSchema.templates![0]!.data,
-          listItemSchema.templates![0]!.data,
+          listItemTextSchema.templates![0]!.data
         ],
       },
     },
   ],
 }
-export const component = aglynElementComponent(schema, loader)
+export const component = aglynElementComponent(schema, ListItem)
 
 export default component

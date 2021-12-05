@@ -82,7 +82,11 @@ const FieldSelect = forwardRef<any, FieldSelectProps>(function RefRenderFn(props
         {...input}
         disabled={isDisabled}
         error={Boolean(invalidMessage)}
-        inputProps={{readOnly: isReadOnly, ...inputProps}}
+        inputProps={{
+          readOnly: isReadOnly,
+          size: 'small',
+          ...inputProps
+        }}
         label={label}
         labelId={`field-select-${input.name}`}
         required={isRequired}

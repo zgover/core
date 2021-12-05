@@ -16,7 +16,7 @@
  */
 
 import { Dictionary, Implements, KeyValueMap } from '@aglyn/shared-data-types'
-import { CANVAS_ROOT_ELEMENT_ID } from './constants/_internal'
+import { CANVAS_ROOT_ELEMENT_ID } from './constants/canvas'
 import { SYMBOL_TYPE, TYPE_KIND, TYPE_OF } from './constants/symbol'
 import {
   AglynComponentElementDataDenormalized,

@@ -21,7 +21,7 @@ import CardActionArea from '@mui/material/CardActionArea'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
 import { forwardRef, MouseEvent, ReactNode, useCallback } from 'react'
-import { Item } from './grid-list'
+import { GridListItemData } from './grid-list'
 
 
 const cardClasses = generateComponentClassKeys('AglynCardIconListItem', ['actionArea', 'selected'])
@@ -71,9 +71,9 @@ const StyledContent = styled('div', {
 }))
 
 export interface CardIconListItemProps extends Partial<MuiCardProps> {
-  item: Item
+  item: GridListItemData
   preview: ReactNode
-  label: ReactNode
+  label?: ReactNode
   selected?: boolean
   onActionClick?: {
     bivarianceHack<T>(event: MouseEvent<T>, selection: unknown): void

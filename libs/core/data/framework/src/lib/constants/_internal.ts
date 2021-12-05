@@ -28,9 +28,6 @@ import type { AppUUN } from '../types'
 export const DEFAULT_APP_UUN = '[DEFAULT]'
 export type DEFAULT_APP_UUN = typeof DEFAULT_APP_UUN
 
-export const CANVAS_ROOT_ELEMENT_ID = '_@_'
-export type CANVAS_ROOT_ELEMENT_ID = typeof CANVAS_ROOT_ELEMENT_ID
-
 export const _INTERNAL_APPS_: Map<AppUUN, AglynAppController> = new Map()
 export const _INTERNAL_EXTENSIONS_: Map<AppUUN, AglynExtensionsController> = new Map()
 export const _INTERNAL_COMMANDS_: Map<AppUUN, AglynCommandsController> = new Map()
@@ -63,6 +60,6 @@ email to 'info@aglyn.com'.
 — Aglyn Engineering Team
 `
 
-if (process.browser) {
+if (process?.['browser']) {
   console.log(CONSOLE_GREETING, CONSOLE_GREETING_STYLES)
 }
