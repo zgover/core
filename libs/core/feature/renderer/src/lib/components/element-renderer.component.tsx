@@ -19,7 +19,7 @@ import { ComponentId } from '@aglyn/core-data-framework'
 import { ReactIs } from '@aglyn/shared-ui-jsx'
 import { _isArrEmpty } from '@aglyn/shared-util-guards'
 import { ComponentType, forwardRef, HTMLAttributes, PropsWithoutRef, RefAttributes } from 'react'
-import { ElementDataProps, withAglynElement } from '../hooks/with-aglyn-element'
+import { ElementDataProps, withAglynElementData } from '../hooks/with-aglyn-element-data'
 import { ElementsRendererComponent } from './elements-renderer.component'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -63,11 +63,11 @@ const ElementRendererComponentRaw = forwardRef<any, DecoratedElementRendererProp
   }
 )
 
-ElementRendererComponentRaw.displayName = 'ElementRendererComponent'
+ElementRendererComponentRaw.displayName = 'Renderer.ElementRendererComponent'
 ElementRendererComponentRaw.defaultProps = {
   children: null,
 }
 
-export const ElementRendererComponent = withAglynElement(ElementRendererComponentRaw)
+export const ElementRendererComponent = withAglynElementData(ElementRendererComponentRaw)
 
 export default ElementRendererComponent

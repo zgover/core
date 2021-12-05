@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
+export { default as dynamicLoader } from 'next/dynamic'
+
 export * from './components/element-renderer.component'
 export * from './components/elements-renderer.component'
 export * from './components/canvas-renderer.component'
+export * from './components/element-error-boundary.component'
 
 export * from './contexts/aglyn-app-context'
 export * from './contexts/aglyn-components-context'
@@ -41,4 +44,6 @@ export * from './hooks/use-aglyn-element-label'
 export * from './hooks/use-aglyn-element-parent-position'
 export * from './hooks/use-aglyn-element-resolved-props'
 export * from './hooks/use-aglyn-elements-history'
-export * from './hooks/with-aglyn-element'
+export * from './hooks/with-aglyn-element-data'
+
+export * from './utils/aglyn-element-component'

@@ -15,43 +15,39 @@
  * limitations under the License.
  */
 
-import {
-  AglynComponentElementTemplateData,
-  AglynComponentSchema,
-  ComponentId,
-  createAglynComponentElement,
-} from '@aglyn/core-data-framework'
-import { ListItemText } from '@mui/material'
+import type { AglynComponentSchema, ComponentId } from '@aglyn/core-data-framework'
+import { aglynElementComponent, dynamicLoader } from '@aglyn/core-feature-renderer'
+import ListItemText, { ListItemTextProps } from '@mui/material/ListItemText'
+import { BUNDLE_ID } from '../constants'
+import { generateTemplateId } from '../utils/generate-template-id'
 
-export const loader = () => import('@mui/material/ListItemText').then((i) => i.default)
-export const componentId: ComponentId = 'list-item-text'
-export const bundleId: ComponentId = 'mui'
-export const metadata: AglynComponentSchema['metadata'] = {
-  displayName: 'List Item Text',
-}
-export const templates: AglynComponentElementTemplateData[] = [
-  {
-    id: 'mui:list-item-text',
-    title: 'List Item Text',
-    data: {
-      componentId: componentId,
-      bundleId: bundleId,
-      props: {
-        primary: 'Item Primary',
-        secondary: 'This is the secondary',
+
+const ID: ComponentId = 'list-item-text'
+
+export const loader = ListItemText//dynamicLoader(() => import('@mui/material/ListItemText'))
+export const schema: AglynComponentSchema<ListItemTextProps> = {
+  componentId: ID,
+  bundleId: BUNDLE_ID,
+  metadata: {
+    displayName: 'List Item Text',
+    iconIds: 'format-list-checks',
+  },
+  templates: [
+    {
+      id: generateTemplateId(ID),
+      label: 'List Item Text',
+      iconIds: 'format-list-checks',
+      data: {
+        componentId: ID,
+        bundleId: BUNDLE_ID,
+        props: {
+          primary: 'Item Primary',
+          secondary: 'This is the secondary',
+        },
       },
     },
-  },
-]
-
-export const component = createAglynComponentElement(
-  {
-    componentId,
-    bundleId,
-    metadata,
-    templates,
-  },
-  ListItemText
-)
+  ],
+}
+export const component = aglynElementComponent(schema, loader)
 
 export default component

@@ -23,14 +23,3 @@ import type { ComponentType } from 'react'
 export type FormSchema = DdfSchema
 export type FormField = DdfField
 export type FormTemplate = ComponentType<DdfFormRendererProps>
-
-export enum FieldComponent {
-  CHECKBOX = 'checkbox',
-  DATE_PICKER = 'date-picker',
-  ICON_SELECT = 'icon-select',
-  RADIO = 'radio',
-  SELECT = 'select',
-  TEXT_FIELD = 'text-field',
-  TEXTAREA = 'textarea',
-  TIME_PICKER = 'time-picker',
-}

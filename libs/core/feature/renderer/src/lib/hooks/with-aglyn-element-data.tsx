@@ -16,7 +16,7 @@
  */
 
 import {
-  AglynComponentElement,
+  IAglynComponent,
   AglynComponentElementDataNormalized,
   ElementId,
 } from '@aglyn/core-data-framework'
@@ -36,41 +36,45 @@ export interface RequiredElementDataProps {
 
 export interface OptionalElementDataProps extends InnerRefProp {
   elementData: AglynComponentElementDataNormalized<any>
-  component: AglynComponentElement<any>
+  component: IAglynComponent<any>
   elemProps: any
 }
 
 export interface ElementDataProps extends RequiredElementDataProps, OptionalElementDataProps {}
 
-export function withAglynElement<U = any, T = any>(
+export function withAglynElementData<U = any, T = any>(
   WrappedComponent: ComponentType<PropsWithoutRef<ElementDataProps & U> & RefAttributes<T>>
 ): ComponentType<RequiredElementDataProps & U & RefAttributes<T>> {
-  const component = forwardRef<T, RequiredElementDataProps & U>(function RefRenderFn(props, ref) {
-    const { $id, children: childrenProp, className: classNameProp, ...rest } = props
-    const elementData = useAglynElementData($id)
-    const component = useAglynComponent(elementData.componentId, elementData.bundleId)
-    const { children, className: classNameElem, ...elemProps } = useAglynElementResolvedProps($id)
-    const innerRefProps = useAglynElementConditionalInnerRefProps($id, ref)
-    const className = clsx(classNameProp, classNameElem)
 
-    return (
-      <WrappedComponent
-        ref={ref}
-        $id={$id}
-        elementData={elementData}
-        component={component}
-        elemProps={elemProps}
-        className={className}
-        {...innerRefProps}
-        {...(rest as any)}
-      >
-        {children}
-        {childrenProp}
-      </WrappedComponent>
-    )
-  })
-  component.displayName = `WithElementData(${getDisplayName(WrappedComponent)})`
-  return component as ComponentType<RequiredElementDataProps & U & RefAttributes<T>>
+  const displayName = getDisplayName(WrappedComponent)
+  const WithAglynElementData = forwardRef<T, RequiredElementDataProps & U>(
+    function RefRenderFn(props, ref) {
+      const { $id, children: childrenProp, className: classNameProp, ...rest } = props
+      const elementData = useAglynElementData($id)
+      const component = useAglynComponent(elementData.componentId, elementData.bundleId)
+      const { children, className: classNameElem, ...elemProps } = useAglynElementResolvedProps($id)
+      const innerRefProps = useAglynElementConditionalInnerRefProps($id, ref)
+      const className = clsx(classNameProp, classNameElem)
+
+      return (
+        <WrappedComponent
+          ref={ref}
+          $id={$id}
+          elementData={elementData}
+          component={component}
+          elemProps={elemProps}
+          className={className}
+          {...innerRefProps}
+          {...(rest as any)}
+        >
+          {children}
+          {childrenProp}
+        </WrappedComponent>
+      )
+    }
+  )
+  WithAglynElementData.displayName = `WithAglynElementData(${displayName})`
+  return WithAglynElementData as ComponentType<RequiredElementDataProps & U & RefAttributes<T>>
 }
 
-export default withAglynElement
+export default withAglynElementData

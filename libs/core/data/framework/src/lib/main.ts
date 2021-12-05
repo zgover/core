@@ -64,7 +64,6 @@ export * from './constants/version'
 export * from './util/aglyn-is'
 export * from './util/build-component-props-form-schema'
 export * from './util/confirm-valid-lineal-relationship'
-export * from './util/create-aglyn-component-element'
 export * from './util/create-component-element-data'
 export * from './util/create-component-element-data-copy'
 export * from './util/create-component-element-id'
@@ -144,7 +143,7 @@ export type {
 export type {
   AglynComponentBesignerFlags,
   AglynComponentClassElement,
-  AglynComponentElement,
+  IAglynComponent,
   AglynComponentElementData,
   AglynComponentElementDataDenormalized,
   AglynComponentElementDataNormalized,

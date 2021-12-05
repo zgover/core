@@ -33,7 +33,7 @@ import { styled } from '@aglyn/shared-feature-themes'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import MuiTreeItem, { TreeItemProps } from '@mui/lab/TreeItem'
 import MuiTreeView, { SingleSelectTreeViewProps } from '@mui/lab/TreeView'
-import { forwardRef, Fragment, useCallback, useMemo } from 'react'
+import { forwardRef, Fragment, useCallback, useMemo, useState } from 'react'
 import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
 
 
@@ -48,7 +48,6 @@ const TreeItemIcon = styled(SvgPathIcon, {
   borderRadius: '0.25em',
   backgroundColor: theme.palette.background.default,
   border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.quaternary.main,
   boxShadow: theme.shadows['1'],
 }))
 const ScrollableTreeView = styled(MuiTreeView, {name: 'AglynScrollableTreeView'})({
@@ -62,19 +61,25 @@ interface ElementsTreeItemComponentProps extends Partial<TreeItemProps> {
 
 const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps>(
   function RefRenderFn(props, ref) {
-    const {$id, ...rest} = props
-    const elements = useAglynElementData($id, 'elements')
-    const componentId = useAglynElementData($id, 'componentId')
-    const bundleId = useAglynElementData($id, 'bundleId')
-    const label = useAglynElementLabel($id)
-    const iconIds = useAglynComponentSchema(componentId, bundleId)?.metadata?.iconIds
+    const {$id, ...rest} = props,
+      elements = useAglynElementData($id, 'elements'),
+      componentId = useAglynElementData($id, 'componentId'),
+      bundleId = useAglynElementData($id, 'bundleId'),
+      label = useAglynElementLabel($id),
+      iconIds = useAglynComponentSchema(componentId, bundleId)?.metadata?.iconIds,
+      iconColor = useAglynComponentSchema(componentId, bundleId)?.metadata?.iconColor
+
     return (
       <MuiTreeItem
         ref={ref}
         nodeId={$id}
         label={
           <Fragment>
-            <TreeItemIcon iconIds={iconIds || DEFAULT_COMPONENT_ICON_ID} />
+            <TreeItemIcon
+              color="quaternary"
+              iconIds={iconIds || DEFAULT_COMPONENT_ICON_ID}
+              sx={{color: iconColor}}
+            />
             {label}
           </Fragment>
         }

@@ -16,17 +16,64 @@
  */
 
 import { PaletteOptions } from '../../vendor/mui'
+import { IActionStates } from '../theme.types'
+
 
 /**
  * Console Theme
  */
 export namespace ConsolePalette {
+  export const status = {
+    info: {
+      main: '#E53935',
+      light: '#EA605D',
+      dark: '#A02725',
+      contrastText: '#FFFFFF',
+    },
+    error: {
+      main: '#E53935',
+      light: '#EA605D',
+      dark: '#A02725',
+      contrastText: '#FFFFFF',
+    },
+    success: {
+      main: '#4CAF50',
+      light: '#81C784',
+      dark: '#388E3C',
+      contrastText: '#000000DE',
+    },
+    warning: {
+      main: '#FFAB40',
+      light: '#FFBB66',
+      dark: '#B2772C',
+      contrastText: '#000000DE',
+    },
+  }
+
+  export const shadesOfGrey = {
+    50: '#FAFAFA',
+    100: '#F5F5F5',
+    200: '#EEEEEE',
+    300: '#E0E0E0',
+    400: '#BDBDBD',
+    500: '#9E9E9E',
+    600: '#757575',
+    700: '#616161',
+    800: '#424242',
+    900: '#212121',
+    A100: '#D5D5D5',
+    A200: '#AAAAAA',
+    A400: '#303030',
+    A700: '#616161',
+  }
+
   export type ColorVariant = 'light' | 'dark'
   export type BackgroundRecord = PaletteOptions['background']
 
   export namespace Background {
     export const light: BackgroundRecord = {
-      default: '#FAFAFA',
+      default: '#F5F5F5',
+      secondary: `#F8F9FA`,
       paper: '#FFFFFF',
     }
     export const dark: BackgroundRecord = {
@@ -105,102 +152,97 @@ export namespace ConsolePalette {
     }
 
     export const LIGHT: OrdinalRecord = {
-      primary: { ...Primary.LIGHT },
-      secondary: { ...Secondary.LIGHT },
-      tertiary: { ...Tertiary.LIGHT },
-      quaternary: { ...Quaternary.LIGHT },
+      primary: {...Primary.LIGHT},
+      secondary: {...Secondary.LIGHT},
+      tertiary: {...Tertiary.LIGHT},
+      quaternary: {...Quaternary.LIGHT},
     }
     export const DARK: OrdinalRecord = {
-      primary: { ...Primary.DARK },
-      secondary: { ...Secondary.DARK },
-      tertiary: { ...Tertiary.DARK },
-      quaternary: { ...Quaternary.DARK },
+      primary: {...Primary.DARK},
+      secondary: {...Secondary.DARK},
+      tertiary: {...Tertiary.DARK},
+      quaternary: {...Quaternary.DARK},
     }
   }
 
-  export const status = {
-    info: {
-      main: '#E53935',
-      light: '#EA605D',
-      dark: '#A02725',
-      contrastText: '#FFFFFF',
-    },
-    error: {
-      main: '#E53935',
-      light: '#EA605D',
-      dark: '#A02725',
-      contrastText: '#FFFFFF',
-    },
-    success: {
-      main: '#4CAF50',
-      light: '#81C784',
-      dark: '#388E3C',
-      contrastText: '#000000DE',
-    },
-    warning: {
-      main: '#FFAB40',
-      light: '#FFBB66',
-      dark: '#B2772C',
-      contrastText: '#000000DE',
-    },
-  }
 
-  export const shadesOfGrey = {
-    50: '#FAFAFA',
-    100: '#F5F5F5',
-    200: '#EEEEEE',
-    300: '#E0E0E0',
-    400: '#BDBDBD',
-    500: '#9E9E9E',
-    600: '#757575',
-    700: '#616161',
-    800: '#424242',
-    900: '#212121',
-    A100: '#D5D5D5',
-    A200: '#AAAAAA',
-    A400: '#303030',
-    A700: '#616161',
+  export type ActionIdentifier = 'svgBackground' | 'svgFilled' | 'svgStroke'
+  export type ActionRecord = Pick<PaletteOptions, ActionIdentifier>
+
+  // TODO: SETUP COLORS
+  export namespace Action {
+    export namespace SvgBackground {
+      export const LIGHT: IActionStates = {
+        default: shadesOfGrey[50],
+        hover: shadesOfGrey[50],
+        active: shadesOfGrey[50],
+        focus: shadesOfGrey[50],
+      }
+      export const DARK: IActionStates = {
+        default: shadesOfGrey[50],
+        hover: shadesOfGrey[50],
+        active: shadesOfGrey[50],
+        focus: shadesOfGrey[50],
+      }
+    }
+    export namespace SvgFilled {
+      export const LIGHT: IActionStates = {
+        default: shadesOfGrey[500],
+        hover: ConsolePalette.Ordinal.LIGHT.secondary['light'],
+        active: ConsolePalette.Ordinal.LIGHT.secondary['light'],
+        focus: ConsolePalette.Ordinal.LIGHT.secondary['light'],
+      }
+      export const DARK: IActionStates = {
+        default: shadesOfGrey[500],
+        hover: ConsolePalette.Ordinal.LIGHT.secondary['light'],
+        active: ConsolePalette.Ordinal.LIGHT.secondary['light'],
+        focus: ConsolePalette.Ordinal.LIGHT.secondary['light'],
+      }
+    }
+    export namespace SvgStroke {
+      export const LIGHT: IActionStates = {
+        default: '#FFFFFF',
+        hover: '#FFFFFF',
+        active: '#FFFFFF',
+        focus: '#FFFFFF',
+      }
+      export const DARK: IActionStates = {
+        default: '#FFFFFF',
+        hover: '#FFFFFF',
+        active: '#FFFFFF',
+        focus: '#FFFFFF',
+      }
+    }
+
+    export const LIGHT: ActionRecord = {
+      svgBackground: SvgBackground.LIGHT,
+      svgFilled: SvgFilled.LIGHT,
+      svgStroke: SvgStroke.LIGHT,
+    }
+    export const DARK: ActionRecord = {
+      svgBackground: SvgBackground.DARK,
+      svgFilled: SvgFilled.DARK,
+      svgStroke: SvgStroke.DARK,
+    }
   }
 }
 
 export const consolePalette: Record<Uppercase<ConsolePalette.ColorVariant>, PaletteOptions> = {
   LIGHT: {
     mode: 'light',
+    background: {...ConsolePalette.Background.light},
+    grey: {...ConsolePalette.shadesOfGrey},
     ...ConsolePalette.Ordinal.LIGHT,
+    ...ConsolePalette.Action.LIGHT,
     ...ConsolePalette.status,
-    grey: { ...ConsolePalette.shadesOfGrey },
-    background: { ...ConsolePalette.Background.light },
-    svgBg: {
-      base: ConsolePalette.shadesOfGrey[50],
-      active: ConsolePalette.shadesOfGrey[50],
-    },
-    svgFilled: {
-      base: ConsolePalette.shadesOfGrey[500],
-      active: ConsolePalette.Ordinal.LIGHT.secondary['light'],
-    },
-    svgStroke: {
-      base: '#FFFFFF',
-      active: '#FFFFFF',
-    },
   },
   DARK: {
     mode: 'dark',
+    background: {...ConsolePalette.Background.dark},
+    grey: {...ConsolePalette.shadesOfGrey},
     ...ConsolePalette.Ordinal.DARK,
+    ...ConsolePalette.Action.DARK,
     ...ConsolePalette.status,
-    grey: { ...ConsolePalette.shadesOfGrey },
-    background: { ...ConsolePalette.Background.dark },
-    svgBg: {
-      base: ConsolePalette.Ordinal.DARK.secondary['dark'],
-      active: ConsolePalette.Ordinal.DARK.secondary['dark'],
-    },
-    svgFilled: {
-      base: ConsolePalette.Ordinal.DARK.primary['dark'],
-      active: ConsolePalette.Ordinal.DARK.secondary['dark'],
-    },
-    svgStroke: {
-      base: ConsolePalette.Ordinal.DARK.primary['main'],
-      active: ConsolePalette.Ordinal.DARK.secondary['main'],
-    },
   },
 }
 

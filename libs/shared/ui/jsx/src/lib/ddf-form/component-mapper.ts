@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
+import { PropertyEditorFieldFlag } from '@aglyn/core-data-framework'
 import ComponentMapper from '@data-driven-forms/react-form-renderer/common-types/component-mapper'
 
-import { FieldComponent } from './types'
 import FieldIconSelect from './components/FieldIconSelect'
 import FieldSelect from './components/FieldSelect'
 import FieldTextField from './components/FieldTextField'
 
+
 export const componentMapper: ComponentMapper = {
-  [FieldComponent.TEXT_FIELD]: FieldTextField,
-  [FieldComponent.TEXTAREA]: FieldTextField,
-  [FieldComponent.ICON_SELECT]: FieldIconSelect,
-  [FieldComponent.SELECT]: FieldSelect,
+  [PropertyEditorFieldFlag.TEXT_FIELD]: FieldTextField,
+  [PropertyEditorFieldFlag.TEXTAREA]: FieldTextField,
+  [PropertyEditorFieldFlag.ICON_SELECT]: FieldIconSelect,
+  [PropertyEditorFieldFlag.SELECT]: FieldSelect,
 }

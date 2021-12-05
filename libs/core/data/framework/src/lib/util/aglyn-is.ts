@@ -28,7 +28,7 @@ import type {
   AglynCommandListener,
   AglynCommandResolver,
 } from '../controllers/aglyn-commands.controller'
-import { AglynComponentElement } from '../controllers/aglyn-components.controller'
+import { IAglynComponent } from '../controllers/aglyn-components.controller'
 import type { AglynExtension } from '../models/aglyn-extension.model'
 import type { AglynAppModule } from '../types'
 
@@ -80,6 +80,6 @@ export function isAglynCommandResolver<T>(object: unknown): object is AglynComma
 export function isAglynCommandListener<T>(object: unknown): object is AglynCommandListener {
   return kindOf(object) === COMMAND_LISTENER_TYPE
 }
-export function isAglynComponentElement<T>(object: unknown): object is AglynComponentElement {
+export function isAglynComponentElement<T>(object: unknown): object is IAglynComponent {
   return kindOf(object) === COMPONENT_ELEMENT_TYPE
 }

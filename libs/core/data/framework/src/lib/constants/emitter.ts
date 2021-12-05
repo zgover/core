@@ -33,7 +33,7 @@ import type {
   AglynCommandResolver,
 } from '../controllers/aglyn-commands.controller'
 import type {
-  AglynComponentElement,
+  IAglynComponent,
   AglynComponentElementDataDenormalized,
   AglynComponentElementDataNormalized,
   AglynComponentsBundle,
@@ -198,7 +198,7 @@ export type ComponentGetPayload = PayloadData<{ componentId: CommandUId, bundleI
 export type ComponentsGetPayload = PayloadData<{ ids?: { componentId: CommandUId, bundleId?: BundleUId }[] }>
 export type ComponentSchemaGetPayload = PayloadData<{ componentId: CommandUId, bundleId?: BundleUId }>
 export type ComponentsBundleGetPayload = PayloadData<{ bundleId: BundleUId }>
-export type ComponentRegisterPayload<P extends AnyProps = any> = PayloadData<{ schema: AglynComponentSchema<P>, component: AglynComponentElement<P> }>
+export type ComponentRegisterPayload<P extends AnyProps = any> = PayloadData<{ schema: AglynComponentSchema<P>, component: IAglynComponent<P> }>
 export type ComponentUnregisterPayload = PayloadData<{ componentId: ComponentId, bundleId: BundleUId }>
 export type ComponentsBundleRegisterPayload = PayloadData<{ bundle: Omit<AglynComponentsBundle, 'componentIds'>, components: ComponentRegisterPayload[] }>
 export type ComponentsBundleUnregisterPayload = PayloadData<{ bundleId: BundleUId }>

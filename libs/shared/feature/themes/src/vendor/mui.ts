@@ -16,14 +16,147 @@
  */
 
 import type { Theme } from '@mui/material/styles'
+
+
+import type {
+  PaletteColor,
+  PaletteColorOptions,
+  TypeBackground,
+  TypeText,
+} from '@mui/material/styles/createPalette'
+
+import type { Shadows } from '@mui/material/styles/shadows'
+import type { WithStyles } from '@mui/styles'
+
+import type { ClassKeyInferable } from '@mui/styles/withStyles'
 import type {
   FilteringStyledOptions,
   MuiStyledOptions,
   StyledComponent,
   SxProps,
 } from '@mui/system'
+
+import type { Shape } from '@mui/system/createTheme/shape'
 import type { ElementType } from 'react'
-import './mui.overrides'
+import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
+
+
+//    _____     _______ ____  ____  ___ ____  _____ ____
+//   / _ \ \   / / ____|  _ \|  _ \|_ _|  _ \| ____/ ___|
+//  | | | \ \ / /|  _| | |_) | |_) || || | | |  _| \___ \
+//  | |_| |\ V / | |___|  _ <|  _ < | || |_| | |___ ___) |
+//   \___/  \_/  |_____|_| \_\_| \_\___|____/|_____|____/
+
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/ButtonGroup' {
+  interface ButtonGroupPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/ToggleButtonGroup' {
+  interface ToggleButtonGroupPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/Fab' {
+  interface FabPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/SvgIcon' {
+  interface SvgIconPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/AppBar' {
+  interface AppBarPropsColorOverrides extends ColorPropOverrides {}
+}
+
+declare module '@mui/material/styles/createPalette' {
+  interface TypeBackground {
+    secondary: string
+  }
+}
+declare module '@mui/material/styles' {
+  /**
+   * START EXAMPLE – MODULE AUGMENTATION ↓
+   * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
+   * ```typescript
+   * // Add new property ↓
+   * declare module '@mui/material/styles' {
+   *   interface Theme {
+   *     status: {
+   *       danger: React.CSSProperties['color'],
+   *     }
+   *   }
+   *   interface ThemeOptions {
+   *     status: {
+   *       danger: React.CSSProperties['color']
+   *     }
+   *   }
+   * }
+   * const theme = createMuiTheme({
+   *   status: {
+   *     danger: '#e53e3e',
+   *   },
+   * })
+   *
+   * // Add to existing property (e.g., palette, typography) ↓
+   * declare module "@mui/material/styles" {
+   *   interface Palette {
+   *     neutral: Palette['primary']
+   *   }
+   *   interface PaletteOptions {
+   *     neutral: PaletteOptions['primary']
+   *   }
+   * }
+   * const theme = createMuiTheme({
+   *   palette: {
+   *     neutral: {
+   *       main: '#5c6ac4',
+   *     },
+   *   },
+   * })
+   * ```
+   * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   * END EXAMPLE – MODULE AUGMENTATION ↑
+   */
+
+  interface Palette {
+    background: Palette['background']
+    tertiary: PaletteColor
+    quaternary: PaletteColor
+    svgBackground: IActionStates
+    svgFilled: IActionStates
+    svgStroke: IActionStates
+    text: Palette['text']
+  }
+
+  interface PaletteOptions {
+    background?: PaletteOptions['background']
+    tertiary?: PaletteColorOptions
+    quaternary?: PaletteColorOptions
+    svgBackground?: IActionStates
+    svgFilled?: IActionStates
+    svgStroke?: IActionStates
+    text?: PaletteOptions['text']
+  }
+
+  interface Theme {
+    insetShadows: Shadows
+    shape: Shape & { appIconBorderRadius: number | string }
+  }
+
+  type ExtendPropsOfWithStyles<P extends { classes?: ClassNameMap<string> },
+    StylesType extends ClassKeyInferable<any, any>,
+    IncludeTheme extends boolean | undefined = false> = P & WithStyles<StylesType, IncludeTheme>
+}
+
+declare module '@mui/styles' {
+  interface DefaultTheme extends Theme {}
+}
+
+
+//   _______  ______   ___  ____ _____ ____
+//  | ____\ \/ /  _ \ / _ \|  _ \_   _/ ___|
+//  |  _|  \  /| |_) | | | | |_) || | \___ \
+//  | |___ /  \|  __/| |_| |  _ < | |  ___) |
+//  |_____/_/\_\_|    \___/|_| \_\|_| |____/
 
 
 export type StyledOptions<P = any, FP extends keyof P = keyof P> = FilteringStyledOptions<P, FP> & MuiStyledOptions
@@ -81,6 +214,24 @@ export type {
   TypographyVariants,
   TypographyVariantsOptions,
 } from '@mui/material/styles'
+
+
+export type {
+  ColorPartial,
+  CommonColors,
+  TypeBackground,
+  TypeText,
+} from '@mui/material/styles/createPalette'
+
+export type {
+  Shadows,
+} from '@mui/material/styles/shadows'
+
+export type {
+  ClassKeyInferable,
+} from '@mui/styles/withStyles'
+
+export type { Shape } from '@mui/system/createTheme/shape'
 
 export {
   alpha,

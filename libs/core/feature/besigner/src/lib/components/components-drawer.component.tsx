@@ -45,6 +45,7 @@ const ItemSvgIcon = styled(SvgPathIcon, {
   backgroundColor: theme.palette.background.default,
   border: `1px solid ${theme.palette.divider}`,
   color: theme.palette.quaternary.main,
+  overflow: 'visible'
 }))
 const AppBarTitle = styled(Typography, {
   name: 'AppBarTitle',
@@ -155,11 +156,15 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
       (item) => (
         <CardIconListItem
           item={item}
-          label={item.title}
+          label={item.label}
           onActionClick={handleItemClick}
           preview={
             <>
-              <ItemSvgIcon color="primary" iconIds={item.iconIds || DEFAULT_COMPONENT_ICON_ID} />
+              <ItemSvgIcon
+                color="primary"
+                iconIds={item.iconIds || DEFAULT_COMPONENT_ICON_ID}
+                sx={{color: item.iconColor}}
+              />
             </>
           }
         />

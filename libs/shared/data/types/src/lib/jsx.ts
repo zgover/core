@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import type { Component } from 'react'
-import type { ComponentProps, ComponentPropsWithRef, ElementType, Ref } from 'react'
+import type { Component, ComponentProps, ComponentPropsWithRef, ElementType, Ref } from 'react'
 import type { DistributiveOmit, EmptyObj } from './basic'
 
 
@@ -24,7 +23,7 @@ export type JSXKey = string | number
 
 export type JSXText = string | symbol
 export type JSXChild = JSXElementBase | JSXText
-export type JSXFragment = {} | JSXNodeArray
+export type JSXFragment = EmptyObj | JSXNodeArray
 export type JSXNode = JSXChild | JSXFragment | JSXPortal | boolean | null | undefined
 
 export type JSXIntrinsicElements = JSX.IntrinsicElements
@@ -51,7 +50,7 @@ export interface JSXElementBase<P = any,
   key: JSXKey | null
 }
 
-export interface JSXElementClassBase<P = {}, S = {}> extends Component<P, S> {
+export interface JSXElementClassBase<P = EmptyObj, S = EmptyObj> extends Component<P, S> {
   context: unknown
   setState<K extends keyof S>(
     state:
@@ -83,7 +82,7 @@ export interface ResolveProps<P = any> {
 }
 
 export type InnerRefProp<T = any> = { innerRef?: Ref<T> }
-export type PropsWithInnerRef<P, T> = InnerRefProp<T> & P
+export type PropsWithInnerRef<P, T = any> = P & InnerRefProp<T>
 
 export type InferElementTypeProps<T> = T extends ElementType<infer P> ? P : never
 
@@ -103,15 +102,17 @@ export type OverrideableComponentProps<P = any, T = OverrideComponentProp> = P &
   OverrideComponentPropPlusOverrideProps<T>
 
 
-/**
- *
- *
- *
- *
- *
- *
- *
- */
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /**
@@ -212,6 +213,6 @@ export type DefaultComponentProps<M extends OverridableTypeMap> =
 export type BaseProps<M extends OverridableTypeMap> = M['props'];
 
 export interface OverridableTypeMap {
-  props: {}
+  props: EmptyObj
   defaultComponent: ElementType
 }

@@ -73,10 +73,10 @@ export const TYPE_OF = 'ßßtypeof'
 export const TYPE_KIND = 'ßßkind'
 
 export let MODULE_TYPE: SYMBOL_TYPE = HexTag.x60106
-export type MODULE_TYPE = typeof MODULE_TYPE
+export type MODULE_TYPE = SYMBOL_TYPE | typeof MODULE_TYPE
 
 export let EXTENSION_TYPE: SYMBOL_TYPE = HexTag.x60107
-export type EXTENSION_TYPE = typeof EXTENSION_TYPE
+export type EXTENSION_TYPE = SYMBOL_TYPE | typeof EXTENSION_TYPE
 
 export let COMMAND_RESOLVER_TYPE: SYMBOL_TYPE = HexTag.x60108
 export type COMMAND_RESOLVER_TYPE = typeof COMMAND_RESOLVER_TYPE

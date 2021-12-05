@@ -16,12 +16,8 @@
  */
 
 import { bundle as muiBundle } from '@aglyn/addons-ui-mui-bundle'
-import {
-  createAglynComponentElement,
-  initializeApp,
-  registerBundle,
-  registerComponent,
-} from '@aglyn/core-data-framework'
+import { initializeApp, registerBundle, registerComponent } from '@aglyn/core-data-framework'
+import { aglynElementComponent } from '@aglyn/core-feature-renderer'
 import {
   CacheProvider,
   consoleThemeLight,
@@ -50,7 +46,7 @@ const metaElements: MakeMetaElementsConfig = [
 ]
 const linkElements: MakeLinkElementsConfig = []
 
-const c1 = createAglynComponentElement(
+const c1 = aglynElementComponent(
   {
     componentId: 'root',
     metadata: {
@@ -58,10 +54,10 @@ const c1 = createAglynComponentElement(
       title: 'Root element',
     },
   },
-  'span'
+  'span',
 )
 
-const c2 = createAglynComponentElement(
+const c2 = aglynElementComponent(
   {
     componentId: 'root1',
     metadata: {
@@ -69,10 +65,10 @@ const c2 = createAglynComponentElement(
       title: 'Root element',
     },
   },
-  'span'
+  'span',
 )
 
-const c3 = createAglynComponentElement(
+const c3 = aglynElementComponent(
   {
     componentId: 'root2',
     metadata: {
@@ -80,10 +76,10 @@ const c3 = createAglynComponentElement(
       title: 'Root element',
     },
   },
-  'span'
+  'span',
 )
 
-const c4 = createAglynComponentElement(
+const c4 = aglynElementComponent(
   {
     componentId: 'root3',
     metadata: {
@@ -91,10 +87,10 @@ const c4 = createAglynComponentElement(
       title: 'Root element',
     },
   },
-  'span'
+  'span',
 )
 
-const c5 = createAglynComponentElement(
+const c5 = aglynElementComponent(
   {
     componentId: 'root4',
     metadata: {
@@ -104,7 +100,7 @@ const c5 = createAglynComponentElement(
     templates: [
       {
         id: 'root4:1',
-        title: 'Root 4',
+        label: 'Root 4',
         data: {
           componentId: 'root4',
           props: {
@@ -114,7 +110,7 @@ const c5 = createAglynComponentElement(
       },
     ],
   },
-  'span'
+  'span',
 )
 const components = [c1, c2, c3, c4, c5]
 
@@ -130,12 +126,13 @@ try {
 
   components.forEach((i) => registerComponent(app, i))
   registerBundle(app, muiBundle)
-} catch (e) {
+}
+catch (e) {
   console.error(e, 'initialize aglyn app')
 }
 
 function AppWrapperRaw(props) {
-  const { children } = props
+  const {children} = props
   const Wrapper = isProduction ? Fragment : Fragment // StrictMode
 
   useEffect(() => {
@@ -159,7 +156,7 @@ function AppWrapperRaw(props) {
   )
 }
 AppWrapperRaw.displayName = 'AppWrapper'
-const AppWrapper = withTheme({ theme: consoleThemeLight })(AppWrapperRaw)
+const AppWrapper = withTheme({theme: consoleThemeLight})(AppWrapperRaw)
 
 const previewProduction = false
 const isProduction = process.env.NODE_ENV === 'production' || previewProduction
@@ -201,7 +198,7 @@ export interface _AppProps extends NextAppProps {
  * @returns {JSX.Element}
  */
 function _App(props: _AppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const {Component, emotionCache = clientSideEmotionCache, pageProps} = props
 
   return (
     <CacheProvider value={emotionCache}>
@@ -212,7 +209,7 @@ function _App(props: _AppProps) {
   )
 }
 _App.displayName = '_App'
-_App.getInitialProps = async ({ ctx, Component }) => {
+_App.getInitialProps = async ({ctx, Component}) => {
   let pageProps = {}
 
   if (Component.getInitialProps) {

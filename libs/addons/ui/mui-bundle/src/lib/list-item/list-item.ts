@@ -16,55 +16,54 @@
  */
 
 import {
-  AglynComponentElementTemplateData,
   AglynComponentSchema,
   ComponentId,
   ComponentsLinealDirectiveFlag,
-  createAglynComponentElement,
 } from '@aglyn/core-data-framework'
-import { ListItem } from '@mui/material'
+import { aglynElementComponent, dynamicLoader } from '@aglyn/core-feature-renderer'
 
-export const loader = () => import('@mui/material/ListItem').then((i) => i.default)
-export const componentId: ComponentId = 'list-item'
-export const bundleId: ComponentId = 'mui'
-export const metadata: AglynComponentSchema['metadata'] = {
-  displayName: 'List Item',
-}
-export const renderFlags: AglynComponentSchema['renderFlags'] = {
-  hierarchy: {
-    restrictChildren: [ComponentsLinealDirectiveFlag.LIMIT_TO, { components: ['list'] }],
+import ListItem, { ListItemProps } from '@mui/material/ListItem'
+import { BUNDLE_ID } from '../constants'
+import { schema as listItemTextSchema } from '../list-item-text'
+import { generateTemplateId } from '../utils/generate-template-id'
+
+
+const ID: ComponentId = 'list-item'
+
+export const loader = ListItem//dynamicLoader(() => import('@mui/material/ListItem'))
+export const schema: AglynComponentSchema<ListItemProps> = {
+  componentId: ID,
+  bundleId: BUNDLE_ID,
+  metadata: {
+    displayName: 'List Item',
+    iconIds: 'format-list-text',
+    iconColor: '#2196f3',
   },
-}
-export const templates: AglynComponentElementTemplateData[] = [
-  {
-    id: 'mui:list-item',
-    title: 'List Item',
-    data: {
-      componentId: componentId,
-      bundleId: bundleId,
-      elements: [
-        {
-          componentId: 'list-item-text',
-          bundleId: bundleId,
-          props: {
-            primary: 'Item Primary',
-            secondary: 'This is the secondary',
-          },
+  renderFlags: {
+    hierarchy: {
+      restrictChildren: [
+        ComponentsLinealDirectiveFlag.LIMIT_TO, {
+          components: [listItemTextSchema.componentId],
         },
       ],
     },
   },
-]
-
-export const component = createAglynComponentElement(
-  {
-    componentId,
-    bundleId,
-    metadata,
-    templates,
-    renderFlags,
-  },
-  ListItem
-)
+  templates: [
+    {
+      id: generateTemplateId(ID),
+      label: 'List Item',
+      iconIds: 'format-list-text',
+      iconColor: '#2196f3',
+      data: {
+        componentId: ID,
+        bundleId: BUNDLE_ID,
+        elements: [
+          listItemTextSchema.templates![0]!.data
+        ],
+      },
+    },
+  ],
+}
+export const component = aglynElementComponent(schema, loader)
 
 export default component

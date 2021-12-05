@@ -73,7 +73,6 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
     const componentSchema = useAglynComponentSchema(componentId, bundleId)
     const elementAttributes = useBesignerElementAttributes({$id, componentId, bundleId})
     const {getApp} = useAglynAppContext()
-    // const {hoverOpen, hoverClose, hoverSelect, hoverDeselect} = useHoverContext()
     const interactMode = useAglynBesignerStore('flags', 'interactMode')
     const rearrangeEnabled = interactMode === InteractionModeFlag.REARRANGE
     const selectEnabled = interactMode === InteractionModeFlag.SELECT
@@ -117,15 +116,6 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         const target = e.currentTarget
         if (target) {
           setBesignerCanvasHovered(getApp(), {hovered: {$id}})
-          // const clientPosition = getElementClientRectBounding(target)
-          // hoverOpen(e, {
-          //   hovered: {
-          //     $id: $id,
-          //     // position: clientPosition,
-          //     // componentId: componentId,
-          //     // bundleId: bundleId,
-          //   },
-          // })
         }
         else {
           // hoverClose(e as any)
@@ -147,15 +137,6 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         const target = e.currentTarget
         if (target) {
           setBesignerCanvasSelected(getApp(), {selected: {$id}})
-          // const clientPosition = getElementClientRectBounding(target)
-          // hoverSelect(e, {
-          //   selected: {
-          //     $id: $id,
-          //     // position: clientPosition,
-          //     // componentId: componentId,
-          //     // bundleId: bundleId,
-          //   },
-          // })
         }
         else {
           // hoverDeselect(e)
@@ -207,7 +188,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   },
 )
 
-ElementRendererComponent.displayName = 'ElementRendererComponent'
+ElementRendererComponent.displayName = 'Besigner.ElementRendererComponent'
 ElementRendererComponent.defaultProps = {}
 
 export { ElementRendererComponent }

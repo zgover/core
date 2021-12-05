@@ -28,7 +28,7 @@ import {
 } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import type {
-  AglynComponentElement,
+  IAglynComponent,
   AglynComponentElementTemplateData,
   AglynComponentsBundle,
   AglynComponentSchema,
@@ -67,7 +67,7 @@ export function getAllComponentsTemplateValues(
 export function getComponent<P extends AnyProps>(
   app: AglynAppController,
   payload: ComponentGetPayload,
-): OrUndef<AglynComponentElement<P>> {
+): OrUndef<IAglynComponent<P>> {
   return _getComponentsController(app)?.getComponent(payload)
 }
 

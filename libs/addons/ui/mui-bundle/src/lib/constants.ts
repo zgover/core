@@ -15,20 +15,5 @@
  * limitations under the License.
  */
 
-export * from './vendor/emotion'
-export * from './vendor/jss'
-export * from './vendor/mui'
 
-export * from './lib/theme.types'
-export * from './lib/constants'
-
-export * from './lib/besigner-theme'
-export * from './lib/console-theme'
-
-export * from './lib/hocs/with-emotion-styles-cache-client'
-export * from './lib/hocs/with-theme'
-
-export * from './lib/util/create-responsive-theme'
-export * from './lib/util/generate-component-class-keys'
-export * from './lib/util/create-inset-shadows'
-export * from './lib/util/use-font-family'
+export const BUNDLE_ID = 'mui'

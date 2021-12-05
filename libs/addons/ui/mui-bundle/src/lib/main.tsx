@@ -16,31 +16,33 @@
  */
 
 import {
-  AglynComponentsBundle,
-  BundleUId,
   ComponentRegisterPayload,
   ComponentsBundleRegisterPayload,
   createComponentsBundle,
 } from '@aglyn/core-data-framework'
 
+
 import button from './button'
+import { BUNDLE_ID } from './constants'
 import list from './list'
 import listItem from './list-item'
 import listItemText from './list-item-text'
 
-export const bundleId: BundleUId = 'mui'
-export const metadata: AglynComponentsBundle['metadata'] = {
-  displayName: 'Mui Components',
-  description: 'Material-UI view components',
-  icon: 'view-array',
-}
-export const components: ComponentRegisterPayload[] = [button, list, listItem, listItemText]
 
-export const bundle: ComponentsBundleRegisterPayload = createComponentsBundle(
-  {
-    bundleId,
-    metadata,
+export const schema = {
+  bundleId: BUNDLE_ID,
+  metadata: {
+    displayName: 'Mui Components',
+    description: 'Material-UI view components',
+    icon: 'view-array',
   },
-  components
-)
+}
+export const components: ComponentRegisterPayload[] = [
+  button,
+  list,
+  listItem,
+  listItemText,
+]
+
+export const bundle: ComponentsBundleRegisterPayload = createComponentsBundle(schema, components)
 export default bundle

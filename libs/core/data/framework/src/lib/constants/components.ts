@@ -15,11 +15,20 @@
  * limitations under the License.
  */
 
-import { FieldComponent } from '@aglyn/shared-ui-jsx'
-
 export enum ComponentsLinealDirectiveFlag {
   LIMIT_TO = 0x01,
   DISALLOW = 0x02,
+}
+
+export enum PropertyEditorFieldFlag {
+  CHECKBOX = 'checkbox',
+  DATE_PICKER = 'date-picker',
+  ICON_SELECT = 'icon-select',
+  RADIO = 'radio',
+  SELECT = 'select',
+  TEXT_FIELD = 'text-field',
+  TEXTAREA = 'textarea',
+  TIME_PICKER = 'time-picker',
 }
 
 export const DEFAULT_COMPONENT_ICON_ID = 'cube-outline'
@@ -28,9 +37,9 @@ export const DEFAULT_PROPS_FORM_SCHEMA = {
   fields: [
     {
       name: 'displayName',
-      component: FieldComponent.TEXT_FIELD,
+      component: PropertyEditorFieldFlag.TEXT_FIELD,
       label: 'Display name',
       // variant: 'outlined',
-    }
-  ]
+    },
+  ],
 }

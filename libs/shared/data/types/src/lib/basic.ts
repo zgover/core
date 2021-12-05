@@ -66,7 +66,7 @@ export type KeyValueMap<K extends PKey = PKey, T = unknown> = Record<K, T>
 export type Dictionary<T = unknown> = KeyValueMap<string, T>
 
 /** Any type of object record with string index types */
-export type AnyProps = Record<string, unknown>
+export type AnyProps = Partial<Record<string, unknown>>
 
 /** Dictionary collection optionally specify values to T */
 export type EmptyObj<K extends keyof any = keyof any> = Record<K, never>

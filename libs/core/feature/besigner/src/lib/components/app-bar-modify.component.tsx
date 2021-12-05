@@ -38,7 +38,9 @@ import { forwardRef, memo, MouseEvent, useCallback } from 'react'
 import { useAddElementCallback } from '../hooks/use-add-element-callback'
 
 
-const AglynAppBarModify = styled(MuiAppBar, {name: 'AglynAppBarModify'})({
+const AglynAppBarModify = styled(MuiAppBar, {
+  name: 'AglynAppBarModify',
+})<MuiAppBarProps>({
   top: 0,
 })
 
@@ -56,16 +58,16 @@ const HistoryControls = memo(() => {
     <Stack direction="row" spacing={0.25}>
       <Tooltip title={'Undo (⌘Z)'}>
         <span>
-          <IconButton aria-label="undo action" onClick={handleUndoClick} disabled={past <= 0}>
-            <SvgPathIcon fontSize="small" iconIds={'undo'} />
-          </IconButton>
+        <IconButton aria-label="undo action" onClick={handleUndoClick} disabled={past <= 0}>
+          <SvgPathIcon fontSize="small" iconIds={'undo'} />
+        </IconButton>
         </span>
       </Tooltip>
       <Tooltip title={'Redo (⌘Y)'}>
         <span>
-          <IconButton aria-label="redo action" onClick={handleRedoClick} disabled={future <= 0}>
-            <SvgPathIcon fontSize="small" iconIds={'redo'} />
-          </IconButton>
+        <IconButton aria-label="redo action" onClick={handleRedoClick} disabled={future <= 0}>
+          <SvgPathIcon fontSize="small" iconIds={'redo'} />
+        </IconButton>
         </span>
       </Tooltip>
     </Stack>
@@ -107,7 +109,13 @@ export const AppBarModifyComponent = forwardRef<any, AppBarModifyComponentProps>
     )
 
     return (
-      <AglynAppBarModify ref={ref} position="static" color="default" elevation={0} {...rest}>
+      <AglynAppBarModify
+        ref={ref}
+        position="static"
+        color="inherit"
+        elevation={0}
+        {...rest}
+      >
         <Toolbar variant="dense">
           <Tooltip title={'Add element'}>
             <IconButton

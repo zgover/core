@@ -158,7 +158,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
           <Grid spacing={2} container item>
             <Grid className={classes.preview} item>
               <ButtonBase className={classes.button} onClick={handleButtonClick} disableRipple>
-                <SvgPathIcon className={classes.icon} fontSize="inherit" iconIds={value} />
+                <SvgPathIcon className={classes.iconIds} fontSize="inherit" iconIds={value} />
               </ButtonBase>
             </Grid>
             <Grid item sm>
@@ -174,7 +174,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
                   Choose icon: <b>{(allIcons.byIconId[value] ?? {}).name ?? '(none)'}</b>
                 </span>
                 <SvgPathIcon
-                  className={classes.icon}
+                  className={classes.iconIds}
                   iconIds={open ? 'chevron-up' : 'chevron-down'}
                 />
               </ButtonBase>

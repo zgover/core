@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { BundleUId, CommandUId, AglynComponentElement } from '@aglyn/core-data-framework'
+import type { BundleUId, CommandUId, IAglynComponent } from '@aglyn/core-data-framework'
 import { getComponent } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 import { useMemo } from 'react'
@@ -23,7 +23,7 @@ import { useMemo } from 'react'
 export function useAglynComponent(
   componentId: CommandUId,
   bundleId?: BundleUId
-): AglynComponentElement {
+): IAglynComponent {
   const { getApp } = useAglynAppContext()
   return useMemo(() => {
     return getComponent(getApp(), { componentId, bundleId })

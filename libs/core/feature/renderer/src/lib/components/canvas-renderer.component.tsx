@@ -32,7 +32,7 @@ export interface CanvasRendererComponentProps
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
 }
 
-export const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentProps>(
+const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const { elementRendererComponent: elementRendererComponentProp, children, ...rest } = props
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
@@ -54,4 +54,5 @@ CanvasRendererComponent.defaultProps = {
   component: 'div',
 }
 
+export { CanvasRendererComponent }
 export default CanvasRendererComponent

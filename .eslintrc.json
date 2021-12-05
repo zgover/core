@@ -106,6 +106,7 @@
         "@typescript-eslint/no-empty-interface": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-namespace": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-var-requires": "off",
         "no-fallthrough": "off",
@@ -113,6 +114,11 @@
         "react-hooks/rules-of-hooks": "off",
         "tsdoc/syntax": ["warn", {}]
       }
+    },
+    {
+      "files": ["*.tsx"],
+      "extends": ["plugin:@nrwl/nx/react-typescript"],
+      "rules": {"react/no-children-prop": "off"}
     },
     {
       "files": ["*.js", "*.jsx"],

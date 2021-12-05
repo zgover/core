@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
-export interface TypeActionSvgState {
+export interface IActionStates {
   default: string
   hover: string
   active: string
   focus: string
+}
+
+export interface ColorPropOverrides {
+  quaternary: true
+  tertiary: true
 }

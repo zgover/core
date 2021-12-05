@@ -15,61 +15,67 @@
  * limitations under the License.
  */
 
-import type {
-  AglynComponentElementTemplateData,
-  AglynComponentSchema,
-  BundleUId,
-  ComponentId,
-} from '@aglyn/core-data-framework'
-import { createAglynComponentElement } from '@aglyn/core-data-framework'
-import { FieldComponent } from '@aglyn/shared-ui-jsx'
-import Button from '@mui/material/Button'
+import type { AglynComponentSchema, ComponentId } from '@aglyn/core-data-framework'
+import { ComponentsLinealDirectiveFlag, PropertyEditorFieldFlag } from '@aglyn/core-data-framework'
+import { aglynElementComponent, dynamicLoader } from '@aglyn/core-feature-renderer'
+import Button, { ButtonProps } from '@mui/material/Button'
+import { BUNDLE_ID } from '../constants'
+import { schema as listItemSchema } from '../list-item/list-item'
+import { generateTemplateId } from '../utils/generate-template-id'
 
-export const loader = () => import('@mui/material/Button').then((i) => i.default)
-export const componentId: ComponentId = 'button'
-export const bundleId: BundleUId = 'mui'
-export const metadata: AglynComponentSchema['metadata'] = {
-  displayName: 'Button',
-}
-export const renderFlags: AglynComponentSchema['renderFlags'] = {
-  propsSchema: {
-    fields: [
-      {
-        name: 'variant',
-        component: FieldComponent.SELECT,
-        label: 'Variant',
-        variant: 'outlined',
-        options: [
-          { value: 'text', label: 'Text' },
-          { value: 'outlined', label: 'Outlined' },
-          { value: 'contained', label: 'Contained' },
-        ],
-      },
-    ],
+
+const ID: ComponentId = 'button'
+
+export const loader = Button//dynamicLoader(() => import('@mui/material/Button'))
+export const schema: AglynComponentSchema<ButtonProps> = {
+  componentId: ID,
+  bundleId: BUNDLE_ID,
+  metadata: {
+    displayName: 'Button',
+    iconIds: 'gesture-tap-button',
+    iconColor: '#4caf50',
   },
-}
-export const templates: AglynComponentElementTemplateData[] = [
-  {
-    id: 'mui:button',
-    title: 'Outlined Button',
-    data: {
-      componentId: componentId,
-      bundleId: bundleId,
-      props: {
-        variant: 'outlined',
-        children: 'Click Me',
-      },
+  renderFlags: {
+    hierarchy: {
+      restrictChildren: [
+        ComponentsLinealDirectiveFlag.LIMIT_TO, {
+          components: [listItemSchema.componentId],
+        },
+      ],
+    },
+    propsSchema: {
+      fields: [
+        {
+          name: 'variant',
+          component: PropertyEditorFieldFlag.SELECT,
+          label: 'Variant',
+          variant: 'outlined',
+          options: [
+            {value: 'text', label: 'Text'},
+            {value: 'outlined', label: 'Outlined'},
+            {value: 'contained', label: 'Contained'},
+          ],
+        },
+      ],
     },
   },
-]
-export const schema: AglynComponentSchema = {
-  componentId,
-  bundleId,
-  metadata,
-  renderFlags,
-  templates,
+  templates: [
+    {
+      id: generateTemplateId(ID),
+      label: 'Outlined Button',
+      iconIds: 'gesture-tap-button',
+      iconColor: '#4caf50',
+      data: {
+        componentId: ID,
+        bundleId: BUNDLE_ID,
+        props: {
+          variant: 'outlined',
+          children: 'Click Me',
+        },
+      },
+    },
+  ],
 }
-
-export const component = createAglynComponentElement(schema, Button)
+export const component = aglynElementComponent(schema, loader)
 
 export default component

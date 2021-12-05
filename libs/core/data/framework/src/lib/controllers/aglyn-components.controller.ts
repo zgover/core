@@ -15,22 +15,23 @@
  * limitations under the License.
  */
 
-import { IconId as MdiIconId } from '@aglyn/shared-data-mdi'
-import {
-  AnyProps,
-  InnerRefProp,
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import type { IconId as MdiIconId } from '@aglyn/shared-data-mdi'
+import type {
+  AnyProps, EmptyObj,
   JSXIntrinsicElement,
   OrUndef,
   ResolveProps,
 } from '@aglyn/shared-data-types'
-import { StyledOptions } from '@aglyn/shared-feature-themes'
-import { FormSchema } from '@aglyn/shared-ui-jsx'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import type { StyledOptions } from '@aglyn/shared-feature-themes'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import type { FormSchema } from '@aglyn/shared-ui-jsx'
 import { _isArr } from '@aglyn/shared-util-guards'
-import { ComponentClass, FunctionComponent } from 'react'
-import { ComponentsLinealDirectiveFlag } from '../constants/components'
-import {
-  AglynAppEffectFlag,
-  AglynAppEventFlag,
+import type { ComponentClass, FunctionComponent } from 'react'
+import { ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from 'react'
+import type { ComponentsLinealDirectiveFlag } from '../constants/components'
+import type {
   ComponentGetPayload,
   ComponentRegisterPayload,
   ComponentsBundleGetPayload,
@@ -39,6 +40,7 @@ import {
   ComponentSchemaGetPayload,
   ComponentUnregisterPayload,
 } from '../constants/emitter'
+import { AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
 import {
   COMPONENT_ELEMENT_TYPE,
   EXTENSION_TYPE,
@@ -46,22 +48,24 @@ import {
   TYPE_KIND,
   TYPE_OF,
 } from '../constants/symbol'
-import {
+import type {
   AglynModuleEffectListener,
-  AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import { AglynTypeFields, BundleUId, ComponentId, ElementId, TemplateId } from '../types'
+import {
+  AglynModuleModel,
+} from '../models/aglyn-module.model'
+import type { AglynTypeFields, BundleUId, ComponentId, ElementId, TemplateId } from '../types'
 import { isAglynComponentElement } from '../util/aglyn-is'
-import { AglynAppController } from './aglyn-app.controller'
+import type { AglynAppController } from './aglyn-app.controller'
 
 
 export type AglynComponentsTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMPONENT_ELEMENT_TYPE>
 
-export type AglynComponentClassElement<P extends AnyProps = any> = ComponentClass<P>
-export type AglynComponentFunctionElement<P extends AnyProps = any> = FunctionComponent<P>
-export type AglynComponentIntrinsicElement<P extends AnyProps = any> = JSXIntrinsicElement<P>
-export type AglynComponentElementType<P extends AnyProps = any> =
+export type AglynComponentClassElement<P = EmptyObj> = ComponentClass<P>
+export type AglynComponentFunctionElement<P = EmptyObj> = FunctionComponent<P>
+export type AglynComponentIntrinsicElement<P = EmptyObj> = JSXIntrinsicElement<P>
+export type AglynComponentElementType<P = EmptyObj> =
   | AglynComponentClassElement<P>
   | AglynComponentFunctionElement<P>
   | AglynComponentIntrinsicElement<P>
@@ -77,14 +81,14 @@ export type ComponentsLinealOrder<T extends ComponentsLinealDirectiveFlag = Comp
 ]
 
 export type ComponentsRegistryKeys = (ComponentId | [ComponentId, BundleUId])[]
-export type ComponentsRegistryValues = AglynComponentElement[]
+export type ComponentsRegistryValues = IAglynComponent[]
 export type ComponentsRegistryEntry = [
   cId: ComponentId | [ComponentId, BundleUId],
-  cmp: AglynComponentElement
+  cmp: IAglynComponent
 ]
 
 export type InstanceBundles = Map<BundleUId, AglynComponentsBundle>
-export type InstanceComponents = Map<ComponentId | [ComponentId, BundleUId], AglynComponentElement>
+export type InstanceComponents = Map<ComponentId | [ComponentId, BundleUId], IAglynComponent>
 export type InstanceSchemas = Map<ComponentId | [ComponentId, BundleUId], AglynComponentSchema>
 export type InstanceTemplates = Map<TemplateId, AglynComponentElementTemplateData>
 
@@ -100,16 +104,17 @@ export interface AglynComponentsBundle {
   metadata?: {
     displayName: string
     description?: string
-    icon?: string
+    iconIds?: string
   }
   componentIds: ComponentId[]
 }
 
-export interface AglynComponentElement<P extends AnyProps = any>
-  extends AglynComponentClassElement<P & InnerRefProp> {
-  readonly [TYPE_OF]: typeof MODULE_TYPE
-  readonly [TYPE_KIND]: typeof EXTENSION_TYPE
-  componentId: ComponentId
+export interface IAglynComponent<P = EmptyObj, T = any>
+  extends ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<T>> {
+
+  readonly [TYPE_OF]?: MODULE_TYPE
+  readonly [TYPE_KIND]?: EXTENSION_TYPE
+  componentId?: ComponentId
   bundleId?: BundleUId
 }
 
@@ -120,6 +125,7 @@ export interface AglynComponentMetadata {
   subtitle?: string
   description?: string
   iconIds?: MdiIconId
+  iconColor?: string,
 }
 
 export interface AglynComponentBesignerFlags {
@@ -139,7 +145,7 @@ export interface AglynComponentPropsFormSchema extends FormSchema {
 
 }
 
-export interface AglynComponentRenderFlags<P extends AnyProps = any> {
+export interface AglynComponentRenderFlags<P = EmptyObj> {
   hierarchy?: {
     restrictChildren?: ComponentsLinealOrder
     restrictParent?: ComponentsLinealOrder
@@ -153,7 +159,7 @@ export interface AglynComponentRenderFlags<P extends AnyProps = any> {
   }
 }
 
-export interface AglynComponentSchema<P extends AnyProps = any> {
+export interface AglynComponentSchema<P = EmptyObj> {
   componentId: ComponentId
   bundleId?: BundleUId
 
@@ -170,22 +176,23 @@ export interface AglynComponentSchema<P extends AnyProps = any> {
   templates?: AglynComponentElementTemplateData<P>[]
 }
 
-export interface AglynComponentElementTemplateData<P extends AnyProps = any> {
+export interface AglynComponentElementTemplateData<P = EmptyObj> {
   readonly id: TemplateId
-  title: string
+  label: string
   description?: string
   iconIds?: MdiIconId
+  iconColor?: string,
   data: TemplateSubElementData<P>
 }
 
-export interface TemplateSubElementData<P extends AnyProps = any> {
+export interface TemplateSubElementData<P = EmptyObj> {
   readonly componentId: ComponentId
   readonly bundleId?: BundleUId
   elements?: TemplateSubElementData<P>[]
   props?: AnyProps
 }
 
-export interface AglynComponentElementData<P extends AnyProps = any> {
+export interface AglynComponentElementData<P = EmptyObj> {
   readonly $id: ElementId
   readonly componentId: ComponentId
   readonly bundleId?: BundleUId
@@ -196,11 +203,11 @@ export interface AglynComponentElementData<P extends AnyProps = any> {
   elements?: (AglynComponentElementDataDenormalized<P>[]) | (ElementId[])
 }
 
-export interface AglynComponentElementDataDenormalized<P extends AnyProps = any> extends AglynComponentElementData<P> {
+export interface AglynComponentElementDataDenormalized<P = EmptyObj> extends AglynComponentElementData<P> {
   elements?: AglynComponentElementDataDenormalized<P>[]
 }
 
-export interface AglynComponentElementDataNormalized<P extends AnyProps = any> extends AglynComponentElementData<P> {
+export interface AglynComponentElementDataNormalized<P = EmptyObj> extends AglynComponentElementData<P> {
   elements?: ElementId[]
 }
 
@@ -214,7 +221,7 @@ export interface AglynComponentsController extends AglynModuleModel {
   getAllComponentsValues(): ComponentsRegistryValues
   getAllComponentsTemplateValues(): AglynComponentElementTemplateData[]
 
-  getComponent(payload: ComponentGetPayload): OrUndef<AglynComponentElement>
+  getComponent(payload: ComponentGetPayload): OrUndef<IAglynComponent>
   getComponentSchema(payload: ComponentSchemaGetPayload): OrUndef<AglynComponentSchema>
   getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynComponentsBundle>
 
@@ -285,7 +292,7 @@ export class AglynComponentsController extends AglynModuleModel<AglynComponentsC
     return this._templateValues()
   }
 
-  public getComponent = (payload: ComponentGetPayload): OrUndef<AglynComponentElement> => {
+  public getComponent = (payload: ComponentGetPayload): OrUndef<IAglynComponent> => {
     const {componentId, bundleId = undefined} = payload
     const key = this.buildMapKey({bundleId, componentId})
     if (bundleId) {
