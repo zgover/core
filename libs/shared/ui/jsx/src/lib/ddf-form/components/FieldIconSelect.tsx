@@ -121,42 +121,44 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
         : iconUnset
     }, [currentValue])
     const [open, setOpen] = useState(false)
-    const [icons, {applyFilter}] = useMdiIcons()
+    const [icons, applyFilter, clearFilter] = useMdiIcons()
     const [selected, setSelected] = useState(() => currentValue)
     const selectedIcon = useMemo(() => {
       console.log('selected', selected)
       return selected
         ? getIcon(selected, {failoverIcon: iconUnset})
         : iconUnset
-    }, [selected])
+    }, [selected, getIcon])
 
 
     const handleButtonClick = useCallback(() => {
       setOpen((prev) => !prev)
-    }, [])
+    }, [setOpen])
     const handleChooseButtonClick = useCallback(() => {
       input.onChange(selected)
       setOpen((prev) => !prev)
-    }, [selected])
+    }, [selected, setOpen])
     const handleFilterChange = useCallback((e) => {
       const target = e.currentTarget
-      if (target) {applyFilter(target.value)}
-    }, [])
+      if (target && target.value) {applyFilter(target.value)}
+      else {clearFilter()}
+    }, [applyFilter, clearFilter])
     const handleItemClick = useCallback((e, item: MdiIcon) => {
       setSelected(item.id)
-    }, [])
-    const renderItemContent = useCallback((item) => {
+    }, [setSelected])
+    const renderItemContent = useCallback(function RenderItemContent(item) {
       return (
-        <Tooltip title={item.name}>
+        <Tooltip key={item.id} title={item.name}>
           <CardIconListItem
             item={item}
             onActionClick={handleItemClick}
-            preview={<SvgPathIcon iconIds={item.id} />}
             selected={selected && selected === item.id}
+            preview={<SvgPathIcon fontSize="large" iconIds={item.id} />}
           />
         </Tooltip>
       )
-    }, [selected])
+    }, [selected, handleItemClick])
+    console.log('icons', icons)
 
     return (
       <Fragment>

@@ -140,7 +140,7 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
           {renderItemContent(items[index], index, items)}
         </ItemWrapper>
       )
-    }, [renderItemContent])
+    }, [items, renderItemContent])
 
     return (
       <VirtuosoGrid

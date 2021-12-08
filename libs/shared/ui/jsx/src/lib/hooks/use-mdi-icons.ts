@@ -34,11 +34,7 @@ export type FilterOpts = {
 }
 export type ApplyFilterFn = (query: string) => void
 export type ClearFilterFn = () => void
-export type FilterHelpers = {
-  applyFilter: ApplyFilterFn
-  clearFilter: ClearFilterFn
-}
-export type UseMdiIconsReturn = [MdiIcon[], FilterHelpers, IconsNormalized]
+export type UseMdiIconsReturn = [MdiIcon[], ApplyFilterFn, ClearFilterFn]
 
 export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
   const allIds = Array.from(mdiIcons.iconIds)
@@ -61,29 +57,38 @@ export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
 }
 
 const defaultKeys = ['name', 'aliases']
+const fuzzyInstance = new FindWithFuzzy<MdiIcon>([], {
+  keys: ['name'],
+  includeScore: true,
+  // shouldSort: true,
+  // sortFn: ({score:a}, {score:b}) => a > b ? 1 : a < b ? -1 : 0,
+  // threshold: 0.25,
+  // minMatchCharLength: 3
+})
 
 export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIconsReturn {
   const allIcons = useMemoizedMdiIcons()
-  const fuzzy = new FindWithFuzzy(allIcons, {
-    keys: opts?.keys || defaultKeys,
-    includeScore: true,
-    shouldSort: true,
-    // sortFn: ({score:a}, {score:b}) => a > b ? 1 : a < b ? -1 : 0,
-    threshold: 0.45,
-    minMatchCharLength: 2,
-  })
-  const searchItems = (query: string) => {
-    return fuzzy.search(query ?? '').map((i) => i.item)
-  }
-  const [query, setQuery] = useState(initialQuery ?? '')
-  const filteredIcons = useMemo<MdiIcon[]>(() => {
-    return query ? searchItems(query) : allIcons
-  }, [query, allIcons])
 
-  const applyFilter: ApplyFilterFn = useCallback((query: string) => setQuery(query), [])
-  const clearFilter: ClearFilterFn = useCallback(() => setQuery(''), [])
+  const fuzzy = useMemo(() => {
+    fuzzyInstance.setCollection(allIcons)
+    return fuzzyInstance
+  }, [allIcons])
 
-  return useMemo(() => [filteredIcons, {applyFilter, clearFilter}, mdiIcons], [filteredIcons])
+  const [iconResults, setIconResults] = useState(() => allIcons)
+
+  const clearFilter: ClearFilterFn = useCallback(() => {
+    setIconResults(allIcons)
+  }, [allIcons, setIconResults])
+
+  const applyFilter: ApplyFilterFn = useCallback((query: string) => {
+    const results = fuzzy.search(query)
+    console.log('results', query, results)
+    setIconResults(results.map((i) => i.item))
+  }, [fuzzy, setIconResults])
+
+  return useMemo(() => {
+    return [iconResults, applyFilter, clearFilter]
+  }, [iconResults, applyFilter, clearFilter])
 }
 
 export default useMdiIcons
