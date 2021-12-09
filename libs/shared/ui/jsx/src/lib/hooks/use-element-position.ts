@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ClientPosition, getElementPosition } from '@aglyn/shared-util-dom'
+import { ClientRectObject, getElementClientRectBounding } from '@aglyn/shared-util-dom'
 import { RefCallback, RefObject, useCallback, useRef } from 'react'
 
 
@@ -25,9 +25,9 @@ export interface UseElementPositionOptions {
 
 export function useElementPosition<T>(
   options?: UseElementPositionOptions,
-): [RefObject<ClientPosition>, RefCallback<T>] {
+): [RefObject<ClientRectObject>, RefCallback<T>] {
   // const [clientPosition, setRect] = useState<ClientPosition>()
-  const clientPosition = useRef<ClientPosition>()
+  const clientPosition = useRef<ClientRectObject>()
   const nodeRef = useRef()
 
   const setRef = useCallback((node) => {
@@ -35,7 +35,7 @@ export function useElementPosition<T>(
     if (node) {
       window['MyNode'] = node
       console.log('node', node)
-      const position = getElementPosition(node)
+      const position = getElementClientRectBounding(node)
 
       // console.log('position', position, rect)
       clientPosition.current = position
