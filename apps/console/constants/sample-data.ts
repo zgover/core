@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-export const samplePageData = [
+import { AglynComponentElementDataDenormalized } from '@aglyn/core-data-framework'
+
+
+export const samplePageData: AglynComponentElementDataDenormalized[] = [
   {
     $id: 'root1',
     componentId: 'root',

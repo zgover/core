@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-import { getApp } from '@aglyn/core-data-framework'
-import { BesignerComponent } from '@aglyn/core-feature-besigner'
+import {getApp} from '@aglyn/core-data-framework'
+import {BesignerComponent} from '@aglyn/core-feature-besigner'
+import {HAS_WINDOW} from '@aglyn/shared-data-brand'
 
 
 function Besigner(props) {
-  if (typeof document !== 'undefined') {
+  if (HAS_WINDOW) {
     console.log('page:/besigner app', getApp())
   }
   return <BesignerComponent />

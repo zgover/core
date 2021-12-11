@@ -110,15 +110,9 @@
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-var-requires": "off",
         "no-fallthrough": "off",
-        "react/no-children-prop": "off",
         "react-hooks/rules-of-hooks": "off",
         "tsdoc/syntax": ["warn", {}]
       }
-    },
-    {
-      "files": ["*.tsx"],
-      "extends": ["plugin:@nrwl/nx/react-typescript"],
-      "rules": {"react/no-children-prop": "off"}
     },
     {
       "files": ["*.js", "*.jsx"],
@@ -135,7 +129,8 @@
               "!@mui/material/test-utils/*"
             ]
           }
-        ]
+        ],
+        "react/no-children-prop": "off"
       }
     }
   ]

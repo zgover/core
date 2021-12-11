@@ -16,7 +16,6 @@
  */
 
 import { AppLink } from '@aglyn/shared-ui-jsx'
-import { createStyles, Theme, withStyles, WithStyles } from '@aglyn/shared-feature-themes'
 import { objectRemap } from '@aglyn/shared-util-tools'
 import { Box, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
@@ -26,24 +25,15 @@ import { withAppContext } from '../../contexts/app-context'
 import { Fields, formIsValid, validateField } from '../../forms'
 import AuthLayout from '../../layouts/AuthLayout'
 
-const styles = (theme: Theme) =>
-  createStyles({
-    form: { '& .MuiTextField-root': {} },
-    uppercase: { textTransform: 'uppercase' },
-    button: {
-      marginTop: theme.spacing(2),
-      marginBottom: theme.spacing(2),
-    },
-    bottom: {
-      lineHeight: 1.5,
-      marginTop: theme.spacing(4),
-    },
-  })
 
-export default withStyles(styles, { name: 'Page:SignIn' })(
-  withAppContext<WithStyles<typeof styles>>(function SignIn(props) {
-    const { app, classes } = props
-    const currentUser = app?.getCurrentUser()
+interface Props {
+
+}
+
+export default withAppContext<Props>(
+  function SignIn(props) {
+    const { app } = props
+    const currentUser = app?.getCurrentUser?.()
     // console.log('app?.getCurrentUser()', currentUser)
     const router = useRouter()
     if (currentUser) {
@@ -104,13 +94,13 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
 
     return (
       <AuthLayout text="Sign In to your Account">
-        <form autoComplete="on" className={classes.form} onSubmit={onSubmit}>
+        <form autoComplete="on" onSubmit={onSubmit}>
           <div>
             <Typography
               children="Enter your credentials"
-              className={classes.uppercase}
               variant="h5"
               gutterBottom
+              sx={{textTransform: 'uppercase'}}
             />
             <FieldSet fields={fields} loading={submitting} onUpdate={handleUpdate} />
             <AppLink children="Forgot password?" color="primary" href="/auth/recovery" />
@@ -133,28 +123,32 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
             )}
             <Button
               children={submitting ? 'Please wait...' : 'Continue'}
-              className={classes.button}
               color="secondary"
               disabled={Boolean(submitting)}
               size="large"
               type="submit"
               variant="contained"
               fullWidth
+              sx={{my: 2}}
             />
           </div>
         </form>
         <Typography
           align="center"
-          className={classes.panelBottom}
           color="primary"
           component="div"
           variant="overline"
+          sx={{lineHeight: 1.5, marginTop: 4}}
         >
           <b children={"Don't have an account?"} />
           <br />
-          <AppLink children="Create an account" color="secondary" href="/auth/signup" />
+          <AppLink
+            children="Create an account"
+            color="secondary"
+            href="/auth/signup"
+          />
         </Typography>
       </AuthLayout>
     )
-  })
+  }
 )

@@ -16,9 +16,23 @@
  */
 
 
-export const validationMessage = (meta, validateOnMount) => {
-  if (validateOnMount) {
-    return meta.error || meta.submitError
-  }
-  return meta.touched && (meta.error || meta.submitError)
+export const APP_WWW = {
+  META_TITLE: 'Aglyn',
+  META_DESCRIPTION: 'Contributions to the “no code” web application market by optimizing the process and necessary steps for a website to get off the ground for organizations',
+}
+
+export enum IconVariant {
+  // Data
+  PROPERTY = 'variable',
+  DOCUMENT = 'book-variant',
+  COLLECTION = 'book-variant-multiple',
+
+  // Data-Type
+  STRING = 'code-string',
+  ARRAY = 'code-array',
+  OBJECT = 'code-braces-box',
+
+  // User
+  LOGIN = 'login-variant',
+  LOGOUT = 'logout-variant',
 }

@@ -15,63 +15,50 @@
  * limitations under the License.
  */
 
-import { icons as mdiIcons, IconsNormalized } from '@aglyn/shared-data-mdi'
-
-import { _isArr } from '@aglyn/shared-util-guards'
+import type { IconData } from '@aglyn/shared-data-mdi'
 import { FindWithFuzzy } from '@aglyn/shared-util-vendor'
 import { useCallback, useMemo, useState } from 'react'
-import { arraySortBy } from '@aglyn/shared-util-tools'
 
 
-export type MdiIcon = {
-  id: string
-  name: string
-  aliases: string[]
-  path: string
-}
-export type FilterOpts = {
-  keys?: string[]
-}
+export type MdiIcon = IconData
 export type ApplyFilterFn = (query: string) => void
 export type ClearFilterFn = () => void
 export type UseMdiIconsReturn = [MdiIcon[], ApplyFilterFn, ClearFilterFn]
 
-export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
-  const allIds = Array.from(mdiIcons.iconIds)
-  const ids = _isArr(iconIds) ? Array.from(iconIds) : allIds
-  return useMemo(
-    () =>
-      ids.map((id) => {
-        const icon = mdiIcons.byIconId[id]
-        return !icon
-          ? null
-          : {
-            id,
-            name: icon.name,
-            path: icon.path,
-            aliases: Object.keys(icon.alias).filter((i) => icon.alias[i] === true),
-          }
-      }),
-    [ids],
-  )
+export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | undefined)[] {
+  return useMemo(() => {
+    const mdi = require('@aglyn/shared-data-mdi')
+    const mdiIds = mdi?.icons?.iconIds || []
+    const mdiIcons = mdi?.icons?.byIconId || {}
+
+    return (iconIds || mdiIds).map((id) => {
+      const icon = mdiIcons[id]
+      return !icon ? undefined : ({
+        ...icon,
+        id: id,
+        alias: Object.keys(icon.alias || {}),
+      })
+    })
+  }, [iconIds])
 }
 
-const defaultKeys = ['name', 'aliases']
-const fuzzyInstance = new FindWithFuzzy<MdiIcon>([], {
-  keys: ['name'],
+export const findMdiIconsFuzzy = new FindWithFuzzy<MdiIcon>([], {
+  keys: [
+    {name: 'name', weight: 0.7},
+    {name: 'alias', weight: 0.3},
+  ],
   includeScore: true,
-  // shouldSort: true,
-  // sortFn: ({score:a}, {score:b}) => a > b ? 1 : a < b ? -1 : 0,
+  shouldSort: true,
   // threshold: 0.25,
   // minMatchCharLength: 3
 })
 
-export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIconsReturn {
+export function useMdiIcons(): UseMdiIconsReturn {
   const allIcons = useMemoizedMdiIcons()
 
   const fuzzy = useMemo(() => {
-    fuzzyInstance.setCollection(allIcons)
-    return fuzzyInstance
+    findMdiIconsFuzzy.setCollection(allIcons)
+    return findMdiIconsFuzzy
   }, [allIcons])
 
   const [iconResults, setIconResults] = useState(() => allIcons)
@@ -82,7 +69,6 @@ export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIco
 
   const applyFilter: ApplyFilterFn = useCallback((query: string) => {
     const results = fuzzy.search(query)
-    console.log('results', query, results)
     setIconResults(results.map((i) => i.item))
   }, [fuzzy, setIconResults])
 

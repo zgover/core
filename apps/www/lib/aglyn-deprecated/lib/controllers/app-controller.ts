@@ -33,7 +33,7 @@ import {
   User as AuthUser,
   UserCredential,
 } from 'firebase/auth'
-import 'firebase/auth'
+// import 'firebase/auth'
 import {
   collection,
   CollectionReference,
@@ -45,7 +45,7 @@ import {
   Firestore,
   getFirestore as getFbFirestore,
 } from 'firebase/firestore'
-import 'firebase/firestore'
+// import 'firebase/firestore'
 
 import { Persist } from '../constants'
 import { Permission, Role, User } from '../types'

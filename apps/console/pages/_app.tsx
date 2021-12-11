@@ -15,151 +15,13 @@
  * limitations under the License.
  */
 
-import { bundle as muiBundle } from '@aglyn/addons-ui-mui-bundle'
-import { initializeApp, registerBundle, registerComponent } from '@aglyn/core-data-framework'
-import { aglynElementComponent } from '@aglyn/core-feature-renderer'
-import {
-  CacheProvider,
-  consoleThemeLight,
-  createEmotionCache,
-  EmotionCache,
-  withTheme,
-} from '@aglyn/shared-feature-themes'
-import {
-  makeLinkElements,
-  MakeLinkElementsConfig,
-  makeMetaElements,
-  MakeMetaElementsConfig,
-} from '@aglyn/shared-ui-jsx'
-import CssBaseline from '@mui/material/CssBaseline'
+import { CacheProvider, createEmotionCache, EmotionCache } from '@aglyn/shared-feature-themes'
 import { AppProps as NextAppProps } from 'next/app'
-import Head from 'next/head'
-import { Fragment, useEffect } from 'react'
-import { APP } from '../const'
-import { samplePageData } from '../constants/sample-data'
+import AppWrapper from '../components/app-wrapper'
+
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
-const metaElements: MakeMetaElementsConfig = [
-  ['viewport', 'width=device-width, initial-scale=1'],
-  ['description', APP.META_DESCRIPTION],
-]
-const linkElements: MakeLinkElementsConfig = []
-
-const c1 = aglynElementComponent(
-  {
-    componentId: 'root',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
-  },
-  'span',
-)
-
-const c2 = aglynElementComponent(
-  {
-    componentId: 'root1',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
-  },
-  'span',
-)
-
-const c3 = aglynElementComponent(
-  {
-    componentId: 'root2',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
-  },
-  'span',
-)
-
-const c4 = aglynElementComponent(
-  {
-    componentId: 'root3',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
-  },
-  'span',
-)
-
-const c5 = aglynElementComponent(
-  {
-    componentId: 'root4',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
-    templates: [
-      {
-        id: 'root4:1',
-        label: 'Root 4',
-        data: {
-          componentId: 'root4',
-          props: {
-            children: 'First Root4',
-          },
-        },
-      },
-    ],
-  },
-  'span',
-)
-const components = [c1, c2, c3, c4, c5]
-
-try {
-  const app = initializeApp({
-    logLevel: 'debug',
-    modulesOptions: {
-      canvas: {
-        initialElements: samplePageData,
-      },
-    },
-  })
-
-  components.forEach((i) => registerComponent(app, i))
-  registerBundle(app, muiBundle)
-}
-catch (e) {
-  console.error(e, 'initialize aglyn app')
-}
-
-function AppWrapperRaw(props) {
-  const {children} = props
-  const Wrapper = isProduction ? Fragment : Fragment // StrictMode
-
-  useEffect(() => {
-    // Remove the server-side injected CSS.
-    const jssStyles = document.querySelector('#jss-server-side')
-    if (jssStyles) jssStyles.parentElement.removeChild(jssStyles)
-  }, [])
-
-  return (
-    <Wrapper>
-      <Head>
-        <title>{APP.META_TITLE}</title>
-        {makeMetaElements(metaElements)}
-        {makeLinkElements(linkElements)}
-      </Head>
-      <CssBaseline />
-      <div className="app">
-        <main>{children}</main>
-      </div>
-    </Wrapper>
-  )
-}
-AppWrapperRaw.displayName = 'AppWrapper'
-const AppWrapper = withTheme({theme: consoleThemeLight})(AppWrapperRaw)
-
-const previewProduction = false
-const isProduction = process.env.NODE_ENV === 'production' || previewProduction
 
 export interface _AppProps extends NextAppProps {
   emotionCache?: EmotionCache
@@ -197,7 +59,7 @@ export interface _AppProps extends NextAppProps {
  * @param {AppProps} props
  * @returns {JSX.Element}
  */
-function _App(props: _AppProps) {
+export default function _App(props: _AppProps) {
   const {Component, emotionCache = clientSideEmotionCache, pageProps} = props
 
   return (
@@ -208,19 +70,3 @@ function _App(props: _AppProps) {
     </CacheProvider>
   )
 }
-_App.displayName = '_App'
-_App.getInitialProps = async ({ctx, Component}) => {
-  let pageProps = {}
-
-  if (Component.getInitialProps) {
-    pageProps = await Component.getInitialProps(ctx)
-  }
-
-  return {
-    pageProps: {
-      lang: ctx.query.lang || 'en',
-      ...pageProps,
-    },
-  }
-}
-export default _App

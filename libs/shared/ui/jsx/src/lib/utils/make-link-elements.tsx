@@ -24,8 +24,18 @@ export type MakeLinkElementsConfig = [
 ][]
 
 export function makeLinkElements(items: MakeLinkElementsConfig): JSX.Element[] {
-  return items.map(([rel, href, { id, ...rest } = {} as any], i) => (
-    <link key={id ?? href ?? i} id={id} rel={rel} href={href} {...rest} />
-  ))
+  return items.map((item, i) => {
+    const [rel, href, other] = item
+    const {id, key, ...rest} = {...other}
+    return (
+      <link
+        key={key ?? id ?? i}
+        id={id}
+        rel={rel}
+        href={href}
+        {...rest}
+      />
+    )
+  })
 }
 export default makeLinkElements

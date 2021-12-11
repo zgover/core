@@ -34,7 +34,7 @@ const classKeys = generateComponentClassKeys('AglynBreadcrumbs', [
 ])
 
 const StyledBreadcrumbs = styled(MuiBreadcrumbs, {
-  name: 'Breadcrumbs',
+  name: 'AglynBreadcrumbs',
 })(({theme}) => ({
   display: 'flex',
   alignItems: 'center',

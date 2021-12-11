@@ -20,7 +20,7 @@ import { styled } from '@aglyn/shared-feature-themes'
 import { forwardRef, HTMLAttributes } from 'react'
 
 const BackgroundImageRoot = styled('div', {
-  name: 'BackgroundImage',
+  name: 'AglynBackgroundImage',
 })({
   backgroundColor: 'inherit',
   backgroundRepeat: 'no-repeat',

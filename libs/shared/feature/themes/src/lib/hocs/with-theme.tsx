@@ -27,7 +27,7 @@ export type WithThemeOptions = {
   disableCssBaseline?: boolean
 }
 
-export function withTheme(options: WithThemeOptions) {
+function withTheme(options: WithThemeOptions) {
   const {theme, disableCssBaseline} = {...options}
   const [lightTheme, darkTheme] = _isArr(theme) ? theme : [theme]
 
@@ -48,4 +48,5 @@ export function withTheme(options: WithThemeOptions) {
     return memo(WithTheme)
   }
 }
+export { withTheme }
 export default withTheme

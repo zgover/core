@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { darken, styled } from '@aglyn/shared-feature-themes'
+import {BUILD_ID, PKG_VERSION} from '@aglyn/shared-data-brand'
+import {darken, styled} from '@aglyn/shared-feature-themes'
 import {
   AglynSvgLogo,
   AppLink,
@@ -25,25 +26,23 @@ import {
   Menu,
   SvgPathIcon,
 } from '@aglyn/shared-ui-jsx'
-import { _isArr, _isArrEmpty, _isObj } from '@aglyn/shared-util-guards'
-import AppBar, { AppBarProps } from '@mui/material/AppBar'
+import {_isArr, _isArrEmpty, _isObj} from '@aglyn/shared-util-guards'
+import AppBar, {AppBarProps} from '@mui/material/AppBar'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
-import { cyan, purple } from '@mui/material/colors'
+import {cyan, purple} from '@mui/material/colors'
 import Container from '@mui/material/Container'
-import IconButton, { IconButtonProps } from '@mui/material/IconButton'
-import Tab, { TabProps } from '@mui/material/Tab'
+import IconButton, {IconButtonProps} from '@mui/material/IconButton'
+import Tab, {TabProps} from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
-import { ElementType, Fragment, ReactNode } from 'react'
-import { Breadcrumbs, BreadcrumbsProps } from '../components/Breadcrumbs'
+import {useRouter} from 'next/router'
+import {ElementType, Fragment, ReactNode} from 'react'
+import {Breadcrumbs, BreadcrumbsProps} from '../components/Breadcrumbs'
 import Copyright from '../components/Copyright'
-import { APP, tailNavigation } from '../const'
-import { CurrentUserContextType, withCurrentUserContext } from '../contexts/current-user-context'
-import { AggregatedPageMeta, withAggregatedPageMeta } from '../lib/app-pages'
+import {tailNavigation} from '../const'
 
 
 const StyledLogo = styled(AglynSvgLogo, {
@@ -243,12 +242,12 @@ export interface MainLayoutProps {
   tabBarTitle?: string
   centerNavigationItems?: Array<any>
   breadcrumbItems?: BreadcrumbsProps['items']
-  navTabItems?: (TabProps & AppLinkProps<'text'> & { iconIds: string })[]
+  navTabItems?: (TabProps & AppLinkProps<'text'> & {iconIds: string})[]
   quickActionMenus?: QuickActionsMenuItem[]
   productName?: string
   footerNavItems?: GridButtonsProps['items']
-  aggregatedPageMeta: AggregatedPageMeta
-  currentUserContext: CurrentUserContextType
+  // aggregatedPageMeta: AggregatedPageMeta
+  // currentUserContext: CurrentUserContextType
 }
 
 function MainLayoutRaw(props: MainLayoutProps) {
@@ -257,24 +256,21 @@ function MainLayoutRaw(props: MainLayoutProps) {
     children,
     title,
     centerNavigationItems,
-    currentUserContext,
     tabBarTitle,
-    aggregatedPageMeta,
     navTabItems,
     productName,
     footerNavItems,
     quickActionMenus: quickActions,
   } = props
-  const {pageMeta, overrideMeta, pageAncestors} = aggregatedPageMeta
   const tabValue = navTabItems
     ? navTabItems
-  .filter((i) => router.asPath.includes(i.href))
-  .reduce((prev, current) => {
-    const currentHref = (_isObj(current.href) ? current.href.paths : current.href) as string
-    const prevHref = (_isObj(prev.href) ? prev.href.paths : prev.href) as string
+    .filter((i) => router.asPath.includes(i.href))
+    .reduce((prev, current) => {
+      const currentHref = (_isObj(current.href) ? current.href.paths : current.href) as string
+      const prevHref = (_isObj(prev.href) ? prev.href.paths : prev.href) as string
 
-    return currentHref.length > prevHref.length ? current : prev
-  }).href ?? ''
+      return currentHref.length > prevHref.length ? current : prev
+    }).href ?? ''
     : ''
 
   const buildIconButton = ({avatar, iconId, children, ...rest}, i) => (
@@ -319,7 +315,9 @@ function MainLayoutRaw(props: MainLayoutProps) {
                     <StyledLogoInner>
                       <StyledLogo color="inherit" />
                     </StyledLogoInner>
-                    {productName ? <StyledProductName children={` ${productName}`} /> : null}
+                    {productName && (
+                      <StyledProductName>{` ${productName}`}</StyledProductName>
+                    )}
                   </AppLink>
                 </StyledLogoWrapper>
               </StyledLeft>
@@ -341,16 +339,15 @@ function MainLayoutRaw(props: MainLayoutProps) {
                 value={tabValue}
                 variant="scrollable"
               >
-                {tabBarTitle && <TabBarTitle children={tabBarTitle} />}
-                {navTabItems &&
-                navTabItems.map(({iconIds, ...item}, i) => (
+                {tabBarTitle && <TabBarTitle>{tabBarTitle}</TabBarTitle>}
+                {navTabItems && navTabItems.map(({iconIds, ...item}, i) => (
                   <StyledTab
                     key={item.id ?? item['key'] ?? i}
                     // disableRipple
                     color="inherit"
                     component={AppLink}
                     href={item.href ?? ''}
-                    icon={<SvgPathIcon iconIds={iconId} />}
+                    icon={<SvgPathIcon iconIds={iconIds} />}
                     label={item.label}
                     underline="none"
                     value={item.href ?? i}
@@ -403,7 +400,9 @@ function MainLayoutRaw(props: MainLayoutProps) {
               justifyContent="center"
             >
               <Typography align="center" color="textSecondary" variant="overline">
-                <span>{`Version ${APP.VERSION}`}</span> <span>{`(${APP.BUILD_ID})`}</span>
+                <span>{`Version ${PKG_VERSION}`}</span>
+                {' '}
+                <span>{`(${BUILD_ID})`}</span>
               </Typography>
             </Box>
           </Box>
@@ -416,9 +415,9 @@ function MainLayoutRaw(props: MainLayoutProps) {
 MainLayoutRaw.displayName = 'MainLayout'
 MainLayoutRaw.defaultProps = {
   footerNavItems: tailNavigation as any,
-  aggregatedPageMeta: {} as any,
-  currentUserContext: {} as any,
+  // aggregatedPageMeta: {} as any,
+  // currentUserContext: {} as any,
 }
 
-export const MainLayout = withCurrentUserContext(withAggregatedPageMeta(MainLayoutRaw))
+export const MainLayout = /*withCurrentUserContext(withAggregatedPageMeta(*/MainLayoutRaw/*))*/
 export default MainLayout

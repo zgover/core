@@ -15,10 +15,16 @@
  * limitations under the License.
  */
 
+export default function HsEmbedScript() {
 
-export const validationMessage = (meta, validateOnMount) => {
-  if (validateOnMount) {
-    return meta.error || meta.submitError
-  }
-  return meta.touched && (meta.error || meta.submitError)
+  return (
+    <script
+      type="text/javascript"
+      id="hs-script-loader"
+      src="https://js.hs-scripts.com/20566719.js"
+      async
+      defer
+    />
+  )
 }
+HsEmbedScript.displayName = 'HsEmbedScript'

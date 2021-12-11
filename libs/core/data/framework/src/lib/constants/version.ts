@@ -15,16 +15,11 @@
  * limitations under the License.
  */
 
-import { _isStrEmpty, _isStrT } from '@aglyn/shared-util-guards'
-import pkg from '../../../../../../../package.json'
+import {_isStrEmpty, _isStrT} from '@aglyn/shared-util-guards'
 
 
 export type AglynVersion = string
-export let SDK_VERSION = String(pkg.version ?? 'N/A')
-
-export const PRODUCTION = process.env.NODE_ENV === 'production'
-export const DEVELOPMENT = process.env.NODE_ENV === 'development'
-export const PREVIEW = process.env.NODE_ENV === 'preview'
+export let SDK_VERSION = '1.0.0-beta.0'
 
 export function setVersion(version: string): void {
   if (!_isStrT(version) || _isStrEmpty(version)) {

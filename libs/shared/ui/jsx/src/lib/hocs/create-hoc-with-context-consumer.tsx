@@ -46,9 +46,6 @@ export interface WithContextConsumer<T, Key extends string = 'ctx'> {
 
 /**
  * Helper util to HOC a context consumer
- * @param prop
- * @return {<P>(Component: ComponentType<P & Record<K, T>>) => ComponentType<Omit<P, K>>}
- * @param Consumer
  */
 export function createHocWithContextConsumer<T, K extends string = 'ctx'>(
   Consumer: Consumer<T>,

@@ -24,7 +24,7 @@ import type {
   ResolveProps,
 } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type { StyledOptions } from '@aglyn/shared-feature-themes'
+import type { StyledOptions, SxProps } from '@aglyn/shared-feature-themes'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { FormSchema } from '@aglyn/shared-ui-jsx'
 import { _isArr } from '@aglyn/shared-util-guards'
@@ -199,15 +199,15 @@ export interface AglynComponentElementData<P = EmptyObj> {
   parentId?: ElementId
   displayName?: string
   description?: string
-  props?: P
+  props?: { sx?: SxProps } & P
   elements?: (AglynComponentElementDataDenormalized<P>[]) | (ElementId[])
 }
 
-export interface AglynComponentElementDataDenormalized<P = EmptyObj> extends AglynComponentElementData<P> {
+export interface AglynComponentElementDataDenormalized<P = any> extends AglynComponentElementData<P> {
   elements?: AglynComponentElementDataDenormalized<P>[]
 }
 
-export interface AglynComponentElementDataNormalized<P = EmptyObj> extends AglynComponentElementData<P> {
+export interface AglynComponentElementDataNormalized<P = any> extends AglynComponentElementData<P> {
   elements?: ElementId[]
 }
 

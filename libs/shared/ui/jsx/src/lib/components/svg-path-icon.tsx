@@ -61,7 +61,7 @@ export const SvgPathIcon = forwardRef<any, SvgPathIconProps>(function RefRenderF
       ? _isStrT(iconIds) ? [iconIds] : iconIds
       : null
     return (iconIdArray || (!pathsProp && !children))
-      ? getIconPathData(iconIdArray ?? [null], null, mdiIconOptions).map((iconPath, index) => (
+      ? getIconPathData(iconIdArray ?? [null], mdiIconOptions).map((iconPath, index) => (
         <SvgPath key={index} d={iconPath as string} />
       ))
       : null

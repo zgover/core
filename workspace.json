@@ -192,6 +192,30 @@
       "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:ui-renderer"],
       "implicitDependencies": []
     },
+    "shared-data-brand": {
+      "root": "libs/shared/data/brand",
+      "sourceRoot": "libs/shared/data/brand/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/data/brand/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/data/brand"],
+          "options": {
+            "jestConfig": "libs/shared/data/brand/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["scope:lib"],
+      "implicitDependencies": []
+    },
     "shared-data-mdi": {
       "root": "libs/shared/data/mdi",
       "sourceRoot": "libs/shared/data/mdi/src",

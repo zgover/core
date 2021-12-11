@@ -158,7 +158,6 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
         </Tooltip>
       )
     }, [selected, handleItemClick])
-    console.log('icons', icons)
 
     return (
       <Fragment>

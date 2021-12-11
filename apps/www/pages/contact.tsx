@@ -109,7 +109,6 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
 }
 
 function Contact(props) {
-  const {} = props
 
   const handleSubmit = useCallback(async (values) => {
     return await fetch(`/api/h/f/${DdfForms.formIds.contact}`, {
@@ -129,9 +128,6 @@ function Contact(props) {
       title={'Contact Us | Aglyn'}
       centerNavigationItems={mainNavigation}
       productName={productNames.www}
-      sx={{
-        pt: (theme) => theme.mixins.toolbar.minHeight,
-      }}
     >
       <main>
         <Box py={12} bgcolor={'background.paper'}>
@@ -149,24 +145,24 @@ function Contact(props) {
                       <Typography
                         variant={'h2'}
                         component={'h1'}
-                        children={'Contact Us'}
                         align="center"
                         sx={{
                           mb: 4,
                         }}
-                      />
+                      >
+                        Contact Us
+                      </Typography>
                       <Typography
                         variant={'h4'}
                         component={'h2'}
-                        children={
-                          'Looking for more information or need support? Complete the form below.'
-                        }
                         align="center"
                         sx={{
                           color: 'secondary.main',
                           mb: 4,
                         }}
-                      />
+                      >
+                        Looking for more information or need support? Complete the form below.
+                      </Typography>
                     </>
                   ),
                 },

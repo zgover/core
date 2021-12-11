@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ComponentWithInjectedProp, createHocWithContextConsumer } from '@aglyn/shared-ui-jsx'
+import { createHocWithContextConsumer } from '@aglyn/shared-ui-jsx'
 import { createContext, useContext } from 'react'
 import { AppController } from '../lib/aglyn-deprecated'
 
@@ -32,18 +32,9 @@ export const {
 } = AppContext
 
 export type AppContextConsumer = typeof AppContextConsumer
+export const useAppContext = () => useContext(AppContext)
 
 /**
  * App context HOC
- * @export
- * @template P
- * @param {ComponentWithInjectedProp<P, AppContextType, 'app'>} Component
- * @return {*}
  */
-export function withAppContext<P>(
-  Component: ComponentWithInjectedProp<P, AppContextConsumer, 'app'>,
-) {
-  return createHocWithContextConsumer(AppContextConsumer, 'app')(Component)
-}
-
-export const useAppContext = () => useContext(AppContext)
+export const withAppContext = createHocWithContextConsumer(AppContextConsumer, 'app')

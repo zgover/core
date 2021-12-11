@@ -16,9 +16,8 @@
  */
 
 
-export const validationMessage = (meta, validateOnMount) => {
-  if (validateOnMount) {
-    return meta.error || meta.submitError
-  }
-  return meta.touched && (meta.error || meta.submitError)
+export const BRAND = {
+  NAME: 'Aglyn',
+  LEGAL_NAME: 'Aglyn LLC',
+  BESIGNER: 'Besigner',
 }

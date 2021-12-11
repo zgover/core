@@ -16,7 +16,7 @@
  */
 
 import { ConditionalNonDist } from '@aglyn/shared-data-types'
-import { ComponentWithInjectedProp, InjectedContextConsumerProps, createHocWithContextConsumer } from '@aglyn/shared-ui-jsx'
+import { InjectedContextConsumerProps, createHocWithContextConsumer } from '@aglyn/shared-ui-jsx'
 import { _isLength } from '@aglyn/shared-util-guards'
 import { noop } from '@aglyn/shared-util-tools'
 import { createUid } from '@aglyn/shared-util-vendor'
@@ -118,13 +118,5 @@ export type WithAppLoaderProps = InjectedContextConsumerProps<AppLoaderConsumer,
 
 /**
  * App loading context HOC prop injector
- * @export
- * @template P
- * @param {ComponentWithInjectedProp<P, AppLoaderConsumer, WithN>} Component
- * @return {*}
  */
-export function withAppLoader<P>(
-  Component: ComponentWithInjectedProp<P, AppLoaderConsumer, WithN>,
-) {
-  return createHocWithContextConsumer(AppLoaderConsumer, WithN)(Component)
-}
+export const withAppLoader = createHocWithContextConsumer(AppLoaderConsumer, WithN)

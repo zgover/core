@@ -22,6 +22,6 @@
  * @param {Record<string | number, any>} source
  * @returns {boolean}
  */
-export function _hasProperty<T extends unknown>(key: keyof T | keyof any, source: T): key is keyof T {
+export function _hasProperty<T>(key: keyof any, source: T): key is keyof T {
   return Object.prototype.hasOwnProperty.call(source, key)
 }

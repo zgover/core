@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+
 export enum ComponentsLinealDirectiveFlag {
   LIMIT_TO = 0x01,
   DISALLOW = 0x02,

@@ -36,6 +36,8 @@ export const _INTERNAL_BESIGNERS_: Map<AppUUN, AglynBesignerController> = new Ma
 export const _INTERNAL_CANVAS_: Map<AppUUN, AglynCanvasController> = new Map()
 export const _INTERNAL_CONTEXTS_: Map<AppUUN, AglynContextsController> = new Map()
 
+
+const y = new Date().getFullYear()
 export const CONSOLE_GREETING_STYLES = 'font-family:"Courier New",monospace;color:#E040FB;font-size:12px;'
 export const CONSOLE_GREETING = `%c
        d8888          888                         888      888       .d8888b.
@@ -50,7 +52,7 @@ d88P     888  "Y88888 888  "Y88888 888  888       88888888 88888888  "Y8888P"
              Y8b d88P     Y8b d88P
               "Y88P"       "Y88P"
 
-                            Copyright (c) 2021 Aglyn LLC. All Rights Reserved.
+                            Copyright (c) ${y} Aglyn LLC. All Rights Reserved.
 
 Hello there, Friend! 👋
 

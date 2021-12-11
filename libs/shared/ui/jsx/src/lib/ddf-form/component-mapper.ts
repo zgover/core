@@ -15,13 +15,23 @@
  * limitations under the License.
  */
 
-import { PropertyEditorFieldFlag } from '@aglyn/core-data-framework'
 import ComponentMapper from '@data-driven-forms/react-form-renderer/common-types/component-mapper'
 
 import FieldIconSelect from './components/FieldIconSelect'
 import FieldSelect from './components/FieldSelect'
 import FieldTextField from './components/FieldTextField'
 
+
+export enum PropertyEditorFieldFlag {
+  CHECKBOX = 'checkbox',
+  DATE_PICKER = 'date-picker',
+  ICON_SELECT = 'icon-select',
+  RADIO = 'radio',
+  SELECT = 'select',
+  TEXT_FIELD = 'text-field',
+  TEXTAREA = 'textarea',
+  TIME_PICKER = 'time-picker',
+}
 
 export const componentMapper: ComponentMapper = {
   [PropertyEditorFieldFlag.TEXT_FIELD]: FieldTextField,

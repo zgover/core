@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-
-export const validationMessage = (meta, validateOnMount) => {
-  if (validateOnMount) {
-    return meta.error || meta.submitError
-  }
-  return meta.touched && (meta.error || meta.submitError)
-}
+export * from './lib/aglyn'
+export * from './lib/applications'
+export * from './lib/global'
+export * from './lib/html-head'
