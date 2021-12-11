@@ -150,7 +150,7 @@ const withAglynNxNext = (opts = {}) => {
       ...opts?.experimental,
     },
 
-    headers: async () => {
+    async headers() {
       const headers = typeof opts?.headers === 'function'
         ? await opts.headers() || []
         : opts?.headers || []
@@ -167,7 +167,7 @@ const withAglynNxNext = (opts = {}) => {
       ]
     },
 
-    webpack: async (config, options, ...args) => {
+    webpack(config, options, ...args) {
       const {webpack, buildId} = options
       config.plugins.push(
         new webpack.DefinePlugin({
@@ -176,9 +176,10 @@ const withAglynNxNext = (opts = {}) => {
       )
 
       return opts?.webpack
-        ? await opts.webpack(config, options, ...args)
+        ? opts.webpack(config, options, ...args)
         : config
     },
+
   })
 }
 
