@@ -86,22 +86,9 @@ export * from './util/normalize-component-element-data'
 // /_/  /_/\____/_____/_____/_____/____/
 // 👇
 
-export {
-  AglynBaseModel,
-  AglynBaseModelOptions,
-} from './models/aglyn-base.model'
-export {
-  AglynModuleEffectListener,
-  AglynModuleModel,
-  AglynModuleModelOptions,
-  AglynModuleModelT,
-  AglynModuleTypeFields,
-} from './models/aglyn-module.model'
-export {
-  AglynExtension,
-  AglynExtensionOptions,
-  AglynExtensionT,
-} from './models/aglyn-extension.model'
+export * from './models/aglyn-base.model'
+export * from './models/aglyn-module.model'
+export * from './models/aglyn-extension.model'
 
 
 //    __________  _   ____________  ____  __    __    __________ _____
