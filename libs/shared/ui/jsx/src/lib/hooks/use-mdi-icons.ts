@@ -30,22 +30,21 @@ export function useMemoizedMdiIcons(iconIds?: IconId[]): (MdiIcon | undefined)[]
   const [icons, setIcons] = useState([])
 
   useEffect(() => {
-    console.log('useMemoizedMdiIcons useeffect', icons)
     let unloaded = false
     if (Array.isArray(iconIds) && iconIds.length > 0) {
       getMdiIconFromId(iconIds).then((icons: MdiIcon[]) => {
-        if (unloaded) return
+        // if (unloaded) return
         setIcons([...icons])
       })
     }
-    else if (!Array.isArray(iconIds)) {
+    else if (!iconIds) {
       getMdiAllIcons().then((icons) => {
-        if (unloaded) return
+        // if (unloaded) return
         setIcons([...icons])
       })
     }
     return () => {unloaded = true}
-  }, [iconIds])
+  }, [iconIds, setIcons])
 
   return icons
 }
