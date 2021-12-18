@@ -17,9 +17,8 @@
 
 import {DEFAULT_ICON} from '@aglyn/shared-data-mdi'
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-
-import useFieldApi from '@data-driven-forms/react-form-renderer/use-field-api'
-import {UseFieldApiConfig} from '@data-driven-forms/react-form-renderer/use-field-api/use-field-api'
+import {Icon, MdiSvgIcon, useMdiIconsFuzzy} from '@aglyn/shared-ui-mdi-jsx'
+import {useDebouncedCallback} from '@aglyn/shared-util-vendor'
 import {Tooltip} from '@mui/material'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
@@ -29,11 +28,11 @@ import MuiLink from '@mui/material/Link'
 import MuiTextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-import {forwardRef, Fragment, HTMLProps, useCallback, useMemo, useState} from 'react'
+import {forwardRef, HTMLProps, useCallback, useMemo, useState} from 'react'
 import {CardIconListItem} from '../../components/card-icon-list-item'
 import {GridList} from '../../components/grid-list'
-import {SvgPathIcon} from '../../components/svg-path-icon'
-import {Icon, useMdiIconsFuzzy} from '../../hooks/use-mdi-icons-fuzzy'
+
+import {useFieldApi, UseFieldApiConfig} from '../ddf-reexports'
 
 import {withGridItem} from '../field-hocs'
 import {validationMessage} from '../utils'
@@ -87,7 +86,6 @@ export interface FieldIconSelectProps extends HTMLProps<HTMLDivElement> {
 const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
   function RefRenderFn(props, ref) {
     const {
-      className,
       input,
       isReadOnly,
       isDisabled,
@@ -131,14 +129,20 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
       input.onChange(selected)
       setOpen((prev) => !prev)
     }, [selected, setOpen])
+    const updateFilter = useDebouncedCallback((value?: string) => {
+      console.log('update filter value', value)
+      if (value) {applyFilter(value)}
+      else {clearFilter()}
+    }, 750)
     const handleFilterChange = useCallback((e) => {
       const target = e.currentTarget
-      if (target && target.value) {applyFilter(target.value)}
-      else {clearFilter()}
-    }, [applyFilter, clearFilter])
+      if (target && target.value) {updateFilter(target.value)}
+      else {updateFilter()}
+    }, [applyFilter, clearFilter, updateFilter])
     const handleItemClick = useCallback((e, item: Icon) => {
       setSelected(item.id)
     }, [setSelected])
+
     const renderItemContent = useCallback(function RenderItemContent(item) {
       return (
         <Tooltip
@@ -152,84 +156,82 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
             item={item}
             onActionClick={handleItemClick}
             selected={selected && selected === item.id}
-            preview={<SvgPathIcon fontSize="medium" iconIds={item.id} />}
+            preview={<MdiSvgIcon fontSize="medium" iconIds={item.id} />}
           />
         </Tooltip>
       )
     }, [selected, handleItemClick])
 
     return (
-      <Fragment>
-        <Grid ref={ref} container>
-          <Grid spacing={2} alignItems={'center'} container item>
-            <Grid item>
-              <ButtonBase
-                onClick={handleButtonClick}
-                disableRipple
-                sx={(theme) => ({fontSize: theme.typography.pxToRem(38)})}
-                title={currentIcon.name || 'Choose icon'}
-              >
-                <SvgPathIcon fontSize="inherit" iconIds={currentValue} />
-              </ButtonBase>
-            </Grid>
-            <Grid item sm>
-              <Typography component="div" variant="caption">
-                {label}
-              </Typography>
-              <MuiLink
-                onClick={handleButtonClick}
-                variant="button"
-                component="button"
-                color="secondary"
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'flex-start',
-                }}
-              >
-                <span><SvgPathIcon iconIds={open ? 'chevron-up' : 'chevron-down'} /></span>
-                <span>{currentIcon.name}</span>
-              </MuiLink>
-            </Grid>
+      <Grid ref={ref} container>
+        <Grid spacing={2} alignItems={'center'} container item>
+          <Grid item>
+            <ButtonBase
+              onClick={handleButtonClick}
+              disableRipple
+              sx={(theme) => ({fontSize: theme.typography.pxToRem(38)})}
+              title={currentIcon.name || 'Choose icon'}
+            >
+              <MdiSvgIcon fontSize="inherit" iconIds={currentValue} />
+            </ButtonBase>
           </Grid>
-          <Grid xs={12} item>
-            <StyledCollapse in={open}>
-              <Grid alignItems="center" spacing={2} container>
-                <Grid xs={12} item>
-                  <MuiTextField
-                    onChange={handleFilterChange}
-                    placeholder="Search icons..."
-                    size="small"
-                    helperText={helperContent}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs>
-                  <Typography component="div" variant="body2">
-                    Selected icon: <b>{selectedIcon.name}</b>
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <Button color="secondary" onClick={handleChooseButtonClick} variant="contained">
-                    Choose
-                  </Button>
-                </Grid>
-              </Grid>
-
-              <GridListWrapper>
-                <GridList
-                  GridContainerProps={{spacing: 1}}
-                  GridItemProps={{xs: 2}}
-                  ListWrapperProps={{className: classKeys.gridList}}
-                  items={icons}
-                  renderItemContent={renderItemContent}
-                  {...GridListProps}
-                />
-              </GridListWrapper>
-            </StyledCollapse>
+          <Grid item sm>
+            <Typography component="div" variant="caption">
+              {label}
+            </Typography>
+            <MuiLink
+              onClick={handleButtonClick}
+              variant="button"
+              component="button"
+              color="secondary"
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+              }}
+            >
+              <span><MdiSvgIcon iconIds={open ? 'chevron-up' : 'chevron-down'} /></span>
+              <span>{currentIcon.name}</span>
+            </MuiLink>
           </Grid>
         </Grid>
-      </Fragment>
+        <Grid xs={12} item>
+          <StyledCollapse in={open}>
+            <Grid alignItems="center" spacing={2} container>
+              <Grid xs={12} item>
+                <MuiTextField
+                  onChange={handleFilterChange}
+                  placeholder="Search icons..."
+                  size="small"
+                  helperText={helperContent}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs>
+                <Typography component="div" variant="body2">
+                  Selected icon: <b>{selectedIcon.name}</b>
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Button color="secondary" onClick={handleChooseButtonClick} variant="contained">
+                  Choose
+                </Button>
+              </Grid>
+            </Grid>
+
+            <GridListWrapper>
+              <GridList
+                GridContainerProps={{spacing: 1}}
+                GridItemProps={{xs: 2}}
+                ListWrapperProps={{className: classKeys.gridList}}
+                items={icons}
+                renderItemContent={renderItemContent}
+                {...GridListProps}
+              />
+            </GridListWrapper>
+          </StyledCollapse>
+        </Grid>
+      </Grid>
     )
   },
 )

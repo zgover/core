@@ -15,16 +15,13 @@
  * limitations under the License.
  */
 
-import Fuse from 'fuse.js'
+import {Fuse} from '@aglyn/shared-util-vendor'
 import {useCallback, useMemo, useState} from 'react'
-import type {Icon as MdiIcon} from './use-mdi-icons'
+import type {ApplyFilterFn, ClearFilterFn, Icon} from '../types'
 import {useMdiIcons} from './use-mdi-icons'
 
 
-export type Icon = MdiIcon
-export type ApplyFilterFn = (query: string) => void
-export type ClearFilterFn = () => void
-export type UseMdiIconsReturn = [
+type UseMdiIconsReturn = [
   filteredIcons: Icon[],
   allIcons: Icon[],
   applyFilter: ApplyFilterFn,
@@ -32,7 +29,7 @@ export type UseMdiIconsReturn = [
 ]
 export const useMdiIconsFuzzy = (): UseMdiIconsReturn => {
   const allIcons = useMdiIcons()
-  const [filteredIcons, setFilteredIcons] = useState(() => allIcons)
+  const [filteredIcons, setFilteredIcons] = useState(allIcons)
 
   const fuzzy = useMemo(() => {
     return new Fuse(allIcons, {

@@ -25,9 +25,10 @@ const PROCESS_VERSIONS = String(process.versions ?? 'NULL')
 
 const COMMIT_REF = String(process.env.COMMIT_REF ?? 'NULL')
 
-const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
-const IS_TEST = process.env.NODE_ENV === 'test'
+const NODE_ENV = process.env.NODE_ENV
+const IS_DEVELOPMENT = NODE_ENV === 'development'
+const IS_PRODUCTION = NODE_ENV === 'production'
+const IS_TEST = NODE_ENV === 'test'
 
 const SECURITY_HEADERS = [
   /**
@@ -86,7 +87,7 @@ const BRAND_HEADERS = [
  * @param opts {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
 const withAglynNxNext = (opts = {}) => {
-  console.log('process.env.NODE_ENV', process.env.NODE_ENV, IS_PRODUCTION)
+  console.log('process.env.NODE_ENV', NODE_ENV)
 
   return withNx({
     ...opts,
@@ -104,7 +105,7 @@ const withAglynNxNext = (opts = {}) => {
     // Next.js provides gzip compression to compress rendered content and static files. In general
     // you will want to enable compression on a HTTP proxy like nginx, to offload load from the
     // Node.js process.
-    compress: true,
+    compress: IS_PRODUCTION,
 
     optimizeFonts: IS_PRODUCTION,
 

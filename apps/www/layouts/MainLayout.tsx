@@ -24,8 +24,8 @@ import {
   GridButtons,
   GridButtonsProps,
   Menu,
-  SvgPathIcon,
 } from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr, _isArrEmpty, _isObj} from '@aglyn/shared-util-guards'
 import AppBar, {AppBarProps} from '@mui/material/AppBar'
 import Avatar from '@mui/material/Avatar'
@@ -273,9 +273,9 @@ function MainLayoutRaw(props: MainLayoutProps) {
     }).href ?? ''
     : ''
 
-  const buildIconButton = ({avatar, iconId, children, ...rest}, i) => (
+  const buildIconButton = ({avatar, iconIds, children, ...rest}, i) => (
     <IconButton key={rest.id ?? rest['href'] ?? i} color="inherit" {...rest}>
-      {avatar ? <StyledAvatar {...avatar} /> : iconId && <SvgPathIcon iconIds={iconId} />}
+      {avatar ? <StyledAvatar {...avatar} /> : iconIds && <MdiSvgIcon iconIds={iconIds} />}
       {children}
     </IconButton>
   )
@@ -347,7 +347,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
                     color="inherit"
                     component={AppLink}
                     href={item.href ?? ''}
-                    icon={<SvgPathIcon iconIds={iconIds} />}
+                    icon={<MdiSvgIcon iconIds={iconIds} />}
                     label={item.label}
                     underline="none"
                     value={item.href ?? i}

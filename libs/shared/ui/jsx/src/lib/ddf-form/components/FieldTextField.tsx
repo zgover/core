@@ -15,65 +15,63 @@
  * limitations under the License.
  */
 
-import { forwardRef, ReactNode } from 'react'
+import MuiTextField, {TextFieldProps as MuiTextFieldProps} from '@mui/material/TextField'
+import {forwardRef, ReactNode} from 'react'
+import {useFieldApi, UseFieldApiConfig} from '../ddf-reexports'
 
-import MuiTextField, { TextFieldProps as MuiTextFieldProps } from '@mui/material/TextField'
+import {withGridItem} from '../field-hocs'
+import {validationMessage} from '../utils'
 
-import useFieldApi, {
-  UseFieldApiConfig,
-} from '@data-driven-forms/react-form-renderer/use-field-api'
 
-import { withGridItem } from '../field-hocs'
-import { validationMessage } from '../utils'
+export type FieldTextFieldProps = MuiTextFieldProps & UseFieldApiConfig & {
+  isReadOnly?: boolean
+  isDisabled?: boolean
+  isRequired?: boolean
+  description?: ReactNode
+  validateOnMount?: boolean
+}
 
-export type FieldTextFieldProps = MuiTextFieldProps &
-  UseFieldApiConfig & {
-    isReadOnly?: boolean
-    isDisabled?: boolean
-    isRequired?: boolean
-    description?: ReactNode
-    validateOnMount?: boolean
-  }
+const FieldTextField = forwardRef<any, FieldTextFieldProps>(
+  function RefRenderFn(props, ref) {
+    const {
+      input,
+      isReadOnly,
+      isDisabled,
+      placeholder,
+      isRequired,
+      label,
+      helperText,
+      description,
+      validateOnMount,
+      meta,
+      inputProps,
+      ...rest
+    } = useFieldApi(props)
+    const invalidMessage = validationMessage(meta, validateOnMount)
+    const helpText =
+      invalidMessage ||
+      ((meta.touched || validateOnMount) && meta.warning) ||
+      helperText ||
+      description
 
-const FieldTextField = forwardRef<any, FieldTextFieldProps>(function RefRenderFn(props, ref) {
-  const {
-    input,
-    isReadOnly,
-    isDisabled,
-    placeholder,
-    isRequired,
-    label,
-    helperText,
-    description,
-    validateOnMount,
-    meta,
-    inputProps,
-    ...rest
-  } = useFieldApi(props)
-  const invalidMessage = validationMessage(meta, validateOnMount)
-  const helpText =
-    invalidMessage ||
-    ((meta.touched || validateOnMount) && meta.warning) ||
-    helperText ||
-    description
-
-  return (
-    <MuiTextField
-      ref={ref}
-      {...input}
-      disabled={isDisabled}
-      error={Boolean(invalidMessage)}
-      helperText={helpText}
-      inputProps={{ readOnly: isReadOnly, ...inputProps }}
-      label={label}
-      placeholder={placeholder}
-      required={isRequired}
-      size="small"
-      fullWidth
-      {...rest}
-    />
-  )
-})
+    return (
+      <MuiTextField
+        {...input}
+        ref={ref}
+        disabled={isDisabled}
+        error={Boolean(invalidMessage)}
+        helperText={helpText}
+        inputProps={{readOnly: isReadOnly, ...inputProps}}
+        label={label}
+        placeholder={placeholder}
+        required={isRequired}
+        size="small"
+        fullWidth
+        {...rest}
+      />
+    )
+  },
+)
 
 FieldTextField.displayName = 'FieldTextField'
 

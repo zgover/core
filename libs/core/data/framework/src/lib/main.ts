@@ -176,5 +176,4 @@ export type {
   BesignerDndState,
   BesignerFlagState,
   BesignerPanelsState,
-  CommActionData,
 } from './controllers/aglyn-besigner.controller'

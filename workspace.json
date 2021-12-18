@@ -213,7 +213,7 @@
           }
         }
       },
-      "tags": ["scope:lib"],
+      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:data"],
       "implicitDependencies": []
     },
     "shared-data-mdi": {
@@ -311,6 +311,29 @@
       },
       "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:ui"],
       "implicitDependencies": []
+    },
+    "shared-ui-mdi-jsx": {
+      "root": "libs/shared/ui/mdi-jsx",
+      "sourceRoot": "libs/shared/ui/mdi-jsx/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/ui/mdi-jsx/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/ui/mdi-jsx"],
+          "options": {
+            "jestConfig": "libs/shared/ui/mdi-jsx/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:lib:shared", "scope:lib:shared:ui"]
     },
     "shared-ui-next": {
       "root": "libs/shared/ui/next",

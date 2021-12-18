@@ -30,9 +30,8 @@ import {
   PopperStyledComponent,
   PopperStyledComponentProps,
   SrOnlyComponent,
-  SvgPathIcon,
-  SvgPathIconProps,
 } from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon, MdiSvgIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import Button, {ButtonProps} from '@mui/material/Button'
 import ButtonGroup, {ButtonGroupProps} from '@mui/material/ButtonGroup'
 import Tooltip from '@mui/material/Tooltip'
@@ -85,7 +84,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
         svgPathIconProps: {
           iconIds: IconVariant.MODIFY_DELETE,
           color: 'error',
-        } as SvgPathIconProps,
+        } as MdiSvgIconProps,
       },
       {
         id: 'duplicate-element',
@@ -148,7 +147,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
         {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
           <Tooltip key={id} {...tooltipProps}>
             <Button {...buttonProps}>
-              <SvgPathIcon fontSize="small" {...svgPathIconProps} />
+              <MdiSvgIcon fontSize="small" {...svgPathIconProps} />
               <SrOnlyComponent component="span" {...srOnlyProps} />
             </Button>
           </Tooltip>

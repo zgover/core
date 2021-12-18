@@ -15,15 +15,10 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
-import React from 'react'
-
-import SvgPathIcon from './svg-path-icon'
+import type {Icon as MdiIcon, IconId as MdiIconId} from '@aglyn/shared-data-mdi'
 
 
-describe('SvgPathIcon', () => {
-  it('should render successfully', () => {
-    const {baseElement} = render(<SvgPathIcon iconIds={'help'} />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export type Icon = MdiIcon
+export type IconId = MdiIconId
+export type ApplyFilterFn = (query: string) => void
+export type ClearFilterFn = () => void

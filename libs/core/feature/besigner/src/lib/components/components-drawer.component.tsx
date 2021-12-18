@@ -25,8 +25,8 @@ import {
   NavigationDrawer as JsxNavbarDrawer,
   NavigationDrawerProps,
   SrOnlyComponent,
-  SvgPathIcon,
 } from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
@@ -84,7 +84,7 @@ const AppBarTitle = styled(Typography, {
 }))
 
 
-const ItemSvgIcon = styled(SvgPathIcon, {
+const ItemSvgIcon = styled(MdiSvgIcon, {
   name: 'AglynItemSvgIcon',
 })(({theme}) => ({
   fontSize: theme.typography.pxToRem(64),
@@ -140,7 +140,7 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
     const appBarLeft = useMemo(() => (
       <>
         <IconButton color="inherit" edge="start" onClick={handleDrawerCancel} sx={{mr: 2}}>
-          <SvgPathIcon iconIds="close" />
+          <MdiSvgIcon iconIds="close" />
           <SrOnlyComponent>close drawer</SrOnlyComponent>
         </IconButton>
         <AppBarTitle color="inherit" variant="h6">

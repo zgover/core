@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import type { LogLevelString } from '@aglyn/shared-util-logger'
-import { copy } from '@aglyn/shared-util-tools'
-import { objectDeepMerge } from '@aglyn/shared-util-vendor'
-import { createApi } from 'effector'
-import { persist } from 'effector-storage/local'
+import type {LogLevelString} from '@aglyn/shared-util-logger'
+import {copy} from '@aglyn/shared-util-tools'
+import {objectDeepMerge} from '@aglyn/shared-util-vendor'
+import {createApi} from 'effector'
+import {persist} from 'effector-storage/local'
 import {
   BesignerPanelTabFlag,
   BesignerPanelViewFlag,
@@ -36,58 +36,53 @@ import type {
   BesignerSetCanvasSelectedPayload,
   BesignerSetPanelPayload,
 } from '../constants/emitter'
-import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import type { ContextDomain } from '../controllers/aglyn-contexts.controller'
+import type {AglynAppController} from '../controllers/aglyn-app.controller'
+import type {ContextDomain} from '../controllers/aglyn-contexts.controller'
 import type {
   AglynModuleEffectListener,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import { AglynModuleModel } from '../models/aglyn-module.model'
-import type { BundleUId, ComponentId, ElementId, TemplateId } from '../types'
-import type { ContextStore } from './aglyn-contexts.controller'
+import {AglynModuleModel} from '../models/aglyn-module.model'
+import type {BundleUId, ComponentId, ElementId, TemplateId} from '../types'
+import type {ContextStore} from './aglyn-contexts.controller'
 
 
-export interface CommActionData {
-  $id?: ElementId
-  // componentId?: ComponentId
-  // bundleId?: BundleUId
-  // position?: ClientRectObject
-}
-
-export interface BesignerFlagState {
+export type BesignerFlagState = {
   debug?: boolean
   logLevel?: LogLevelString
   interactMode?: InteractionModeFlag
   activeView?: BesignerPanelViewFlag
 }
 
-export interface BesignerCanvasSelectedElement extends CommActionData {
+export type BesignerCanvasSelectedElement = {
+  $id?: ElementId
   hierarchy?: ElementId[]
 }
 
-export interface BesignerCanvasHoveredElement extends CommActionData {
+export type BesignerCanvasHoveredElement = {
+  $id?: ElementId
   hierarchy?: ElementId[]
 }
 
-export interface BesignerCanvasState {
+export type BesignerCanvasState = {
   selected?: BesignerCanvasSelectedElement
   hovered?: BesignerCanvasHoveredElement
 }
 
-export interface BesignerPanelItem {
+export type BesignerPanelItem = {
   id?: BesignerPanelViewFlag
   size?: number | string
   toggled?: boolean
   tab?: BesignerPanelTabFlag
 }
 
-export interface BesignerPanelsState {
+export type BesignerPanelsState = {
   panelLeft?: BesignerPanelItem
   panelRight?: BesignerPanelItem
   panelBottom?: BesignerPanelItem
 }
 
-export interface BesignerDndState {
+export type BesignerDndState = {
   disallowed?: boolean
   dragging?: boolean
   dragActivity?: {
@@ -111,7 +106,7 @@ export interface BesignerDndState {
   }
 }
 
-export interface BesignerContextStores {
+export type BesignerContextStores = {
   flags: BesignerFlagState
   canvas: BesignerCanvasState
   panels: BesignerPanelsState
@@ -200,7 +195,7 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
 
     this.#context._store = this.#context._domain.createStore<BesignerContextStores>(
       objectDeepMerge(copy(DEFAULT_CONTEXT), {...this.options.defaults}),
-      {name: `${this.namespace}:store`}
+      {name: `${this.namespace}:store`},
     )
     persist({store: this.#context._store})
 
@@ -224,7 +219,10 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
         }
       },
 
-      setPanels: <K extends keyof BesignerSetPanelPayload>(store, payload: BesignerSetPanelPayload) => {
+      setPanels: <K extends keyof BesignerSetPanelPayload>(
+        store,
+        payload: BesignerSetPanelPayload,
+      ) => {
         const {panelLeft, panelBottom, panelRight} = payload
         return {
           ...store,

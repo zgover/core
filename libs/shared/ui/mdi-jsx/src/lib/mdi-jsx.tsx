@@ -15,14 +15,18 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { render } from '@testing-library/react'
+import dynamic from 'next/dynamic'
 
-import SvgPath from './svg-path'
 
-describe('SvgPath', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<SvgPath />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export const MdiSvgIcon = dynamic(
+  () => import('./components/mdi-svg-icon'),
+  {ssr: false, loading: () => (<span></span>)},
+)
+MdiSvgIcon.displayName = 'MdiSvgIcon'
+export type {MdiSvgIconProps} from './components/mdi-svg-icon'
+
+export * from './hooks/use-mdi-icon'
+export * from './hooks/use-mdi-icons'
+export * from './hooks/use-mdi-icons-fuzzy'
+
+export * from './types'

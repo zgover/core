@@ -45,6 +45,8 @@ const ElementRendererComponentRaw = forwardRef<any, DecoratedElementRendererProp
       ...rest
     } = props
 
+    console.log('element renderer component ', props)
+
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
 
     return ReactIs.isValidElementType(Component) ? (

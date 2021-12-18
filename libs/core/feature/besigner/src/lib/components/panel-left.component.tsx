@@ -18,7 +18,7 @@
 import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-framework'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {IconVariant} from '@aglyn/shared-data-brand'
-import {SvgPathIcon} from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isEqualitySameType} from '@aglyn/shared-util-guards'
 import {hexadecimalFromNumber, hexadecimalToNumber} from '@aglyn/shared-util-tools'
 import MuiTabContext from '@mui/lab/TabContext'
@@ -41,7 +41,7 @@ const ElementsTree = memo(function ElementsTree() {
       <Box sx={{px: 0.5, pb: 1, pt: 1}}>
         <Button
           color="secondary"
-          startIcon={<SvgPathIcon fontSize="inherit" iconIds="plus" />}
+          startIcon={<MdiSvgIcon fontSize="inherit" iconIds="plus" />}
           onClick={handleAddElementClick}
         >
           Add Element
@@ -97,7 +97,7 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
                 <MuiTab
                   key={id}
                   value={hexadecimalFromNumber(id)}
-                  icon={<SvgPathIcon iconIds={iconIds} />}
+                  icon={<MdiSvgIcon iconIds={iconIds} />}
                 />
               ))}
             </MuiTabList>

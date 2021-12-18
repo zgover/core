@@ -29,16 +29,15 @@ import {
   useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/core-feature-renderer'
-import { styled } from '@aglyn/shared-feature-themes'
-import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
-import MuiTreeItem, { TreeItemProps } from '@mui/lab/TreeItem'
-import MuiTreeView, { SingleSelectTreeViewProps } from '@mui/lab/TreeView'
-import { forwardRef, Fragment, useCallback, useMemo, useState } from 'react'
+import {styled} from '@aglyn/shared-feature-themes'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
+import MuiTreeItem, {TreeItemProps} from '@mui/lab/TreeItem'
+import MuiTreeView, {SingleSelectTreeViewProps} from '@mui/lab/TreeView'
+import {forwardRef, Fragment, useCallback, useMemo} from 'react'
 import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
-import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
 
 
-const TreeItemIcon = styled(SvgPathIcon, {
+const TreeItemIcon = styled(MdiSvgIcon, {
   name: 'AglynTreeItemIcon',
 })(({theme}) => ({
   fontSize: theme.typography.pxToRem(20),
@@ -127,8 +126,8 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
         onNodeFocus={handleTreeItemFocus}
         selected={selectedId ?? ''}
         expanded={defaultExpanded}
-        defaultCollapseIcon={<SvgPathIcon iconIds={'chevron-down'} />}
-        defaultExpandIcon={<SvgPathIcon iconIds={'chevron-right'} />}
+        defaultCollapseIcon={<MdiSvgIcon iconIds={'chevron-down'} />}
+        defaultExpandIcon={<MdiSvgIcon iconIds={'chevron-right'} />}
         {...rest}
       >
         {elements.map(($id) => (

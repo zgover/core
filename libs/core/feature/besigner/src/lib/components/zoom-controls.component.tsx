@@ -15,19 +15,21 @@
  * limitations under the License.
  */
 
-import { styled } from '@aglyn/shared-feature-themes'
-import { SrOnlyComponent, SvgPathIcon } from '@aglyn/shared-ui-jsx'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { yes } from '@aglyn/shared-util-tools'
+import {styled} from '@aglyn/shared-feature-themes'
+import {SrOnlyComponent} from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {yes} from '@aglyn/shared-util-tools'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
 import Tooltip from '@mui/material/Tooltip'
-import { ChangeEvent, EventHandler, forwardRef, HTMLAttributes, useCallback } from 'react'
+import {ChangeEvent, EventHandler, forwardRef, HTMLAttributes, useCallback} from 'react'
+
 
 const ZoomControls = styled('div', {
-  name: 'AglynZoomControls'
-})(({ theme }) => ({
+  name: 'AglynZoomControls',
+})(({theme}) => ({
   position: 'absolute',
   bottom: theme.spacing(1),
   zIndex: theme.zIndex.appBar,
@@ -72,7 +74,7 @@ export const ZoomControlsComponent = forwardRef<any, ZoomControlsComponentProps>
           onZoomReset(e)
         }
       },
-      [onZoomReset]
+      [onZoomReset],
     )
 
     const handleZoomDecrease = useCallback(
@@ -81,7 +83,7 @@ export const ZoomControlsComponent = forwardRef<any, ZoomControlsComponentProps>
           onZoomDecrease(e)
         }
       },
-      [onZoomDecrease]
+      [onZoomDecrease],
     )
 
     const handleZoomIncrease = useCallback(
@@ -90,7 +92,7 @@ export const ZoomControlsComponent = forwardRef<any, ZoomControlsComponentProps>
           onZoomIncrease(e)
         }
       },
-      [onZoomIncrease]
+      [onZoomIncrease],
     )
 
     const buttons = [
@@ -147,10 +149,10 @@ export const ZoomControlsComponent = forwardRef<any, ZoomControlsComponentProps>
     return (
       <ZoomControls ref={ref} {...rest}>
         <ButtonGroup variant="contained" color="primary" aria-label="zoom controls">
-          {buttons.map(({ id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps }) => (
+          {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
             <Tooltip key={id} {...tooltipProps}>
               <Button {...buttonProps}>
-                <SvgPathIcon fontSize="small" {...svgPathIconProps} />
+                <MdiSvgIcon fontSize="small" {...svgPathIconProps} />
                 <SrOnlyComponent component="span" {...srOnlyProps} />
               </Button>
             </Tooltip>
@@ -158,7 +160,7 @@ export const ZoomControlsComponent = forwardRef<any, ZoomControlsComponentProps>
         </ButtonGroup>
       </ZoomControls>
     )
-  }
+  },
 )
 
 ZoomControlsComponent.displayName = 'ZoomControlsComponent'

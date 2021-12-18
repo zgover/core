@@ -16,7 +16,8 @@
  */
 
 import {styled} from '@aglyn/shared-feature-themes'
-import {GridItems, GridItemsProps, SvgPathIcon, SvgPathIconProps} from '@aglyn/shared-ui-jsx'
+import {GridItems, GridItemsProps} from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon, MdiSvgIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr, _isStrT} from '@aglyn/shared-util-guards'
 import {_s, copy} from '@aglyn/shared-util-tools'
 import Container from '@mui/material/Container'
@@ -48,7 +49,7 @@ export interface ConsoleLayoutProps extends MainLayoutProps {
   ContentGridItemsProps?: GridItemsProps
   items?: GridItemsProps['items']
   header?: {
-    icon?: SvgPathIconProps['iconIds'] | SvgPathIconProps
+    icon?: MdiSvgIconProps['iconIds'] | MdiSvgIconProps
     children?: React.ReactNode
   }
   aggregatedPageMeta: AggregatedPageMeta
@@ -124,7 +125,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
         <Container maxWidth={CONTENT_MAX_WIDTH}>
           <Typography component="h1" variant="h4">
             {header?.icon ? (
-              <SvgPathIcon
+              <MdiSvgIcon
                 color="secondary"
                 fontSize="inherit"
                 {

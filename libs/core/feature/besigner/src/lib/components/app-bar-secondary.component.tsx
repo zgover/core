@@ -21,10 +21,10 @@ import {
   setBesignerFlag,
   setBesignerPanels,
 } from '@aglyn/core-data-framework'
-import { useAglynAppContext, useAglynElementHistory } from '@aglyn/core-feature-renderer'
-import { styled } from '@aglyn/shared-feature-themes'
-import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
+import {useAglynAppContext, useAglynElementHistory} from '@aglyn/core-feature-renderer'
+import {styled} from '@aglyn/shared-feature-themes'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
+import MuiAppBar, {AppBarProps as MuiAppBarProps} from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
@@ -32,14 +32,14 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
-import { forwardRef, memo, MouseEvent, useCallback } from 'react'
-import { useAddElementCallback } from '../hooks/use-add-element-callback'
-import { useAglynBesignerStoreState } from '../hooks/use-aglyn-besigner-store-state'
+import {forwardRef, memo, MouseEvent, useCallback} from 'react'
+import {useAddElementCallback} from '../hooks/use-add-element-callback'
+import {useAglynBesignerStoreState} from '../hooks/use-aglyn-besigner-store-state'
 
 
 const AppBarSecondary = styled(MuiAppBar, {
   name: 'AglynAppBarSecondary',
-})<MuiAppBarProps>(({theme})=>({
+})<MuiAppBarProps>(({theme}) => ({
   top: 0,
   borderBottom: `1px solid ${theme.palette.divider}`,
   [`& .MuiToolbar-root`]: {
@@ -60,7 +60,7 @@ const AddControls = memo(function AddControls() {
           edge="start"
           onClick={handleAddElementClick}
         >
-          <SvgPathIcon
+          <MdiSvgIcon
             fontSize="small"
             iconIds={'shape-square-rounded-plus'}
           />
@@ -89,7 +89,7 @@ const HistoryControls = memo(function HistoryControls() {
             onClick={handleUndoClick}
             disabled={past <= 0}
           >
-            <SvgPathIcon fontSize="small" iconIds={'undo'} />
+            <MdiSvgIcon fontSize="small" iconIds={'undo'} />
           </IconButton>
         </span>
       </Tooltip>
@@ -100,7 +100,7 @@ const HistoryControls = memo(function HistoryControls() {
             onClick={handleRedoClick}
             disabled={future <= 0}
           >
-            <SvgPathIcon fontSize="small" iconIds={'redo'} />
+            <MdiSvgIcon fontSize="small" iconIds={'redo'} />
           </IconButton>
         </span>
       </Tooltip>
@@ -126,16 +126,22 @@ const InteractControls = memo(function InteractControls() {
         onChange={handleInteractModeClick}
         exclusive
       >
-        <ToggleButton value={InteractionModeFlag.SELECT}>
-          <Tooltip title={'Direct selection'}>
-            <SvgPathIcon fontSize="inherit" iconIds={'cursor-default'} />
-          </Tooltip>
-        </ToggleButton>
-        <ToggleButton value={InteractionModeFlag.REARRANGE}>
-          <Tooltip title={'Rearrange'}>
-            <SvgPathIcon fontSize="inherit" iconIds={'cursor-move'} />
-          </Tooltip>
-        </ToggleButton>
+        <Tooltip title={'Direct selection'}>
+          <ToggleButton
+            selected={interactMode === InteractionModeFlag.SELECT}
+            value={InteractionModeFlag.SELECT}
+          >
+            <MdiSvgIcon fontSize="inherit" iconIds={'cursor-default'} />
+          </ToggleButton>
+        </Tooltip>
+        <Tooltip title={'Rearrange'}>
+          <ToggleButton
+            selected={interactMode === InteractionModeFlag.REARRANGE}
+            value={InteractionModeFlag.REARRANGE}
+          >
+            <MdiSvgIcon fontSize="inherit" iconIds={'cursor-move'} />
+          </ToggleButton>
+        </Tooltip>
       </ToggleButtonGroup>
     </Stack>
   )
@@ -145,11 +151,11 @@ const PanelControls = memo(function PanelControls() {
   const {getApp} = useAglynAppContext()
   const panels = useAglynBesignerStoreState('panels')
   const openPanels = Object.values(panels)
-  .filter((i) => Boolean(i?.toggled))
-  .map((i) => {
-    console.log('openPanels ~~~~i', i)
-    return i?.id
-  })
+    .filter((i) => Boolean(i?.toggled))
+    .map((i) => {
+      console.log('openPanels ~~~~i', i)
+      return i?.id
+    })
 
   console.log('opens panels', panels, openPanels)
 
@@ -171,21 +177,30 @@ const PanelControls = memo(function PanelControls() {
         value={openPanels}
         onChange={handlePanelToggle}
       >
-        <ToggleButton value={BesignerPanelViewFlag.PANEL_LEFT}>
-          <Tooltip title={'Left panel'}>
-            <SvgPathIcon fontSize="inherit" iconIds={'dock-left'} />
-          </Tooltip>
-        </ToggleButton>
-        <ToggleButton value={BesignerPanelViewFlag.PANEL_BOTTOM}>
-          <Tooltip title={'Bottom panel'}>
-            <SvgPathIcon fontSize="inherit" iconIds={'dock-bottom'} />
-          </Tooltip>
-        </ToggleButton>
-        <ToggleButton value={BesignerPanelViewFlag.PANEL_RIGHT}>
-          <Tooltip title={'Right panel'}>
-            <SvgPathIcon fontSize="inherit" iconIds={'dock-right'} />
-          </Tooltip>
-        </ToggleButton>
+        <Tooltip title={'Left panel'}>
+          <ToggleButton
+            selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_LEFT)}
+            value={BesignerPanelViewFlag.PANEL_LEFT}
+          >
+            <MdiSvgIcon fontSize="inherit" iconIds={'dock-left'} />
+          </ToggleButton>
+        </Tooltip>
+        <Tooltip title={'Bottom panel'}>
+          <ToggleButton
+            selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_BOTTOM)}
+            value={BesignerPanelViewFlag.PANEL_BOTTOM}
+          >
+            <MdiSvgIcon fontSize="inherit" iconIds={'dock-bottom'} />
+          </ToggleButton>
+        </Tooltip>
+        <Tooltip title={'Right panel'}>
+          <ToggleButton
+            selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_RIGHT)}
+            value={BesignerPanelViewFlag.PANEL_RIGHT}
+          >
+            <MdiSvgIcon fontSize="inherit" iconIds={'dock-right'} />
+          </ToggleButton>
+        </Tooltip>
       </ToggleButtonGroup>
     </Stack>
   )
@@ -206,7 +221,7 @@ export const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponent
         {...rest}
       >
         <Toolbar variant="dense">
-          <AddControls/>
+          <AddControls />
 
           <Box sx={{mx: 0.25}} />
 
@@ -214,11 +229,11 @@ export const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponent
 
           <Box sx={{flexGrow: 1}} />
 
-          <InteractControls/>
+          <InteractControls />
 
           <Box sx={{mx: 1}} />
 
-          <PanelControls/>
+          <PanelControls />
 
           {children}
         </Toolbar>

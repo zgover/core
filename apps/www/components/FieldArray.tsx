@@ -16,7 +16,7 @@
  */
 
 import {DoD} from '@aglyn/shared-data-types'
-import {SvgPathIcon} from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
 import React from 'react'
 import {Components} from '../lib/input-fields'
 import FormFields, {Props as FormFieldsProps} from './FormFields'
@@ -92,7 +92,7 @@ function FieldArray(props: Props) {
           GridItemProps: {xs: 12},
           component: Components.Elements.byKey.Button,
           variant: 'outlined',
-          startIcon: <SvgPathIcon iconIds="plus" />,
+          startIcon: <MdiSvgIcon iconIds="plus" />,
           children: 'Add',
           onClick: (e) => {
             console.log('click')

@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-import { FormTemplateRenderProps } from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
-
-import FormSpy from '@data-driven-forms/react-form-renderer/form-spy'
-import useFormApi from '@data-driven-forms/react-form-renderer/use-form-api'
+import {MdiSvgIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {
+  FormTemplateRenderProps,
+} from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
-import { forwardRef } from 'react'
-import { SvgPathIcon } from '../components/svg-path-icon'
+import {forwardRef} from 'react'
+
+import {FormSpy, useFormApi} from './ddf-reexports'
 
 
 export interface GridFormTemplateProps extends FormTemplateRenderProps {}
@@ -60,7 +61,7 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(function 
               <Button
                 color="secondary"
                 disabled={submitting || !valid || pristine}
-                startIcon={<SvgPathIcon iconIds="content-save" />}
+                startIcon={<MdiSvgIcon iconIds="content-save" />}
                 style={{marginRight: 8}}
                 type="submit"
                 variant="contained"

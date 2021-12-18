@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
-import { AppLink, AppLinkProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared-ui-jsx'
-import { _isLength } from '@aglyn/shared-util-guards'
-import { yes } from '@aglyn/shared-util-tools'
-import MuiBreadcrumbs, { BreadcrumbsProps as MuiBreadcrumbsProps } from '@mui/material/Breadcrumbs'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {AppLink, AppLinkProps} from '@aglyn/shared-ui-jsx'
+import {MdiSvgIcon, MdiSvgIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import {_isLength} from '@aglyn/shared-util-guards'
+import {yes} from '@aglyn/shared-util-tools'
+import MuiBreadcrumbs, {BreadcrumbsProps as MuiBreadcrumbsProps} from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
-import React, { forwardRef, useMemo } from 'react'
+import React, {forwardRef, useMemo} from 'react'
 
 
 const classKeys = generateComponentClassKeys('AglynBreadcrumbs', [
@@ -61,7 +62,7 @@ const StyledBreadcrumbs = styled(MuiBreadcrumbs, {
 }))
 
 export interface ItemProps extends AppLinkProps<'text'> {
-  icon?: SvgPathIconProps
+  icon?: MdiSvgIconProps
   disabled?: boolean
 }
 
@@ -74,7 +75,7 @@ export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(function RefRenderF
   const {centerIcons, children, items, ...rest} = props
 
   const MemoedItem = useMemo(() => {
-    const Component = forwardRef<any, ItemProps & { isLast: boolean }>(function RefRenderFn(
+    const Component = forwardRef<any, ItemProps & {isLast: boolean}>(function RefRenderFn(
       itemProps,
       ref,
     ) {
@@ -94,7 +95,7 @@ export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(function RefRenderF
 
       return (
         <ItemComponent ref={ref as any} className={itemClass} {...item}>
-          {icon ? <SvgPathIcon className={classKeys.icon} {...icon} /> : null}
+          {icon ? <MdiSvgIcon className={classKeys.icon} {...icon} /> : null}
           {item.children}
         </ItemComponent>
       )
