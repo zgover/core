@@ -28,7 +28,6 @@ import {
   FIELD_DISABLED,
   FIELD_FULL_WIDTH,
   FIELD_SIZE,
-  IS_OPTION_EQUAL_TO_VALUE,
 } from '../constants/field-presets'
 import {generateTemplateId} from '../utils/generate-template-id'
 
@@ -55,10 +54,6 @@ export const schema: AglynComponentSchema<ButtonProps> = {
           description: 'The variant to use.',
           component: PropertyEditorFieldFlag.SELECT,
           label: 'Variant',
-          variant: 'outlined',
-          isClearable: true,
-          size: 'small',
-          isOptionEqualToValue: IS_OPTION_EQUAL_TO_VALUE,
           options: [
             {value: '', label: 'Default'},
             {value: 'text', label: 'Text'},

@@ -23,7 +23,7 @@ import {
 import {mdiBorderInside} from '@aglyn/shared-ui-mdi-jsx'
 import Toolbar, {type ToolbarProps} from '@mui/material/Toolbar'
 import {BUNDLE_ID} from '../constants/bundle-common'
-import {FIELD_DISABLE_GUTTERS, IS_OPTION_EQUAL_TO_VALUE} from '../constants/field-presets'
+import {FIELD_DISABLE_GUTTERS} from '../constants/field-presets'
 import {generateTemplateId} from '../utils/generate-template-id'
 
 
@@ -46,10 +46,6 @@ export const schema: AglynComponentSchema<ToolbarProps> = {
           description: 'The variant to use.',
           component: PropertyEditorFieldFlag.SELECT,
           label: 'Variant',
-          variant: 'outlined',
-          isClearable: true,
-          size: 'small',
-          isOptionEqualToValue: IS_OPTION_EQUAL_TO_VALUE,
           options: [
             {value: '', label: 'Default'},
             {value: 'dense', label: 'Dense'},

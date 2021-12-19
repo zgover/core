@@ -16,13 +16,16 @@
  */
 
 import {componentMapper as muiComponentMapper} from '@data-driven-forms/mui-component-mapper'
+import Select from '@data-driven-forms/mui-component-mapper/select'
+import Switch from '@data-driven-forms/mui-component-mapper/switch'
+import TextField from '@data-driven-forms/mui-component-mapper/text-field'
 import {ComponentMapper, componentTypes} from '@data-driven-forms/react-form-renderer'
-
 import FieldIconSelect from './components/field-icon-select'
 // import FieldSelect from './components/field-select'
 // import FieldSwitch from './components/field-switch'
 // import FieldTextField from './components/field-text-field'
 
+export const IS_OPTION_EQUAL_TO_VALUE = ((option: any, value: any) => option.value === value)
 
 export const PropertyEditorFieldFlag = {
   ...componentTypes,
@@ -33,7 +36,33 @@ export const componentMapper: ComponentMapper = {
   ...muiComponentMapper,
   // [PropertyEditorFieldFlag.TEXT_FIELD]: FieldTextField,
   // [PropertyEditorFieldFlag.TEXTAREA]: FieldTextField,
-  [PropertyEditorFieldFlag.ICON_SELECT]: FieldIconSelect,
+  [PropertyEditorFieldFlag.SELECT]: {
+    component: Select,
+    isClearable: true,
+    size: 'small',
+    variant: 'outlined',
+    TextFieldProps: {
+      color: 'secondary',
+    },
+    isOptionEqualToValue: IS_OPTION_EQUAL_TO_VALUE,
+  },
+  [PropertyEditorFieldFlag.SWITCH]: {
+    component: Switch,
+    size: 'medium',
+    color: 'secondary',
+
+  },
+  [PropertyEditorFieldFlag.TEXT_FIELD]: {
+    component: TextField,
+    size: 'small',
+    color: 'secondary',
+  },
+  [PropertyEditorFieldFlag.ICON_SELECT]: {
+    component: FieldIconSelect,
+    isClearable: true,
+    size: 'small',
+    isOptionEqualToValue: IS_OPTION_EQUAL_TO_VALUE,
+  },
   // [PropertyEditorFieldFlag.SELECT]: FieldSelect,
   // [PropertyEditorFieldFlag.SWITCH]: FieldSwitch,
 }

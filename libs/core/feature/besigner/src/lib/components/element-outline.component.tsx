@@ -16,7 +16,7 @@
  */
 
 import {OverridableStringUnion} from '@aglyn/shared-data-types'
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {alpha, generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 import {useDynamicEffect} from '@aglyn/shared-ui-jsx'
 import {getElementClientRectBounding, VirtualElement} from '@aglyn/shared-util-dom'
 import {_isFnT} from '@aglyn/shared-util-guards'
@@ -49,12 +49,14 @@ const ElementOutline = styled(Box, {
     easing: theme.transitions.easing.easeInOut,
   }),
   [`&.${classKeys.hovered}`]: {
-    outlineOffset: 1,
+    outlineOffset: 0,
     outlineStyle: 'dashed',
     outlineColor: theme.palette.quaternary.main,
+    backgroundColor: alpha(theme.palette.quaternary.dark, 0.36),
   },
   [`&.${classKeys.selected}`]: {
-    outlineOffset: 1,
+    outlineOffset: 6,
+    outlineWidth: 2,
     outlineColor: theme.palette.secondary.light,
     outlineStyle: 'solid',
   },

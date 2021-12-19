@@ -18,13 +18,11 @@
 import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-framework'
 import {
   useAglynAppContext,
-  useAglynCanvasApiEvents,
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {IconVariant} from '@aglyn/shared-data-brand'
 import {styled} from '@aglyn/shared-feature-themes'
-import {componentMapper, FormRenderer, GridFormTemplate} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isEqualitySameType} from '@aglyn/shared-util-guards'
 import {hexadecimalFromNumber, hexadecimalToNumber} from '@aglyn/shared-util-tools'
@@ -32,15 +30,13 @@ import MuiTabContext from '@mui/lab/TabContext'
 import MuiTabList from '@mui/lab/TabList'
 import MuiTabPanel from '@mui/lab/TabPanel'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
 import MuiTab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
 import React, {forwardRef, Fragment, useCallback} from 'react'
 import useAglynBesignerPanelValue from '../hooks/use-aglyn-besigner-panel-value'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
-import {useComponentFormSchema} from '../hooks/use-component-form-schema'
+import ElementPropsForm from './element-props-form.component'
 import {WorkspacePanelComponent, WorkspacePanelComponentProps} from './workspace-panel.component'
 
 
@@ -142,41 +138,12 @@ const ElementInfo = function ElementInfo({$id, ...props}: any) {
 
 
 const PropsForm = function PropsForm({$id, ...props}: any) {
-  const {updateElement, deleteElement} = useAglynCanvasApiEvents()
-  const {props: elemProps, componentId, bundleId} = useAglynElementData($id) || {}
-  const formSchema = useComponentFormSchema({componentId, bundleId})
-
-  const handleFormCancel = useCallback((e, reason) => {}, [])
-  const handleElementSave = useCallback((values) => {
-    updateElement({element: {$id, props: {...values}}})
-  }, [$id])
-  const handleDeleteElement = useCallback((e) => {
-    deleteElement({$id})
-  }, [$id])
 
   return (
     <TabPanelInner {...props}>
-      <FormRenderer
-        FormTemplate={GridFormTemplate}
-        componentMapper={componentMapper}
-        onCancel={handleFormCancel}
-        onSubmit={handleElementSave}
-        initialValues={elemProps}
-        schema={formSchema}
-        clearOnUnmount
-        ssss={true}
-      >
-        {(props) => {
-          console.log('[[[[[[[props', props)
-          return <span></span>
-        }}
-      </FormRenderer>
-
-      <FormControl margin="none" fullWidth>
-        <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
-          Delete Element
-        </Button>
-      </FormControl>
+      <ElementPropsForm
+        $id={$id}
+      />
     </TabPanelInner>
   )
 }

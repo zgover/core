@@ -142,6 +142,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
         variant="contained"
         color="primary"
         aria-label="element controls"
+        sx={{boxShadow: 4}}
         {...rest}
       >
         {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (

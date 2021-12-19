@@ -17,7 +17,7 @@
 
 export * from './types/icon'
 
-export * from './mdi-icons-named'
+export * from './icons'
 export {DEFAULT_ICON} from './constants'
 
 export {convertIdToModuleName} from './utils/convert-id-to-module-name'

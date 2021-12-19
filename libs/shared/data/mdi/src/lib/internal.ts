@@ -24,10 +24,10 @@ declare function require(moduleNames: string[], onLoad: (...args: any[]) => void
 export const MdiIcons: Map<IconId, Icon> = new Map<IconId, Icon>()
 
 if (typeof window !== 'undefined') {
-  require(['./mdi-icons-named'], (module) => {
-    module && Object.values(module).forEach((value) => {
+  require(['../../generated/6.5.95/mdi-icons.min.json'], ({data}) => {
+    Array.isArray(data) && data.forEach((value) => {
       if (_isObj(value) && _hasProperty('path', value) && _hasProperty('id', value)) {
-        MdiIcons.set(value.id as string, value as Icon)
+        MdiIcons.set(value.id as IconId, value as Icon)
       }
     })
   })
