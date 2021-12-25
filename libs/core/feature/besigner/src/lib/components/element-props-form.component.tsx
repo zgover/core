@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type {ElementId} from '@aglyn/core-data-framework'
+import {type ElementId} from '@aglyn/core-data-framework'
 import {useAglynCanvasApiEvents, useAglynElementData} from '@aglyn/core-feature-renderer'
 import {
   componentMapper,
@@ -25,8 +25,9 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
-import {forwardRef, useCallback} from 'react'
+import {type ChangeEvent, forwardRef, useCallback} from 'react'
 import useComponentFormSchema from '../hooks/use-component-form-schema'
+import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 
 export interface ElementPropsFormProps extends FormRendererProps {
@@ -36,7 +37,8 @@ export interface ElementPropsFormProps extends FormRendererProps {
 const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
   function RefRenderFn(props, ref) {
     const {$id, ...rest} = props
-    const {updateElement, deleteElement} = useAglynCanvasApiEvents()
+    const {updateElement} = useAglynCanvasApiEvents()
+    const deleteElementCallback = useDeleteElementCallback({$id})
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const elemProps = useAglynElementData($id, 'props')
@@ -46,9 +48,9 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
     const handleElementSave = useCallback((values) => {
       updateElement({element: {$id, props: {...values}}})
     }, [$id])
-    const handleDeleteElement = useCallback((e) => {
-      deleteElement({$id})
-    }, [$id])
+    const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {
+      deleteElementCallback(e)
+    }, [deleteElementCallback])
 
     return (
       <>

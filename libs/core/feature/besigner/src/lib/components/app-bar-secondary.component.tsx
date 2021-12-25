@@ -29,6 +29,7 @@ import {
   mdiDockBottom,
   mdiDockLeft,
   mdiDockRight,
+  MdiIcon,
   mdiRedo,
   mdiShapeSquareRoundedPlus,
   mdiUndo,
@@ -42,7 +43,6 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import React, {forwardRef, MouseEvent, useCallback} from 'react'
-import MdiIcon from '../../../../../../shared/ui/mdi-jsx/src/lib/components/mdi-icon'
 import {useAddElementCallback} from '../hooks/use-add-element-callback'
 import {useAglynBesignerStoreState} from '../hooks/use-aglyn-besigner-store-state'
 
@@ -78,7 +78,7 @@ const AddControls = function AddControls() {
 }
 
 const HistoryControls = function HistoryControls() {
-  const {undo, redo, past, future} = useAglynElementHistory()
+  const [undo, redo, past, future] = useAglynElementHistory()
 
   const handleUndoClick = useCallback(() => {
     undo()
@@ -164,9 +164,20 @@ const PanelControls = function PanelControls() {
   const handlePanelToggle = useCallback(
     (event: MouseEvent<HTMLElement>, value: BesignerPanelViewFlag[]) => {
       setBesignerPanels(getApp(), {
-        panelLeft: {toggled: value.indexOf(BesignerPanelViewFlag.PANEL_LEFT) >= 0},
-        panelRight: {toggled: value.indexOf(BesignerPanelViewFlag.PANEL_RIGHT) >= 0},
-        panelBottom: {toggled: value.indexOf(BesignerPanelViewFlag.PANEL_BOTTOM) >= 0},
+        panels: (panels) => ({
+          panelLeft: {
+            ...panels.panelLeft,
+            toggled: value.indexOf(BesignerPanelViewFlag.PANEL_LEFT) >= 0,
+          },
+          panelRight: {
+            ...panels.panelRight,
+            toggled: value.indexOf(BesignerPanelViewFlag.PANEL_RIGHT) >= 0,
+          },
+          panelBottom: {
+            ...panels.panelBottom,
+            toggled: value.indexOf(BesignerPanelViewFlag.PANEL_BOTTOM) >= 0,
+          },
+        }),
       })
     },
     [],

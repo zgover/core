@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { ElementId } from '@aglyn/core-data-framework'
-import { useMemo } from 'react'
-import { useAglynComponentSchema } from './use-aglyn-component-schema'
-import { useAglynElementData } from './use-aglyn-element-data'
+import {ElementId} from '@aglyn/core-data-framework'
+import {useAglynComponentSchema} from './use-aglyn-component-schema'
+import {useAglynElementData} from './use-aglyn-element-data'
+
 
 export function useAglynElementLabel($id: ElementId) {
   const displayName = useAglynElementData($id, 'displayName')
@@ -26,6 +26,6 @@ export function useAglynElementLabel($id: ElementId) {
   const bundleId = useAglynElementData($id, 'bundleId')
   const schema = useAglynComponentSchema(componentId, bundleId)
   const label = displayName || schema?.metadata?.displayName || $id
-  return useMemo(() => label, [label])
+  return label
 }
 export default useAglynElementLabel

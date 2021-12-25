@@ -75,7 +75,7 @@ const BesignerDndContext = (props: BesignerDndContextProps) => {
   return (
     <DndContext
       onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
+      onDragMove={handleDragOver}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
       {...rest}

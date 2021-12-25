@@ -224,7 +224,7 @@ export interface IAglynComponentsController extends IAglynModuleModel<AglynCompo
   getAllComponentsValues(): ComponentsRegistryValues
   getAllComponentsTemplateValues(): AglynComponentElementTemplate[]
 
-  getComponent(payload: ComponentGetPayload): OrUndef<IAglynComponent>
+  getComponent<P, T>(payload: ComponentGetPayload): OrUndef<IAglynComponent<P, T>>
   getComponentSchema(payload: ComponentSchemaGetPayload): OrUndef<AglynComponentSchema>
   getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynComponentsBundle>
   buildMapKey(data: {componentId: ComponentId, bundleId: BundleUId}): string

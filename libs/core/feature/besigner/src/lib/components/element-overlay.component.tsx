@@ -15,38 +15,39 @@
  * limitations under the License.
  */
 
-import {
-  type CanvasRendererComponentProps,
-  type ElementDataProps,
-  ElementsRendererComponent,
-  useAglynElementData,
-} from '@aglyn/core-feature-renderer'
-import {_isArrEmpty} from '@aglyn/shared-util-guards'
-import ElementPopperComponent, {type ElementPopperComponentProps} from './element-popper.component'
+import {NoSsr} from '@mui/material'
+import useAglynCanvasHovered from '../hooks/use-aglyn-canvas-hovered'
+import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
+import ElementPopperComponent from './element-popper.component'
 
 
-export interface ViewportPoppersComponentProps extends ElementPopperComponentProps, ElementDataProps {
-  elementRendererComponent?: CanvasRendererComponentProps['elementRendererComponent']
+export interface ViewportPoppersComponentProps {
+
 }
 
 function ElementOverlayComponent(props: ViewportPoppersComponentProps) {
   const {
-    elementRendererComponent: renderer,
-    $id,
     ...rest
   } = props
-  const ElementRenderer = renderer || ElementOverlayComponent
-  const elements = useAglynElementData($id, 'elements')
+  const selected = useAglynCanvasSelected()
+  const hovered = useAglynCanvasHovered()
 
   return (
-    <ElementPopperComponent $id={$id} {...rest}>
-      {!_isArrEmpty(elements || []) && (
-        <ElementsRendererComponent
-          elementRendererComponent={ElementRenderer}
-          elements={elements}
-        />
-      )}
-    </ElementPopperComponent>
+    <NoSsr defer>
+      <ElementPopperComponent
+        $id={selected?.$id}
+        data-aglyn-overlay="selected"
+        variant="overlaySelected"
+      />
+      <ElementPopperComponent
+        $id={hovered?.$id}
+        data-aglyn-overlay="hovered"
+        variant="overlayHovered"
+        {...(!selected?.$id || selected?.$id !== hovered?.$id ? {} : {
+          open: false,
+        })}
+      />
+    </NoSsr>
   )
 }
 

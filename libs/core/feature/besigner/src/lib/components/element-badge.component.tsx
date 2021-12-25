@@ -17,35 +17,28 @@
 
 import {
   BesignerPanelTabFlag,
-  CANVAS_ROOT_ELEMENT_ID,
   duplicateCanvasElement,
   type ElementId,
   isRootElementId,
   setBesignerCanvasSelected,
   setBesignerPanels,
 } from '@aglyn/core-data-framework'
-import {
-  useAglynAppContext,
-  useAglynComponentSchema,
-  useAglynElementData,
-} from '@aglyn/core-feature-renderer'
+import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
 import {IconVariant} from '@aglyn/shared-data-brand'
 import {
   PopperStyledArrowComponent,
   PopperStyledComponent,
   type PopperStyledComponentProps,
   SrOnlyComponent,
-  useDynamicEffect,
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type  MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {VirtualElement} from '@aglyn/shared-util-dom'
-import {CSS} from '@aglyn/shared-util-tools'
-import {useDraggable} from '@dnd-kit/core'
 import Button, {type ButtonProps} from '@mui/material/Button'
 import ButtonGroup, {type ButtonGroupProps} from '@mui/material/ButtonGroup'
 import Tooltip from '@mui/material/Tooltip'
 import Zoom from '@mui/material/Zoom'
 import {type ChangeEvent, forwardRef, useCallback, useState} from 'react'
+import {CanvasRenderedElementRefsConsumer} from '../contexts/canvas-rendered-element-refs'
 import useAglynCanvasElementStatus from '../hooks/use-aglyn-canvas-element-status'
 import {useDeleteElementCallback} from '../hooks/use-delete-element-callback'
 
@@ -62,28 +55,10 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
     const {getApp} = useAglynAppContext()
     const deleteElementCallback = useDeleteElementCallback({$id})
     const parentId = useAglynElementData($id, 'parentId') || null
-    const componentId = useAglynElementData($id, 'componentId') || null
-    const bundleId = useAglynElementData($id, 'bundleId') || null
-    const componentSchema = useAglynComponentSchema(componentId, bundleId)
-    const {
-      setNodeRef: dragRef,
-      listeners,
-      attributes,
-      transform,
-      isDragging,
-    } = useDraggable({
-      disabled: $id === CANVAS_ROOT_ELEMENT_ID,
-      id: $id,
-      data: {
-        $id,
-        componentId,
-        bundleId,
-        hierarchy: componentSchema?.renderFlags?.hierarchy,
-      },
-    })
-    const style = {
-      transform: CSS.Translate.toString(transform),
-    }
+
+    // const style = {
+    //   transform: CSS.Translate.toString(transform),
+    // }
 
     const handleDeleteClick = useCallback((e: ChangeEvent<unknown>) => {
       deleteElementCallback(e)
@@ -94,110 +69,127 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
     }, [$id, getApp])
     const handleModifyClick = useCallback((e: ChangeEvent<unknown>) => {
       setBesignerPanels(getApp(), {
-        panelRight: {toggled: true, tab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM},
+        panels: (panels) => ({
+          ...panels,
+          panelRight: {
+            ...panels.panelRight,
+            toggled: true,
+            tab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
+          },
+        }),
       })
     }, [$id, getApp])
     const handleSelectParentClick = useCallback((e: ChangeEvent<unknown>) => {
-      setBesignerCanvasSelected(getApp(), {selected: {$id: parentId}})
+      setBesignerCanvasSelected(getApp(), {
+        selected: (prev) => ({
+          ...prev,
+          $id: parentId,
+        }),
+      })
     }, [parentId, getApp])
 
-    useDynamicEffect(() => {
-      if (anchorEl) {
-        dragRef(anchorEl as HTMLElement)
-      }
-    }, [anchorEl, dragRef])
-
-    const buttons = [
-      ...(isRootElementId($id) ? [] : [
-        {
-          id: 'drag-element',
-          tooltipProps: {
-            title: 'Drag',
-          },
-          srOnlyProps: {
-            children: 'drag',
-          },
-          buttonProps: {
-            style,
-            ...attributes,
-            ...listeners,
-          } as ButtonProps,
-          svgPathIconProps: {
-            path: IconVariant.MODIFY_DRAG,
-            color: 'secondary',
-          } as MdiIconProps,
-        },
-        {
-          id: 'duplicate-element',
-          tooltipProps: {
-            title: 'Duplicate',
-          },
-          srOnlyProps: {
-            children: 'duplicate',
-          },
-          buttonProps: {
-            // disabled: yes(disableZoomResetButton),
-            onClick: handleDuplicateClick,
-          },
-          svgPathIconProps: {
-            path: IconVariant.MODIFY_DUPLICATE,
-          },
-        },
-      ]),
-      {
-        id: 'modify-props',
-        tooltipProps: {
-          title: 'Modify',
-        },
-        srOnlyProps: {
-          children: 'modify',
-        },
-        buttonProps: {
-          // disabled: yes(disableZoomResetButton),
-          onClick: handleModifyClick,
-        },
-        svgPathIconProps: {
-          path: IconVariant.MODIFY_EDIT,
-        },
-      },
-      ...(!parentId) ? [] : [
-        {
-          id: 'select-parent',
-          tooltipProps: {
-            title: 'Select parent',
-          },
-          srOnlyProps: {
-            children: 'select parent',
-          },
-          buttonProps: {
-            disabled: !parentId || isRootElementId(parentId),
-            onClick: handleSelectParentClick,
-          },
-          svgPathIconProps: {
-            path: IconVariant.SELECT_PARENT,
-          },
-        },
-      ],
-    ].filter(i => i && !i.buttonProps.disabled)
 
     return (
-      <ButtonGroup
-        ref={ref}
-        variant="contained"
-        color="primary"
-        aria-label="element controls"
-        sx={{boxShadow: 4}}
-        {...rest}
-      >
-        {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
-          <Tooltip key={id} {...tooltipProps}>
-            <Button {...buttonProps}>
-              <MdiIcon fontSize="small" {...svgPathIconProps} />
-              <SrOnlyComponent component="span" {...srOnlyProps} />
-            </Button>
-          </Tooltip>
-        ))}
-      </ButtonGroup>
+      <CanvasRenderedElementRefsConsumer>
+        {({getElementRef}) => {
+          const current = getElementRef($id)?.current,
+            dragHandle = current?.dragHandle
+
+
+          const buttons = [
+            ...(isRootElementId($id) ? [] : [
+              {
+                id: 'drag-element',
+                tooltipProps: {
+                  title: 'Drag',
+                },
+                srOnlyProps: {
+                  children: 'drag',
+                },
+                buttonProps: {
+                  // style,
+                  ...dragHandle?.attributes,
+                  ...dragHandle?.listeners,
+                } as ButtonProps,
+                svgPathIconProps: {
+                  path: IconVariant.MODIFY_DRAG,
+                  color: 'secondary',
+                } as MdiIconProps,
+              },
+              {
+                id: 'duplicate-element',
+                tooltipProps: {
+                  title: 'Duplicate',
+                },
+                srOnlyProps: {
+                  children: 'duplicate',
+                },
+                buttonProps: {
+                  // disabled: yes(disableZoomResetButton),
+                  onClick: handleDuplicateClick,
+                },
+                svgPathIconProps: {
+                  path: IconVariant.MODIFY_DUPLICATE,
+                },
+              },
+            ]),
+            {
+              id: 'modify-props',
+              tooltipProps: {
+                title: 'Modify',
+              },
+              srOnlyProps: {
+                children: 'modify',
+              },
+              buttonProps: {
+                // disabled: yes(disableZoomResetButton),
+                onClick: handleModifyClick,
+              },
+              svgPathIconProps: {
+                path: IconVariant.MODIFY_EDIT,
+              },
+            },
+            ...(!parentId) ? [] : [
+              {
+                id: 'select-parent',
+                tooltipProps: {
+                  title: 'Select parent',
+                },
+                srOnlyProps: {
+                  children: 'select parent',
+                },
+                buttonProps: {
+                  disabled: !parentId || isRootElementId(parentId),
+                  onClick: handleSelectParentClick,
+                },
+                svgPathIconProps: {
+                  path: IconVariant.SELECT_PARENT,
+                },
+              },
+            ],
+          ].filter(i => i && !i.buttonProps.disabled)
+
+          return (
+            <ButtonGroup
+              ref={ref}
+              variant="contained"
+              color="primary"
+              aria-label="element controls"
+              sx={{boxShadow: 4}}
+              {...rest}
+            >
+              {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
+                <Tooltip key={id} {...tooltipProps}>
+                  <Button {...buttonProps}>
+                    <MdiIcon fontSize="small" {...svgPathIconProps} />
+                    <SrOnlyComponent component="span" {...srOnlyProps} />
+                  </Button>
+                </Tooltip>
+              ))}
+            </ButtonGroup>
+          )
+        }}
+      </CanvasRenderedElementRefsConsumer>
     )
   },
 )
@@ -251,7 +243,7 @@ const ElementBadgeComponent = forwardRef<any, ElementBadgeComponentProps>(
         disableArrow={disableArrow}
         modifiers={modifiers}
         anchorEl={anchorEl}
-        open={isSelfSelected}
+        open={Boolean(isSelfSelected)}
         // keepMounted
         disablePortal
         transition

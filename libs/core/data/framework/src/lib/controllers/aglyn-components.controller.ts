@@ -111,13 +111,13 @@ export class AglynComponentsController extends AglynModuleModel<AglynComponentsC
     return this._templateValues()
   }
 
-  public getComponent(payload: ComponentGetPayload): OrUndef<IAglynComponent> {
+  public getComponent<P, T>(payload: ComponentGetPayload): OrUndef<IAglynComponent<P, T>> {
     const {componentId, bundleId = undefined} = payload
     const key = this.buildMapKey({bundleId, componentId})
     if (bundleId) {
-      return this.components?.get(key)
+      return this.components?.get(key) as unknown as OrUndef<IAglynComponent<P, T>>
     }
-    return this.components?.get(key)
+    return this.components?.get(key) as unknown as OrUndef<IAglynComponent<P, T>>
   }
   public getComponentSchema(payload: ComponentGetPayload): OrUndef<AglynComponentSchema> {
     const {componentId, bundleId} = payload

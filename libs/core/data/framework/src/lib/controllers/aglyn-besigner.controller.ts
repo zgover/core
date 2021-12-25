@@ -133,27 +133,15 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
         }
       },
 
-      setPanels: <K extends keyof BesignerSetPanelPayload>(
+      setPanels: (
         store,
         payload: BesignerSetPanelPayload,
       ) => {
-        const {panelLeft, panelBottom, panelRight} = payload
+        const {panels} = payload
         return {
           ...store,
           panels: {
-            ...store.panels,
-            panelLeft: {
-              ...store.panels.panelLeft,
-              ...panelLeft,
-            },
-            panelBottom: {
-              ...store.panels.panelBottom,
-              ...panelBottom,
-            },
-            panelRight: {
-              ...store.panels.panelRight,
-              ...panelRight,
-            },
+            ...panels(store.panels) || {},
           },
         }
       },
@@ -202,7 +190,7 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
           ...store,
           canvas: {
             ...store.canvas,
-            selected: selected,
+            selected: selected(store.canvas.selected),
           },
         }
       },
@@ -213,7 +201,7 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
           ...store,
           canvas: {
             ...store.canvas,
-            hovered: hovered,
+            hovered: hovered(store.canvas.hovered),
           },
         }
       },

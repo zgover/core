@@ -17,7 +17,6 @@
 
 import {CanvasRendererComponent} from '@aglyn/core-feature-renderer'
 import {styled} from '@aglyn/shared-feature-themes'
-import {NoSsr} from '@mui/material'
 import Box from '@mui/material/Box'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
 import {forwardRef, HTMLAttributes} from 'react'
@@ -49,24 +48,17 @@ const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
           {/*<MuiShadowDom.div>*/}
           <Box
             id="aglyn:canvas"
-            // sx={{position: 'relative'}}
           >
-            <CanvasRendererComponent
-              elementRendererComponent={ElementRendererComponent}
-            />
+            <CanvasRendererComponent rendererComponent={ElementRendererComponent} />
           </Box>
           {/*</MuiShadowDom.div>*/}
-          <NoSsr defer>
 
-            <Box
-              id="aglyn:canvas-overlay"
-              sx={{position: 'relative'}}
-            >
-              <CanvasRendererComponent
-                elementRendererComponent={ElementOverlayComponent}
-              />
-            </Box>
-          </NoSsr>
+          <Box
+            id="aglyn:canvas-overlay"
+            sx={{position: 'relative', zIndex: 'tooltip'}}
+          >
+            <ElementOverlayComponent />
+          </Box>
         </CanvasRenderedElementRefsComponent>
         {children}
       </ViewportFrame>

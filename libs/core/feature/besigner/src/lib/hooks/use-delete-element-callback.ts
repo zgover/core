@@ -21,9 +21,9 @@ import {
   setBesignerCanvasHovered,
   setBesignerCanvasSelected,
 } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
-import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
-import { ChangeEvent, useCallback } from 'react'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {useConfirmationContext} from '@aglyn/shared-ui-jsx'
+import {ChangeEvent, useCallback} from 'react'
 
 
 export interface UseDeleteElementCallbackOptions {
@@ -56,25 +56,25 @@ export const useDeleteElementCallback = (
           color: 'error',
         },
       })
-      .then(
-        (res) => {
-          setBesignerCanvasSelected(app, {selected: null})
-          setBesignerCanvasHovered(app, {hovered: null})
-          deleteCanvasElement(app, {$id: clbkOpts?.$id ?? $id})
-          clbkOpts?.onfulfilled && clbkOpts?.onfulfilled(res)
-          onfulfilled && onfulfilled(res)
-        },
-        (reason) => {
-          console.warn('rejected', reason)
-          clbkOpts?.onrejected && clbkOpts?.onrejected(reason)
-          onrejected && onrejected(reason)
-        },
-      )
-      .catch((e) => {
-        console.error('caught error', e)
-        clbkOpts?.oncatch && clbkOpts?.oncatch(e)
-        oncatch && oncatch(e)
-      })
+        .then(
+          (res) => {
+            setBesignerCanvasSelected(app, {selected: () => ({})})
+            setBesignerCanvasHovered(app, {hovered: () => ({})})
+            deleteCanvasElement(app, {$id: clbkOpts?.$id ?? $id})
+            clbkOpts?.onfulfilled && clbkOpts?.onfulfilled(res)
+            onfulfilled && onfulfilled(res)
+          },
+          (reason) => {
+            console.warn('rejected', reason)
+            clbkOpts?.onrejected && clbkOpts?.onrejected(reason)
+            onrejected && onrejected(reason)
+          },
+        )
+        .catch((e) => {
+          console.error('caught error', e)
+          clbkOpts?.oncatch && clbkOpts?.oncatch(e)
+          oncatch && oncatch(e)
+        })
     },
     [$id, onfulfilled, onrejected, oncatch, confirm],
   )

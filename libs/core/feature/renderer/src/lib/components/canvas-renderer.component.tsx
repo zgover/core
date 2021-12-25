@@ -25,13 +25,13 @@ import {
 
 
 export interface CanvasRendererComponentProps extends HTMLAttributes<HTMLElement>, OverrideableComponentProps {
-  elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
+  rendererComponent?: ElementRendererComponentProps['rendererComponent']
 }
 
 const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {
-      elementRendererComponent: renderer,
+      rendererComponent: renderer,
       children,
       $id,
       ...rest
@@ -42,7 +42,7 @@ const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentProps>(
       <RendererComponent
         ref={ref}
         $id={$id}
-        elementRendererComponent={RendererComponent}
+        rendererComponent={RendererComponent}
         {...rest}
       >
         {children}

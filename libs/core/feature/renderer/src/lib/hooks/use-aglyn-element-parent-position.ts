@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import type { ElementId } from '@aglyn/core-data-framework'
-import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-framework'
-import { useMemo } from 'react'
-import { useAglynElementData } from './use-aglyn-element-data'
+import type {ElementId} from '@aglyn/core-data-framework'
+import {CANVAS_ROOT_ELEMENT_ID} from '@aglyn/core-data-framework'
+import {useAglynElementData} from './use-aglyn-element-data'
+
 
 export function useAglynElementParentPosition($id: ElementId): {
   index: number
@@ -28,13 +28,10 @@ export function useAglynElementParentPosition($id: ElementId): {
   const parentId = useAglynElementData($id, 'parentId') || null
   const parentElements = useAglynElementData(parentId || CANVAS_ROOT_ELEMENT_ID, 'elements') || []
 
-  return useMemo(
-    () => ({
-      index: (parentElements || []).indexOf($id),
-      parentId: parentId,
-      parentElements: parentElements,
-    }),
-    [parentElements, parentId, $id]
-  )
+  return ({
+    index: (parentElements || []).indexOf($id),
+    parentId: parentId,
+    parentElements: parentElements,
+  })
 }
 export default useAglynElementData

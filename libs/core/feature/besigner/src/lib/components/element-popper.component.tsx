@@ -20,7 +20,7 @@ import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Poppe
 import {forwardRef} from 'react'
 import {CanvasRenderedElementRefsConsumer} from '../contexts/canvas-rendered-element-refs'
 import ElementBadgeComponent from './element-badge.component'
-import {ElementOutlineComponent} from './element-outline.component'
+import ElementOutlineComponent from './element-outline.component'
 
 
 const modifiers = [
@@ -46,59 +46,72 @@ const modifiers = [
   },
 ]
 
+const defaultClientRect = ({
+  width: 0, height: 0,
+  left: 0, top: 0, x: 0, y: 0,
+}) as DOMRect
+const virtualElement = {
+  getBoundingClientRect: (): DOMRect => ({
+    ...defaultClientRect,
+    toJSON: () => ({...defaultClientRect}),
+  }),
+}
+
 export interface ElementPopperComponentProps extends Partial<MuiPopperProps> {
   $id: ElementId
+  variant: 'overlayHovered' | 'overlaySelected'
 }
 
 const ElementPopperComponent = forwardRef<any, ElementPopperComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       $id,
-      children,
+      variant,
       ...rest
     } = props
 
     return (
       <CanvasRenderedElementRefsConsumer>
         {({getElementRef}) => {
-          const anchorEl = getElementRef($id)?.current
+          const current = getElementRef($id)?.current,
+            element = current?.element || virtualElement
 
           return (
             <>
               <MuiPopper
                 ref={ref}
-                anchorEl={anchorEl}
+                anchorEl={element || null}
                 placement="top-start"
                 modifiers={modifiers}
                 open
-                data-aglyn-element-popper={$id}
                 keepMounted
                 disablePortal
+
                 //{...elementAttributes}
                 {...rest}
               >
                 <ElementOutlineComponent
-                  anchorEl={anchorEl}
+                  anchorEl={element || null}
                   $id={$id}
                   data-aglyn-element-outline={$id}
                 />
-                <ElementBadgeComponent
-                  anchorEl={anchorEl}
-                  $id={$id}
-                  data-aglyn-element-badge={$id}
-                />
-
+                {variant === 'overlaySelected' && (
+                  <ElementBadgeComponent
+                    anchorEl={element || null}
+                    $id={$id}
+                    data-aglyn-element-badge={$id}
+                  />
+                )}
               </MuiPopper>
-              {children}
             </>
           )
         }}
-          </CanvasRenderedElementRefsConsumer>
-          )
-        },
-        )
-        ElementPopperComponent.displayName = 'ElementPopperComponent'
-        ElementPopperComponent.defaultProps = {}
+      </CanvasRenderedElementRefsConsumer>
+    )
+  },
+)
+ElementPopperComponent.displayName = 'ElementPopperComponent'
+ElementPopperComponent.defaultProps = {}
 
-        export {ElementPopperComponent}
-        export default ElementPopperComponent
+export {ElementPopperComponent}
+export default ElementPopperComponent

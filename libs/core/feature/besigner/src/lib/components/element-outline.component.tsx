@@ -32,8 +32,6 @@ const classKeys = generateComponentClassKeys('AglynElementOutline', [
   'open',
   'hoveringSelf',
   'selectedSelf',
-  'hoveringChild',
-  'selectedChild',
   'draggingSelf',
   'draggingOverSelf',
 ])
@@ -48,7 +46,7 @@ const ElementOutline = styled(Box, {
   right: 0,
   bottom: 0,
   outlineColor: 'transparent',
-  outlineOffset: 0,
+  outlineOffset: 1,
   outlineWidth: 1,
   outlineStyle: 'dashed',
   transition: theme.transitions.create([
@@ -59,58 +57,33 @@ const ElementOutline = styled(Box, {
     'outlineColor',
     'backgroundColor',
   ], {
-    duration: theme.transitions.duration.enteringScreen,
-    easing: theme.transitions.easing.easeIn,
+    duration: theme.transitions.duration.standard,
+    easing: theme.transitions.easing.easeInOut,
   }),
-  [`&.${classKeys.open}`]: {
-    transition: theme.transitions.create([
-      'visibility',
-      'outlineWidth',
-      'outlineOffset',
-      'outlineStyle',
-      'outlineColor',
-      'backgroundColor',
-    ], {
-      duration: theme.transitions.duration.leavingScreen,
-      easing: theme.transitions.easing.easeOut,
-    }),
-  },
-  [`&.${classKeys.selectedSelf}`]: {
-    outlineWidth: 2,
-    outlineStyle: 'solid',
-    outlineColor: theme.palette.quaternary.main,
-  },
-  [`&.${classKeys.hoveringChild}`]: {
-    outlineColor: theme.palette.grey['A400'],
-    backgroundColor: alpha(theme.palette.secondary.light, 0.12),
-  },
-  [`&.${classKeys.selectedChild}`]: {
-    outlineColor: theme.palette.grey['A400'],
-  },
-
-  [`&.${classKeys.hoveringSelf}`]: {
-    outlineWidth: 2,
-    outlineColor: theme.palette.secondary.main,
-    backgroundColor: alpha(theme.palette.secondary.dark, 0.12),
-
-    [`&.${classKeys.selectedSelf}`]: {
-      outlineWidth: 2,
-      outlineOffset: 3,
-      outlineStyle: 'solid',
-      outlineColor: theme.palette.quaternary.main,
-      backgroundColor: alpha(theme.palette.quaternary.dark, 0.12),
-    },
-    [`&.${classKeys.selectedChild}`]: {
-      outlineStyle: 'dashed',
-    },
-  },
 
   [`&.${classKeys.draggingSelf}`]: {
     outlineColor: 'transparent',
     backgroundColor: alpha(theme.palette.grey['300'], 0.76),
   },
-  [`&.${classKeys.draggingOverSelf}`]: {
-    backgroundColor: alpha(theme.palette.quaternary.dark, 0.76),
+  [`&.${classKeys.hoveringSelf}`]: {
+    outlineColor: theme.palette.grey['A400'],
+    backgroundColor: alpha(theme.palette.grey['A400'], 0.12),
+    [`&.${classKeys.selectedSelf}`]: {
+      outlineColor: theme.palette.quaternary.main,
+      backgroundColor: alpha(theme.palette.quaternary.dark, 0.12),
+    },
+    [`&.${classKeys.draggingOverSelf}`]: {
+      outlineColor: theme.palette.quaternary.main,
+      backgroundColor: alpha(theme.palette.quaternary.dark, 0.76),
+    },
+    [`&.${classKeys.draggingSelf}`]: {
+      outlineColor: 'transparent',
+      backgroundColor: alpha(theme.palette.grey['300'], 0.76),
+    },
+  },
+  [`&.${classKeys.selectedSelf}`]: {
+    outlineWidth: 2,
+    outlineStyle: 'solid',
     outlineColor: theme.palette.quaternary.main,
   },
 }))
@@ -135,25 +108,19 @@ const ElementOutlineComponent = forwardRef<any, AglynElementOutlineProps>(
     const {
       isSelfSelected,
       isSelfHovered,
-      isChildSelected,
-      isChildHovered,
-    } = useAglynCanvasElementStatus($id, true)
+    } = useAglynCanvasElementStatus($id)
 
     const className = clsx({
-      [classKeys.open]: Boolean(anchorEl),
       [classKeys.draggingSelf]: Boolean(isActive),
       [classKeys.draggingOverSelf]: Boolean(isOver),
       [classKeys.hoveringSelf]: Boolean(isSelfHovered),
       [classKeys.selectedSelf]: Boolean(isSelfSelected),
-      [classKeys.selectedChild]: Boolean(isChildSelected),
-      [classKeys.hoveringChild]: Boolean(isChildHovered),
     }, classNameProp)
 
 
     const [style, setStyle] = useState(null)
     useDynamicEffect(() => {
       const rect = anchorEl && getElementClientRectBounding(anchorEl)
-      console.log('anchorEl', anchorEl, rect)
       if (rect) {
         setStyle({
           width: rect.width,

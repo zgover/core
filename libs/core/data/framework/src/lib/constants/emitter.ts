@@ -209,12 +209,12 @@ export type CommandTriggerPayload = PayloadData<{commandId: CommandUId} & Dictio
 
 export type BesignerGetStorePayload<K extends keyof BesignerContextStores = any> = PayloadData<{store: K}>
 export type BesignerFlagInteractModePayload<K extends keyof BesignerFlagState = any> = PayloadData<{flag: K, value: BesignerFlagState[K]}>
-export type BesignerSetPanelPayload = PayloadData<Partial<BesignerPanelsState>>
+export type BesignerSetPanelPayload = PayloadData<{panels: (prev: BesignerPanelsState) => BesignerPanelsState}>
 export type BesignerOpenPanelPayload = PayloadData<{panel: keyof BesignerPanelsState}>
 export type BesignerClosePanelPayload = PayloadData<{panel: keyof BesignerPanelsState}>
 export type BesignerSetDndStatePayload = PayloadData<{dnd: (prev: BesignerDndState) => Partial<BesignerDndState>}>
-export type BesignerSetCanvasSelectedPayload = PayloadData<{selected: BesignerCanvasSelectedElement}>
-export type BesignerSetCanvasHoveredPayload = PayloadData<{hovered: BesignerCanvasHoveredElement}>
+export type BesignerSetCanvasSelectedPayload = PayloadData<{selected: (prev: BesignerCanvasSelectedElement) => BesignerCanvasSelectedElement}>
+export type BesignerSetCanvasHoveredPayload = PayloadData<{hovered: (prev: BesignerCanvasHoveredElement) => BesignerCanvasHoveredElement}>
 
 export type CanvasUndoPayload = PayloadData<any>
 export type CanvasRedoPayload = PayloadData<any>

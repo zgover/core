@@ -130,7 +130,6 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
       setOpen((prev) => !prev)
     }, [selected, setOpen])
     const updateFilter = useDebouncedCallback((value?: string) => {
-      console.log('update filter value', value)
       if (value) {applyFilter(value)}
       else {clearFilter()}
     }, 750)

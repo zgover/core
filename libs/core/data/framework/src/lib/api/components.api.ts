@@ -64,10 +64,10 @@ export function getAllComponentsTemplateValues(
   return _getComponentsController(app)?.getAllComponentsTemplateValues()
 }
 
-export function getComponent(
+export function getComponent<P, T>(
   app: IAglynAppController,
   payload: ComponentGetPayload,
-): OrUndef<IAglynComponent> {
+): OrUndef<IAglynComponent<P, T>> {
   return _getComponentsController(app)?.getComponent(payload)
 }
 

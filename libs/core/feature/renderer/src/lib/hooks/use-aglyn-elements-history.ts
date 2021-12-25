@@ -21,7 +21,6 @@ import {
   type ModificationHistoryState,
 } from '@aglyn/core-data-framework'
 import {useStoreMap} from 'effector-react'
-import {useMemo} from 'react'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
@@ -33,14 +32,6 @@ export function useAglynElementHistory() {
   const {past, future} = useStoreMap(store, <T>(state: ModificationHistoryState<T>) => {
     return {past: state.past.length, future: state.future.length}
   })
-  return useMemo(
-    () => ({
-      undo,
-      redo,
-      past,
-      future,
-    }),
-    [undo, redo, past, future],
-  )
+  return [undo, redo, past, future]
 }
 export default useAglynElementHistory

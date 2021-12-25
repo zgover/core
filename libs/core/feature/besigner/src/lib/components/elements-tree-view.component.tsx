@@ -17,7 +17,7 @@
 
 import {
   CANVAS_ROOT_ELEMENT_ID,
-  ElementId,
+  type ElementId,
   setBesignerCanvasHovered,
   setBesignerCanvasSelected,
 } from '@aglyn/core-data-framework'
@@ -32,9 +32,9 @@ import {IconVariant} from '@aglyn/shared-data-brand'
 import {styled} from '@aglyn/shared-feature-themes'
 import {mdiChevronDown, mdiChevronRight, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isStrT} from '@aglyn/shared-util-guards'
-import MuiTreeItem, {TreeItemProps} from '@mui/lab/TreeItem'
-import MuiTreeView, {SingleSelectTreeViewProps} from '@mui/lab/TreeView'
-import {forwardRef, Fragment, useCallback, useMemo} from 'react'
+import MuiTreeItem, {type TreeItemProps} from '@mui/lab/TreeItem'
+import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
+import {forwardRef, Fragment, useCallback} from 'react'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
 
@@ -104,17 +104,24 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     const selectedId = selected?.$id
     const selectedIdHierarchy = useAglynCanvasElementHierarchy(selectedId)
 
-    const defaultExpanded = useMemo(
-      () => selectedIdHierarchy.filter((id) => id !== CANVAS_ROOT_ELEMENT_ID),
-      [selectedIdHierarchy],
-    )
+    const defaultExpanded = selectedIdHierarchy.filter((id) => id !== CANVAS_ROOT_ELEMENT_ID)
     const handleTreeItemSelect = useCallback((e, $id) => {
       console.log('handleTreeItemSelect $id', $id)
-      setBesignerCanvasSelected(getApp(), {selected: {$id}})
+      setBesignerCanvasSelected(getApp(), {
+        selected: (prev) => ({
+          ...prev,
+          $id,
+        }),
+      })
     }, [])
     const handleTreeItemFocus = useCallback((e, $id) => {
       console.log('handleTreeItemFocus $id', $id)
-      setBesignerCanvasHovered(getApp(), {hovered: {$id}})
+      setBesignerCanvasHovered(getApp(), {
+        hovered: (prev) => ({
+          ...prev,
+          $id,
+        }),
+      })
     }, [])
 
     return (

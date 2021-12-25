@@ -15,22 +15,20 @@
  * limitations under the License.
  */
 
-import type { ElementId } from '@aglyn/core-data-framework'
-import type { AnyProps } from '@aglyn/shared-data-types'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { useMemo } from 'react'
+import type {ElementId} from '@aglyn/core-data-framework'
+import type {AnyProps} from '@aglyn/shared-data-types'
+import {_isFnT} from '@aglyn/shared-util-guards'
 import useAglynComponentSchema from './use-aglyn-component-schema'
-import { useAglynElementData } from './use-aglyn-element-data'
+import {useAglynElementData} from './use-aglyn-element-data'
+
 
 export function useAglynElementResolvedProps<P extends AnyProps>($id: ElementId): P {
   const elementData = useAglynElementData($id)
   const schema = useAglynComponentSchema(elementData.componentId, elementData.bundleId)
   const resolveProps = schema?.renderFlags?.resolveProps
 
-  return useMemo(() => {
-    return (
-      (_isFnT(resolveProps) ? resolveProps.call(undefined, elementData) : elementData.props) || {}
-    )
-  }, [resolveProps, elementData]) as P
+  return (
+    (_isFnT(resolveProps) ? resolveProps.call(undefined, elementData) : elementData.props) || {}
+  ) as P
 }
 export default useAglynElementResolvedProps

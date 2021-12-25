@@ -177,7 +177,15 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
     const value = tab && _isEqualitySameType(tab, ...tabs.map((i) => i.id))
       ? tab : BesignerPanelTabFlag.ELEMENT_INFO
     const handleTabChange = useCallback((e, val) => {
-      setBesignerPanels(getApp(), {panelRight: {tab: hexadecimalToNumber(val)}})
+      setBesignerPanels(getApp(), {
+        panels: (panels) => ({
+          ...panels,
+          panelRight: {
+            ...panels.panelRight,
+            tab: hexadecimalToNumber(val),
+          },
+        }),
+      })
     }, [])
 
     return (

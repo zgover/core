@@ -24,9 +24,12 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {useCombinedRefs, useDynamicEffect} from '@aglyn/shared-ui-jsx'
-import {useDroppable} from '@dnd-kit/core'
-import {forwardRef, useCallback, useRef} from 'react'
-import {useCanvasRenderedElementRefs} from '../contexts/canvas-rendered-element-refs'
+import {useDraggable, useDroppable} from '@dnd-kit/core'
+import {forwardRef, MouseEvent, useCallback, useRef} from 'react'
+import {
+  CanvasElementRefEntry,
+  useCanvasRenderedElementRefs,
+} from '../contexts/canvas-rendered-element-refs'
 
 
 export interface ElementRendererComponentProps extends DefaultElementRendererComponentProps {
@@ -35,16 +38,18 @@ export interface ElementRendererComponentProps extends DefaultElementRendererCom
 
 const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const {$id, ...rest} = props
-    const localRef = useRef<Element>()
+    const {$id, rendererComponent, ...rest} = props
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const componentSchema = useAglynComponentSchema(componentId, bundleId)
     const {getApp} = useAglynAppContext()
 
     const {
-      setNodeRef: dropRef,
-    } = useDroppable({
+      setNodeRef: dragRef,
+      listeners,
+      attributes,
+      isDragging,
+    } = useDraggable({
       id: $id,
       data: {
         $id,
@@ -53,21 +58,28 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         hierarchy: componentSchema?.renderFlags?.hierarchy,
       },
     })
+    const {
+      setNodeRef: dropRef,
+    } = useDroppable({
+      id: $id,
+      disabled: Boolean(isDragging),
+      data: {
+        $id,
+        componentId,
+        bundleId,
+        hierarchy: componentSchema?.renderFlags?.hierarchy,
+      },
+    })
 
-    const handleMouseOver = useCallback((e) => {
-      e.stopPropagation()
-      setBesignerCanvasHovered(getApp(), {hovered: {$id}})
-    }, [$id])
 
-    const handleMouseLeave = useCallback((e) => {
-      // e.stopPropagation()
-      setBesignerCanvasHovered(getApp(), {hovered: null})
-    }, [])
+    const localRef = useRef<CanvasElementRefEntry>({
+      $id, element: null, dragHandle: {listeners, attributes}, isDragging,
+    })
+    const setLocalRef = useCallback((element: Element) => {
+      localRef.current.element = element
+      localRef.current.dragHandle = {listeners, attributes}
+    }, [listeners, attributes, isDragging])
 
-    const handleSelect = useCallback((e) => {
-      e.stopPropagation()
-      setBesignerCanvasSelected(getApp(), {selected: {$id}})
-    }, [$id])
 
     const {setElementRef, deleteElementRef} = useCanvasRenderedElementRefs()
     useDynamicEffect(() => {
@@ -83,9 +95,9 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
 
     return (
       <DefaultElementRendererComponent
-        ref={useCombinedRefs(ref, localRef, dropRef)}
+        ref={useCombinedRefs(ref, setLocalRef, dragRef, dropRef)}
         $id={$id}
-        elementRendererComponent={ElementRendererComponent}
+        rendererComponent={rendererComponent || ElementRendererComponent}
         onClick={handleSelect}
         onMouseOver={handleMouseOver}
         onMouseLeave={handleMouseLeave}
@@ -93,6 +105,31 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         {...rest}
       />
     )
+
+    function handleSelect(e: MouseEvent) {
+      e.stopPropagation()
+      setBesignerCanvasSelected(getApp(), {
+        selected: (prev) => ({
+          ...prev,
+          $id,
+        }),
+      })
+    }
+    function handleMouseOver(e: MouseEvent) {
+      e.stopPropagation()
+      setBesignerCanvasHovered(getApp(), {
+        hovered: (prev) => ({
+          ...prev,
+          $id,
+        }),
+      })
+    }
+    function handleMouseLeave(e: MouseEvent) {
+      e.stopPropagation()
+      setBesignerCanvasHovered(getApp(), {
+        hovered: (prev) => prev.$id === $id ? {} : prev,
+      })
+    }
   },
 )
 

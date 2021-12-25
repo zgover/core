@@ -27,7 +27,7 @@ import MuiTabPanel from '@mui/lab/TabPanel'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import MuiTab from '@mui/material/Tab'
-import React, {forwardRef, useCallback, useMemo} from 'react'
+import {forwardRef, useCallback, useMemo} from 'react'
 import {useAddElementCallback} from '../hooks/use-add-element-callback'
 import {useAglynBesignerStoreState} from '../hooks/use-aglyn-besigner-store-state'
 import {ElementsTreeViewComponent} from './elements-tree-view.component'
@@ -74,7 +74,15 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
     }, [tab])
 
     const handleTabChange = useCallback((e, val) => {
-      setBesignerPanels(getApp(), {panelRight: {tab: hexadecimalToNumber(val)}})
+      setBesignerPanels(getApp(), {
+        panels: (panels) => ({
+          ...panels,
+          panelLeft: {
+            ...panels.panelLeft,
+            tab: hexadecimalToNumber(val),
+          },
+        }),
+      })
     }, [])
 
     return (

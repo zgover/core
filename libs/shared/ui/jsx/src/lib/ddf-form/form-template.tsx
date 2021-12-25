@@ -48,7 +48,7 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(
               <FormControl margin="normal" fullWidth>
                 <Button
                   variant="outlined"
-                  onClick={onCancel}
+                  onClick={onReset}
                   disabled={submitting || validating}
                   fullWidth
                 >

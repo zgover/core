@@ -25,7 +25,7 @@ import {
 
 
 export interface ElementsComponentProps extends OverrideableComponentProps {
-  elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
+  rendererComponent?: ElementRendererComponentProps['rendererComponent']
   elements?: ComponentId[]
 }
 
@@ -33,20 +33,20 @@ const ElementsRendererComponent = forwardRef<any, ElementsComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       component: Component,
-      elementRendererComponent: renderer,
+      rendererComponent,
       elements,
       children,
       ...rest
     } = props
-    const ElementRendererComponentProp = renderer || ElementRendererComponent
+    const RendererComponent = rendererComponent || ElementRendererComponent
     return (
       <Component ref={ref} {...rest}>
         {children}
         {elements.map(($id) => (
-          <ElementRendererComponentProp
+          <RendererComponent
             key={$id}
             $id={$id}
-            elementRendererComponent={ElementRendererComponentProp}
+            rendererComponent={RendererComponent}
           />
         ))}
       </Component>

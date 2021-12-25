@@ -136,8 +136,9 @@
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-var-requires": "off",
         "no-fallthrough": "off",
-        "react-hooks/rules-of-hooks": "off",
-        "tsdoc/syntax": ["warn", {}]
+        "tsdoc/syntax": ["warn", {}],
+        "react-hooks/rules-of-hooks": "warn",
+        "react-hooks/exhaustive-deps": "warn"
       }
     },
     {

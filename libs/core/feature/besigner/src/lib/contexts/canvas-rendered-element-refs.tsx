@@ -16,13 +16,26 @@
  */
 
 import {type ElementId} from '@aglyn/core-data-framework'
-import {createContext, ReactNode, RefObject, useContext, useRef, useState} from 'react'
+import {useDraggable} from '@dnd-kit/core'
+import {createContext, type ReactNode, type RefObject, useContext, useRef, useState} from 'react'
 
+
+type UseDraggableReturnType = ReturnType<typeof useDraggable>
+export type ElementDragHandle = {
+  listeners: UseDraggableReturnType['listeners']
+  attributes: UseDraggableReturnType['attributes']
+}
+export type CanvasElementRefEntry = {
+  $id: ElementId
+  element: Element
+  dragHandle: ElementDragHandle
+  isDragging: boolean
+}
 
 export interface CanvasRenderedElementRefs {
   // elementRefs: RefObject<{ [$id: ElementId]: RefObject<Element> }>
-  getElementRef: ($id: ElementId) => RefObject<Element>
-  setElementRef: ($id: ElementId, ref: RefObject<Element>) => void
+  getElementRef: ($id: ElementId) => RefObject<CanvasElementRefEntry>
+  setElementRef: ($id: ElementId, ref: RefObject<CanvasElementRefEntry>) => void
   deleteElementRef: ($id: ElementId) => void
 }
 
@@ -53,15 +66,15 @@ export interface CanvasRenderedElementRefsComponentProps {
 
 function CanvasRenderedElementRefsComponent(props: CanvasRenderedElementRefsComponentProps) {
   const {children} = props
-  const elementRefs = useRef<{[$id: ElementId]: RefObject<Element>}>({})
+  const elementRefs = useRef<Record<ElementId, RefObject<CanvasElementRefEntry>>>({})
   const [context] = useState<CanvasRenderedElementRefs>(() => ({
-    getElementRef: ($id: ElementId): RefObject<Element> => {
+    getElementRef: ($id) => {
       return elementRefs.current[$id]
     },
-    deleteElementRef: ($id: ElementId): void => {
+    deleteElementRef: ($id): void => {
       delete elementRefs.current[$id]
     },
-    setElementRef: ($id: ElementId, ref: RefObject<Element>): void => {
+    setElementRef: ($id, ref): void => {
       elementRefs.current[$id] = ref
     },
   }))

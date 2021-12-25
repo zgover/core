@@ -16,56 +16,65 @@
  */
 
 import {ComponentId} from '@aglyn/core-data-framework'
-import {ReactIs} from '@aglyn/shared-ui-jsx'
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
+import Box from '@mui/material/Box'
+import clsx from 'clsx'
 import {ComponentType, forwardRef, HTMLAttributes, PropsWithoutRef, RefAttributes} from 'react'
-import {ElementDataProps, withAglynElementData} from '../hooks/with-aglyn-element-data'
+import useAglynElementComponent from '../hooks/use-aglyn-element-component'
+import useAglynElementData from '../hooks/use-aglyn-element-data'
+import useAglynElementResolvedProps from '../hooks/use-aglyn-element-resolved-props'
 import {ElementsRendererComponent} from './elements-renderer.component'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export interface ElementRendererComponentProps<T = any> extends HTMLAttributes<T> {
   $id: ComponentId
-  elementRendererComponent?: ComponentType<PropsWithoutRef<ElementRendererComponentProps<any>> & RefAttributes<any>>
+  rendererComponent?: ComponentType<PropsWithoutRef<ElementRendererComponentProps<any>> & RefAttributes<any>>
 }
 
-export type DecoratedElementRendererProps<T = any> = ElementRendererComponentProps<T> &
-  ElementDataProps
-
-const ElementRendererComponentRaw = forwardRef<any, DecoratedElementRendererProps>(
+const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       $id,
-      elemProps,
-      elementData,
-      component: Component,
-      elementRendererComponent: elementRendererComponentProp,
-      children,
+      rendererComponent,
+      children: childrenProp,
+      className: classNameProp,
       ...rest
     } = props
 
-    const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
+    const render = rendererComponent || ElementRendererComponent
+    const elements = useAglynElementData($id, 'elements')
+    const Component = useAglynElementComponent<any, any>($id)
+    const {children, className: classNameElem, ...elemProps} = useAglynElementResolvedProps($id)
+    const className = clsx(classNameProp, classNameElem)
 
-    return ReactIs.isValidElementType(Component) ? (
-      <Component ref={ref} {...elemProps} {...rest}>
+
+    return/* ReactIs.isValidElementType(Component) ?*/ (
+      <Box
+        ref={ref}
+        className={className}
+        component={Component}
+        {...elemProps}
+        {...rest}
+      >
         {children}
-        {!_isArrEmpty(elementData.elements || []) ? (
+        {childrenProp}
+        {!_isArrEmpty(elements || []) ? (
           <ElementsRendererComponent
-            elementRendererComponent={elementRendererComponent}
-            elements={elementData.elements}
+            rendererComponent={render}
+            elements={elements}
           />
         ) : null}
-      </Component>
-    ) : (
-      <>Error loading element component</>
-    )
+      </Box>
+    )/* : (
+     <>Error loading element component</>
+     )*/
   },
 )
 
-ElementRendererComponentRaw.displayName = 'Renderer.ElementRendererComponent'
-ElementRendererComponentRaw.defaultProps = {
+ElementRendererComponent.displayName = 'Renderer.ElementRendererComponent'
+ElementRendererComponent.defaultProps = {
   children: null,
 }
 
-export const ElementRendererComponent = withAglynElementData(ElementRendererComponentRaw)
-
+export {ElementRendererComponent}
 export default ElementRendererComponent
