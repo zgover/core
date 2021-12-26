@@ -21,19 +21,28 @@ import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useStoreMap} from 'effector-react'
 
 
-export const useAglynDndElementStatus = ($id: ElementId) => {
+export type AglynDndElementStatus = [
+  isActive: boolean,
+  isOver: boolean
+]
+
+export function useAglynDndElementStatus($id: ElementId): AglynDndElementStatus {
   const {getApp} = useAglynAppContext()
-  const app = getApp()
-  const dndStore = getBesignerStore(app, {store: 'dnd'})
+  const dndStore = getBesignerStore(getApp(), {store: 'dnd'})
   return useStoreMap({
     store: dndStore,
     keys: [$id],
     fn: (store, [$id]) => {
-      return {
-        isActive: $id && store.active?.data?.current?.$id === $id,
-        isOver: $id && store.over?.data?.current?.$id === $id,
-      }
+      // console.log('useAglynDndElementStatus store', store)
+
+      return [
+        Boolean($id && store.active?.$id === $id),
+        Boolean($id && store.over?.$id === $id),
+      ]
     },
+    // updateFilter: (update, current) => {
+    //   return !deepEqual(current, update, {strict: true})
+    // },
   })
 }
 

@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-import {NoSsr} from '@mui/material'
-import useAglynCanvasHovered from '../hooks/use-aglyn-canvas-hovered'
-import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 import ElementPopperComponent from './element-popper.component'
 
 
@@ -29,25 +26,16 @@ function ElementOverlayComponent(props: ViewportPoppersComponentProps) {
   const {
     ...rest
   } = props
-  const selected = useAglynCanvasSelected()
-  const hovered = useAglynCanvasHovered()
 
   return (
-    <NoSsr defer>
+    <>
       <ElementPopperComponent
-        $id={selected?.$id}
-        data-aglyn-overlay="selected"
-        variant="overlaySelected"
+        variant="selectedOverlay"
       />
       <ElementPopperComponent
-        $id={hovered?.$id}
-        data-aglyn-overlay="hovered"
-        variant="overlayHovered"
-        {...(!selected?.$id || selected?.$id !== hovered?.$id ? {} : {
-          open: false,
-        })}
+        variant="hoveredOverlay"
       />
-    </NoSsr>
+    </>
   )
 }
 

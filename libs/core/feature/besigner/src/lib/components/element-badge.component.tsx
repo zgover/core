@@ -15,184 +15,18 @@
  * limitations under the License.
  */
 
-import {
-  BesignerPanelTabFlag,
-  duplicateCanvasElement,
-  type ElementId,
-  isRootElementId,
-  setBesignerCanvasSelected,
-  setBesignerPanels,
-} from '@aglyn/core-data-framework'
-import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
-import {IconVariant} from '@aglyn/shared-data-brand'
+import {type ElementId} from '@aglyn/core-data-framework'
 import {
   PopperStyledArrowComponent,
   PopperStyledComponent,
   type PopperStyledComponentProps,
-  SrOnlyComponent,
 } from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type  MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {VirtualElement} from '@aglyn/shared-util-dom'
-import Button, {type ButtonProps} from '@mui/material/Button'
-import ButtonGroup, {type ButtonGroupProps} from '@mui/material/ButtonGroup'
-import Tooltip from '@mui/material/Tooltip'
 import Zoom from '@mui/material/Zoom'
-import {type ChangeEvent, forwardRef, useCallback, useState} from 'react'
-import {CanvasRenderedElementRefsConsumer} from '../contexts/canvas-rendered-element-refs'
+import {forwardRef, useState} from 'react'
 import useAglynCanvasElementStatus from '../hooks/use-aglyn-canvas-element-status'
-import {useDeleteElementCallback} from '../hooks/use-delete-element-callback'
+import {ElementOverlayBadgeButtonsComponent} from './element-overlay-badge-buttons.component'
 
-
-interface ElementBadgeButtonGroupProps extends ButtonGroupProps {
-  $id: ElementId
-  anchorEl?: VirtualElement
-}
-
-const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
-  function RefRenderFn(props, ref) {
-    const {$id, anchorEl, ...rest} = props
-
-    const {getApp} = useAglynAppContext()
-    const deleteElementCallback = useDeleteElementCallback({$id})
-    const parentId = useAglynElementData($id, 'parentId') || null
-
-    // const style = {
-    //   transform: CSS.Translate.toString(transform),
-    // }
-
-    const handleDeleteClick = useCallback((e: ChangeEvent<unknown>) => {
-      deleteElementCallback(e)
-    }, [deleteElementCallback])
-
-    const handleDuplicateClick = useCallback((e: ChangeEvent<unknown>) => {
-      duplicateCanvasElement(getApp(), {$id})
-    }, [$id, getApp])
-    const handleModifyClick = useCallback((e: ChangeEvent<unknown>) => {
-      setBesignerPanels(getApp(), {
-        panels: (panels) => ({
-          ...panels,
-          panelRight: {
-            ...panels.panelRight,
-            toggled: true,
-            tab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
-          },
-        }),
-      })
-    }, [$id, getApp])
-    const handleSelectParentClick = useCallback((e: ChangeEvent<unknown>) => {
-      setBesignerCanvasSelected(getApp(), {
-        selected: (prev) => ({
-          ...prev,
-          $id: parentId,
-        }),
-      })
-    }, [parentId, getApp])
-
-
-    return (
-      <CanvasRenderedElementRefsConsumer>
-        {({getElementRef}) => {
-          const current = getElementRef($id)?.current,
-            dragHandle = current?.dragHandle
-
-
-          const buttons = [
-            ...(isRootElementId($id) ? [] : [
-              {
-                id: 'drag-element',
-                tooltipProps: {
-                  title: 'Drag',
-                },
-                srOnlyProps: {
-                  children: 'drag',
-                },
-                buttonProps: {
-                  // style,
-                  ...dragHandle?.attributes,
-                  ...dragHandle?.listeners,
-                } as ButtonProps,
-                svgPathIconProps: {
-                  path: IconVariant.MODIFY_DRAG,
-                  color: 'secondary',
-                } as MdiIconProps,
-              },
-              {
-                id: 'duplicate-element',
-                tooltipProps: {
-                  title: 'Duplicate',
-                },
-                srOnlyProps: {
-                  children: 'duplicate',
-                },
-                buttonProps: {
-                  // disabled: yes(disableZoomResetButton),
-                  onClick: handleDuplicateClick,
-                },
-                svgPathIconProps: {
-                  path: IconVariant.MODIFY_DUPLICATE,
-                },
-              },
-            ]),
-            {
-              id: 'modify-props',
-              tooltipProps: {
-                title: 'Modify',
-              },
-              srOnlyProps: {
-                children: 'modify',
-              },
-              buttonProps: {
-                // disabled: yes(disableZoomResetButton),
-                onClick: handleModifyClick,
-              },
-              svgPathIconProps: {
-                path: IconVariant.MODIFY_EDIT,
-              },
-            },
-            ...(!parentId) ? [] : [
-              {
-                id: 'select-parent',
-                tooltipProps: {
-                  title: 'Select parent',
-                },
-                srOnlyProps: {
-                  children: 'select parent',
-                },
-                buttonProps: {
-                  disabled: !parentId || isRootElementId(parentId),
-                  onClick: handleSelectParentClick,
-                },
-                svgPathIconProps: {
-                  path: IconVariant.SELECT_PARENT,
-                },
-              },
-            ],
-          ].filter(i => i && !i.buttonProps.disabled)
-
-          return (
-            <ButtonGroup
-              ref={ref}
-              variant="contained"
-              color="primary"
-              aria-label="element controls"
-              sx={{boxShadow: 4}}
-              {...rest}
-            >
-              {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
-                <Tooltip key={id} {...tooltipProps}>
-                  <Button {...buttonProps}>
-                    <MdiIcon fontSize="small" {...svgPathIconProps} />
-                    <SrOnlyComponent component="span" {...srOnlyProps} />
-                  </Button>
-                </Tooltip>
-              ))}
-            </ButtonGroup>
-          )
-        }}
-      </CanvasRenderedElementRefsConsumer>
-    )
-  },
-)
 
 export interface ElementBadgeComponentProps extends Partial<PopperStyledComponentProps> {
   $id: ElementId
@@ -243,8 +77,8 @@ const ElementBadgeComponent = forwardRef<any, ElementBadgeComponentProps>(
         disableArrow={disableArrow}
         modifiers={modifiers}
         anchorEl={anchorEl}
-        open={Boolean(isSelfSelected)}
-        // keepMounted
+        open={Boolean(isSelfSelected && anchorEl)}
+        keepMounted
         disablePortal
         transition
         arrowGap={8}
@@ -254,7 +88,7 @@ const ElementBadgeComponent = forwardRef<any, ElementBadgeComponentProps>(
           <Zoom {...TransitionProps}>
             <div>
               {!disableArrow && <PopperStyledArrowComponent ref={setArrowRef} />}
-              <ElementBadgeButtonGroup anchorEl={anchorEl} $id={$id} />
+              <ElementOverlayBadgeButtonsComponent $id={$id} />
             </div>
           </Zoom>
         )}

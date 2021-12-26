@@ -21,6 +21,7 @@ import {forwardRef, type SVGAttributes} from 'react'
 
 
 export interface MdiIconProps extends MuiSvgIconProps {
+  path?: string
   PathProps?: SVGAttributes<SVGPathElement>
 }
 

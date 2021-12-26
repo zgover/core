@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { AglynComponentsContext } from '@aglyn/core-feature-renderer'
-import { ElementType, Fragment, ReactNode, useCallback, useMemo, useState } from 'react'
+import {AglynComponentsContext} from '@aglyn/core-feature-renderer'
+import {ElementType, Fragment, ReactNode, useCallback, useState} from 'react'
 import {
   ComponentsDrawerComponent,
   ComponentsDrawerComponentProps,
@@ -28,6 +28,7 @@ import {
   ElementDrawerOptions,
 } from './element-drawer-context'
 
+
 export interface ComponentsDrawerContextProviderProps
   extends Partial<ComponentsDrawerComponentProps> {
   defaultOptions?: ElementDrawerOptions
@@ -36,29 +37,29 @@ export interface ComponentsDrawerContextProviderProps
 }
 
 function ComponentsDrawerContextProvider(props: ComponentsDrawerContextProviderProps) {
-  const { children, defaultOptions, component, ...rest } = props
+  const {children, defaultOptions, component, ...rest} = props
   const Component = component || ComponentsDrawerComponent
-  const [options, setOptions] = useState(() => ({ ...DEFAULT_OPTIONS, ...defaultOptions }))
+  const [options, setOptions] = useState(() => ({...DEFAULT_OPTIONS, ...defaultOptions}))
   const [resolveReject, setResolveReject] = useState([])
   const [resolve, reject] = resolveReject
-  const isOpen = useMemo(() => resolveReject.length === 2, [resolveReject])
+  const isOpen = resolveReject.length === 2
 
   const handleClose = useCallback((e, reason) => {
     setResolveReject([])
   }, [])
   const handleCancel = useCallback(
     (e, reason) => {
-      reject({ reason })
+      reject({reason})
       handleClose(e, reason)
     },
-    [reject, handleClose]
+    [reject, handleClose],
   )
   const handleConfirm = useCallback(
     (e, item) => {
-      resolve({ option: item })
+      resolve({option: item})
       handleClose(e, 'resolved')
     },
-    [resolve, handleClose, resolveReject]
+    [resolve, handleClose, resolveReject],
   )
 
   const elementDrawer = useCallback(
@@ -68,16 +69,16 @@ function ComponentsDrawerContextProvider(props: ComponentsDrawerContextProviderP
         setResolveReject([resolve, reject])
       })
     },
-    [defaultOptions]
+    [defaultOptions],
   )
-
-  const context = useMemo(() => ({ elementDrawer }), [elementDrawer])
 
   return (
     <Fragment>
-      <ElementDrawerContext.Provider value={context}>{children}</ElementDrawerContext.Provider>
+      <ElementDrawerContext.Provider value={{elementDrawer}}>
+        {children}
+      </ElementDrawerContext.Provider>
       <AglynComponentsContext.Consumer>
-        {({ templateBlocks }) => (
+        {({templateBlocks}) => (
           <Component
             open={isOpen}
             options={options}
@@ -97,5 +98,5 @@ ComponentsDrawerContextProvider.defaultProps = {
   defaultOptions: {},
 }
 
-export { ComponentsDrawerContextProvider }
+export {ComponentsDrawerContextProvider}
 export default ComponentsDrawerContextProvider

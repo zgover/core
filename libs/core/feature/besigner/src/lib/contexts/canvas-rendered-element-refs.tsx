@@ -17,7 +17,15 @@
 
 import {type ElementId} from '@aglyn/core-data-framework'
 import {useDraggable} from '@dnd-kit/core'
-import {createContext, type ReactNode, type RefObject, useContext, useRef, useState} from 'react'
+import {
+  createContext,
+  type MutableRefObject,
+  type ReactNode,
+  useContext,
+  useRef,
+  useState,
+} from 'react'
+import {DragElementWrapper} from 'react-dnd'
 
 
 type UseDraggableReturnType = ReturnType<typeof useDraggable>
@@ -27,26 +35,18 @@ export type ElementDragHandle = {
 }
 export type CanvasElementRefEntry = {
   $id: ElementId
-  element: Element
-  dragHandle: ElementDragHandle
-  isDragging: boolean
+  element: MutableRefObject<Element>
+  dragHandle: DragElementWrapper<any>
 }
 
 export interface CanvasRenderedElementRefs {
   // elementRefs: RefObject<{ [$id: ElementId]: RefObject<Element> }>
-  getElementRef: ($id: ElementId) => RefObject<CanvasElementRefEntry>
-  setElementRef: ($id: ElementId, ref: RefObject<CanvasElementRefEntry>) => void
+  getElementRef: ($id: ElementId) => CanvasElementRefEntry
+  setElementRef: ($id: ElementId, ref: CanvasElementRefEntry) => void
   deleteElementRef: ($id: ElementId) => void
 }
 
-export const CanvasRenderedElementRefsContext = createContext<CanvasRenderedElementRefs>({
-  // elementRefs: {current: {}},
-  getElementRef() {
-    return {current: null}
-  },
-  setElementRef() {},
-  deleteElementRef() {},
-})
+export const CanvasRenderedElementRefsContext = createContext<CanvasRenderedElementRefs>(null)
 CanvasRenderedElementRefsContext.displayName = 'CanvasRenderedElementRefsContext'
 
 export const {
@@ -66,7 +66,7 @@ export interface CanvasRenderedElementRefsComponentProps {
 
 function CanvasRenderedElementRefsComponent(props: CanvasRenderedElementRefsComponentProps) {
   const {children} = props
-  const elementRefs = useRef<Record<ElementId, RefObject<CanvasElementRefEntry>>>({})
+  const elementRefs = useRef<Record<ElementId, CanvasElementRefEntry>>({})
   const [context] = useState<CanvasRenderedElementRefs>(() => ({
     getElementRef: ($id) => {
       return elementRefs.current[$id]

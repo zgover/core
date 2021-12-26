@@ -129,20 +129,22 @@ export const handleCanvasMoveElement = (
   const parentElements = response[parentId].elements || []
 
   if (parentId === current.parentId) {
+    console.log('reordoering')
     response[parentId] = {
       ...response[parentId],
       elements: arrayReorder(
         parentElements,
         parentElements.indexOf($id),
-        index === -1 ? parentElements.length : index,
+        index === -1 ? parentElements.length - 1 : index,
       ),
     }
   }
   else {
+    console.log('moving')
     response[parentId] = {
       ...response[parentId],
       elements: arrayAddAtIndex(
-        index === -1 ? parentElements.length : index,
+        index === -1 ? parentElements.length - 1 : index,
         parentElements,
         $id,
         {copy: true},

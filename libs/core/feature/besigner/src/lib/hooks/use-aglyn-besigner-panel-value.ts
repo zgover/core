@@ -17,18 +17,17 @@
 
 import {BesignerPanelsState} from '@aglyn/core-data-framework'
 import {KeyOf} from '@aglyn/shared-data-types'
-import {useMemo} from 'react'
 import {useAglynBesignerStoreState} from './use-aglyn-besigner-store-state'
 
 
-export const useAglynBesignerPanelValue = <P extends KeyOf<BesignerPanelsState>, K extends KeyOf<BesignerPanelsState[P]>>(
+export function useAglynBesignerPanelValue<P extends KeyOf<BesignerPanelsState>, K extends KeyOf<BesignerPanelsState[P]>>(
   item: P,
   key: K,
-): BesignerPanelsState[P][K] => {
+): BesignerPanelsState[P][K] {
   const panel = useAglynBesignerStoreState('panels', item)
   const {[key]: value} = {...panel}
 
-  return useMemo(() => value, [value, item, key])
+  return value
 }
 
 export default useAglynBesignerPanelValue

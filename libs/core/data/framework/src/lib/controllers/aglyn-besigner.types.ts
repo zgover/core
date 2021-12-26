@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import type {ViewRect} from '@aglyn/shared-util-dom'
 import type {LogLevelString} from '@aglyn/shared-util-logger'
 import type {
   BesignerPanelTabFlag,
@@ -81,28 +80,8 @@ export type BesignerDndElementBaseData<T extends DndDragSourceTypeFlag | DndDrop
   bundleId?: BundleUId
   hierarchy?: AglynComponentHierarchy
 }
-export type BesignerDndElementActive = {
-  id: string
-  data: {current?: BesignerDndElementBaseData<DndDragSourceTypeFlag>}
-  disabled?: boolean
-  rect: {
-    current?: {
-      initial: ViewRect | null;
-      translated: ViewRect | null;
-    }
-  }
-}
-export type BesignerDndElementOver = {
-  id: string
-  data: {current?: BesignerDndElementBaseData<DndDropLinealTypeFlag>}
-  disabled?: boolean
-  rect: {
-    current?: {
-      initial: ViewRect | null;
-      translated: ViewRect | null;
-    }
-  }
-}
+export type BesignerDndElementActive = BesignerDndElementBaseData<DndDragSourceTypeFlag>
+export type BesignerDndElementOver = BesignerDndElementBaseData<DndDropLinealTypeFlag>
 export type BesignerDndState = {
   active?: BesignerDndElementActive
   over?: BesignerDndElementOver

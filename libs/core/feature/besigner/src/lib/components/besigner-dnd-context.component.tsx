@@ -15,73 +15,22 @@
  * limitations under the License.
  */
 
-import {
-  type BesignerDndElementActive,
-  type BesignerDndElementOver,
-  setBesignerDndState,
-} from '@aglyn/core-data-framework'
-import {useAglynAppContext, useAglynCanvasApiEvents} from '@aglyn/core-feature-renderer'
-import {
-  DndContext,
-  type DndContextProps,
-  type DragCancelEvent,
-  type DragEndEvent,
-  type DragOverEvent,
-  type DragStartEvent,
-} from '@dnd-kit/core'
-import {type ReactNode, useCallback} from 'react'
+import {type ReactNode} from 'react'
+import {DndProvider, type DndProviderProps} from 'react-dnd'
+import {HTML5Backend} from 'react-dnd-html5-backend'
 
 
-export interface BesignerDndContextProps extends DndContextProps {
+export type BesignerDndContextProps<T, U> = DndProviderProps<T, U> & {
   children?: ReactNode
 }
 
-const BesignerDndContext = (props: BesignerDndContextProps) => {
+function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
   const {children, ...rest} = props
 
-  const {moveElement} = useAglynCanvasApiEvents()
-  const {getApp} = useAglynAppContext()
-
-  const handleDragStart = useCallback((e: DragStartEvent) => {
-    console.log('drag start', e)
-    if (e.active?.data) {
-      const active = e.active as unknown as BesignerDndElementActive
-      setBesignerDndState(getApp(), {dnd: () => ({active})})
-    }
-  }, [getApp])
-  const handleDragOver = useCallback((e: DragOverEvent) => {
-    console.log('drag over', e)
-    const over = e.over as unknown as BesignerDndElementOver
-    setBesignerDndState(getApp(), {dnd: (prev) => ({...prev, over})})
-  }, [getApp])
-  const handleDragEnd = useCallback((e: DragEndEvent) => {
-    console.log('drag end', e)
-    const active = e.active?.data?.current
-    const over = e.over?.data?.current
-    setBesignerDndState(getApp(), {dnd: () => ({})})
-    if (over?.$id && active?.$id !== over.$id) {
-      moveElement({
-        $id: active.$id,
-        parentId: over.$id,
-        index: -1,
-      })
-    }
-  }, [getApp, moveElement])
-  const handleDragCancel = useCallback((e: DragCancelEvent) => {
-    console.log('drag cancel', e)
-    setBesignerDndState(getApp(), {dnd: () => ({})})
-  }, [getApp])
-
   return (
-    <DndContext
-      onDragStart={handleDragStart}
-      onDragMove={handleDragOver}
-      onDragEnd={handleDragEnd}
-      onDragCancel={handleDragCancel}
-      {...rest}
-    >
+    <DndProvider backend={HTML5Backend} {...rest}>
       {children}
-    </DndContext>
+    </DndProvider>
   )
 }
 BesignerDndContext.displayName = 'BesignerDndContext'

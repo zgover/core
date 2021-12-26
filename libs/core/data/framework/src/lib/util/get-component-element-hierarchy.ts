@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-import { yes } from '@aglyn/shared-util-tools'
-import { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
+import {yes} from '@aglyn/shared-util-tools'
+import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import {
   AglynComponentElementDataNormalizedMap,
   AglynComponentElementHierarchy,
   ElementId,
 } from '../types'
+import isRootElementId from './is-root-element-id'
 
 
 export function getComponentElementHierarchy<T extends ElementId>(
@@ -31,7 +32,7 @@ export function getComponentElementHierarchy<T extends ElementId>(
   const hierarchy = [CANVAS_ROOT_ELEMENT_ID]
 
   let currentId: ElementId = $id
-  while (yes(currentId) && currentId !== CANVAS_ROOT_ELEMENT_ID) {
+  while (yes(currentId) && !isRootElementId(currentId)) {
     hierarchy.splice(1, 0, currentId)
     currentId = elements[currentId]?.parentId
   }

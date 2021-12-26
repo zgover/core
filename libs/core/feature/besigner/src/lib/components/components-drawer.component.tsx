@@ -31,7 +31,7 @@ import {mdiClose, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import {forwardRef, MouseEvent, useCallback, useMemo} from 'react'
+import {forwardRef, MouseEvent, useCallback} from 'react'
 import {ElementDrawerOptions} from '../contexts/element-drawer-context'
 
 
@@ -138,7 +138,7 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
       [onConfirm],
     )
 
-    const appBarLeft = useMemo(() => (
+    const appBarLeft = (
       <>
         <IconButton color="inherit" edge="start" onClick={handleDrawerCancel} sx={{mr: 2}}>
           <MdiIcon path={mdiClose.path} />
@@ -148,13 +148,13 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
           {title}
         </AppBarTitle>
       </>
-    ), [handleDrawerCancel, title])
+    )
 
-    const appBarRight = useMemo(() => (
+    const appBarRight = (
       <Button color="inherit" onClick={handleDrawerCancel} sx={{mr: -1.2}}>
         Cancel
       </Button>
-    ), [handleDrawerCancel])
+    )
 
     const renderItemContent = useCallback(
       (item) => (

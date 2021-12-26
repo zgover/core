@@ -35,6 +35,7 @@ import {_isStrT} from '@aglyn/shared-util-guards'
 import MuiTreeItem, {type TreeItemProps} from '@mui/lab/TreeItem'
 import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
 import {forwardRef, Fragment, useCallback} from 'react'
+import isRootElementId from '../../../../../data/framework/src/lib/util/is-root-element-id'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
 
@@ -104,7 +105,7 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     const selectedId = selected?.$id
     const selectedIdHierarchy = useAglynCanvasElementHierarchy(selectedId)
 
-    const defaultExpanded = selectedIdHierarchy.filter((id) => id !== CANVAS_ROOT_ELEMENT_ID)
+    const defaultExpanded = selectedIdHierarchy.filter(($id) => !isRootElementId($id))
     const handleTreeItemSelect = useCallback((e, $id) => {
       console.log('handleTreeItemSelect $id', $id)
       setBesignerCanvasSelected(getApp(), {

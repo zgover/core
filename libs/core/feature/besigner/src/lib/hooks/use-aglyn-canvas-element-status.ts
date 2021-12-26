@@ -24,7 +24,6 @@ import {
 } from '@aglyn/core-data-framework'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {Conditional} from '@aglyn/shared-data-types'
-import {deepEqual} from '@aglyn/shared-util-vendor'
 import {useStoreMap} from 'effector-react'
 
 
@@ -52,23 +51,22 @@ export function useAglynCanvasElementStatus<T extends boolean>(
     keys: [$id, includeChildStatus, getApp],
     fn: (store, [$id, includeChildStatus, getApp]) => {
       const response: AglynCanvasElementStatus<T> = {
-        isSelfHovered: $id && store.hovered?.$id === $id,
-        isSelfSelected: $id && store.selected?.$id === $id,
+        isSelfHovered: Boolean($id && store.hovered?.$id === $id),
+        isSelfSelected: Boolean($id && store.selected?.$id === $id),
       }
+      if (!includeChildStatus) return response
 
-      if (includeChildStatus) {
-        const elements = getCanvasNormalizedElementsStore(getApp()).getState()
-        const selectedHierarchy = getComponentElementHierarchy(store?.selected?.$id, elements)
-        const hoverHierarchy = getComponentElementHierarchy(store?.hovered?.$id, elements)
-        response['isChildSelected'] = $id && checkHierarchy(selectedHierarchy, $id)
-        response['isChildHovered'] = $id && checkHierarchy(hoverHierarchy, $id)
-      }
+      const elements = getCanvasNormalizedElementsStore(getApp()).getState()
+      const selectedHierarchy = getComponentElementHierarchy(store?.selected?.$id, elements)
+      const hoverHierarchy = getComponentElementHierarchy(store?.hovered?.$id, elements)
+      response['isChildSelected'] = Boolean($id && checkHierarchy(selectedHierarchy, $id))
+      response['isChildHovered'] = Boolean($id && checkHierarchy(hoverHierarchy, $id))
 
       return response
     },
-    updateFilter: (update, current) => {
-      return !deepEqual(current, update, {strict: true})
-    },
+    // updateFilter: (update, current) => {
+    //   return !deepEqual(current, update, {strict: true})
+    // },
   })
 
   function checkHierarchy(v: string[], $id: ElementId) {

@@ -15,25 +15,24 @@
  * limitations under the License.
  */
 
-import { ReactNode, useMemo } from 'react'
-import { useAglynComponentTemplateBlocks } from '../hooks/use-aglyn-component-templates'
-import { AglynComponentsContext } from './aglyn-components-context'
+import {ReactNode} from 'react'
+import {useAglynComponentTemplateBlocks} from '../hooks/use-aglyn-component-templates'
+import {AglynComponentsContext} from './aglyn-components-context'
+
 
 export interface ElementComponentsContextProviderProps {
   children?: ReactNode
 }
 
 export function ElementComponentsContextProvider(props: ElementComponentsContextProviderProps) {
-  const { children } = props
+  const {children} = props
   const templateBlocks = useAglynComponentTemplateBlocks()
-  const ctx = useMemo(
-    () => ({
-      templateBlocks: templateBlocks,
-    }),
-    [templateBlocks]
-  )
 
-  return <AglynComponentsContext.Provider value={ctx}>{children}</AglynComponentsContext.Provider>
+  return (
+    <AglynComponentsContext.Provider value={{templateBlocks}}>
+      {children}
+    </AglynComponentsContext.Provider>
+  )
 }
 ElementComponentsContextProvider.displayName = 'ElementComponentsContextProvider'
 ElementComponentsContextProvider.defaultProps = {

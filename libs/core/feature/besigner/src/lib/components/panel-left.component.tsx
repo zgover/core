@@ -27,7 +27,7 @@ import MuiTabPanel from '@mui/lab/TabPanel'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import MuiTab from '@mui/material/Tab'
-import {forwardRef, useCallback, useMemo} from 'react'
+import {forwardRef, useCallback} from 'react'
 import {useAddElementCallback} from '../hooks/use-add-element-callback'
 import {useAglynBesignerStoreState} from '../hooks/use-aglyn-besigner-store-state'
 import {ElementsTreeViewComponent} from './elements-tree-view.component'
@@ -68,10 +68,8 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
 
     const {getApp} = useAglynAppContext()
     const {toggled, tab, size} = useAglynBesignerStoreState('panels', 'panelLeft') || {}
-    const value = useMemo(() => {
-      return tab && _isEqualitySameType(tab, ...tabs.map((i) => i.id))
-        ? tab : BesignerPanelTabFlag.ELEMENTS_TREE
-    }, [tab])
+    const value = tab && _isEqualitySameType(tab, ...tabs.map((i) => i.id))
+      ? tab : BesignerPanelTabFlag.ELEMENTS_TREE
 
     const handleTabChange = useCallback((e, val) => {
       setBesignerPanels(getApp(), {

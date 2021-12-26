@@ -15,10 +15,18 @@
  * limitations under the License.
  */
 
-import Box, {BoxProps} from '@mui/material/Box'
 import {styled, visuallyHidden} from '@aglyn/shared-feature-themes'
+import Box, {BoxProps} from '@mui/material/Box'
 
-export const SrOnlyComponent = styled(Box)<BoxProps>({
+
+export interface SrOnlyComponentProps extends BoxProps {
+
+}
+
+export const SrOnlyComponent = styled(Box, {
+  name: 'AglynSrOnly'
+})<SrOnlyComponentProps>({
   ...visuallyHidden
 })
+SrOnlyComponent.displayName = 'SrOnlyComponent'
 export default SrOnlyComponent
