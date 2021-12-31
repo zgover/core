@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { styled } from '@aglyn/shared-feature-themes'
-import { AppLink, AppLinkProps } from '@aglyn/shared-ui-jsx'
+import {styled} from '@aglyn/shared-feature-themes'
+import {AppLink, type AppLinkProps} from '@aglyn/shared-ui-jsx'
 import Typography from '@mui/material/Typography'
-import React, { forwardRef, ReactNode } from 'react'
-import { BackgroundImage, BackgroundImageProps } from '../components/BackgroundImage'
+import {forwardRef, type ReactNode} from 'react'
+import {BackgroundImage, type BackgroundImageProps} from '../components/BackgroundImage'
 
 
 const StyledBackgroundImage = styled(BackgroundImage, {
@@ -80,5 +80,5 @@ const PromoSectionView = forwardRef<any, PromoSectionViewProps>(
 )
 
 PromoSectionView.displayName = 'PromoSectionView'
-export { PromoSectionView }
+export {PromoSectionView}
 export default PromoSectionView

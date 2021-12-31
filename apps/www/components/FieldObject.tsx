@@ -16,9 +16,8 @@
  */
 
 import {DoD} from '@aglyn/shared-data-types'
-import {mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import React from 'react'
-import MdiIcon from '../../../libs/shared/ui/mdi-jsx/src/lib/components/mdi-icon'
+import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
+import {useCallback} from 'react'
 import {Components, FieldPreset} from '../lib/input-fields'
 import FormFields, {Props as FormFieldsProps} from './FormFields'
 
@@ -77,7 +76,7 @@ interface ObjectPropertyProps extends Omit<FormFieldsProps, 'items'> {
 function FieldObject(props: Props) {
   const {value, onChange, ...rest} = props
 
-  const handleAddProperty = React.useCallback((e) => {
+  const handleAddProperty = useCallback((e) => {
     // setFields(prev => [...prev, emptyObjectProperty(prev.length)])
   }, [])
 

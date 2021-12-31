@@ -64,7 +64,6 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
         leafComponent={leaf}
         onMouseOver={handleOnMouseOver}
         onMouseDown={handleOnMouseDown}
-        data-aglyn-element-type="element"
         data-aglyn-element-id={$id}
         data-aglyn-element-component={componentId}
         data-aglyn-element-bundle={bundleId}

@@ -15,26 +15,13 @@
  * limitations under the License.
  */
 
-import {LINK_PREF, LINK_PRIORITY, META_PREF} from '@aglyn/shared-data-brand'
-import {createEmotionCache, createEmotionServer, EmotionCache} from '@aglyn/shared-feature-themes'
-import {makeLinkElements, makeMetaElements} from '@aglyn/shared-ui-jsx'
-import {getDisplayName} from '@aglyn/shared-util-tools'
-import Document from 'next/document'
-import NextDocument, {
-  DocumentContext,
-  DocumentInitialProps,
-  Head,
-  Html,
-  Main,
-  NextScript,
-} from 'next/document'
-import {Children} from 'react'
+import {
+  NextEmotionDocumentComponent,
+  type NextEmotionDocumentComponentProps,
+} from '@aglyn/shared-ui-next'
 
 
-export type LangParam = {lang?: string}
-export type InitPropsResponse = Promise<DocumentInitialProps & LangParam>
-
-export interface _DocumentProps extends LangParam {}
+export interface _DocumentProps extends NextEmotionDocumentComponentProps {}
 
 /**
  * Document component handles the initial `document` markup and
@@ -69,73 +56,8 @@ export interface _DocumentProps extends LangParam {}
  * @extends {NextDocument<P>}
  * @template P
  */
-export default class _Document<P extends _DocumentProps> extends Document<P> {
-
+class _Document<P extends _DocumentProps> extends NextEmotionDocumentComponent<P> {
   static displayName = '_Document'
-
-  /**
-   * Returns the context object with the addition of `renderPage`
-   *
-   * `renderPage` callback inside {DocumentContext} executes `React`
-   * rendering logic synchronously to support server-rendering wrappers
-   *
-   * @param {DocumentContext} ctx
-   * @returns {InitPropsResponse}
-   */
-  static async getInitialProps(ctx: DocumentContext): InitPropsResponse {
-    const originalRenderPage = ctx.renderPage
-    const cache: EmotionCache = createEmotionCache()
-    const {extractCriticalToChunks} = createEmotionServer(cache)
-
-    ctx.renderPage = () =>
-      originalRenderPage({
-        enhanceApp: (App: any) => {
-          const displayName = `EnhancedApp(${getDisplayName(App)})`
-          const component = (props) => (
-            <App emotionCache={cache} {...props} />
-          )
-          component.displayName = displayName
-          return component
-        },
-      })
-
-    const initialProps = await NextDocument.getInitialProps(ctx)
-    const emotionStyles = extractCriticalToChunks(initialProps.html)
-    const emotionStyleTags = emotionStyles.styles.map((style) => (
-      <style
-        key={style.key}
-        data-emotion={`${style.key} ${style.ids.join(' ')}`}
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{__html: style.css}}
-      />
-    ))
-
-    return {
-      ...initialProps,
-      lang: ctx.query.lang as string || 'en',
-      // Styles fragment is rendered after the app and page rendering finish.
-      styles: [
-        ...Children.toArray(initialProps.styles),
-        ...emotionStyleTags,
-      ],
-    }
-  }
-
-  public render(): JSX.Element {
-    const {lang} = this.props
-    return (
-      <Html lang={lang}>
-        <Head>
-          <meta charSet="utf-8" />
-          {makeLinkElements(LINK_PRIORITY)}
-          {makeMetaElements(META_PREF)}
-          {makeLinkElements(LINK_PREF)}
-        </Head>
-        <body>
-        <Main />
-        <NextScript />
-        </body>
-      </Html>
-    )
-  }
 }
+
+export default _Document

@@ -15,17 +15,20 @@
  * limitations under the License.
  */
 
-import { styled, withStyles } from '@aglyn/shared-feature-themes'
-import MuiDialog, { DialogProps as MuiDialogProps } from '@mui/material/Dialog'
+import {styled} from '@aglyn/shared-feature-themes'
+import MuiDialog, {type DialogProps as MuiDialogProps} from '@mui/material/Dialog'
 import MuiDialogActions, {
-  DialogActionsProps as MuiDialogActionsProps,
+  type  DialogActionsProps as MuiDialogActionsProps,
 } from '@mui/material/DialogActions'
 import MuiDialogContent from '@mui/material/DialogContent'
-import MuiDialogTitle, { DialogTitleProps as MuiDialogTitleProps } from '@mui/material/DialogTitle'
-import { forwardRef } from 'react'
+import MuiDialogTitle, {
+  type DialogTitleProps as MuiDialogTitleProps,
+} from '@mui/material/DialogTitle'
+import {forwardRef} from 'react'
+
 
 const Dialog = styled(MuiDialog, {
-  name: 'PopupDialog'
+  name: 'PopupDialog',
 })(({theme}) => ({
   width: '100%',
   maxWidth: 360,
@@ -33,7 +36,7 @@ const Dialog = styled(MuiDialog, {
   ['& > .MuiPaper']: {
     width: '80%',
     maxHeight: 435,
-  }
+  },
 }))
 
 export interface PopupDialogProps extends MuiDialogProps {
@@ -65,7 +68,7 @@ const PopupDialog = forwardRef<any, PopupDialogProps>(
         {actions && <MuiDialogActions {...actions} />}
       </Dialog>
     )
-  }
+  },
 )
 
 PopupDialog.displayName = 'PopupDialog'

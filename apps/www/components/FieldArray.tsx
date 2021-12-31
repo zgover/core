@@ -16,11 +16,10 @@
  */
 
 import {DoD} from '@aglyn/shared-data-types'
-import {mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import React from 'react'
-import MdiIcon from '../../../libs/shared/ui/mdi-jsx/src/lib/components/mdi-icon'
+import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
+import {useCallback, useState} from 'react'
 import {Components} from '../lib/input-fields'
-import FormFields, {Props as FormFieldsProps} from './FormFields'
+import FormFields, {type Props as FormFieldsProps} from './FormFields'
 
 
 function FieldArrayItem(props: ArrayItemProps) {
@@ -78,10 +77,10 @@ const emptyArrayItem = (index: number) => {
 
 function FieldArray(props: Props) {
   const {value, ...rest} = props
-  const [fields, setFields] = React.useState<any>(
+  const [fields, setFields] = useState<any>(
     Array.from(new Array(3)).map((_, index) => emptyArrayItem(index)),
   )
-  const handleAddItem = React.useCallback((e) => {
+  const handleAddItem = useCallback((e) => {
     setFields((prev) => [...prev, emptyArrayItem(prev.length)])
   }, [])
 

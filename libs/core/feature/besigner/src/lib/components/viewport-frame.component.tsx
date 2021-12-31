@@ -34,6 +34,7 @@ const ViewportFrame = styled('div', {
   width: '100%',
   background: theme.palette.background.paper,
   border: `0.3em solid ${theme.palette.grey[200]}`,
+  display: 'flex',
   // position: 'relative',
 }))
 
@@ -57,8 +58,12 @@ const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
           <Box
             id="aglyn:canvas"
             onMouseLeave={handleMouseLeave}
+            sx={{minHeight: 1, width: 1}}
           >
-            <TrunkComponent leafComponent={ElementLeafComponent} />
+            <TrunkComponent
+              leafComponent={ElementLeafComponent}
+              sx={{minHeight: 1}}
+            />
           </Box>
           {/*</MuiShadowDom.div>*/}
 

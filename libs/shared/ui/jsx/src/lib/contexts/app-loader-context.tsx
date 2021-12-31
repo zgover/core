@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import {ConditionalNonDist} from '@aglyn/shared-data-types'
+import {type ConditionalNonDist} from '@aglyn/shared-data-types'
 import {_isLength} from '@aglyn/shared-util-guards'
 import {noop} from '@aglyn/shared-util-tools'
 import {createUid} from '@aglyn/shared-util-vendor'
-import {createContext, ReactNode, useContext, useState} from 'react'
+import {createContext, type ReactNode, useContext, useState} from 'react'
 import {
   createHocWithContextConsumer,
-  InjectedContextConsumerProps,
+  type InjectedContextConsumerProps,
 } from '../hocs/create-hoc-with-context-consumer'
 
 

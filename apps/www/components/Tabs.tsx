@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {alpha, makeStyles, Theme} from '@aglyn/shared-feature-themes'
+import {alpha, makeStyles, type Theme} from '@aglyn/shared-feature-themes'
 import {GridButtons} from '@aglyn/shared-ui-jsx'
 import {
   mdiChartSankeyVariant,
@@ -23,6 +23,7 @@ import {
   mdiEye,
   mdiFileDocumentMultiple,
   mdiHome,
+  MdiIcon,
   mdiVariable,
 } from '@aglyn/shared-ui-mdi-jsx'
 import AppBar from '@mui/material/AppBar'
@@ -30,8 +31,7 @@ import Box from '@mui/material/Box'
 import MuiTab from '@mui/material/Tab'
 import MuiTabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import {ReactNode, SyntheticEvent, useCallback, useState} from 'react'
-import MdiIcon from '../../../libs/shared/ui/mdi-jsx/src/lib/components/mdi-icon'
+import {type ReactNode, type SyntheticEvent, useCallback, useState} from 'react'
 
 
 interface TabPanelProps {

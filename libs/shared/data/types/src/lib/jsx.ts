@@ -15,36 +15,38 @@
  * limitations under the License.
  */
 
-import type {
-  Requireable as PropTypesRequireable,
-  ValidationMap as PropTypesValidationMap,
-  Validator as PropTypesValidator,
+import {
+  type Requireable as PropTypesRequireable,
+  type ValidationMap as PropTypesValidationMap,
+  type Validator as PropTypesValidator,
 } from 'prop-types'
-import type {Component, ComponentProps, ComponentPropsWithRef, ElementType, Ref} from 'react'
-import type {AnyObj, DistributiveOmit, EmptyObj} from './basic'
+import {type Component} from 'react'
+import {type AnyObj, type DistributiveOmit, type EmptyObj} from './basic'
 
 
 export type JSXKey = string | number
 
 export type JSXText = string | symbol
-export type JSXChild = JSXElementBase | JSXText
+export type JSXChild = JSXElement | JSXText
 export type JSXFragment = EmptyObj | JSXNodeArray
 export type JSXNode = JSXChild | JSXFragment | JSXPortal | boolean | null | undefined
 
 export type JSXIntrinsicElements = JSX.IntrinsicElements
 export type JSXIntrinsicAttributes = JSX.IntrinsicAttributes
 export type JSXIntrinsicClassAttributes<T> = JSX.IntrinsicClassAttributes<T>
-export type JSXIntrinsicElementMap<P = any> = {
-  [K in keyof JSXIntrinsicElements]: P extends JSXIntrinsicElements[K] ? K : never
-}
-
-export type JSXElementFunctionComponent<P> = (props: P) => JSXElement | null
-export type JSXElementClassComponent<P> = new (props: P) => JSXElementClass
-export type JSXElementConstructor<P> = JSXElementFunctionComponent<P> | JSXElementClassComponent<P>
+export type JSXIntrinsicElementMap<P = any> = { [K in keyof JSXIntrinsicElements]: P extends JSXIntrinsicElements[K] ? K : never }
 export type JSXIntrinsicElement<P = any> = JSXIntrinsicElementMap<P>[keyof JSXIntrinsicElements]
+
+export type JSXElementFunctionComponent<P> = ((props: P) => JSXElement | null)
+export type JSXElementClassComponent<P> = (new (props: P) => JSXComponent<P, any>)
+export type JSXComponentType<P> = JSXElementFunctionComponent<P> | JSXElementClassComponent<P>
 export type JSXElementType<P = any> =
   | JSXIntrinsicElement<P>
-  | JSXElementConstructor<P>
+  | JSXComponentType<P>
+
+export type JSXElementConstructor<P> =
+  | ((props: P) => JSXElement | null)
+  | (new (props: P) => JSXComponent<P, any>)
 
 export type JSXPropValidator<T> = PropTypesValidator<T>;
 export type JSXPropRequireable<T> = PropTypesRequireable<T>;
@@ -65,7 +67,13 @@ export type JSXPropsWithoutRef<P> =
 // distributive conditional to support unions. see:
 // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
 // https://github.com/Microsoft/TypeScript/issues/28339
-  P extends any ? ('ref' extends keyof P ? Pick<P, Exclude<keyof P, 'ref'>> : P) : P;
+  P extends any
+    ? (
+      'ref' extends keyof P
+        ? Pick<P, Exclude<keyof P, 'ref'>>
+        : P
+      )
+    : P;
 
 /** Ensures that the props do not include string ref, which cannot be forwarded */
 export type JSXPropsWithRef<P> =
@@ -78,7 +86,31 @@ export type JSXPropsWithRef<P> =
       : P
     : P;
 
-export type JSXPropsWithChildren<P> = P & {children?: JSXNode | undefined};
+export type JSXPropsWithChildren<P> = P & {children?: JSXNode | undefined}
+
+/**
+ * NOTE: prefer ComponentPropsWithRef, if the ref is forwarded,
+ * or ComponentPropsWithoutRef when refs are not supported.
+ */
+type JSXComponentProps<T extends keyof JSXIntrinsicElements | JSXElementConstructor<any>> =
+  T extends JSXElementConstructor<infer P>
+    ? P
+    : T extends keyof JSXIntrinsicElements
+      ? JSXIntrinsicElements[T]
+      : AnyObj
+
+export type ComponentPropsWithRef<T extends JSXElementType> =
+  T extends JSXElementClassComponent<infer P>
+    ? JSXPropsWithoutRef<P> & JSXRefAttributes<InstanceType<T>>
+    : JSXPropsWithRef<JSXComponentProps<T>>;
+
+export type ComponentPropsWithoutRef<T extends JSXElementType> = JSXPropsWithoutRef<JSXComponentProps<T>>
+
+export type JSXComponentRef<T extends JSXElementType> = T extends JSXNamedExoticComponent<ComponentPropsWithoutRef<T> & JSXRefAttributes<infer Method>>
+  ? Method
+  : ComponentPropsWithRef<T> extends JSXRefAttributes<infer Method>
+    ? Method
+    : never
 
 export interface JSXRefObject<T> {
   readonly current: T | null;
@@ -94,13 +126,13 @@ export interface JSXRefAttributes<T> extends JSXAttributes {
 
 export interface JSXNodeArray extends Array<JSXNode> {}
 
-export interface JSXElementBase<P = any, T extends string | JSXElementConstructor<any> = string | JSXElementConstructor<any>> {
+export interface JSXElement<P = any, T extends string | JSXComponentType<any> = string | JSXComponentType<any>> {
   type: T
   props: P
   key: JSXKey | null
 }
 
-export interface JSXElementClassBase<P = EmptyObj, S = EmptyObj> extends Component<P, S> {
+export interface JSXComponent<P = EmptyObj, S = EmptyObj> extends Component<P, S> {
   context: unknown
   setState<K extends keyof S>(
     state:
@@ -114,18 +146,26 @@ export interface JSXElementClassBase<P = EmptyObj, S = EmptyObj> extends Compone
   state: Readonly<S>
 }
 
-export interface JSXPortal extends JSXElementBase {
+export interface JSXPortal extends JSXElement {
   key: JSXKey | null
   children: JSXNode
 }
 
-export interface JSXElement extends JSXElementBase {}
+export interface JSXComponentClass<P = EmptyObj, S = any> {
+  new(props: P, context?: any): JSXComponent<P, S>
+}
 
-export interface JSXElementClass extends JSXElementClassBase {}
+export interface JSXFunctionComponent<P = EmptyObj, S = any> {
+  (props: JSXPropsWithChildren<P>, context?: any): JSXElement<any, any> | null;
+  propTypes?: JSXWeakValidationMap<P> | undefined;
+  contextTypes?: JSXPropValidationMap<any> | undefined;
+  defaultProps?: Partial<P> | undefined;
+  displayName?: string | undefined;
+}
 
-export interface JSXElementAttributesProperty extends JSX.ElementAttributesProperty {}
+export interface JSXElementAttributesProperty {props: EmptyObj}
 
-export interface JSXElementChildrenAttribute extends JSX.ElementChildrenAttribute {}
+export interface JSXElementChildrenAttribute {children: EmptyObj}
 
 // TODO: similar to how Fragment is actually a symbol, the values returned from createContext,
 // forwardRef and memo are actually objects that are treated specially by the renderer; see:
@@ -140,7 +180,7 @@ export interface JSXExoticComponent<P = AnyObj> {
   /**
    * **NOTE**: Exotic components are not callable.
    */
-  (props: P): (JSXElementBase | null);
+  (props: P): (JSXElement | null);
   readonly $$typeof: symbol;
 }
 
@@ -159,12 +199,12 @@ export interface ResolveProps<P = any> {
   <OUT = P>(inProps: P): OUT
 }
 
-export type InnerRefProp<T = any> = {innerRef?: Ref<T>}
+export type InnerRefProp<T = any> = {innerRef?: JSXRef<T>}
 export type PropsWithInnerRef<P, T = any> = P & InnerRefProp<T>
 
-export type InferElementTypeProps<T> = T extends ElementType<infer P> ? P : never
+export type InferElementTypeProps<T> = T extends JSXElementType<infer P> ? P : never
 
-export type OverrideComponentProp<P = any> = {component?: ElementType<P>}
+export type OverrideComponentProp<P = any> = {component?: JSXElementType<P>}
 
 export type OverrideComponentsProps<T extends OverrideComponentProp = any> =
   [T] extends [{component: infer P}]
@@ -172,7 +212,7 @@ export type OverrideComponentsProps<T extends OverrideComponentProp = any> =
     : never
 
 export type OverrideComponentPropPlusOverrideProps<T extends OverrideComponentProp = any> =
-  [T] extends [{component: ElementType}]
+  [T] extends [{component: JSXElementType}]
     ? OverrideComponentsProps<T> & Pick<T, 'component'>
     : {component?: undefined}
 
@@ -213,9 +253,9 @@ export type ConsistentWith<DecorationTargetProps, InjectedProps> = {
  * additional {AdditionalProps}
  */
 export type PropInjectorComponent<InjectedProps, AdditionalProps = EmptyObj> = {
-  <C extends JSXElementConstructor<ConsistentWith<ComponentProps<C>, InjectedProps>>>(
+  <C extends JSXComponentType<ConsistentWith<JSXComponentProps<C>, InjectedProps>>>(
     component: C,
-  ): JSXElementConstructor<DistributiveOmit<JSX.LibraryManagedAttributes<C, ComponentProps<C>>,
+  ): JSXComponentType<DistributiveOmit<JSX.LibraryManagedAttributes<C, JSXComponentProps<C>>,
     keyof InjectedProps> & AdditionalProps>
 }
 
@@ -253,7 +293,7 @@ type IfEquals<T, U, Y = unknown, N = never> = (<G>() => G extends T ? 1 : 2) ext
  * Adjusts valid props based on the type of `component`.
  */
 export interface OverridableComponent<M extends OverridableTypeMap> {
-  <C extends ElementType>(
+  <C extends JSXElementType>(
     props: {
       /**
        * The component used for the root node.
@@ -271,7 +311,7 @@ export interface OverridableComponent<M extends OverridableTypeMap> {
  */
 // prettier-ignore
 export type OverrideProps<M extends OverridableTypeMap,
-  C extends ElementType> = (
+  C extends JSXElementType> = (
   & BaseProps<M>
   & DistributiveOmit<ComponentPropsWithRef<C>, keyof BaseProps<M>>
   );
@@ -292,5 +332,5 @@ export type BaseProps<M extends OverridableTypeMap> = M['props'];
 
 export interface OverridableTypeMap {
   props: EmptyObj
-  defaultComponent: ElementType
+  defaultComponent: JSXElementType
 }

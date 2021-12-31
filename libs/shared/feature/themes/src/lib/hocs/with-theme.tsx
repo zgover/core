@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
+import {JSXComponentType} from '@aglyn/shared-data-types'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {getDisplayName} from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
-import {ComponentType} from 'react'
 import {Theme, ThemeProvider} from '../../vendor/mui'
 
 
@@ -31,7 +31,7 @@ function withTheme(options: WithThemeOptions) {
   const {theme, disableCssBaseline} = {...options}
   const [lightTheme, darkTheme] = _isArr(theme) ? theme : [theme]
 
-  return function WithTheme<P>(Component: ComponentType<P>) {
+  return function WithTheme<P>(Component: JSXComponentType<P>) {
     const displayName = `WithTheme(${getDisplayName(Component)})`
 
     function WithTheme(props: P & {themeType?: 'light' | 'dark'}) {

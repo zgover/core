@@ -16,12 +16,12 @@
  */
 
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import Card, {CardProps} from '@mui/material/Card'
-import CardActions, {CardActionsProps} from '@mui/material/CardActions'
-import MuiCardContent, {CardContentProps} from '@mui/material/CardContent'
-import MuiCardHeader, {CardHeaderProps} from '@mui/material/CardHeader'
+import Card, {type CardProps} from '@mui/material/Card'
+import CardActions, {type CardActionsProps} from '@mui/material/CardActions'
+import MuiCardContent, {type CardContentProps} from '@mui/material/CardContent'
+import MuiCardHeader, {type CardHeaderProps} from '@mui/material/CardHeader'
 import clsx from 'clsx'
-import React, {forwardRef} from 'react'
+import {forwardRef} from 'react'
 import ErrorBoundary from './ErrorBoundary'
 
 

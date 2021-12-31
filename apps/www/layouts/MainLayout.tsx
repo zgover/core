@@ -20,26 +20,26 @@ import {darken, styled} from '@aglyn/shared-feature-themes'
 import {
   AglynSvgLogo,
   AppLink,
-  AppLinkProps,
+  type AppLinkProps,
   GridButtons,
-  GridButtonsProps,
+  type GridButtonsProps,
   Menu,
 } from '@aglyn/shared-ui-jsx'
-import {MdiIcon, MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr, _isArrEmpty, _isObj} from '@aglyn/shared-util-guards'
-import AppBar, {AppBarProps} from '@mui/material/AppBar'
+import AppBar, {type AppBarProps} from '@mui/material/AppBar'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import {cyan, purple} from '@mui/material/colors'
 import Container from '@mui/material/Container'
-import IconButton, {IconButtonProps} from '@mui/material/IconButton'
-import Tab, {TabProps} from '@mui/material/Tab'
+import IconButton, {type IconButtonProps} from '@mui/material/IconButton'
+import Tab, {type TabProps} from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import {useRouter} from 'next/router'
-import React, {ElementType, Fragment, ReactNode} from 'react'
+import {type ElementType, Fragment, type ReactNode} from 'react'
 import {Breadcrumbs, BreadcrumbsProps} from '../components/Breadcrumbs'
 import Copyright from '../components/Copyright'
 import {tailNavigation} from '../const'

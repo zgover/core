@@ -16,8 +16,7 @@
  */
 
 import {BRAND, CURRENT_YEAR} from '@aglyn/shared-data-brand'
-import Typography, {TypographyProps} from '@mui/material/Typography'
-import React from 'react'
+import Typography, {type TypographyProps} from '@mui/material/Typography'
 
 
 function Copyright(props: Props) {

@@ -15,17 +15,19 @@
  * limitations under the License.
  */
 
-import { OverrideableComponentProps } from '@aglyn/shared-data-types'
-import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
+import {type OverrideableComponentProps} from '@aglyn/shared-data-types'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 import {
   DataGrid,
-  DataGridProps as MuiDataGridProps,
+  type DataGridProps as MuiDataGridProps,
   GridOverlay,
-  GridOverlayProps,
+  type GridOverlayProps,
 } from '@material-ui/data-grid'
-import LinearProgress, { LinearProgressProps as MuiLinearProgressProps } from '@mui/material/LinearProgress'
+import LinearProgress, {
+  type LinearProgressProps as MuiLinearProgressProps,
+} from '@mui/material/LinearProgress'
 import clsx from 'clsx'
-import { forwardRef, HTMLAttributes } from 'react'
+import {forwardRef, type  HTMLAttributes} from 'react'
 
 
 const classKeys = generateComponentClassKeys('DataTable', [

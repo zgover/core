@@ -18,11 +18,11 @@
 import {
   alpha,
   createStyles,
-  ExtendPropsOfWithStyles,
+  type ExtendPropsOfWithStyles,
   withStyles,
 } from '@aglyn/shared-feature-themes'
-import {NavigationDrawer, NavigationDrawerProps} from '@aglyn/shared-ui-jsx'
-import {mdiClose} from '@aglyn/shared-ui-mdi-jsx'
+import {NavigationDrawer, type NavigationDrawerProps} from '@aglyn/shared-ui-jsx'
+import {mdiClose, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isStrT} from '@aglyn/shared-util-guards'
 import {objectRemap} from '@aglyn/shared-util-tools'
 import {Box, Button} from '@mui/material'
@@ -30,8 +30,7 @@ import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
-import React, {forwardRef} from 'react'
-import MdiIcon from '../../../libs/shared/ui/mdi-jsx/src/lib/components/mdi-icon'
+import {forwardRef, Fragment} from 'react'
 import FieldSet from '../components/FieldSet'
 import {Fields} from '../forms'
 
@@ -90,7 +89,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
     <NavigationDrawer
       ref={ref}
       appBarLeft={
-        <React.Fragment>
+        <Fragment>
           <IconButton
             children={<MdiIcon path={mdiClose.path} />}
             className={classes.closeButton}
@@ -104,7 +103,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
             component="div"
             variant="h6"
           />
-        </React.Fragment>
+        </Fragment>
       }
       appBarRight={
         <Button
@@ -121,16 +120,16 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
     >
       <div className={classes.wrapper}>
         {loading && (
-          <React.Fragment>
+          <Fragment>
             <LinearProgress classes={{root: classes.loadingBar}} color="secondary" />
-          </React.Fragment>
+          </Fragment>
         )}
 
         <Container>
           <br />
           {error && (_isStrT(error) ? error : 'Error loading...')}
           {!error && (
-            <React.Fragment>
+            <Fragment>
               <Typography children={'Unique ID'} variant="subtitle2" />
               <Typography children={id ?? '(none)'} variant="subtitle1" />
               <FieldSet fields={fields} loading={loading} onUpdate={onUpdate} />
@@ -146,7 +145,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
                   </pre>
                 </Box>
               </Box>
-            </React.Fragment>
+            </Fragment>
           )}
         </Container>
       </div>

@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import { AppLink } from '@aglyn/shared-ui-jsx'
-import { objectRemap } from '@aglyn/shared-util-tools'
-import { Box, Button, Typography } from '@mui/material'
-import { useRouter } from 'next/router'
-import React, { useCallback, useState } from 'react'
+import {AppLink} from '@aglyn/shared-ui-jsx'
+import {objectRemap} from '@aglyn/shared-util-tools'
+import {Box, Button, Typography} from '@mui/material'
+import {useRouter} from 'next/router'
+import {useCallback, useState} from 'react'
 import FieldSet from '../../components/FieldSet'
-import { withAppContext } from '../../contexts/app-context'
-import { Fields, formIsValid, validateField } from '../../forms'
+import {withAppContext} from '../../contexts/app-context'
+import {Fields, formIsValid, validateField} from '../../forms'
 import AuthLayout from '../../layouts/AuthLayout'
 
 
@@ -32,7 +32,7 @@ interface Props {
 
 export default withAppContext<Props>(
   function SignIn(props) {
-    const { app } = props
+    const {app} = props
     const currentUser = app?.getCurrentUser?.()
     // console.log('app?.getCurrentUser()', currentUser)
     const router = useRouter()
@@ -49,7 +49,7 @@ export default withAppContext<Props>(
 
     const handleUpdate = (name: string) => (e) => {
       const value = e.target?.value
-      setFields((prev) => ({ ...prev, [name]: validateField(prev[name], value) }))
+      setFields((prev) => ({...prev, [name]: validateField(prev[name], value)}))
     }
     const clearForm = () => {
       setFields((prev) => {
@@ -82,14 +82,14 @@ export default withAppContext<Props>(
           },
           (error) => {
             console.error('Form Error: ', error)
-            const { code, message } = error
+            const {code, message} = error
             setFormError(`(Code: ${code}) ${message}`)
             clearForm()
             setSubmitting(false)
-          }
+          },
         )
       },
-      [fields]
+      [fields],
     )
 
     return (
@@ -140,7 +140,7 @@ export default withAppContext<Props>(
           variant="overline"
           sx={{lineHeight: 1.5, marginTop: 4}}
         >
-          <b children={"Don't have an account?"} />
+          <b children={'Don\'t have an account?'} />
           <br />
           <AppLink
             children="Create an account"
@@ -150,5 +150,5 @@ export default withAppContext<Props>(
         </Typography>
       </AuthLayout>
     )
-  }
+  },
 )

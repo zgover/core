@@ -17,11 +17,12 @@
 
 import {ProductNames} from '@aglyn/shared-data-brand'
 import {componentMapper, GridItems} from '@aglyn/shared-ui-jsx'
-import FormTemplateRenderProps
-  from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
-import FormRenderer from '@data-driven-forms/react-form-renderer/form-renderer'
-import FormSpy from '@data-driven-forms/react-form-renderer/form-spy'
-import useFormApi from '@data-driven-forms/react-form-renderer/use-form-api'
+import {
+  FormRenderer,
+  FormSpy,
+  type FormTemplateRenderProps,
+  useFormApi,
+} from '@data-driven-forms/react-form-renderer'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
@@ -30,7 +31,7 @@ import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
-import React, {useCallback} from 'react'
+import {useCallback} from 'react'
 import {mainNavigation} from '../const'
 import {DdfForms} from '../forms'
 import MainLayout from '../layouts/MainLayout'

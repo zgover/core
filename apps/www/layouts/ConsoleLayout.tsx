@@ -16,18 +16,18 @@
  */
 
 import {styled} from '@aglyn/shared-feature-themes'
-import {GridItems, GridItemsProps} from '@aglyn/shared-ui-jsx'
-import {mdiCogOutline, MdiIcon, MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import {GridItems, type GridItemsProps} from '@aglyn/shared-ui-jsx'
+import {mdiCogOutline, MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isStrT} from '@aglyn/shared-util-guards'
 import {_s, copy} from '@aglyn/shared-util-tools'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
-import {ReactNode} from 'react'
+import {type ReactNode} from 'react'
 import Breadcrumbs from '../components/Breadcrumbs'
-import {CurrentUserContextType, withCurrentUserContext} from '../contexts/current-user-context'
-import {AggregatedPageMeta, withAggregatedPageMeta} from '../lib/app-pages'
+import {type CurrentUserContextType, withCurrentUserContext} from '../contexts/current-user-context'
+import {type AggregatedPageMeta, withAggregatedPageMeta} from '../lib/app-pages'
 import {tabItems} from '../lib/navigation-menus'
-import MainLayout, {MainLayoutProps as MainLayoutProps} from './MainLayout'
+import MainLayout, {type MainLayoutProps as MainLayoutProps} from './MainLayout'
 
 
 export const CONTENT_MAX_WIDTH = 'lg'

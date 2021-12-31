@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-import MuiTextField, { OutlinedTextFieldProps as MuiTextFieldProps } from '@mui/material/TextField'
-import MuiMenuItem, { MenuItemProps as MuiMenuItemProps } from '@mui/material/MenuItem'
+import MuiMenuItem, {type MenuItemProps as MuiMenuItemProps} from '@mui/material/MenuItem'
+import MuiTextField, {
+  type OutlinedTextFieldProps as MuiTextFieldProps,
+} from '@mui/material/TextField'
 
 
 export interface FieldSelectProps extends MuiTextFieldProps {
@@ -28,12 +30,12 @@ function FieldSelect(props: FieldSelectProps) {
   return (
     <MuiTextField select {...rest}>
       {items.map((item, key) => (
-        <MuiMenuItem key={item.id ?? key} {...item} />)
+        <MuiMenuItem key={item.id ?? key} {...item} />),
       )}
     </MuiTextField>
   )
 }
 
 FieldSelect.displayName = 'FieldSelect'
-export { FieldSelect }
+export {FieldSelect}
 export default FieldSelect

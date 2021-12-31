@@ -16,15 +16,15 @@
  */
 
 
-import { AppLink } from '@aglyn/shared-ui-jsx'
-import { objectRemap } from '@aglyn/shared-util-tools'
-import { Box, Button, Typography } from '@mui/material'
-import { useRouter } from 'next/router'
-import React from 'react'
+import {AppLink} from '@aglyn/shared-ui-jsx'
+import {objectRemap} from '@aglyn/shared-util-tools'
+import {Box, Button, Typography} from '@mui/material'
+import {useRouter} from 'next/router'
+import {useCallback, useState} from 'react'
 import FieldSet from '../../components/FieldSet'
-import { withAppContext } from '../../contexts/app-context'
-import { Fields, formIsValid, validateField } from '../../forms'
-import AuthLayout  from '../../layouts/AuthLayout'
+import {withAppContext} from '../../contexts/app-context'
+import {Fields, formIsValid, validateField} from '../../forms'
+import AuthLayout from '../../layouts/AuthLayout'
 
 
 interface Props {
@@ -41,9 +41,9 @@ export default withAppContext<Props>(
       router.push('/')
     }
 
-    const [submitting, setSubmitting] = React.useState(false)
-    const [formError, setFormError] = React.useState(null)
-    const [fields, setFields] = React.useState<Fields.FieldGroup>(() => ({
+    const [submitting, setSubmitting] = useState(false)
+    const [formError, setFormError] = useState(null)
+    const [fields, setFields] = useState<Fields.FieldGroup>(() => ({
       [Fields.firstNameField.id]: Fields.firstNameField,
       [Fields.lastNameField.id]: Fields.lastNameField,
       [Fields.emailField.id]: Fields.emailField,
@@ -63,7 +63,7 @@ export default withAppContext<Props>(
       })
     }
 
-    const onSubmit = React.useCallback(async (e) => {
+    const onSubmit = useCallback(async (e) => {
       e.preventDefault()
       setSubmitting(true)
       setFormError(null)
@@ -103,7 +103,7 @@ export default withAppContext<Props>(
               gutterBottom
               sx={{textTransform: 'uppercase'}}
             />
-            <FieldSet fields={fields} loading={submitting} onUpdate={handleUpdate}/>
+            <FieldSet fields={fields} loading={submitting} onUpdate={handleUpdate} />
             {formError && (
               <Box
                 bgcolor={'error.light'}
@@ -139,8 +139,8 @@ export default withAppContext<Props>(
           variant="overline"
           sx={{lineHeight: 1.5, marginTop: 4}}
         >
-          <b children={'Already have an account?'}/>
-          <br/>
+          <b children={'Already have an account?'} />
+          <br />
           <AppLink
             children="Sign in instead"
             color="secondary"

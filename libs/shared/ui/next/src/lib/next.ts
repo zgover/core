@@ -15,4 +15,10 @@
  * limitations under the License.
  */
 
-export * from './lib/next'
+
+export * from './components/next-app-wrapper.component'
+export * from './components/next-emotion-app.component'
+export * from './components/next-emotion-document.component'
+export * from './components/next-page-decorated-layout.component'
+
+export * from './utils/get-next-page-layout'

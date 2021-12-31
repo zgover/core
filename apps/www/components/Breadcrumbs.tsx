@@ -16,14 +16,16 @@
  */
 
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import {AppLink, AppLinkProps} from '@aglyn/shared-ui-jsx'
-import {MdiIcon, MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import {AppLink, type AppLinkProps} from '@aglyn/shared-ui-jsx'
+import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isLength} from '@aglyn/shared-util-guards'
 import {yes} from '@aglyn/shared-util-tools'
-import MuiBreadcrumbs, {BreadcrumbsProps as MuiBreadcrumbsProps} from '@mui/material/Breadcrumbs'
+import MuiBreadcrumbs, {
+  type BreadcrumbsProps as MuiBreadcrumbsProps,
+} from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
-import React, {forwardRef, useMemo} from 'react'
+import {forwardRef, useMemo} from 'react'
 
 
 const classKeys = generateComponentClassKeys('AglynBreadcrumbs', [
@@ -117,7 +119,7 @@ export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(
         {children}
       </StyledBreadcrumbs>
     )
-  }
+  },
 )
 
 Breadcrumbs.displayName = 'Breadcrumbs'

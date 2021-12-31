@@ -18,12 +18,12 @@
 // import 'firebase/firestore'
 import {DoD} from '@aglyn/shared-data-types'
 import {getApps} from '@firebase/app'
-import {Analytics, getAnalytics as getFbAnalytics} from 'firebase/analytics'
+import {type Analytics, getAnalytics as getFbAnalytics} from 'firebase/analytics'
 
 import 'firebase/analytics'
-import {FirebaseApp, getApp as getFbApp, initializeApp} from 'firebase/app'
+import {type FirebaseApp, getApp as getFbApp, initializeApp} from 'firebase/app'
 import {
-  Auth,
+  type Auth,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth as getFbAuth,
@@ -31,22 +31,22 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
   signOut,
-  User as AuthUser,
-  UserCredential,
+  type User as AuthUser,
+  type UserCredential,
 } from 'firebase/auth'
 // import 'firebase/auth'
 import {
   collection,
-  CollectionReference,
+  type CollectionReference,
   connectFirestoreEmulator,
   doc,
-  DocumentData,
-  DocumentReference,
-  DocumentSnapshot,
-  Firestore,
+  type DocumentData,
+  type DocumentReference,
+  type DocumentSnapshot,
+  type Firestore,
   getFirestore as getFbFirestore,
 } from 'firebase/firestore'
-import {Permission, Role, User} from '../types'
+import {type Permission, type Role, type User} from '../types'
 
 import {CollectionRefController} from './CollectionRefController'
 import {DatabaseRefController} from './DatabaseRefController'

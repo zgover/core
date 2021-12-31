@@ -14,29 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Component, type PropsWithChildren, type ReactNode} from 'react'
 
-import React from 'react'
 
 type State = {
   hasError: boolean
 }
-type Props = React.PropsWithChildren<{
-  fallback?: React.ReactNode
+type Props = PropsWithChildren<{
+  fallback?: ReactNode
 }>
 
 /**
  * @see https://reactjs.org/docs/error-boundaries.html
  */
-class ErrorBoundary extends React.Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   constructor(props) {
     super(props)
-    this.state = { hasError: false }
+    this.state = {hasError: false}
   }
 
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI.
     console.error(error, 'getDerivedStateFromError')
-    return { hasError: true }
+    return {hasError: true}
   }
 
   componentDidCatch(error, errorInfo) {

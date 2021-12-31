@@ -22,7 +22,7 @@ import Container from '@mui/material/Container'
 import Slide from '@mui/material/Slide'
 import Typography from '@mui/material/Typography'
 import {forwardRef, useEffect, useState} from 'react'
-import BackgroundImage, {BackgroundImageProps} from '../components/BackgroundImage'
+import BackgroundImage, {type BackgroundImageProps} from '../components/BackgroundImage'
 import Copyright from '../components/Copyright'
 
 

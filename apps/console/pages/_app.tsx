@@ -15,68 +15,137 @@
  * limitations under the License.
  */
 
-import {CacheProvider, createEmotionCache, EmotionCache} from '@aglyn/shared-feature-themes'
-import {NextAppWithLayout} from '@aglyn/shared-ui-next'
-import {AppProps as NextAppProps} from 'next/app'
-import AppWrapper from '../components/app-wrapper'
+import {bundle as muiBundle} from '@aglyn/addons-ui-mui-bundle'
+import {
+  doesAppExist,
+  initializeApp,
+  registerBundle,
+  registerComponent,
+} from '@aglyn/core-data-framework'
+import {createAglynComponent} from '@aglyn/core-feature-renderer'
+import {APP_WWW} from '@aglyn/shared-data-brand'
+import {
+  AppLoaderProviderComponent,
+  type MakeLinkElementsConfig,
+  type MakeMetaElementsConfig,
+} from '@aglyn/shared-ui-jsx'
+import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
+import {samplePageData} from '../constants/sample-data'
 
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache()
+export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentProps<Props, InitialProps> {}
 
-export interface _AppProps extends NextAppProps {
-  emotionCache?: EmotionCache
-}
-
-/**
- *
- * App component manages mounting and hydration for the client app
- * at the Next.JS app entry point, removes server styles and is
- * responsible for rendering every page Component
- *
- * @example
- * > ## Resolution order
- * >
- * > ### Server-side
- * > 1. [_App]{@link _App}.getInitialProps (if-exists)
- * > 2. <PageComponent>.getInitialProps
- * > 3. [_Document]{@link _Document}.getInitialProps
- * > 4. [_App]{@link _App}.render
- * > 5. <PageComponent>.render
- * > 6. [_Document]{@link _Document}.render
- * >
- * > ### Server-side (w/ error)
- * > 1. [_Document]{@link _Document}.getInitialProps
- * > 2. [_App]{@link _App}.render
- * > 3. <PageComponent>.render
- * > 4. [_Document]{@link _Document}.render
- * >
- * > ### Client-side
- * > 1. [_App]{@link _App}.getInitialProps (if-exists)
- * > 2. <PageComponent>.getInitialProps
- * > 3. [_App]{@link _App}.render
- * > 4. <PageComponent>.render
- *
- * @param {AppProps} props
- * @returns {JSX.Element}
- */
-export default function _App(props: _AppProps) {
-  const {
-    Component,
-    emotionCache = clientSideEmotionCache,
-    pageProps,
-    ...rest
-  } = props
-
+function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
+  const {NextAppWrapperProps, ...rest} = props
+  const metaElements: MakeMetaElementsConfig = [
+    ['viewport', 'width=device-width, initial-scale=1'],
+    ['description', APP_WWW.META_DESCRIPTION],
+    ...NextAppWrapperProps?.metaElements || [],
+  ]
+  const linkElements: MakeLinkElementsConfig = [
+    ...NextAppWrapperProps?.linkElements || [],
+  ]
   return (
-    <CacheProvider value={emotionCache}>
-      <AppWrapper>
-        <NextAppWithLayout
-          Component={Component}
-          pageProps={pageProps}
-          {...rest}
-        />
-      </AppWrapper>
-    </CacheProvider>
+    <NextEmotionAppComponent
+      NextAppWrapperProps={{
+        documentTitle: APP_WWW.META_TITLE,
+        ...NextAppWrapperProps,
+        metaElements,
+        linkElements,
+        mainWrapper: AppLoaderProviderComponent,
+      }}
+      {...rest}
+    />
   )
+}
+_App.displayName = '_App'
+export default _App
+
+
+const c1 = createAglynComponent(
+  {
+    componentId: 'root',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+    },
+  },
+  'span',
+)
+
+const c2 = createAglynComponent(
+  {
+    componentId: 'root1',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+    },
+  },
+  'span',
+)
+
+const c3 = createAglynComponent(
+  {
+    componentId: 'root2',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+    },
+  },
+  'span',
+)
+
+const c4 = createAglynComponent(
+  {
+    componentId: 'root3',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+    },
+  },
+  'span',
+)
+
+const c5 = createAglynComponent(
+  {
+    componentId: 'root4',
+    metadata: {
+      displayName: 'Root Element',
+      title: 'Root element',
+    },
+    templates: [
+      {
+        id: 'root4:1',
+        label: 'Root 4',
+        data: {
+          componentId: 'root4',
+          props: {
+            children: 'First Root4',
+          },
+        },
+      },
+    ],
+  },
+  'span',
+)
+const components = [c1, c2, c3, c4, c5]
+
+try {
+  if (!doesAppExist()) {
+    const app = initializeApp({
+      logLevel: 'debug',
+      modulesOptions: {
+        canvas: {
+          initialElements: samplePageData,
+        },
+      },
+    })
+
+
+    components.forEach((i) => registerComponent(app, i))
+    registerBundle(app, muiBundle)
+  }
+}
+catch (e) {
+  console.error(e, 'initialize aglyn app')
 }

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {OverrideableComponentProps} from '@aglyn/shared-data-types'
+import {type OverrideableComponentProps} from '@aglyn/shared-data-types'
 import {styled} from '@aglyn/shared-feature-themes'
-import {forwardRef, HTMLAttributes} from 'react'
+import {forwardRef, type HTMLAttributes} from 'react'
 
 
 const BackgroundImageRoot = styled('div', {
