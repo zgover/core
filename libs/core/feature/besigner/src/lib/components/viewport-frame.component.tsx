@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import {CanvasRendererComponent} from '@aglyn/core-feature-renderer'
+import {TrunkComponent} from '@aglyn/core-feature-renderer'
 import {styled} from '@aglyn/shared-feature-themes'
 import Box from '@mui/material/Box'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
 import {forwardRef, HTMLAttributes} from 'react'
-import {CanvasRenderedElementRefsComponent} from '../contexts/canvas-rendered-element-refs'
-import {ElementOverlayComponent} from './element-overlay.component'
-import {ElementRendererComponent} from './element-renderer.component'
+import CanvasRenderedElementRefsComponent from '../contexts/canvas-rendered-element-refs'
+import ElementLeafComponent from './element-leaf.component'
+import ElementOverlayComponent from './element-overlay.component'
 
 
 const ViewportFrame = styled('div', {
@@ -49,7 +49,7 @@ const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
           <Box
             id="aglyn:canvas"
           >
-            <CanvasRendererComponent rendererComponent={ElementRendererComponent} />
+            <TrunkComponent leafComponent={ElementLeafComponent} />
           </Box>
           {/*</MuiShadowDom.div>*/}
 

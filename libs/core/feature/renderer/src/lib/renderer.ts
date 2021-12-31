@@ -17,10 +17,10 @@
 
 export {default as dynamicLoader} from 'next/dynamic'
 
-export * from './components/element-renderer.component'
-export * from './components/elements-renderer.component'
-export * from './components/canvas-renderer.component'
-export * from './components/element-error-boundary.component'
+export * from './components/leaf.component'
+export * from './components/branch.component'
+export * from './components/trunk.component'
+export * from './components/error-boundary.component'
 
 export * from './contexts/aglyn-app-context'
 export * from './contexts/aglyn-components-context'

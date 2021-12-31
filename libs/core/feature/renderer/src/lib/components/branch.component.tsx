@@ -15,38 +15,35 @@
  * limitations under the License.
  */
 
-import {ComponentId} from '@aglyn/core-data-framework'
-import {OverrideableComponentProps} from '@aglyn/shared-data-types'
+import {type ComponentId} from '@aglyn/core-data-framework'
+import {type OverrideableComponentProps} from '@aglyn/shared-data-types'
 import {forwardRef, Fragment} from 'react'
-import {
-  ElementRendererComponent,
-  ElementRendererComponentProps,
-} from './element-renderer.component'
+import {LeafComponent} from './leaf.component'
 
 
-export interface ElementsComponentProps extends OverrideableComponentProps {
-  rendererComponent?: ElementRendererComponentProps['rendererComponent']
+export interface BranchComponentProps extends OverrideableComponentProps {
+  leafComponent?: LeafComponent
   elements?: ComponentId[]
 }
 
-const ElementsRendererComponent = forwardRef<any, ElementsComponentProps>(
+const BranchComponent = forwardRef<any, BranchComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       component: Component,
-      rendererComponent,
+      leafComponent,
       elements,
       children,
       ...rest
     } = props
-    const RendererComponent = rendererComponent || ElementRendererComponent
+    const Leaf = leafComponent || LeafComponent
     return (
       <Component ref={ref} {...rest}>
         {children}
         {elements.map(($id) => (
-          <RendererComponent
+          <Leaf
             key={$id}
             $id={$id}
-            rendererComponent={RendererComponent}
+            leafComponent={Leaf}
           />
         ))}
       </Component>
@@ -54,12 +51,12 @@ const ElementsRendererComponent = forwardRef<any, ElementsComponentProps>(
   },
 )
 
-ElementsRendererComponent.displayName = 'ElementsRendererComponent'
-ElementsRendererComponent.defaultProps = {
+BranchComponent.displayName = 'BranchComponent'
+BranchComponent.defaultProps = {
   component: Fragment,
   children: null,
   elements: [],
 }
 
-export {ElementsRendererComponent}
-export default ElementsRendererComponent
+export {BranchComponent}
+export default BranchComponent

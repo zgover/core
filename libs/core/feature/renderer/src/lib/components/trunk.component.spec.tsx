@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
+import {render} from '@testing-library/react'
 
-import ElementRendererComponent from './element-renderer.component'
+import TrunkComponent from './trunk.component'
 
-describe('ElementRendererComponent', () => {
+
+describe('TrunkComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<ElementRendererComponent />)
+    const {baseElement} = render(<TrunkComponent />)
     expect(baseElement).toBeTruthy()
   })
 })

@@ -17,38 +17,38 @@
 
 import {ComponentId} from '@aglyn/core-data-framework'
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
-import Box from '@mui/material/Box'
+import Box, {type BoxProps} from '@mui/material/Box'
 import clsx from 'clsx'
-import {ComponentType, forwardRef, HTMLAttributes, PropsWithoutRef, RefAttributes} from 'react'
+import {forwardRef} from 'react'
 import useAglynElementComponent from '../hooks/use-aglyn-element-component'
 import useAglynElementData from '../hooks/use-aglyn-element-data'
 import useAglynElementResolvedProps from '../hooks/use-aglyn-element-resolved-props'
-import {ElementsRendererComponent} from './elements-renderer.component'
+import BranchComponent from './branch.component'
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export interface ElementRendererComponentProps<T = any> extends HTMLAttributes<T> {
+
+export interface LeafComponentProps extends BoxProps {
   $id: ComponentId
-  rendererComponent?: ComponentType<PropsWithoutRef<ElementRendererComponentProps<any>> & RefAttributes<any>>
+  leafComponent?: LeafComponent
 }
 
-const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
+const LeafComponent = forwardRef<any, LeafComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       $id,
-      rendererComponent,
+      leafComponent,
       children: childrenProp,
       className: classNameProp,
       ...rest
     } = props
 
-    const render = rendererComponent || ElementRendererComponent
+    const leaf = leafComponent || LeafComponent
     const elements = useAglynElementData($id, 'elements')
     const Component = useAglynElementComponent<any, any>($id)
     const {children, className: classNameElem, ...elemProps} = useAglynElementResolvedProps($id)
     const className = clsx(classNameProp, classNameElem)
 
 
-    return/* ReactIs.isValidElementType(Component) ?*/ (
+    return (
       <Box
         ref={ref}
         className={className}
@@ -59,22 +59,21 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         {children}
         {childrenProp}
         {!_isArrEmpty(elements || []) ? (
-          <ElementsRendererComponent
-            rendererComponent={render}
+          <BranchComponent
+            leafComponent={leaf}
             elements={elements}
           />
         ) : null}
       </Box>
-    )/* : (
-     <>Error loading element component</>
-     )*/
+    )
   },
 )
 
-ElementRendererComponent.displayName = 'Renderer.ElementRendererComponent'
-ElementRendererComponent.defaultProps = {
+LeafComponent.displayName = 'Renderer.LeafComponent'
+LeafComponent.defaultProps = {
   children: null,
 }
 
-export {ElementRendererComponent}
-export default ElementRendererComponent
+type LeafComponent = typeof LeafComponent
+export {LeafComponent}
+export default LeafComponent

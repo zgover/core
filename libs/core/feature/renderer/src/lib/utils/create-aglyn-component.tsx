@@ -28,15 +28,15 @@ import {copy, getDisplayName} from '@aglyn/shared-util-tools'
 import {ChangeCase} from '@aglyn/shared-util-vendor'
 import {forwardRef} from 'react'
 import {
-  ElementErrorBoundaryComponent,
-  ElementErrorBoundaryComponentProps,
-} from '../components/element-error-boundary.component'
+  ErrorBoundaryComponent,
+  ErrorBoundaryComponentProps,
+} from '../components/error-boundary.component'
 
 
 export function createAglynComponent<P extends AnyProps>(
   schema: AglynComponentSchema<P>,
   component: AglynElementType<P>,
-  errorComponent?: ElementErrorBoundaryComponentProps<P>['errorComponent'],
+  errorComponent?: ErrorBoundaryComponentProps<P>['errorComponent'],
 ): ComponentRegisterPayload<P> {
   const {componentId, bundleId, renderFlags} = schema
   const {emotionStyled} = {...renderFlags}
@@ -54,7 +54,7 @@ export function createAglynComponent<P extends AnyProps>(
   const AglynComponent = forwardRef<any, any>(
     function RefRenderFn(props, ref) {
       return (
-        <ElementErrorBoundaryComponent
+        <ErrorBoundaryComponent
           innerRef={ref}
           props={props}
           component={ComponentElement}

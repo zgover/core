@@ -21,21 +21,21 @@ import {ReactIs} from '@aglyn/shared-ui-jsx'
 import {Component} from 'react'
 
 
-export interface ElementErrorBoundaryComponentState {error: any}
+export interface ErrorBoundaryComponentState {error: any}
 
-export type ElementErrorBoundaryComponentProps<P extends AnyProps> = PropsWithInnerRef<{
+export type ErrorBoundaryComponentProps<P extends AnyProps> = PropsWithInnerRef<{
   component: AglynElementType<P>
   errorComponent?: AglynElementType<{props: P, error: any}>
   props: P
 }>
 
-class ElementErrorBoundaryComponent<P extends AnyProps> extends Component<ElementErrorBoundaryComponentProps<P>, ElementErrorBoundaryComponentState> {
+class ErrorBoundaryComponent<P extends AnyProps> extends Component<ErrorBoundaryComponentProps<P>, ErrorBoundaryComponentState> {
 
-  public static displayName = `ElementErrorBoundaryComponent`
+  public static displayName = `ErrorBoundaryComponent`
 
-  public state: ElementErrorBoundaryComponentState = {error: null}
+  public state: ErrorBoundaryComponentState = {error: null}
 
-  public static getDerivedStateFromError(error: any): Partial<ElementErrorBoundaryComponentState> | null {
+  public static getDerivedStateFromError(error: any): Partial<ErrorBoundaryComponentState> | null {
     if (error) {
       console.error(error)
       return {error}
@@ -72,5 +72,5 @@ class ElementErrorBoundaryComponent<P extends AnyProps> extends Component<Elemen
   }
 }
 
-export {ElementErrorBoundaryComponent}
-export default ElementErrorBoundaryComponent
+export {ErrorBoundaryComponent}
+export default ErrorBoundaryComponent

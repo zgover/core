@@ -135,9 +135,7 @@ A utility library contains low-level utilities used by many libraries and applic
 └──┴──┴────────────────────
 ```
 
-### Apps
-
-###### Monorepo package type
+### Apps Monorepo package type
 
 * **WWW**
   * URL: [https://aglyn.com/](https://aglyn.com/)
@@ -148,9 +146,9 @@ A utility library contains low-level utilities used by many libraries and applic
   * Workspace name: `console`
   * Directory: [apps/console](apps/console)
 
-### Core SDK
+### Package scope predicate: lib(`core`)
 
-###### Monorepo package type
+<code>@aglyn/libs/core/*`TYPE_PREDICATE`*-*`LIBRARY_NAME`*</code>
 
 #### Data-access
 
@@ -175,11 +173,11 @@ A utility library contains low-level utilities used by many libraries and applic
   * Workspace name: `core-feature-renderer`
   * Directory: [libs/core/feature/renderer](libs/core/feature/renderer)
 
-### Kind: Shared libraries
+### Package scope predicate: lib(`shared`)
 
-###### Monorepo package type
+<code>@aglyn/libs/shared/*`TYPE_PREDICATE`*-*`LIBRARY_NAME`*</code>
 
-#### Data-access
+#### Services and Providers (i.e., data-access)
 
 * **MDI**
   * NodeJS import: `@aglyn/shared-data-mdi`

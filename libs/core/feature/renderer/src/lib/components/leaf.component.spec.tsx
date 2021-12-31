@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
+import {render} from '@testing-library/react'
+import LeafComponent from './leaf.component'
 
-import { ElementRendererComponent } from './element-renderer.component'
 
-describe('ElementRendererComponent', () => {
+describe('ElementLeafComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<ElementRendererComponent $id={null} />)
+    const {baseElement} = render(<LeafComponent $id={null} />)
     expect(baseElement).toBeTruthy()
   })
 })

@@ -26,8 +26,8 @@ import {
   setBesignerDndState,
 } from '@aglyn/core-data-framework'
 import {
-  ElementRendererComponent as DefaultElementRendererComponent,
-  type ElementRendererComponentProps as DefaultElementRendererComponentProps,
+  LeafComponent,
+  type LeafComponentProps,
   useAglynAppContext,
   useAglynCanvasApiEvents,
   useAglynCanvasElementHierarchy,
@@ -35,7 +35,7 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
-import {forwardRef, type MouseEvent, useEffect, useRef} from 'react'
+import {forwardRef, type MouseEvent, useCallback, useEffect, useMemo, useRef} from 'react'
 import {DropTargetMonitor, useDrag, useDrop} from 'react-dnd'
 import {useCanvasRenderedElementRefs} from '../contexts/canvas-rendered-element-refs'
 
@@ -55,144 +55,48 @@ type DragCollected = {
   over?: BesignerDndElementOver,
 }
 
-export interface ElementRendererComponentProps extends DefaultElementRendererComponentProps {
+export interface ElementLeafComponentProps extends LeafComponentProps {
   [prop: string]: any
 }
 
-const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
+const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
   function RefRenderFn(props, ref) {
-    const {$id, rendererComponent, ...rest} = props
+    const {$id, leafComponent, ...rest} = props
     const {getApp} = useAglynAppContext()
     const {moveElement} = useAglynCanvasApiEvents()
+    const leaf = leafComponent || ElementLeafComponent
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const componentSchema = useAglynComponentSchema(componentId, bundleId)
     const hierarchy = componentSchema?.renderFlags?.hierarchy
 
-    const dragItem = ({
-      $id,
-      type: DndDragSourceTypeFlag.CANVAS_ELEMENT,
-      componentId,
-      bundleId,
-      hierarchy,
-    })
-    const [{isDragging}, dragHandle, dragRef] = useDrag<BesignerDndElementActive, BesignerDndElementOver, DragCollected>(() => ({
-      type: 'aglyn-element',
-      item: (monitor) => {
-        handleDragStart(dragItem)
-        return dragItem
-      },
-      // end: (active, monitor) => {
-      //   const over = monitor.getDropResult()
-      //   handleDragEnd(active, over)
-      // },
-      isDragging: (monitor) => monitor?.getItem()?.$id === $id,
-      canDrag: !isRootElementId($id),
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
-        // over: monitor.getDropResult(),
-        // active: monitor.getItem(),
-      }),
-    }))
 
-    const isOverDropOfDrag = isDragging//useEntityIsDragging(entityId)
-    const trail = useAglynCanvasElementHierarchy($id)//useEntityTrail(entityId)
-
-    const over: BesignerDndElementOver = ({
-      $id,
-      type: DndDropLinealTypeFlag.ACTIVITY_ELEMENT_INSIDE,
-      componentId,
-      bundleId,
-      hierarchy,
-    })
-    const [dropCollected, dropRef] = useDrop<BesignerDndElementActive, BesignerDndElementOver, DropCollected>(() => ({
-      accept: 'aglyn-element',
-      // hover: (active, monitor) => {
-      //   if (monitor.isOver({shallow: true}) && active?.$id && active?.$id !== over.$id) {
-      //     handleDragOver(active)
-      //   }
-      // },
-      drop: (active, monitor) => {
-        if (monitor.didDrop()) return
-        setBesignerDndState(getApp(), {dnd: () => ({})})
-
-        if (monitor.isOver({shallow: true})) {
-          console.log('drp collection', active, over)
-          handleDragEnd(active, over)
-        }
-        // if (monitor.didDrop()) {
-        //   console.log('skipping canDrop; child handled', `active:(${active?.$id}) over:(${$id})`)
-        //   return
-        // }
-        // handleDragEnd(active)
-        return over
-      },
-      collect: dropCollector,
-    }))
-    const {
-      isOverSelf,
-    } = dropCollected
-
-    const elemRef = useRef<Element>(null)
-    // const localRef = useRef<CanvasElementRefEntry>({
-    //   $id, element: elemRef, dragHandle,
-    // })
-    const {setElementRef, deleteElementRef} = useCanvasRenderedElementRefs()
-    setElementRef($id, {$id, element: elemRef, dragHandle})
-    useEffect(() => {
-      // setElementRef($id, localRef)
-      return () => {
-        deleteElementRef($id)
-      }
-    }, [deleteElementRef])
-
-    useEffect(() => {
-      isOverSelf && handleDragOver(over)
-    }, [isOverSelf, over])
-
-
-    // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    // console.log('element attributes', elementAttributes)
-
-    return (
-      <DefaultElementRendererComponent
-        ref={useCombinedRefs(ref, elemRef, dragRef, dropRef)}
-        $id={$id}
-        rendererComponent={rendererComponent || ElementRendererComponent}
-        onMouseOver={handleMouseOver}
-        // onMouseLeave={handleMouseLeave}
-        onMouseDown={handleSelect}
-        data-aglyn-element-type="element"
-        data-aglyn-element-id={$id}
-        data-aglyn-element-component={componentId}
-        data-aglyn-element-bundle={bundleId}
-        {...rest}
-      />
-    )
-
-
-    function handleSelect(e: MouseEvent) {
+    const handleSelect = useCallback((e: MouseEvent) => {
       e.stopPropagation()
       e.preventDefault()
       setBesignerCanvasSelected(getApp(), {
         selected: () => ({$id}),
       })
-    }
-    function handleMouseOver(e: MouseEvent) {
+    }, [$id, getApp])
+
+
+    const handleMouseOver = useCallback((e: MouseEvent) => {
       e.stopPropagation()
       setBesignerCanvasHovered(getApp(), {
         hovered: () => ({$id}),
       })
-    }
-    function handleMouseLeave(e: MouseEvent) {
+    }, [$id, getApp])
+
+
+    const handleMouseLeave = useCallback((e: MouseEvent) => {
       e.stopPropagation()
       setBesignerCanvasHovered(getApp(), {
         hovered: (prev) => prev.$id === $id ? {} : prev,
       })
-    }
+    }, [$id, getApp])
 
 
-    function handleDragStart(active: BesignerDndElementActive) {
+    const handleDragStart = useCallback((active: BesignerDndElementActive) => {
       console.log('handleDragStart', $id, active)
       // console.log('handle drag over', $id, active)
 
@@ -202,25 +106,61 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
       setBesignerDndState(getApp(), {
         dnd: () => ({active}),
       })
-    }
-    function handleDragOver(over?: BesignerDndElementOver) {
+    }, [$id, getApp])
+
+
+    const handleDragOver = useCallback((over?: BesignerDndElementOver) => {
       setBesignerCanvasHovered(getApp(), {
         hovered: () => ({$id: over?.$id}),
       })
       setBesignerDndState(getApp(), {
         dnd: (prev) => ({...prev, over}),
       })
-    }
+    }, [getApp])
 
-    function handleDragEnd(active: BesignerDndElementActive, over?: BesignerDndElementOver) {
+
+    const handleDragEnd = useCallback((
+      active: BesignerDndElementActive,
+      over?: BesignerDndElementOver
+    ) => {
       console.log('handleDragEnd', active, over)
       setBesignerDndState(getApp(), {dnd: () => ({})})
       if (over?.$id && active?.$id !== over.$id) {
         moveElement({$id: active.$id, parentId: over?.$id, index: -1})
       }
-    }
+    }, [getApp, moveElement])
 
-    function dropCollector(monitor: DropTargetMonitor) {
+
+    const dragItem = useMemo(() => ({
+      $id,
+      type: DndDragSourceTypeFlag.CANVAS_ELEMENT,
+      componentId,
+      bundleId,
+      hierarchy,
+    }), [$id, bundleId, componentId, hierarchy])
+
+
+    const [{isDragging}, dragHandle, dragRef] = useDrag<BesignerDndElementActive, BesignerDndElementOver, DragCollected>(() => ({
+      type: 'aglyn-element',
+      item: (monitor) => {
+        handleDragStart(dragItem)
+        return dragItem
+      },
+      isDragging: (monitor) => monitor?.getItem()?.$id === $id,
+      canDrag: !isRootElementId($id),
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+        // over: monitor.getDropResult(),
+        // active: monitor.getItem(),
+      }),
+    }))
+
+
+    const isOverDropOfDrag = isDragging
+    const trail = useAglynCanvasElementHierarchy($id)
+
+
+    const dropCollector = useCallback((monitor: DropTargetMonitor) => {
       const active = monitor.getItem<BesignerDndElementActive>()
       const isOverDrop = trail.some((i) => i === $id)
       const isInSame = isOverDrop && active && active.$id && trail.some((i) => i === active.$id)
@@ -240,12 +180,81 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         isOverChildOfSameDrag,
         isOverDropOfDrag,
       }
-    }
+    }, [$id, isOverDropOfDrag, trail])
+
+
+    const over: BesignerDndElementOver = useMemo(() => ({
+      $id,
+      type: DndDropLinealTypeFlag.ACTIVITY_ELEMENT_INSIDE,
+      componentId,
+      bundleId,
+      hierarchy,
+    }), [$id, bundleId, componentId, hierarchy])
+
+
+    const [dropCollected, dropRef] = useDrop<BesignerDndElementActive, BesignerDndElementOver, DropCollected>(() => ({
+      accept: 'aglyn-element',
+      drop: (active, monitor) => {
+        if (monitor.didDrop()) return
+        setBesignerDndState(getApp(), {dnd: () => ({})})
+
+        if (monitor.isOver({shallow: true})) {
+          console.log('drp collection', active, over)
+          handleDragEnd(active, over)
+        }
+        return over
+      },
+      collect: dropCollector,
+    }))
+
+
+    const {isOverSelf} = dropCollected
+    // const localRef = useRef<CanvasElementRefEntry>({
+    //   $id, element: elemRef, dragHandle,
+    // })
+
+
+    const {setElementRef, deleteElementRef} = useCanvasRenderedElementRefs()
+    const elemRef = useRef<Element>(null)
+    setElementRef($id, {$id, element: elemRef, dragHandle})
+
+
+    useEffect(() => {
+      // setElementRef($id, localRef)
+      return () => {
+        deleteElementRef($id)
+      }
+    }, [$id, deleteElementRef])
+
+
+    useEffect(() => {
+      isOverSelf && handleDragOver(over)
+    }, [handleDragOver, isOverSelf, over])
+
+
+    // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    // console.log('element attributes', elementAttributes)
+
+    return (
+      <LeafComponent
+        ref={useCombinedRefs(ref, elemRef, dragRef, dropRef)}
+        $id={$id}
+        leafComponent={leaf}
+        onMouseOver={handleMouseOver}
+        // onMouseLeave={handleMouseLeave}
+        onMouseDown={handleSelect}
+        data-aglyn-element-type="element"
+        data-aglyn-element-id={$id}
+        data-aglyn-element-component={componentId}
+        data-aglyn-element-bundle={bundleId}
+        {...rest}
+      />
+    )
   },
 )
 
-ElementRendererComponent.displayName = 'Besigner.ElementRendererComponent'
-ElementRendererComponent.defaultProps = {}
+ElementLeafComponent.displayName = 'Besigner.LeafComponent'
+ElementLeafComponent.defaultProps = {}
 
-export {ElementRendererComponent}
-export default ElementRendererComponent
+export {ElementLeafComponent}
+export default ElementLeafComponent

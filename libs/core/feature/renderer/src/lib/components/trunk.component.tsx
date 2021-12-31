@@ -16,46 +16,43 @@
  */
 
 import {CANVAS_ROOT_ELEMENT_ID} from '@aglyn/core-data-framework'
-import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
+import {type OverrideableComponentProps} from '@aglyn/shared-data-types'
 import {forwardRef, HTMLAttributes} from 'react'
-import {
-  ElementRendererComponent,
-  ElementRendererComponentProps,
-} from './element-renderer.component'
+import {LeafComponent} from './leaf.component'
 
 
-export interface CanvasRendererComponentProps extends HTMLAttributes<HTMLElement>, OverrideableComponentProps {
-  rendererComponent?: ElementRendererComponentProps['rendererComponent']
+export interface TrunkComponentProps extends HTMLAttributes<HTMLElement>, OverrideableComponentProps {
+  leafComponent?: LeafComponent
 }
 
-const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentProps>(
+const TrunkComponent = forwardRef<any, TrunkComponentProps>(
   function RefRenderFn(props, ref) {
     const {
-      rendererComponent: renderer,
+      leafComponent,
       children,
       $id,
       ...rest
     } = props
-    const RendererComponent = renderer || ElementRendererComponent
+    const Leaf = leafComponent || LeafComponent
     // const elements = useAglynElementData(CANVAS_ROOT_ELEMENT_ID, 'elements')
     return (
-      <RendererComponent
+      <Leaf
         ref={ref}
         $id={$id}
-        rendererComponent={RendererComponent}
+        leafComponent={Leaf}
         {...rest}
       >
         {children}
-      </RendererComponent>
+      </Leaf>
     )
   },
 )
 
-CanvasRendererComponent.displayName = 'CanvasRendererComponent'
-CanvasRendererComponent.defaultProps = {
+TrunkComponent.displayName = 'TrunkComponent'
+TrunkComponent.defaultProps = {
   component: 'div',
   $id: CANVAS_ROOT_ELEMENT_ID,
 }
 
-export {CanvasRendererComponent}
-export default CanvasRendererComponent
+export {TrunkComponent}
+export default TrunkComponent

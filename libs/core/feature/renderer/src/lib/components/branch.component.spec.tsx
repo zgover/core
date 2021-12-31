@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
+import {render} from '@testing-library/react'
 
-import CanvasRendererComponent from './canvas-renderer.component'
+import {BranchComponent} from './branch.component'
 
-describe('CanvasRendererComponent', () => {
+
+describe('ElementsRendererComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<CanvasRendererComponent />)
+    const {baseElement} = render(<BranchComponent />)
     expect(baseElement).toBeTruthy()
   })
 })
