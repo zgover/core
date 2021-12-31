@@ -33,7 +33,7 @@ import {
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import {MouseEvent, MouseEventHandler, useCallback, useEffect, useMemo} from 'react'
+import {useCallback, useEffect, useMemo} from 'react'
 import {
   DragElementWrapper,
   DragPreviewOptions,
@@ -64,27 +64,16 @@ export type UseLeafDnd = [
   dragHandleRef: DragHandleRef,
   dragPreviewRef: DragPreviewRef,
   dropRef: DropRef,
-  onHover: MouseEventHandler<any>,
-  onSelect: MouseEventHandler<any>
 ]
 export function useLeafDnd($id: ElementId): UseLeafDnd {
+  const {getApp} = useAglynAppContext()
   const componentId = useAglynElementData($id, 'componentId')
   const bundleId = useAglynElementData($id, 'bundleId')
-  const {getApp} = useAglynAppContext()
   const {moveElement} = useAglynCanvasApiEvents()
   const componentSchema = useAglynComponentSchema(componentId, bundleId)
   const hierarchy = componentSchema?.renderFlags?.hierarchy
 
 
-  const handleSelect = useCallback((e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setBesignerCanvasSelected(getApp(), {selected: () => ({$id})})
-  }, [$id, getApp])
-  const handleHover = useCallback((e: MouseEvent) => {
-    e.stopPropagation()
-    setBesignerCanvasHovered(getApp(), {hovered: () => ({$id})})
-  }, [$id, getApp])
   const handleDragStart = useCallback((active: BesignerDndElementActive) => {
     console.log('handleDragStart', $id, active)
     setBesignerCanvasSelected(getApp(), {selected: () => ({$id: active.$id})})
@@ -178,6 +167,6 @@ export function useLeafDnd($id: ElementId): UseLeafDnd {
     isOverSelf && handleDragOver(dropItem)
   }, [handleDragOver, isOverSelf, dropItem])
 
-  return [dragHandleRef, dragPreviewRef, dropRef, handleHover, handleSelect]
+  return [dragHandleRef, dragPreviewRef, dropRef]
 }
 export default useLeafDnd

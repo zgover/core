@@ -15,14 +15,8 @@
  * limitations under the License.
  */
 
+import {CANVAS_ROOT_ELEMENT_ID, type ElementId} from '@aglyn/core-data-framework'
 import {
-  CANVAS_ROOT_ELEMENT_ID,
-  type ElementId,
-  setBesignerCanvasHovered,
-  setBesignerCanvasSelected,
-} from '@aglyn/core-data-framework'
-import {
-  useAglynAppContext,
   useAglynCanvasElementHierarchy,
   useAglynComponentSchema,
   useAglynElementData,
@@ -36,6 +30,7 @@ import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeIte
 import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
 import {forwardRef, Fragment, useCallback, useMemo, useState} from 'react'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
+import useAglynElementStatusManagers from '../hooks/use-aglyn-element-status-managers'
 
 
 const TreeItem = styled(MuiTreeItem, {name: 'AglynTreeItem'})(({theme}) => ({
@@ -114,10 +109,9 @@ export interface ElementsTreeViewComponentProps extends Partial<SingleSelectTree
 export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
-
-    const {getApp} = useAglynAppContext()
     const selected = useAglynCanvasSelected()
     const selectedHierarchy = useAglynCanvasElementHierarchy(selected?.$id)
+    const [handleHover, handleSelect] = useAglynElementStatusManagers()
     const [expanded, setExpanded] = useState<ElementId[]>([])
     const allExpanded = useMemo(() => [
       ...selectedHierarchy, ...expanded,
@@ -126,17 +120,13 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     const handleTreeItemSelect = useCallback((e, $id) => {
       e.stopPropagation()
       e.preventDefault()
-      setBesignerCanvasSelected(getApp(), {
-        selected: (prev) => ({...prev, $id: $id === selected?.$id ? null : $id}),
-      })
-    }, [getApp, selected])
+      handleSelect(e, $id === selected?.$id ? null : $id)
+    }, [handleSelect, selected])
 
 
     const handleTreeItemFocus = useCallback((e, $id) => {
-      setBesignerCanvasHovered(getApp(), {
-        hovered: (prev) => ({...prev, $id}),
-      })
-    }, [getApp])
+      handleHover(e, $id)
+    }, [handleHover])
 
 
     const handleTreeItemToggle = useCallback((e, ids: ElementId[]) => {

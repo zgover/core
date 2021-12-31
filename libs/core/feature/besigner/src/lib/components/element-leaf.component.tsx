@@ -23,6 +23,7 @@ import {
 import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
 import {forwardRef, useEffect, useRef} from 'react'
 import {useCanvasRenderedElementRefs} from '../contexts/canvas-rendered-element-refs'
+import useAglynElementStatusManagers from '../hooks/use-aglyn-element-status-managers'
 import useLeafDnd from '../hooks/use-leaf-dnd'
 
 
@@ -36,7 +37,8 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const leaf = leafComponent || ElementLeafComponent
-    const [dragHandleRef, dragPreviewRef, dropRef, handleHover, handleSelect] = useLeafDnd($id)
+    const [handleHover, handleSelect] = useAglynElementStatusManagers($id)
+    const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
     const [setElementRef, deleteElementRef] = useCanvasRenderedElementRefs()
     const elemRef = useRef<Element>(null)
     setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
