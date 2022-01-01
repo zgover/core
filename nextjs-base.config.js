@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withNx = require('@nrwl/next/plugins/with-nx')
 const pkg = require('./package.json')
+const nextComposePlugins = require('next-compose-plugins')
+const withNx = require('@nrwl/next/plugins/with-nx')
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.NEXT_ANALYZE_BUNDLE === 'true',
+})
 
 const PKG_VERSION = String(pkg?.version ?? 'NULL')
 const PROCESS_VERSION = String(process.version ?? 'NULL')
@@ -84,19 +87,19 @@ const BRAND_HEADERS = [
 
 /**
  * Base configuration for NextJS Apps next.config.js
- * @param opts {import('@nrwl/next/plugins/with-nx').WithNxOptions}
+ * @param nextConfig {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
-const withAglynNxNext = (opts = {}) => {
+const withAglyn = (nextConfig = {}) => {
   console.log('process.env.NODE_ENV', NODE_ENV)
 
-  return withNx({
-    ...opts,
+  return {
+    ...nextConfig,
     env: {
       PKG_VERSION,
       COMMIT_REF,
       PROCESS_VERSION,
       PROCESS_VERSIONS,
-      ...opts?.env,
+      ...nextConfig?.env,
     },
 
     // Disable production source maps
@@ -118,19 +121,19 @@ const withAglynNxNext = (opts = {}) => {
       // Motivated by https://github.com/zeit/next.js/issues/7687
       ignoreDevErrors: IS_PRODUCTION,
       ignoreBuildErrors: IS_PRODUCTION,
-      ...opts?.typescript,
+      ...nextConfig?.typescript,
     },
 
     eslint: {
       ignoreDuringBuilds: IS_PRODUCTION,
-      ...opts?.eslint,
+      ...nextConfig?.eslint,
     },
 
     nx: {
       // Set this to false if you do not want to use SVGR
       // See: https://github.com/gregberge/svgr
       svgr: false,
-      ...opts?.nx,
+      ...nextConfig?.nx,
     },
 
     images: {
@@ -140,17 +143,17 @@ const withAglynNxNext = (opts = {}) => {
         'console.aglyn.com',
         'cdn.aglyn.com',
       ],
-      ...opts?.images,
+      ...nextConfig?.images,
     },
 
     // Will be available on server only
     serverRuntimeConfig: {
-      ...opts?.serverRuntimeConfig,
+      ...nextConfig?.serverRuntimeConfig,
     },
     // Will be available on both server and client
     publicRuntimeConfig: {
       staticFolder: '/static',
-      ...opts?.publicRuntimeConfig,
+      ...nextConfig?.publicRuntimeConfig,
     },
 
     experimental: {
@@ -159,13 +162,13 @@ const withAglynNxNext = (opts = {}) => {
       // Next.js can automatically create a standalone folder which copies only the necessary files
       // for a production deployment including select files in node_modules.
       outputStandalone: false,
-      ...opts?.experimental,
+      ...nextConfig?.experimental,
     },
 
     async headers() {
-      const headers = typeof opts?.headers === 'function'
-        ? await opts.headers() || []
-        : opts?.headers || []
+      const headers = typeof nextConfig?.headers === 'function'
+        ? await nextConfig.headers() || []
+        : nextConfig?.headers || []
 
       return [
         {
@@ -187,12 +190,20 @@ const withAglynNxNext = (opts = {}) => {
         }),
       )
 
-      return opts?.webpack
-        ? opts.webpack(config, options, ...args)
+      return nextConfig?.webpack
+        ? nextConfig.webpack(config, options, ...args)
         : config
     },
 
-  })
+  }
 }
 
-module.exports = withAglynNxNext
+/**
+ * Base configuration for NextJS Apps next.config.js
+ * @param nextConfig {import('@nrwl/next/plugins/with-nx').WithNxOptions}
+ **/
+module.exports = (nextConfig = {}) => {
+  return nextComposePlugins([
+    withAglyn, withNx, withBundleAnalyzer,
+  ], nextConfig)
+}

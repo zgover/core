@@ -1,4 +1,4 @@
-export default {
+export const mdiTriangle = {
   "id": "triangle",
   "name": "Triangle",
   "path": "M1,21H23L12,2",
@@ -7,3 +7,4 @@ export default {
     "Shape"
   ]
 }
+export default mdiTriangle

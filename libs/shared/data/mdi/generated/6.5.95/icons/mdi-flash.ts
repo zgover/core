@@ -1,4 +1,4 @@
-export default {
+export const mdiFlash = {
   "id": "flash",
   "name": "Flash",
   "path": "M7,2V13H10V22L17,10H13L17,2H7Z",
@@ -11,3 +11,4 @@ export default {
     "Weather"
   ]
 }
+export default mdiFlash

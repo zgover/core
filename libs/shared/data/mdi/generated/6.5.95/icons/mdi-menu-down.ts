@@ -1,4 +1,4 @@
-export default {
+export const mdiMenuDown = {
   "id": "menu-down",
   "name": "Menu Down",
   "path": "M7,10L12,15L17,10H7Z",
@@ -10,3 +10,4 @@ export default {
     "Arrow"
   ]
 }
+export default mdiMenuDown

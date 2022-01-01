@@ -1,4 +1,4 @@
-export default {
+export const mdiAlphaH = {
   "id": "alpha-h",
   "name": "Alpha H",
   "path": "M9,7V17H11V13H13V17H15V7H13V11H11V7H9Z",
@@ -10,3 +10,4 @@ export default {
     "Alpha / Numeric"
   ]
 }
+export default mdiAlphaH

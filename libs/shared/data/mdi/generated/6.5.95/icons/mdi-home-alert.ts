@@ -1,4 +1,4 @@
-export default {
+export const mdiHomeAlert = {
   "id": "home-alert",
   "name": "Home Alert",
   "path": "M12 3L2 12H5V20H19V12H22L12 3M13 18H11V16H13V18M13 14H11V8H13V14Z",
@@ -10,3 +10,4 @@ export default {
     "Alert / Error"
   ]
 }
+export default mdiHomeAlert

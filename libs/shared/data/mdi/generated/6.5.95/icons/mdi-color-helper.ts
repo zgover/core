@@ -1,4 +1,4 @@
-export default {
+export const mdiColorHelper = {
   "id": "color-helper",
   "name": "Color Helper",
   "path": "M0,24H24V20H0V24Z",
@@ -10,3 +10,4 @@ export default {
     "Color"
   ]
 }
+export default mdiColorHelper

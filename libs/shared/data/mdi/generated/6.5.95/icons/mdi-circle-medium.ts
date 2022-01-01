@@ -1,7 +1,8 @@
-export default {
+export const mdiCircleMedium = {
   "id": "circle-medium",
   "name": "Circle Medium",
   "path": "M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z",
   "as": [],
   "tags": []
 }
+export default mdiCircleMedium

@@ -1,4 +1,4 @@
-export default {
+export const mdiSquare = {
   "id": "square",
   "name": "Square",
   "path": "M3,3V21H21V3",
@@ -7,3 +7,4 @@ export default {
     "Shape"
   ]
 }
+export default mdiSquare

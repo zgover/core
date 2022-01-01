@@ -1,4 +1,4 @@
-export default {
+export const mdiVolumeLow = {
   "id": "volume-low",
   "name": "Volume Low",
   "path": "M7,9V15H11L16,20V4L11,9H7Z",
@@ -12,3 +12,4 @@ export default {
     "Cellphone / Phone"
   ]
 }
+export default mdiVolumeLow

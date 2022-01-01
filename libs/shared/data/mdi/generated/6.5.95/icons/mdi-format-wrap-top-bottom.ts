@@ -1,4 +1,4 @@
-export default {
+export const mdiFormatWrapTopBottom = {
   "id": "format-wrap-top-bottom",
   "name": "Format Wrap Top Bottom",
   "path": "M12,7L17,17H7L12,7M3,3H21V5H3V3M3,19H21V21H3V19Z",
@@ -7,3 +7,4 @@ export default {
     "Text / Content / Format"
   ]
 }
+export default mdiFormatWrapTopBottom

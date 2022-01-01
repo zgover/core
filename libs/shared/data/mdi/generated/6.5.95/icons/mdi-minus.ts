@@ -1,4 +1,4 @@
-export default {
+export const mdiMinus = {
   "id": "minus",
   "name": "Minus",
   "path": "M19,13H5V11H19V13Z",
@@ -10,3 +10,4 @@ export default {
     "Math"
   ]
 }
+export default mdiMinus

@@ -1,4 +1,4 @@
-export default {
+export const mdiCurrencyKzt = {
   "id": "currency-kzt",
   "name": "Currency Kzt",
   "path": "M5,3H19V5H5V3M5,6H19V8H13V21H11V8H5V6Z",
@@ -10,3 +10,4 @@ export default {
     "Currency"
   ]
 }
+export default mdiCurrencyKzt

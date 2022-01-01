@@ -1,4 +1,4 @@
-export default {
+export const mdiArrangeSendBackward = {
   "id": "arrange-send-backward",
   "name": "Arrange Send Backward",
   "path": "M2,2H16V16H2V2M22,8V22H8V18H18V8H22M4,4V14H14V4H4Z",
@@ -8,3 +8,4 @@ export default {
     "Geographic Information System"
   ]
 }
+export default mdiArrangeSendBackward

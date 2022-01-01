@@ -1,4 +1,4 @@
-export default {
+export const mdiCardsDiamond = {
   "id": "cards-diamond",
   "name": "Cards Diamond",
   "path": "M19,12L12,22L5,12L12,2",
@@ -14,3 +14,4 @@ export default {
     "Transportation + Road"
   ]
 }
+export default mdiCardsDiamond

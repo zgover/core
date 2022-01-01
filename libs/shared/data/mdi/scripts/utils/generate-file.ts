@@ -27,7 +27,7 @@ type FileOptionsJson = {
 }
 type FileOptionsExportDefault = {
   type: 'module',
-  data: Record<any, any>[] | Record<any, any>
+  data: Record<any, any>
 }
 type FileOptionsExportDefaultArray = {
   type: 'module-array',
@@ -79,10 +79,15 @@ function generateJsonFile(opts: FileOptions & FileOptionsJson) {
 }
 
 function generateExportDefaultFile(opts: FileOptions & FileOptionsExportDefault) {
-  const filename = `${opts.file}.ts`
-  const data = JSON.stringify(opts.data, null, 2)
-  const contents = `export default ${data}`
-  writeFile(opts.dir, filename, contents)
+  const {file, data, dir} = opts
+  const filename = `${file}.ts`
+  const dataStr = JSON.stringify(data, null, 2)
+  const exportName = convertIdToModuleName(data.id)
+  const contents = [
+    `export const ${exportName} = ${dataStr}`,
+    `export default ${exportName}`,
+  ].join('\r\n')
+  writeFile(dir, filename, contents)
 }
 
 function generateExportDefaultArray(opts: FileOptions & FileOptionsExportDefaultArray) {
@@ -90,7 +95,7 @@ function generateExportDefaultArray(opts: FileOptions & FileOptionsExportDefault
   const imports = []
   const names = opts.data.map((icon) => {
     const name = convertIdToModuleName(icon.id)
-    imports.push(`import {default as ${name}} from '${opts.importDir}${icon.id}'`)
+    imports.push(`import ${name} from '${opts.importDir}${icon.id}'`)
     return name
   }).join(',\r\n  ')
   const contents = [
@@ -103,8 +108,7 @@ function generateExportDefaultArray(opts: FileOptions & FileOptionsExportDefault
 function generateExportNamedFile(opts: FileOptions & FileOptionsExportName) {
   const filename = `${opts.file}.ts`
   const contents = opts.data.map((icon) => {
-    const name = convertIdToModuleName(icon.id)
-    return `export {default as ${name}} from '${opts.importDir}${icon.id}'`
+    return `export * from '${opts.importDir}${icon.id}'`
   }).join('\r\n')
   writeFile(opts.dir, filename, contents)
 }

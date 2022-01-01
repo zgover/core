@@ -66,6 +66,7 @@ function Index(props) {
                       width="504"
                       height="380"
                       loading="eager"
+                      priority
                     />
                   ),
                 },
