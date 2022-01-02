@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import {
   type MutableRefObject,
   type ReactNode,
   useContext,
+  useMemo,
   useRef,
-  useState,
 } from 'react'
 import {type DragElementWrapper, type DragSourceOptions} from 'react-dnd'
 
@@ -40,7 +40,11 @@ export type CanvasRenderedElementRefs = [
   getElementRef: ($id: ElementId) => CanvasElementRefEntry,
 ]
 
-export const CanvasRenderedElementRefsContext = createContext<CanvasRenderedElementRefs>(null)
+export const CanvasRenderedElementRefsContext = createContext<CanvasRenderedElementRefs>([
+  (() => {}) as any,
+  (() => {}) as any,
+  (() => {}) as any,
+])
 CanvasRenderedElementRefsContext.displayName = 'CanvasRenderedElementRefsContext'
 
 export const {
@@ -61,7 +65,7 @@ export interface CanvasRenderedElementRefsComponentProps {
 function CanvasRenderedElementRefsComponent(props: CanvasRenderedElementRefsComponentProps) {
   const {children} = props
   const elementRefs = useRef<Record<ElementId, CanvasElementRefEntry>>({})
-  const [context] = useState<CanvasRenderedElementRefs>(() => ([
+  const context = useMemo<CanvasRenderedElementRefs>(() => ([
     ($id, ref): void => {
       elementRefs.current[$id] = ref
     },
@@ -71,17 +75,7 @@ function CanvasRenderedElementRefsComponent(props: CanvasRenderedElementRefsComp
     ($id) => {
       return elementRefs.current[$id]
     },
-  ]))
-
-  // useDndMonitor({
-  //   onDragStart(event) {},
-  //   onDragMove(event) {},
-  //   onDragOver(event) {
-  //     setOver({...event, canDrop: confirmValidLinealRelationship({item: {...event.active},
-  // parent: {...event.over}})}) console.log('event on drag over', event) }, onDragEnd(event) {
-  // setOver(null) }, onDragCancel(event) {}, })
-
-  // console.log('selectedOptions selectedOpen', selectedOptions, selectedOpen, hoveredOpen)
+  ]), [elementRefs])
 
   return (
     <CanvasRenderedElementRefsProvider value={context}>

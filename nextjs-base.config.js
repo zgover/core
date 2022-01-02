@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,13 @@ const withAglyn = (nextConfig = {}) => {
       // Next.js can automatically create a standalone folder which copies only the necessary files
       // for a production deployment including select files in node_modules.
       outputStandalone: false,
+      // Concurrent features in React 18 include built-in support for server-side Suspense and SSR
+      // streaming support, allowing you to server-render pages using HTTP streaming.
+      concurrentFeatures: false,
+      // React Server Components allow us to render everything, including the components themselves,
+      // on the server. This is fundamentally different from server-side rendering where you're
+      // pre-generating HTML on the server.
+      serverComponents: false,
       ...nextConfig?.experimental,
     },
 

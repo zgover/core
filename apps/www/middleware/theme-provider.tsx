@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
  */
 
 import {
-  Theme,
+  type Theme,
   ThemeProvider as MuiThemeProvider,
-  ThemeProviderProps as MuiThemeProviderProps,
+  type ThemeProviderProps as MuiThemeProviderProps,
 } from '@aglyn/shared-feature-themes'
-import React from 'react'
-import { NextAppMiddleware } from '../lib/next-app'
+import {type ReactElement, useEffect} from 'react'
+import {type NextAppMiddleware} from '../lib/next-app'
+
 
 /**
  * Next app middleware for material-ui theme provider component
@@ -34,13 +35,13 @@ import { NextAppMiddleware } from '../lib/next-app'
  * @returns {ThemeProviderElement<T>}
  */
 export function ThemeProviderComponent<T>(props: Props): ThemeProviderElement<T> {
-  const { theme, children, selector, ...rest } = props
+  const {theme, children, selector, ...rest} = props
 
-  React.useEffect(() => {
+  useEffect(() => {
     function removeSsrStyles() {
       // Remove the server-side injected CSS from the client side to
       // avoid client and server style rule conflicts
-      const jssStyles = document.querySelector(selector)
+      const jssStyles = document?.querySelector(selector)
       if (jssStyles) {
         jssStyles.parentElement.removeChild(jssStyles)
       }
@@ -59,8 +60,8 @@ ThemeProviderComponent.defaultProps = {
 }
 ThemeProviderComponent.displayName = 'ThemeProviderComponent'
 
-export type Props = MuiThemeProviderProps & { selector?: string }
-export type ThemeProviderElement<T> = React.ReactElement<MuiThemeProviderProps<T>>
+export type Props = MuiThemeProviderProps & {selector?: string}
+export type ThemeProviderElement<T> = ReactElement<MuiThemeProviderProps<T>>
 export type ThemeProviderMiddleware<T = Theme, P = Props> = (theme: T) => NextAppMiddleware<P>
 
 export const themeProvider: ThemeProviderMiddleware<any, any> = (theme) => ({

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,10 @@ import {
   registerComponent,
 } from '@aglyn/core-data-framework'
 import {createAglynComponent} from '@aglyn/core-feature-renderer'
-import {APP_WWW} from '@aglyn/shared-data-brand'
-import {
-  AppLoaderProviderComponent,
-  type MakeLinkElementsConfig,
-  type MakeMetaElementsConfig,
-} from '@aglyn/shared-ui-jsx'
+import {APP_CONSOLE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
+import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
 import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
+import {Fragment, useMemo} from 'react'
 import {samplePageData} from '../constants/sample-data'
 
 
@@ -37,22 +34,43 @@ export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentP
 
 function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
   const {NextAppWrapperProps, ...rest} = props
-  const metaElements: MakeMetaElementsConfig = [
+  const {
+    metaElements: wrapperMetaElements,
+    linkElements: wrapperLinkElements,
+    headChildren: wrapperHeadChildren,
+    documentTitle: wrapperDocumentTitle,
+    ...nextAppWrapperProps
+  } = NextAppWrapperProps || {}
+  const documentTitle = useMemo(() => (
+    wrapperDocumentTitle || APP_CONSOLE.META_TITLE
+  ), [wrapperDocumentTitle])
+  const headChildren = useMemo(() => (
+    <Fragment>
+      {!IS_PRODUCTION ? null : (
+        <Fragment>
+        </Fragment>
+      )}
+      {wrapperHeadChildren}
+    </Fragment>
+  ), [wrapperHeadChildren])
+  const metaElements: MakeMetaElementsConfig = useMemo(() => ([
     ['viewport', 'width=device-width, initial-scale=1'],
-    ['description', APP_WWW.META_DESCRIPTION],
-    ...NextAppWrapperProps?.metaElements || [],
-  ]
-  const linkElements: MakeLinkElementsConfig = [
-    ...NextAppWrapperProps?.linkElements || [],
-  ]
+    ['description', APP_CONSOLE.META_DESCRIPTION],
+    ...wrapperMetaElements || [],
+  ]), [wrapperMetaElements])
+  const linkElements: MakeLinkElementsConfig = useMemo(() => ([
+    ...wrapperLinkElements || [],
+  ]), [wrapperLinkElements])
+
+
   return (
     <NextEmotionAppComponent
       NextAppWrapperProps={{
-        documentTitle: APP_WWW.META_TITLE,
-        ...NextAppWrapperProps,
+        documentTitle,
+        headChildren,
         metaElements,
         linkElements,
-        mainWrapper: AppLoaderProviderComponent,
+        ...nextAppWrapperProps,
       }}
       {...rest}
     />

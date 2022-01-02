@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-import type { Theme } from '@mui/material/styles'
+import {type Theme} from '@mui/material/styles'
 
-import type { Shadows } from '@mui/material/styles/shadows'
-import type { WithStyles } from '@mui/styles'
+import {type Shadows} from '@mui/material/styles/shadows'
+import {type WithStyles} from '@mui/styles'
 
-import type { ClassKeyInferable } from '@mui/styles/withStyles'
+import {type ClassKeyInferable} from '@mui/styles/withStyles'
 
-import type { Shape } from '@mui/system/createTheme/shape'
-import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
+import {type Shape} from '@mui/system/createTheme/shape'
+import {type ColorPropOverrides, type IActionStates} from '../lib/theme.types'
 
 
 //    _____     _______ ____  ____  ___ ____  _____ ____
@@ -56,10 +56,12 @@ declare module '@mui/material/styles/createPalette' {
   interface TypeBackground {
     secondary: string
   }
+
   interface Palette {
     tertiary: Palette['primary']
     quaternary: Palette['primary']
   }
+
   interface PaletteOptions {
     tertiary?: PaletteOptions['primary']
     quaternary?: PaletteOptions['primary']
@@ -113,7 +115,7 @@ declare module '@mui/material/styles' {
 
   interface Theme {
     insetShadows: Shadows
-    shape: Shape & { appIconBorderRadius: number | string }
+    shape: Shape & {appIconBorderRadius: number | string}
   }
 
   interface Palette {
@@ -136,7 +138,7 @@ declare module '@mui/material/styles' {
     text?: PaletteOptions['text']
   }
 
-  type ExtendPropsOfWithStyles<P extends { classes?: ClassNameMap<string> },
+  type ExtendPropsOfWithStyles<P extends {classes?: ClassNameMap<string>},
     StylesType extends ClassKeyInferable<any, any>,
     IncludeTheme extends boolean | undefined = false> = P & WithStyles<StylesType, IncludeTheme>
 }
@@ -153,77 +155,56 @@ declare module '@mui/styles' {
 //  |_____/_/\_\_|    \___/|_| \_\|_| |____/
 
 
-export type {
-  Overwrite,
+export {
+  type Overwrite,
 } from '@mui/types'
 
-export type {
-  ShapeOptions,
-  Spacing,
-  SpacingOptions,
-  MuiStyledOptions as StyledOptions,
-  MuiStyledOptions,
-  SxProps,
-  BoxProps,
+export {
+  type ShapeOptions,
+  type Spacing,
+  type SpacingOptions,
+  type MuiStyledOptions as StyledOptions,
+  type MuiStyledOptions,
+  type SxProps,
+  type BoxProps,
 } from '@mui/system'
 
-export { visuallyHidden } from '@mui/utils'
-
-export type {
-  Breakpoint,
-  BreakpointOverrides,
-  Breakpoints,
-  BreakpointsOptions,
-  ClassNameMap,
-  ColorFormat,
-  ColorObject,
-  ComponentsOverrides,
-  ComponentsProps,
-  ComponentsPropsList,
-  ComponentsVariants,
-  CreateMUIStyled,
-  CSSObject,
-  Direction,
-  Duration,
-  Easing,
-  ExtendPropsOfWithStyles,
-  Palette,
-  PaletteColor,
-  PaletteColorOptions,
-  PaletteOptions,
-  SimplePaletteColorOptions,
-  StyledComponentProps,
-  Theme,
-  ThemedProps,
-  ThemeOptions,
-  ThemeWithProps,
-  Transitions,
-  TransitionsOptions,
-  TypographyStyle,
-  TypographyVariant,
-  TypographyVariants,
-  TypographyVariantsOptions,
-} from '@mui/material/styles'
-
-
-export type {
-  ColorPartial,
-  CommonColors,
-  TypeBackground,
-  TypeText,
-} from '@mui/material/styles/createPalette'
-
-export type {
-  Shadows,
-} from '@mui/material/styles/shadows'
-
-export type {
-  ClassKeyInferable,
-} from '@mui/styles/withStyles'
-
-export type { Shape } from '@mui/system/createTheme/shape'
+export {visuallyHidden} from '@mui/utils'
 
 export {
+  type Breakpoint,
+  type BreakpointOverrides,
+  type Breakpoints,
+  type BreakpointsOptions,
+  type ClassNameMap,
+  type ColorFormat,
+  type ColorObject,
+  type ComponentsOverrides,
+  type ComponentsProps,
+  type ComponentsPropsList,
+  type ComponentsVariants,
+  type CreateMUIStyled,
+  type CSSObject,
+  type Direction,
+  type Duration,
+  type Easing,
+  type ExtendPropsOfWithStyles,
+  type Palette,
+  type PaletteColor,
+  type PaletteColorOptions,
+  type PaletteOptions,
+  type SimplePaletteColorOptions,
+  type StyledComponentProps,
+  type Theme,
+  type ThemedProps,
+  type ThemeOptions,
+  type ThemeWithProps,
+  type Transitions,
+  type TransitionsOptions,
+  type TypographyStyle,
+  type TypographyVariant,
+  type TypographyVariants,
+  type TypographyVariantsOptions,
   alpha,
   createTheme,
   darken,
@@ -244,36 +225,51 @@ export {
   ThemeProvider,
   useTheme,
   useThemeProps,
+  withStyles,
+  makeStyles,
+  createStyles,
 } from '@mui/material/styles'
 
-export type {
-  BaseCreateCSSProperties,
-  BaseCSSProperties,
-  CSSProperties,
-  ServerStyleSheets,
-  StyledProps,
-  StyleRules,
-  StyleRulesCallback,
-  Styles,
-  StylesOptions,
-  StylesProviderProps,
-  ThemedComponentProps,
-  ThemeOfStyles,
-  ThemeProviderProps,
-  WithStyles,
-  WithStylesOptions,
-  WithTheme,
-  WithThemeCreatorOption,
-} from '@mui/styles'
 
 export {
-  createStyles,
+  type ColorPartial,
+  type CommonColors,
+  type TypeBackground,
+  type TypeText,
+} from '@mui/material/styles/createPalette'
+
+export {
+  type Shadows,
+} from '@mui/material/styles/shadows'
+
+export {
+  type ClassKeyInferable,
+} from '@mui/styles/withStyles'
+
+export {type Shape} from '@mui/system/createTheme/shape'
+
+export {
+  type BaseCreateCSSProperties,
+  type BaseCSSProperties,
+  type CSSProperties,
+  type ServerStyleSheets,
+  type StyledProps,
+  type StyleRules,
+  type StyleRulesCallback,
+  type Styles,
+  type StylesOptions,
+  type StylesProviderProps,
+  type ThemedComponentProps,
+  type ThemeOfStyles,
+  type ThemeProviderProps,
+  type WithStyles,
+  type WithStylesOptions,
+  type WithTheme,
+  type WithThemeCreatorOption,
   getThemeProps,
   jssPreset,
-  makeStyles,
   StylesContext,
   StylesProvider,
   useThemeVariants,
-  withStyles,
   withThemeCreator,
 } from '@mui/styles'

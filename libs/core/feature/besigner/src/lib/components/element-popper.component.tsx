@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ const defaultClientRect = ({
   left: 0, top: 0, x: 0, y: 0,
 }) as DOMRect
 const virtualElement = {
+  ...defaultClientRect,
   getBoundingClientRect: (): DOMRect => ({
     ...defaultClientRect,
     toJSON: () => ({...defaultClientRect}),
@@ -83,10 +84,7 @@ export interface ElementPopperComponentProps extends Partial<MuiPopperProps> {
 
 const ElementPopperComponent = forwardRef<any, ElementPopperComponentProps>(
   function RefRenderFn(props, ref) {
-    const {
-      variant,
-      ...rest
-    } = props
+    const {variant, ...rest} = props || {}
 
 
     const {getApp} = useAglynAppContext()
@@ -204,7 +202,9 @@ const ElementPopperComponent = forwardRef<any, ElementPopperComponentProps>(
   },
 )
 ElementPopperComponent.displayName = 'ElementPopperComponent'
-ElementPopperComponent.defaultProps = {}
+ElementPopperComponent.defaultProps = {
+  variant: 'hoveredOverlay',
+}
 
 export {ElementPopperComponent}
 export default ElementPopperComponent

@@ -18,7 +18,7 @@
 import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-brand'
 import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
 import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
-import {useEffect} from 'react'
+import {Fragment, useEffect, useMemo} from 'react'
 import HsEmbedScript from '../components/hs-embed-script'
 import VisitorQueueScript from '../components/visitor-queue-script'
 import {withAppController} from '../lib/aglyn-deprecated/lib/controllers/app-controller'
@@ -38,14 +38,35 @@ export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentP
 
 function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
   const {NextAppWrapperProps, ...rest} = props
-  const metaElements: MakeMetaElementsConfig = [
+  const {
+    metaElements: wrapperMetaElements,
+    linkElements: wrapperLinkElements,
+    headChildren: wrapperHeadChildren,
+    documentTitle: wrapperDocumentTitle,
+    ...nextAppWrapperProps
+  } = NextAppWrapperProps || {}
+  const documentTitle = useMemo(() => (
+    wrapperDocumentTitle || APP_WWW.META_TITLE
+  ), [wrapperDocumentTitle])
+  const headChildren = useMemo(() => (
+    <Fragment>
+      {!IS_PRODUCTION ? null : (
+        <Fragment>
+          <HsEmbedScript />
+          <VisitorQueueScript />
+        </Fragment>
+      )}
+      {wrapperHeadChildren}
+    </Fragment>
+  ), [wrapperHeadChildren])
+  const metaElements: MakeMetaElementsConfig = useMemo(() => ([
     ['viewport', 'width=device-width, initial-scale=1'],
     ['description', APP_WWW.META_DESCRIPTION],
-    ...NextAppWrapperProps?.metaElements || [],
-  ]
-  const linkElements: MakeLinkElementsConfig = [
-    ...NextAppWrapperProps?.linkElements || [],
-  ]
+    ...wrapperMetaElements || [],
+  ]), [wrapperMetaElements])
+  const linkElements: MakeLinkElementsConfig = useMemo(() => ([
+    ...wrapperLinkElements || [],
+  ]), [wrapperLinkElements])
 
   useEffect(() => {
     if (IS_PRODUCTION) app?.getAnalytics()
@@ -55,16 +76,11 @@ function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
   return (
     <NextEmotionAppComponent
       NextAppWrapperProps={{
-        documentTitle: APP_WWW.META_TITLE,
-        ...NextAppWrapperProps,
+        documentTitle,
+        headChildren,
         metaElements,
         linkElements,
-        headChildren: !IS_PRODUCTION ? null : (
-          <>
-            <HsEmbedScript />
-            <VisitorQueueScript />
-          </>
-        ),
+        ...nextAppWrapperProps,
       }}
       {...rest}
     />
