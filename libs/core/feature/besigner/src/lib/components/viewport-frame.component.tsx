@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import Box from '@mui/material/Box'
 import {forwardRef, type HTMLAttributes, type MouseEvent, useCallback} from 'react'
 import CanvasRenderedElementRefsComponent from '../contexts/canvas-rendered-element-refs'
 import ElementLeafComponent from './element-leaf.component'
-import ElementOverlayComponent from './element-overlay.component'
+import ElementOverlaysComponent from './element-overlays.component'
 
 
 const ViewportFrame = styled('div', {
@@ -71,7 +71,7 @@ const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
             id="aglyn:canvas-overlay"
             sx={{position: 'relative', zIndex: 'tooltip'}}
           >
-            <ElementOverlayComponent />
+            <ElementOverlaysComponent />
           </Box>
         </CanvasRenderedElementRefsComponent>
         {children}

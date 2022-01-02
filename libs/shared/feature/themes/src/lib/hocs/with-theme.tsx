@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import {JSXComponentType} from '@aglyn/shared-data-types'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {getDisplayName} from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
-import {Theme, ThemeProvider} from '../../vendor/mui'
+import {type Theme, ThemeProvider} from '../../vendor/mui'
 
 
 export type WithThemeOptions = {
@@ -31,10 +30,10 @@ function withTheme(options: WithThemeOptions) {
   const {theme, disableCssBaseline} = {...options}
   const [lightTheme, darkTheme] = _isArr(theme) ? theme : [theme]
 
-  return function WithTheme<P>(Component: JSXComponentType<P>) {
-    const displayName = `WithTheme(${getDisplayName(Component)})`
+  return function WithTheme<P>(Component) {
+    const displayName = `ThemedComponent(${getDisplayName(Component)})`
 
-    function WithTheme(props: P & {themeType?: 'light' | 'dark'}) {
+    function ThemedComponent(props: P & {themeType?: 'light' | 'dark'}) {
       const {themeType, ...rest} = props
       const activeTheme = themeType === 'dark' ? darkTheme : lightTheme
       return (
@@ -44,8 +43,8 @@ function withTheme(options: WithThemeOptions) {
         </ThemeProvider>
       )
     }
-    WithTheme.displayName = displayName
-    return WithTheme
+    ThemedComponent.displayName = displayName
+    return ThemedComponent
   }
 }
 export {withTheme}

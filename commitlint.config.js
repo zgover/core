@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,29 @@
  * limitations under the License.
  */
 
-import ElementPopperComponent from './element-popper.component'
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
 
-
-export interface ViewportPoppersComponentProps {
-
+  /**
+   * @see {@link https://commitlint.js.org/#/reference-rules|Commitlint Rules Docs}
+   */
+  rules: {
+    'type-enum': [
+      2,
+      'always',
+      [
+        'build',
+        'chore',
+        'ci',
+        'docs',
+        'feat',
+        'fix',
+        'perf',
+        'refactor',
+        'revert',
+        'style',
+        'test',
+      ],
+    ],
+  },
 }
-
-function ElementOverlayComponent(props: ViewportPoppersComponentProps) {
-  const {
-    ...rest
-  } = props
-
-  return (
-    <>
-      <ElementPopperComponent
-        variant="hoveredOverlay"
-      />
-      <ElementPopperComponent
-        variant="selectedOverlay"
-      />
-    </>
-  )
-}
-
-ElementOverlayComponent.displayName = 'ElementOverlayComponent'
-
-export {ElementOverlayComponent}
-export default ElementOverlayComponent

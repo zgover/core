@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@
 import {styled} from '@aglyn/shared-feature-themes'
 import Stack, {type StackProps} from '@mui/material/Stack'
 import {forwardRef} from 'react'
-import {AppBarPrimaryComponent} from './app-bar-primary.component'
-import {AppBarSecondaryComponent} from './app-bar-secondary.component'
-import {PanelLeftComponent} from './panel-left.component'
-import {PanelRightComponent} from './panel-right.component'
-import {ViewportRootComponent} from './viewport-root.component'
+import AppBarPrimaryComponent from './app-bar-primary.component'
+import AppBarSecondaryComponent from './app-bar-secondary.component'
+import PanelLeftComponent from './panel-left.component'
+import PanelRightComponent from './panel-right.component'
+import ViewportRootComponent from './viewport-root.component'
 
 
 const WorkspaceEditor = styled(Stack, {
@@ -40,7 +40,7 @@ const WorkspaceEditor = styled(Stack, {
 
 export interface WorkspaceEditorComponentProps extends StackProps {}
 
-const WorkspaceEditorComponentRaw = forwardRef<any, WorkspaceEditorComponentProps>(
+const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
 
@@ -110,8 +110,8 @@ const WorkspaceEditorComponentRaw = forwardRef<any, WorkspaceEditorComponentProp
   },
 )
 
-WorkspaceEditorComponentRaw.displayName = 'WorkspaceEditorComponent'
-WorkspaceEditorComponentRaw.defaultProps = {}
+WorkspaceEditorComponent.displayName = 'WorkspaceEditorComponent'
+WorkspaceEditorComponent.defaultProps = {}
 
-export const WorkspaceEditorComponent = WorkspaceEditorComponentRaw
+export {WorkspaceEditorComponent}
 export default WorkspaceEditorComponent

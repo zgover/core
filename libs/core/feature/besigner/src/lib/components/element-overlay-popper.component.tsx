@@ -78,11 +78,11 @@ export type PopperVariant =
   | 'hoveredOverlay'
   | 'selectedOverlay'
 
-export interface ElementPopperComponentProps extends Partial<MuiPopperProps> {
+export interface ElementOverlayPopperComponentProps extends Partial<MuiPopperProps> {
   variant: PopperVariant
 }
 
-const ElementPopperComponent = forwardRef<any, ElementPopperComponentProps>(
+const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperComponentProps>(
   function RefRenderFn(props, ref) {
     const {variant, ...rest} = props || {}
 
@@ -201,10 +201,10 @@ const ElementPopperComponent = forwardRef<any, ElementPopperComponentProps>(
     )
   },
 )
-ElementPopperComponent.displayName = 'ElementPopperComponent'
-ElementPopperComponent.defaultProps = {
+ElementOverlayPopperComponent.displayName = 'ElementOverlayPopperComponent'
+ElementOverlayPopperComponent.defaultProps = {
   variant: 'hoveredOverlay',
 }
 
-export {ElementPopperComponent}
-export default ElementPopperComponent
+export {ElementOverlayPopperComponent}
+export default ElementOverlayPopperComponent

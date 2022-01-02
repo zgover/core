@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ export type JSXIntrinsicClassAttributes<T> = JSX.IntrinsicClassAttributes<T>
 export type JSXIntrinsicElementMap<P = any> = { [K in keyof JSXIntrinsicElements]: P extends JSXIntrinsicElements[K] ? K : never }
 export type JSXIntrinsicElement<P = any> = JSXIntrinsicElementMap<P>[keyof JSXIntrinsicElements]
 
-export type JSXElementFunctionComponent<P> = ((props: P) => JSXElement | null)
-export type JSXElementClassComponent<P> = (new (props: P) => JSXComponent<P, any>)
+export type JSXElementFunctionComponent<P> = {(props: P): JSXElement | null}
+export type JSXElementClassComponent<P> = JSXComponentClass<P, any>
 export type JSXComponentType<P> = JSXElementFunctionComponent<P> | JSXElementClassComponent<P>
 export type JSXElementType<P = any> =
   | JSXIntrinsicElement<P>
