@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 import {type AnyProps} from '@aglyn/shared-data-types'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {type NextPage} from 'next'
-import {type AppProps} from 'next/app'
+import {type AppProps as NextAppProps} from 'next/app'
 import {type ReactElement} from 'react'
 
 
@@ -28,7 +28,7 @@ export type NextPageGetLayout<Props = AnyProps, InitialProps = Props> = {
 export type NextPageWithLayout<Props = AnyProps, InitialProps = Props> = NextPage<Props, InitialProps> & {
   getLayout?: NextPageGetLayout<Props, InitialProps>
 }
-export type NextAppWithLayoutProps<Props = AnyProps, InitialProps = Props> = AppProps<Props> & {
+export type NextAppWithLayoutProps<Props = AnyProps, InitialProps = Props> = NextAppProps<Props> & {
   Component: NextPageWithLayout<Props, InitialProps>
   defaultGetLayout?: NextPageGetLayout<Props, InitialProps>,
 }

@@ -18,10 +18,12 @@
 
 import {
   type ElementId,
-  getBesignerStore,
   getCanvasNormalizedElementsStore,
   getComponentElementHierarchy,
 } from '@aglyn/core-data-framework'
+import {
+  getBesignerStore,
+} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {type Conditional} from '@aglyn/shared-data-types'
 import {useStoreMap} from 'effector-react'

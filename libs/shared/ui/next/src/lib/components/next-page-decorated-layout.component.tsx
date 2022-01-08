@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import getNextPageLayout, {type NextAppWithLayoutProps} from '../utils/get-next-page-layout'
+import {getNextPageLayout, type NextAppWithLayoutProps} from '../utils/get-next-page-layout'
 
 
 export interface NextPageDecoratedLayoutComponentProps<Props, InitialProps> extends NextAppWithLayoutProps<Props, InitialProps> {}

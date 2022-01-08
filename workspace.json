@@ -44,7 +44,8 @@
           "executor": "@nrwl/next:server",
           "options": {
             "buildTarget": "console:build",
-            "dev": true
+            "dev": true,
+            "port": 4200
           },
           "configurations": {
             "production": {
@@ -111,6 +112,29 @@
       },
       "tags": ["sc:app", "sc:app:console"],
       "implicitDependencies": ["console"]
+    },
+    "core-data-besigner": {
+      "root": "libs/core/data/besigner",
+      "sourceRoot": "libs/core/data/besigner/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/core/data/besigner/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/core/data/besigner"],
+          "options": {
+            "jestConfig": "libs/core/data/besigner/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:data", "sc:lib:core:data:besigner"]
     },
     "core-data-framework": {
       "root": "libs/core/data/framework",
@@ -346,8 +370,7 @@
             "passWithNoTests": true
           }
         }
-      },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:ui"]
+      }
     },
     "shared-util-dom": {
       "root": "libs/shared/util/dom",
@@ -533,6 +556,89 @@
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
     },
+    "site": {
+      "root": "apps/site",
+      "sourceRoot": "apps/site",
+      "projectType": "application",
+      "targets": {
+        "build": {
+          "executor": "@nrwl/next:build",
+          "outputs": ["{options.outputPath}"],
+          "defaultConfiguration": "production",
+          "options": {
+            "root": "apps/site",
+            "outputPath": "dist/apps/site"
+          },
+          "configurations": {
+            "production": {}
+          }
+        },
+        "serve": {
+          "executor": "@nrwl/next:server",
+          "options": {
+            "buildTarget": "site:build",
+            "dev": true,
+            "port": 4500
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "site:build:production",
+              "dev": false
+            }
+          }
+        },
+        "export": {
+          "executor": "@nrwl/next:export",
+          "options": {
+            "buildTarget": "site:build:production"
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/apps/site"],
+          "options": {
+            "jestConfig": "apps/site/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["apps/site/**/*.{ts,tsx,js,jsx}"]
+          }
+        }
+      },
+      "tags": ["sc:app\"", "\"sc:app:site"]
+    },
+    "site-e2e": {
+      "root": "apps/site-e2e",
+      "sourceRoot": "apps/site-e2e/src",
+      "projectType": "application",
+      "targets": {
+        "e2e": {
+          "executor": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/site-e2e/cypress.json",
+            "devServerTarget": "site:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "site:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["apps/site-e2e/**/*.{js,ts}"]
+          }
+        }
+      },
+      "tags": [],
+      "implicitDependencies": ["site"]
+    },
     "www": {
       "root": "apps/www",
       "sourceRoot": "apps/www",
@@ -553,7 +659,8 @@
           "executor": "@nrwl/next:server",
           "options": {
             "buildTarget": "www:build",
-            "dev": true
+            "dev": true,
+            "port": 4100
           },
           "configurations": {
             "production": {

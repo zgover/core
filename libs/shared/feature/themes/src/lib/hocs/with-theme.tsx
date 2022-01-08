@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {type JSXComponentType} from '@aglyn/shared-data-types'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {getDisplayName} from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
@@ -26,16 +27,18 @@ export type WithThemeOptions = {
   disableCssBaseline?: boolean
 }
 
+export type PropsWithThemeMode<P> = P & {themeMode?: 'light' | 'dark'}
+
 function withTheme(options: WithThemeOptions) {
   const {theme, disableCssBaseline} = {...options}
   const [lightTheme, darkTheme] = _isArr(theme) ? theme : [theme]
 
-  return function WithTheme<P>(Component) {
+  return function WithTheme<P>(Component: JSXComponentType<P>): JSXComponentType<PropsWithThemeMode<P>> {
     const displayName = `ThemedComponent(${getDisplayName(Component)})`
 
-    function ThemedComponent(props: P & {themeType?: 'light' | 'dark'}) {
-      const {themeType, ...rest} = props
-      const activeTheme = themeType === 'dark' ? darkTheme : lightTheme
+    function ThemedComponent(props: PropsWithThemeMode<P>) {
+      const {themeMode, ...rest} = props
+      const activeTheme = themeMode === 'dark' ? darkTheme : lightTheme
       return (
         <ThemeProvider theme={activeTheme}>
           {!disableCssBaseline ? <CssBaseline /> : null}

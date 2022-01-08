@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ export * from './types'
 // 👇
 
 export * from './api/app.api'
-export * from './api/besigner.api'
 export * from './api/canvas.api'
 export * from './api/commands.api'
 export * from './api/components.api'
@@ -46,7 +45,6 @@ export * from './constants/_internal'
 export * from './constants/app'
 export * from './constants/canvas'
 export * from './constants/components'
-export * from './constants/besigner'
 export * from './constants/emitter'
 export * from './constants/error'
 export * from './constants/lifecycle'
@@ -100,12 +98,17 @@ export * from './models/aglyn-extension.types'
 //  / /   / / / /  |/ / / / / /_/ / / / / /   / /   / __/ / /_/ \__ \
 // / /___/ /_/ / /|  / / / / _, _/ /_/ / /___/ /___/ /___/ _, ____/ /
 // \____/\____/_/ |_/ /_/ /_/ |_|\____/_____/_____/_____/_/ |_/____/
-// 👇 TYPES ONLY
+// 👇
 
 export * from './controllers/aglyn-app.types'
-export * from './controllers/aglyn-besigner.types'
+export * from './controllers/aglyn-app.controller'
 export * from './controllers/aglyn-canvas.types'
+export * from './controllers/aglyn-canvas.controller'
 export * from './controllers/aglyn-commands.types'
+export * from './controllers/aglyn-commands.controller'
 export * from './controllers/aglyn-components.types'
+export * from './controllers/aglyn-components.controller'
 export * from './controllers/aglyn-contexts.types'
+export * from './controllers/aglyn-contexts.controller'
 export * from './controllers/aglyn-extensions.types'
+export * from './controllers/aglyn-extensions.controller'

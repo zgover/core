@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {IS_PRODUCTION} from '@aglyn/shared-data-brand'
+import {HAS_DOCUMENT, IS_PRODUCTION} from '@aglyn/shared-data-brand'
 import {type JSXElementType} from '@aglyn/shared-data-types'
 import {consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
 import {
@@ -36,6 +36,7 @@ export interface NextAppWrapperComponentProps {
   metaElements?: MakeMetaElementsConfig
   linkElements?: MakeLinkElementsConfig
   mainWrapper?: JSXElementType<{children?: ReactNode}>
+  disableMainElement?: boolean
 }
 
 function NextAppWrapperComponentRaw(props: NextAppWrapperComponentProps) {
@@ -46,12 +47,13 @@ function NextAppWrapperComponentRaw(props: NextAppWrapperComponentProps) {
     metaElements,
     linkElements,
     mainWrapper,
+    disableMainElement,
   } = props
   const Wrapper = IS_PRODUCTION ? Fragment : Fragment // StrictMode
   const MainWrapper = mainWrapper || Fragment
 
   useEffect(() => {
-    if (typeof document !== 'undefined') {
+    if (HAS_DOCUMENT) {
       // Remove the server-side injected CSS.
       const jssStyles = document?.querySelector('#jss-server-side')
       jssStyles?.parentElement?.removeChild(jssStyles)
@@ -68,7 +70,9 @@ function NextAppWrapperComponentRaw(props: NextAppWrapperComponentProps) {
       </Head>
       <div className="app">
         <MainWrapper>
-          <main>{children}</main>
+          {disableMainElement ? children : (
+            <main>{children}</main>
+          )}
         </MainWrapper>
       </div>
     </Wrapper>

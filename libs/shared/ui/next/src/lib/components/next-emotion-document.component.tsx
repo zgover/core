@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,33 +47,34 @@ export type InitPropsResponse = Promise<DocumentInitialProps & LangParam>
 export interface NextEmotionDocumentComponentProps extends LangParam {}
 
 /**
+ * Next.js custom _document.jsx with cached emotion styles
+ *
  * Document component handles the initial `document` markup and
  * renders only on the server side. Commonly used for implementing
  * server side rendering for `css-in-js` libraries.
  *
- * @example
- * > ## Resolution order
- * >
- * > ### Server-side
- * > 1. {@link NextAppWrapperComponent.getInitialProps} (if-exists)
- * > 2. <PageComponent>.getInitialProps
- * > 3. {@link NextEmotionDocumentComponent.getInitialProps}
- * > 4. {@link NextAppWrapperComponent.render}
- * > 5. <PageComponent>.render
- * > 6. {@link NextEmotionDocumentComponent.render}
- * >
- * > ### Server-side (w/ error)
- * > 1. {@link NextEmotionDocumentComponent.getInitialProps}
- * > 2. {@link NextAppWrapperComponent.render}
- * > 3. <PageComponent>.render
- * > 4. {@link NextEmotionDocumentComponent.render}
- * >
- * > ### Client-side
- * > 1. {@link NextAppWrapperComponent.getInitialProps} (if-exists)
- * > 2. <PageComponent>.getInitialProps
- * > 3. {@link NextAppWrapperComponent.render}
- * > 4. <PageComponent>.render
+ * # Resolution order
+ * __Server-side__
  *
+ * 1. (if-exists) getInitialProps _app.tsx {@link NextEmotionAppComponent.getInitialProps}
+ * 2. (if-exists) getInitialProps page {@link NextPageWithLayout.getInitialProps}
+ * 3. getInitialProps _document.tsx {@link NextEmotionDocumentComponent.getInitialProps}
+ * 4. render _app.tsx {@link NextEmotionAppComponent.render}
+ * 5. render page {@link NextPageWithLayout.render}
+ * 6. render _document.tsx {@link NextEmotionDocumentComponent.render}
+ *
+ * __Server-side (w/ error)__
+ *
+ * 1. (if-exists) getInitialProps _document.tsx {@link NextEmotionDocumentComponent.getInitialProps}
+ * 2. render _app.tsx {@link NextEmotionAppComponent.render}
+ * 3. render page {@link NextPageWithLayout.render}
+ * 4. render _document.tsx {@link NextEmotionDocumentComponent.render}
+ *
+ * __Client-side__
+ * 1. (if-exists) getInitialProps _app.tsx {@link NextEmotionAppComponent.getInitialProps}
+ * 2. (if-exists) getInitialProps page {@link NextPageWithLayout.getInitialProps}
+ * 3. render _app.tsx {@link NextEmotionAppComponent.render}
+ * 4. render page {@link NextPageWithLayout.render}
  * @see {@link NextAppWrapperComponent}
  */
 class NextEmotionDocumentComponent<P extends NextEmotionDocumentComponentProps> extends NextDocument<P> {
@@ -94,7 +95,7 @@ class NextEmotionDocumentComponent<P extends NextEmotionDocumentComponentProps> 
     ctx.renderPage = () =>
       originalRenderPage({
         enhanceApp: (App: any) => {
-          const displayName = `EnhancedApp(${getDisplayName(App)})`
+          const displayName = `EmotionCachedApp(${getDisplayName(App)})`
           const component = (props: unknown) => (
             <App emotionCache={cache} {...props} />
           )

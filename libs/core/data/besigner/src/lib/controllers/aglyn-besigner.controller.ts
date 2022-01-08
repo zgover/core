@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,13 @@
  * limitations under the License.
  */
 
+import {
+  type AglynModuleEffectListener,
+  AglynModuleModel,
+  type ContextDomain,
+  type ContextStore,
+  type IAglynAppController,
+} from '@aglyn/core-data-framework'
 import {copy} from '@aglyn/shared-util-tools'
 import {objectDeepMerge} from '@aglyn/shared-util-vendor'
 import {createApi} from 'effector'
@@ -30,9 +37,6 @@ import {
   type BesignerSetDndStatePayload,
   type BesignerSetPanelPayload,
 } from '../constants/emitter'
-import AglynModuleModel from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../models/aglyn-module.types'
-import {type IAglynAppController} from './aglyn-app.types'
 import {
   type AglynBesignerControllerOptions,
   type BesignerCanvasState,
@@ -44,7 +48,6 @@ import {
   type BesignerPanelsState,
   type IAglynBesignerController,
 } from './aglyn-besigner.types'
-import {type ContextDomain, type ContextStore} from './aglyn-contexts.types'
 
 
 const DEFAULT_CONTEXT: Partial<BesignerContextStores> = {

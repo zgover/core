@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,8 @@ export function initializeApp(opts?: AglynAppOptions): IAglynAppController {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_EXISTS, {appName})
   }
   const app: IAglynAppController = new AglynAppController({...opts, appName})
+  app.setupModules()
+  app.setupExtensions()
   _INTERNAL_APPS_.set(appName, app)
 
   app.aglynOnInit()

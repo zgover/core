@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../../vendor/mui'
-import { consoleOverrides } from './console.overrides'
-import { consolePalette } from './console.palette'
-import { consoleShape } from './console.shape'
-import { consoleSpacing } from './console.spacing'
-import { consoleTypography } from './console.typography'
+import {type ThemeOptions} from '../../vendor/mui'
+import {consoleOverrides} from './console.overrides'
+import {consolePalette} from './console.palette'
+import {consoleShape} from './console.shape'
+import {consoleSpacing} from './console.spacing'
+import {consoleTypography} from './console.typography'
+
 
 const baseOptions: ThemeOptions = {
   typography: consoleTypography,

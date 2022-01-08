@@ -29,7 +29,7 @@
     "baseUrl": ".",
     "paths": {
       "@aglyn/addons-ui-mui-bundle": ["libs/addons/ui/mui-bundle/src/index.ts"],
-      "@aglyn/core-data-components": ["libs/core/data/components/src/index.ts"],
+      "@aglyn/core-data-besigner": ["libs/core/data/besigner/src/index.ts"],
       "@aglyn/core-data-framework": ["libs/core/data/framework/src/index.ts"],
       "@aglyn/core-feature-besigner": ["libs/core/feature/besigner/src/index.ts"],
       "@aglyn/core-feature-renderer": ["libs/core/feature/renderer/src/index.ts"],

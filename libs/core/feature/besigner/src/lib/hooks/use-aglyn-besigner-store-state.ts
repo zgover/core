@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type BesignerContextStores, getBesignerStore} from '@aglyn/core-data-framework'
+import {type BesignerContextStores, getBesignerStore} from '@aglyn/core-data-besigner'
 import {type Conditional} from '@aglyn/shared-data-types'
 import {useStoreMap} from 'effector-react'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'

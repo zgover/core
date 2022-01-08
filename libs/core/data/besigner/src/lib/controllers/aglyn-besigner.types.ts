@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,18 @@
  * limitations under the License.
  */
 
+import {
+  type AglynComponentHierarchy,
+  type AglynModuleModelOptions,
+  type AglynModuleModelT,
+  type BundleUId,
+  type ComponentId,
+  type ContextDomain,
+  type ContextStore,
+  type ElementId,
+  type IAglynAppController,
+  type IAglynModuleModel,
+} from '@aglyn/core-data-framework'
 import {type LogLevelString} from '@aglyn/shared-util-logger'
 import {
   type BesignerPanelTabFlag,
@@ -33,19 +45,6 @@ import {
   type BesignerSetDndStatePayload,
   type BesignerSetPanelPayload,
 } from '../constants/emitter'
-import {
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type IAglynModuleModel,
-} from '../models/aglyn-module.types'
-import {type IAglynAppController} from './aglyn-app.types'
-import {
-  type AglynComponentHierarchy,
-  type BundleUId,
-  type ComponentId,
-  type ElementId,
-} from './aglyn-components.types'
-import {type ContextDomain, type ContextStore} from './aglyn-contexts.types'
 
 
 export type BesignerFlagState = {

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  */
 
 import {type AppUUN, type IAglynAppController} from '../controllers/aglyn-app.types'
-import {type IAglynBesignerController} from '../controllers/aglyn-besigner.types'
 import {type IAglynCanvasController} from '../controllers/aglyn-canvas.types'
 import {type IAglynCommandsController} from '../controllers/aglyn-commands.types'
 import {type IAglynComponentsController} from '../controllers/aglyn-components.types'
@@ -28,7 +27,6 @@ export const _INTERNAL_APPS_: Map<AppUUN, IAglynAppController> = new Map()
 export const _INTERNAL_EXTENSIONS_: Map<AppUUN, IAglynExtensionsController> = new Map()
 export const _INTERNAL_COMMANDS_: Map<AppUUN, IAglynCommandsController> = new Map()
 export const _INTERNAL_COMPONENTS_: Map<AppUUN, IAglynComponentsController> = new Map()
-export const _INTERNAL_BESIGNERS_: Map<AppUUN, IAglynBesignerController> = new Map()
 export const _INTERNAL_CANVAS_: Map<AppUUN, IAglynCanvasController> = new Map()
 export const _INTERNAL_CONTEXTS_: Map<AppUUN, IAglynContextsController> = new Map()
 

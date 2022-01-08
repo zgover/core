@@ -17,9 +17,11 @@
 
 import {
   type ElementId,
+} from '@aglyn/core-data-framework'
+import {
   setBesignerCanvasHovered,
   setBesignerCanvasSelected,
-} from '@aglyn/core-data-framework'
+} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useCallback} from 'react'
 

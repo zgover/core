@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-framework'
+import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {IconVariant} from '@aglyn/shared-data-brand'
 import {styled} from '@aglyn/shared-feature-themes'

@@ -16,7 +16,8 @@
  */
 
 
-import {type ElementId, getBesignerStore} from '@aglyn/core-data-framework'
+import {type ElementId} from '@aglyn/core-data-framework'
+import {getBesignerStore} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useStoreMap} from 'effector-react'
 

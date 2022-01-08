@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {setBesignerCanvasHovered} from '@aglyn/core-data-framework'
+import {setBesignerCanvasHovered} from '@aglyn/core-data-besigner'
 import {TrunkComponent, useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {styled} from '@aglyn/shared-feature-themes'
 import Box from '@mui/material/Box'

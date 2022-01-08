@@ -15,26 +15,6 @@
  * limitations under the License.
  */
 
-import {
-  mdiArrowTopLeft,
-  mdiBookVariant,
-  mdiBookVariantMultiple,
-  mdiCodeArray,
-  mdiCodeBracesBox,
-  mdiCodeString,
-  mdiContentDuplicate,
-  mdiCubeOutline,
-  mdiDeleteOutline,
-  mdiDrag,
-  mdiFileTree,
-  mdiFormDropdown,
-  mdiInformationVariant,
-  mdiLoginVariant,
-  mdiLogoutVariant,
-  mdiPencil,
-  mdiVariable,
-} from '@aglyn/shared-ui-mdi-jsx'
-
 
 export const APP_WWW = {
   META_TITLE: 'Aglyn',
@@ -44,38 +24,11 @@ export const APP_CONSOLE = {
   META_TITLE: 'Aglyn Console',
   META_DESCRIPTION: 'Contributions to the “no code” web application market by optimizing the process and necessary steps for a website to get off the ground for organizations',
 }
+export const APP_SITE = {
+  META_TITLE: 'My website',
+  META_DESCRIPTION: 'Created with Aglyn website besigner',
+}
 
 export const ProductNames = {
   WWW: '.com',
-}
-
-export const IconVariant = {
-  // Blocks and symbols
-  ENTITY_BLOCK: mdiCubeOutline.path,
-
-  // Data
-  PROPERTY: mdiVariable.path,
-  DOCUMENT: mdiBookVariant.path,
-  COLLECTION: mdiBookVariantMultiple.path,
-
-  // Data-sets
-  PROPERTIES: mdiFormDropdown.path,
-  DETAILS: mdiInformationVariant.path,
-  TREE_VIEW: mdiFileTree.path,
-
-  // Data-Type
-  STRING: mdiCodeString.path,
-  ARRAY: mdiCodeArray.path,
-  OBJECT: mdiCodeBracesBox.path,
-
-  // Modification
-  MODIFY_DUPLICATE: mdiContentDuplicate.path,
-  MODIFY_DELETE: mdiDeleteOutline.path,
-  MODIFY_EDIT: mdiPencil.path,
-  MODIFY_DRAG: mdiDrag.path,
-  SELECT_PARENT: mdiArrowTopLeft.path,
-
-  // User
-  LOGIN: mdiLoginVariant.path,
-  LOGOUT: mdiLogoutVariant.path,
 }

@@ -18,9 +18,11 @@
 import {
   deleteCanvasElement,
   type ElementId,
+} from '@aglyn/core-data-framework'
+import {
   setBesignerCanvasHovered,
   setBesignerCanvasSelected,
-} from '@aglyn/core-data-framework'
+} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useConfirmationContext} from '@aglyn/shared-ui-jsx'
 import {type ChangeEvent, useCallback} from 'react'

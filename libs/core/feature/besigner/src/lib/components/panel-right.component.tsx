@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {BesignerPanelTabFlag, type ElementId, setBesignerPanels} from '@aglyn/core-data-framework'
+import {type ElementId} from '@aglyn/core-data-framework'
+import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
 import {
   useAglynAppContext,
   useAglynComponentSchema,

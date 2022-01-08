@@ -16,12 +16,8 @@
  */
 
 import {bundle as muiBundle} from '@aglyn/addons-ui-mui-bundle'
-import {
-  doesAppExist,
-  initializeApp,
-  registerBundle,
-  registerComponent,
-} from '@aglyn/core-data-framework'
+import {initializeBesignerApp} from '@aglyn/core-data-besigner'
+import {doesAppExist, registerBundle, registerComponent} from '@aglyn/core-data-framework'
 import {createAglynComponent} from '@aglyn/core-feature-renderer'
 import {APP_CONSOLE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
 import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
@@ -140,7 +136,7 @@ const components = [c1, c2, c3, c4, c5]
 
 try {
   if (!doesAppExist()) {
-    const app = initializeApp({
+    const app = initializeBesignerApp({
       logLevel: 'debug',
       modulesOptions: {
         canvas: {

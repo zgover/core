@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,6 @@ import {
   type IAglynBaseModel,
 } from '../models/aglyn-base.types'
 import {type AglynUniqueId, type Payload} from '../types'
-import {
-  type AglynBesignerControllerOptions,
-  type  IAglynBesignerController,
-} from './aglyn-besigner.types'
 import {type AglynCanvasControllerOptions, type IAglynCanvasController} from './aglyn-canvas.types'
 import {type IAglynCommandsController} from './aglyn-commands.types'
 import {
@@ -54,19 +50,20 @@ export interface AglynAppOptions extends AglynBaseModelOptions {
     commands?: AglynExtensionsControllerOptions
     components?: AglynComponentsControllerOptions
     canvas?: AglynCanvasControllerOptions
-    besigner?: AglynBesignerControllerOptions
   }
 }
 
-export interface IAglynAppController extends IAglynBaseModel<AglynAppOptions> {
+export interface IAglynAppController<Options extends AglynAppOptions = AglynAppOptions> extends IAglynBaseModel<Options> {
   readonly extensions: IAglynExtensionsController
   readonly contexts: IAglynContextsController
   readonly commands: IAglynCommandsController
   readonly components: IAglynComponentsController
   readonly canvas: IAglynCanvasController
-  readonly besigner?: IAglynBesignerController
   readonly deleted: boolean
   readonly appName: AppUUN
+
+  setupModules(): this
+  setupExtensions(): this
 
   getName(): AppUUN
   isDeleted(): boolean
@@ -79,6 +76,6 @@ export interface IAglynAppController extends IAglynBaseModel<AglynAppOptions> {
   effect(data: AglynEffectOptions<AglynAppEffectFlag>): this
 }
 
-export interface AglynAppControllerT extends AglynBaseModelT<AglynAppOptions> {
-  new(options: AglynAppOptions): IAglynAppController
+export interface AglynAppControllerT<Options extends AglynAppOptions = AglynAppOptions> extends AglynBaseModelT<Options> {
+  new(options: AglynAppOptions): IAglynAppController<Options>
 }

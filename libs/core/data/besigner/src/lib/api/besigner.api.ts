@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+import {
+  type ContextStore,
+} from '@aglyn/core-data-framework'
 import {_INTERNAL_BESIGNERS_} from '../constants/_internal'
 import {
   type BesignerClosePanelPayload,
@@ -26,22 +29,21 @@ import {
   type BesignerSetDndStatePayload,
   type BesignerSetPanelPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
 import {
   type BesignerContextStores,
   type IAglynBesignerController,
 } from '../controllers/aglyn-besigner.types'
-import {type ContextStore} from '../controllers/aglyn-contexts.types'
-import {_validateAppArg} from './app.api'
+import {IBesignerAppController} from '../controllers/besigner-app.types'
+import {_validateBesignerAppArg} from './app.api'
 
 
-export function _getBesignerController(app: IAglynAppController): IAglynBesignerController {
-  _validateAppArg(app)
+export function _getBesignerController(app: IBesignerAppController): IAglynBesignerController {
+  _validateBesignerAppArg(app)
   return _INTERNAL_BESIGNERS_.get(app.getName())
 }
 
 export function getBesignerStore<K extends keyof BesignerContextStores>(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerGetStorePayload<K>,
 ): ContextStore<BesignerContextStores[K]> {
   const besignerController = _getBesignerController(app)
@@ -49,7 +51,7 @@ export function getBesignerStore<K extends keyof BesignerContextStores>(
 }
 
 export function setBesignerFlag(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerFlagInteractModePayload,
 ) {
   const besignerController = _getBesignerController(app)
@@ -57,7 +59,7 @@ export function setBesignerFlag(
 }
 
 export function setBesignerPanels(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerSetPanelPayload,
 ) {
   const besignerController = _getBesignerController(app)
@@ -65,7 +67,7 @@ export function setBesignerPanels(
 }
 
 export function openBesignerPanel(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerOpenPanelPayload,
 ) {
   const besignerController = _getBesignerController(app)
@@ -73,7 +75,7 @@ export function openBesignerPanel(
 }
 
 export function closeBesignerPanel(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerClosePanelPayload,
 ) {
   const besignerController = _getBesignerController(app)
@@ -81,7 +83,7 @@ export function closeBesignerPanel(
 }
 
 export function setBesignerDndState(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetDndStatePayload,
 ) {
   const besignerController = _getBesignerController(app)
@@ -89,7 +91,7 @@ export function setBesignerDndState(
 }
 
 export function setBesignerCanvasSelected(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetCanvasSelectedPayload,
 ) {
   const besignerController = _getBesignerController(app)
@@ -97,7 +99,7 @@ export function setBesignerCanvasSelected(
 }
 
 export function setBesignerCanvasHovered(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetCanvasHoveredPayload,
 ) {
   const besignerController = _getBesignerController(app)

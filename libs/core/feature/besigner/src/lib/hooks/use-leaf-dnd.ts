@@ -16,16 +16,18 @@
  */
 
 import {
+  type ElementId,
+  isRootElementId,
+} from '@aglyn/core-data-framework'
+import {
   type BesignerDndElementActive,
   type BesignerDndElementOver,
   DndDragSourceTypeFlag,
   DndDropLinealTypeFlag,
-  type ElementId,
-  isRootElementId,
   setBesignerCanvasHovered,
   setBesignerCanvasSelected,
   setBesignerDndState,
-} from '@aglyn/core-data-framework'
+} from '@aglyn/core-data-besigner'
 import {
   useAglynAppContext,
   useAglynCanvasApiEvents,

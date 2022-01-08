@@ -20,7 +20,7 @@ import {
   InteractionModeFlag,
   setBesignerFlag,
   setBesignerPanels,
-} from '@aglyn/core-data-framework'
+} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {styled} from '@aglyn/shared-feature-themes'
 import {
