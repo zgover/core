@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,16 +40,15 @@ export function createAglynComponent<P>(
   component: AglynElementType<P>,
   errorComponent?: ErrorBoundaryComponentProps<P>['errorComponent'],
 ): ComponentRegisterPayload<P> {
-  const {componentId, bundleId, renderFlags} = schema
-  const {emotionStyled} = {...renderFlags}
+  const {componentId, bundleId, emotion} = schema
 
   const displayName = getDisplayName(component, ChangeCase.pascalCase(componentId))
 
   const ComponentElement =
-    !emotionStyled?.disable
+    !emotion?.disable
       ? styled(component as any, {
         name: displayName,
-        ...emotionStyled?.options,
+        ...emotion?.options,
       })({})
       : component
 

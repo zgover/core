@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ export const components: ComponentRegisterPayload[] = [
 
 export const schema = {
   bundleId: BUNDLE_ID,
-  metadata: {
-    displayName: 'Mui Components',
-    description: 'Material-UI view components',
-    iconPath: mdiViewArray.path,
+  displayName: 'Mui Components',
+  description: 'Material-UI view components',
+  icon: {
+    path: mdiViewArray.path,
   },
 }
 

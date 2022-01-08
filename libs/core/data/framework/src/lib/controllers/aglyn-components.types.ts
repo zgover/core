@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,22 +126,37 @@ export type AglynComponentElementTemplate = {
   id: TemplateId
   label: string
   description?: string
-  iconPath?: MdiIconProps['path']
-  iconColor?: string,
   data: AglynComponentTemplateData<any>
+  icon?: {
+    path?: MdiIconProps['path'],
+    color?: string
+  }
 }
 
 export interface AglynComponentSchema<P = any> {
   componentId: ComponentId
   bundleId?: BundleUId
   // Metadata
-  metadata: {
-    displayName: string
-    title?: string
-    subtitle?: string
-    description?: string
-    iconPath?: MdiIconProps['path']
-    iconColor?: string,
+  displayName: string
+  title?: string
+  subtitle?: string
+  description?: string
+  icon?: {
+    path?: MdiIconProps['path'],
+    color?: string
+  }
+  // Render feature flags
+  hierarchy?: {
+    restrictChildren?: ComponentsLinealOrder
+    restrictParent?: ComponentsLinealOrder
+  }
+  propsSchema?: {
+    fields: AglynComponentField[]
+  }
+  resolveProps?: ResolveProps<AglynComponentElementDataNormalized<P>>
+  emotion?: {
+    disable?: boolean
+    options?: StyledOptions
   }
   // Besigner feature flags
   besignerFlags?: {
@@ -155,21 +170,6 @@ export interface AglynComponentSchema<P = any> {
     outline?: {disable?: boolean}
     removing?: {disable?: boolean}
     selecting?: {disable?: boolean}
-  }
-  // Render feature flags
-  renderFlags?: {
-    hierarchy?: {
-      restrictChildren?: ComponentsLinealOrder
-      restrictParent?: ComponentsLinealOrder
-    }
-    propsSchema?: {
-      fields: AglynComponentField[]
-    }
-    resolveProps?: ResolveProps<AglynComponentElementDataNormalized<P>>
-    emotionStyled?: {
-      disable?: boolean
-      options?: StyledOptions
-    }
   }
   // Besigner templates for modeling new elements
   templates?: AglynComponentElementTemplate[]
@@ -189,14 +189,22 @@ export interface AglynComponentElementData<P = any, Normal extends boolean = fal
 export interface AglynComponentsBundle {
   readonly bundleId: BundleUId
   componentIds: ComponentId[]
-  metadata?: AglynComponentSchema<any>['metadata']
+  // Metadata
+  displayName: string
+  title?: string
+  subtitle?: string
+  description?: string
+  icon?: {
+    path?: MdiIconProps['path'],
+    color?: string
+  }
 }
 
 
-export type AglynComponentPropsFormSchema<P = any> = AglynComponentSchema<P>['renderFlags']['propsSchema']
-export type AglynComponentHierarchy<P = any> = AglynComponentSchema<P>['renderFlags']['hierarchy']
+export type AglynComponentPropsFormSchema<P = any> = AglynComponentSchema<P>['propsSchema']
+export type AglynComponentHierarchy<P = any> = AglynComponentSchema<P>['hierarchy']
+export type AglynComponentHierarchyFlags<P = any> = AglynComponentSchema<P>['hierarchy']
 export type AglynComponentBesignerFlags<P = any> = AglynComponentSchema<P>['besignerFlags']
-export type AglynComponentRenderFlags<P = any> = AglynComponentSchema<P>['renderFlags']
 
 export type AglynComponentElementDataDenormalized<P = any> = AglynComponentElementData<P, false>
 export type AglynComponentElementDataNormalized<P = any> = AglynComponentElementData<P, true>
@@ -205,7 +213,7 @@ export type AglynComponentElementDataDenormalizedList = AglynComponentElementDat
 export type AglynComponentElementHierarchy<$ID extends ElementId = ElementId> = [root: CANVAS_ROOT_ELEMENT_ID, ...parentIds: [...ElementId[], $ID]]
 
 export type AglynComponentsBundleMetadata = AglynComponentsBundle
-export type AglynComponentsBundleSchema = Pick<AglynComponentsBundle, 'bundleId' | 'metadata'>
+export type AglynComponentsBundleSchema = Omit<AglynComponentsBundle, 'componentIds'>
 
 export interface AglynComponentsControllerOptions extends AglynModuleModelOptions {}
 

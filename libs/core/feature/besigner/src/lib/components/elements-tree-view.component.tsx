@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
       componentId = useAglynElementData($id, 'componentId'),
       bundleId = useAglynElementData($id, 'bundleId'),
       label = useAglynElementLabel($id),
-      metadata = useAglynComponentSchema(componentId, bundleId)?.metadata
+      icon = useAglynComponentSchema(componentId, bundleId)?.icon
 
     return (
       <TreeItem
@@ -75,7 +75,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
           <Fragment>
             <MdiIcon
               color="quaternary"
-              path={metadata?.iconPath || IconVariant.ENTITY_BLOCK}
+              path={icon?.path || IconVariant.ENTITY_BLOCK}
               sx={{
                 fontSize: 20,
                 marginLeft: -0.25,
@@ -87,7 +87,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
                 border: 1,
                 borderColor: 'divider',
                 boxShadow: 1,
-                color: metadata?.iconColor || 'quaternary',
+                color: icon?.color || 'quaternary',
               }}
             />
             {label}

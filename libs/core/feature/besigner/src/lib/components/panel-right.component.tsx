@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ const ElementInfo = function ElementInfo({$id, ...props}: any) {
   const parentId = useAglynElementData($id, 'parentId')
   const {metadata} = useAglynComponentSchema(componentId, bundleId) || {}
   const {displayName, title, subtitle, description} = metadata || {}
-  const failoverText = '(undefined)'
+  const failoverText = 'n/a'
   const details = useMemo(() => [
     {
       id: 'element-overview',
@@ -93,6 +93,7 @@ const ElementInfo = function ElementInfo({$id, ...props}: any) {
           id: 'component-description',
           label: 'Description',
           value: description,
+          TypographyProps: {gutterBottom: true},
         },
       ],
     },
@@ -119,6 +120,7 @@ const ElementInfo = function ElementInfo({$id, ...props}: any) {
           id: 'bundle-id',
           label: 'Bundle ID',
           value: bundleId,
+          ValueTypographyProps: {},
         },
       ],
     },
@@ -126,20 +128,28 @@ const ElementInfo = function ElementInfo({$id, ...props}: any) {
 
   return (
     <>
-      {details.map(({label, items}, key) => (
+      {details.map(({id: key, label, items}) => (
         <Fragment key={key}>
           <Typography variant="subtitle1" component="div" sx={{mb: 2}}>
             {label}
           </Typography>
-          {items.map(({label, value}, key) => (
-            <Fragment key={key}>
-              <Typography variant="caption" component="div" sx={{textTransform: 'uppercase'}}>
+          {items.map(({id: key, label, value, TypographyProps, ValueTypographyProps}) => (
+            <Typography key={key} component="div" {...TypographyProps}>
+              <Typography
+                variant="caption"
+                display="inline"
+                sx={{textTransform: 'uppercase'}}
+              >
                 <b>{label}:</b>
-              </Typography>
-              <Typography variant="body1" component="div" gutterBottom>
+              </Typography>{' '}
+              <Typography
+                variant="body1"
+                display="inline"
+                {...ValueTypographyProps}
+              >
                 {value || <i>{failoverText}</i>}
               </Typography>
-            </Fragment>
+            </Typography>
           ))}
           <DividerSpacer variant="middle" />
         </Fragment>

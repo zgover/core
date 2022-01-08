@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import {type DragElementWrapper} from 'react-dnd'
 
 export interface BadgeButtonProps extends Omit<TooltipProps, 'children'> {
   children?: SrOnlyComponentProps['children']
-  iconPath: MdiIconProps['path']
+  icon: {path: MdiIconProps['path']}
   ButtonProps?: ButtonProps
   IconProps?: MdiIconProps
   SrOnlyProps?: SrOnlyComponentProps
@@ -39,7 +39,7 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>(
     const {
       children,
       ButtonProps,
-      iconPath,
+      icon,
       IconProps,
       SrOnlyProps,
       ...rest
@@ -48,7 +48,7 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>(
     return (
       <MuiTooltip ref={ref} {...rest}>
         <MuiButton {...ButtonProps}>
-          <MdiIcon fontSize="small" path={iconPath} {...IconProps} />
+          <MdiIcon fontSize="small" path={icon?.path} {...IconProps} />
           <SrOnlyComponent component="span" {...SrOnlyProps}>
             {children}
           </SrOnlyComponent>
@@ -122,7 +122,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
             title="Drag"
             children="drag"
             ButtonProps={{ref: dragHandleRef}}
-            iconPath={IconVariant.MODIFY_DRAG}
+            icon={{path: IconVariant.MODIFY_DRAG}}
             IconProps={{color: 'secondary'}}
           />
         )}
@@ -132,7 +132,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
             title="Duplicate"
             children="duplicate"
             ButtonProps={{onClick: handleDuplicateClick}}
-            iconPath={IconVariant.MODIFY_DUPLICATE}
+            icon={{path: IconVariant.MODIFY_DUPLICATE}}
           />
         )}
 
@@ -140,7 +140,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
           title="Modify"
           children="modify"
           onClick={handleModifyClick}
-          iconPath={IconVariant.MODIFY_EDIT}
+          icon={{path: IconVariant.MODIFY_EDIT}}
         />
 
         {!isRootElementId($id) && (
@@ -152,7 +152,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
               onMouseEnter: handleParentHover,
               onMouseLeave: handleHoverParentLeave,
             }}
-            iconPath={IconVariant.SELECT_PARENT}
+            icon={{path: IconVariant.SELECT_PARENT}}
           />
         )}
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,35 +32,35 @@ const ID: ComponentId = 'toolbar'
 export const schema: AglynComponentSchema<ToolbarProps> = {
   componentId: ID,
   bundleId: BUNDLE_ID,
-  metadata: {
-    displayName: 'Toolbar Content',
-    iconPath: mdiBorderInside.path,
-    iconColor: '#2196f3',
+  displayName: 'Toolbar Content',
+  icon: {
+    path: mdiBorderInside.path,
+    color: '#2196f3',
   },
-  renderFlags: {
-    propsSchema: {
-      fields: [
-        FIELD_DISABLE_GUTTERS,
-        {
-          name: 'variant',
-          description: 'The variant to use.',
-          component: PropertyEditorFieldFlag.SELECT,
-          label: 'Variant',
-          options: [
-            {value: '', label: 'Default'},
-            {value: 'dense', label: 'Dense'},
-            {value: 'regular', label: 'Regular'},
-          ],
-        },
-      ],
-    },
+  propsSchema: {
+    fields: [
+      FIELD_DISABLE_GUTTERS,
+      {
+        name: 'variant',
+        description: 'The variant to use.',
+        component: PropertyEditorFieldFlag.SELECT,
+        label: 'Variant',
+        options: [
+          {value: '', label: 'Default'},
+          {value: 'dense', label: 'Dense'},
+          {value: 'regular', label: 'Regular'},
+        ],
+      },
+    ],
   },
   templates: [
     {
       id: generateTemplateId(ID),
       label: 'Toolbar Content',
-      iconPath: mdiBorderInside.path,
-      iconColor: '#2196f3',
+      icon: {
+        path: mdiBorderInside.path,
+        color: '#2196f3',
+      },
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,

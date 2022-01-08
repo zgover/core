@@ -17,9 +17,29 @@
 
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 // import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
-import {forwardRef, type HTMLAttributes, type Ref} from 'react'
+import {forwardRef, type HTMLAttributes, type Ref, useRef} from 'react'
+import {useSlider} from 'react-use'
 import {ViewportFrameComponent} from './viewport-frame.component'
 
+
+const Demo = () => {
+  const ref = useRef(null)
+  const {isSliding, value, ...rest} = useSlider(ref)
+
+  return (
+    <div>
+      <div ref={ref} style={{position: 'relative'}}>
+        <p style={{textAlign: 'center', color: isSliding ? 'red' : 'green'}}>
+          {Math.round(value * 100)}%
+          {JSON.stringify(rest, null, 2)}
+        </p>
+        <div style={{position: 'absolute', width: `${value * 100}%`, background: isSliding ? 'red' : 'green', height: 20}}>
+          <div style={{position: 'absolute', right: 0}}>🎚</div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const ViewportCanvas = styled('div', {
   name: 'AglynViewportCanvas',
@@ -97,6 +117,8 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
           <ViewportFrameComponent />
           {/*</ViewportCanvasPanner>*/}
         </CanvasArtboard>
+
+        <Demo />
 
         {/*<RulerComponent*/}
         {/*  variant="vertical"*/}

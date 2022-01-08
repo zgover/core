@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,24 +32,24 @@ const ID: ComponentId = 'list'
 export const schema: AglynComponentSchema<ListProps> = {
   componentId: ID,
   bundleId: 'mui',
-  metadata: {
-    displayName: 'List',
-    iconPath: mdiFormatListBulletedSquare.path,
+  displayName: 'List',
+  icon: {
+    path: mdiFormatListBulletedSquare.path,
   },
-  renderFlags: {
-    hierarchy: {
-      restrictChildren: [
-        ComponentsLinealDirectiveFlag.LIMIT_TO, {
-          components: [listItemSchema.componentId],
-        },
-      ],
-    },
+  hierarchy: {
+    restrictChildren: [
+      ComponentsLinealDirectiveFlag.LIMIT_TO, {
+        components: [listItemSchema.componentId],
+      },
+    ],
   },
   templates: [
     {
       id: generateTemplateId(ID),
       label: 'List',
-      iconPath: mdiFormatListBulletedSquare.path,
+      icon: {
+        path: mdiFormatListBulletedSquare.path,
+      },
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,

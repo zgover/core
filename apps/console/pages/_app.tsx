@@ -83,10 +83,8 @@ export default _App
 const c1 = createAglynComponent(
   {
     componentId: 'root',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
+    displayName: 'Root Element',
+    title: 'Root element',
   },
   'span',
 )
@@ -94,10 +92,8 @@ const c1 = createAglynComponent(
 const c2 = createAglynComponent(
   {
     componentId: 'root1',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
+    displayName: 'Root Element',
+    title: 'Root element',
   },
   'span',
 )
@@ -105,10 +101,8 @@ const c2 = createAglynComponent(
 const c3 = createAglynComponent(
   {
     componentId: 'root2',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
+    displayName: 'Root Element',
+    title: 'Root element',
   },
   'span',
 )
@@ -116,10 +110,8 @@ const c3 = createAglynComponent(
 const c4 = createAglynComponent(
   {
     componentId: 'root3',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
+    displayName: 'Root Element',
+    title: 'Root element',
   },
   'span',
 )
@@ -127,10 +119,8 @@ const c4 = createAglynComponent(
 const c5 = createAglynComponent(
   {
     componentId: 'root4',
-    metadata: {
-      displayName: 'Root Element',
-      title: 'Root element',
-    },
+    displayName: 'Root Element',
+    title: 'Root element',
     templates: [
       {
         id: 'root4:1',

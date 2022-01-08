@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,12 @@ export const navigationItems = [
 
 export const tabItems = [
   {
-    iconPath: mdiHome.path,
+    icon: {path: mdiHome.path},
     label: 'Dashboard',
     href: '/',
   },
   {
-    iconPath: mdiVectorPolylineEdit.path,
+    icon: {path: mdiVectorPolylineEdit.path},
     label: 'Manage',
     href: '/manage',
   },
@@ -55,7 +55,7 @@ export const tabItems = [
 
 export const quickActions = [
   {
-    iconPath: mdiCogOutline.path,
+    icon: {path: mdiCogOutline.path},
     alt: '',
   },
   {

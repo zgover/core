@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,39 +37,39 @@ const ID: ComponentId = 'button'
 export const schema: AglynComponentSchema<ButtonProps> = {
   componentId: ID,
   bundleId: BUNDLE_ID,
-  metadata: {
-    displayName: 'Button',
-    iconPath: mdiGestureTapButton.path,
-    iconColor: '#2196f3',
+  displayName: 'Button',
+  icon: {
+    path: mdiGestureTapButton.path,
+    color: '#2196f3',
   },
-  renderFlags: {
-    propsSchema: {
-      fields: [
-        FIELD_COLOR,
-        FIELD_DISABLED,
-        FIELD_FULL_WIDTH,
-        FIELD_SIZE,
-        {
-          name: 'variant',
-          description: 'The variant to use.',
-          component: PropertyEditorFieldFlag.SELECT,
-          label: 'Variant',
-          options: [
-            {value: '', label: 'Default'},
-            {value: 'text', label: 'Text'},
-            {value: 'outlined', label: 'Outlined'},
-            {value: 'contained', label: 'Contained'},
-          ],
-        },
-      ],
-    },
+  propsSchema: {
+    fields: [
+      FIELD_COLOR,
+      FIELD_DISABLED,
+      FIELD_FULL_WIDTH,
+      FIELD_SIZE,
+      {
+        name: 'variant',
+        description: 'The variant to use.',
+        component: PropertyEditorFieldFlag.SELECT,
+        label: 'Variant',
+        options: [
+          {value: '', label: 'Default'},
+          {value: 'text', label: 'Text'},
+          {value: 'outlined', label: 'Outlined'},
+          {value: 'contained', label: 'Contained'},
+        ],
+      },
+    ],
   },
   templates: [
     {
       id: generateTemplateId(ID),
       label: 'Outlined Button',
-      iconPath: mdiGestureTapButton.path,
-      iconColor: '#2196f3',
+      icon: {
+        path: mdiGestureTapButton.path,
+        color: '#2196f3',
+      },
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,

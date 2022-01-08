@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,7 +229,7 @@ export const NAVIGATION_MAX_WIDTH = 'lg'
 export const FOOTER_MAX_WIDTH = 'lg'
 
 export interface QuickActionsMenuItem extends IconButtonProps {
-  iconPath?: MdiIconProps['path']
+  icon?: {path: MdiIconProps['path']}
   avatar?: any
   dense?: boolean
   href?: any
@@ -242,7 +242,7 @@ export interface MainLayoutProps {
   tabBarTitle?: string
   centerNavigationItems?: Array<any>
   breadcrumbItems?: BreadcrumbsProps['items']
-  navTabItems?: (TabProps & AppLinkProps<'text'> & {iconPath: MdiIconProps['path']})[]
+  navTabItems?: (TabProps & AppLinkProps<'text'> & {icon: {path: MdiIconProps['path']}})[]
   quickActionMenus?: QuickActionsMenuItem[]
   productName?: string
   footerNavItems?: GridButtonsProps['items']
@@ -273,9 +273,9 @@ function MainLayoutRaw(props: MainLayoutProps) {
     }).href ?? ''
     : ''
 
-  const buildIconButton = ({avatar, iconPath, children, ...rest}, i) => (
+  const buildIconButton = ({avatar, icon, children, ...rest}, i) => (
     <IconButton key={rest.id ?? rest['href'] ?? i} color="inherit" {...rest}>
-      {avatar ? <StyledAvatar {...avatar} /> : iconPath && <MdiIcon path={iconPath} />}
+      {avatar ? <StyledAvatar {...avatar} /> : icon?.path && <MdiIcon path={icon?.path} />}
       {children}
     </IconButton>
   )
@@ -340,7 +340,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
                 variant="scrollable"
               >
                 {tabBarTitle && <TabBarTitle>{tabBarTitle}</TabBarTitle>}
-                {navTabItems && navTabItems.map(({iconPath, ...item}, i) => (
+                {navTabItems && navTabItems.map(({icon, ...item}, i) => (
                   <StyledTab
                     key={item.id ?? item['key'] ?? i}
                     // disableRipple
@@ -349,7 +349,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
                     href={item.href ?? ''}
                     icon={
                       <MdiIcon
-                        path={iconPath}
+                        path={icon?.path}
                       />
                     }
                     label={item.label}

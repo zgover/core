@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,25 +29,25 @@ const ID: ComponentId = 'app-bar'
 export const schema: AglynComponentSchema<AppBarProps> = {
   componentId: ID,
   bundleId: BUNDLE_ID,
-  metadata: {
-    displayName: 'App Toolbar',
-    iconPath: mdiPageLayoutHeader.path,
-    iconColor: '#2196f3',
+  displayName: 'App Toolbar',
+  icon: {
+    path: mdiPageLayoutHeader.path,
+    color: '#2196f3',
   },
-  renderFlags: {
-    propsSchema: {
-      fields: [
-        FIELD_COLOR_ALT1,
-        FIELD_POSITION,
-      ],
-    },
+  propsSchema: {
+    fields: [
+      FIELD_COLOR_ALT1,
+      FIELD_POSITION,
+    ],
   },
   templates: [
     {
       id: generateTemplateId(ID),
       label: 'App Toolbar',
-      iconPath: mdiPageLayoutHeader.path,
-      iconColor: '#2196f3',
+      icon: {
+        path: mdiPageLayoutHeader.path,
+        color: '#2196f3',
+      },
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,
