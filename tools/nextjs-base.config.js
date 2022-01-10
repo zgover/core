@@ -111,7 +111,7 @@ const AGLYN_CONFIG = {
   experimental: {
     // ssr and displayName are configured by default
     styledComponents: false,
-    // optimizeImages: true,
+    optimizeImages: true,
     // optimizeCss: true,
     // Next.js can automatically create a standalone folder which copies only
     // the necessary files for a production deployment including select files in
@@ -141,31 +141,35 @@ const AGLYN_CONFIG = {
   },
   httpAgentOptions: {keepAlive: true},
   images: {
-    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    disableStaticImages: false,
     domains: [
       'aglyn.com',
       'console.aglyn.com',
       'cdn.aglyn.com',
     ],
+    formats: ['image/avif', 'image/webp'],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     loader: 'default',
-    path: '/_static/_cache/image',
+    minimumCacheTTL: 60,
+    path: '/_next/images',
   },
-  // Will be available on server only
   nx: {
     // Set this to false if you do not want to use SVGR
     // See: https://github.com/gregberge/svgr
-    svgr: false,
+    svgr: true,
   },
   onDemandEntries: {maxInactiveAge: 15000, pagesBufferLength: 2},
   optimizeFonts: true,
   outputFileTracing: true,
   productionBrowserSourceMaps: false,
   poweredByHeader: true,
+  // Available on both server and client
   publicRuntimeConfig: {
     staticFolder: '/_static',
   },
   reactStrictMode: !IS_PRODUCTION,
-  // Will be available on both server and client
+  // Available on server only
   serverRuntimeConfig: {},
   staticPageGenerationTimeout: 30,
   swcMinify: true,

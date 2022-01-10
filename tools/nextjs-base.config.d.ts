@@ -34,6 +34,9 @@ export interface WithAglynOptions extends WithNxOptions {
       excludeAssets?: any,
       logLevel: 'info' | string,
     }
+  },
+  publicRuntimeConfig?: WithNxOptions['publicRuntimeConfig'] & {
+    staticFolder?: string
   }
 }
 

@@ -20,7 +20,7 @@ export type TenantSite = {
   description: string
   subdomain: string
   customDomain?: string
-  pages: string[]
+  paths: string[]
 }
 export const mockDB: TenantSite[] = [
   {
@@ -28,20 +28,20 @@ export const mockDB: TenantSite[] = [
     description: 'Subdomain + custom domain',
     subdomain: 'myhost-1',
     customDomain: 'custom-domain-1.com',
-    pages: ['/index', '/aa'],
+    paths: ['/index', '/aa'],
   },
   {
     name: 'Site 2',
     description: 'Subdomain only',
     subdomain: 'myhost-2',
     customDomain: null,
-    pages: ['/index', '/aa'],
+    paths: ['/index', '/aa'],
   },
   {
     name: 'Site 3',
     description: 'Subdomain only',
     subdomain: 'myhost-3',
     customDomain: null,
-    pages: ['/index', '/aa'],
+    paths: ['/index', '/aa'],
   },
 ]

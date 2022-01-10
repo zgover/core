@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import img4 from '/public/_static/images/designer/website-designer-functional-op
 import img1 from '/public/_static/images/designer/website-designer-preview-collage.png'
 import {ProductNames} from '@aglyn/shared-data-brand'
 import {GridItems} from '@aglyn/shared-ui-jsx'
+import {Image} from '@aglyn/shared-ui-next'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
-import Image from 'next/image'
 import BackgroundImage from '../components/BackgroundImage'
 import {mainNavigation} from '../const'
 import MainLayout from '../layouts/MainLayout'
@@ -62,10 +62,9 @@ function Index(props) {
                     <Image
                       src={img1}
                       alt="website designer preview collage"
-                      placeholder="blur"
                       width="504"
                       height="380"
-                      loading="eager"
+                      shimmer
                       priority
                     />
                   ),
@@ -108,9 +107,9 @@ function Index(props) {
                     <Image
                       src={img2}
                       alt="website designer element category search"
-                      placeholder="blur"
                       width="400"
                       height="478"
+                      shimmer
                     />
                   ),
                 },
@@ -151,9 +150,9 @@ function Index(props) {
                     <Image
                       src={img3}
                       alt="website designer custom element attributes"
-                      placeholder="blur"
                       width="400"
                       height="477"
+                      shimmer
                     />
                   ),
                 },
@@ -194,9 +193,9 @@ function Index(props) {
                     <Image
                       src={img4}
                       alt="website designer functional operations"
-                      placeholder="blur"
                       width="400"
                       height="440"
+                      shimmer
                     />
                   ),
                 },

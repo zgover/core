@@ -29,15 +29,23 @@ export interface StaticPaths extends ParsedUrlQuery, TenantSite {}
 export const getTenantPageStaticPaths: GetStaticPaths = async (
   context: GetStaticPathsContext,
 ): Promise<GetStaticPathsResult<StaticPaths>> => {
+
   function mapTenants(sites: TenantSite[]) {
-    const mapPages = (pages, host) =>
-      pages.map((pg) => ({
-        params: {host, page: pg.split('/').filter((i) => Boolean(i))},
+    function mapPaths(
+      paths: TenantSite['paths'],
+      host: TenantSite['subdomain' | 'customDomain'],
+    ) {
+      return paths.map((pg: string) => ({
+        params: {
+          path: pg.split('/').filter((i) => Boolean(i)),
+          host: host,
+        },
       }))
-    return sites.reduce((prev, {subdomain, customDomain, pages}) => ([
+    }
+    return sites.reduce((prev, {subdomain, customDomain, paths}) => ([
       ...prev,
-      ...mapPages(pages, subdomain),
-      ...(customDomain ? mapPages(pages, customDomain) : []),
+      ...mapPaths(paths, subdomain),
+      ...(customDomain ? mapPaths(paths, customDomain) : []),
     ]), [])
   }
 
@@ -46,7 +54,7 @@ export const getTenantPageStaticPaths: GetStaticPaths = async (
 
   return {
     paths: paths,
-    fallback: "blocking", // ISR server-render if static cache is not available
+    fallback: 'blocking', // ISR server-render if static cache is not available
   }
 }
 export default getTenantPageStaticPaths

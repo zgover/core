@@ -21,12 +21,4 @@ const withAglyn = require('../../tools/nextjs-base.config')
 /**
  * @type {import('/tools/nextjs-base.config').WithAglynOptions}
  **/
-const nextConfig = {
-  nx: {
-    // Set this to true if you would like to to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
-}
-
-module.exports = withAglyn(nextConfig)
+module.exports = withAglyn({})

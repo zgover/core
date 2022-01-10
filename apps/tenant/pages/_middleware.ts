@@ -16,6 +16,7 @@
  */
 
 import {type NextRequest, NextResponse} from 'next/server'
+import {IMPLICIT_DIRS} from '../constants/site-paths'
 
 
 export default function middleware(req: NextRequest) {
@@ -26,10 +27,12 @@ export default function middleware(req: NextRequest) {
   // If localhost, assign the host value manually
   // If prod, get the custom domain/subdomain value by removing the root URL
   // (in the case of "test.vercel.app", "vercel.app" is the root URL)
-  const tenantHost =
+  const subdomain =
     process.env.NODE_ENV === 'production'
       ? hostHeader.replace(`.${process.env.AGLYN_TENANT_DOMAIN}`, '')
-      : process.env.AGLYN_TENANT_SUBDOMAIN
+      : process.env.NODE_ENV === 'development'
+        ? hostHeader.replace(`.${process.env.HOST}`, '')
+        : process.env.AGLYN_TENANT_CUSTOM_DOMAIN || process.env.AGLYN_TENANT_SUBDOMAIN
 
   // Prevent security issues – users should not be able to canonically access
   // the pages/_sites folder and its respective contents. This can also be
@@ -38,13 +41,9 @@ export default function middleware(req: NextRequest) {
     return new Response(null, {status: 404})
   }
 
-  if (
-    !pathname.startsWith('/_static') && // exclude all files in the public
-    !pathname.includes('.') && // exclude all with filetype extension in public
-    !pathname.startsWith('/api') // exclude all API routes
-  ) {
+  if (!IMPLICIT_DIRS.some((path) => pathname.startsWith(path))) {
     // rewrite to the current hostname under the pages/_sites folder
-    // the main logic component will happen in pages/_sites/[host]/[...page].tsx
-    return NextResponse.rewrite(`/_sites/${tenantHost}${pathname}`)
+    // the main logic component will happen in pages/_sites/[host]/[...path].tsx
+    return NextResponse.rewrite(`/_sites/${subdomain}${pathname}`)
   }
 }

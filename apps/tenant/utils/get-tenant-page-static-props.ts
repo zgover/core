@@ -37,14 +37,15 @@ export interface StaticProps extends Dictionary {
 export const getTenantPageStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext<StaticPaths, PreviewData>,
 ): Promise<GetStaticPropsResult<StaticProps>> => {
-  const {
-    params: {host},
-  } = context
+
+  const {params: {host}} = context
 
   // fetch data from mock database using the site value as the key
-  const data = mockDB.find(({subdomain, customDomain}) => subdomain === host || customDomain === host)
+  const tenant = mockDB.find(
+    ({subdomain, customDomain}) => subdomain === host || customDomain === host,
+  )
 
-  if (!data) {
+  if (!tenant) {
     return {
       notFound: true,
       revalidate: 1, // never=false, always=1, since=SECONDS
@@ -52,7 +53,7 @@ export const getTenantPageStaticProps: GetStaticProps = async (
   }
 
   return {
-    props: {tenant: data},
+    props: {tenant},
     revalidate: 30, // never=false, always=1, since=SECONDS
   }
 }

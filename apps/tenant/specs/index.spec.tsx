@@ -16,9 +16,7 @@
  */
 
 import {render} from '@testing-library/react'
-import React from 'react'
-
-import Page from '../pages/_sites/[host]/[...page]'
+import Page from '../pages/_sites/[host]/[...path]'
 
 
 describe('Index', () => {

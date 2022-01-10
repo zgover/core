@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {objectDeepMergeMany} from '@aglyn/shared-util-vendor'
+import {objectDeepMergeFillIn} from '@aglyn/shared-util-vendor'
 import {
   type AglynComponentElementDataDenormalized,
   type AglynComponentElementTemplate,
@@ -46,9 +46,6 @@ export function createComponentElementData(
 ): AglynComponentElementDataDenormalized {
   const {data} = {...options}
 
-  return objectDeepMergeMany([
-    {...ELEMENT_DEFAULTS},
-    traverseComponentTemplate(data),
-  ]) as AglynComponentElementDataDenormalized
+  return objectDeepMergeFillIn({...ELEMENT_DEFAULTS}, traverseComponentTemplate(data))
 }
 export default createComponentElementData

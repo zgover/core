@@ -17,7 +17,7 @@
 
 import getTenantPageStaticPaths from '../../../utils/get-tenant-page-static-paths'
 import getTenantPageStaticProps from '../../../utils/get-tenant-page-static-props'
-import CatchAllPage from './[...page]'
+import CatchAllPage from './[...path]'
 
 
 export const getStaticPaths = async (context) => {

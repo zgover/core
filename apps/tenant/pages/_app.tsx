@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-import { APP_SITE, IS_PRODUCTION } from '@aglyn/shared-data-brand'
-import { NextEmotionAppComponent, type NextEmotionAppComponentProps } from '@aglyn/shared-ui-next'
-import { Fragment, useEffect, useMemo } from 'react'
+import {APP_SITE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
+import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
+import {Fragment, useEffect, useMemo} from 'react'
+
 
 export interface _AppProps<Props, InitialProps>
   extends NextEmotionAppComponentProps<Props, InitialProps> {}
 
 function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
-  const { NextAppWrapperProps, ...rest } = props
+  const {NextAppWrapperProps, ...rest} = props
   const {
     metaElements: wrapperMetaElements,
     linkElements: wrapperLinkElements,
@@ -33,7 +34,7 @@ function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
   } = NextAppWrapperProps || {}
   const documentTitle = useMemo(
     () => wrapperDocumentTitle || APP_SITE.META_TITLE,
-    [wrapperDocumentTitle]
+    [wrapperDocumentTitle],
   )
   const headChildren = useMemo(
     () => (
@@ -42,7 +43,7 @@ function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
         {wrapperHeadChildren}
       </Fragment>
     ),
-    [wrapperHeadChildren]
+    [wrapperHeadChildren],
   )
   const metaElements: any = useMemo(
     () => [
@@ -50,7 +51,7 @@ function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
       ['description', APP_SITE.META_DESCRIPTION],
       ...(wrapperMetaElements || []),
     ],
-    [wrapperMetaElements]
+    [wrapperMetaElements],
   )
   const linkElements = useMemo(() => [...(wrapperLinkElements || [])], [wrapperLinkElements])
 
