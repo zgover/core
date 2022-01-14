@@ -36,8 +36,8 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
     enableMouseEvents: true,
     enableKeyboardEvents: true,
     delay: 0,
-    delayTouchStart: 200,
-    delayMouseStart: 200,
+    delayTouchStart: 0,
+    delayMouseStart: 0,
     touchSlop: 5,
     ...options,
   }

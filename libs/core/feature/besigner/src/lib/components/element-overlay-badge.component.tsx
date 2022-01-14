@@ -56,7 +56,6 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>(
   },
 )
 
-
 export interface ElementOverlayBadgeButtonsComponentProps extends ButtonGroupProps {
   $id: ElementId
   dragHandleRef: DragElementWrapper<any>
@@ -122,6 +121,11 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
             children="drag"
             ButtonProps={{ref: dragHandleRef}}
             icon={{path: IconVariant.MODIFY_DRAG, color: 'secondary'}}
+            sx={{
+              pl: 0.75, pr: 0.5,
+              '&:hover': {cursor: 'move'},
+              '&.MuiButtonGroup-grouped': {minWidth: 32},
+            }}
           />
         )}
 
