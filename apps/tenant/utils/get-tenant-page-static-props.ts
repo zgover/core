@@ -42,7 +42,7 @@ export const getTenantPageStaticProps: GetStaticProps = async (
 
   // fetch data from mock database using the site value as the key
   const tenant = mockDB.find(
-    ({subdomain, customDomain}) => subdomain === host || customDomain === host,
+    ({subdomain, cname}) => subdomain === host || cname === host,
   )
 
   if (!tenant) {

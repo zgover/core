@@ -32,7 +32,7 @@ export default function middleware(req: NextRequest) {
       ? hostHeader.replace(`.${process.env.AGLYN_TENANT_DOMAIN}`, '')
       : process.env.NODE_ENV === 'development'
         ? hostHeader.replace(`.${process.env.HOST}`, '')
-        : process.env.AGLYN_TENANT_CUSTOM_DOMAIN || process.env.AGLYN_TENANT_SUBDOMAIN
+        : process.env.AGLYN_TENANT_CNAME || process.env.AGLYN_TENANT_SUBDOMAIN
 
   // Prevent security issues – users should not be able to canonically access
   // the pages/_sites folder and its respective contents. This can also be

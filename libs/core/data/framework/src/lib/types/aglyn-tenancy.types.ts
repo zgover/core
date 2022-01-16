@@ -15,24 +15,50 @@
  * limitations under the License.
  */
 
-import {type PageUid} from '@aglyn/core-data-framework'
+import {type PageUid} from './aglyn-pages.types'
 
 
 export type TenantUid = string
 export type HostUid = string
+export type RoleUid = string
+export type PermissionUid = string
+export type UserUid = string
+
+export interface AglynUser {
+  $id: UserUid
+  roleId?: RoleUid
+  superAdmin?: boolean
+  email?: string
+}
+
+export interface AglynRole {
+  $id: RoleUid
+  displayName?: string
+  description?: string
+  permissions?: PermissionUid[]
+}
+
+export interface AglynPermission {
+  $id: PermissionUid
+  displayName?: string
+  description?: string
+}
 
 export interface AglynTenant {
   $id: TenantUid
-  hosts: HostUid[]
-  displayName: string
+  ownerId?: UserUid
+  displayName?: string
+  organization?: string
+  hosts?: Record<HostUid, true>
+  subOwners?: Record<UserUid, true>
 }
 
-export interface AglynTenantHost {
+export interface AglynHost {
   $id: HostUid
-  tenantUid: TenantUid
-  customDomain?: string
-  displayName: string
-  name?: string
+  tenantId?: TenantUid
+  cname?: string
+  displayName?: string
+  title?: string
   description?: string
-  pages: PageUid[]
+  pages?: Record<PageUid, true>
 }

@@ -145,6 +145,9 @@ try {
       },
     })
 
+    if (window) {
+      window['__AGLYN_APP__'] = app
+    }
 
     components.forEach((i) => registerComponent(app, i))
     registerBundle(app, muiBundle)

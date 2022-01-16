@@ -72,7 +72,7 @@ export const getServerSideProps = async (ctx) => {
 
   if (!tenant && ctx) {
     console.log('Page:Besigner WRITE START')
-    await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake tenant', hosts: ['-MtN17_cpfPPLwWjE6z4']})
+    await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake tenant'})
     tenant = await getServerSideProps(null).then((data) => data.props.tenant)
     console.log('Page:Besigner WRITE DONE', tenant)
   }

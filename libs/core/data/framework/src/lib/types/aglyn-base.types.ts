@@ -34,6 +34,7 @@ export interface AglynBaseModelOptions {
 export interface IAglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions, LO = never> extends StringLike, Serializable, AglynLifecycleObserver<LO> {
   readonly [Symbol.toStringTag]: string
   readonly namespace: string
+  readonly createdAt: Timestamp
   readonly options: O
   readonly errorFactory: AglynErrorFactory
   readonly logger: AglynLogger

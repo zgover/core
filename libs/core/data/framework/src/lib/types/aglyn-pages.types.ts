@@ -16,7 +16,7 @@
  */
 
 import {type ElementId} from './aglyn-elements.types'
-import {type HostUid} from './aglyn-tenants.types'
+import {type HostUid} from './aglyn-tenancy.types'
 
 
 export type PageUid = string

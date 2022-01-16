@@ -21,8 +21,7 @@ import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
 import clsx from 'clsx'
 import dynamic from 'next/dynamic'
 // import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
-import {forwardRef, type HTMLAttributes, type Ref, useRef} from 'react'
-import {useSlider} from 'react-use'
+import {forwardRef, type HTMLAttributes, type Ref} from 'react'
 import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
 
 
@@ -30,25 +29,6 @@ const ViewportFrameComponent = dynamic(
   () => import('./viewport-frame.component').then((mod) => mod.ViewportFrameComponent),
   {ssr: false, loading: () => <AppLoaderOverlayView open />},
 )
-
-const Demo = () => {
-  const ref = useRef(null)
-  const {isSliding, value, ...rest} = useSlider(ref)
-
-  return (
-    <div>
-      <div ref={ref} style={{position: 'relative'}}>
-        <p style={{textAlign: 'center', color: isSliding ? 'red' : 'green'}}>
-          {Math.round(value * 100)}%
-          {JSON.stringify(rest, null, 2)}
-        </p>
-        <div style={{position: 'absolute', width: `${value * 100}%`, background: isSliding ? 'red' : 'green', height: 20}}>
-          <div style={{position: 'absolute', right: 0}}>🎚</div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 const ViewportCanvas = styled('div', {
   name: 'AglynViewportCanvas',
@@ -62,7 +42,7 @@ const ViewportCanvas = styled('div', {
 })
 
 const canvasArtboardClassKeys = generateComponentClassKeys('AglynCanvasArtboard', [
-  'deviceResponsive',
+  'responsive',
   'deviceXs',
   'deviceSm',
   'deviceMd',
@@ -84,7 +64,7 @@ const ViewportArtboard = styled('div', {
     duration: theme.transitions.duration.leavingScreen,
   }),
   width: '100%',
-  [`&, &.${canvasArtboardClassKeys.deviceResponsive}`]: {width: '100%'},
+  [`&, &.${canvasArtboardClassKeys.responsive}`]: {width: '100%'},
   [`&.${canvasArtboardClassKeys.deviceXs}`]: {width: 390},
   [`&.${canvasArtboardClassKeys.deviceSm}`]: {width: theme.breakpoints.values.sm},
   [`&.${canvasArtboardClassKeys.deviceMd}`]: {width: theme.breakpoints.values.md},
@@ -120,7 +100,7 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
 
     const devicePreview = useAglynBesignerStoreState('flags', 'devicePreview')
     const artboardClass = clsx({
-      [canvasArtboardClassKeys.deviceResponsive]: BesignerDeviceFlag.RESPONSIVE === devicePreview,
+      [canvasArtboardClassKeys.responsive]: BesignerDeviceFlag.RESPONSIVE === devicePreview,
       [canvasArtboardClassKeys.deviceXs]: BesignerDeviceFlag.XS === devicePreview,
       [canvasArtboardClassKeys.deviceSm]: BesignerDeviceFlag.SM === devicePreview,
       [canvasArtboardClassKeys.deviceMd]: BesignerDeviceFlag.MD === devicePreview,
@@ -147,8 +127,6 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
           <ViewportFrameComponent />
           {/*</ViewportCanvasPanner>*/}
         </ViewportArtboard>
-
-        <Demo />
 
         {/*<RulerComponent*/}
         {/*  variant="vertical"*/}

@@ -33,7 +33,7 @@ export const getTenantPageStaticPaths: GetStaticPaths = async (
   function mapTenants(sites: TenantSite[]) {
     function mapPaths(
       paths: TenantSite['paths'],
-      host: TenantSite['subdomain' | 'customDomain'],
+      host: TenantSite['subdomain' | 'cname'],
     ) {
       return paths.map((pg: string) => ({
         params: {
@@ -42,10 +42,10 @@ export const getTenantPageStaticPaths: GetStaticPaths = async (
         },
       }))
     }
-    return sites.reduce((prev, {subdomain, customDomain, paths}) => ([
+    return sites.reduce((prev, {subdomain, cname, paths}) => ([
       ...prev,
       ...mapPaths(paths, subdomain),
-      ...(customDomain ? mapPaths(paths, customDomain) : []),
+      ...(cname ? mapPaths(paths, cname) : []),
     ]), [])
   }
 

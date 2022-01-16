@@ -33,7 +33,7 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public static readonly namespace: string = NS
 
   readonly #options: O = null
-  readonly #created: Timestamp
+  readonly #createdAt: Timestamp
   #errorFactory: AglynErrorFactory
   #emitter: AglynEmitter
   #logger: AglynLogger
@@ -41,13 +41,14 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public get [Symbol.toStringTag](): string {return getStaticField(Symbol.toStringTag, this)}
   public get namespace(): string {return getStaticField('namespace', this)}
   public get options(): O {return this.#options}
+  public get createdAt(): Timestamp {return this.#createdAt}
   public get errorFactory(): AglynErrorFactory {return this.#errorFactory}
   public get logger(): AglynLogger {return this.#logger}
   public get emitter(): AglynEmitter {return this.#emitter}
 
   protected constructor(options: O) {
     this.#options = {...options}
-    this.#created = Timestamp.now()
+    this.#createdAt = Timestamp.now()
     this.#setup()
   }
   #setup() {
@@ -69,7 +70,7 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public toJSON(): Dictionary {
     return {
       namespace: this.namespace,
-      created: this.#created,
+      created: this.#createdAt,
     }
   }
 
@@ -77,7 +78,7 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
     return this.#options
   }
   public getCreatedAt(): Timestamp {
-    return this.#created
+    return this.#createdAt
   }
   public getErrorFactory(): AglynErrorFactory {
     return this.#errorFactory

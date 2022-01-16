@@ -15,33 +15,20 @@
  * limitations under the License.
  */
 
-export type TenantSite = {
-  name: string
-  description: string
-  subdomain: string
-  cname?: string
-  paths: string[]
+/** Tuple with exactly two elements */
+export interface Tuple<T1, T2 = T1> extends Array<T1 | T2> {
+  0: T1
+  1: T2
+  length: 2 // using the numeric literal type '2'
 }
-export const mockDB: TenantSite[] = [
-  {
-    name: 'Site 1',
-    description: 'Subdomain + custom domain',
-    subdomain: 'myhost-1',
-    cname: 'custom-domain-1.com',
-    paths: ['/index', '/aa'],
-  },
-  {
-    name: 'Site 2',
-    description: 'Subdomain only',
-    subdomain: 'myhost-2',
-    cname: null,
-    paths: ['/index', '/aa'],
-  },
-  {
-    name: 'Site 3',
-    description: 'Subdomain only',
-    subdomain: 'myhost-3',
-    cname: null,
-    paths: ['/index', '/aa'],
-  },
-]
+
+/** Tuple with a guaranteed minimum of one (1) item */
+export interface TupleMin1<T> extends Array<T> {
+  0: T
+}
+
+/** Tuple with a guaranteed minimum of two (2) items */
+export interface TupleMin2<T1, T2 = T1> extends TupleMin1<T1 | T2> {
+  0: T1
+  1: T2
+}
