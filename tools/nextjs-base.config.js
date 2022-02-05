@@ -21,7 +21,7 @@ const withNx = require('@nrwl/next/plugins/with-nx')
 const deepFillIn = require('mout/object/deepFillIn')
 
 const PACKAGE_VERSION = String(pkg?.version ?? 'X.X.X')
-const PROCESS_VERSION = process.version
+const PROCESS_VERSION = String(process.version)
 const PROCESS_VERSIONS = process.versions
 
 const NODE_ENV = process.env.NODE_ENV
@@ -77,7 +77,6 @@ const SECURITY_HEADERS = [
 const BRAND_HEADERS = [
   {key: 'x-aglyn-package-version', value: PACKAGE_VERSION},
   {key: 'x-aglyn-process-version', value: PROCESS_VERSION},
-  {key: 'x-aglyn-process-versions', value: PROCESS_VERSIONS},
 ]
 
 /**
