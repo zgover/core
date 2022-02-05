@@ -2,9 +2,10 @@
   "$id": "dHirL_dGRk-dL5tJeK2dg",
   "tenantId": "-atN0g5dZgoDp4rfMaO_",
   "hostId": "-MtN17_cpfPPLwWjE6z4",
+  "screenId": "dL5tJeKN0g5dZgoLwWjE6z4",
   "createdAt": 1642246934,
   "updatedAt": 1642246934,
-  "type": "screen",
+  "contributors": ["jw8IbTiuFuJPExklgKd0Go50TFoB"],
   "format": 2,
   "elements": {
     "root1": {

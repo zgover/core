@@ -18,12 +18,12 @@
 import {type Conditional, type TimestampSeconds} from '@aglyn/shared-data-types'
 import {
   type ActivityAccess,
+  type HostEntityType,
   type HostRedirectParams,
   type HostRedirectStatusCode,
   type HostScreenStatus,
   type HostScreenVisibility,
   type HostViewFormat,
-  type HostViewType,
 } from '../constants/tenancy'
 import {type AglynElementsById, type AglynElementsList} from './aglyn-elements.types'
 
@@ -32,12 +32,14 @@ export type UserUid = string
 export type RoleUid = string
 export type PermissionUid = string
 export type TenantUid = string
+export type ProjectUid = string
 export type HostUid = string
-export type ScreenUid = string
-export type VersionUid = string
-export type ViewPartUid = string
 export type HostPath = string
 export type HostMediaUid = string
+export type RedirectUid = string
+export type ScreenUid = string
+export type VersionUid = string
+export type LayoutUid = string
 
 export interface AglynUser {
   $id: UserUid
@@ -62,12 +64,13 @@ export interface AglynRolePermission {
   roles?: Record<RoleUid, true>
 }
 
-export interface AglynActivityAccess {
+export interface AglynAccessRule {
   roles?: Record<RoleUid, ActivityAccess>
   permissions?: Record<PermissionUid, ActivityAccess>
   users?: Record<UserUid, ActivityAccess>
 }
 
+/** Hosted in master catalog */
 export interface AglynTenant {
   $id: TenantUid
   ownerId?: UserUid
@@ -77,35 +80,42 @@ export interface AglynTenant {
   hosts?: Record<HostUid, true>
 }
 
+/** Hosted in master catalog */
 export interface AglynTenantHost {
   $id: HostUid
   tenantId?: TenantUid
+  projectId?: ProjectUid
   cname?: string
-  pathsFile?: string
-  organization?: {
-    type?: 'organization' | 'person'
+  displayName?: string
+  description?: string
+}
+
+/** Hosted in tenants' host project */
+export interface AglynTenantHostEntry {
+  $id: HostUid
+  screens?: Record<ScreenUid, true>
+  redirects?: Record<RedirectUid, true>
+  displayName?: string
+  title?: string
+  description?: string
+  separator?: string
+  image?: string
+  favicon?: string
+  entity?: {
+    type?: HostEntityType
     name?: string
     logo?: string
   }
-  displayName?: string
-  separator?: string
-  title?: string
-  description?: string
-  image?: string
-  favicon?: string
-  screens?: Record<ScreenUid, true>
 }
 
-export interface AglynHostPaths {
-  tenantId?: TenantUid
+/** Hosted in tenants' host project */
+export interface AglynTenantHostRedirect {
+  $id: RedirectUid
   hostId?: HostUid
-  paths?: Record<HostPath, ScreenUid>
-  redirects?: Record<HostPath, AglynHostRedirect>
-}
-
-export type AglynHostRedirect = {
-  source?: HostPath
-  destination?: HostPath
+  sourcePath?: HostPath
+  sourceScreen?: ScreenUid
+  destinationPath?: HostPath
+  destinationScreen?: ScreenUid
   statusCode?: HostRedirectStatusCode
   params?: HostRedirectParams
   flags?: {
@@ -113,24 +123,25 @@ export type AglynHostRedirect = {
     ignoreSlash?: true
     ignoreCase?: true
   }
-  description?: string
   hits?: number
   lastAccess?: TimestampSeconds
+  description?: string
 }
 
-export interface AglynHostScreen {
+/** Hosted in tenants' host project */
+export interface AglynTenantHostScreen {
   $id: ScreenUid
   parentId?: ScreenUid
-  tenantId?: TenantUid
   hostId?: HostUid
   ownerId?: UserUid
+  layoutId?: LayoutUid
   slug?: string
-  versionId?: VersionUid
-  versions?: Record<VersionUid, true>
+  version?: VersionUid
+  versions?: Array<VersionUid>
   status?: HostScreenStatus
   visibility?: HostScreenVisibility
-  access?: AglynActivityAccess
-  contributors?: Record<UserUid, true>
+  access?: AglynAccessRule
+  contributors?: Array<UserUid>
   createdAt?: TimestampSeconds
   updatedAt?: TimestampSeconds
   deletedAt?: TimestampSeconds
@@ -144,20 +155,43 @@ export interface AglynHostScreen {
   description?: string
 }
 
-export interface AglynHostViewPart<T extends HostViewFormat = HostViewFormat.NORMALIZED> {
-  $id: ViewPartUid
-  tenantId?: TenantUid
+/** Hosted in tenants' host project */
+export interface AglynTenantHostLayout {
+  $id: LayoutUid
   hostId?: HostUid
-  layout?: ViewPartUid
-  type?: HostViewType
-  contributors?: Record<UserUid, true>
+  layoutId?: LayoutUid
+  version?: VersionUid
+  versions?: Array<VersionUid>
+  displayName?: string
+  description?: string
+  contributors?: Array<UserUid>
   createdAt?: TimestampSeconds
   updatedAt?: TimestampSeconds
-  notes?: string
+}
+
+/** Hosted in tenants' host project */
+export interface AglynTenantHostScreenVersion<T extends HostViewFormat = HostViewFormat.NORMALIZED> {
+  $id: VersionUid
+  hostId?: HostUid
+  screenId?: ScreenUid
+  contributors?: Array<UserUid>
+  createdAt?: TimestampSeconds
+  updatedAt?: TimestampSeconds
   title?: string
   description?: string
   breadcrumb?: string
   image?: HostMediaUid
+  format?: T
+  elements?: Conditional<T, HostViewFormat.NORMALIZED, AglynElementsList, AglynElementsById>
+}
+
+/** Hosted in tenants' host project */
+export interface AglynTenantHostLayoutVersion<T extends HostViewFormat = HostViewFormat.NORMALIZED> {
+  $id: VersionUid
+  hostId?: HostUid
+  contributors?: Array<UserUid>
+  createdAt?: TimestampSeconds
+  updatedAt?: TimestampSeconds
   format?: T
   elements?: Conditional<T, HostViewFormat.NORMALIZED, AglynElementsList, AglynElementsById>
 }

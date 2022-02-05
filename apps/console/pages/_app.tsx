@@ -145,7 +145,7 @@ try {
       },
     })
 
-    if (window) {
+    if (typeof window !== 'undefined') {
       window['__AGLYN_APP__'] = app
     }
 

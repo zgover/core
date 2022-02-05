@@ -51,6 +51,11 @@ export enum ActivityAccess {
   SUPER = READ_WRITE | 0x1 << 0x3
 }
 
+export enum HostEntityType {
+  ORGANIZATION = 0x1,
+  PERSON = 0x2,
+}
+
 export enum HostRedirectStatusCode {
   MOVED_PERMANENTLY = 301,
   FOUND = 302,
