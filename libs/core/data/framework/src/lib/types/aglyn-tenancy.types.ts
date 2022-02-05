@@ -33,6 +33,7 @@ export type RoleUid = string
 export type PermissionUid = string
 export type TenantUid = string
 export type ProjectUid = string
+export type ProjectNumber = number
 export type HostUid = string
 export type HostPath = string
 export type HostMediaUid = string
@@ -85,6 +86,7 @@ export interface AglynTenantHost {
   $id: HostUid
   tenantId?: TenantUid
   projectId?: ProjectUid
+  projectNumber?: ProjectNumber
   cname?: string
   displayName?: string
   description?: string
