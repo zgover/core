@@ -22,7 +22,6 @@ import {
   FormRenderer,
   type FormRendererProps,
   FormSpy,
-  GridFormTemplate,
   useFormApi,
 } from '@aglyn/shared-ui-jsx'
 import {mdiContentSave, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
@@ -69,7 +68,7 @@ const FormTemplate = forwardRef<any, FormTemplateRenderProps>(
     )
   },
 )
-GridFormTemplate.displayName = 'GridFormTemplate'
+FormTemplate.displayName = 'FormTemplate'
 
 export interface ElementPropsFormProps extends FormRendererProps {
   $id?: ElementId

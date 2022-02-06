@@ -288,7 +288,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
   const buildTextButton = (item, key) => (
     <AppLink
       key={key}
-      linkType="button"
+      componentVariant="button"
       color="inherit"
       sx={{p: item?.avatar ? 0.5 : undefined}}
       {...item}

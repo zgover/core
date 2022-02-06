@@ -18,7 +18,7 @@
 import {
   type AglynComponentSchema,
   type ComponentId,
-  PropertyEditorFieldFlag,
+  FieldComponentType,
 } from '@aglyn/core-data-framework'
 import {mdiBorderInside} from '@aglyn/shared-ui-mdi-jsx'
 import Toolbar, {type ToolbarProps} from '@mui/material/Toolbar'
@@ -43,7 +43,7 @@ export const schema: AglynComponentSchema<ToolbarProps> = {
       {
         name: 'variant',
         description: 'The variant to use.',
-        component: PropertyEditorFieldFlag.SELECT,
+        component: FieldComponentType.SELECT,
         label: 'Variant',
         options: [
           {value: '', label: 'Default'},

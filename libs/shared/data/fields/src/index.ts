@@ -15,17 +15,4 @@
  * limitations under the License.
  */
 
-import {type SxProps, type Theme} from '../../vendor/mui'
-
-
-export function handlePassSxProps<T extends object = Theme>(
-  sx: SxProps<T>,
-  ...passProps: Array<SxProps<T>>
-): SxProps<T>
-
-export function handlePassSxProps<T extends object = Theme>(
-  ...sx: Array<SxProps<T>>
-): SxProps<T> {
-  return sx.map((i) => Array.isArray(i) ? i : [i]) as SxProps<T>
-}
-export default handlePassSxProps
+export * from './lib/fields'

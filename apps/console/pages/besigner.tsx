@@ -16,12 +16,13 @@
  */
 
 import {getApp} from '@aglyn/core-data-framework'
-import {getAdminTenant, setAdminTenant} from '@aglyn/core-data-tenancy'
+import {getAdminTenant} from '@aglyn/core-data-tenancy'
 import {IS_BROWSER} from '@aglyn/shared-data-brand'
 import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
 import dynamic from 'next/dynamic'
 import {useEffect} from 'react'
 // import {useEffect} from 'react-hooks'
+import '../constants/app-setup'
 
 
 const AglynBesigner = dynamic(
@@ -52,7 +53,7 @@ export const getServerSideProps = async (ctx) => {
   // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'sample tenant', hosts: []})
   console.log('Page:Besigner getStaticProps START')
   const tenantId = '-atN0g5dZgoDp4rfMaO_'
-  let tenant = await getAdminTenant(tenantId)
+  const tenant = await getAdminTenant(tenantId)
     .then((snapshot) => {
       if (snapshot.exists()) {
         console.log('getAdminTenant exists', tenantId, snapshot.val())
@@ -72,8 +73,8 @@ export const getServerSideProps = async (ctx) => {
 
   if (!tenant && ctx) {
     console.log('Page:Besigner WRITE START')
-    await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake tenant'})
-    tenant = await getServerSideProps(null).then((data) => data.props.tenant)
+    // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake tenant'})
+    // tenant = await getServerSideProps(null).then((data) => data.props.tenant)
     console.log('Page:Besigner WRITE DONE', tenant)
   }
 

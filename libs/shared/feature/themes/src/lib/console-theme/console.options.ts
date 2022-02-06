@@ -30,7 +30,7 @@ const baseOptions: ThemeOptions = {
   shape: consoleShape,
 }
 
-export const consoleOptions = {
+export const consoleOptions: ThemeOptions = {
   palette: consolePalette.LIGHT,
   ...baseOptions,
 }

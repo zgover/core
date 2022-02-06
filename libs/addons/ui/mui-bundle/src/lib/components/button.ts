@@ -18,7 +18,7 @@
 import {
   type AglynComponentSchema,
   type ComponentId,
-  PropertyEditorFieldFlag,
+  FieldComponentType,
 } from '@aglyn/core-data-framework'
 import {mdiGestureTapButton} from '@aglyn/shared-ui-mdi-jsx'
 import Button, {type ButtonProps} from '@mui/material/Button'
@@ -51,7 +51,7 @@ export const schema: AglynComponentSchema<ButtonProps> = {
       {
         name: 'variant',
         description: 'The variant to use.',
-        component: PropertyEditorFieldFlag.SELECT,
+        component: FieldComponentType.SELECT,
         label: 'Variant',
         options: [
           {value: '', label: 'Default'},

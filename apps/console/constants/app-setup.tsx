@@ -81,7 +81,7 @@ const c5 = createAglynComponent(
 const components = [c1, c2, c3, c4, c5]
 
 try {
-  if (!doesAppExist()) {
+  if (!doesAppExist() && typeof window !== 'undefined') {
     const app = initializeBesignerApp({
       logLevel: 'debug',
       modulesOptions: {

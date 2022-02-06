@@ -19,7 +19,6 @@ import {APP_CONSOLE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
 import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
 import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
 import {Fragment, useMemo} from 'react'
-import '../constants/app-setup'
 
 
 export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentProps<Props, InitialProps> {}

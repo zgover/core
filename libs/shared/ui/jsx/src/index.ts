@@ -17,6 +17,7 @@
 
 export * from './lib/components/app-link'
 export * from './lib/components/app-loader-overlay-view'
+export * from './lib/components/background-image.component'
 export * from './lib/components/card-icon-list-item'
 export * from './lib/components/dialog-confirm'
 export * from './lib/components/elevation-scroll'

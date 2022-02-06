@@ -421,6 +421,21 @@
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
     },
+    "shared-data-fields": {
+      "root": "libs/shared/data/fields",
+      "sourceRoot": "libs/shared/data/fields/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/data/fields/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+    },
     "shared-data-mdi": {
       "root": "libs/shared/data/mdi",
       "sourceRoot": "libs/shared/data/mdi/src",
@@ -439,6 +454,21 @@
           "options": {
             "jestConfig": "libs/shared/data/mdi/jest.config.js",
             "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+    },
+    "shared-data-regex": {
+      "root": "libs/shared/data/regex",
+      "sourceRoot": "libs/shared/data/regex/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/data/regex/**/*.ts"]
           }
         }
       },

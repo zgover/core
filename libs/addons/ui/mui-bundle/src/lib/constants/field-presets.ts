@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import {AglynComponentField, PropertyEditorFieldFlag} from '@aglyn/core-data-framework'
+import {AglynComponentField, FieldComponentType} from '@aglyn/core-data-framework'
 
 
 export const FIELD_COLOR: AglynComponentField = {
   name: 'color',
   description: 'The color of the component. It supports those theme colors that make sense for this component.',
-  component: PropertyEditorFieldFlag.SELECT,
+  component: FieldComponentType.SELECT,
   label: 'Theme color',
   options: [
     {value: '', label: 'Default'},
@@ -47,25 +47,25 @@ export const FIELD_COLOR_ALT1: AglynComponentField = {
 export const FIELD_DISABLED: AglynComponentField = {
   name: 'disabled',
   description: 'If true, the component is disabled.',
-  component: PropertyEditorFieldFlag.SWITCH,
+  component: FieldComponentType.SWITCH,
   label: 'Disabled?',
 }
 export const FIELD_FULL_WIDTH: AglynComponentField = {
   name: 'fullWidth',
   description: 'If true, the button will take up the full width of its container.',
-  component: PropertyEditorFieldFlag.SWITCH,
+  component: FieldComponentType.SWITCH,
   label: 'Full width?',
 }
 export const FIELD_DISABLE_GUTTERS: AglynComponentField = {
   name: 'disableGutters',
   description: 'If true, disables gutter padding.',
-  component: PropertyEditorFieldFlag.SWITCH,
+  component: FieldComponentType.SWITCH,
   label: 'Disable gutters?',
 }
 export const FIELD_SIZE: AglynComponentField = {
   name: 'size',
   description: 'The size of the component. small is equivalent to the dense button styling.',
-  component: PropertyEditorFieldFlag.SELECT,
+  component: FieldComponentType.SELECT,
   label: 'Size',
   options: [
     {value: '', label: 'Default'},
@@ -78,7 +78,7 @@ export const FIELD_SIZE: AglynComponentField = {
 export const FIELD_POSITION: AglynComponentField = {
   name: 'position',
   description: 'The positioning type. The behavior of the different options is described in the MDN web docs. Note: sticky is not universally supported and will fall back to static when unavailable.',
-  component: PropertyEditorFieldFlag.SELECT,
+  component: FieldComponentType.SELECT,
   label: 'Position',
   options: [
     {value: '', label: 'Default'},

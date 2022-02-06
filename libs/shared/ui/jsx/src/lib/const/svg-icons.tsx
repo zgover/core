@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  */
 
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {_isEqualitySameType} from '@aglyn/shared-util-guards'
 import MuiSvgIcon, {SvgIconProps as MuiSvgIconProps} from '@mui/material/SvgIcon'
 import {forwardRef} from 'react'
 
@@ -33,37 +34,63 @@ export const BESIGNER_SVG_LOGO = {
   viewBox: '0 0 77.2 18',
 }
 
-export const AglynSvgLogo = forwardRef<any, MuiSvgIconProps>(
-  function RefRenderFn(props, ref) {
-    return (
-      <MuiSvgIcon
-        ref={ref}
-        viewBox={AGLYN_SVG_LOGO.viewBox}
-        aria-label={'Aglyn Logo'}
-        {...props}
-      >
-        <path d={AGLYN_SVG_LOGO.path} />
-      </MuiSvgIcon>
-    )
-  },
-)
-AglynSvgLogo.displayName = 'AglynSvgLogo'
 
-export const BesignerSvgLogo = forwardRef<any, MuiSvgIconProps>(
-  function RefRenderFn(props, ref) {
-    return (
-      <MuiSvgIcon
-        ref={ref}
-        viewBox={BESIGNER_SVG_LOGO.viewBox}
-        aria-label={'Besigner Logo'}
-        {...props}
-      >
-        <path d={BESIGNER_SVG_LOGO.path} />
-      </MuiSvgIcon>
-    )
-  },
-)
+export const AglynSvgLogo = styled(MuiSvgIcon, {name: 'AglynSvgLogo'})({
+  // width: 'unset',
+  height: 'unset',
+})
+AglynSvgLogo.displayName = 'AglynSvgLogo'
+AglynSvgLogo.defaultProps = {
+  'aria-label': 'aglyn',
+  viewBox: AGLYN_SVG_LOGO.viewBox,
+  children: (<path d={AGLYN_SVG_LOGO.path} />),
+}
+
+export const BesignerSvgLogo = styled(MuiSvgIcon, {name: 'BesignerSvgLogo'})({
+  // width: 'unset',
+  // height: 'unset',
+})
 BesignerSvgLogo.displayName = 'BesignerSvgLogo'
+BesignerSvgLogo.defaultProps = {
+  'aria-label': 'besigner',
+  viewBox: BESIGNER_SVG_LOGO.viewBox,
+  children: (<path d={BESIGNER_SVG_LOGO.path} />),
+}
+
+
+// forwardRef<any, MuiSvgIconProps>(
+//   function RefRenderFn({sx, ...props}, ref) {
+//     return (
+//       <MuiSvgIcon
+//         ref={ref}
+//         viewBox={AGLYN_SVG_LOGO.viewBox}
+//         aria-label={'Aglyn Logo'}
+//         sx={handlePassSxProps({width: 'unset', height: 'unset'}, sx)}
+//         {...props}
+//       >
+//         <path d={AGLYN_SVG_LOGO.path} />
+//       </MuiSvgIcon>
+//     )
+//   },
+// )
+// AglynSvgLogo.displayName = 'AglynSvgLogo'
+
+// export const BesignerSvgLogo = forwardRef<any, MuiSvgIconProps>(
+//   function RefRenderFn({sx, ...props}, ref) {
+//     return (
+//       <MuiSvgIcon
+//         ref={ref}
+//         viewBox={BESIGNER_SVG_LOGO.viewBox}
+//         aria-label={'Besigner Logo'}
+//         sx={handlePassSxProps({width: 'unset', height: 'unset'}, sx)}
+//         {...props}
+//       >
+//         <path d={BESIGNER_SVG_LOGO.path} />
+//       </MuiSvgIcon>
+//     )
+//   },
+// )
+// BesignerSvgLogo.displayName = 'BesignerSvgLogo'
 
 
 const aglynSvgIconClassKey = generateComponentClassKeys('AglynSvgIcon', [
@@ -78,6 +105,8 @@ export interface AglynSvgIconProps extends MuiSvgIconProps {
   a1Color?: string
   a2Color?: string
   a3Color?: string
+  rounded?: boolean
+  bordered?: boolean
 }
 
 export const AglynSvgIcon = styled(forwardRef<any, AglynSvgIconProps>(
@@ -120,7 +149,12 @@ export const AglynSvgIcon = styled(forwardRef<any, AglynSvgIconProps>(
   },
 ), {
   name: 'AglynSvgIcon',
-})(({theme, rectBgColor, a1Color, a2Color, a3Color}) => ({
+  shouldForwardProp(propName) {
+    return !_isEqualitySameType(propName, 'rectBgColor', 'a1Color', 'a2Color', 'a3Color', 'rounded', 'bordered')
+  },
+})<AglynSvgIconProps>(({theme, rectBgColor, a1Color, a2Color, a3Color, rounded, bordered}) => ({
+  borderRadius: !rounded ? undefined : theme.shape.appIconBorderRadius,
+  border: !bordered ? undefined : `1px solid ${theme.palette.divider}`,
   [`& .${aglynSvgIconClassKey.rectBg}`]: {
     fill: 'currentColor',
     color: rectBgColor ?? theme.palette.primary.main,

@@ -28,15 +28,20 @@ export const consoleOverrides: ThemeOptions['components'] = {
     },
   },
   MuiIconButton: {
+    defaultProps: {
+      color: 'secondary',
+    },
     // color: 'inherit', // Default color to inherit
     styleOverrides: {root: {padding: 8}},
   },
   MuiLink: {
+    defaultProps: {
+      color: 'secondary',
+    },
     styleOverrides: {
       root: {
         '&[disabled]': {
           pointerEvents: 'none',
-          color: 'var(--text-disabled)',
           textDecoration: 'none',
           filter: 'grayscale(1) opacity(0.65)',
         },
@@ -44,11 +49,13 @@ export const consoleOverrides: ThemeOptions['components'] = {
     },
   },
   MuiButton: {
+    defaultProps: {
+      color: 'secondary',
+    },
     styleOverrides: {
       root: {
         '&a[disabled]': {
           pointerEvents: 'none',
-          color: 'var(--text-disabled)',
           textDecoration: 'none',
           filter: 'grayscale(1) opacity(0.65)',
         },

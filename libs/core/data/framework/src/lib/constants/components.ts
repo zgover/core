@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {PropertyEditorFieldFlag} from '@aglyn/shared-ui-jsx'
+import {FieldComponentType} from '@aglyn/shared-ui-jsx'
 import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
 
 
-export {PropertyEditorFieldFlag}
+export {FieldComponentType}
 
 export enum ComponentsLinealDirectiveFlag {
   LIMIT_TO = 0x01,
@@ -35,19 +35,19 @@ export const DEFAULT_PROPS_FORM_SCHEMA: AglynComponentPropsFormSchema = {
   fields: [
     // {
     //   name: 'iconId',
-    //   component: PropertyEditorFieldFlag.ICON_SELECT,
+    //   component: FieldComponentType.ICON_SELECT,
     //   label: 'Icon',
     // },
     // {
     //   name: 'displayName',
-    //   component: PropertyEditorFieldFlag.TEXT_FIELD,
+    //   component: FieldComponentType.TEXT_FIELD,
     //   label: 'Display name',
     //   // variant: 'outlined',
     // },
     {
       name: 'children',
       description: 'The content of the component.',
-      component: PropertyEditorFieldFlag.TEXT_FIELD,
+      component: FieldComponentType.TEXT_FIELD,
       label: 'Content',
     },
   ],

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,54 +15,55 @@
  * limitations under the License.
  */
 
-import { PartialPick } from '@aglyn/shared-data-types'
-import Link, { LinkProps } from 'next/link'
-import { AnchorHTMLAttributes, forwardRef } from 'react'
+import {styled} from '@aglyn/shared-feature-themes'
+import Link, {type LinkProps} from 'next/link'
+import {type AnchorHTMLAttributes, forwardRef} from 'react'
 
-type AnchorProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
 
-export interface NextLinkProps extends AnchorProps, PartialPick<LinkProps, 'as'> {
+interface AnchorProps extends AnchorHTMLAttributes<HTMLAnchorElement> {}
+
+// Add support for the sx prop
+const Anchor = styled('a', {name: 'AglynAnchor'})<AnchorProps>({})
+Anchor.displayName = 'Anchor'
+
+
+export interface NextLinkProps extends Omit<AnchorProps, 'href'>, Omit<LinkProps, 'as' | 'href'> {
+  href?: LinkProps['href']
   hrefAs?: LinkProps['as']
-  className?: string
 }
 
-export const NextLink = forwardRef<HTMLAnchorElement, NextLinkProps>(function RefRenderFn(
-  props,
-  ref
-) {
-  const {
-    hrefAs,
-    children,
-    href,
-    replace,
-    scroll,
-    passHref,
-    shallow,
-    prefetch,
-    locale,
-    as,
-    component: _,
-    ...rest
-  }: NextLinkProps & { component?: any } = props
+const NextLink = forwardRef<HTMLAnchorElement, NextLinkProps>(
+  function RefRenderFn(props, ref) {
+    const {
+      hrefAs,
+      href,
+      replace,
+      scroll,
+      passHref,
+      shallow,
+      prefetch,
+      locale,
+      ...rest
+    } = props
 
-  return (
-    <Link
-      as={as ?? hrefAs}
-      href={href}
-      locale={locale}
-      passHref={passHref}
-      prefetch={prefetch}
-      replace={replace}
-      scroll={scroll}
-      shallow={shallow}
-    >
-      <a ref={ref} {...rest}>
-        {children}
-      </a>
-    </Link>
-  )
-})
+    return (
+      <Link
+        as={hrefAs}
+        href={href}
+        locale={locale}
+        passHref={passHref}
+        prefetch={prefetch}
+        replace={replace}
+        scroll={scroll}
+        shallow={shallow}
+      >
+        <Anchor ref={ref} {...rest} />
+      </Link>
+    )
+  },
+)
 
 NextLink.displayName = 'NextLink'
 
+export {NextLink}
 export default NextLink
