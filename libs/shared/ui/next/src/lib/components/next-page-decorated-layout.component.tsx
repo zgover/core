@@ -28,8 +28,6 @@ export function NextPageDecoratedLayoutComponent<Props, InitialProps>(
   props: NextPageDecoratedLayoutComponentProps<Props, InitialProps>,
 ) {
   const Component = props.Component
-  return getNextPageLayout(props)((
-    <Component {...props.pageProps} />
-  ), props)
+  return getNextPageLayout(props)((<Component {...props.pageProps} />), props)
 }
 export default NextPageDecoratedLayoutComponent

@@ -57,6 +57,19 @@ function Index(props) {
               spacing={2}
               items={[
                 {
+                  xs: 12,
+                  children: (
+                    <>
+                      <Typography
+                        variant={'h2'}
+                        component={'h1'}
+                        children={TITLE}
+                        sx={{mb: 4}}
+                      />
+                    </>
+                  ),
+                },
+                {
                   xs: 12, md: 5,
                   children: (
                     <Image
@@ -74,16 +87,21 @@ function Index(props) {
                   children: (
                     <>
                       <Typography
-                        variant={'h2'}
-                        children={TITLE}
-                        sx={{mb: 4}}
-                      />
-                      <Typography
                         variant={'h4'}
-                        variantMapping={{'h4': 'h3'}}
+                        component={'h2'}
+                        // variantMapping={{'h4': 'h3'}}
                         children={'The essentials to keep your workflow simple'}
                         color="quaternary.main"
+                        sx={{mb: 2}}
                       />
+                      <Typography
+                        variant={'h6'}
+                        component={'div'}
+                        color="text.secondary"
+                        sx={{mb: 4, '& > b': {color: 'text.secondary'}}}
+                      >
+                        <b>A</b>pps <b>G</b>iving <b>L</b>ove for <b>Y</b>our <b>N</b>etwork
+                      </Typography>
                     </>
                   ),
                 },

@@ -20,59 +20,20 @@ import {
   AglynSvgIcon,
   AglynSvgLogo,
   AppLink,
-  BackgroundImageComponent,
   componentMapper,
   FormRenderer,
-  FormSpy,
-  useFormApi,
 } from '@aglyn/shared-ui-jsx'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {type FormTemplateRenderProps} from '@data-driven-forms/react-form-renderer'
 import type FormSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
-import {CssBaseline, Divider} from '@mui/material'
-import Box from '@mui/material/Box'
+import {Divider} from '@mui/material'
 import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl'
-import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import {forwardRef, useCallback, useState} from 'react'
+import {useCallback, useState} from 'react'
+import AuthBaseComponent from '../components/auth-base.component'
+import AuthBasicFormComponent from '../components/auth-basic-form.component'
 
-
-const FormTemplate = forwardRef<any, FormTemplateRenderProps>(
-  function RefRenderFn(props, ref) {
-    const {formFields, schema, ...rest} = props
-    const {handleSubmit} = useFormApi()
-    return (
-      <form ref={ref} onSubmit={handleSubmit} noValidate {...rest}>
-        {schema.title}
-        <Grid spacing={2} container>
-          {formFields}
-        </Grid>
-        <FormSpy>
-          {({submitting, pristine, valid}) => (
-            <Box mt={2}>
-              <FormControl margin="normal" fullWidth>
-                <Button
-                  color="secondary"
-                  disabled={submitting/* || !valid || pristine*/}
-                  style={{marginRight: 8}}
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                >
-                  Next
-                </Button>
-              </FormControl>
-            </Box>
-          )}
-        </FormSpy>
-      </form>
-    )
-  },
-)
-FormTemplate.displayName = 'FormTemplate'
 
 const formSchema: FormSchema = {
   'fields': [
@@ -80,7 +41,7 @@ const formSchema: FormSchema = {
     FIELD_SCHEMA_PASSWORD,
   ],
 }
-const defaultValues = {username: '', password: ''}
+const defaultValues = {email: '', password: ''}
 
 function Signin() {
 
@@ -93,134 +54,116 @@ function Signin() {
   }, [])
 
   return (
-    <BackgroundImageComponent
-      url="/_static/images/backgrounds/patterns/abstract-wave-lines.svg"
-      sx={{
-        minHeight: '100vh',
-        bgcolor: 'primary.dark',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: [2, 3],
-        color: 'common.white',
-      }}
-    >
-      <CssBaseline />
-      <Stack
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        spacing={2}
+    <>
+
+      <Paper
+        elevation={1}
+        sx={{
+          p: 2,
+          zIndex: 5,
+          width: 440,
+          maxWidth: 1,
+        }}
       >
 
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            zIndex: 5,
-          }}
+        <Stack
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+          spacing={1}
+          sx={{mb: 4}}
         >
 
+          <Typography
+            component="div"
+            variant="body2"
+            alignSelf="flex-end"
+          >
+            <AppLink
+              href="/signup"
+            >
+              {'Create account'}
+            </AppLink>
+          </Typography>
+
           <Stack
-            direction="column"
+            direction="row"
             justifyContent="center"
             alignItems="center"
             spacing={1}
-            sx={{mb: 4}}
+            sx={{pb: 3}}
           >
-
-            <Typography
-              component="div"
-              variant="body2"
-              alignSelf="flex-end"
-            >
-              <AppLink
-                href="/signup"
-              >
-                {'Create account'}
-              </AppLink>
-            </Typography>
-
-            <Stack
-              direction="row"
-              justifyContent="center"
-              alignItems="flex-start"
-              spacing={1}
-              sx={{pb: 3}}
-            >
-              <AglynSvgIcon rounded bordered sx={{fontSize: 20}} />
-              <AglynSvgLogo sx={{fontSize: 64}} />
-            </Stack>
-
-
-            <Typography
-              component="h1"
-              variant="h4"
-            >
-              {'Sign in'}
-            </Typography>
-
-            <Typography
-              component="div"
-              variant="h6"
-            >
-              {'Use your Aglyn account'}
-            </Typography>
+            <AglynSvgIcon rounded bordered sx={{fontSize: 24}} />
+            <AglynSvgLogo sx={{fontSize: 64, transform: `translateY(0.12rem)`}} />
           </Stack>
 
-          <FormRenderer
-            FormTemplate={FormTemplate}
-            componentMapper={componentMapper}
-            onCancel={handleFormCancel}
-            onReset={handleFormCancel}
-            onSubmit={handleFormSubmit}
-            initialValues={values}
-            schema={formSchema}
-            subscription={{values: true}}
-            clearOnUnmount
-          />
 
-          <Divider flexItem sx={{my: 1}}>
-            {'Or'}
-          </Divider>
-
-          <Stack
-            direction="column"
-            justifyContent="center"
-            alignItems="stretch"
-            spacing={1}
+          <Typography
+            component="h1"
+            variant="h4"
           >
+            {'Sign in'}
+          </Typography>
 
-            <Button
-              // variant="contained"
-              startIcon={<MdiIcon path={mdiGoogle.path} />}
-            >
-              {'Sign in with Google'}
-            </Button>
+          <Typography
+            component="div"
+            variant="h6"
+          >
+            {'Use your Aglyn account'}
+          </Typography>
+        </Stack>
 
-          </Stack>
+        <FormRenderer
+          FormTemplate={AuthBasicFormComponent}
+          componentMapper={componentMapper}
+          onCancel={handleFormCancel}
+          onReset={handleFormCancel}
+          onSubmit={handleFormSubmit}
+          initialValues={values}
+          schema={formSchema}
+          subscription={{values: true}}
+          clearOnUnmount
+        />
 
-        </Paper>
+        <Divider flexItem sx={{my: 1}}>
+          {'Or'}
+        </Divider>
 
-        <Typography
-          component="div"
-          variant="body2"
-          color=""
+        <Stack
+          direction="column"
+          justifyContent="center"
+          alignItems="stretch"
+          spacing={1}
         >
-          {'Having trouble logging in? '}
-          <AppLink
-            href="/account-recovery"
+
+          <Button
+            startIcon={<MdiIcon path={mdiGoogle.path} />}
           >
-            Account recovery
-          </AppLink>
-        </Typography>
+            {'Sign in with Google'}
+          </Button>
 
-      </Stack>
+        </Stack>
 
-    </BackgroundImageComponent>
+      </Paper>
+
+      <Typography
+        component="div"
+        variant="body2"
+        color=""
+      >
+        {'Having trouble logging in? '}
+        <AppLink
+          href="/account-recovery"
+        >
+          Account recovery
+        </AppLink>
+      </Typography>
+
+
+    </>
   )
 }
 Signin.displayName = 'Page:Signin'
+Signin.getLayout = (children) => <AuthBaseComponent children={children} />
 
 export default Signin

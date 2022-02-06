@@ -15,17 +15,27 @@
  * limitations under the License.
  */
 
+import {type Dictionary} from '@aglyn/shared-data-types'
 import {type SxProps, type Theme} from '../../vendor/mui'
 
 
-export function handlePassSxProps<T extends object = Theme>(
+export type MergedPassSxProps<T extends Dictionary<any> = Theme> = Extract<SxProps<T>, any[]>
+
+export function handlePassSxProps<T extends Dictionary<any> = Theme>(
   sx: SxProps<T>,
   ...passProps: Array<SxProps<T>>
-): SxProps<T>
+): MergedPassSxProps<T>
 
-export function handlePassSxProps<T extends object = Theme>(
+export function handlePassSxProps<T extends Dictionary<any> = Theme>(
   ...sx: Array<SxProps<T>>
-): SxProps<T> {
-  return sx.map((i) => Array.isArray(i) ? i : [i]) as SxProps<T>
+): MergedPassSxProps<T> {
+  const res: Extract<SxProps<T>, any[]> = []
+
+  for (const i of sx) {
+    if (Array.isArray(i)) res.push(...i)
+    else res.push(i)
+  }
+
+  return res
 }
 export default handlePassSxProps

@@ -129,6 +129,16 @@
               }
             ]
           }
+        ],
+        "no-fallthrough": "off",
+        "react/no-children-prop": "off",
+        "no-restricted-imports": [
+          "error", {
+            "patterns": [
+              "@mui/*/*/*",
+              "!@mui/material/test-utils/*"
+            ]
+          }
         ]
       }
     },
@@ -143,10 +153,8 @@
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-var-requires": "off",
-        "no-fallthrough": "off",
         "tsdoc/syntax": ["warn", {}],
-        "react-hooks/rules-of-hooks": "warn",
-        "react-hooks/exhaustive-deps": "error"
+        "react/no-children-prop": "off"
       }
     },
     {
@@ -156,16 +164,19 @@
     },
     {
       "files": ["*.tsx"],
+      "extends": ["plugin:@nrwl/nx/react-typescript"],
       "rules": {
-        "no-restricted-imports": [
-          "error", {
-            "patterns": [
-              "@mui/*/*/*",
-              "!@mui/material/test-utils/*"
-            ]
-          }
-        ],
-        "react/no-children-prop": "off"
+        "react/no-children-prop": "off",
+        "react-hooks/rules-of-hooks": "warn",
+        "react-hooks/exhaustive-deps": "error"
+      }
+    },
+    {
+      "files": ["*.tsx", "*.jsx"],
+      "rules": {
+        "react/no-children-prop": "off",
+        "react-hooks/rules-of-hooks": "warn",
+        "react-hooks/exhaustive-deps": "error"
       }
     }
   ]
