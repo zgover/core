@@ -50,7 +50,7 @@ const formSchema: FormSchema = {
     FIELD_SCHEMA_PASSWORD_CONFIRM,
   ],
 }
-const defaultValues = {email: '', password: ''}
+const defaultValues = {firstName: '', lastName: '', email: '', password: '', confirmPasswd: ''}
 
 function Signup() {
 
@@ -131,6 +131,7 @@ function Signup() {
           initialValues={values}
           schema={formSchema}
           subscription={{values: true}}
+
           clearOnUnmount
         />
 

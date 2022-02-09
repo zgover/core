@@ -56,14 +56,6 @@ export enum HostEntityType {
   PERSON = 0x2,
 }
 
-export enum HostRedirectStatusCode {
-  MOVED_PERMANENTLY = 301,
-  FOUND = 302,
-  SEE_OTHER = 303,
-  NOT_MODIFIED = 304,
-  TEMPORARY_REDIRECT = 307,
-}
-
 export enum HostRedirectParams {
   IGNORE,
   FORWARD = 0x1,

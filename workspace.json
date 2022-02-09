@@ -421,6 +421,21 @@
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
     },
+    "shared-data-enums": {
+      "root": "libs/shared/data/enums",
+      "sourceRoot": "libs/shared/data/enums/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/data/enums/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+    },
     "shared-data-fields": {
       "root": "libs/shared/data/fields",
       "sourceRoot": "libs/shared/data/fields/src",
@@ -676,6 +691,21 @@
           "options": {
             "jestConfig": "libs/shared/util/guards/jest.config.js",
             "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+    },
+    "shared-util-http": {
+      "root": "libs/shared/util/http",
+      "sourceRoot": "libs/shared/util/http/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/http/**/*.ts"]
           }
         }
       },

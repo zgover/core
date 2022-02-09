@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
+import {type HttpStatusCode} from '@aglyn/shared-data-enums'
 import {type Conditional, type TimestampSeconds} from '@aglyn/shared-data-types'
 import {
   type ActivityAccess,
   type HostEntityType,
   type HostRedirectParams,
-  type HostRedirectStatusCode,
   type HostScreenStatus,
   type HostScreenVisibility,
   type HostViewFormat,
@@ -118,7 +118,7 @@ export interface AglynTenantHostRedirect {
   sourceScreen?: ScreenUid
   destinationPath?: HostPath
   destinationScreen?: ScreenUid
-  statusCode?: HostRedirectStatusCode
+  statusCode?: HttpStatusCode
   params?: HostRedirectParams
   flags?: {
     regex?: true
