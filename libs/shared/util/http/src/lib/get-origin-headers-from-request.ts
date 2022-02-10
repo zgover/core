@@ -18,7 +18,7 @@ import getOriginHeaders from './get-origin-headers'
 import {type OriginFn, type StaticOrigin} from './types'
 
 
-async function getOriginHeadersFromRequest(
+export async function getOriginHeadersFromRequest(
   req: Request,
   origin: StaticOrigin | OriginFn,
 ) {
@@ -31,5 +31,4 @@ async function getOriginHeadersFromRequest(
   return getOriginHeaders(reqOrigin, value)
 }
 
-export {getOriginHeadersFromRequest}
 export default getOriginHeadersFromRequest

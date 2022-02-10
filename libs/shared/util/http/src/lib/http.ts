@@ -17,10 +17,28 @@
 
 export * from './types'
 
+// CREATE
+
 export * from './create-cors-response-handler'
 export * from './create-json-response'
+
+// HELPER
+
+export * from './handle-cors-response'
+
+// GUARDS
+
+export * from './is-origin-allowed'
+
+// SET
+
+export * from './set-cookie-user-token'
+
+// GET
+
+export * from './get-absolute-url-from-request'
 export * from './get-allowed-headers'
 export * from './get-origin-headers-from-request'
 export * from './get-origin-headers'
-export * from './handle-cors-response'
-export * from './is-origin-allowed'
+export * from './get-request-ip-address'
+export * from './get-user-id-token-cookie'

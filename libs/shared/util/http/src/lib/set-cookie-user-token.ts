@@ -20,7 +20,7 @@ import {type CookieSerializeOptions} from 'next/dist/server/web/types'
 import {type NextRequest, type NextResponse} from 'next/server'
 
 
-export function getCookieUserToken(
+export function setCookieUserToken(
   request: NextRequest,
   response: NextResponse,
   token: string,
@@ -31,4 +31,4 @@ export function getCookieUserToken(
     ...options,
   })
 }
-export default getCookieUserToken
+export default setCookieUserToken

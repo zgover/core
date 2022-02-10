@@ -33,7 +33,7 @@ import {type HttpStatusCode} from '@aglyn/shared-data-enums'
  * @param init - optionally provide {@link ResponseInit} object to spread
  * @returns a new {@link Response} object instance
  */
-function createJsonResponse(status: HttpStatusCode, data: any, init?: ResponseInit) {
+export function createJsonResponse(status: HttpStatusCode, data: any, init?: ResponseInit) {
   return new Response(JSON.stringify(data), {
     ...init,
     status,
@@ -44,5 +44,4 @@ function createJsonResponse(status: HttpStatusCode, data: any, init?: ResponseIn
   })
 }
 
-export {createJsonResponse}
 export default createJsonResponse

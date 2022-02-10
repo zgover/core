@@ -46,7 +46,7 @@ const defaultOptions: CorsOptions = {
  * @returns the modified {@link Response} object to send answer the request
  * @see {@link createCorsResponseHandler} when reusing same {@link CorsOptions}
  */
-async function handleCorsResponse(
+export async function handleCorsResponse(
   req: Request,
   res: Response,
   options?: CorsOptions,
@@ -102,5 +102,4 @@ async function handleCorsResponse(
   return res
 }
 
-export {handleCorsResponse}
 export default handleCorsResponse

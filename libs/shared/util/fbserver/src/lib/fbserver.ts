@@ -15,6 +15,4 @@
  * limitations under the License.
  */
 
-export * from './utils/get-cookie-user-token'
-export * from './utils/set-cookie-user-token'
 export * from './utils/verify-user-token'

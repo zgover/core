@@ -16,7 +16,7 @@
  */
 
 
-const getAbsoluteURL = (url: string, req: Request = null) => {
+export function getAbsoluteURL(url: string, req: Request = null) {
   let host
   if (req) {
     host = req.headers.get('host')

@@ -19,7 +19,7 @@ import {COOKIE_KEY_USER_TOKEN} from '@aglyn/shared-data-fbenums'
 import {type NextRequest} from 'next/server'
 
 
-export function getCookieUserToken(request: NextRequest) {
+export function getUserIdTokenCookie(request: NextRequest) {
   return request.cookies[COOKIE_KEY_USER_TOKEN]
 }
-export default getCookieUserToken
+export default getUserIdTokenCookie

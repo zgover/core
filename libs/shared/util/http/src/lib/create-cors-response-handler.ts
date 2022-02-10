@@ -22,8 +22,7 @@ import {type CorsOptions} from './types'
  * Curry the {@link handleCorsResponse} to handle a reusable cors config
  * @param options - optional object of {@link CorsOptions}
  */
-function createCorsResponseHandler(options?: CorsOptions) {
+export function createCorsResponseHandler(options?: CorsOptions) {
   return (req: Request, res: Response) => handleCorsResponse(req, res, options)
 }
-export {createCorsResponseHandler}
 export default createCorsResponseHandler

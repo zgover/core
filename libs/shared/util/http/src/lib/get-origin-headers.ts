@@ -18,7 +18,7 @@ import isOriginAllowed from './is-origin-allowed'
 import {type StaticOrigin} from './types'
 
 
-function getOriginHeaders(reqOrigin: string | undefined, origin: StaticOrigin) {
+export function getOriginHeaders(reqOrigin: string | undefined, origin: StaticOrigin) {
   const headers = new Headers()
 
   if (origin === '*') {
@@ -42,5 +42,4 @@ function getOriginHeaders(reqOrigin: string | undefined, origin: StaticOrigin) {
   return headers
 }
 
-export {getOriginHeaders}
 export default getOriginHeaders

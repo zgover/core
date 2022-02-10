@@ -22,7 +22,7 @@
  * @param allowed - optionally override which headers to allow
  * @returns a new {@link Headers} object instance
  */
-function getAllowedHeaders(req: Request, allowed?: string | string[]) {
+export function getAllowedHeaders(req: Request, allowed?: string | string[]) {
   const headers = new Headers()
 
   if (!allowed) {
@@ -40,5 +40,4 @@ function getAllowedHeaders(req: Request, allowed?: string | string[]) {
   return headers
 }
 
-export {getAllowedHeaders}
 export default getAllowedHeaders

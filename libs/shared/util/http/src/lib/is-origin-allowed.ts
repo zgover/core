@@ -18,7 +18,7 @@
 import {type StaticOrigin} from './types'
 
 
-function isOriginAllowed(origin: string, allowed: StaticOrigin): boolean {
+export function isOriginAllowed(origin: string, allowed: StaticOrigin): boolean {
   return Array.isArray(allowed)
     ? allowed.some((o) => isOriginAllowed(origin, o))
     : typeof allowed === 'string'
@@ -28,5 +28,4 @@ function isOriginAllowed(origin: string, allowed: StaticOrigin): boolean {
         : !!allowed
 }
 
-export {isOriginAllowed}
 export default isOriginAllowed
