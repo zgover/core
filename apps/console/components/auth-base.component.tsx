@@ -16,8 +16,13 @@
  */
 
 import {handlePassSxProps} from '@aglyn/shared-feature-themes'
-import {BackgroundImageComponent, BackgroundImageComponentProps} from '@aglyn/shared-ui-jsx'
-import Stack from '@mui/material/Stack'
+import {
+  AppLoaderProviderComponent,
+  BackgroundImageComponent,
+  BackgroundImageComponentProps,
+} from '@aglyn/shared-ui-jsx'
+import AppLoaderOverlayView
+  from '../../../libs/shared/ui/jsx/src/lib/components/app-loader-overlay-view'
 
 
 export interface AuthBaseComponentProps extends Partial<BackgroundImageComponentProps> {
@@ -29,32 +34,28 @@ function AuthBaseComponent(props: AuthBaseComponentProps) {
 
 
   return (
-    <BackgroundImageComponent
-      url="/_static/images/backgrounds/patterns/abstract-wave-lines.svg"
-      sx={handlePassSxProps({
-        minHeight: '100vh',
-        bgcolor: 'primary.dark',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: [2, 3],
-        color: 'common.white',
-      }, sx)}
-      {...rest}
-    >
-      <Stack
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        spacing={2}
-      >
+    <AppLoaderProviderComponent>
+      <AppLoaderOverlayView>
+        <BackgroundImageComponent
+          url="/_static/images/backgrounds/patterns/abstract-wave-lines.svg"
+          sx={handlePassSxProps({
+            minHeight: '100vh',
+            bgcolor: 'primary.dark',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: [2, 3],
+            color: 'common.white',
+          }, sx)}
+          {...rest}
+        >
 
-        {children}
+          {children}
 
-      </Stack>
-
-    </BackgroundImageComponent>
+        </BackgroundImageComponent>
+      </AppLoaderOverlayView>
+    </AppLoaderProviderComponent>
   )
 }
 AuthBaseComponent.displayName = 'AuthBaseComponent'

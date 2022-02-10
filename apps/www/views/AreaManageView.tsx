@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
   } = props
   const router = useRouter()
   const {enqueueSnackbar} = useSnackbar()
-  const {queueLoading, isLoading} = useAppLoader()
+  const {queueLoading, loading} = useAppLoader()
   const [loadingDocuments, setLoadingDocuments] = useState(false)
   const [error, setError] = useState<any>(null)
   const [documents, setDocuments] = useState<{[id: string]: any}>(null)
@@ -263,7 +263,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
         fields={mappedFields}
         id={activeDocument?.data?.id}
         label={documentName.singular}
-        loading={isLoading}
+        loading={loading}
         open={Boolean(documentId || formOpen)}
         formVariant={activeDocument?.type}
         onClose={handleCloseForm}

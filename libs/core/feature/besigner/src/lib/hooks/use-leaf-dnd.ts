@@ -31,7 +31,7 @@ import {
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import {hexadecimalFromNumber} from '@aglyn/shared-util-tools'
+import {numberToHexadecimal} from '@aglyn/shared-util-tools'
 import {useCallback, useEffect, useMemo} from 'react'
 import {
   type DragElementWrapper,
@@ -118,7 +118,7 @@ export function useLeafDnd(
   }), [$id, dragType, bundleId, componentId, hierarchy])
 
   const draggable = useDrag<BesignerDndElementActive, BesignerDndElementOver, DragCollected>(() => ({
-    type: hexadecimalFromNumber(dragType),
+    type: numberToHexadecimal(dragType),
     item: () => {
       handleDragStart(dragItem)
       return dragItem
@@ -164,8 +164,8 @@ export function useLeafDnd(
 
   const droppable = useDrop<BesignerDndElementActive, BesignerDndElementOver, DropCollected>(() => ({
     accept: [
-      hexadecimalFromNumber(DndDragSourceTypeFlag.CANVAS_ELEMENT),
-      hexadecimalFromNumber(DndDragSourceTypeFlag.COMPONENT_TEMPLATE),
+      numberToHexadecimal(DndDragSourceTypeFlag.CANVAS_ELEMENT),
+      numberToHexadecimal(DndDragSourceTypeFlag.COMPONENT_TEMPLATE),
     ],
     drop: (active, monitor) => {
       if (monitor.didDrop()) return undefined

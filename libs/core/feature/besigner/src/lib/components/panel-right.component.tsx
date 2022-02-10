@@ -25,7 +25,7 @@ import {
 import {ICON_VARIANT_DETAILS, ICON_VARIANT_PROPERTIES} from '@aglyn/shared-data-brand'
 import {alpha, handlePassSxProps, styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {hexadecimalFromNumber, hexadecimalToNumber} from '@aglyn/shared-util-tools'
+import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
 import MuiTabContext from '@mui/lab/TabContext'
 import MuiTabList from '@mui/lab/TabList'
 import MuiTabPanel from '@mui/lab/TabPanel'
@@ -183,7 +183,7 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
           ...panels,
           panelRight: {
             ...panels.panelRight,
-            tab: hexadecimalToNumber(val),
+            tab: numberFromHexadecimal(val),
           },
         }),
       })
@@ -200,7 +200,7 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
         component="aside"
         {...rest}
       >
-        <MuiTabContext value={hexadecimalFromNumber(value)}>
+        <MuiTabContext value={numberToHexadecimal(value)}>
           <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
             <MuiTabList
               onChange={handleTabChange}
@@ -209,17 +209,17 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
               textColor="secondary"
             >
               <MuiTab
-                value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENT_INFO)}
+                value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_INFO)}
                 icon={<MdiIcon path={ICON_VARIANT_DETAILS.path} />}
               />
               <MuiTab
-                value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENT_PROPS_FORM)}
+                value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_PROPS_FORM)}
                 icon={<MdiIcon path={ICON_VARIANT_PROPERTIES.path} />}
               />
             </MuiTabList>
           </Box>
 
-          <TabPanel value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENT_INFO)}>
+          <TabPanel value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_INFO)}>
             <TabPanelInner>
               {selected?.$id ? (
                 <ElementInfo $id={selected?.$id} />
@@ -231,7 +231,7 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
             </TabPanelInner>
           </TabPanel>
 
-          <TabPanel value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENT_PROPS_FORM)}>
+          <TabPanel value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_PROPS_FORM)}>
             <TabPanelInner>
               {selected?.$id ? (
                 <ElementPropsForm $id={selected?.$id} />

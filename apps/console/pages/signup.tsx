@@ -16,23 +16,29 @@
  */
 
 import {
+  type AuthCallbackResult,
+  type AuthResultError,
+  type AuthResultUser,
+} from '@aglyn/shared-data-fbenums'
+import {
   FIELD_SCHEMA_EMAIL,
   FIELD_SCHEMA_FIRST_NAME,
   FIELD_SCHEMA_LAST_NAME,
   FIELD_SCHEMA_PASSWORD,
   FIELD_SCHEMA_PASSWORD_CONFIRM,
 } from '@aglyn/shared-data-fields'
+import {getFirebaseAuth, googleOAuthProvider} from '@aglyn/shared-feature-fbclient'
 import {
   AglynSvgIcon,
   AglynSvgLogo,
   AppLink,
   componentMapper,
   FormRenderer,
+  useAppLoader,
 } from '@aglyn/shared-ui-jsx'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {_isStrT} from '@aglyn/shared-util-guards'
 import type FormSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
-import {type OAuthCredential, UserCredential} from '@firebase/auth'
-import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
@@ -40,22 +46,20 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import {type FormApi, type SubmissionErrors} from 'final-form'
 import {
-  AuthError,
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  setPersistence,
   signInWithPopup,
 } from 'firebase/auth'
+import {useRouter} from 'next/router'
 import {useCallback, useState} from 'react'
 import AuthBaseComponent from '../components/auth-base.component'
 import AuthBasicFormComponent from '../components/auth-basic-form.component'
-import {getFirebaseAuth, googleOAuthProvider} from '../lib/firebase/firebase-app'
+import AuthErrorAlert from '../components/auth-error-alert'
 
 
 const firebaseAuth = getFirebaseAuth()
-
-type ResultError = AuthError & {credential?: OAuthCredential}
-type ResultUser = UserCredential & {credential?: OAuthCredential}
-type ResultAuth = Promise<UserCredential>
 
 const formSchema: FormSchema = {
   'fields': [
@@ -70,44 +74,63 @@ const defaultValues = {firstName: '', lastName: '', email: '', Passwd: '', Confi
 
 function Signup() {
 
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<ResultUser>(null)
-  const [error, setError] = useState<ResultError>(null)
+  const router = useRouter()
+  const {returnUrl} = router.query
+  const {queueLoading, loading} = useAppLoader()
+  const [user, setUser] = useState<AuthResultUser>(null)
+  const [error, setError] = useState<AuthResultError>(null)
 
 
-  const handleGoogleOAuthSignUp = useCallback((): ResultAuth => {
+  const handleRedirect = useCallback(() => {
+    let href = '/'
+    if (returnUrl && _isStrT(returnUrl)) {
+      href = decodeURIComponent(returnUrl)
+    }
+    router.push(href)
+  }, [returnUrl, router])
+
+  const handleGoogleOAuthSignUp = useCallback((): AuthCallbackResult => {
     return signInWithPopup(firebaseAuth, googleOAuthProvider)
   }, [])
 
-  const handlePasswordSignUp = useCallback((email: string, password: string): ResultAuth => {
+  const handlePasswordSignUp = useCallback((
+    email: string,
+    password: string,
+  ): AuthCallbackResult => {
     return createUserWithEmailAndPassword(firebaseAuth, email, password)
   }, [])
 
-  const handleSignUp = useCallback(async (email?: any, password?: string) => {
+  const handleSignUp = useCallback(async (values?: any) => {
+    if (error) setError(null)
     if (loading) return
-    setLoading(true)
-    const result: ResultAuth = email && password
-      ? handlePasswordSignUp(email, password)
-      : handleGoogleOAuthSignUp()
+    const dequeueLoading = queueLoading()
 
-    await result
+    await setPersistence(firebaseAuth, browserLocalPersistence)
+      .then(() => {
+        return values
+          ? handlePasswordSignUp(values.email, values.Passwd)
+          : handleGoogleOAuthSignUp()
+      })
       .then((result) => {
         setUser({...result, credential: GoogleAuthProvider.credentialFromResult(result)})
-        if (error) setError(null)
+        return handleRedirect()
+      })
+      .then(() => {
+        dequeueLoading()
       })
       .catch((error) => {
         setError({...error, credential: GoogleAuthProvider.credentialFromError(error)})
+        dequeueLoading()
       })
 
-    setLoading(false)
-  }, [loading, handleGoogleOAuthSignUp, handlePasswordSignUp, error])
+  }, [error, loading, queueLoading, handlePasswordSignUp, handleGoogleOAuthSignUp, handleRedirect])
 
   const handleFormSubmit = useCallback(async (
     values,
     formApi: FormApi,
     onError: (errors?: SubmissionErrors) => void,
   ) => {
-    await handleSignUp(values.email, values.Passwd)
+    await handleSignUp(values)
   }, [handleSignUp])
 
   const handleGoogleButtonClick = useCallback(async () => {
@@ -116,7 +139,12 @@ function Signup() {
 
 
   return (
-    <>
+    <Stack
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+      spacing={2}
+    >
 
       <Paper
         elevation={1}
@@ -127,16 +155,6 @@ function Signup() {
           maxWidth: 1,
         }}
       >
-
-        {`Loading: ${loading}`}
-        <br />
-        <br />
-        {`Error: ${JSON.stringify(error, null, 2)}`}
-        <br />
-        <br />
-        {`User: ${JSON.stringify(user, null, 2)}`}
-        <br />
-        <br />
 
         <Stack
           direction="column"
@@ -185,6 +203,11 @@ function Signup() {
           </Typography>
         </Stack>
 
+        <AuthErrorAlert
+          error={error}
+          sx={{mt: 1, mb: 2}}
+        />
+
         <FormRenderer
           FormTemplate={AuthBasicFormComponent}
           componentMapper={componentMapper}
@@ -195,27 +218,6 @@ function Signup() {
 
           clearOnUnmount
         />
-
-        {error ? (
-          <Alert
-            sx={{my: 1}}
-            severity="error"
-          >
-            <Typography
-              component="div"
-              variant="body1"
-            >
-              <strong>ERROR: </strong>
-              {error.message}
-            </Typography>
-            <Typography
-              component="div"
-              variant="caption"
-              color="textSecondary"
-              children={error.code}
-            />
-          </Alert>
-        ) : null}
 
         <Divider flexItem sx={{my: 1}}>
           {'Or'}
@@ -237,12 +239,23 @@ function Signup() {
 
         </Stack>
 
+        <br />
+        <br />
+        {`Loading: ${loading}`}
+        <br />
+        <br />
+        {`Error: ${JSON.stringify(error, null, 2)}`}
+        <br />
+        <br />
+        {`User: ${JSON.stringify(user, null, 2)}`}
+        <br />
+        <br />
+
       </Paper>
 
       <Typography
         component="div"
         variant="body2"
-        color=""
       >
         {'Already have an account? '}
         <AppLink
@@ -253,7 +266,7 @@ function Signup() {
       </Typography>
 
 
-    </>
+    </Stack>
   )
 }
 Signup.displayName = 'Page:Signup'

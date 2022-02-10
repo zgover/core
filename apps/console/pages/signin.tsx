@@ -15,25 +15,45 @@
  * limitations under the License.
  */
 
+import {
+  type AuthCallbackResult,
+  type AuthResultError,
+  type AuthResultUser,
+} from '@aglyn/shared-data-fbenums'
 import {FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD} from '@aglyn/shared-data-fields'
+import {getFirebaseAuth, googleOAuthProvider} from '@aglyn/shared-feature-fbclient'
 import {
   AglynSvgIcon,
   AglynSvgLogo,
   AppLink,
   componentMapper,
   FormRenderer,
+  useAppLoader,
 } from '@aglyn/shared-ui-jsx'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {_isStrT} from '@aglyn/shared-util-guards'
 import type FormSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
-import {Divider} from '@mui/material'
 import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import {type FormApi, type SubmissionErrors} from 'final-form'
+import {
+  browserLocalPersistence,
+  GoogleAuthProvider,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from 'firebase/auth'
+import {useRouter} from 'next/router'
 import {useCallback, useState} from 'react'
 import AuthBaseComponent from '../components/auth-base.component'
 import AuthBasicFormComponent from '../components/auth-basic-form.component'
+import AuthErrorAlert from '../components/auth-error-alert'
 
+
+const firebaseAuth = getFirebaseAuth()
 
 const formSchema: FormSchema = {
   'fields': [
@@ -43,18 +63,78 @@ const formSchema: FormSchema = {
 }
 const defaultValues = {email: '', password: ''}
 
-function Signin() {
+function SignIn() {
 
-  const [values, setValues] = useState(defaultValues)
-  const handleFormCancel = useCallback(() => {
-    setValues(defaultValues)
+  const router = useRouter()
+  const {returnUrl} = router.query
+  const {queueLoading, loading} = useAppLoader()
+  const [user, setUser] = useState<AuthResultUser>(null)
+  const [error, setError] = useState<AuthResultError>(null)
+
+
+  const handleRedirect = useCallback(async () => {
+    let href = '/'
+    if (returnUrl && _isStrT(returnUrl)) {
+      href = decodeURIComponent(returnUrl)
+    }
+    return await router.push(href)
+  }, [returnUrl, router])
+
+  const handleGoogleOAuthSignIn = useCallback((): AuthCallbackResult => {
+    return signInWithPopup(firebaseAuth, googleOAuthProvider)
   }, [])
-  const handleFormSubmit = useCallback((values) => {
-    setValues({...values})
+
+  const handlePasswordSignIn = useCallback((
+    email: string,
+    password: string,
+  ): AuthCallbackResult => {
+    return signInWithEmailAndPassword(firebaseAuth, email, password)
   }, [])
+
+  const handleSignIn = useCallback(async (values?: any) => {
+    if (error) setError(null)
+    if (loading) return
+    const dequeueLoading = queueLoading()
+
+    await setPersistence(firebaseAuth, browserLocalPersistence)
+      .then(() => {
+        return values
+          ? handlePasswordSignIn(values.email, values.Passwd)
+          : handleGoogleOAuthSignIn()
+      })
+      .then((result) => {
+        setUser({...result, credential: GoogleAuthProvider.credentialFromResult(result)})
+        return handleRedirect()
+      })
+      .then(() => {
+        dequeueLoading()
+      })
+      .catch((error) => {
+        setError({...error, credential: GoogleAuthProvider.credentialFromError(error)})
+        dequeueLoading()
+      })
+
+  }, [error, loading, queueLoading, handlePasswordSignIn, handleGoogleOAuthSignIn, handleRedirect])
+
+  const handleFormSubmit = useCallback(async (
+    values,
+    formApi: FormApi,
+    onError: (errors?: SubmissionErrors) => void,
+  ) => {
+    await handleSignIn(values)
+  }, [handleSignIn])
+
+  const handleGoogleButtonClick = useCallback(async () => {
+    await handleSignIn()
+  }, [handleSignIn])
 
   return (
-    <>
+    <Stack
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+      spacing={2}
+    >
 
       <Paper
         elevation={1}
@@ -113,13 +193,15 @@ function Signin() {
           </Typography>
         </Stack>
 
+        <AuthErrorAlert
+          error={error}
+          sx={{mt: 1, mb: 2}}
+        />
+
         <FormRenderer
           FormTemplate={AuthBasicFormComponent}
           componentMapper={componentMapper}
-          onCancel={handleFormCancel}
-          onReset={handleFormCancel}
           onSubmit={handleFormSubmit}
-          initialValues={values}
           schema={formSchema}
           subscription={{values: true}}
           clearOnUnmount
@@ -138,11 +220,24 @@ function Signin() {
 
           <Button
             startIcon={<MdiIcon path={mdiGoogle.path} />}
+            onClick={handleGoogleButtonClick}
           >
             {'Sign in with Google'}
           </Button>
 
         </Stack>
+
+        <br />
+        <br />
+        {`Loading: ${loading}`}
+        <br />
+        <br />
+        {`Error: ${JSON.stringify(error, null, 2)}`}
+        <br />
+        <br />
+        {`User: ${JSON.stringify(user, null, 2)}`}
+        <br />
+        <br />
 
       </Paper>
 
@@ -160,10 +255,10 @@ function Signin() {
       </Typography>
 
 
-    </>
+    </Stack>
   )
 }
-Signin.displayName = 'Page:Signin'
-Signin.getLayout = (children) => <AuthBaseComponent children={children} />
+SignIn.displayName = 'Page:SignIn'
+SignIn.getLayout = (children) => <AuthBaseComponent children={children} />
 
-export default Signin
+export default SignIn

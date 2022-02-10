@@ -20,7 +20,7 @@ import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {ICON_VARIANT_TREE_VIEW} from '@aglyn/shared-data-brand'
 import {styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import {hexadecimalFromNumber, hexadecimalToNumber} from '@aglyn/shared-util-tools'
+import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
 import MuiTabContext from '@mui/lab/TabContext'
 import MuiTabList from '@mui/lab/TabList'
 import MuiTabPanel from '@mui/lab/TabPanel'
@@ -89,7 +89,7 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
           ...panels,
           panelLeft: {
             ...panels.panelLeft,
-            tab: hexadecimalToNumber(val),
+            tab: numberFromHexadecimal(val),
           },
         }),
       })
@@ -106,7 +106,7 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
         component="aside"
         {...rest}
       >
-        <MuiTabContext value={hexadecimalFromNumber(value)}>
+        <MuiTabContext value={numberToHexadecimal(value)}>
           <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
             <MuiTabList
               onChange={handleTabChange}
@@ -115,13 +115,13 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
               textColor="secondary"
             >
               <MuiTab
-                value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENTS_TREE)}
+                value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENTS_TREE)}
                 icon={<MdiIcon path={ICON_VARIANT_TREE_VIEW.path} />}
               />
             </MuiTabList>
           </Box>
 
-          <TabPanel value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENTS_TREE)}>
+          <TabPanel value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENTS_TREE)}>
             <TabPanelInner>
               <ElementsTree />
             </TabPanelInner>

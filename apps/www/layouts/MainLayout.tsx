@@ -350,13 +350,13 @@ function MainLayoutRaw(props: MainLayoutProps) {
                     key={item.id ?? item['key'] ?? i}
                     // disableRipple
                     color="inherit"
-                    component={AppLink as any}
                     href={item.href ?? ''}
                     icon={<MdiIcon {...icon} />}
                     label={item.label}
                     underline="none"
                     value={item.href ?? i}
                     wrapped
+                    {...{component: AppLink} as any}
                     {...a11yProps(i)}
                     {...item}
                   />

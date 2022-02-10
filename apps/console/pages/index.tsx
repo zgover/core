@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
-import {getApp} from '@aglyn/core-data-framework'
+import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {GridButtons} from '@aglyn/shared-ui-jsx'
 import {mdiBug, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import styled from '@emotion/styled'
 import React from 'react'
+import {useAuthState} from 'react-firebase-hooks/auth'
 
+
+const firebaseAuth = getFirebaseAuth()
 
 const StyledPage = styled.div`
   .page {
@@ -28,8 +31,7 @@ const StyledPage = styled.div`
 `
 
 export function Index() {
-  console.log('page:/index', getApp())
-
+  const [user, loading, error] = useAuthState(firebaseAuth)
   /*
    * Replace the elements below with your own.
    *
@@ -37,8 +39,13 @@ export function Index() {
    */
   return (
     <StyledPage>
-      <h2>Resources &amp; Tools</h2>
+      <h2>Resources &amp; Tosols</h2>
       <p>Thank you for using and showing some ♥ for Nx.</p>
+      <div>
+        User: <pre>{JSON.stringify(user, null, 2)}</pre>
+        Loading: <pre>{JSON.stringify(loading, null, 2)}</pre>
+        Error: <pre>{JSON.stringify(error, null, 2)}</pre>
+      </div>
       <MdiIcon path={mdiBug.path} />
       <GridButtons
         items={[

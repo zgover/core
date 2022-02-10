@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,14 @@ import {alpha, styled} from '@aglyn/shared-feature-themes'
 import MuiBackdrop, {BackdropProps as MuiBackdropProps} from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import LinearProgress from '@mui/material/LinearProgress'
+import Portal, {PortalProps as MuiPortalProps} from '@mui/material/Portal'
 import Typography from '@mui/material/Typography'
-import {useRouter} from 'next/router'
-import {forwardRef, useEffect, useState} from 'react'
-import {withAppLoader, WithAppLoaderProps} from '../contexts/app-loader-context'
-import {NextRouterEvent} from '../hooks/router-events'
+import {forwardRef} from 'react'
+import {AppLoaderConsumer} from '../contexts/app-loader-context'
 
 
 const LoadingBackdrop = styled(MuiBackdrop, {
-  name: 'LoadingBackdrop',
+  name: 'AglynLoadingBackdrop',
 })(({theme}) => ({
   backgroundColor: alpha(theme.palette.common.white, 0.48),
   color: theme.palette.getContrastText(alpha(theme.palette.common.white, 0.36)),
@@ -37,7 +36,7 @@ const LoadingBackdrop = styled(MuiBackdrop, {
 }))
 
 const LoadingProgressBar = styled(LinearProgress, {
-  name: 'LoadingProgressBar',
+  name: 'AglynLoadingProgressBar',
 })(({theme}) => ({
   position: 'absolute',
   top: 0,
@@ -46,42 +45,42 @@ const LoadingProgressBar = styled(LinearProgress, {
   width: '100%',
 }))
 
-export interface AppLoaderOverlayProps extends Partial<MuiBackdropProps>, WithAppLoaderProps {}
+export interface AppLoaderOverlayProps extends Partial<MuiBackdropProps>, Partial<MuiPortalProps> {}
 
 const AppLoaderOverlayViewRaw = forwardRef<any, AppLoaderOverlayProps>(
   function RefRenderFn(props, ref) {
-    const {open, appLoader, ...rest} = props
-    const isOpen = Boolean(open || appLoader?.isLoading)
-    const [loading, setLoading] = useState(false)
-    const router = useRouter()
-    useEffect(() => {
-      const handleStart = () => {
-        setLoading(true)
-      }
-      const handleEnd = () => {
-        setLoading(false)
-      }
-      router.events.on(NextRouterEvent.ROUTE_CHANGE_START, handleStart)
-      router.events.on(NextRouterEvent.ROUTE_CHANGE_COMPLETE, handleEnd)
-      router.events.on(NextRouterEvent.ROUTE_CHANGE_ERROR, handleEnd)
-      return () => {
-        router.events.off(NextRouterEvent.ROUTE_CHANGE_START, handleStart)
-        router.events.off(NextRouterEvent.ROUTE_CHANGE_COMPLETE, handleEnd)
-        router.events.off(NextRouterEvent.ROUTE_CHANGE_ERROR, handleEnd)
-      }
-    }, [router])
+    const {open, children, disablePortal, container, ...rest} = props
 
     return (
-      <LoadingBackdrop ref={ref} open={isOpen || loading} mountOnEnter unmountOnExit {...rest}>
-        <LoadingProgressBar color="secondary" />
-        <CircularProgress color="secondary" />
-        <Typography children="Loading..." component="div" variant="overline" sx={{mt: 2}} />
-      </LoadingBackdrop>
+      <>
+        {children}
+        <Portal disablePortal={disablePortal} container={container}>
+          <AppLoaderConsumer>
+            {({loading}) => (
+              <LoadingBackdrop
+                ref={ref}
+                open={open || loading}
+                mountOnEnter
+                unmountOnExit {...rest}
+              >
+                <LoadingProgressBar color="secondary" />
+                <CircularProgress color="secondary" />
+                <Typography
+                  children="Loading..."
+                  component="div"
+                  variant="overline"
+                  sx={{mt: 2, fontWeight: 'fontWeightBold'}}
+                />
+              </LoadingBackdrop>
+            )}
+          </AppLoaderConsumer>
+        </Portal>
+      </>
     )
   },
 )
 
 AppLoaderOverlayViewRaw.displayName = 'AppLoaderOverlayView'
 
-export const AppLoaderOverlayView = withAppLoader(AppLoaderOverlayViewRaw)
+export const AppLoaderOverlayView = AppLoaderOverlayViewRaw
 export default AppLoaderOverlayView

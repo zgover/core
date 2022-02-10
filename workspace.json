@@ -436,6 +436,21 @@
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
     },
+    "shared-data-fbenums": {
+      "root": "libs/shared/data/fbenums",
+      "sourceRoot": "libs/shared/data/fbenums/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/data/fbenums/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+    },
     "shared-data-fields": {
       "root": "libs/shared/data/fields",
       "sourceRoot": "libs/shared/data/fields/src",
@@ -511,6 +526,36 @@
         }
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+    },
+    "shared-feature-fbclient": {
+      "root": "libs/shared/feature/fbclient",
+      "sourceRoot": "libs/shared/feature/fbclient/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/feature/fbclient/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:feature"]
+    },
+    "shared-feature-fbserver": {
+      "root": "libs/shared/feature/fbserver",
+      "sourceRoot": "libs/shared/feature/fbserver/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/feature/fbserver/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:feature"]
     },
     "shared-feature-themes": {
       "root": "libs/shared/feature/themes",
@@ -668,6 +713,36 @@
           "options": {
             "jestConfig": "libs/shared/util/errors/jest.config.js",
             "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+    },
+    "shared-util-fbclient": {
+      "root": "libs/shared/util/fbclient",
+      "sourceRoot": "libs/shared/util/fbclient/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/fbclient/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+    },
+    "shared-util-fbserver": {
+      "root": "libs/shared/util/fbserver",
+      "sourceRoot": "libs/shared/util/fbserver/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/fbserver/**/*.ts"]
           }
         }
       },
