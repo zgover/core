@@ -17,8 +17,8 @@
 
 import {getApp} from '@aglyn/core-data-framework'
 import {getAdminTenant} from '@aglyn/core-data-tenancy'
-import {IS_BROWSER} from '@aglyn/shared-data-brand'
-import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
+import {HAS_BROWSER} from '@aglyn/shared-data-brand'
+import {LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import dynamic from 'next/dynamic'
 import {useEffect} from 'react'
 // import {useEffect} from 'react-hooks'
@@ -27,7 +27,7 @@ import '../constants/app-setup'
 
 const AglynBesigner = dynamic(
   () => import('@aglyn/core-feature-besigner').then((mod) => mod.BesignerComponent),
-  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+  {ssr: false, loading: () => <LoadingOverlayComponent open />},
 )
 
 function Besigner(props) {
@@ -36,7 +36,7 @@ function Besigner(props) {
 
 
   useEffect(() => {
-    if (IS_BROWSER) {
+    if (HAS_BROWSER()) {
       console.log('page:/besigner app', getApp())
     }
   }, [])

@@ -34,7 +34,7 @@ import {
   AppLink,
   componentMapper,
   FormRenderer,
-  useAppLoader,
+  useLoading,
 } from '@aglyn/shared-ui-jsx'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isStrT} from '@aglyn/shared-util-guards'
@@ -54,9 +54,8 @@ import {
 } from 'firebase/auth'
 import {useRouter} from 'next/router'
 import {useCallback, useState} from 'react'
-import AuthBaseComponent from '../components/auth-base.component'
-import AuthBasicFormComponent from '../components/auth-basic-form.component'
-import AuthErrorAlert from '../components/auth-error-alert'
+import AuthFormTemplateComponent from '../components/auth-form-template.component'
+import LayoutUserAuthComponent from '../components/layout-user-auth.component'
 
 
 const firebaseAuth = getFirebaseAuth()
@@ -76,7 +75,7 @@ function Signup() {
 
   const router = useRouter()
   const {returnUrl} = router.query
-  const {queueLoading, loading} = useAppLoader()
+  const {queueLoading, loading} = useLoading()
   const [user, setUser] = useState<AuthResultUser>(null)
   const [error, setError] = useState<AuthResultError>(null)
 
@@ -139,137 +138,134 @@ function Signup() {
 
 
   return (
-    <Stack
-      direction="column"
-      justifyContent="center"
-      alignItems="center"
-      spacing={2}
-    >
-
-      <Paper
-        elevation={1}
-        sx={{
-          p: 2,
-          zIndex: 5,
-          width: 440,
-          maxWidth: 1,
-        }}
+    <>
+      <Stack
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        spacing={2}
       >
 
-        <Stack
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          spacing={1}
-          sx={{mb: 4}}
+        <Paper
+          elevation={1}
+          sx={{
+            p: 2,
+            zIndex: 5,
+            width: 440,
+            maxWidth: 1,
+          }}
         >
 
-          <Typography
-            component="div"
-            variant="body2"
-            alignSelf="flex-end"
-          >
-            <AppLink
-              href="/signin"
-            >
-              {'Sign in'}
-            </AppLink>
-          </Typography>
-
           <Stack
-            direction="row"
+            direction="column"
             justifyContent="center"
             alignItems="center"
             spacing={1}
-            sx={{pb: 3}}
+            sx={{mb: 4}}
           >
-            <AglynSvgIcon rounded bordered sx={{fontSize: 24}} />
-            <AglynSvgLogo sx={{fontSize: 64, transform: `translateY(0.12rem)`}} />
+
+            <Typography
+              component="div"
+              variant="body2"
+              alignSelf="flex-end"
+            >
+              <AppLink
+                href="/signin"
+              >
+                {'Sign in'}
+              </AppLink>
+            </Typography>
+
+            <Stack
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              spacing={1}
+              sx={{pb: 3}}
+            >
+              <AglynSvgIcon rounded bordered sx={{fontSize: 24}} />
+              <AglynSvgLogo sx={{fontSize: 64, transform: `translateY(0.12rem)`}} />
+            </Stack>
+
+
+            <Typography
+              component="h1"
+              variant="h4"
+            >
+              {'Sign up'}
+            </Typography>
+
+            <Typography
+              component="div"
+              variant="h6"
+            >
+              {'Create a new Aglyn Account'}
+            </Typography>
           </Stack>
 
+          <FormRenderer
+            FormTemplate={AuthFormTemplateComponent}
+            componentMapper={componentMapper}
+            onSubmit={handleFormSubmit}
+            initialValues={defaultValues}
+            schema={formSchema}
+            subscription={{values: true}}
 
-          <Typography
-            component="h1"
-            variant="h4"
+            clearOnUnmount
+          />
+
+          <Divider flexItem sx={{my: 1}}>
+            {'Or'}
+          </Divider>
+
+          <Stack
+            direction="column"
+            justifyContent="center"
+            alignItems="stretch"
+            spacing={1}
           >
-            {'Sign up'}
-          </Typography>
 
-          <Typography
-            component="div"
-            variant="h6"
-          >
-            {'Create a new Aglyn Account'}
-          </Typography>
-        </Stack>
+            <Button
+              startIcon={<MdiIcon path={mdiGoogle.path} />}
+              onClick={handleGoogleButtonClick}
+            >
+              {'Sign up with Google'}
+            </Button>
 
-        <AuthErrorAlert
-          error={error}
-          sx={{mt: 1, mb: 2}}
-        />
+          </Stack>
 
-        <FormRenderer
-          FormTemplate={AuthBasicFormComponent}
-          componentMapper={componentMapper}
-          onSubmit={handleFormSubmit}
-          initialValues={defaultValues}
-          schema={formSchema}
-          subscription={{values: true}}
+          <br />
+          <br />
+          {`Loading: ${loading}`}
+          <br />
+          <br />
+          {`Error: ${JSON.stringify(error, null, 2)}`}
+          <br />
+          <br />
+          {`User: ${JSON.stringify(user, null, 2)}`}
+          <br />
+          <br />
 
-          clearOnUnmount
-        />
+        </Paper>
 
-        <Divider flexItem sx={{my: 1}}>
-          {'Or'}
-        </Divider>
-
-        <Stack
-          direction="column"
-          justifyContent="center"
-          alignItems="stretch"
-          spacing={1}
+        <Typography
+          component="div"
+          variant="body2"
         >
-
-          <Button
-            startIcon={<MdiIcon path={mdiGoogle.path} />}
-            onClick={handleGoogleButtonClick}
+          {'Already have an account? '}
+          <AppLink
+            href="/signin"
           >
-            {'Sign up with Google'}
-          </Button>
-
-        </Stack>
-
-        <br />
-        <br />
-        {`Loading: ${loading}`}
-        <br />
-        <br />
-        {`Error: ${JSON.stringify(error, null, 2)}`}
-        <br />
-        <br />
-        {`User: ${JSON.stringify(user, null, 2)}`}
-        <br />
-        <br />
-
-      </Paper>
-
-      <Typography
-        component="div"
-        variant="body2"
-      >
-        {'Already have an account? '}
-        <AppLink
-          href="/signin"
-        >
-          Sign in
-        </AppLink>
-      </Typography>
+            Sign in
+          </AppLink>
+        </Typography>
 
 
-    </Stack>
+      </Stack>
+    </>
   )
 }
 Signup.displayName = 'Page:Signup'
-Signup.getLayout = (children) => <AuthBaseComponent children={children} />
+Signup.layoutComponent = LayoutUserAuthComponent
 
 export default Signup

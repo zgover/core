@@ -25,11 +25,11 @@ import Alert, {type AlertProps as MuiAlertProps} from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 
 
-export interface AuthErrorAlertProps extends Partial<MuiAlertProps> {
+export interface AuthErrorAlertComponentProps extends Partial<MuiAlertProps> {
   error?: AuthResultError
 }
 
-function AuthErrorAlert(props: AuthErrorAlertProps) {
+function AuthErrorAlertComponent(props: AuthErrorAlertComponentProps) {
   const {error, ...rest} = props
 
   return (
@@ -58,6 +58,7 @@ function AuthErrorAlert(props: AuthErrorAlertProps) {
     </>
   )
 }
+AuthErrorAlertComponent.displayName = 'AuthErrorAlertComponent'
 
-export {AuthErrorAlert}
-export default AuthErrorAlert
+export {AuthErrorAlertComponent}
+export default AuthErrorAlertComponent

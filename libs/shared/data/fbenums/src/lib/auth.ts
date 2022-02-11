@@ -25,7 +25,7 @@ import {
 
 
 export type AuthCode = IndexOf<typeof AuthErrorCodes> | 'general'
-export type AuthResultError = AuthError & {credential?: OAuthCredential}
+export type AuthResultError = AuthError //& {credential?: OAuthCredential}
 export type AuthResultUser = UserCredential & {credential?: OAuthCredential}
 export type AuthCallbackResult = Promise<UserCredential>
 

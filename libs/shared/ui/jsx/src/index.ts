@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  */
 
 export * from './lib/components/app-link'
-export * from './lib/components/app-loader-overlay-view'
 export * from './lib/components/background-image.component'
 export * from './lib/components/card-icon-list-item'
 export * from './lib/components/dialog-confirm'
@@ -24,6 +23,8 @@ export * from './lib/components/elevation-scroll'
 export * from './lib/components/grid-buttons'
 export * from './lib/components/grid-items'
 export * from './lib/components/grid-list'
+export * from './lib/components/loading-layout.component'
+export * from './lib/components/loading-overlay.component'
 export * from './lib/components/menu'
 export * from './lib/components/mui-shadow-dom'
 export * from './lib/components/navigation-drawer'
@@ -37,7 +38,7 @@ export * from './lib/components/confirmation-provider.component'
 export * from './lib/components/zoomable-panning-component'
 
 
-export * from './lib/contexts/app-loader-context'
+export * from './lib/contexts/loading.context'
 export * from './lib/contexts/confirmation.context'
 
 export * from './lib/hooks/router-events'

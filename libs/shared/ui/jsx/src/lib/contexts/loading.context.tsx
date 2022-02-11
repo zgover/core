@@ -40,7 +40,7 @@ export type DequeueLoading = (queueId?: QueueId) => void /* Call to dequeue/end 
 export type DequeueAllLoading = () => void
 export type CheckLoading = (queueId?: QueueId) => boolean
 
-export type AppLoaderContextType = {
+export type LoadingContextType = {
   // queues: Queues
   loading: boolean
   queueLoading: EnqueueLoading
@@ -49,7 +49,7 @@ export type AppLoaderContextType = {
   checkLoading: CheckLoading
 }
 
-export const APP_LOADER_CONTEXT_DEFAULT_VALUE: AppLoaderContextType = {
+export const LOADING_CONTEXT_DEFAULT_VALUE: LoadingContextType = {
   loading: false,
   queueLoading: noop() as any,
   dequeueLoading: noop() as any,
@@ -57,31 +57,31 @@ export const APP_LOADER_CONTEXT_DEFAULT_VALUE: AppLoaderContextType = {
   checkLoading: noop() as any,
 }
 
-export const AppLoader = createContext<AppLoaderContextType>(APP_LOADER_CONTEXT_DEFAULT_VALUE)
-AppLoader.displayName = 'AppLoader'
+export const LoadingContext = createContext<LoadingContextType>(LOADING_CONTEXT_DEFAULT_VALUE)
+LoadingContext.displayName = 'LoadingContext'
 
 export const {
-  Provider: AppLoaderProvider,
-  Consumer: AppLoaderConsumer,
-} = AppLoader
+  Provider: LoadingProvider,
+  Consumer: LoadingConsumer,
+} = LoadingContext
 
 const createQueueId = () => {
   return createUid()
 }
 
-export const useAppLoader = () => {
-  const context = useContext(AppLoader)
+export const useLoading = () => {
+  const context = useContext(LoadingContext)
   return context
 }
 
-export interface AppLoaderProviderComponentProps {
+export interface LoadingProviderComponentProps {
   children?: ReactNode
 }
 
-export function AppLoaderProviderComponent(props: AppLoaderProviderComponentProps) {
+export function LoadingProviderComponent(props: LoadingProviderComponentProps) {
   const {children} = props
   const localRef = useRef<Queues>([])
-  const [state, setState] = useState<AppLoaderContextType>(() => ({
+  const [state, setState] = useState<LoadingContextType>(() => ({
     loading: false,
     queueLoading: <T extends boolean>(asTuple?: T): QueueResponse<T> => {
       const queueId = createQueueId()
@@ -126,20 +126,20 @@ export function AppLoaderProviderComponent(props: AppLoaderProviderComponentProp
   }, [router])
 
   return (
-    <AppLoaderProvider
+    <LoadingProvider
       value={state}
     >
       {children}
-    </AppLoaderProvider>
+    </LoadingProvider>
   )
 }
 
-const WithN = 'appLoader'
+const WithN = '_contextLoading'
 type WithN = typeof WithN
-export type AppLoaderConsumer = typeof AppLoaderConsumer
-export type WithAppLoaderProps = InjectedContextConsumerProps<AppLoaderConsumer, WithN>
+export type LoadingConsumer = typeof LoadingConsumer
+export type WithInjectedLoadingContextProps = InjectedContextConsumerProps<LoadingConsumer, WithN>
 
 /**
  * App loading context HOC prop injector
  */
-export const withAppLoader = createHocWithContextConsumer(AppLoaderConsumer, WithN)
+export const withInjectedLoadingContext = createHocWithContextConsumer(LoadingConsumer, WithN)

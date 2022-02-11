@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {useAppLoader} from '@aglyn/shared-ui-jsx'
+import {useLoading} from '@aglyn/shared-ui-jsx'
 import {mdiFilterVariant, MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
 import {_s, objectRemap} from '@aglyn/shared-util-tools'
 import {createUid} from '@aglyn/shared-util-vendor'
@@ -62,7 +62,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
   } = props
   const router = useRouter()
   const {enqueueSnackbar} = useSnackbar()
-  const {queueLoading, loading} = useAppLoader()
+  const {queueLoading, loading} = useLoading()
   const [loadingDocuments, setLoadingDocuments] = useState(false)
   const [error, setError] = useState<any>(null)
   const [documents, setDocuments] = useState<{[id: string]: any}>(null)

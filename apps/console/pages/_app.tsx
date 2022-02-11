@@ -16,19 +16,14 @@
  */
 
 import {APP_CONSOLE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
-import {
-  initializeFirebaseApp,
-  initializeFirebaseAppCheck,
-  initializeFirebaseAuth,
-} from '@aglyn/shared-feature-fbclient'
 import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
 import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
 import {Fragment, useMemo} from 'react'
 
 
-initializeFirebaseApp()
-initializeFirebaseAppCheck()
-initializeFirebaseAuth()
+// initializeFirebaseApp()
+// initializeFirebaseAppCheck()
+// initializeFirebaseAuth()
 
 export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentProps<Props, InitialProps> {}
 

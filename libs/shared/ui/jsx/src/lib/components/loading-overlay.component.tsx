@@ -16,13 +16,13 @@
  */
 
 import {alpha, styled} from '@aglyn/shared-feature-themes'
-import MuiBackdrop, {BackdropProps as MuiBackdropProps} from '@mui/material/Backdrop'
+import MuiBackdrop, {type BackdropProps as MuiBackdropProps} from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import LinearProgress from '@mui/material/LinearProgress'
 import Portal, {PortalProps as MuiPortalProps} from '@mui/material/Portal'
 import Typography from '@mui/material/Typography'
 import {forwardRef} from 'react'
-import {AppLoaderConsumer} from '../contexts/app-loader-context'
+import {LoadingConsumer} from '../contexts/loading.context'
 
 
 const LoadingBackdrop = styled(MuiBackdrop, {
@@ -45,9 +45,9 @@ const LoadingProgressBar = styled(LinearProgress, {
   width: '100%',
 }))
 
-export interface AppLoaderOverlayProps extends Partial<MuiBackdropProps>, Partial<MuiPortalProps> {}
+export interface LoadingOverlayComponentProps extends Partial<MuiBackdropProps>, Partial<MuiPortalProps> {}
 
-const AppLoaderOverlayViewRaw = forwardRef<any, AppLoaderOverlayProps>(
+const LoadingOverlayComponent = forwardRef<any, LoadingOverlayComponentProps>(
   function RefRenderFn(props, ref) {
     const {open, children, disablePortal, container, ...rest} = props
 
@@ -55,7 +55,7 @@ const AppLoaderOverlayViewRaw = forwardRef<any, AppLoaderOverlayProps>(
       <>
         {children}
         <Portal disablePortal={disablePortal} container={container}>
-          <AppLoaderConsumer>
+          <LoadingConsumer>
             {({loading}) => (
               <LoadingBackdrop
                 ref={ref}
@@ -73,14 +73,14 @@ const AppLoaderOverlayViewRaw = forwardRef<any, AppLoaderOverlayProps>(
                 />
               </LoadingBackdrop>
             )}
-          </AppLoaderConsumer>
+          </LoadingConsumer>
         </Portal>
       </>
     )
   },
 )
 
-AppLoaderOverlayViewRaw.displayName = 'AppLoaderOverlayView'
+LoadingOverlayComponent.displayName = 'LoadingOverlayComponent'
 
-export const AppLoaderOverlayView = AppLoaderOverlayViewRaw
-export default AppLoaderOverlayView
+export {LoadingOverlayComponent}
+export default LoadingOverlayComponent

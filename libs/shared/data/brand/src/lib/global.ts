@@ -23,9 +23,9 @@ export const COMMIT_REF = String(process.env.COMMIT_REF || 'NULL')
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 export const IS_TEST = process.env.NODE_ENV === 'test'
-export const IS_BROWSER = Boolean(process['browser'])
 
-export const HAS_WINDOW = typeof window !== undefined
-export const HAS_DOCUMENT = typeof document !== undefined
+export const HAS_BROWSER = () => Boolean(process['browser'])
+export const HAS_WINDOW = () => typeof window !== 'undefined'
+export const HAS_DOCUMENT = () => typeof document !== 'undefined'
 
 export const CURRENT_YEAR = new Date().getFullYear()

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {FormSpy, useFormApi} from '@aglyn/shared-ui-jsx'
 import {type FormTemplateRenderProps} from '@data-driven-forms/react-form-renderer'
 import Box from '@mui/material/Box'
@@ -22,25 +23,36 @@ import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
 import {forwardRef} from 'react'
+import {useAuthState} from 'react-firebase-hooks/auth'
+import AuthErrorAlertComponent from './auth-error-alert.component'
 
 
-const AuthBasicFormComponent = forwardRef<any, FormTemplateRenderProps>(
+const firebaseAuth = getFirebaseAuth()
+
+export interface AuthFormTemplateComponentProps extends FormTemplateRenderProps {}
+
+const AuthFormTemplateComponent = forwardRef<any, FormTemplateRenderProps>(
   function RefRenderFn(props, ref) {
     const {formFields, schema, ...rest} = props
     const {handleSubmit} = useFormApi()
+    const [, loading, error] = useAuthState(firebaseAuth)
     return (
       <form ref={ref} onSubmit={handleSubmit} noValidate {...rest}>
         {schema.title}
         <Grid spacing={2} container>
           {formFields}
         </Grid>
+        <AuthErrorAlertComponent
+          error={error as any}
+          sx={{mt: 2, mb: 1}}
+        />
         <FormSpy>
           {({submitting, pristine, valid}) => (
             <Box mt={2}>
               <FormControl margin="normal" fullWidth>
                 <Button
                   color="secondary"
-                  disabled={submitting/* || !valid || pristine*/}
+                  disabled={submitting/* || !valid || pristine*/ || loading}
                   style={{marginRight: 8}}
                   type="submit"
                   variant="contained"
@@ -56,7 +68,7 @@ const AuthBasicFormComponent = forwardRef<any, FormTemplateRenderProps>(
     )
   },
 )
-AuthBasicFormComponent.displayName = 'AuthBasicFormComponent'
+AuthFormTemplateComponent.displayName = 'AuthFormTemplateComponent'
 
-export {AuthBasicFormComponent}
-export default AuthBasicFormComponent
+export {AuthFormTemplateComponent}
+export default AuthFormTemplateComponent

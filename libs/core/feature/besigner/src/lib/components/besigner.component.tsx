@@ -22,7 +22,7 @@ import {
   ElementsContextProvider,
 } from '@aglyn/core-feature-renderer'
 import {consoleThemeDark, consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
-import {AppLoaderOverlayView, ConfirmationProviderComponent} from '@aglyn/shared-ui-jsx'
+import {LoadingOverlayComponent, ConfirmationProviderComponent} from '@aglyn/shared-ui-jsx'
 import NoSsr from '@mui/material/NoSsr'
 import dynamic from 'next/dynamic'
 import {forwardRef, Fragment} from 'react'
@@ -33,7 +33,7 @@ import {type WorkspaceEditorComponentProps} from './workspace-editor.component'
 
 const WorkspaceEditorComponent = dynamic(
   () => import('./workspace-editor.component').then((mod) => mod.WorkspaceEditorComponent),
-  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+  {ssr: false, loading: () => <LoadingOverlayComponent open />},
 )
 
 export interface BesignerComponentProps extends WorkspaceEditorComponentProps {

@@ -51,7 +51,7 @@ function NextAppWrapperComponentRaw(props: NextAppWrapperComponentProps) {
   const MainWrapper = mainWrapper || Fragment
 
   useEffect(() => {
-    if (HAS_DOCUMENT) {
+    if (HAS_DOCUMENT()) {
       // Remove the server-side injected CSS.
       const jssStyles = document?.querySelector('#jss-server-side')
       jssStyles?.parentElement?.removeChild(jssStyles)

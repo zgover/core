@@ -16,10 +16,9 @@
  */
 
 import {type AnyProps} from '@aglyn/shared-data-types'
-import {_isFnT} from '@aglyn/shared-util-guards'
 import {type NextPage} from 'next'
 import {type AppProps as NextAppProps} from 'next/app'
-import {type ReactElement} from 'react'
+import {type ComponentType, type ReactElement} from 'react'
 
 
 export type NextPageGetLayout<Props = AnyProps, InitialProps = Props> = {
@@ -27,6 +26,7 @@ export type NextPageGetLayout<Props = AnyProps, InitialProps = Props> = {
 }
 export type NextPageWithLayout<Props = AnyProps, InitialProps = Props> = NextPage<Props, InitialProps> & {
   getLayout?: NextPageGetLayout<Props, InitialProps>
+  layoutComponent?: ComponentType<any>
 }
 export type NextAppWithLayoutProps<Props = AnyProps, InitialProps = Props> = NextAppProps<Props> & {
   Component: NextPageWithLayout<Props, InitialProps>
@@ -38,10 +38,17 @@ const GET_LAYOUT_NOOP = (page: ReactElement) => page
 export function getNextPageLayout<Props, InitialProps>(
   props: NextAppWithLayoutProps<Props, InitialProps>,
 ): NextPageGetLayout<Props, InitialProps> {
-  return _isFnT(props.Component.getLayout)
-    ? props.Component.getLayout
-    : _isFnT(props.defaultGetLayout)
-      ? props.defaultGetLayout
-      : GET_LAYOUT_NOOP
+  const {Component, defaultGetLayout} = props
+
+  if (Component.getLayout) return Component.getLayout
+  if (Component.layoutComponent) return (children, props) => {
+    const InnerComponent = Component.layoutComponent
+    const OuterComponent = getNextPageLayout({...props, Component: InnerComponent})
+    return OuterComponent(<InnerComponent>{children}</InnerComponent>, props)
+  }
+  if (defaultGetLayout) return defaultGetLayout
+
+  return GET_LAYOUT_NOOP
 }
+
 export default getNextPageLayout

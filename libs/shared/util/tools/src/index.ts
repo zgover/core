@@ -78,6 +78,8 @@ export * from './lib/object/object-update'
 
 // SERIALIZE
 
+export * from './lib/serialize/base64-decode'
+export * from './lib/serialize/base64-encode'
 export * from './lib/serialize/php-serial-deserialize-from-byte-stream'
 export * from './lib/serialize/php-serial-is-serialized-byte-stream'
 export * from './lib/serialize/php-serial-serialize-to-byte-stream'

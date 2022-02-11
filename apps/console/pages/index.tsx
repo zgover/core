@@ -19,12 +19,11 @@ import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {GridButtons} from '@aglyn/shared-ui-jsx'
 import {mdiBug, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import styled from '@emotion/styled'
-import React from 'react'
 import {useAuthState} from 'react-firebase-hooks/auth'
+import LayoutAuthenticatedComponent from '../components/layout-authenticated.component'
 
 
 const firebaseAuth = getFirebaseAuth()
-
 const StyledPage = styled.div`
   .page {
   }
@@ -38,48 +37,52 @@ export function Index() {
    * Note: The corresponding styles are in the ./index.@emotion/styled file.
    */
   return (
-    <StyledPage>
-      <h2>Resources &amp; Tosols</h2>
-      <p>Thank you for using and showing some ♥ for Nx.</p>
-      <div>
-        User: <pre>{JSON.stringify(user, null, 2)}</pre>
-        Loading: <pre>{JSON.stringify(loading, null, 2)}</pre>
-        Error: <pre>{JSON.stringify(error, null, 2)}</pre>
-      </div>
-      <MdiIcon path={mdiBug.path} />
-      <GridButtons
-        items={[
-          {
-            GridItemProps: {
-              xs: 6,
+    <>
+      <StyledPage>
+        <h2>Resources &amp; Tosols</h2>
+        <p>Thank you for using and showing some ♥ for Nx.</p>
+        <div>
+          User: <pre>{JSON.stringify(user, null, 2)}</pre>
+          Loading: <pre>{JSON.stringify(loading, null, 2)}</pre>
+          Error: <pre>{JSON.stringify(error, null, 2)}</pre>
+        </div>
+        <MdiIcon path={mdiBug.path} />
+        <GridButtons
+          items={[
+            {
+              GridItemProps: {
+                xs: 6,
+              },
+              children: 'Hello Button 1',
+              variant: 'contained',
+              color: 'primary',
+              fullWidth: true,
             },
-            children: 'Hello Button 1',
-            variant: 'contained',
-            color: 'primary',
-            fullWidth: true,
-          },
-          {
-            GridItemProps: {
-              xs: 3,
+            {
+              GridItemProps: {
+                xs: 3,
+              },
+              children: 'Hello Button 1',
+              variant: 'contained',
+              color: 'primary',
+              fullWidth: true,
             },
-            children: 'Hello Button 1',
-            variant: 'contained',
-            color: 'primary',
-            fullWidth: true,
-          },
-          {
-            GridItemProps: {
-              xs: 3,
+            {
+              GridItemProps: {
+                xs: 3,
+              },
+              children: 'Hello Button 1',
+              variant: 'contained',
+              color: 'primary',
+              fullWidth: true,
             },
-            children: 'Hello Button 1',
-            variant: 'contained',
-            color: 'primary',
-            fullWidth: true,
-          },
-        ]}
-      />
-    </StyledPage>
+          ]}
+        />
+      </StyledPage>
+    </>
   )
 }
+Index.displayName = 'Page:Index'
+Index.layoutComponent = LayoutAuthenticatedComponent
 
 export default Index
