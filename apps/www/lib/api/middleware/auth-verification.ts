@@ -17,7 +17,7 @@
 
 import {HttpStatusCode} from '@aglyn/shared-data-enums'
 import {
-  jsonCreateResponse,
+  createNewJsonResponse,
   withCsrfTokenHeader,
   withIdTokenHeader,
 } from '@aglyn/shared-util-rest-api'
@@ -31,12 +31,10 @@ export const requireIdToken = <T = any>(handler: NextApiHandler<T>): NextApiHand
       await verifyIdToken(req.idToken)
     }
     catch (error) {
-      return jsonCreateResponse(HttpStatusCode.UNAUTHORIZED, {
-        data: {
-          status: 'error',
-          error: error,
-          statusMessage: 'Unauthorized request sent',
-        },
+      return createNewJsonResponse(HttpStatusCode.UNAUTHORIZED, {
+        status: 'error',
+        error: error,
+        statusMessage: 'Unauthorized request sent',
       })
     }
 
@@ -47,12 +45,10 @@ export const requireIdToken = <T = any>(handler: NextApiHandler<T>): NextApiHand
 export const requireCsrfToken = <T = any>(handler: NextApiHandler<T>): NextApiHandler<T> => {
   return withCsrfTokenHeader((async (req, res) => {
     if (req['csrfToken'] !== req.cookies.csrfToken) {
-      return jsonCreateResponse(HttpStatusCode.UNAUTHORIZED, {
-        data: {
-          status: 'error',
-          error: Error('CSRF mismatch. Possible break-in attempt!'),
-          statusMessage: 'Invalid request',
-        },
+      return createNewJsonResponse(HttpStatusCode.UNAUTHORIZED, {
+        status: 'error',
+        error: Error('CSRF mismatch. Possible break-in attempt!'),
+        statusMessage: 'Invalid request',
       })
     }
     await handler(req, res)

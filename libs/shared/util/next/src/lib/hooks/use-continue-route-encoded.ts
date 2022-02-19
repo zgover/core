@@ -15,12 +15,26 @@
  * limitations under the License.
  */
 
-export * from './auth'
-export * from './set-api-response-cookie'
-export * from './types'
+import {base64Encode} from '@aglyn/shared-util-tools'
+import {useRouter} from 'next/router'
+import {useMemo} from 'react'
+import type {ContinueRouteData} from '../types'
 
-export * from './middleware/http-request-method-middleware'
 
-export * from './utils/initialize-middleware'
-export * from './utils/create-new-json-response'
-export * from './utils/next-handle-json-response'
+export function encodeContinueRoute({href, hrefAs}: ContinueRouteData) {
+  return encodeURIComponent(
+    base64Encode(
+      JSON.stringify({href, hrefAs}),
+    ),
+  )
+}
+
+export function useContinueRouteEncoded() {
+  const router = useRouter()
+  const href = router.pathname,
+    hrefAs = router.asPath
+
+  return useMemo(() => encodeContinueRoute({href, hrefAs}), [href, hrefAs])
+}
+
+export default useContinueRouteEncoded

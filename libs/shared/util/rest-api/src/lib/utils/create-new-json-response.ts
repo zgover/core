@@ -15,9 +15,17 @@
  * limitations under the License.
  */
 import type {HttpStatusCode} from '@aglyn/shared-data-enums'
-import type {NextApiResponse} from 'next'
-import type {JsonResponse} from '../types'
+import {JsonResponse} from '../types'
 
+
+export type JsonCreateResponseOptions = {
+  status?: true | 'error',
+  statusCode?: HttpStatusCode,
+  statusMessage?: string,
+  data?: any,
+  error?: any
+  init?: ResponseInit,
+}
 
 /**
  * Speed up creating a new {@link Response} object specifying the JSON header
@@ -25,25 +33,30 @@ import type {JsonResponse} from '../types'
  * JSON response data
  * @example - pages/_middleware.ts
  * export function middleware(req: NextRequest) {
- *   return jsonCreateResponse(
+ *   return createNewJsonResponse(
  *     HttpStatusCode.OK,
  *     {data: 'Hello World!'},
 
  * @returns a new {@link Response} object instance
  */
-export function jsonHandleNextResponse(
-  response: NextApiResponse<JsonResponse>,
+export function createNewJsonResponse(
   statusCode: HttpStatusCode,
-  options?: JsonResponse,
+  options: JsonCreateResponseOptions = {},
 ) {
-  const {statusMessage, data, error} = {...options}
+  const {statusMessage, data, error, init} = options
   const json: JsonResponse = {statusCode, data}
   if (error) json.error = error
   if (statusMessage) json.statusMessage = statusMessage
 
-  response
-    .status(statusCode)
-    .json(json)
+  return new Response(JSON.stringify(json), {
+    ...init,
+    status: statusCode,
+    statusText: statusMessage,
+    headers: {
+      ...init?.headers,
+      'Content-Type': 'application/json',
+    },
+  })
 }
 
-export default jsonHandleNextResponse
+export default createNewJsonResponse

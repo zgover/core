@@ -15,11 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  type AuthCallbackResult,
-  type AuthResultError,
-  type AuthResultUser,
-} from '@aglyn/shared-data-fbenums'
+import type {AuthCallbackResult, AuthResultError, AuthResultUser} from '@aglyn/shared-data-fbenums'
 import {FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD} from '@aglyn/shared-data-fields'
 import {getFirebaseAuth, googleOAuthProvider} from '@aglyn/shared-feature-fbclient'
 import {
@@ -31,14 +27,14 @@ import {
   useLoading,
 } from '@aglyn/shared-ui-jsx'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {_isStrT} from '@aglyn/shared-util-guards'
+import {useContinueRouteDecoded} from '@aglyn/shared-util-next'
 import type FormSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import {type FormApi, type SubmissionErrors} from 'final-form'
+import type {FormApi, SubmissionErrors} from 'final-form'
 import {
   browserLocalPersistence,
   GoogleAuthProvider,
@@ -60,24 +56,22 @@ const formSchema: FormSchema = {
     FIELD_SCHEMA_PASSWORD,
   ],
 }
-const defaultValues = {email: '', password: ''}
+const defaultValues = {email: '', Passwd: ''}
 
 function SignIn() {
 
   const router = useRouter()
-  const {returnUrl} = router.query
+  const [{href, hrefAs}] = useContinueRouteDecoded()
   const {queueLoading, loading} = useLoading()
   const [user, setUser] = useState<AuthResultUser>(null)
   const [error, setError] = useState<AuthResultError>(null)
 
 
   const handleRedirect = useCallback(async () => {
-    let href = '/'
-    if (returnUrl && _isStrT(returnUrl)) {
-      href = decodeURIComponent(returnUrl)
-    }
-    return await router.push(href)
-  }, [returnUrl, router])
+    return href
+      ? await router.push(href, hrefAs || '')
+      : await router.push('/')
+  }, [href, hrefAs, router])
 
   const handleGoogleOAuthSignIn = useCallback((): AuthCallbackResult => {
     return signInWithPopup(firebaseAuth, googleOAuthProvider)
@@ -198,6 +192,7 @@ function SignIn() {
             componentMapper={componentMapper}
             onSubmit={handleFormSubmit}
             schema={formSchema}
+            initialValues={defaultValues}
             subscription={{values: true}}
             clearOnUnmount
           />

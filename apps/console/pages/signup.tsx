@@ -15,11 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  type AuthCallbackResult,
-  type AuthResultError,
-  type AuthResultUser,
-} from '@aglyn/shared-data-fbenums'
+import type {AuthCallbackResult, AuthResultError, AuthResultUser} from '@aglyn/shared-data-fbenums'
 import {
   FIELD_SCHEMA_EMAIL,
   FIELD_SCHEMA_FIRST_NAME,
@@ -37,14 +33,14 @@ import {
   useLoading,
 } from '@aglyn/shared-ui-jsx'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {_isStrT} from '@aglyn/shared-util-guards'
+import {useContinueRouteDecoded} from '@aglyn/shared-util-next'
 import type FormSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import {type FormApi, type SubmissionErrors} from 'final-form'
+import type {FormApi, SubmissionErrors} from 'final-form'
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
@@ -74,19 +70,17 @@ const defaultValues = {firstName: '', lastName: '', email: '', Passwd: '', Confi
 function Signup() {
 
   const router = useRouter()
-  const {returnUrl} = router.query
+  const [{href, hrefAs}] = useContinueRouteDecoded()
   const {queueLoading, loading} = useLoading()
   const [user, setUser] = useState<AuthResultUser>(null)
   const [error, setError] = useState<AuthResultError>(null)
 
 
-  const handleRedirect = useCallback(() => {
-    let href = '/'
-    if (returnUrl && _isStrT(returnUrl)) {
-      href = decodeURIComponent(returnUrl)
-    }
-    router.push(href)
-  }, [returnUrl, router])
+  const handleRedirect = useCallback(async () => {
+    return href
+      ? await router.push(href, hrefAs || '')
+      : await router.push('/')
+  }, [href, hrefAs, router])
 
   const handleGoogleOAuthSignUp = useCallback((): AuthCallbackResult => {
     return signInWithPopup(firebaseAuth, googleOAuthProvider)

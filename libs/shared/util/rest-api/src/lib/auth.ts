@@ -18,7 +18,7 @@
 import {HttpStatusCode} from '@aglyn/shared-data-enums'
 import {getRequestHeader} from '@aglyn/shared-util-http'
 import type {NextApiHandler, NextApiRequest, NextApiResponse} from 'next'
-import {jsonCreateResponse} from './rest-api'
+import {createNewJsonResponse} from './rest-api'
 
 
 export const requireHeader = <T = any>(
@@ -30,12 +30,10 @@ export const requireHeader = <T = any>(
     const header = getRequestHeader(req, key)
 
     if (!header) {
-      return jsonCreateResponse(HttpStatusCode.BAD_REQUEST, {
-        data: {
-          status: 'error',
-          error: Error(`Missing required header - (key: ${key})!`),
-          statusMessage: 'Bad request. Failed to satisfy headers.',
-        },
+      return createNewJsonResponse(HttpStatusCode.BAD_REQUEST, {
+        status: 'error',
+        error: Error(`Missing required header - (key: ${key})!`),
+        statusMessage: 'Bad request. Failed to satisfy headers.',
       })
     }
     req[key] = header

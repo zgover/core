@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import {HttpRequestMethod, HttpStatusCode} from '@aglyn/shared-data-enums'
-import {httpRequestMethodMiddleware, jsonHandleNextResponse} from '@aglyn/shared-util-rest-api'
+import {httpRequestMethodMiddleware, nextHandleJsonResponse} from '@aglyn/shared-util-rest-api'
 import type {NextApiRequest, NextApiResponse} from 'next'
 import {use} from 'next-api-middleware'
 
@@ -29,7 +29,7 @@ async function signin(request: NextApiRequest, response: NextApiResponse) {
   //   console.error(e)
   //   return res.status(500).json({error: 'Unexpected error.'})
   // }
-  jsonHandleNextResponse(response, HttpStatusCode.OK, {data: {status: true}})
+  nextHandleJsonResponse(response, HttpStatusCode.OK, {status: true})
 }
 
 export default use(

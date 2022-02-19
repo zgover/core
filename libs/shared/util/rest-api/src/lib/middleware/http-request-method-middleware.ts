@@ -17,8 +17,7 @@
 
 import {HttpRequestMethod, HttpStatusCode} from '@aglyn/shared-data-enums'
 import type {NextMiddleware} from 'next-api-middleware'
-import jsonCreateResponse from '../utils/json-create-response'
-import jsonHandleNextResponse from '../utils/json-handle-next-response'
+import nextHandleJsonResponse from '../utils/next-handle-json-response'
 
 
 /**
@@ -36,17 +35,16 @@ export function httpRequestMethodMiddleware(
   allowed: HttpRequestMethod[] | HttpRequestMethod,
 ): NextMiddleware {
   return async function(req, res, next) {
-    const method = req.method.toUpperCase()
-    const lookup = HttpRequestMethod[HttpRequestMethod[method]]
+    const method = req.method.toUpperCase() as HttpRequestMethod
     const valid = Array.isArray(allowed)
-      ? allowed.includes(lookup)
-      : lookup === allowed
+      ? allowed.includes(method)
+      : method === allowed
 
     if (valid || method === HttpRequestMethod.OPTIONS) {
       await next()
     }
     else {
-      jsonHandleNextResponse(res, HttpStatusCode.NOT_FOUND, {
+      nextHandleJsonResponse(res, HttpStatusCode.NOT_FOUND, {
         status: 'error', statusMessage: 'Resource not found',
       })
     }

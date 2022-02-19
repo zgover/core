@@ -17,7 +17,7 @@
 
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {AglynSvgLogo, LoadingLayoutComponent, useLoading} from '@aglyn/shared-ui-jsx'
-import {base64Encode} from '@aglyn/shared-util-tools'
+import {useContinueRouteEncoded} from '@aglyn/shared-util-next'
 import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
@@ -35,8 +35,9 @@ export interface LayoutAuthenticatedComponentProps {
 function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) {
   const {children, ...rest} = props
   const [user, authLoading, error] = useAuthState(firebaseAuth)
-  const router = useRouter()
   const {queueLoading} = useLoading()
+  const router = useRouter()
+  const continueRoute = useContinueRouteEncoded()
 
   useEffect(() => {
     // const dequeueLoading = authLoading ? queueLoading() : null
@@ -46,23 +47,17 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
   }, [authLoading, queueLoading])
 
   useEffect(() => {
-    const loc = {
-      pathname: router.pathname,
-      asPath: router.asPath,
-      route: router.route,
-      host: location.host,
-      href: location.href,
-    }
-    console.log('loc', loc)
-    console.log('base64', base64Encode(JSON.stringify(loc)))
+    console.log('loc', location)
+    console.log('base64', continueRoute)
     if (!user && !authLoading) {
       const dequeueLoading = queueLoading()
-      router.push(`/signin?returnUrl=${encodeURIComponent(base64Encode(JSON.stringify(loc)))}`)
+      router
+        .push(`/signin?continue=${continueRoute}`)
         .finally(() => {
           dequeueLoading && dequeueLoading()
         })
     }
-  }, [user, authLoading, router])
+  }, [user, authLoading, continueRoute])
 
 
   return (
