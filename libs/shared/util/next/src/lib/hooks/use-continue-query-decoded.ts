@@ -16,30 +16,33 @@
  */
 
 import type {OrUndef} from '@aglyn/shared-data-types'
+import {_isArr} from '@aglyn/shared-util-guards'
 import {base64Decode} from '@aglyn/shared-util-tools'
 import {useRouter} from 'next/router'
 import {useMemo} from 'react'
 import type {ContinueRouteData} from '../types'
 
 
-export function decodeContinueRoute(continueParam: string): ContinueRouteData {
+export function decodeContinueQuery(query: string): ContinueRouteData {
   return JSON.parse(
     base64Decode(
       decodeURIComponent(
-        continueParam,
+        query,
       ),
     ),
   )
 }
 
-export function useContinueRouteDecoded(): [ContinueRouteData, OrUndef<string[] | string>] {
+export function useContinueQueryDecoded(): [ContinueRouteData, OrUndef<string[] | string>] {
   const router = useRouter()
-  const {continue: cont} = router.query
+  const {continue: query} = router.query
 
   return useMemo(() => {
-    const decoded = decodeContinueRoute((Array.isArray(cont) ? cont[0] : cont) || '')
-    return [decoded, cont]
-  }, [cont])
+    return [
+      decodeContinueQuery((_isArr(query) ? query[0] : query) || ''),
+      query,
+    ]
+  }, [query])
 }
 
-export default useContinueRouteDecoded
+export default useContinueQueryDecoded

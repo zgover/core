@@ -17,12 +17,12 @@
 
 export * from './types'
 
-export * from './components/field-icon-select'
-export * from './components/field-select'
-export * from './components/field-switch'
-export * from './components/field-text-field'
-export * from './components/field-textarea'
-export * from './components/grid-form-template'
+export * from './components/icon-select.component'
+export * from './components/select.component'
+export * from './components/switch.component'
+export * from './components/text-field.component'
+export * from './components/textarea.component'
+export * from './components/grid-form-template.component'
 
 export * from './constants/component-mappers'
 export * from './constants/dynamic-fields'

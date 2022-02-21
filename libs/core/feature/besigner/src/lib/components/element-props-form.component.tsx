@@ -21,11 +21,11 @@ import {
   FormRenderer,
   type FormRendererProps,
   FormSpy,
+  type FormTemplateRenderProps,
   simpleComponentMapper,
   useFormApi,
 } from '@aglyn/shared-ui-jsx-forms'
 import {mdiContentSave, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {type FormTemplateRenderProps} from '@data-driven-forms/react-form-renderer'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'

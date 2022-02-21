@@ -20,7 +20,7 @@ import {GridButtons} from '@aglyn/shared-ui-jsx'
 import {mdiBug, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import styled from '@emotion/styled'
 import {useAuthState} from 'react-firebase-hooks/auth'
-import LayoutAuthenticatedComponent from '../components/layout-authenticated.component'
+import LayoutAuthenticatedComponent from '../layouts/layout-authenticated.component'
 
 
 const firebaseAuth = getFirebaseAuth()

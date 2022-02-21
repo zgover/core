@@ -41,7 +41,7 @@ import Head from 'next/head'
 import {useRouter} from 'next/router'
 import {type ElementType, Fragment, type ReactNode} from 'react'
 // import {BreadcrumbsComponent, BreadcrumbsProps} from '../components/BreadcrumbsComponent'
-import CopyrightComponent from './copyright.component'
+import CopyrightComponent from '../components/copyright.component'
 import {tailNavigation} from '../const'
 
 

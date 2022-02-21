@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {handlePassSxProps} from '@aglyn/shared-feature-themes'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {
   BackgroundImageComponent,
   type BackgroundImageComponentProps,
@@ -23,18 +23,18 @@ import {
 } from '@aglyn/shared-ui-jsx'
 
 
-export interface LayoutUserAuthComponentProps extends Partial<BackgroundImageComponentProps> {
+export interface LayoutAuthAreaProps extends Partial<BackgroundImageComponentProps> {
 
 }
 
-function LayoutUserAuthComponent(props: LayoutUserAuthComponentProps) {
+function LayoutAuthAreaComponent(props: LayoutAuthAreaProps) {
   const {children, sx, ...rest} = props
 
 
   return (
     <BackgroundImageComponent
       url="/_static/images/backgrounds/patterns/abstract-wave-lines.svg"
-      sx={handlePassSxProps({
+      sx={mergeSxProps({
         minHeight: '100vh',
         bgcolor: 'primary.dark',
         display: 'flex',
@@ -52,8 +52,8 @@ function LayoutUserAuthComponent(props: LayoutUserAuthComponentProps) {
     </BackgroundImageComponent>
   )
 }
-LayoutUserAuthComponent.displayName = 'LayoutUserAuthComponent'
-LayoutUserAuthComponent.layoutComponent = LoadingLayoutComponent
+LayoutAuthAreaComponent.displayName = 'LayoutAuthAreaComponent'
+LayoutAuthAreaComponent.layoutComponent = LoadingLayoutComponent
 
-export {LayoutUserAuthComponent}
-export default LayoutUserAuthComponent
+export {LayoutAuthAreaComponent}
+export default LayoutAuthAreaComponent

@@ -21,20 +21,22 @@ import {useMemo} from 'react'
 import type {ContinueRouteData} from '../types'
 
 
-export function encodeContinueRoute({href, hrefAs}: ContinueRouteData) {
+export function encodeContinueQuery(query: ContinueRouteData) {
   return encodeURIComponent(
     base64Encode(
-      JSON.stringify({href, hrefAs}),
+      JSON.stringify(
+        query,
+      ),
     ),
   )
 }
 
-export function useContinueRouteEncoded() {
+export function useContinueQueryEncoded() {
   const router = useRouter()
   const href = router.pathname,
     hrefAs = router.asPath
 
-  return useMemo(() => encodeContinueRoute({href, hrefAs}), [href, hrefAs])
+  return useMemo(() => encodeContinueQuery({href, hrefAs}), [href, hrefAs])
 }
 
-export default useContinueRouteEncoded
+export default useContinueQueryEncoded

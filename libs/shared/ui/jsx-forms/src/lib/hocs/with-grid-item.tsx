@@ -16,7 +16,7 @@
  */
 
 import type {EmptyObj} from '@aglyn/shared-data-types'
-import {handlePassSxProps} from '@aglyn/shared-feature-themes'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {getDisplayName} from '@aglyn/shared-util-tools'
 import MuiGrid, {type GridProps as MuiGridProps} from '@mui/material/Grid'
 import {
@@ -51,7 +51,7 @@ export function withGridItem<P>(WrappedComponent: ComponentType<P>): GridWrapped
         <MuiGrid
           ref={ref}
           item
-          sx={handlePassSxProps({position: 'relative'}, sx)}
+          sx={mergeSxProps({position: 'relative'}, sx)}
           {...gridProps}
         >
           <WrappedComponent {...rest as P} />

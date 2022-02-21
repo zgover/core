@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
+import {
+  type FormSchema,
+  validation,
+  type ValidationOptions,
+  validatorTypes,
+} from '@aglyn/shared-ui-jsx-forms'
 import {_hasProperty, _isStrT} from '@aglyn/shared-util-guards'
 import {length} from '@aglyn/shared-util-tools'
-import {Schema as DdfSchema} from '@data-driven-forms/react-form-renderer'
-import validation from '@data-driven-forms/react-form-renderer/validation'
-import {ValidationOptions} from '@data-driven-forms/react-form-renderer/validation/validation'
-import validatorTypes from '@data-driven-forms/react-form-renderer/validator-types'
 import md5 from 'md5'
 
 
@@ -173,7 +175,7 @@ export namespace Fields {
 
 
 export namespace DdfForms {
-  export type Schema = DdfSchema
+  export type Schema = FormSchema
   export const ValidatorType = validatorTypes
 
   export const ContactFormSchema: Schema = {

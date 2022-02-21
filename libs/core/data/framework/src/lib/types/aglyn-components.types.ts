@@ -25,15 +25,15 @@ import {
 } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {type BoxProps, type StyledOptions} from '@aglyn/shared-feature-themes'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {
   type ConditionDefinition,
   type DataType,
   type FieldActions,
   type ResolvePropsFunction,
   type Validator,
-} from '@data-driven-forms/react-form-renderer'
+} from '@aglyn/shared-ui-jsx-forms'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import {type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {type ComponentsLinealDirectiveFlag, type FieldComponentType} from '../constants/components'
 import {
   type ComponentGetPayload,

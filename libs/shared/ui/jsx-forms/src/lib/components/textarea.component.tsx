@@ -17,12 +17,11 @@
 
 import {TextField as MuiTextField, type TextFieldProps as MuiTextFieldProps} from '@mui/material'
 import {forwardRef, type ReactNode} from 'react'
-import {withGridItem} from '../hocs/with-grid-item'
 import {validationMessage} from '../utils/validation-message'
 import {useFieldApi, type UseFieldApiConfig} from '../vendor/data-driven-forms'
 
 
-export type FieldTextFieldProps = MuiTextFieldProps & UseFieldApiConfig & {
+export type TextareaProps = MuiTextFieldProps & UseFieldApiConfig & {
   isReadOnly?: boolean
   isDisabled?: boolean
   isRequired?: boolean
@@ -30,7 +29,7 @@ export type FieldTextFieldProps = MuiTextFieldProps & UseFieldApiConfig & {
   validateOnMount?: boolean
 }
 
-const FieldTextField = forwardRef<any, FieldTextFieldProps>(
+const TextareaComponent = forwardRef<any, TextareaProps>(
   function RefRenderFn(props, ref) {
     const {
       input,
@@ -66,12 +65,13 @@ const FieldTextField = forwardRef<any, FieldTextFieldProps>(
         required={isRequired}
         size="small"
         fullWidth
+        multiline
         {...rest}
       />
     )
   },
 )
 
-FieldTextField.displayName = 'FieldTextField'
+TextareaComponent.displayName = 'TextareaComponent'
 
-export default withGridItem(FieldTextField)
+export default TextareaComponent

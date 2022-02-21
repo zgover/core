@@ -22,6 +22,11 @@
  * @param {*} val
  * @returns {val is any[]}
  */
-export function _isArr<T>(val: unknown): val is T[] {
-  return Array.isArray(val)
+export function _isArrOfArr<T>(val: unknown): val is T[][] {
+  if (!Array.isArray(val)) return false
+  for (const i of val) {
+    if (!Array.isArray(i)) return false
+  }
+  return true
 }
+export default _isArrOfArr

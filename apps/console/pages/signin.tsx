@@ -19,10 +19,10 @@ import type {AuthCallbackResult, AuthResultError, AuthResultUser} from '@aglyn/s
 import {FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD} from '@aglyn/shared-data-forms'
 import {getFirebaseAuth, googleOAuthProvider} from '@aglyn/shared-feature-fbclient'
 import {AglynSvgIcon, AglynSvgLogo, AppLink, useLoading} from '@aglyn/shared-ui-jsx'
+import type {FormSchema} from '@aglyn/shared-ui-jsx-forms'
 import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {useContinueRouteDecoded} from '@aglyn/shared-util-next'
-import type FormSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
+import {useContinueQueryDecoded} from '@aglyn/shared-util-next'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Paper from '@mui/material/Paper'
@@ -39,7 +39,7 @@ import {
 import {useRouter} from 'next/router'
 import {useCallback, useState} from 'react'
 import AuthFormTemplateComponent from '../components/auth-form-template.component'
-import LayoutUserAuthComponent from '../components/layout-user-auth.component'
+import LayoutAuthAreaComponent from '../layouts/layout-auth-area.component'
 
 
 const firebaseAuth = getFirebaseAuth()
@@ -47,17 +47,23 @@ const firebaseAuth = getFirebaseAuth()
 const formSchema: FormSchema = {
   fields: [FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD],
 }
-const defaultValues = {email: '', Passwd: ''}
+const defaultValues = {
+  [FIELD_SCHEMA_EMAIL.name]: '',
+  [FIELD_SCHEMA_PASSWORD.name]: '',
+}
 
 function SignIn() {
   const router = useRouter()
-  const [{href, hrefAs}] = useContinueRouteDecoded()
+  const [{href, hrefAs}] = useContinueQueryDecoded()
   const {queueLoading, loading} = useLoading()
   const [user, setUser] = useState<AuthResultUser>(null)
   const [error, setError] = useState<AuthResultError>(null)
 
   const handleRedirect = useCallback(async () => {
-    return href ? await router.push(href, hrefAs || '') : await router.push('/')
+    return await (href
+        ? router.push(href, hrefAs || '')
+        : router.push('/')
+    )
   }, [href, hrefAs, router])
 
   const handleGoogleOAuthSignIn = useCallback((): AuthCallbackResult => {
@@ -194,6 +200,6 @@ function SignIn() {
   )
 }
 SignIn.displayName = 'Page:SignIn'
-SignIn.layoutComponent = LayoutUserAuthComponent
+SignIn.layoutComponent = LayoutAuthAreaComponent
 
 export default SignIn

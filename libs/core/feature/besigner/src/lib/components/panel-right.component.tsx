@@ -23,7 +23,7 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {ICON_VARIANT_DETAILS, ICON_VARIANT_PROPERTIES} from '@aglyn/shared-data-enums'
-import {alpha, handlePassSxProps, styled} from '@aglyn/shared-feature-themes'
+import {alpha, mergeSxProps, styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
 import MuiTabContext from '@mui/lab/TabContext'
@@ -146,7 +146,7 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
                 variant="body1"
                 display="inline"
                 {...ValueTypographyProps}
-                sx={handlePassSxProps((theme) => ({
+                sx={mergeSxProps((theme) => ({
                   bgcolor: alpha(theme.palette.secondary.light, 0.18),
                   border: `1px solid ${alpha(theme.palette.secondary.light, 0.72)}`,
                   borderRadius: '0.3em',

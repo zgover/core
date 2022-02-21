@@ -65,7 +65,7 @@ BesignerSvgLogo.defaultProps = {
 //         ref={ref}
 //         viewBox={AGLYN_SVG_LOGO.viewBox}
 //         aria-label={'Aglyn Logo'}
-//         sx={handlePassSxProps({width: 'unset', height: 'unset'}, sx)}
+//         sx={mergeSxProps({width: 'unset', height: 'unset'}, sx)}
 //         {...props}
 //       >
 //         <path d={AGLYN_SVG_LOGO.path} />
@@ -82,7 +82,7 @@ BesignerSvgLogo.defaultProps = {
 //         ref={ref}
 //         viewBox={BESIGNER_SVG_LOGO.viewBox}
 //         aria-label={'Besigner Logo'}
-//         sx={handlePassSxProps({width: 'unset', height: 'unset'}, sx)}
+//         sx={mergeSxProps({width: 'unset', height: 'unset'}, sx)}
 //         {...props}
 //       >
 //         <path d={BESIGNER_SVG_LOGO.path} />

@@ -38,8 +38,6 @@ import {
 } from '@mui/material'
 
 import {forwardRef, type HTMLProps, useCallback, useMemo, useState} from 'react'
-
-import {withGridItem} from '../hocs/with-grid-item'
 import {validationMessage} from '../utils/validation-message'
 
 import {useFieldApi, type UseFieldApiConfig} from '../vendor/data-driven-forms'
@@ -89,12 +87,12 @@ const GridListWrapper = styled('div', {
   },
 }))
 
-export interface FieldIconSelectProps extends HTMLProps<HTMLDivElement> {
+export interface IconSelectProps extends HTMLProps<HTMLDivElement> {
   initialValue?: string
   classes?: Partial<typeof classKeys>
 }
 
-const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
+const IconSelectComponent = forwardRef<any, IconSelectProps>(
   function RefRenderFn(props, ref) {
     const {
       input,
@@ -251,6 +249,6 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
   },
 )
 
-FieldIconSelect.displayName = 'FieldIconSelect'
+IconSelectComponent.displayName = 'IconSelectComponent'
 
-export default withGridItem(FieldIconSelect)
+export default IconSelectComponent

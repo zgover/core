@@ -25,11 +25,10 @@ import {FormSpy, type FormTemplateRenderProps, useFormApi} from '../vendor/data-
 
 export interface GridFormTemplateProps extends FormTemplateRenderProps {}
 
-export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(
+export const GridFormTemplateComponent = forwardRef<any, GridFormTemplateProps>(
   function RefRenderFn(props, ref) {
-    const {formFields, schema, ...rest} = props
-    const {handleSubmit, onReset, onCancel, getState} = useFormApi()
-    const {submitting, valid, pristine} = getState()
+    const {formFields, schema} = props
+    const {handleSubmit, onCancel} = useFormApi()
     return (
       <form ref={ref} onSubmit={handleSubmit} noValidate>
         {schema.title}
@@ -42,7 +41,7 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(
               <FormControl margin="normal" fullWidth>
                 <Button
                   variant="outlined"
-                  onClick={onReset}
+                  onClick={onCancel}
                   disabled={submitting || validating}
                   fullWidth
                 >
@@ -59,7 +58,7 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(
                   variant="contained"
                   fullWidth
                 >
-                  Save Element
+                  Continue
                 </Button>
               </FormControl>
             </Box>
@@ -69,5 +68,5 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(
     )
   },
 )
-GridFormTemplate.displayName = 'GridFormTemplate'
-export default GridFormTemplate
+GridFormTemplateComponent.displayName = 'GridFormTemplateComponent'
+export default GridFormTemplateComponent

@@ -90,3 +90,7 @@ export {
   WizardContext,
   type WizardContextValue,
 } from '@data-driven-forms/react-form-renderer'
+
+export {
+  ValidationOptions,
+} from '@data-driven-forms/react-form-renderer/validation/validation'

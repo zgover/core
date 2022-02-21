@@ -17,7 +17,7 @@
 
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {AglynSvgLogo, LoadingLayoutComponent, useLoading} from '@aglyn/shared-ui-jsx'
-import {useContinueRouteEncoded} from '@aglyn/shared-util-next'
+import {useContinueQueryEncoded} from '@aglyn/shared-util-next'
 import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
@@ -37,7 +37,7 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
   const [user, authLoading, error] = useAuthState(firebaseAuth)
   const {queueLoading} = useLoading()
   const router = useRouter()
-  const continueRoute = useContinueRouteEncoded()
+  const continueRoute = useContinueQueryEncoded()
 
   useEffect(() => {
     // const dequeueLoading = authLoading ? queueLoading() : null

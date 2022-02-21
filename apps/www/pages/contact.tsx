@@ -17,13 +17,13 @@
 
 import {BRAND_NAMES} from '@aglyn/shared-data-enums'
 import {GridItems} from '@aglyn/shared-ui-jsx'
-import {simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {
   FormRenderer,
   FormSpy,
   type FormTemplateRenderProps,
+  simpleComponentMapper,
   useFormApi,
-} from '@data-driven-forms/react-form-renderer'
+} from '@aglyn/shared-ui-jsx-forms'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'

@@ -30,14 +30,13 @@ import {
   type SwitchProps as MuiSwitchProps,
 } from '@mui/material'
 import {forwardRef, type ReactNode} from 'react'
-
-import {withGridItem} from '../hocs/with-grid-item'
 import {validationMessage} from '../utils/validation-message'
 import {useFieldApi, type UseFieldApiConfig} from '../vendor/data-driven-forms'
 
 
-export type FieldSwitchBaseProps = MuiSwitchProps & UseFieldApiConfig
-export interface FieldSwitchProps extends FieldSwitchBaseProps {
+export type SwitchBaseProps = MuiSwitchProps & UseFieldApiConfig
+
+export interface SwitchProps extends SwitchBaseProps {
   isReadOnly?: boolean
   isDisabled?: boolean
   isRequired?: boolean
@@ -55,7 +54,7 @@ export interface FieldSwitchProps extends FieldSwitchBaseProps {
   FormHelperTextProps?: MuiFormHelperTextProps
 }
 
-const FieldSwitch = forwardRef<any, FieldSwitchProps>(
+const SwitchComponent = forwardRef<any, SwitchProps>(
   function RefRenderFn(props, ref) {
     const {
       input,
@@ -119,6 +118,6 @@ const FieldSwitch = forwardRef<any, FieldSwitchProps>(
   },
 )
 
-FieldSwitch.displayName = 'FieldSwitch'
+SwitchComponent.displayName = 'SwitchComponent'
 
-export default withGridItem(FieldSwitch)
+export default SwitchComponent

@@ -21,12 +21,12 @@ import {mdiCogOutline, MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-js
 import {_s, copy} from '@aglyn/shared-util-tools'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
-import {type ReactNode} from 'react'
+import type {ReactNode} from 'react'
 import {isElement} from 'react-is'
 // import {type CurrentUserContextType} from '../contexts/current-user-context'
 // import {type AggregatedPageMeta} from '../lib/app-pages'
 // import {tabItems} from '../lib/navigation-menus'
-import BreadcrumbsComponent from './breadcrumbs.component'
+import BreadcrumbsComponent from '../components/breadcrumbs.component'
 import LayoutMainComponent, {type MainLayoutProps as MainLayoutProps} from './layout-main.component'
 
 

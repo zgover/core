@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {
   FormControl as MuiFormControl,
   type FormControlProps as MuiFormControlProps,
@@ -27,20 +27,13 @@ import {
   type SelectProps as MuiSelectProps,
 } from '@mui/material'
 import {forwardRef, type ReactNode} from 'react'
-import {withGridItem} from '../hocs/with-grid-item'
 import {validationMessage} from '../utils/validation-message'
 import {useFieldApi, type UseFieldApiConfig} from '../vendor/data-driven-forms'
 
 
-export const SelectFormControl = styled(MuiFormControl, {
-  name: 'AglynSelectFormControl',
-})({
-  width: '100%',
-  display: 'flex',
-})
+export type SelectBaseProps = MuiSelectProps & UseFieldApiConfig
 
-export type FieldSelectBaseProps = (MuiSelectProps & UseFieldApiConfig)
-export interface FieldSelectProps extends FieldSelectBaseProps {
+export interface SelectProps extends SelectBaseProps {
   isReadOnly?: boolean
   isDisabled?: boolean
   isRequired?: boolean
@@ -51,7 +44,7 @@ export interface FieldSelectProps extends FieldSelectBaseProps {
   defaultOption?: MuiMenuItemProps
 }
 
-const FieldSelect = forwardRef<any, FieldSelectProps>(
+const SelectComponent = forwardRef<any, SelectProps>(
   function RefRenderFn(props, ref) {
     const {
       input,
@@ -67,7 +60,7 @@ const FieldSelect = forwardRef<any, FieldSelectProps>(
       inputProps,
       options = [],
       variant,
-      FormControlProps,
+      FormControlProps: {sx: formControlSx, ...formControlProps},
       defaultOption,
       disableDefaultOption,
       ...rest
@@ -80,7 +73,13 @@ const FieldSelect = forwardRef<any, FieldSelectProps>(
       description
 
     return (
-      <SelectFormControl ref={ref} variant={variant} size="small" {...FormControlProps}>
+      <MuiFormControl
+        ref={ref}
+        variant={variant}
+        size="small"
+        sx={mergeSxProps({width: '100%', display: 'flex'}, formControlSx)}
+        {...formControlProps}
+      >
         <MuiInputLabel id={`field-select-${input.name}`}>{label}</MuiInputLabel>
         <MuiSelect
           {...input}
@@ -109,11 +108,14 @@ const FieldSelect = forwardRef<any, FieldSelectProps>(
           ))}
         </MuiSelect>
         {!helpText ? null : <MuiFormHelperText>{helpText}</MuiFormHelperText>}
-      </SelectFormControl>
+      </MuiFormControl>
     )
   },
 )
 
-FieldSelect.displayName = 'FieldSelect'
+SelectComponent.displayName = 'SelectComponent'
+SelectComponent.defaultProps = {
+  FormControlProps: {},
+}
 
-export default withGridItem(FieldSelect)
+export default SelectComponent

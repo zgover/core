@@ -19,7 +19,7 @@ import dynamic from 'next/dynamic'
 
 
 export const FieldIconSelect = dynamic(
-  () => import('../components/field-icon-select').then((mod) => mod.default),
+  () => import('../components/icon-select.component').then((mod) => mod.default),
   {ssr: false},
 )
 export const FieldSelect = dynamic(
