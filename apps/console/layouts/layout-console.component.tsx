@@ -15,20 +15,24 @@
  * limitations under the License.
  */
 
+import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {BackgroundImageComponent, GridItems, type GridItemsProps} from '@aglyn/shared-ui-jsx'
-import {mdiCogOutline, MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import {mdiCogOutline, MdiIcon, type MdiIconProps, mdiShieldLock} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
-import {Container, Typography} from '@mui/material'
+import {Container, Stack, Typography} from '@mui/material'
 import type {ReactNode} from 'react'
+import {useAuthState} from 'react-firebase-hooks/auth'
 import {isElement} from 'react-is'
 // import {type CurrentUserContextType} from '../contexts/current-user-context'
 // import {type AggregatedPageMeta} from '../lib/app-pages'
 // import {tabItems} from '../lib/navigation-menus'
 import BreadcrumbsComponent from '../components/breadcrumbs.component'
-import LayoutMainComponent, {type MainLayoutProps as MainLayoutProps} from './layout-main.component'
+import LayoutAuthenticatedComponent from './layout-authenticated.component'
+import LayoutMainComponent, {type MainLayoutProps} from './layout-main.component'
 
 
+const firebaseAuth = getFirebaseAuth()
 export const CONTENT_MAX_WIDTH = 'xl'
 const getHeader = (first, second) => (
   <span>
@@ -36,7 +40,7 @@ const getHeader = (first, second) => (
   </span>
 )
 
-export interface ConsoleLayoutProps extends MainLayoutProps {
+export interface LayoutConsoleProps extends MainLayoutProps {
   ContentGridItemsProps?: GridItemsProps
   items?: GridItemsProps['items']
   header?: {
@@ -47,7 +51,7 @@ export interface ConsoleLayoutProps extends MainLayoutProps {
   currentUserContext?: any//CurrentUserContextType
 }
 
-function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
+function LayoutConsoleComponent(props: LayoutConsoleProps) {
   const {
     header: headerProp,
     aggregatedPageMeta,
@@ -59,6 +63,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
     currentUserContext,
     ...rest
   } = props
+  const [user, loading, error] = useAuthState(firebaseAuth)
   const {pageMeta, overrideMeta, pageAncestors} = aggregatedPageMeta || {}
   const title = titleProp ?? (overrideMeta ?? pageMeta)?.title
   const [rootArea, mainArea, subArea] = pageAncestors || []
@@ -87,28 +92,44 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
         },
       ],
     },
-    {
-      title: 'User Account',
-      // avatar: {
-      //   alt: currentUserContext.currentUser?.displayName,
-      //   src: gravatarUrlFromEmail(currentUserContext.currentUser?.email),
-      // },
-      items: [
-        {
-          dense: true,
-          children: 'Account Settings',
-          href: '/settings/account',
-        },
-      ],
-    },
   ]
 
   return (
     <LayoutMainComponent
-      navTabItems={[]/*tabItems as any*/}
       title={title ? [..._isArr(title) ? title : [title], 'Secure'] : 'Secure'}
       productName={'Console'}
       quickActionMenus={quickActionMenus}
+      tabBarTitle={(
+        <Stack
+          direction="row"
+          spacing={{sm: 0.15, md: 0.5}}
+          alignItems="center"
+          typography={'subtitle2'}
+          lineHeight={'normal'}
+          sx={{color: 'tertiary.light'}}
+        >
+          <span>
+            {'Secure'}
+          </span>
+          <MdiIcon
+            path={mdiShieldLock.path}
+            fontSize={'small'}
+            sx={{color: 'tertiary.light'}}
+          />
+        </Stack>
+      )}
+      navTabItems={[
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          href: '/',
+        },
+        {
+          id: 'besigner',
+          label: 'Besigner',
+          href: '/besigner',
+        },
+      ]}
       {...rest}
     >
       <BackgroundImageComponent
@@ -176,8 +197,9 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
   )
 }
 
-ConsoleLayoutRaw.displayName = 'LayoutConsoleComponent'
-ConsoleLayoutRaw.defaultProps = {}
+LayoutConsoleComponent.displayName = 'LayoutConsoleComponent'
+LayoutConsoleComponent.defaultProps = {}
+LayoutConsoleComponent.layoutComponent = LayoutAuthenticatedComponent
 
-export const LayoutConsoleComponent = /*withCurrentUserContext(withAggregatedPageMeta(*/ConsoleLayoutRaw/*))*/
+export {LayoutConsoleComponent}
 export default LayoutConsoleComponent

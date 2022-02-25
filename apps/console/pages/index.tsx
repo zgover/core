@@ -17,11 +17,9 @@
 
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {GridButtons} from '@aglyn/shared-ui-jsx'
-import {mdiBug, mdiHome, MdiIcon, mdiShieldLock} from '@aglyn/shared-ui-mdi-jsx'
+import {mdiBug, mdiHome, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import styled from '@emotion/styled'
-import {Stack} from '@mui/material'
 import {useAuthState} from 'react-firebase-hooks/auth'
-import LayoutAuthenticatedComponent from '../layouts/layout-authenticated.component'
 import LayoutConsoleComponent from '../layouts/layout-console.component'
 
 
@@ -39,96 +37,66 @@ export function Index() {
    * Note: The corresponding styles are in the ./index.@emotion/styled file.
    */
   return (
-    <LayoutConsoleComponent
-      title={'My Dashboard'}
-      tabBarTitle={(
-        <Stack
-          direction="row"
-          spacing={{sm: 0.15, md: 0.5}}
-          alignItems="center"
-          typography={'subtitle2'}
-          lineHeight={'normal'}
-          sx={{color: 'tertiary.light'}}
-        >
-          <span>
-            {'Secure'}
-          </span>
-          <MdiIcon
-            path={mdiShieldLock.path}
-            fontSize={'small'}
-            sx={{color: 'tertiary.light'}}
-          />
-        </Stack>
-      )}
-      header={{
-        children: 'My Dashboard',
-        icon: {path: mdiHome.path},
-      }}
-      breadcrumbItems={[
-        {
-          id: 'home',
-          children: 'Home',
-          href: '/',
-        },
-      ]}
-      navTabItems={[
-        {
-          id: 'dashboard',
-          label: 'Dashboard',
-          href: '/',
-        },
-        {
-          id: 'besigner',
-          label: 'Besigner',
-          href: '/besigner',
-        },
-      ]}
-    >
-      <StyledPage>
-        <h2>Resources &amp; Tosols</h2>
-        <p>Thank you for using and showing some ♥ for Nx.</p>
-        <div>
-          User: <pre>{JSON.stringify(user, null, 2)}</pre>
-          Loading: <pre>{JSON.stringify(loading, null, 2)}</pre>
-          Error: <pre>{JSON.stringify(error, null, 2)}</pre>
-        </div>
-        <MdiIcon path={mdiBug.path} />
-        <GridButtons
-          items={[
-            {
-              GridItemProps: {
-                xs: 6,
-              },
-              children: 'Hello Button 1',
-              variant: 'contained',
-              color: 'primary',
-              fullWidth: true,
+    <StyledPage>
+      <h2>Resources &amp; Tosols</h2>
+      <p>Thank you for using and showing some ♥ for Nx.</p>
+      <div>
+        User: <pre>{JSON.stringify(user, null, 2)}</pre>
+        Loading: <pre>{JSON.stringify(loading, null, 2)}</pre>
+        Error: <pre>{JSON.stringify(error, null, 2)}</pre>
+      </div>
+      <MdiIcon path={mdiBug.path} />
+      <GridButtons
+        items={[
+          {
+            GridItemProps: {
+              xs: 6,
             },
-            {
-              GridItemProps: {
-                xs: 3,
-              },
-              children: 'Hello Button 1',
-              variant: 'contained',
-              color: 'primary',
-              fullWidth: true,
+            children: 'Hello Button 1',
+            variant: 'contained',
+            color: 'primary',
+            fullWidth: true,
+          },
+          {
+            GridItemProps: {
+              xs: 3,
             },
-            {
-              GridItemProps: {
-                xs: 3,
-              },
-              children: 'Hello Button 1',
-              variant: 'contained',
-              color: 'primary',
-              fullWidth: true,
+            children: 'Hello Button 1',
+            variant: 'contained',
+            color: 'primary',
+            fullWidth: true,
+          },
+          {
+            GridItemProps: {
+              xs: 3,
             },
-          ]}
-        />
-      </StyledPage>
-    </LayoutConsoleComponent>
+            children: 'Hello Button 1',
+            variant: 'contained',
+            color: 'primary',
+            fullWidth: true,
+          },
+        ]}
+      />
+    </StyledPage>
   )
 }
 Index.displayName = 'Page:Index'
-Index.layoutComponent = LayoutAuthenticatedComponent
+Index.layoutComponent = LayoutConsoleComponent
+Index.layoutProps = {
+  LayoutConsoleComponent: {
+    title: 'My Dashboard',
+    header: {
+      children: 'My Dashboard',
+      icon: {path: mdiHome.path},
+    },
+    breadcrumbItems: [
+      {
+        id: 'home',
+        children: 'Home',
+        href: '/',
+      },
+    ],
+  },
+}
 
 export default Index

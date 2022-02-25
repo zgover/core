@@ -18,37 +18,73 @@
 import {type AnyProps} from '@aglyn/shared-data-types'
 import {type NextPage} from 'next'
 import {type AppProps as NextAppProps} from 'next/app'
-import {type ComponentType, type ReactElement} from 'react'
+import {type ReactElement} from 'react'
 
 
-export type NextPageGetLayout<Props = AnyProps, InitialProps = Props> = {
-  (page: ReactElement, props: NextAppWithLayoutProps<Props, InitialProps>): ReactElement
+export type NextPageGetLayoutFn = (
+  page: ReactElement,
+  props: NextAppWithLayoutProps,
+) => ReactElement
+
+export type NextPageMemberLayoutComponent = {
+  layoutComponent?: NextPageWithLayout
+  layoutProps?: {
+    [P in NextPageWithLayout['displayName']]: AnyProps
+  }
 }
-export type NextPageWithLayout<Props = AnyProps, InitialProps = Props> = NextPage<Props, InitialProps> & {
-  getLayout?: NextPageGetLayout<Props, InitialProps>
-  layoutComponent?: ComponentType<any>
+
+export type NextPageMemberLayoutGetComponent = {
+  getLayout?: NextPageGetLayoutFn
 }
+
+export type NextPageLayoutMembers =
+  & NextPageMemberLayoutComponent
+  & NextPageMemberLayoutGetComponent
+
+export type NextPageWithLayout<Props = AnyProps, InitialProps = Props> =
+  & NextPage<Props, InitialProps>
+  & NextPageLayoutMembers
+
 export type NextAppWithLayoutProps<Props = AnyProps, InitialProps = Props> = NextAppProps<Props> & {
   Component: NextPageWithLayout<Props, InitialProps>
-  defaultGetLayout?: NextPageGetLayout<Props, InitialProps>,
+  defaultGetLayout?: NextPageGetLayoutFn,
 }
 
 const GET_LAYOUT_NOOP = (page: ReactElement) => page
 
 export function getNextPageLayout<Props, InitialProps>(
   props: NextAppWithLayoutProps<Props, InitialProps>,
-): NextPageGetLayout<Props, InitialProps> {
+): NextPageGetLayoutFn {
   const {Component, defaultGetLayout} = props
 
-  if (Component.getLayout) return Component.getLayout
-  if (Component.layoutComponent) return (children, props) => {
-    const InnerComponent = Component.layoutComponent
-    const OuterComponent = getNextPageLayout({...props, Component: InnerComponent})
-    return OuterComponent(<InnerComponent>{children}</InnerComponent>, props)
+  if (Component.getLayout) {
+    return Component.getLayout
   }
-  if (defaultGetLayout) return defaultGetLayout
 
-  return GET_LAYOUT_NOOP
+  if (Component.layoutComponent) {
+    const LayoutComponent = Component.layoutComponent
+    const layoutProps = Component.layoutProps?.[LayoutComponent.displayName]
+    if (layoutProps) {
+      LayoutComponent.layoutProps = {
+        ...LayoutComponent.layoutProps,
+        ...Component.layoutProps,
+      }
+    }
+
+    return (page, props) => {
+      const OuterComponent = getNextPageLayout({
+        ...props, Component: LayoutComponent,
+      })
+      const children = (
+        <LayoutComponent {...layoutProps}>
+          {page}
+        </LayoutComponent>
+      )
+      return OuterComponent(children, props)
+    }
+  }
+
+  return defaultGetLayout || GET_LAYOUT_NOOP
 }
 
 export default getNextPageLayout

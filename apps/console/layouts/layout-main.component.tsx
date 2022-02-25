@@ -16,6 +16,7 @@
  */
 
 import {APP_CONSOLE, BUILD_ID, PACKAGE_VERSION} from '@aglyn/shared-data-enums'
+import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {darken, mergeSxProps, styled} from '@aglyn/shared-feature-themes'
 import {
   AglynSvgIcon,
@@ -28,7 +29,8 @@ import {
   Menu,
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {_isArr, _isArrEmpty, _isObj} from '@aglyn/shared-util-guards'
+import {_isArr, _isArrEmpty} from '@aglyn/shared-util-guards'
+import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
 import {
   AppBar,
   Avatar,
@@ -46,11 +48,32 @@ import {
 import {cyan, purple} from '@mui/material/colors'
 import Head from 'next/head'
 import {useRouter} from 'next/router'
-import {Fragment, type ReactNode} from 'react'
+import {Fragment, type ReactNode, useMemo} from 'react'
+import {useAuthState} from 'react-firebase-hooks/auth'
 import BreadcrumbsComponent, {type BreadcrumbsProps} from '../components/breadcrumbs.component'
 import CopyrightComponent from '../components/copyright.component'
 import {tailNavigation} from '../const'
 
+
+const TabItem = styled(MuiTab, {
+  name: 'AglynTabItem',
+})(({theme}) => ({
+  flexDirection: 'row',
+  '& > *:first-of-type': {
+    marginBottom: 0,
+    marginRight: 1,
+  },
+  '& .MuiTab-labelIcon': {
+    minHeight: 46,
+    minWidth: 'auto',
+    paddingLeft: 0,
+    paddingRight: 0,
+    marginLeft: 4,
+    '&:first-of-type': {
+      marginLeft: 0,
+    },
+  },
+}))
 
 const StyledBreadcrumbs = styled(BreadcrumbsComponent, {
   name: 'BreadcrumbsComponent',
@@ -74,6 +97,7 @@ function a11yProps(index) {
   }
 }
 
+const firebaseAuth = getFirebaseAuth()
 export const NAVIGATION_MAX_WIDTH = false
 export const FOOTER_MAX_WIDTH = 'xl'
 
@@ -102,7 +126,6 @@ export interface MainLayoutProps {
 }
 
 function MainLayoutRaw(props: MainLayoutProps) {
-  const router = useRouter()
   const {
     children,
     title,
@@ -114,16 +137,13 @@ function MainLayoutRaw(props: MainLayoutProps) {
     quickActionMenus: quickActions,
     breadcrumbItems,
   } = props
-  const tabValue = navTabItems
-    ? navTabItems
-    .filter((i) => router.asPath.includes(i.href))
-    .reduce((prev, current) => {
-      const currentHref = (_isObj(current?.href) ? current?.href?.paths : current?.href) as string
-      const prevHref = (_isObj(prev?.href) ? prev?.href?.paths : prev?.href) as string
-
-      return currentHref?.length > prevHref?.length ? current : prev
-    }, {})?.href ?? false
-    : false
+  const [user] = useAuthState(firebaseAuth)
+  const router = useRouter()
+  const tabValue = useMemo(() => {
+    return navTabItems.find((i) => {
+      return (i?.hrefAs || i?.href || '') === router.asPath
+    })?.href || false
+  }, [router, navTabItems])
 
   const buildIconButton = ({avatar, icon, children, ...rest}, i) => (
     <IconButton key={rest.id ?? rest['href'] ?? i} color="inherit" {...rest}>
@@ -220,6 +240,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
                 sx={{
                   flexGrow: 1,
                   display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <Box
@@ -295,15 +316,42 @@ function MainLayoutRaw(props: MainLayoutProps) {
                   display: 'flex',
                   flexGrow: 1,
                   flexBasis: '72%',
+                  alignItems: 'center',
                 }}
               >
                 {(centerNavigationItems ?? []).map(buildNav('cni', buildTextButton))}
               </Box>
               <Box
                 component={'div'}
-                sx={{display: 'flex'}}
+                sx={{display: 'flex', alignItems: 'center'}}
               >
                 {(quickActions ?? []).map(buildNav('qa', buildIconButton))}
+                <Menu
+                  title={'User account'}
+                  items={[
+                    {
+                      dense: true,
+                      children: 'Account Settings',
+                      href: '/settings/account',
+                    },
+                  ]}
+                  sx={{
+                    p: {padding: 0.5, xs: 0.25},
+                    '&:last-child': {
+                      paddingLeft: 0.75,
+                    },
+                  }}
+                >
+                  <IconButton color="inherit">
+                    <Avatar
+                      alt={user?.displayName}
+                      src={gravatarUrlFromEmail(user?.email)}
+                      sx={{
+                        backgroundColor: cyan[600],
+                      }}
+                    />
+                  </IconButton>
+                </Menu>
               </Box>
             </Toolbar>
           </AppBar>
@@ -352,7 +400,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
                   indicatorColor="secondary"
                   scrollButtons="auto"
                   textColor="inherit"
-                  value={tabValue ?? false}
+                  value={tabValue || false}
                   variant="scrollable"
                   sx={{
                     minHeight: 40,
@@ -379,38 +427,20 @@ function MainLayoutRaw(props: MainLayoutProps) {
                     },
                   }}
                 >
-                  {navTabItems && navTabItems.map(({icon, sx, ...item}, i) => (
-                    <MuiTab
-                      key={item.id ?? i}
-                      // disableRipple
-                      color="inherit"
+                  {navTabItems && navTabItems.map(({icon, ...item}, index) => (
+                    <TabItem
+                      key={item.id ?? index}
                       href={item.href ?? ''}
-                      icon={(icon && ((icon.path && <MdiIcon {...icon} />) || icon))}
-                      label={item.label}
-                      underline="none"
-                      value={item.href ?? i}
-                      wrapped
+                      value={item.href ?? index}
+                      icon={icon?.path && <MdiIcon {...icon} /> || icon}
                       componentVariant="button-base"
                       anchorComponent="button"
-                      sx={mergeSxProps({
-                        flexDirection: 'row',
-                        '& > *:first-of-type': {
-                          marginBottom: 0,
-                          marginRight: 1,
-                        },
-                        '& .MuiTab-labelIcon': {
-                          minHeight: 46,
-                          minWidth: 'auto',
-                          paddingLeft: 0,
-                          paddingRight: 0,
-                          marginLeft: 4,
-                          '&:first-of-type': {
-                            marginLeft: 0,
-                          },
-                        },
-                      }, sx)}
+                      color="inherit"
+                      underline="none"
+                      // disableRipple
+                      wrapped
+                      {...a11yProps(index)}
                       {...{component: AppLink} as any}
-                      {...a11yProps(i)}
                       {...item}
                     />
                   ))}
@@ -420,16 +450,10 @@ function MainLayoutRaw(props: MainLayoutProps) {
           ) : null}
         </AppBar>
       </ElevateOnScroll>
-      <Box
-        component={'main'}
-        // sx={{
-        //   // marginTop: theme.spacing(-6),
-        //   marginTop: (theme) => `${theme.mixins.toolbar.minHeight}px`,
-        // }}
-      >
+      <Box component={'main'}>
         {children}
       </Box>
-      <footer>
+      <Box component={'footer'}>
         <Container maxWidth={FOOTER_MAX_WIDTH}>
           <Box
             component={'div'}
@@ -483,7 +507,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
             </Box>
           </Box>
         </Container>
-      </footer>
+      </Box>
     </Fragment>
   )
 }
