@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
  */
 
 import {MdiIcons} from '../internal'
-import type {Icon} from '../types/icon'
+import type {Icon, IconId} from '../types/icon'
 
 
-export function getMdiAllIcons(): Icon[] {
-  return [...MdiIcons.values()]
+export function getMdiAllIcons(): Map<IconId, Icon> {
+  // return [...MdiIcons.values()]
+  return MdiIcons
 }
 export default getMdiAllIcons

@@ -17,7 +17,7 @@
 
 import {styled} from '@aglyn/shared-feature-themes'
 import {LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
-import Stack, {type StackProps} from '@mui/material/Stack'
+import {Stack, type StackProps} from '@mui/material'
 import dynamic from 'next/dynamic'
 import {forwardRef} from 'react'
 import AppBarSecondaryComponent from './app-bar-secondary.component'

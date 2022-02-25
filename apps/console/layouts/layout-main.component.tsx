@@ -24,6 +24,7 @@ import {
   type AppLinkProps,
   ElevateOnScroll,
   Menu,
+  MenuItemProps,
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
@@ -58,7 +59,7 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
   const inner = (
     <>
       {!avatar
-        ? !icon.path || !icon ? icon : (<MdiIcon {...icon} />)
+        ? !icon?.path ? icon : (<MdiIcon {...icon} />)
         : (<Avatar {...avatar} sx={{bgcolor: 'grey.500'}} />)
       }
       {children}
@@ -111,13 +112,21 @@ export interface QuickActionsMenuItem extends IconButtonProps {
   avatar?: any
   dense?: boolean
   href?: any
-  items?: QuickActionsMenuItem[]
+  items?: MenuItemProps[]
+}
+
+export interface CenterNavMenuItem extends AppLinkProps<'button'> {
+  icon?: MdiIconProps
+  avatar?: any
+  dense?: boolean
+  href?: any
+  items?: MenuItemProps[]
 }
 
 export interface LayoutMainProps {
   children?: ReactNode | undefined
   title?: ReactNode[] | ReactNode
-  centerNavigationItems?: Array<AppLinkProps>
+  centerNavigationItems?: CenterNavMenuItem[]
   quickActions?: QuickActionsMenuItem[]
   appBarSuffix?: ReactNode
   disableAppBarElevation?: boolean

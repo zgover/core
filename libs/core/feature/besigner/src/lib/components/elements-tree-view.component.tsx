@@ -74,27 +74,29 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
         expandIcon={<MdiIcon path={mdiChevronRight.path} />}
         label={
           <Fragment>
-            <MdiIcon
-              color="quaternary"
-              {...icon}
-              path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
-              sx={[
-                {
-                  fontSize: 20,
-                  marginLeft: -0.25,
-                  marginRight: 0.5,
-                  marginBottom: -0.5,
-                  padding: 0.26,
-                  borderRadius: '0.25em',
-                  backgroundColor: 'background.default',
-                  border: 1,
-                  borderColor: 'divider',
-                  boxShadow: 1,
-                  color: 'quaternary',
-                },
-                ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
-              ]}
-            />
+            {!icon.path && icon ? icon : (
+              <MdiIcon
+                color="quaternary"
+                {...icon}
+                path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
+                sx={[
+                  {
+                    fontSize: 20,
+                    marginLeft: -0.25,
+                    marginRight: 0.5,
+                    marginBottom: -0.5,
+                    padding: 0.26,
+                    borderRadius: '0.25em',
+                    backgroundColor: 'background.default',
+                    border: 1,
+                    borderColor: 'divider',
+                    boxShadow: 1,
+                    color: 'quaternary',
+                  },
+                  ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
+                ]}
+              />
+            )}
             {label}
           </Fragment>
         }

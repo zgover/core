@@ -107,7 +107,9 @@ const BreadcrumbsComponent = forwardRef<any, BreadcrumbsProps>(
               className={itemClass}
               {...rest}
             >
-              {icon ? <MdiIcon {...icon} className={iconClass} /> : null}
+              {!icon?.path ? icon : (
+                <MdiIcon {...icon} className={iconClass} />
+              )}
               {children}
             </ItemComponent>
           )

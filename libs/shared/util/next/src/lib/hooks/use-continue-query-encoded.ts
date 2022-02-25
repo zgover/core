@@ -33,10 +33,15 @@ export function encodeContinueQuery(query: ContinueRouteData) {
 
 export function useContinueQueryEncoded() {
   const router = useRouter()
-  const href = router.pathname,
-    hrefAs = router.asPath
+  const href = typeof location !== 'undefined'
+      ? location?.href
+      : router.pathname,
+    pathname = router.pathname,
+    asPath = router.asPath
 
-  return useMemo(() => encodeContinueQuery({href, hrefAs}), [href, hrefAs])
+  return useMemo(() => {
+    return encodeContinueQuery({href})
+  }, [href, pathname, asPath])
 }
 
 export default useContinueQueryEncoded

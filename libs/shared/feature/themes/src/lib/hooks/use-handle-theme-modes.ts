@@ -16,15 +16,17 @@
  */
 
 import {_isEqualitySameType} from '@aglyn/shared-util-guards'
-import useMediaQuery from '@mui/material/useMediaQuery'
+import {useMediaQuery} from '@mui/material'
 import Cookie from 'js-cookie'
-import {useCallback, useMemo, useState} from 'react'
+import {type SyntheticEvent, useCallback, useMemo, useState} from 'react'
 
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+export type ThemeMode = 'light' | 'dark'
+export type LocalMode = 'light' | 'dark' | 'system'
 export type UseThemeMode = [
-  mode: ThemeMode,
-  toggleThemeMode: (mode?: ThemeMode) => void
+  themeMode: ThemeMode,
+  localMode: LocalMode,
+  toggleThemeMode: (event: SyntheticEvent<any>, to?: LocalMode) => void,
 ]
 
 export const COOKIE_THEME_KEY = 'theme-color-scheme'
@@ -32,32 +34,33 @@ export const COOKIE_THEME_KEY = 'theme-color-scheme'
 export function useHandleThemeModes(defaultMode?: ThemeMode): UseThemeMode {
   const prefDark = useMediaQuery('(prefers-color-scheme: dark)')
   const cookieMode = Cookie.get(COOKIE_THEME_KEY)
-  const [localMode, setLocalMode] = useState<ThemeMode | null>(null)
+  const [localMode, setLocalMode] = useState<LocalMode | null>(null)
 
-  const mode = useMemo(() => {
+  const themeMode = useMemo(() => {
     const value = localMode
       || cookieMode
       || prefDark
       || defaultMode
-    if (value === 'system') return prefDark ? 'dark' : 'light'
-    if (value === 'dark') return 'dark'
-    if (value === 'light') return 'light'
-    return 'system'
+    if (value === 'dark' || value === 'light') return value
+    return prefDark ? 'dark' : 'light'
   }, [cookieMode, defaultMode, localMode, prefDark])
 
-  const toggleThemeMode = useCallback((to?: ThemeMode) => {
+  const toggleThemeMode = useCallback((event: SyntheticEvent<any>, to?: LocalMode) => {
     const override = _isEqualitySameType(to, 'light', 'dark', 'system') ? to : null
     const value = override || (
-      mode === 'light' ? 'system'
-        : mode === 'system' ? 'dark'
-          : mode === 'dark' ? 'light'
-            : 'system'
+      (localMode || themeMode) === 'light' ? 'dark'
+        : (localMode || themeMode) === 'system' ? 'light'
+          : 'system'
     )
     Cookie.set(COOKIE_THEME_KEY, value, {expires: 365})
     setLocalMode(value)
-  }, [mode])
+  }, [themeMode, localMode])
 
-  return useMemo(() => [mode, toggleThemeMode], [mode, toggleThemeMode])
+  return useMemo(() => [
+    themeMode,
+    localMode || themeMode,
+    toggleThemeMode,
+  ], [themeMode, localMode, toggleThemeMode])
 }
 
 export default useHandleThemeModes

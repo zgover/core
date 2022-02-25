@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
+import type {JSXNode} from '@aglyn/shared-data-types'
 import {noop} from '@aglyn/shared-util-tools'
-import {JSXNode} from '@aglyn/shared-data-types'
-import {ButtonProps} from '@mui/material/Button'
-import {DialogProps} from '@mui/material/Dialog'
-import {Context, createContext, useContext} from 'react'
+import type {ButtonProps, DialogProps} from '@mui/material'
+import {type Context, createContext, useContext} from 'react'
 
 
 export type ConfirmationContextConfig = {
@@ -75,8 +74,9 @@ export const buildConfirmationContextConfig = (defaultConfig, config) => {
   }
 }
 
-export const ConfirmationContext: ConfirmationContext =
-  createContext<ConfirmationContextType>(DEFAULT_CONTEXT_VALUE)
+export const ConfirmationContext: ConfirmationContext = createContext<ConfirmationContextType>(
+  DEFAULT_CONTEXT_VALUE,
+)
 ConfirmationContext.displayName = 'ConfirmationContext'
 
 export function useConfirmationContext(): ConfirmationContextType {

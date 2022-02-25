@@ -165,6 +165,7 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
               color="inherit"
               position="sticky"
               variant="elevation"
+              enableColorOnDark
             >
               <Toolbar
                 variant="dense"
@@ -238,7 +239,7 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
                       key={item.id ?? index}
                       href={item.href ?? ''}
                       value={item.href ?? index}
-                      icon={icon?.path && <MdiIcon {...icon} /> || icon}
+                      icon={!icon?.path ? icon : <MdiIcon {...icon} />}
                       componentVariant="button-base"
                       anchorComponent="button"
                       color="inherit"

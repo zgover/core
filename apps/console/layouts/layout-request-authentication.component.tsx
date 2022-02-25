@@ -15,17 +15,38 @@
  * limitations under the License.
  */
 
+import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {BackgroundImageComponent, type BackgroundImageComponentProps} from '@aglyn/shared-ui-jsx'
+import {useContinueQueryDecoded} from '@aglyn/shared-util-next'
+import {useRouter} from 'next/router'
+import {useEffect} from 'react'
+import {useAuthState} from 'react-firebase-hooks/auth'
 
+
+const firebaseAuth = getFirebaseAuth()
 
 export interface LayoutRequestAuthenticationProps extends Partial<BackgroundImageComponentProps> {
 
 }
 
 function LayoutRequestAuthenticationComponent(props: LayoutRequestAuthenticationProps) {
-  const {children, sx, ...rest} = props
+  const {
+    children,
+    sx,
+    ...rest
+  } = props
+  const router = useRouter()
+  const [user] = useAuthState(firebaseAuth)
+  const [{href, asPath}] = useContinueQueryDecoded()
 
+  useEffect(() => {
+    if (user) {
+      href
+        ? router.push(href, asPath || undefined)
+        : router.push('/')
+    }
+  }, [href, asPath, router, user])
 
   return (
     <BackgroundImageComponent

@@ -16,7 +16,7 @@
  */
 
 import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
-import {type ElementId} from '@aglyn/core-data-framework'
+import type {ElementId} from '@aglyn/core-data-framework'
 import {
   useAglynAppContext,
   useAglynComponentSchema,
@@ -26,13 +26,8 @@ import {ICON_VARIANT_DETAILS, ICON_VARIANT_PROPERTIES} from '@aglyn/shared-data-
 import {alpha, mergeSxProps, styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
-import MuiTabContext from '@mui/lab/TabContext'
-import MuiTabList from '@mui/lab/TabList'
-import MuiTabPanel from '@mui/lab/TabPanel'
-import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
-import MuiTab from '@mui/material/Tab'
-import Typography from '@mui/material/Typography'
+import {TabContext as MuiTabContext, TabList as MuiTabList, TabPanel as MuiTabPanel} from '@mui/lab'
+import {Box, Divider, Tab as MuiTab, Typography} from '@mui/material'
 import {forwardRef, Fragment, useCallback, useMemo} from 'react'
 import useAglynBesignerPanelValue from '../hooks/use-aglyn-besigner-panel-value'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'

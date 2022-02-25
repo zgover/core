@@ -15,20 +15,26 @@
  * limitations under the License.
  */
 
-import {_hasOwnProperty, _isObj} from '@aglyn/shared-util-guards'
+import {_hasOwnProperty, _isArr, _isObj} from '@aglyn/shared-util-guards'
 import type {Icon, IconId} from './types/icon'
 
 
-declare function require(modules: string[], onLoad: (...args: any[]) => void): void
+export const MdiIcons = new Map<IconId, Icon>()
 
-export const MdiIcons: Map<IconId, Icon> = new Map<IconId, Icon>()
-
-if (typeof window !== 'undefined') {
-  require(['../../generated/6.5.95/mdi-icons.min.json'], ({data}) => {
-    Array.isArray(data) && data.forEach((value) => {
-      if (_isObj(value) && _hasOwnProperty('path', value) && _hasOwnProperty('id', value)) {
-        MdiIcons.set(value.id as IconId, value as Icon)
-      }
-    })
-  })
-}
+;(async function() {
+  if (typeof window !== 'undefined') {
+    await import('../../generated/6.5.95/mdi-icons.min.json')
+      .then(({data}) => {
+        if (_isArr) {
+          data.forEach((value) => {
+            if (_isObj(value) && _hasOwnProperty('path', value) && _hasOwnProperty('id', value)) {
+              MdiIcons.set(value.id as IconId, value as Icon)
+            }
+          })
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading icons', error)
+      })
+  }
+})()

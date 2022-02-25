@@ -15,45 +15,24 @@
  * limitations under the License.
  */
 
+import {
+  ICON_VARIANT_APP_SETTINGS,
+  ICON_VARIANT_SIGN_OUT,
+  ICON_VARIANT_THEME_DARK,
+  ICON_VARIANT_THEME_LIGHT,
+  ICON_VARIANT_THEME_SYSTEM,
+  ICON_VARIANT_USER_SETTINGS,
+} from '@aglyn/shared-data-enums'
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {useThemeModeContext} from '@aglyn/shared-feature-themes'
-import {mdiBrightness4, mdiBrightness5, mdiCog, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
-import {IconButton as MuiIconButton, Tooltip as MuiTooltip} from '@mui/material'
 import {useAuthState} from 'react-firebase-hooks/auth'
 import LayoutAuthenticatedComponent from './layout-authenticated.component'
 import LayoutMainComponent, {type LayoutMainProps} from './layout-main.component'
 
 
 const firebaseAuth = getFirebaseAuth()
-
-function ChangeThemeMenuItem(props) {
-  const [mode, toggleThemeMode] = useThemeModeContext()
-  return (
-    <>
-      {'Theme mode'}
-      <MuiTooltip
-        aria-label="switch theme scheme colors"
-        title={
-          mode === 'dark'
-            ? 'Light mode'
-            : 'Dark mode'
-        }
-      >
-        <MuiIconButton onClick={toggleThemeMode as any}>
-          <MdiIcon
-            path={
-              mode === 'dark'
-                ? mdiBrightness4.path
-                : mdiBrightness5.path
-            }
-          />
-        </MuiIconButton>
-      </MuiTooltip>
-    </>
-  )
-}
 
 export interface LayoutConsoleProps extends LayoutMainProps {
 }
@@ -66,6 +45,7 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
     ...rest
   } = props
   const [user] = useAuthState(firebaseAuth)
+  const [themeMode, localMode, toggleThemeMode] = useThemeModeContext()
 
   return (
     <LayoutMainComponent
@@ -74,17 +54,31 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
       quickActions={[
         ...quickActions || [],
         {
-          icon: {path: mdiCog.path},
+          icon: {path: ICON_VARIANT_APP_SETTINGS.path},
           // alt: '',
           items: [
             {
               dense: true,
-              children: <ChangeThemeMenuItem />,
+              onClick: toggleThemeMode,
+              // component: 'button',
+              children: 'Theme mode',
+              icon: {
+                path: localMode === 'dark' ? ICON_VARIANT_THEME_DARK.path
+                  : localMode === 'light' ? ICON_VARIANT_THEME_LIGHT.path
+                    : ICON_VARIANT_THEME_SYSTEM.path,
+              },
+              title: (
+                localMode === 'light' ? 'Switch to dark mode'
+                  : localMode === 'dark' ? 'Switch to system theme'
+                    : 'Switch to light mode'
+              ),
+              'aria-label': 'switch theme mode',
+
             },
           ],
         },
         {
-          title: 'User account',
+          title: 'User menu',
           avatar: {
             title: user?.displayName || 'No name',
             src: gravatarUrlFromEmail(user?.email),
@@ -92,8 +86,16 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
           items: [
             {
               dense: true,
-              children: 'Account Settings',
-              href: '/settings/account',
+              children: 'Settings',
+              href: '/account/settings',
+              icon: {path: ICON_VARIANT_USER_SETTINGS.path},
+              divider: true,
+            },
+            {
+              dense: true,
+              children: 'Sign out',
+              href: '/signout',
+              icon: {path: ICON_VARIANT_SIGN_OUT.path},
             },
           ],
         },

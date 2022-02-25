@@ -19,7 +19,7 @@
  * Convert any value to 8-bit hexadecimal string
  * @param val - value to convert
  */
-export function numberToHexadecimal(val: Parameters<typeof Number>): string {
+export function numberToHexadecimal<T>(val: T): string {
   return Number(val).toString(16)
 }
 export default numberToHexadecimal

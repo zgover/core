@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
+import {
+  ICON_VARIANT_THEME_DARK,
+  ICON_VARIANT_THEME_LIGHT,
+  ICON_VARIANT_THEME_SYSTEM,
+} from '@aglyn/shared-data-enums'
 import {styled, useThemeModeContext} from '@aglyn/shared-feature-themes'
 import {AglynSvgIcon, BesignerSvgLogo} from '@aglyn/shared-ui-jsx'
-import {mdiBrightness4, mdiBrightness5, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import AppBar, {type AppBarProps} from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import MuiIconButton from '@mui/material/IconButton'
@@ -39,7 +44,7 @@ export interface AppBarPrimaryComponentProps extends Partial<AppBarProps> {}
 export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
-    const [mode, toggleThemeMode] = useThemeModeContext()
+    const [themeMode, localMode, toggleThemeMode] = useThemeModeContext()
 
     return (
       <AppBarPrimary
@@ -67,19 +72,19 @@ export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProp
           />
           <Box sx={{flexGrow: 1}} />
           <MuiTooltip
-            aria-label="switch theme scheme colors"
+            aria-label="switch theme mode"
             title={
-              mode === 'dark'
-                ? 'Light mode'
-                : 'Dark mode'
+              localMode === 'dark' ? 'Switch to light mode'
+                : localMode === 'light' ? 'Switch to dark mode'
+                  : 'Switch to system them preference'
             }
           >
-            <MuiIconButton onClick={toggleThemeMode as any}>
+            <MuiIconButton onClick={toggleThemeMode}>
               <MdiIcon
                 path={
-                  mode === 'dark'
-                    ? mdiBrightness4.path
-                    : mdiBrightness5.path
+                  localMode === 'dark' ? ICON_VARIANT_THEME_DARK.path
+                    : localMode === 'light' ? ICON_VARIANT_THEME_LIGHT.path
+                      : ICON_VARIANT_THEME_SYSTEM.path
                 }
               />
             </MuiIconButton>

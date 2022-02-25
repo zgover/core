@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export function getMdiIconFromId<T extends IdParam>(iconId: T): IconResponse<T> 
     }
     return result as IconResponse<T>
   }
-  const icon = iconId && MdiIcons.get(iconId)
+  const icon = iconId ? MdiIcons.get(iconId) : undefined
   return handleIconNotFound(iconId, icon) as IconResponse<T>
 }
 export default getMdiIconFromId

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type AppUUN} from '@aglyn/core-data-framework'
+import type {AppUUN} from '@aglyn/core-data-framework'
 import {
   AglynAppContextComponent,
   ElementComponentsContextProvider,
@@ -23,10 +23,10 @@ import {
 } from '@aglyn/core-feature-renderer'
 import {consoleThemeDark, consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
 import {ConfirmationProviderComponent, LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
-import NoSsr from '@mui/material/NoSsr'
+import {NoSsr} from '@mui/material'
 import dynamic from 'next/dynamic'
 import {forwardRef, Fragment} from 'react'
-import {ComponentsDrawerContextProvider} from '../contexts/components-drawer-context.provider'
+import ComponentsDrawerContextProvider from '../contexts/components-drawer-context.provider'
 import BesignerDndContext from './besigner-dnd-context.component'
 import type {WorkspaceEditorComponentProps} from './workspace-editor.component'
 

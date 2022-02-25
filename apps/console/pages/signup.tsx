@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type {AuthCallbackResult, AuthResultError, AuthResultUser} from '@aglyn/shared-data-enums'
+import type {AuthCallbackResult, AuthResultError} from '@aglyn/shared-data-enums'
 import {
   FIELD_SCHEMA_EMAIL,
   FIELD_SCHEMA_FIRST_NAME,
@@ -28,12 +28,7 @@ import {AglynSvgIcon, AglynSvgLogo, AppLink, useLoading} from '@aglyn/shared-ui-
 import type {FormSchema} from '@aglyn/shared-ui-jsx-forms'
 import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {useContinueQueryDecoded} from '@aglyn/shared-util-next'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
+import {Button, Divider, Paper, Stack, Typography} from '@mui/material'
 import type {FormApi, SubmissionErrors} from 'final-form'
 import {
   browserLocalPersistence,
@@ -42,7 +37,6 @@ import {
   setPersistence,
   signInWithPopup,
 } from 'firebase/auth'
-import {useRouter} from 'next/router'
 import {useCallback, useState} from 'react'
 import AuthFormTemplateComponent from '../components/auth-form-template.component'
 import LayoutRequestAuthenticationComponent
@@ -69,18 +63,8 @@ const defaultValues = {
 }
 
 function Signup() {
-  const router = useRouter()
-  const [{href, hrefAs}] = useContinueQueryDecoded()
   const {queueLoading, loading} = useLoading()
-  const [user, setUser] = useState<AuthResultUser>(null)
   const [error, setError] = useState<AuthResultError>(null)
-
-  const handleRedirect = useCallback(async () => {
-    return await (href
-        ? router.push(href, hrefAs || '')
-        : router.push('/')
-    )
-  }, [href, hrefAs, router])
 
   const handleGoogleOAuthSignUp = useCallback((): AuthCallbackResult => {
     return signInWithPopup(firebaseAuth, googleOAuthProvider)
@@ -93,39 +77,35 @@ function Signup() {
     [],
   )
 
-  const handleSignUp = useCallback(
-    async (values?: any) => {
-      if (error) setError(null)
-      if (loading) return
-      const dequeueLoading = queueLoading()
+  const handleSignUp = useCallback(async (values?: any) => {
+    if (loading) return
+    if (error) setError(null)
+    const dequeueLoading = queueLoading()
 
-      await setPersistence(firebaseAuth, browserLocalPersistence)
-        .then(() => {
-          return values
-            ? handlePasswordSignUp(values.email, values.Passwd)
-            : handleGoogleOAuthSignUp()
-        })
-        .then((result) => {
-          setUser({...result, credential: GoogleAuthProvider.credentialFromResult(result)})
-          return handleRedirect()
-        })
-        .then(() => {
-          dequeueLoading()
-        })
-        .catch((error) => {
-          setError({...error, credential: GoogleAuthProvider.credentialFromError(error)})
-          dequeueLoading()
-        })
-    },
-    [error, loading, queueLoading, handlePasswordSignUp, handleGoogleOAuthSignUp, handleRedirect],
-  )
+    await setPersistence(firebaseAuth, browserLocalPersistence)
+      .then(() => {
+        return values
+          ? handlePasswordSignUp(
+            values[FIELD_SCHEMA_EMAIL.name],
+            values[FIELD_SCHEMA_PASSWORD.name],
+          )
+          : handleGoogleOAuthSignUp()
+      })
+      .catch((error) => {
+        setError({...error, credential: GoogleAuthProvider.credentialFromError(error)})
+      })
+      .finally(() => {
+        dequeueLoading()
+      })
+  }, [error, loading, queueLoading, handlePasswordSignUp, handleGoogleOAuthSignUp])
 
-  const handleFormSubmit = useCallback(
-    async (values, formApi: FormApi, onError: (errors?: SubmissionErrors) => void) => {
-      await handleSignUp(values)
-    },
-    [handleSignUp],
-  )
+  const handleFormSubmit = useCallback(async (
+    values,
+    formApi: FormApi,
+    onError: (errors?: SubmissionErrors) => void,
+  ) => {
+    await handleSignUp(values)
+  }, [handleSignUp])
 
   const handleGoogleButtonClick = useCallback(async () => {
     await handleSignUp()
@@ -184,32 +164,31 @@ function Signup() {
             clearOnUnmount
           />
 
-          <Divider flexItem sx={{my: 1}}>
-            {'Or'}
+          <Divider flexItem variant="middle" sx={{my: 1}}>
+            {'Or sign up with'}
           </Divider>
 
-          <Stack direction="column" justifyContent="center" alignItems="stretch" spacing={1}>
-            <Button startIcon={<MdiIcon path={mdiGoogle.path} />} onClick={handleGoogleButtonClick}>
-              {'Sign up with Google'}
+          <Stack
+            direction="column"
+            justifyContent="center"
+            alignItems="stretch"
+            spacing={1}
+          >
+            <Button
+              variant="outlined"
+              startIcon={<MdiIcon path={mdiGoogle.path} />}
+              onClick={handleGoogleButtonClick}
+            >
+              {'Google'}
             </Button>
           </Stack>
-
-          <br />
-          <br />
-          {`Loading: ${loading}`}
-          <br />
-          <br />
-          {`Error: ${JSON.stringify(error, null, 2)}`}
-          <br />
-          <br />
-          {`User: ${JSON.stringify(user, null, 2)}`}
-          <br />
-          <br />
         </Paper>
 
         <Typography component="div" variant="body2">
           {'Already have an account? '}
-          <AppLink href="/signin">Sign in</AppLink>
+          <AppLink href="/signin">
+            {'Sign in'}
+          </AppLink>
         </Typography>
       </Stack>
     </>

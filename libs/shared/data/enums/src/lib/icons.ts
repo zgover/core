@@ -16,14 +16,19 @@
  */
 
 import {
+  mdiAccountSettings,
   mdiArrowExpandHorizontal,
   mdiArrowTopLeft,
   mdiBookVariant,
   mdiBookVariantMultiple,
+  mdiBrightness1,
+  mdiBrightness3,
+  mdiBrightness5,
   mdiCellphone,
   mdiCodeArray,
   mdiCodeBracesBox,
   mdiCodeString,
+  mdiCog,
   mdiContentDuplicate,
   mdiCubeOutline,
   mdiDeleteOutline,
@@ -40,6 +45,7 @@ import {
   mdiOpenInNew,
   mdiPencil,
   mdiTablet,
+  mdiTune,
   mdiVariable,
 } from '@aglyn/shared-ui-mdi-jsx'
 
@@ -65,8 +71,15 @@ export const ICON_VARIANT_MODIFY_EDIT = mdiPencil
 export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
 export const ICON_VARIANT_SELECT_PARENT = mdiArrowTopLeft
 // User
-export const ICON_VARIANT_LOGIN = mdiLoginVariant
-export const ICON_VARIANT_LOGOUT = mdiLogoutVariant
+export const ICON_VARIANT_SIGN_IN = mdiLoginVariant
+export const ICON_VARIANT_SIGN_OUT = mdiLogoutVariant
+export const ICON_VARIANT_APP_SETTINGS = mdiCog
+export const ICON_VARIANT_APP_PREFERENCES = mdiTune
+export const ICON_VARIANT_USER_SETTINGS = mdiAccountSettings
+// Theme mode
+export const ICON_VARIANT_THEME_DARK = mdiBrightness3
+export const ICON_VARIANT_THEME_LIGHT = mdiBrightness1
+export const ICON_VARIANT_THEME_SYSTEM = mdiBrightness5
 // Devices
 export const ICON_VARIANT_MOBILE = mdiCellphone
 export const ICON_VARIANT_TABLET = mdiTablet

@@ -45,15 +45,8 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
   }, [authLoading, queueLoading])
 
   useEffect(() => {
-    console.log('loc', location)
-    console.log('base64', continueRoute)
     if (!user && !authLoading) {
-      const dequeueLoading = queueLoading()
-      router
-        .push(`/signin?continue=${continueRoute}`)
-        .finally(() => {
-          dequeueLoading && dequeueLoading()
-        })
+      router.push(`/signin?continue=${continueRoute}`)
     }
   }, [user, authLoading, continueRoute, queueLoading, router])
 

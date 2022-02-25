@@ -157,18 +157,21 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
     )
 
     const renderItemContent = useCallback(
-      (item: AglynComponentElementTemplate) => (
+      ({icon, ...item}: AglynComponentElementTemplate) => (
         <CardIconListItem
           item={item}
           label={item.label}
           onActionClick={handleItemClick}
           preview={
             <>
-              <ItemIcon
-                color="primary"
-                {...item.icon}
-                path={item.icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
-              />
+              {!icon?.path && icon ? icon : (
+                <ItemIcon
+                  color="primary"
+                  {...icon}
+                  path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
+                />
+              )}
+
             </>
           }
         />

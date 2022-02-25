@@ -17,6 +17,7 @@
 
 
 export type ContinueRouteData = {
-  href?: string,
-  hrefAs?: string,
+  href: string,
+  pathname?: string,
+  asPath?: string,
 }

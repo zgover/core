@@ -17,12 +17,12 @@
 
 import {alpha, generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 import {_isFnT} from '@aglyn/shared-util-guards'
-import Stack, {type StackProps as MuiStackProps} from '@mui/material/Stack'
+import {Stack, type StackProps as MuiStackProps} from '@mui/material'
 import clsx from 'clsx'
 import {type ChangeEvent, forwardRef, useCallback, useRef} from 'react'
-import {useAglynBesignerPanelValue} from '../hooks/use-aglyn-besigner-panel-value'
-import {ViewportCanvasComponent} from './viewport-canvas.component'
-import {ViewportZoomControlsComponent} from './viewport-zoom-controls.component'
+import useAglynBesignerPanelValue from '../hooks/use-aglyn-besigner-panel-value'
+import ViewportCanvasComponent from './viewport-canvas.component'
+import ViewportZoomControlsComponent from './viewport-zoom-controls.component'
 
 
 const classKeys = generateComponentClassKeys('AglynViewport', [

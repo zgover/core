@@ -16,9 +16,12 @@
  */
 
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {
   Box,
   type BoxProps as MuiBoxProps,
+  ListItemIcon,
+  ListItemText,
   Menu as MuiMenu,
   MenuItem as MuiMenuItem,
   type MenuItemProps as MuiMenuItemProps,
@@ -44,7 +47,7 @@ const defaultState = {
   mouseY: null,
 }
 
-export type MenuItemProps = AppLinkProps & MuiMenuItemProps
+export type MenuItemProps = AppLinkProps & MuiMenuItemProps & {icon?: MdiIconProps}
 
 /* eslint-disable-next-line */
 export interface MenuProps extends MuiBoxProps {
@@ -121,7 +124,7 @@ export const Menu = forwardRef<any, MenuProps>(
           onClose={handleClose}
           {...MenuProps}
         >
-          {items.map(({onClick, ...item}, key) => (
+          {items.map(({onClick, icon, children, ...item}, key) => (
             <MuiMenuItem
               key={item.id ?? item.key ?? key}
               component={AppLink}
@@ -130,7 +133,18 @@ export const Menu = forwardRef<any, MenuProps>(
                 onClick && onClick(e)
               }}
               {...item}
-            />
+            >
+              {!icon?.path || !icon ? null : (
+                <ListItemIcon>
+                  {!icon.path ? icon : (
+                    <MdiIcon {...icon} />
+                  )}
+                </ListItemIcon>
+              )}
+              <ListItemText>
+                {children}
+              </ListItemText>
+            </MuiMenuItem>
           ))}
         </MuiMenu>
       </Box>

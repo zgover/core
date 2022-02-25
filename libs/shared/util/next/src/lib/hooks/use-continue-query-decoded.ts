@@ -38,10 +38,8 @@ export function useContinueQueryDecoded(): [ContinueRouteData, OrUndef<string[] 
   const {continue: query} = router.query
 
   return useMemo(() => {
-    return [
-      decodeContinueQuery((_isArr(query) ? query[0] : query) || ''),
-      query,
-    ]
+    const href = (_isArr(query) ? query[0] : query) || ''
+    return [decodeContinueQuery(href), query]
   }, [query])
 }
 

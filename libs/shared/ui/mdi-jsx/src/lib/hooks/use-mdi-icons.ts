@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,16 @@
  * limitations under the License.
  */
 
-import {DEFAULT_ICON, getMdiAllIcons, type Icon, type IconId} from '@aglyn/shared-data-mdi'
+import {getMdiAllIcons, getMdiIconFromId, type Icon, type IconId} from '@aglyn/shared-data-mdi'
 import {useMemo} from 'react'
 
 
 export function useMdiIcons(iconId?: IconId[]): Icon[] {
   return useMemo(() => {
     const MdiIcons = getMdiAllIcons()
-    if (Array.isArray(iconId)) {
-      const icons = MdiIcons.filter(({id}) => iconId.indexOf(id) >= 0)
-      return iconId.map((id) => {
-        return icons.find((icon) => icon.id === id) || DEFAULT_ICON
-      })
-    }
-    return MdiIcons
+    return Array.isArray(iconId)
+      ? [...iconId].map(getMdiIconFromId)
+      : [...MdiIcons.values()]
   }, [iconId])
 }
 export default useMdiIcons
