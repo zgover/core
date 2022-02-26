@@ -1,19 +1,11 @@
-/**
- * @license
- * Copyright (c) 2021 Aglyn LLC
- *
- * Use of this source code is governed by an MIT-style license that can be
- * found in the root directory of this source tree.
- */
-
-import { ElementType, forwardRef, HTMLAttributes } from 'react'
+import {type ElementType, forwardRef, type HTMLAttributes} from 'react'
 
 
-export interface ${NAME}Props<C extends React.ElementType = any> extends HTMLAttributes<C> {
+export interface ${NAME}Props<C extends ElementType = any> extends HTMLAttributes<C> {
   component?: C
 }
 
-export const ${NAME} = forwardRef<any, ${NAME}Props>(
+export const ${NAME}Component = forwardRef<any, ${NAME}Props>(
   function RefRenderFn(props, ref) {
     const { 
       children,
@@ -29,7 +21,7 @@ export const ${NAME} = forwardRef<any, ${NAME}Props>(
   }
 )
 
-${NAME}.displayName = '${NAME}'
+${NAME}.displayName = '${NAME}Component'
 ${NAME}.defaultProps = {
   component: 'div',
 }
