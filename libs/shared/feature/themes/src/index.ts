@@ -25,10 +25,8 @@ export * from './lib/constants'
 export * from './lib/besigner-theme'
 export * from './lib/console-theme'
 
-export * from './lib/hocs/with-emotion-styles-cache-client'
-export * from './lib/hocs/with-theme'
-
-export * from './lib/hooks/use-handle-theme-modes'
+export * from './lib/hocs/create-with-emotion-client-cache'
+export * from './lib/hocs/create-with-theme-provider'
 
 export * from './lib/util/create-responsive-theme'
 export * from './lib/util/generate-component-class-keys'

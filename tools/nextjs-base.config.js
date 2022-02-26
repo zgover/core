@@ -16,6 +16,7 @@
  */
 
 const nextComposePlugins = require('next-compose-plugins')
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const pkg = require('../package.json')
 const withNx = require('@nrwl/next/plugins/with-nx')
 const deepFillIn = require('mout/object/deepFillIn')
@@ -85,13 +86,13 @@ const BRAND_HEADERS = [
  **/
 const AGLYN_CONFIG = {
   aglyn: {
-    analyzeBundle: process.env.NEXT_ANALYZE_BUNDLE === 'true',
+    analyzeBundle: process.env.NEXT_ANALYZE_BUNDLE === 'true' && !IS_PRODUCTION,
     analyzerOptions: {},
   },
   // Next.js provides gzip compression to compress rendered content and static
   // files. In general, you will want to enable compression on a HTTP proxy like
   // nginx, to offload load from the Node.js process.
-  compress: true,
+  compress: IS_PRODUCTION,
   // Opt-in to using the Next.js compiler for minification. This is 7x faster
   // than Terser.
   crossOrigin: 'anonymous',
@@ -116,7 +117,7 @@ const AGLYN_CONFIG = {
   experimental: {
     // ssr and displayName are configured by default
     styledComponents: false,
-    optimizeImages: true,
+    optimizeImages: IS_PRODUCTION,
     // optimizeCss: true,
     // Next.js can automatically create a standalone folder which copies only
     // the necessary files for a production deployment including select files in
@@ -146,7 +147,8 @@ const AGLYN_CONFIG = {
   },
   httpAgentOptions: {keepAlive: true},
   images: {
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // DEFAULT [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
+    deviceSizes: [600, 768, 900, 1080, 1200, 1536, 1920, 2560],
     disableStaticImages: false,
     domains: [
       'aglyn.com',
@@ -165,10 +167,11 @@ const AGLYN_CONFIG = {
       'hostname.aglyn.com',
       'www.aglyn.com',
     ],
+    // DEFAULT: [16, 32, 48, 64, 96, 128, 256, 384]
+    imageSizes: [24, 40, 64, 96, 144, 256, 390, 512],
     formats: ['image/avif', 'image/webp'],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     loader: 'default',
-    minimumCacheTTL: 60,
+    minimumCacheTTL: (60 * 60) * 24, // 24hrs = 86400sec
     path: '/_next/image',
   },
   nx: {
@@ -176,11 +179,16 @@ const AGLYN_CONFIG = {
     // See: https://github.com/gregberge/svgr
     svgr: true,
   },
-  onDemandEntries: {maxInactiveAge: 15000, pagesBufferLength: 2},
-  optimizeFonts: true,
-  outputFileTracing: true,
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 1000 * 30,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
+  optimizeFonts: IS_PRODUCTION,
+  // outputFileTracing: true,
   productionBrowserSourceMaps: false,
-  poweredByHeader: true,
+  poweredByHeader: !IS_PRODUCTION,
   // Available on both server and client
   publicRuntimeConfig: {
     staticFolder: '/_static',
@@ -188,15 +196,14 @@ const AGLYN_CONFIG = {
   reactStrictMode: !IS_PRODUCTION,
   // Available on server only
   serverRuntimeConfig: {},
-  staticPageGenerationTimeout: 30,
-  swcMinify: true,
+  staticPageGenerationTimeout: 15,
+  swcMinify: IS_PRODUCTION,
   trailingSlash: false,
   typescript: {
     // Motivated by https://github.com/zeit/next.js/issues/7687
     // ignoreDevErrors: IS_PRODUCTION,
     ignoreBuildErrors: IS_PRODUCTION,
   },
-  webpack5: true,
   // Disable production source maps
   webpack: (config, options) => {
     const {webpack, buildId} = options
@@ -250,11 +257,10 @@ function withAglyn(nextConfig = {}) {
         ]
       },
 
-      webpack: (config, options, ...args) => {
-        const aglynWebpackConfig = AGLYN_CONFIG.webpack(config, options, ...args)
+      webpack: (webpackConfig, options) => {
+        const config = AGLYN_CONFIG.webpack(webpackConfig, options)
 
         if (aglynConfig.analyzeBundle) {
-          const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
           const {
             serverFilename,
             clientFilename,
@@ -275,10 +281,10 @@ function withAglyn(nextConfig = {}) {
         }
 
         if (typeof merged.webpack === 'function') {
-          return merged.webpack(aglynWebpackConfig, options, ...args)
+          return merged.webpack(config, options)
         }
 
-        return aglynWebpackConfig
+        return config
       },
     }
   }

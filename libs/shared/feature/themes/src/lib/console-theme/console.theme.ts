@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type Theme} from '../../vendor/mui'
+import type {Theme} from '../../vendor/mui'
 import {createResponsiveTheme} from '../util/create-responsive-theme'
 import {consoleOptions, consoleOptionsDark} from './console.options'
 

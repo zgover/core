@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,20 @@
  * limitations under the License.
  */
 
-import type {Options} from '@emotion/cache'
-import createCache from '@emotion/cache'
-import type {EmotionCache} from '@emotion/react'
-import {CacheProvider} from '@emotion/react'
-import type {EmotionServer} from '@emotion/server/create-instance'
-import createInstance from '@emotion/server/create-instance'
+import createCache, {type Options as CreateEmotionCacheOptions} from '@emotion/cache'
+import {CacheProvider, type EmotionCache} from '@emotion/react'
+import createInstance, {type EmotionServer} from '@emotion/server/create-instance'
 
 
-export type {
-  EmotionCache,
-  EmotionServer,
-}
-export {CacheProvider}
+export {CacheProvider, CreateEmotionCacheOptions, EmotionCache, EmotionServer}
 
-export type CreateEmotionCacheOptions = Options
-
-export function createEmotionCache(options?: CreateEmotionCacheOptions) {
+export function createEmotionCache(options?: CreateEmotionCacheOptions): EmotionCache {
   return createCache({
     key: 'css',
     ...options,
-  }) as unknown as EmotionCache
+  })
 }
 
-export function createEmotionServer(...args: Parameters<typeof createInstance>) {
-  return createInstance(...args)
+export function createEmotionServer(cache: EmotionCache): EmotionServer {
+  return createInstance(cache)
 }

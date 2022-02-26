@@ -24,7 +24,7 @@ import {
   ICON_VARIANT_USER_SETTINGS,
 } from '@aglyn/shared-data-enums'
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
-import {useThemeModeContext} from '@aglyn/shared-feature-themes'
+import {useThemeMode} from '@aglyn/shared-feature-themes'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
 import {useAuthState} from 'react-firebase-hooks/auth'
@@ -45,7 +45,7 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
     ...rest
   } = props
   const [user] = useAuthState(firebaseAuth)
-  const [themeMode, localMode, toggleThemeMode] = useThemeModeContext()
+  const [themeMode, toggleThemeMode] = useThemeMode()
 
   return (
     <LayoutMainComponent
@@ -63,14 +63,14 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
               // component: 'button',
               children: 'Theme mode',
               icon: {
-                path: localMode === 'dark' ? ICON_VARIANT_THEME_DARK.path
-                  : localMode === 'light' ? ICON_VARIANT_THEME_LIGHT.path
+                path: themeMode === 'dark' ? ICON_VARIANT_THEME_DARK.path
+                  : themeMode === 'light' ? ICON_VARIANT_THEME_LIGHT.path
                     : ICON_VARIANT_THEME_SYSTEM.path,
               },
               title: (
-                localMode === 'light' ? 'Switch to dark mode'
-                  : localMode === 'dark' ? 'Switch to system theme'
-                    : 'Switch to light mode'
+                themeMode === 'light' ? 'Light theme'
+                  : themeMode === 'dark' ? 'Dark theme'
+                    : 'Default theme'
               ),
               'aria-label': 'switch theme mode',
 

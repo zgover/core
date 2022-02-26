@@ -20,8 +20,15 @@ import type {WithNxOptions} from '@nrwl/next/plugins/with-nx'
 
 export interface WithAglynOptions extends WithNxOptions {
   aglyn?: {
-    // Build webpack with webpack-bundle-analyzer plugin
-    analyzeBundle?: true,
+    /**
+     * Enable the Webpack Bundle Analyzer plugin for the webpack config. You may
+     * also enable this by using an ENV variable NEXT_ANALYZE_BUNDLE="true"
+     */
+    analyzeBundle?: boolean,
+    /**
+     * When {@link analyzeBundle} is equal to true, these options will be passed
+     * to the constructor during `new BundleAnalyzerPlugin()`
+     */
     analyzerOptions?: {
       analyzerMode?: 'json' | 'static' | 'server'
       serverFilename?: string
@@ -36,6 +43,13 @@ export interface WithAglynOptions extends WithNxOptions {
     }
   },
   publicRuntimeConfig?: WithNxOptions['publicRuntimeConfig'] & {
+    /**
+     * The absolute path to the root directory of location where static files
+     * within the runtime environment can be accessed
+     * @example -
+     * Source location (actual): `APP_ROOT_DIR/public/_static/`
+     * Runtime location (value): `'/_static'`
+     */
     staticFolder?: string
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
  */
 
 /**
- * Is literal type null... null is actually 'object' type literal
- *
- * @export
- * @param {*} val
- * @returns {val is null}
+ * Check if a value is of primitive `null` literal type. The `typeof value`
+ * value on a `null` literal will equal a string equal to `'object'`.
+ * @example
+ * // Shortcuts the following equality checks
+ * value === null && typeof value === 'object'
  */
-export function _isNull(val: unknown): val is null {
-  return typeof val === 'object' && val === null
+export function _isNull(value: unknown): value is null {
+  return value === null && typeof value === 'object'
 }
+export default _isNull

@@ -20,7 +20,7 @@ import {
   ICON_VARIANT_THEME_LIGHT,
   ICON_VARIANT_THEME_SYSTEM,
 } from '@aglyn/shared-data-enums'
-import {styled, useThemeModeContext} from '@aglyn/shared-feature-themes'
+import {styled, useThemeMode} from '@aglyn/shared-feature-themes'
 import {AglynSvgIcon, BesignerSvgLogo} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import AppBar, {type AppBarProps} from '@mui/material/AppBar'
@@ -44,7 +44,7 @@ export interface AppBarPrimaryComponentProps extends Partial<AppBarProps> {}
 export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
-    const [themeMode, localMode, toggleThemeMode] = useThemeModeContext()
+    const [themeMode, toggleThemeMode] = useThemeMode()
 
     return (
       <AppBarPrimary
@@ -74,16 +74,16 @@ export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProp
           <MuiTooltip
             aria-label="switch theme mode"
             title={
-              localMode === 'dark' ? 'Switch to light mode'
-                : localMode === 'light' ? 'Switch to dark mode'
-                  : 'Switch to system them preference'
+              themeMode === 'light' ? 'Light theme'
+                : themeMode === 'dark' ? 'Dark theme'
+                  : 'Default theme'
             }
           >
             <MuiIconButton onClick={toggleThemeMode}>
               <MdiIcon
                 path={
-                  localMode === 'dark' ? ICON_VARIANT_THEME_DARK.path
-                    : localMode === 'light' ? ICON_VARIANT_THEME_LIGHT.path
+                  themeMode === 'dark' ? ICON_VARIANT_THEME_DARK.path
+                    : themeMode === 'light' ? ICON_VARIANT_THEME_LIGHT.path
                       : ICON_VARIANT_THEME_SYSTEM.path
                 }
               />

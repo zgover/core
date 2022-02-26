@@ -333,15 +333,15 @@ export type WithPageMetaProps<P> = P & Record<WithN, AggregatedPageMeta>
 export type WithPageMetaComponent<P> = ComponentType<WithPageMetaProps<P>>
 
 export function withAggregatedPageMeta<P>(
-  Component: ComponentType<P & {aggregatedPageMeta?: AggregatedPageMeta}>,
+  WrappedComponent: ComponentType<P & {aggregatedPageMeta?: AggregatedPageMeta}>,
 ) {
-  const displayName = `WithAggregatedPageMeta(${getDisplayName(Component)})`
+  const displayName = getDisplayName(WrappedComponent)
   const WithAggregatedPageMeta = forwardRef<any, Omit<P, 'aggregatedPageMeta'>>(
     function RefRenderFn(props, ref) {
       const router = useRouter()
       const aggregatedPageMeta = getAggregatedPageMeta(router)
       return (
-        <Component
+        <WrappedComponent
           ref={ref}
           aggregatedPageMeta={aggregatedPageMeta}
           {...props as P}
@@ -349,6 +349,6 @@ export function withAggregatedPageMeta<P>(
       )
     },
   )
-  WithAggregatedPageMeta.displayName = displayName
+  WithAggregatedPageMeta.displayName = `WithAggregatedPageMeta(${displayName})`
   return WithAggregatedPageMeta
 }

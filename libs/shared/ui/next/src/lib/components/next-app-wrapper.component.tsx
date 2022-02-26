@@ -17,7 +17,11 @@
 
 import {HAS_DOCUMENT, IS_PRODUCTION} from '@aglyn/shared-data-enums'
 import type {JSXElementType} from '@aglyn/shared-data-types'
-import {consoleThemeDark, consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
+import {
+  consoleThemeDark,
+  consoleThemeLight,
+  createWithThemeProvider,
+} from '@aglyn/shared-feature-themes'
 import {
   makeLinkElements,
   type MakeLinkElementsConfig,
@@ -79,7 +83,7 @@ NextAppWrapperComponentRaw.defaultProps = {
   mainWrapper: Fragment,
 }
 
-export const NextAppWrapperComponent = withTheme({
+export const NextAppWrapperComponent = createWithThemeProvider({
   theme: [consoleThemeLight, consoleThemeDark],
 })(NextAppWrapperComponentRaw)
 export default NextAppWrapperComponent
