@@ -15,31 +15,31 @@
  * limitations under the License.
  */
 
-import {
-  type CanvasAddElementPayload,
-  type CanvasDeleteElementPayload,
-  type CanvasDuplicateElementPayload,
-  type CanvasGetApiEventsPayload,
-  type CanvasGetElementsDenormalizedPayload,
-  type CanvasGetElementsNormalizedPayload,
-  type CanvasMoveElementPayload,
-  type CanvasRedoPayload,
-  type CanvasSetElementPayload,
-  type CanvasSetElementsPayload,
-  type CanvasUndoPayload,
-  type CanvasUpdateElementPayload,
+import type {
+  CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
+  CanvasGetApiEventsPayload,
+  CanvasGetElementsDenormalizedPayload,
+  CanvasGetElementsNormalizedPayload,
+  CanvasMoveElementPayload,
+  CanvasRedoPayload,
+  CanvasSetElementPayload,
+  CanvasSetElementsPayload,
+  CanvasUndoPayload,
+  CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from './aglyn-app.types'
-import {type ContextDomain, type ContextEvent, type ContextStore} from './aglyn-contexts.types'
-import {
-  type AglynElementNormalized,
-  type AglynElementsById,
-  type AglynElementsList,
+import type {IAglynAppController} from './aglyn-app.types'
+import type {ContextDomain, ContextEvent, ContextStore} from './aglyn-contexts.types'
+import type {
+   AglynElementNormalized,
+   AglynElementsById,
+   AglynElementsList,
 } from './aglyn-elements.types'
-import {
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type IAglynModuleModel,
+import type {
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  IAglynModuleModel,
 } from './aglyn-module.types'
 
 

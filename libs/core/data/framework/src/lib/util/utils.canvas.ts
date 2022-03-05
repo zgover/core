@@ -91,7 +91,7 @@ export const handleCanvasUpdateElement = (
   payload: CanvasUpdateElementPayload,
 ) => {
 
-  const {element: {props, ...element}} = payload
+  const {element} = payload
   return {
     ...state,
     [element.$id]: {

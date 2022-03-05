@@ -18,36 +18,36 @@
 import {createApi} from 'effector'
 import {persist} from 'effector-storage/local'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
-import {
-  type CanvasAddElementPayload,
-  type CanvasDeleteElementPayload,
-  type CanvasDuplicateElementPayload,
-  type CanvasGetApiEventsPayload,
-  type CanvasGetElementsDenormalizedPayload,
-  type CanvasGetElementsNormalizedPayload,
-  type CanvasGetStorePayload,
-  type CanvasMoveElementPayload,
-  type CanvasRedoPayload,
-  type CanvasSetElementPayload,
-  type CanvasSetElementsPayload,
-  type CanvasUndoPayload,
-  type CanvasUpdateElementPayload,
+import type {
+  CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
+  CanvasGetApiEventsPayload,
+  CanvasGetElementsDenormalizedPayload,
+  CanvasGetElementsNormalizedPayload,
+  CanvasGetStorePayload,
+  CanvasMoveElementPayload,
+  CanvasRedoPayload,
+  CanvasSetElementPayload,
+  CanvasSetElementsPayload,
+  CanvasUndoPayload,
+  CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type IAglynAppController} from '../types/aglyn-app.types'
-import {
-  type AglynCanvasControllerOptions,
-  type ElementsDataStore,
-  type ElementsDataStoreApi,
-  type IAglynCanvasController,
+import type {IAglynAppController} from '../types/aglyn-app.types'
+import type {
+  AglynCanvasControllerOptions,
+  ElementsDataStore,
+  ElementsDataStoreApi,
+  IAglynCanvasController,
 } from '../types/aglyn-canvas.types'
-import {type ContextDomain, type ContextStore} from '../types/aglyn-contexts.types'
-import {
-  type AglynElementNormalized,
-  type AglynElementsById,
-  type AglynElementsList,
+import type {ContextDomain, ContextStore} from '../types/aglyn-contexts.types'
+import type {
+  AglynElementNormalized,
+  AglynElementsById,
+  AglynElementsList,
 } from '../types/aglyn-elements.types'
-import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
+import type {AglynModuleEffectListener} from '../types/aglyn-module.types'
 import {denormalizeComponentElementData} from '../util/denormalize-component-element-data'
 import {handleRedoEvent} from '../util/handle-state-modification-history-redo'
 import {handleUndoEvent} from '../util/handle-state-modification-history-undo'

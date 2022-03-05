@@ -75,11 +75,10 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
           ],
         },
         {
-          title: 'User menu',
-          sx: {p: 0},
+          title: 'Manage account',
+          sx: {p: 0.5},
           edge: 'end',
           avatar: {
-            title: user?.displayName || 'No name',
             src: gravatarUrlFromEmail(user?.email),
           },
           items: [
