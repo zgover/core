@@ -20,7 +20,7 @@ import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {BackgroundImageComponent, type BackgroundImageComponentProps} from '@aglyn/shared-ui-jsx'
 import {useContinueQueryDecoded} from '@aglyn/shared-util-next'
 import {useRouter} from 'next/router'
-import {useEffect, useState} from 'react'
+import {useEffect} from 'react'
 import {useAuthState} from 'react-firebase-hooks/auth'
 
 
@@ -40,33 +40,16 @@ function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps)
   const router = useRouter()
   const [user, userAuthLoading] = useAuthState(firebaseAuth)
   const [, pushContinue] = useContinueQueryDecoded()
-  const [redirecting, setRedirecting] = useState(false)
 
   useEffect(() => {
-    if (!user || userAuthLoading || redirecting) return void 0
+    if (!user || userAuthLoading) return void 0
 
-    if (!requireEmailVerification || user.emailVerified) {
-      return void pushContinueOrHome()
+    if (requireEmailVerification && !user.emailVerified) {
+      return void router.push('/validate-email')
     }
 
-    return void 0
-
-    async function pushContinueOrHome() {
-      setRedirecting(true)
-      await pushContinue('/')
-        .then((success) => {
-          if (!success) {
-            console.warn('Redirecting following user identity confirmed')
-          }
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-        .finally(() => {
-          setRedirecting(false)
-        })
-    }
-  }, [user, userAuthLoading, redirecting, pushContinue, requireEmailVerification])
+    return void pushContinue('/')
+  }, [user, userAuthLoading, pushContinue, requireEmailVerification, router])
 
   return (
     <BackgroundImageComponent

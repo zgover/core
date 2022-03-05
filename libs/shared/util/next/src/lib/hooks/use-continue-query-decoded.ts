@@ -39,8 +39,8 @@ export function useContinueQueryDecoded(): UseContinueQueryDecodedResponse {
   const {continue: query} = router.query
 
   const continueRouteData = useMemo(() => {
-    const continueQuery = _isArr(query) ? query[0] : query
-    return useContinueQueryDecoded.decodeContinueQuery(continueQuery || '')
+    const continueQuery = (_isArr(query) ? query[0] : query) || ''
+    return useContinueQueryDecoded.decodeContinueQuery(continueQuery)
   }, [query])
 
   const pushContinue = useCallback((
@@ -59,7 +59,7 @@ export function useContinueQueryDecoded(): UseContinueQueryDecodedResponse {
 }
 
 useContinueQueryDecoded.decodeContinueQuery = (query: string): ContinueRouteData => {
-  return JSON.parse(base64Decode(query))
+  return JSON.parse(base64Decode(query || '') || '{}')
 }
 
 export default useContinueQueryDecoded

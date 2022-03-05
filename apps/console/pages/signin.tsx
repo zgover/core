@@ -32,6 +32,7 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import {useCallback, useState} from 'react'
+import AuthErrorAlertComponent from '../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../components/auth-form-template.component'
 import LayoutUnauthenticatedComponent from '../layouts/layout-unauthenticated.component'
 
@@ -106,13 +107,7 @@ function SignIn() {
     >
       <Paper
         variant="outlined"
-        sx={{
-          // w: 440,
-          p: 2,
-          // maxWidth: 1,
-          // zIndex: '',
-        }}
-        // zIndex={5}
+        sx={{p: 2}}
       >
         <Stack
           direction="column"
@@ -158,6 +153,10 @@ function SignIn() {
           initialValues={defaultValues}
           subscription={{values: true}}
           clearOnUnmount
+        />
+        <AuthErrorAlertComponent
+          error={error as any}
+          sx={{mt: 2, mb: 1}}
         />
 
         <Divider

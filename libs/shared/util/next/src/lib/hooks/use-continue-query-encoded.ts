@@ -26,12 +26,11 @@ export function useContinueQueryEncoded() {
 
   return useMemo(() => {
     const href = typeof location !== 'undefined'
-        ? location?.href
+        ? location.href
         : router.pathname,
-      pathname = router.pathname,
       asPath = router.asPath
 
-    return useContinueQueryEncoded.encodeContinueQuery({href})
+    return useContinueQueryEncoded.encodeContinueQuery({href, asPath})
   }, [router])
 }
 
