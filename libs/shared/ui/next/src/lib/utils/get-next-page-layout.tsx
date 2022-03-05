@@ -60,9 +60,9 @@ export function getNextPageLayout<Props, InitialProps>(
     const ComponentLayout = Component.layoutComponent
     const layoutProps = objectDeepMerge(
       {},
-      ComponentLayout.layoutProps || {},
-      Component.layoutProps || {},
-      mergedLayoutProps || {},
+      {...ComponentLayout.layoutProps},
+      {...Component.layoutProps},
+      {...mergedLayoutProps},
     )
 
     return (page, props) => {

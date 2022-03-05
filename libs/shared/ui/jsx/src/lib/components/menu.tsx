@@ -15,15 +15,18 @@
  * limitations under the License.
  */
 
+import {Conditional, OverrideableComponentProps} from '@aglyn/shared-data-types'
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {
   Box,
   type BoxProps as MuiBoxProps,
   Divider,
-  DividerProps,
+  type DividerProps,
   ListItemIcon,
   ListItemText,
+  ListSubheader as MuiListSubheader,
+  type ListSubheaderProps as MuiListSubheaderProps,
   Menu as MuiMenu,
   MenuItem as MuiMenuItem,
   type MenuItemProps as MuiMenuItemProps,
@@ -39,7 +42,6 @@ import {
   useCallback,
   useState,
 } from 'react'
-import AppLink, {type AppLinkProps} from './app-link'
 
 
 const ITEM_HEIGHT = 48
@@ -49,9 +51,15 @@ const defaultState = {
   mouseY: null,
 }
 
-type MenuItemText = AppLinkProps & MuiMenuItemProps & {icon?: MdiIconProps}
-type MenuItemDivider = DividerProps & {dividerOnly: true}
-export type MenuItemProps = | MenuItemText | MenuItemDivider
+type ItemTypes = 'item' | 'divider' | 'subheader' | undefined | never
+type ItemTypeProps = MuiMenuItemProps & {type?: 'item', icon?: MdiIconProps}
+type DividerTypeProps = DividerProps & {type: 'divider'}
+type SubheaderTypeProps = MuiListSubheaderProps & {type: 'subheader'}
+export type MenuItemProps<T extends ItemTypes = ItemTypes> =
+  OverrideableComponentProps &
+  Conditional<T, 'divider', DividerTypeProps,
+    Conditional<T, 'subheader', SubheaderTypeProps,
+      Conditional<T, 'item' | undefined | never, ItemTypeProps, ItemTypeProps>>>
 
 /* eslint-disable-next-line */
 export interface MenuProps extends MuiBoxProps {
@@ -60,6 +68,7 @@ export interface MenuProps extends MuiBoxProps {
   dense?: boolean
   MenuProps?: Partial<MuiMenuProps>
   children: ReactElement
+  horizontalOrigin?: MuiMenuProps['anchorOrigin']['horizontal']
 }
 
 export const Menu = forwardRef<any, MenuProps>(
@@ -72,6 +81,7 @@ export const Menu = forwardRef<any, MenuProps>(
       sx,
       dense,
       MenuProps,
+      horizontalOrigin,
       ...rest
     } = props
 
@@ -113,11 +123,11 @@ export const Menu = forwardRef<any, MenuProps>(
           }}
           anchorOrigin={context ? undefined : {
             vertical: 'bottom',
-            horizontal: 'right',
+            horizontal: horizontalOrigin || 'left',
           }}
           transformOrigin={context ? undefined : {
             vertical: 'top',
-            horizontal: 'right',
+            horizontal: horizontalOrigin || 'left',
           }}
           PaperProps={context ? undefined : {
             sx: {
@@ -130,42 +140,55 @@ export const Menu = forwardRef<any, MenuProps>(
           onClose={handleClose}
           {...MenuProps}
         >
-          {items.map(({onClick, icon, children, dividerOnly, ...item}: any, key) => {
-            if (dividerOnly) {
-              return (
-                <Divider
-                  key={item.id ?? item.key ?? key}
-                  onClick={onClick}
-                  {...item as any}
-                >
-                  {children}
-                </Divider>
-              )
-            }
+          {items.map(({onClick, icon, children, type, ...item}: any, key) => {
 
-            return (
-              <MuiMenuItem
-                key={item.id ?? item.key ?? key}
-                component={AppLink}
-                dense={dense}
-                onClick={(e) => {
-                  handleClose()
-                  onClick && onClick(e)
-                }}
-                {...item}
-              >
-                {!icon?.path || !icon ? null : (
-                  <ListItemIcon>
-                    {!icon?.path ? icon : (
-                      <MdiIcon fontSize="small" {...icon} />
+            switch (type) {
+              case 'subheader':
+                return (
+                  <MuiListSubheader
+                    key={item.id ?? item.key ?? key}
+                    onClick={onClick}
+                    {...item as any}
+                  >
+
+                    {children}
+                  </MuiListSubheader>
+                )
+              case 'divider':
+                return (
+                  <Divider
+                    key={item.id ?? item.key ?? key}
+                    onClick={onClick}
+                    {...item as any}
+                  >
+                    {children}
+                  </Divider>
+                )
+              case 'item':
+              default:
+                return (
+                  <MuiMenuItem
+                    key={item.id ?? item.key ?? key}
+                    dense={dense}
+                    onClick={(e) => {
+                      handleClose()
+                      onClick && onClick(e)
+                    }}
+                    {...item}
+                  >
+                    {!icon?.path || !icon ? null : (
+                      <ListItemIcon>
+                        {!icon?.path ? icon : (
+                          <MdiIcon fontSize="small" {...icon} />
+                        )}
+                      </ListItemIcon>
                     )}
-                  </ListItemIcon>
-                )}
-                <ListItemText>
-                  {children}
-                </ListItemText>
-              </MuiMenuItem>
-            )
+                    <ListItemText>
+                      {children}
+                    </ListItemText>
+                  </MuiMenuItem>
+                )
+            }
           })}
         </MuiMenu>
       </Box>

@@ -241,7 +241,11 @@ const PreviewControls = function PreviewControls() {
         transformOrigin={{horizontal: 'right', vertical: 'top'}}
         anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
       >
-        <MuiListSubheader sx={{lineHeight: theme => theme.typography.pxToRem(32)}}>Artboard preview mode</MuiListSubheader>
+        <MuiListSubheader
+          sx={{lineHeight: theme => theme.typography.pxToRem(32)}}
+        >
+          Artboard preview mode
+        </MuiListSubheader>
         {devicePreviewOptions.map((item) => (
           <MuiMenuItem
             key={item.value}

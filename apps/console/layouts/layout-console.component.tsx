@@ -25,6 +25,7 @@ import {
 } from '@aglyn/shared-data-enums'
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
 import {useThemeMode} from '@aglyn/shared-feature-themes'
+import {AppLink} from '@aglyn/shared-ui-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
 import {useAuthState} from 'react-firebase-hooks/auth'
@@ -46,6 +47,9 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
   } = props
   const [user] = useAuthState(firebaseAuth)
   const [, toggleThemeMode, themeSetting] = useThemeMode()
+  const friendlyThemeMode = themeSetting === 'light' || themeSetting === 'dark'
+    ? themeSetting
+    : 'device default'
 
   return (
     <LayoutMainComponent
@@ -55,28 +59,12 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
         ...quickActions || [],
         {
           icon: {path: ICON_VARIANT_APP_SETTINGS.path},
-          MenuProps: {dense: true},
+          MenuProps: {dense: true, horizontalOrigin: 'right'},
           // alt: '',
-          items: [
-            {
-              onClick: toggleThemeMode,
-              // component: 'button',
-              children: themeSetting === 'light' ? 'Light theme'
-                : themeSetting === 'dark' ? 'Dark theme'
-                  : 'Default theme',
-              icon: {
-                path: themeSetting === 'dark' ? ICON_VARIANT_THEME_DARK.path
-                  : themeSetting === 'light' ? ICON_VARIANT_THEME_LIGHT.path
-                    : ICON_VARIANT_THEME_SYSTEM.path,
-              },
-              'aria-label': 'switch theme mode',
-
-            },
-          ],
         },
         {
           title: 'Manage account',
-          MenuProps: {dense: true},
+          MenuProps: {dense: true, horizontalOrigin: 'right'},
           sx: {p: 0.5},
           edge: 'end',
           avatar: {
@@ -84,19 +72,38 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
           },
           items: [
             {
+              onClick: toggleThemeMode,
+              // component: 'button',
+              children: `Theme mode: ${friendlyThemeMode}`,
+              icon: {
+                path: themeSetting === 'dark' ? ICON_VARIANT_THEME_DARK.path
+                  : themeSetting === 'light' ? ICON_VARIANT_THEME_LIGHT.path
+                    : ICON_VARIANT_THEME_SYSTEM.path,
+              },
+              'aria-label': 'switch theme mode',
+            },
+            {
               children: 'Settings',
+              component: AppLink,
               href: '/account/settings',
               icon: {path: ICON_VARIANT_USER_SETTINGS.path},
             },
             {
-              dividerOnly: true,
+              type: 'divider',
             },
             {
               children: 'Sign out',
+              component: AppLink,
               href: '/signout',
               icon: {path: ICON_VARIANT_SIGN_OUT.path},
             },
           ],
+        },
+      ]}
+      centerNavigationItems={[
+        ...quickActions || [],
+        {
+          children: 'Home',
         },
       ]}
       {...rest}

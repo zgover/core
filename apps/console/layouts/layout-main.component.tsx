@@ -28,10 +28,11 @@ import {
   type MenuProps,
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {_isArr} from '@aglyn/shared-util-guards'
+import {_isArr, _isArrEmpty} from '@aglyn/shared-util-guards'
 import {
   AppBar,
   Avatar,
+  Button,
   IconButton,
   type IconButtonProps,
   Stack,
@@ -58,26 +59,18 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
     ...rest
   } = item
   const itemKey = key || id || i
-  const inner = (
-    <>
-      {!avatar
-        ? !icon?.path ? icon : (<MdiIcon {...icon} />)
-        : (<Avatar {...avatar} sx={{bgcolor: 'grey.500'}} />)
-      }
-      {children}
-    </>
-  )
   const rendered = type === 'text' ? (
-    <AppLink
+    <Button
       key={key}
       id={id}
-      componentVariant="button"
       color="inherit"
       sx={mergeSxProps({p: avatar ? 0.5 : undefined}, sx)}
+      startIcon={!icon?.path ? icon : (<MdiIcon {...icon} />)}
+      {...(!rest.href ? {} : {component: AppLink, componentVariant: 'button'})}
       {...rest}
     >
-      {inner}
-    </AppLink>
+      {children}
+    </Button>
   ) : (
     <IconButton
       key={itemKey}
@@ -85,11 +78,15 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
       sx={sx}
       {...rest}
     >
-      {inner}
+      {!avatar
+        ? !icon?.path ? icon : (<MdiIcon {...icon} />)
+        : (<Avatar {...avatar} sx={{bgcolor: 'grey.500'}} />)
+      }
+      {children}
     </IconButton>
   )
 
-  return _isArr(items) ? (
+  return !_isArrEmpty(items) ? (
     <Menu
       key={itemKey}
       items={items}
@@ -119,7 +116,7 @@ export interface QuickActionsMenuItem extends IconButtonProps {
   MenuProps?: Partial<MenuProps>
 }
 
-export interface CenterNavMenuItem extends AppLinkProps<'button'> {
+export interface CenterNavMenuItem extends Omit<AppLinkProps<'button'>, 'componentVariant'> {
   icon?: MdiIconProps
   avatar?: any
   dense?: boolean

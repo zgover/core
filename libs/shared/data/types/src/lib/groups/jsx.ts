@@ -204,18 +204,15 @@ export type PropsWithInnerRef<P, T = any> = P & InnerRefProp<T>
 
 export type InferElementTypeProps<T> = T extends JSXElementType<infer P> ? P : never
 
-export type OverrideComponentProp<P = any> = {component?: JSXElementType<P>}
-
-export type OverrideComponentsProps<T extends OverrideComponentProp = any> =
+type OverrideComponentProp<P = any> = {component?: JSXElementType<P>}
+type OverrideComponentsProps<T extends OverrideComponentProp = any> =
   [T] extends [{component: infer P}]
     ? InferElementTypeProps<P>
     : never
-
-export type OverrideComponentPropPlusOverrideProps<T extends OverrideComponentProp = any> =
+type OverrideComponentPropPlusOverrideProps<T extends OverrideComponentProp = any> =
   [T] extends [{component: JSXElementType}]
     ? OverrideComponentsProps<T> & Pick<T, 'component'>
     : {component?: undefined}
-
 export type OverrideableComponentProps<P = any, T = OverrideComponentProp> = P &
   OverrideComponentPropPlusOverrideProps<T>
 

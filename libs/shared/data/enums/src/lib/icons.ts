@@ -21,9 +21,6 @@ import {
   mdiArrowTopLeft,
   mdiBookVariant,
   mdiBookVariantMultiple,
-  mdiBrightness1,
-  mdiBrightness3,
-  mdiBrightness5,
   mdiCellphone,
   mdiCodeArray,
   mdiCodeBracesBox,
@@ -46,8 +43,11 @@ import {
   mdiOpenInNew,
   mdiPencil,
   mdiTablet,
+  mdiThemeLightDark,
   mdiTune,
   mdiVariable,
+  mdiWeatherNight,
+  mdiWhiteBalanceSunny,
 } from '@aglyn/shared-ui-mdi-jsx'
 
 
@@ -78,9 +78,9 @@ export const ICON_VARIANT_APP_SETTINGS = mdiCog
 export const ICON_VARIANT_APP_PREFERENCES = mdiTune
 export const ICON_VARIANT_USER_SETTINGS = mdiAccountSettings
 // Theme mode
-export const ICON_VARIANT_THEME_DARK = mdiBrightness3
-export const ICON_VARIANT_THEME_LIGHT = mdiBrightness1
-export const ICON_VARIANT_THEME_SYSTEM = mdiBrightness5
+export const ICON_VARIANT_THEME_DARK = mdiWeatherNight
+export const ICON_VARIANT_THEME_LIGHT = mdiWhiteBalanceSunny
+export const ICON_VARIANT_THEME_SYSTEM = mdiThemeLightDark
 // Devices
 export const ICON_VARIANT_MOBILE = mdiCellphone
 export const ICON_VARIANT_TABLET = mdiTablet
