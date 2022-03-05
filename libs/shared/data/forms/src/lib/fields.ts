@@ -23,15 +23,11 @@ import {
   REGEX_NUMBER,
   REGEX_SPECIAL_CHARACTER,
 } from '@aglyn/shared-data-regex'
-import {
-  FieldComponentTypeFlag,
-  type FieldSchema,
-  FieldValidatorTypeFlag,
-} from '@aglyn/shared-ui-jsx-forms'
+import {FieldComponentType, type FieldSchema, FieldValidatorType} from '@aglyn/shared-ui-jsx-forms'
 
 
 export const FIELD_SCHEMA_EMAIL: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'email',
   label: 'Email',
   placeholder: 'Work email',
@@ -39,11 +35,11 @@ export const FIELD_SCHEMA_EMAIL: FieldSchema = {
   isRequired: true,
   validate: [
     {
-      type: FieldValidatorTypeFlag.REQUIRED,
+      type: FieldValidatorType.REQUIRED,
       message: 'Email address is required',
     },
     {
-      type: FieldValidatorTypeFlag.PATTERN,
+      type: FieldValidatorType.PATTERN,
       pattern: REGEX_EMAIL,
       message: 'Enter a valid email (name@domain.com)',
     },
@@ -51,43 +47,43 @@ export const FIELD_SCHEMA_EMAIL: FieldSchema = {
 }
 
 export const FIELD_SCHEMA_PASSWORD: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'Passwd',
   label: 'Password',
   type: 'password',
   isRequired: true,
   validate: [
     {
-      type: FieldValidatorTypeFlag.REQUIRED,
+      type: FieldValidatorType.REQUIRED,
       message: 'Password is required',
     },
     {
-      type: FieldValidatorTypeFlag.PATTERN,
+      type: FieldValidatorType.PATTERN,
       pattern: /^.{6,30}$/,
       message: 'Length must between 6–30 characters',
     },
     {
-      type: FieldValidatorTypeFlag.PATTERN,
+      type: FieldValidatorType.PATTERN,
       pattern: REGEX_LETTER_UPPER,
       message: 'Must contain at least 1 uppercase letter',
     },
     {
-      type: FieldValidatorTypeFlag.PATTERN,
+      type: FieldValidatorType.PATTERN,
       pattern: REGEX_LETTER_LOWER,
       message: 'Must contain at least 1 lowercase letter',
     },
     {
-      type: FieldValidatorTypeFlag.PATTERN,
+      type: FieldValidatorType.PATTERN,
       pattern: REGEX_NUMBER,
       message: 'Must contain at least 1 number',
     },
     {
-      type: FieldValidatorTypeFlag.PATTERN,
+      type: FieldValidatorType.PATTERN,
       pattern: REGEX_SPECIAL_CHARACTER,
       message: 'Must contain a special character [/!@$]',
     },
     {
-      type: FieldValidatorTypeFlag.PATTERN,
+      type: FieldValidatorType.PATTERN,
       pattern: REGEX_NO_SPACES,
       message: 'Password can not have spaces',
     },
@@ -95,14 +91,14 @@ export const FIELD_SCHEMA_PASSWORD: FieldSchema = {
 }
 
 export const FIELD_SCHEMA_PASSWORD_CONFIRM: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'ConfirmPasswd',
   label: 'Confirm',
   type: 'password',
   required: true,
   validate: [
     {
-      type: FieldValidatorTypeFlag.REQUIRED,
+      type: FieldValidatorType.REQUIRED,
       message: 'Confirm your password.',
     },
     (value, values) => {
@@ -112,7 +108,7 @@ export const FIELD_SCHEMA_PASSWORD_CONFIRM: FieldSchema = {
 }
 
 export const FIELD_SCHEMA_FIRST_NAME: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'firstName',
   label: 'First name',
   type: 'text',
@@ -122,9 +118,9 @@ export const FIELD_SCHEMA_FIRST_NAME: FieldSchema = {
   },
   isRequired: true,
   validate: [
-    {type: FieldValidatorTypeFlag.REQUIRED, message: 'Please enter a first name'},
+    {type: FieldValidatorType.REQUIRED, message: 'Please enter a first name'},
     {
-      type: FieldValidatorTypeFlag.MIN_LENGTH,
+      type: FieldValidatorType.MIN_LENGTH,
       threshold: 2,
       message: 'Please enter a longer first name',
     },
@@ -132,7 +128,7 @@ export const FIELD_SCHEMA_FIRST_NAME: FieldSchema = {
 }
 
 export const FIELD_SCHEMA_LAST_NAME: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'lastName',
   label: 'Last name',
   type: 'text',
@@ -142,9 +138,9 @@ export const FIELD_SCHEMA_LAST_NAME: FieldSchema = {
   },
   isRequired: true,
   validate: [
-    {type: FieldValidatorTypeFlag.REQUIRED, message: 'Provide your last name'},
+    {type: FieldValidatorType.REQUIRED, message: 'Provide your last name'},
     {
-      type: FieldValidatorTypeFlag.MIN_LENGTH,
+      type: FieldValidatorType.MIN_LENGTH,
       threshold: 1,
       message: 'Please enter a longer last name',
     },
@@ -152,28 +148,28 @@ export const FIELD_SCHEMA_LAST_NAME: FieldSchema = {
 }
 
 export const FIELD_SCHEMA_ORGANIZATION_NAME: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'organization',
   label: 'Organization name',
   type: 'text',
   isRequired: true,
   validate: [
     {
-      type: FieldValidatorTypeFlag.REQUIRED,
+      type: FieldValidatorType.REQUIRED,
       message: 'Provide your organization/company name',
     },
   ],
 }
 
 export const FIELD_SCHEMA_COMMENTS_SHORT: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'comments',
   label: 'Comments',
   type: 'text',
 }
 
 export const FIELD_SCHEMA_COMMENTS_LONG: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXTAREA,
+  component: FieldComponentType.TEXTAREA,
   name: 'comments',
   label: 'Comments',
   type: 'text',
@@ -181,14 +177,14 @@ export const FIELD_SCHEMA_COMMENTS_LONG: FieldSchema = {
 }
 
 export const FIELD_SCHEMA_DESCRIPTION_SHORT: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'description',
   label: 'Description',
   type: 'text',
 }
 
 export const FIELD_SCHEMA_DESCRIPTION_LONG: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXTAREA,
+  component: FieldComponentType.TEXTAREA,
   name: 'description',
   label: 'Description',
   type: 'text',
@@ -196,7 +192,7 @@ export const FIELD_SCHEMA_DESCRIPTION_LONG: FieldSchema = {
 }
 
 export const FIELD_SCHEMA_PHONE_NUMBER: FieldSchema = {
-  component: FieldComponentTypeFlag.TEXT_FIELD,
+  component: FieldComponentType.TEXT_FIELD,
   name: 'phoneNumber',
   label: 'Phone number',
   type: 'text',

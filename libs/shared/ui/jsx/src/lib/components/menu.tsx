@@ -136,7 +136,7 @@ export const Menu = forwardRef<any, MenuProps>(
             >
               {!icon?.path || !icon ? null : (
                 <ListItemIcon>
-                  {!icon.path ? icon : (
+                  {!icon?.path ? icon : (
                     <MdiIcon {...icon} />
                   )}
                 </ListItemIcon>

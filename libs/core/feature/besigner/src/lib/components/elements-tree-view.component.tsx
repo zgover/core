@@ -74,7 +74,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
         expandIcon={<MdiIcon path={mdiChevronRight.path} />}
         label={
           <Fragment>
-            {!icon.path && icon ? icon : (
+            {!icon?.path && icon ? icon : (
               <MdiIcon
                 color="quaternary"
                 {...icon}

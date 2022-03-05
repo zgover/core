@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export enum FieldComponentTypeFlag {
+export enum FieldComponentType {
   TEXT_FIELD = 'text-field',
   FIELD_ARRAY = 'field-array',
   CHECKBOX = 'checkbox',
@@ -38,7 +38,7 @@ export enum FieldComponentTypeFlag {
   SLIDER = 'slider',
 }
 
-export enum FieldValidatorTypeFlag {
+export enum FieldValidatorType {
   REQUIRED = 'required',
   MIN_LENGTH = 'min-length',
   MAX_LENGTH = 'max-length',
@@ -48,35 +48,4 @@ export enum FieldValidatorTypeFlag {
   MAX_NUMBER_VALUE = 'max-number-value',
   PATTERN = 'pattern',
   URL = 'url',
-}
-
-export enum FieldComponentType {
-  TEXT_FIELD = 0xeac7,
-  TEXTAREA = 0xeaca,
-  CHECKBOX = 0xeacb,
-  RADIO = 0xeacc,
-  SELECT = 0xead2,
-  SLIDER = 0xeacd,
-  TIME_PICKER = 0xeace,
-  DATE_PICKER = 0xead0,
-  ICON_PICKER = 0xead1,
-  SWITCH = 0xeae3,
-  PLAIN_TEXT = 0xead1,
-  DUAL_LIST_SELECT = 0xead8,
-  FIELD_ARRAY = 0xead3,
-  WIZARD = 0xead4,
-  TABS = 0xead7,
-  BUTTON = 0xeae1,
-}
-
-export enum FieldValidatorType {
-  REQUIRED = 0xeac7,
-  MIN_LENGTH = 0xeaca,
-  MAX_LENGTH = 0xeacb,
-  EXACT_LENGTH = 0xeacc,
-  MIN_ITEMS = 0xead2,
-  MIN_NUMBER_VALUE = 0xeacd,
-  MAX_NUMBER_VALUE = 0xeace,
-  PATTERN = 0xead0,
-  URL = 0xead1,
 }
