@@ -35,6 +35,7 @@ import {
   mdiDrag,
   mdiFileTree,
   mdiFormDropdown,
+  mdiHomeVariant,
   mdiInformationVariant,
   mdiLaptop,
   mdiLoginVariant,
@@ -90,3 +91,5 @@ export const ICON_VARIANT_FLUID_RESPONSIVE = mdiArrowExpandHorizontal
 // Navigation
 export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
 export const ICON_VARIANT_MENU_DOWN = mdiMenuDown
+// Site area
+export const ICON_VARIANT_HOME = mdiHomeVariant

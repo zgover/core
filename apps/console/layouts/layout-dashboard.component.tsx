@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {ICON_VARIANT_HOME} from '@aglyn/shared-data-enums'
 import {darken, mergeSxProps, styled} from '@aglyn/shared-feature-themes'
 import {
   AppLink,
@@ -302,7 +303,15 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
               {headerChildren}
             </Typography>
             <BreadcrumbsComponent
-              items={breadcrumbItems || []}
+              items={[
+                {
+                  id: 'home',
+                  children: 'Home',
+                  href: '/',
+                  icon: {path: ICON_VARIANT_HOME.path},
+                },
+                ..._isArr(breadcrumbItems) ? breadcrumbItems : [],
+              ]}
               sx={{
                 my: 2,
                 marginTop: 1,

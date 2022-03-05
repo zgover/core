@@ -31,9 +31,9 @@ export function _isLength<T>(
   rightOperand: Iterable<T> | ArrayLike<T> | number,
   operator: ComparisonOperator = '===',
 ): boolean {
-  if (leftOperand) {
-    const left = _isNum(leftOperand) ? leftOperand : leftOperand['length'] || 0
-    const right = _isNum(rightOperand) ? rightOperand : rightOperand['length'] || 0
+  if (typeof leftOperand !== 'undefined') {
+    const left = _isNum(leftOperand) ? leftOperand : leftOperand['length'] ?? 0
+    const right = _isNum(rightOperand) ? rightOperand : rightOperand['length'] ?? 0
     return compare(left, right, operator)
   }
   return false

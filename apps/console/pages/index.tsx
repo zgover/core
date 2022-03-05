@@ -91,13 +91,7 @@ Index.layoutProps = {
       children: 'My Dashboard',
       icon: {path: mdiHome.path},
     },
-    breadcrumbItems: [
-      {
-        id: 'home',
-        children: 'Home',
-        href: '/',
-      },
-    ],
+    breadcrumbItems: [],
   },
 }
 
