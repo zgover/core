@@ -145,7 +145,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     return this
   }
   public redo(payload?: CanvasRedoPayload): this {
-    this.#events.undo(payload)
+    this.#events.redo(payload)
     return this
   }
   public setElements(payload: CanvasSetElementsPayload): this {

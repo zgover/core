@@ -86,7 +86,6 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
-      console.log('handle element save', values)
       updateCanvasElement(getApp(), {element: {$id, props: {...values}}})
     }, [$id, getApp])
     const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {

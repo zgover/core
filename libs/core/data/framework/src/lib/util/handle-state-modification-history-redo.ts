@@ -20,20 +20,19 @@ import {type ModificationHistoryState} from '../types/generic.types'
 
 
 export const handleRedoEvent = <S>(state: ModificationHistoryState<S>) => {
-  if (!_isArrEmpty(state.future)) {
-    return handleStateModificationHistoryRedo(state)
-  }
-  return undefined
+  return handleStateModificationHistoryRedo(state)
 }
 
 export const handleStateModificationHistoryRedo = <S>(
   state: ModificationHistoryState<S>,
 ): ModificationHistoryState<S> => {
   if (!_isArrEmpty(state.future)) {
+    const future = state.future
+    const past = [state.present, ...state.past]
     return {
-      past: [state.present, ...state.past],
-      present: state.future.slice(0, 1)[0],
-      future: state.future.slice(1),
+      present: future.pop(),
+      past: past,
+      future: future,
     }
   }
   return state
