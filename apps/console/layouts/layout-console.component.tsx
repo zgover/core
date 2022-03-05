@@ -45,7 +45,7 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
     ...rest
   } = props
   const [user] = useAuthState(firebaseAuth)
-  const [themeMode, toggleThemeMode] = useThemeMode()
+  const [themeMode, toggleThemeMode, themeSetting] = useThemeMode()
 
   return (
     <LayoutMainComponent
@@ -61,17 +61,14 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
               dense: true,
               onClick: toggleThemeMode,
               // component: 'button',
-              children: 'Theme mode',
+              children: themeSetting === 'light' ? 'Light theme'
+                : themeSetting === 'dark' ? 'Dark theme'
+                  : 'Default theme',
               icon: {
-                path: themeMode === 'dark' ? ICON_VARIANT_THEME_DARK.path
-                  : themeMode === 'light' ? ICON_VARIANT_THEME_LIGHT.path
+                path: themeSetting === 'dark' ? ICON_VARIANT_THEME_DARK.path
+                  : themeSetting === 'light' ? ICON_VARIANT_THEME_LIGHT.path
                     : ICON_VARIANT_THEME_SYSTEM.path,
               },
-              title: (
-                themeMode === 'light' ? 'Light theme'
-                  : themeMode === 'dark' ? 'Dark theme'
-                    : 'Default theme'
-              ),
               'aria-label': 'switch theme mode',
 
             },
@@ -79,6 +76,8 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
         },
         {
           title: 'User menu',
+          sx: {p: 0},
+          edge: 'end',
           avatar: {
             title: user?.displayName || 'No name',
             src: gravatarUrlFromEmail(user?.email),

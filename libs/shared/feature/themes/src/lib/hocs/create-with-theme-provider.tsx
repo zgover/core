@@ -36,6 +36,7 @@ export type ThemeMode = 'light' | 'dark' | null
 export type UseThemeMode = [
   themeMode: ThemeMode,
   toggleThemeMode: (event: SyntheticEvent<any>, to?: ThemeMode) => void,
+  themeMode: ThemeMode,
 ]
 
 export const COOKIE_THEME_KEY = 'theme-color-scheme'
@@ -76,8 +77,8 @@ export function useThemeModeState(): UseThemeMode {
   }, [localMode])
 
   return useMemo(
-    () => [themeMode, toggleThemeMode],
-    [themeMode, toggleThemeMode],
+    () => [themeMode, toggleThemeMode, localMode],
+    [themeMode, toggleThemeMode, localMode],
   )
 }
 

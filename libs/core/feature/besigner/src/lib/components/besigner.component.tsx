@@ -21,11 +21,6 @@ import {
   ElementComponentsContextProvider,
   ElementsContextProvider,
 } from '@aglyn/core-feature-renderer'
-import {
-  consoleThemeDark,
-  consoleThemeLight,
-  createWithThemeProvider,
-} from '@aglyn/shared-feature-themes'
 import {ConfirmationProviderComponent, LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import {NoSsr} from '@mui/material'
 import dynamic from 'next/dynamic'
@@ -76,7 +71,7 @@ const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(
 BesignerComponentRaw.displayName = 'BesignerComponent'
 BesignerComponentRaw.defaultProps = {}
 
-export const BesignerComponent = createWithThemeProvider({
-  theme: [consoleThemeLight, consoleThemeDark],
-})(BesignerComponentRaw)
+export const BesignerComponent = BesignerComponentRaw /*createWithThemeProvider({
+ theme: [consoleThemeLight, consoleThemeDark],
+ })(BesignerComponentRaw)*/
 export default BesignerComponent
