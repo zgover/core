@@ -54,19 +54,16 @@ function SignIn() {
   const handleGoogleOAuthSignIn = useCallback((): AuthCallbackResult => {
     return signInWithPopup(firebaseAuth, googleOAuthProvider)
   }, [])
-
-  const handlePasswordSignIn = useCallback(
-    (email: string, password: string): AuthCallbackResult => {
-      return signInWithEmailAndPassword(firebaseAuth, email, password)
-    },
-    [],
-  )
-
+  const handlePasswordSignIn = useCallback((
+    email: string,
+    password: string
+  ): AuthCallbackResult => {
+    return signInWithEmailAndPassword(firebaseAuth, email, password)
+  }, [])
   const handleSignIn = useCallback(async (values?: any) => {
     if (loading) return
     if (error) setError(null)
     const dequeueLoading = queueLoading()
-
     await setPersistence(firebaseAuth, browserLocalPersistence)
       .then(() => {
         return values
@@ -83,7 +80,6 @@ function SignIn() {
         dequeueLoading()
       })
   }, [error, loading, queueLoading, handlePasswordSignIn, handleGoogleOAuthSignIn])
-
   const handleFormSubmit = useCallback(async (
     values,
     formApi: FormApi,
@@ -91,7 +87,6 @@ function SignIn() {
   ) => {
     await handleSignIn(values)
   }, [handleSignIn])
-
   const handleGoogleButtonClick = useCallback(async () => {
     await handleSignIn()
   }, [handleSignIn])

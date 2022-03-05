@@ -16,12 +16,11 @@
  */
 
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
-import {useLoading} from '@aglyn/shared-ui-jsx'
+import {SecureLoadingOverlayComponent, useLoading} from '@aglyn/shared-ui-jsx'
 import {useContinueQueryEncoded} from '@aglyn/shared-util-next'
 import {useRouter} from 'next/router'
 import {type ReactNode, useEffect} from 'react'
 import {useAuthState} from 'react-firebase-hooks/auth'
-import SecureLoadingOverlayComponent from '../components/secure-loading-overlay.component'
 
 
 const firebaseAuth = getFirebaseAuth()

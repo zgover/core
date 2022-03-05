@@ -17,7 +17,7 @@
 
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {AglynSvgLogo} from '@aglyn/shared-ui-jsx'
-import {Stack, StackProps} from '@mui/material'
+import {Stack, type StackProps} from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import {forwardRef} from 'react'
 import LoadingTextComponent from './loading-text.component'
@@ -55,7 +55,7 @@ const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>
         </LoadingTextComponent>
       </Stack>
     )
-  }
+  },
 )
 SecureLoadingOverlayComponent.displayName = 'SecureLoadingOverlayComponent'
 

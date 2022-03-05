@@ -28,6 +28,7 @@ const firebaseAuth = getFirebaseAuth()
 
 export interface LayoutRequestAuthenticationProps extends Partial<BackgroundImageComponentProps> {
   requireEmailVerification?: boolean
+  isSignOut?: boolean
 }
 
 function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps) {
@@ -35,6 +36,7 @@ function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps)
     children,
     sx,
     requireEmailVerification,
+    isSignOut,
     ...rest
   } = props
   const router = useRouter()
@@ -42,14 +44,17 @@ function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps)
   const [, pushContinue] = useContinueQueryDecoded()
 
   useEffect(() => {
-    if (!user || userAuthLoading) return void 0
-
+    if (userAuthLoading) return void 0
+    if (isSignOut && user) return void 0
+    if (!user && !isSignOut) return void 0
+    if (isSignOut) {
+      return void router.push('/signin')
+    }
     if (requireEmailVerification && !user.emailVerified) {
       return void router.push('/validate-email')
     }
-
     return void pushContinue('/')
-  }, [user, userAuthLoading, pushContinue, requireEmailVerification, router])
+  }, [user, userAuthLoading, pushContinue, requireEmailVerification, router, isSignOut])
 
   return (
     <BackgroundImageComponent
