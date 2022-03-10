@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {_isEqualitySameType} from '@aglyn/shared-util-guards'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 import {
   Card as MuiCard,
   CardActions as MuiCardActions,
@@ -27,56 +26,60 @@ import {
   type CardHeaderProps,
   type CardProps,
 } from '@mui/material'
+import clsx from 'clsx'
 import {forwardRef, type ReactNode} from 'react'
 import ErrorBoundaryComponent from './error-boundary.component'
 
 
+const classKeys = generateComponentClassKeys('AglynWidgetCard', [
+  'contentGutterX',
+  'contentGutterY',
+  'contentBordered',
+  'headerCentered',
+])
+
 const Card = styled(MuiCard, {
   name: 'AglynWidgetCard',
-  shouldForwardProp(propName) {
-    return !_isEqualitySameType(
-      propName,
-      'contentGutterX',
-      'contentGutterY',
-      'headerCentered',
-      'contentBordered',
-    )
-  },
-})<WidgetCardProps>(({
-  theme,
-  contentGutterX,
-  contentGutterY,
-  headerCentered,
-  contentBordered,
-}) => ({
-  ['& .MuiCardContent-root']: {
+})(({theme}) => ({
+  '& .MuiCardContent-root': {
     padding: 0,
-    ...(!contentGutterX ? {} : {
+    ':last-child': {
+      paddingBottom: 'initial',
+    },
+  },
+  '& .MuiCardHeader-root': {
+    fontWeight: theme.typography.fontWeightBold,
+  },
+  [`&.${classKeys.contentGutterX}`]: {
+    '& .MuiCardContent-root': {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
       [theme.breakpoints.up('md')]: {
         paddingTop: theme.spacing(3),
         paddingBottom: theme.spacing(3),
       },
-    }),
-    ...(!contentGutterY ? {} : {
+    },
+  },
+  [`&.${classKeys.contentGutterY}`]: {
+    '& .MuiCardContent-root': {
       paddingTop: theme.spacing(2),
       paddingBottom: theme.spacing(2),
-      '&:last-child': {paddingBottom: theme.spacing(3)},
-    }),
-    ...(!contentBordered ? {} : {
+      // '&:last-child': {paddingBottom: theme.spacing(3)},
+    },
+  },
+  [`&.${classKeys.contentBordered}`]: {
+    '& .MuiCardContent-root': {
       borderStyle: 'solid',
       borderColor: theme.palette.divider,
       borderTopWidth: 1,
       borderBottomWidth: 1,
-    }),
+    },
   },
-  ['& .MuiCardHeader-root']: {
-    fontWeight: theme.typography.fontWeightBold,
-    ...(!headerCentered ? {} : {
+  [`&.${classKeys.headerCentered}`]: {
+    '& .MuiCardHeader-root': {
       marginBottom: theme.spacing(-1),
       alignSelf: 'center',
-    }),
+    },
   },
 }))
 
@@ -105,13 +108,24 @@ const WidgetCardComponent = forwardRef<any, WidgetCardProps>(
       ActionProps,
       HeaderProps,
       ContentProps,
+      contentGutterX,
+      contentGutterY,
+      headerCentered,
+      contentBordered,
       ...rest
     } = props
+
+    const cardClassName = clsx({
+      [classKeys.contentGutterX]: Boolean(contentGutterX),
+      [classKeys.contentGutterY]: Boolean(contentGutterY),
+      [classKeys.contentBordered]: Boolean(contentBordered),
+      [classKeys.headerCentered]: Boolean(HeaderProps?.subheader || headerCentered),
+    }, className)
 
     return (
       <Card
         ref={ref}
-        headerCentered={Boolean(HeaderProps?.subheader)}
+        className={cardClassName}
         {...rest}
       >
         <ErrorBoundaryComponent>

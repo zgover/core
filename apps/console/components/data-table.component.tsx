@@ -153,6 +153,8 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
         sx={mergeSxProps({
           height: 400,
           width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           '& .MuiDataGrid-root': {
             border: 'none',
             '& .MuiDataGrid-cell': {
@@ -164,22 +166,19 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
         }, sx)}
         {...RootBoxProps}
       >
-        <Box sx={{display: 'flex', height: 1}}>
-          <Box sx={{flexGrow: 1}}>
-            <DataGrid
-              rows={rows}
-              columns={columns}
-              loading={loading}
-              components={{
-                NoRowsOverlay: noRowsOverlay(noRowsLabel),
-                LoadingOverlay: AppLoaderOverlayView(LoadingOverlayViewProps),
-                ...components,
-              }}
-              {...rest}
-            />
-            {children}
-          </Box>
-        </Box>
+        <DataGrid
+          sx={{flexGrow: 1}}
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          components={{
+            NoRowsOverlay: noRowsOverlay(noRowsLabel),
+            LoadingOverlay: AppLoaderOverlayView(LoadingOverlayViewProps),
+            ...components,
+          }}
+          {...rest}
+        />
+        {children}
       </Box>
     )
   },
