@@ -24,7 +24,11 @@ import type {FirebaseApp, FirebaseOptions} from 'firebase/app'
 import {initializeAppCheck, ReCaptchaV3Provider} from 'firebase/app-check'
 import {connectAuthEmulator, getAuth} from 'firebase/auth'
 import {connectDatabaseEmulator, getDatabase} from 'firebase/database'
-import {connectFirestoreEmulator, getFirestore} from 'firebase/firestore'
+import {
+  connectFirestoreEmulator,
+  enableIndexedDbPersistence,
+  getFirestore,
+} from 'firebase/firestore'
 import type {ReactNode} from 'react'
 import {
   AppCheckProvider,
@@ -89,47 +93,67 @@ function GetLayout({children}) {
   )
 }
 
+let connectedFirestore = null
+let connectedDatabase = null
+let connectedAuth = null
+
 function GetInnerLayout({children}) {
   const app = useFirebaseApp()
   const auth = getAuth(app)
   const database = getDatabase(app)
   const store = getFirestore(app)
-  // const {status, data: store} = useInitFirestore(async (firebaseApp) => {
-  //   const db = initializeFirestore(firebaseApp, {})
-  //   await enableIndexedDbPersistence(db)
-  //   return db
-  // })
+
+
+  // Set up development emulators
+  if (!connectedFirestore) {
+    try {
+      if (IS_DEVELOPMENT) {
+        connectFirestoreEmulator(store, 'localhost', 8080)
+      }
+      void enableIndexedDbPersistence(store)
+      connectedFirestore = true
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
+  if (!connectedDatabase) {
+    try {
+      if (IS_DEVELOPMENT) {
+        connectDatabaseEmulator(database, 'localhost', 9000)
+      }
+      connectedDatabase = true
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
+  if (!connectedAuth) {
+    try {
+      if (IS_DEVELOPMENT) {
+        connectAuthEmulator(auth, 'http://localhost:9099')
+      }
+      connectedAuth = true
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
+  let appCheck
+  try {
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(DEFAULT_RECAPTCHA_API_KEY),
+      isTokenAutoRefreshEnabled: true,
+    })
+  }
+  catch (error) {
+    console.error(error)
+  }
 
   if (status === 'loading') {
     return (<SecureLoadingOverlayComponent />)
   }
 
-  // Set up development emulators
-  if (IS_DEVELOPMENT) {
-    try {
-      connectFirestoreEmulator(store, 'localhost', 8080)
-    }
-    catch (error) {
-      console.error(error)
-    }
-    try {
-      connectDatabaseEmulator(database, 'localhost', 9000)
-    }
-    catch (error) {
-      console.error(error)
-    }
-    try {
-      connectAuthEmulator(auth, 'http://localhost:9099')
-    }
-    catch (error) {
-      console.error(error)
-    }
-  }
-
-  const appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(DEFAULT_RECAPTCHA_API_KEY),
-    isTokenAutoRefreshEnabled: true,
-  })
   return (
     <AuthProvider sdk={auth}>
       <AppCheckProvider sdk={appCheck}>
