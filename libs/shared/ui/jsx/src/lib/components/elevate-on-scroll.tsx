@@ -19,34 +19,62 @@ import {_isFnT} from '@aglyn/shared-util-guards'
 import {useScrollTrigger} from '@mui/material'
 // eslint-disable-next-line no-restricted-imports
 import type {UseScrollTriggerOptions} from '@mui/material/useScrollTrigger/useScrollTrigger'
-import {cloneElement, type ReactElement} from 'react'
+import {cloneElement, type ReactElement, useMemo} from 'react'
 
-/* eslint-disable-next-line */
-export interface ElevationOnScrollProps<P = any & {elevation: number}> {
-  children: ReactElement<P>
-  renderProps?: Partial<P> | ((elevated: boolean) => Partial<P>)
-  scrollTrigger?: UseScrollTriggerOptions
+
+export type ElevatedRenderProps = {
+  activeWithHysteresis: boolean
+  activeWithoutHysteresis: boolean
 }
 
-export function ElevateOnScroll<P>(props: ElevationOnScrollProps<P>) {
-  const {children, scrollTrigger, renderProps} = props
-  const triggered = useScrollTrigger(scrollTrigger)
-  const overrideProps = _isFnT(renderProps)
-    ? renderProps(triggered)
-    : renderProps
+/* eslint-disable-next-line */
+export interface ElevationOnScrollProps<P = any> extends Omit<UseScrollTriggerOptions, 'disableHysteresis'> {
+  /**
+   * If children is a function uses renderProps prop and copies children
+   */
+  children: ReactElement<P> | ((state: ElevatedRenderProps) => ReactElement<P>)
+  renderProps?: Partial<P> | ((state: ElevatedRenderProps) => Partial<P>)
 
+  withHysteresis?: Omit<UseScrollTriggerOptions, 'disableHysteresis'>
+  withoutHysteresis?: Omit<UseScrollTriggerOptions, 'disableHysteresis'>
+}
+
+function ElevateOnScroll<P>(props: ElevationOnScrollProps<P>) {
+  const {
+    children,
+    renderProps,
+    threshold,
+    target,
+    withHysteresis,
+    withoutHysteresis,
+  } = props
+  const activeWithoutHysteresis = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: withoutHysteresis?.threshold ?? threshold,
+    target: withoutHysteresis?.target ?? target,
+  })
+  const activeWithHysteresis = useScrollTrigger({
+    disableHysteresis: false,
+    threshold: withHysteresis?.threshold ?? threshold,
+    target: withHysteresis?.target ?? target,
+  })
+  const state = useMemo(
+    () => ({activeWithHysteresis, activeWithoutHysteresis}),
+    [activeWithHysteresis, activeWithoutHysteresis],
+  )
+
+  if (_isFnT(children)) {
+    return children(state)
+  }
+
+  const overrideProps = _isFnT(renderProps) ? renderProps(state) : renderProps
   return cloneElement(children, overrideProps)
 }
 
 ElevateOnScroll.displayName = 'ElevateOnScroll'
 ElevateOnScroll.defaultProps = {
-  renderProps: (elevated) => ({
-    elevation: elevated ? 4 : 0,
-  }),
-  scrollTrigger: {
-    disableHysteresis: true,
-    threshold: 0,
-  },
+  disableHysteresis: false,
 }
 
+export {ElevateOnScroll}
 export default ElevateOnScroll

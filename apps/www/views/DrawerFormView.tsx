@@ -30,7 +30,7 @@ import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
-import {forwardRef, Fragment} from 'react'
+import {forwardRef, Fragment, MouseEventHandler, ChangeEventHandler} from 'react'
 import FieldSet from '../components/FieldSet'
 import {Fields} from '../forms'
 
@@ -61,9 +61,9 @@ export interface DrawerFormViewProps
 
   loading?: boolean
   error?: string | boolean
-  onClose: React.MouseEventHandler
-  onSave: React.MouseEventHandler<HTMLButtonElement>
-  onUpdate: (fieldId: string) => React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  onClose: MouseEventHandler
+  onSave: MouseEventHandler<HTMLButtonElement>
+  onUpdate: (fieldId: string) => ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
 }
 
 const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn(props, ref) {

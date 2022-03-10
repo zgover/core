@@ -24,7 +24,6 @@ import {
   ElevateOnScroll,
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps, mdiShieldLock} from '@aglyn/shared-ui-mdi-jsx'
-import {_isArr, _isArrEmpty} from '@aglyn/shared-util-guards'
 import {
   AppBar,
   Box,
@@ -88,11 +87,33 @@ const defaultNavTabItems = [
   },
 ]
 
+const defaultBreadcrumbs = [
+  {
+    id: 'home',
+    children: 'Home',
+    href: '/',
+    icon: {path: ICON_VARIANT_HOME.path},
+  },
+]
+
+const defaultTabBarTitle = (
+  <Box sx={{color: 'tertiary.light'}}>
+    <span>{'Secure'}</span>
+    <MdiIcon
+      path={mdiShieldLock.path}
+      fontSize={'small'}
+    />
+  </Box>
+)
+
 export type NavTabItem = Partial<AppLinkProps & MuiTabProps & {icon: MdiIconProps}>
 
 export interface LayoutDashboardProps {
   children?: ReactNode
   breadcrumbItems?: BreadcrumbsProps['items']
+  disableBreadcrumbs?: true
+  disableDefaultBreadcrumb?: true
+
   tabBarTitle?: ReactNode
   navTabItems?: NavTabItem[]
   header?: TypographyProps<any, any> & {
@@ -105,9 +126,12 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
     children,
     header: headerProp,
     breadcrumbItems,
+    disableBreadcrumbs,
+    disableDefaultBreadcrumb,
     tabBarTitle: tabBarTitleProp,
-    navTabItems: navTabItemsProp,
+    navTabItems,
   } = props
+  const router = useRouter()
 
   const {
     children: headerChildren,
@@ -116,49 +140,30 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
     ...header
   } = headerProp || {}
 
-  const tabBarTitle = tabBarTitleProp ?? (
-    <Stack
-      direction="row"
-      spacing={{sm: 0.15, md: 0.5}}
-      alignItems="center"
-      typography={'subtitle2'}
-      lineHeight={'normal'}
-      sx={{color: 'tertiary.light'}}
-    >
-      <span>{'Secure'}</span>
-      <MdiIcon
-        path={mdiShieldLock.path}
-        fontSize={'small'}
-        sx={{color: 'tertiary.light'}}
-      />
-    </Stack>
-  )
-  const navTabItems: NavTabItem[] = navTabItemsProp || defaultNavTabItems
-  const router = useRouter()
-  const tabValue = useMemo(() => {
-    return navTabItems.find((i) => {
-      return (i?.hrefAs || i?.href || '') === router.asPath
-    })?.href || false
-  }, [router, navTabItems])
+  const breadcrumbs = [
+    ...(disableDefaultBreadcrumb ? [] : defaultBreadcrumbs),
+    ...breadcrumbItems,
+  ]
+
+  const tabItems: NavTabItem[] = navTabItems ?? defaultNavTabItems
+
+  const tabValue = useMemo(() => (
+    tabItems
+      .find((i) => (i?.hrefAs || i?.href || '') === router.asPath)
+      ?.href
+    || false
+  ), [router, tabItems])
 
   return (
     <>
-
-      {tabBarTitle || (_isArr(navTabItems) && !_isArrEmpty(navTabItems)) ? (
-        <ElevateOnScroll
-          renderProps={(elevated) => ({
-            elevation: elevated ? 4 : 0,
-          })}
-          scrollTrigger={{
-            disableHysteresis: true,
-            threshold: TOP_BAR_HEIGHT,
-          }}
-        >
+      <ElevateOnScroll threshold={TOP_BAR_HEIGHT}>
+        {({activeWithoutHysteresis}) => (
           <AppBar
             component="aside"
             color="inherit"
             position="sticky"
             variant="elevation"
+            elevation={activeWithoutHysteresis ? 4 : 0}
             enableColorOnDark
           >
             <Toolbar
@@ -172,22 +177,28 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
                 borderBottomColor: 'divider',
               }}
             >
-              {tabBarTitle && (
-                <Typography
-                  component={'div'}
-                  variant={'h6'}
-                  sx={{
-                    lineHeight: 'normal',
-                    letterSpacing: 2,
-                    fontSize: `0.95em`,
-                    fontWeight: 'fontWeightMedium',
-                    textTransform: 'uppercase',
-                    color: 'text.secondary',
-                  }}
+              <Typography
+                component={'div'}
+                variant={'h6'}
+                sx={{
+                  lineHeight: 'normal',
+                  letterSpacing: 2,
+                  fontSize: `0.95em`,
+                  fontWeight: 'fontWeightMedium',
+                  textTransform: 'uppercase',
+                  color: 'text.secondary',
+                }}
+              >
+                <Stack
+                  direction="row"
+                  spacing={{sm: 0.15, md: 0.5}}
+                  alignItems="center"
+                  typography={'subtitle2'}
+                  lineHeight={'normal'}
                 >
-                  {tabBarTitle}
-                </Typography>
-              )}
+                  {tabBarTitleProp ?? defaultTabBarTitle}
+                </Stack>
+              </Typography>
 
               <Divider
                 orientation="vertical"
@@ -228,7 +239,7 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
                   },
                 }}
               >
-                {navTabItems && navTabItems.map(({icon, ...item}, index) => (
+                {tabItems.map(({icon, ...item}, index) => (
                   <TabItem
                     key={item.id ?? index}
                     href={item.href ?? ''}
@@ -248,8 +259,8 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
               </MuiTabs>
             </Toolbar>
           </AppBar>
-        </ElevateOnScroll>
-      ) : null}
+        )}
+      </ElevateOnScroll>
 
       <Box
         component="main"
@@ -298,28 +309,22 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
               )}
               {headerChildren}
             </Typography>
-            <BreadcrumbsComponent
-              items={[
-                {
-                  id: 'home',
-                  children: 'Home',
-                  href: '/',
-                  icon: {path: ICON_VARIANT_HOME.path},
-                },
-                ..._isArrEmpty(breadcrumbItems) ? [] : breadcrumbItems,
-              ]}
-              sx={{
-                my: 2,
-                marginTop: 1,
-                color: 'text.primary',
-                'a': {
-                  textDecoration: 'none',
-                  ':hover': {
-                    color: 'secondary.main',
+            {disableBreadcrumbs ? null : (
+              <BreadcrumbsComponent
+                items={breadcrumbs}
+                sx={{
+                  my: 2,
+                  marginTop: 1,
+                  color: 'text.primary',
+                  'a': {
+                    textDecoration: 'none',
+                    ':hover': {
+                      color: 'secondary.main',
+                    },
                   },
-                },
-              }}
-            />
+                }}
+              />
+            )}
           </Container>
         </BackgroundImageComponent>
 
@@ -331,6 +336,12 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
   )
 }
 LayoutDashboardComponent.displayName = 'LayoutDashboardComponent'
+LayoutDashboardComponent.defaultProps = {
+  navTabItems: undefined,
+  breadcrumbItems: [],
+  disableBreadcrumbs: false,
+  disableDefaultBreadcrumb: false,
+}
 LayoutDashboardComponent.layoutComponent = LayoutConsoleComponent
 LayoutDashboardComponent.layoutProps = {
   LayoutConsoleComponent: {

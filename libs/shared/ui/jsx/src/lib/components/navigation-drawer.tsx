@@ -15,86 +15,43 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 
-import MuiAppBar, {AppBarProps as MuiAppBarProps} from '@mui/material/AppBar'
-import MuiDrawer, {DrawerProps as MuiDrawerProps} from '@mui/material/Drawer'
-import Toolbar, {ToolbarProps as MuiToolbarProps} from '@mui/material/Toolbar'
-import clsx from 'clsx'
-import {forwardRef, HTMLAttributes, ReactNode, Ref, useRef} from 'react'
+import {
+  AppBar,
+  type AppBarProps,
+  Box,
+  type BoxProps,
+  Drawer,
+  type DrawerProps,
+  Toolbar,
+  type ToolbarProps,
+} from '@mui/material'
+import {forwardRef, type ReactNode, type Ref, useRef} from 'react'
 import useCombinedRefs from '../hooks/use-combined-refs'
 import ElevateOnScroll from './elevate-on-scroll'
 
 
-const classKeys = generateComponentClassKeys('AglynNavigationDrawer', [
-  'root',
-  'appBar',
-  'toolbar',
-  'left',
-  'right',
-  'content',
-])
-
-const Drawer = styled(MuiDrawer, {
-  name: 'NavigationDrawer',
-})(({theme}) => ({
-  '& .MuiDrawer-paper': {
-    width: theme.breakpoints.values.sm,
-    maxWidth: '100%',
-  },
-}))
-
-const AppBar = styled(MuiAppBar, {
-  name: 'AppBar',
-})(({theme}) => ({
-  borderBottom: `1px solid ${theme.palette.divider}`,
-}))
-
-const Left = styled('div', {
-  name: 'AppbarLeft',
-})({
-  flexGrow: 1,
-  display: 'flex',
-  alignItems: 'center',
-  position: 'relative',
-})
-
-const Right = styled('div', {
-  name: 'AppbarRight',
-})({
-  display: 'flex',
-  alignItems: 'center',
-  position: 'relative',
-})
-
-const Content = styled('div', {
-  name: 'AppbarContent',
-})({
-  height: '100%',
-  width: '100%',
-  overflow: 'auto',
-})
-
 /* eslint-disable-next-line */
-export interface NavigationDrawerProps extends Partial<MuiDrawerProps> {
+export interface NavigationDrawerProps extends Partial<DrawerProps> {
   appBarLeft?: ReactNode
   appBarRight?: ReactNode
-  contentRef?: Ref<HTMLDivElement>
-  AppBarProps?: Partial<MuiAppBarProps>
-  ToolbarProps?: Partial<MuiToolbarProps>
-  ContentProps?: HTMLAttributes<HTMLDivElement>
-  AppBarLeftProps?: HTMLAttributes<HTMLDivElement>
-  AppBarRightProps?: HTMLAttributes<HTMLDivElement>
+  contentRef?: Ref<any>
+  AppBarProps?: Partial<AppBarProps>
+  ToolbarProps?: Partial<ToolbarProps>
+  ContentProps?: BoxProps
+  AppBarLeftProps?: BoxProps
+  AppBarRightProps?: BoxProps
 }
 
-export const NavigationDrawer = forwardRef<any, NavigationDrawerProps>(
+const NavigationDrawer = forwardRef<any, NavigationDrawerProps>(
   function RefRenderFn(props, ref) {
     const {
       children,
-      className: classNameProp,
       contentRef,
       appBarLeft,
       appBarRight,
+      sx,
       AppBarProps,
       ToolbarProps,
       ContentProps,
@@ -103,53 +60,93 @@ export const NavigationDrawer = forwardRef<any, NavigationDrawerProps>(
       ...rest
     } = props
 
-    const localContentRef = useRef<HTMLDivElement>()
-    const className = clsx(classKeys.root, classNameProp)
-    const appBarClassName = clsx(classKeys.appBar, AppBarProps?.className)
-    const toolbarClassName = clsx(classKeys.toolbar, ToolbarProps?.className)
-    const contentClassName = clsx(classKeys.content, ContentProps?.className)
-    const appBarLeftClassName = clsx(classKeys.left, AppBarLeftProps?.className)
-    const appBarRightClassName = clsx(classKeys.right, AppBarRightProps?.className)
+    const localContentRef = useRef<any>()
 
     return (
-      <Drawer ref={ref} anchor="right" className={className} {...rest}>
-        <ElevateOnScroll scrollTrigger={{target: localContentRef.current}}>
-          <AppBar
-            color="default"
-            position="relative"
-            variant="elevation"
-            {...AppBarProps}
-            className={appBarClassName}
-          >
-            <Toolbar {...ToolbarProps} className={toolbarClassName}>
-              <Left
-                {...AppBarLeftProps}
-                className={appBarLeftClassName}
-              >
-                {appBarLeft}
-              </Left>
-              <Right
-                {...AppBarRightProps}
-                className={appBarRightClassName}
-              >
-                {appBarRight}
-              </Right>
-            </Toolbar>
-          </AppBar>
+      <Drawer
+        ref={ref}
+        sx={mergeSxProps(
+          {
+            '& .MuiDrawer-paper': {
+              width: theme => theme.breakpoints.values.sm,
+              maxWidth: '100%',
+            },
+          },
+          sx,
+        )}
+        {...rest}
+      >
+        <ElevateOnScroll target={localContentRef.current}>
+          {({activeWithoutHysteresis}) => (
+            <AppBar
+              color="default"
+              position="relative"
+              variant="elevation"
+              elevation={activeWithoutHysteresis ? 4 : 0}
+              {...AppBarProps}
+
+              sx={mergeSxProps(
+                {
+                  borderBottomWidth: 1,
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: 'divider',
+                },
+                AppBarProps?.sx,
+              )}
+            >
+              <Toolbar {...ToolbarProps}>
+                <Box
+                  {...AppBarLeftProps}
+                  sx={mergeSxProps(
+                    {
+                      flexGrow: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      position: 'relative',
+                    },
+                    AppBarLeftProps?.sx,
+                  )}
+                >
+                  {appBarLeft}
+                </Box>
+                <Box
+                  {...AppBarRightProps}
+                  sx={mergeSxProps(
+                    {
+                      display: 'flex',
+                      alignItems: 'center',
+                      position: 'relative',
+                    },
+                    AppBarRightProps?.sx,
+                  )}
+                >
+                  {appBarRight}
+                </Box>
+              </Toolbar>
+            </AppBar>
+          )}
         </ElevateOnScroll>
-        <Content
+        <Box
           ref={useCombinedRefs(localContentRef, contentRef)}
           {...ContentProps}
-          className={contentClassName}
+          sx={mergeSxProps(
+            {
+              height: '100%',
+              width: '100%',
+              overflow: 'auto',
+            },
+            ContentProps?.sx,
+          )}
         >
           {children}
-        </Content>
+        </Box>
       </Drawer>
     )
   },
 )
 
-NavigationDrawer.displayName = 'NavigationDrawer'
+NavigationDrawer.displayName = 'AglynNavigationDrawer'
 NavigationDrawer.defaultProps = {}
 
+export {NavigationDrawer}
 export default NavigationDrawer

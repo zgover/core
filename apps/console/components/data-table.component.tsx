@@ -104,8 +104,7 @@ const noRowsOverlay = (label: string) =>
           </g>
         </svg>
         <div className={classKeys.label}>
-          {'No '}
-          {label ?? 'Items'}
+          {label ?? 'No Items'}
         </div>
       </StyledGridOverlay>
     )
@@ -135,7 +134,7 @@ export interface DataTableProps extends Partial<MuiDataGridProps> {
 }
 
 const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
-  function RefRenderFn(props) {
+  function RefRenderFn(props, ref) {
     const {
       rows = [],
       columns = [],
@@ -150,6 +149,7 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
     } = props
     return (
       <Box
+        ref={ref}
         sx={mergeSxProps({
           height: 400,
           width: '100%',
@@ -158,6 +158,8 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
           '& .MuiDataGrid-root': {
             border: 'none',
             '& .MuiDataGrid-cell': {
+
+
               '&:focus': {
                 outline: 'none',
               },

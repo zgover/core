@@ -24,26 +24,24 @@ import {
 } from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {
+  ICON_VARIANT_DOCK_BOTTOM_TOGGLE,
+  ICON_VARIANT_DOCK_LEFT_TOGGLE,
+  ICON_VARIANT_DOCK_RIGHT_TOGGLE,
   ICON_VARIANT_FLUID_RESPONSIVE,
   ICON_VARIANT_LAPTOP,
   ICON_VARIANT_MENU_DOWN,
   ICON_VARIANT_MOBILE,
+  ICON_VARIANT_MODIFY_ADD,
+  ICON_VARIANT_MODIFY_MODE_REARRANGE,
+  ICON_VARIANT_MODIFY_MODE_SELECT,
+  ICON_VARIANT_MODIFY_REDO,
+  ICON_VARIANT_MODIFY_UNDO,
   ICON_VARIANT_MONITOR_LARGE,
   ICON_VARIANT_MONITOR_SMALL,
   ICON_VARIANT_TABLET,
 } from '@aglyn/shared-data-enums'
 import {styled} from '@aglyn/shared-feature-themes'
-import {
-  mdiCursorDefault,
-  mdiCursorMove,
-  mdiDockBottom,
-  mdiDockLeft,
-  mdiDockRight,
-  MdiIcon,
-  mdiRedo,
-  mdiShapeSquareRoundedPlus,
-  mdiUndo,
-} from '@aglyn/shared-ui-mdi-jsx'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import MuiAppBar, {type AppBarProps as MuiAppBarProps} from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import MuiButton from '@mui/material/Button'
@@ -88,7 +86,7 @@ const AddControls = forwardRef<any, StackProps>(
             edge="start"
             onClick={handleAddElementClick}
           >
-            <MdiIcon fontSize="small" path={mdiShapeSquareRoundedPlus.path} />
+            <MdiIcon fontSize="small" path={ICON_VARIANT_MODIFY_ADD.path} />
           </MuiIconButton>
         </MuiTooltip>
       </MuiStack>
@@ -116,7 +114,7 @@ const HistoryControls = forwardRef<any, StackProps>(
             onClick={handleUndoClick}
             disabled={!canUndo}
           >
-            <MdiIcon fontSize="small" path={mdiUndo.path} />
+            <MdiIcon fontSize="small" path={ICON_VARIANT_MODIFY_UNDO.path} />
           </MuiIconButton>
         </span>
         </MuiTooltip>
@@ -127,7 +125,7 @@ const HistoryControls = forwardRef<any, StackProps>(
             onClick={handleRedoClick}
             disabled={!canRedo}
           >
-            <MdiIcon fontSize="small" path={mdiRedo.path} />
+            <MdiIcon fontSize="small" path={ICON_VARIANT_MODIFY_REDO.path} />
           </MuiIconButton>
         </span>
         </MuiTooltip>
@@ -287,7 +285,7 @@ const InteractControls = function InteractControls() {
             selected={interactMode === InteractionModeFlag.SELECT}
             value={InteractionModeFlag.SELECT}
           >
-            <MdiIcon fontSize="inherit" path={mdiCursorDefault.path} />
+            <MdiIcon fontSize="inherit" path={ICON_VARIANT_MODIFY_MODE_SELECT.path} />
           </MuiToggleButton>
         </MuiTooltip>
         <MuiTooltip title={'Rearrange'}>
@@ -295,7 +293,7 @@ const InteractControls = function InteractControls() {
             selected={interactMode === InteractionModeFlag.REARRANGE}
             value={InteractionModeFlag.REARRANGE}
           >
-            <MdiIcon fontSize="inherit" path={mdiCursorMove.path} />
+            <MdiIcon fontSize="inherit" path={ICON_VARIANT_MODIFY_MODE_REARRANGE.path} />
           </MuiToggleButton>
         </MuiTooltip>
       </MuiToggleButtonGroup>
@@ -345,7 +343,7 @@ const PanelControls = forwardRef<any, StackProps>(
               selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_LEFT)}
               value={BesignerPanelViewFlag.PANEL_LEFT}
             >
-              <MdiIcon fontSize="inherit" path={mdiDockLeft.path} />
+              <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_LEFT_TOGGLE.path} />
             </MuiToggleButton>
           </MuiTooltip>
           <MuiTooltip title={'Bottom panel'}>
@@ -353,7 +351,7 @@ const PanelControls = forwardRef<any, StackProps>(
               selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_BOTTOM)}
               value={BesignerPanelViewFlag.PANEL_BOTTOM}
             >
-              <MdiIcon fontSize="inherit" path={mdiDockBottom.path} />
+              <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_BOTTOM_TOGGLE.path} />
             </MuiToggleButton>
           </MuiTooltip>
           <MuiTooltip title={'Right panel'}>
@@ -361,7 +359,7 @@ const PanelControls = forwardRef<any, StackProps>(
               selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_RIGHT)}
               value={BesignerPanelViewFlag.PANEL_RIGHT}
             >
-              <MdiIcon fontSize="inherit" path={mdiDockRight.path} />
+              <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_RIGHT_TOGGLE.path} />
             </MuiToggleButton>
           </MuiTooltip>
         </MuiToggleButtonGroup>

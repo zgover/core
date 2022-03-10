@@ -158,101 +158,114 @@ function LayoutMainComponent(props: LayoutMainProps) {
         flexDirection="column"
         minHeight="100vh"
       >
-        <ElevateOnScroll
-          renderProps={(elevated) => ({
-            elevation: elevated && !disableAppBarElevation ? 4 : 0,
-          })}
-        >
-          <AppBar
-            component="header"
-            color="inherit"
-            variant="elevation"
-            position={disableAppBarElevation ? 'relative' : 'sticky'}
-            enableColorOnDark
-            sx={{
-              borderBottomWidth: `1px`,
-              borderBottomStyle: 'solid',
-              borderBottomColor: 'divider',
-              zIndex: theme => theme.zIndex.appBar + 5,
-            }}
-          >
-            <Stack
-              component={Toolbar}
-              variant="dense"
-              alignItems="center"
-              justifyContent="flex-start"
-              direction="row"
-              height={TOP_BAR_HEIGHT}
+        <ElevateOnScroll>
+          {({activeWithoutHysteresis}) => (
+            <AppBar
+              component="header"
+              color="inherit"
+              variant="elevation"
+              elevation={
+                !disableAppBarElevation && activeWithoutHysteresis ? 4 : 0
+              }
+              position={disableAppBarElevation ? 'relative' : 'sticky'}
+              sx={{
+                height: `${TOP_BAR_HEIGHT}px`,
+                borderBottomWidth: `1px`,
+                borderBottomStyle: 'solid',
+                borderBottomColor: 'divider',
+                zIndex: theme => theme.zIndex.appBar + 5,
+              }}
             >
-              <Stack
-                flexGrow={1}
+              <Toolbar
+                component={Stack}
+                variant="dense"
                 alignItems="center"
-                direction="row"
                 justifyContent="flex-start"
-                color="inherit"
-                component={AppLink}
-                componentVariant="button-base"
-                anchorComponent="button"
-                href="/"
-                disableRipple
-                spacing={0.75}
-                sx={{
-                  fontWeight: 'fontWeightRegular',
-                  fontFamily: 'h6.fontFamily',
-                  fontSize: (theme) => ({
-                    fontSize: theme.typography.pxToRem(18),
-                    md: theme.typography.pxToRem(20),
-                  }),
-                }}
+                direction="row"
               >
-                <AglynSvgIcon
-                  sx={{
-                    fontSize: `1.75em`,
-                    borderRadius: theme => theme.shape.appIconBorderRadius,
-                    ml: -0.5,
-                  }}
-                />
-                <AglynSvgLogo
-                  color="secondary"
-                  sx={{
-                    transform: 'translateY(0.0265em)',
-                    height: 'auto',
-                    fontSize: '2.765em',
-                  }}
-                />
-                {appBarSuffix && (
-                  <Typography
-                    component="span"
-                    fontWeight="inherit"
-                    fontSize="inherit"
-                    lineHeight="inherit"
-                    color="textPrimary"
-                    display="flex"
-                    alignItems="center"
+                <Stack
+                  flexGrow={1}
+                  alignItems="center"
+                  direction="row"
+                  justifyContent="flex-start"
+                  color="inherit"
+                >
+                  <AppLink
+                    href="/"
+                    componentVariant="button-base"
+                    // anchorComponent="button"
+                    color="inherit"
+                    disableRipple
                   >
-                    {appBarSuffix}
-                  </Typography>
+                    <Stack
+                      component="span"
+                      alignItems="center"
+                      direction="row"
+                      justifyContent="flex-start"
+                      spacing={0.75}
+                      sx={{
+                        fontWeight: 'fontWeightRegular',
+                        fontFamily: 'h6.fontFamily',
+                        fontSize: (theme) => ({
+                          fontSize: theme.typography.pxToRem(18),
+                          md: theme.typography.pxToRem(20),
+                        }),
+                      }}
+                    >
+                      <AglynSvgIcon rounded bordered sx={{fontSize: `1.75em`, ml: -0.5}} />
+                      <AglynSvgLogo
+                        color="secondary"
+                        sx={{
+                          transform: 'translateY(0.0265em)',
+                          height: 'auto',
+                          fontSize: '2.765em',
+                        }}
+                      />
+                      {appBarSuffix && (
+                        <Typography
+                          component="span"
+                          fontWeight="inherit"
+                          fontSize="inherit"
+                          lineHeight="inherit"
+                          color="textPrimary"
+                          display="flex"
+                          alignItems="center"
+                        >
+                          {appBarSuffix}
+                        </Typography>
+                      )}
+                    </Stack>
+
+                  </AppLink>
+                </Stack>
+
+                {_isArrEmpty(centerNavigationItems) ? null : (
+                  <Stack
+                    component="nav"
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="flex-start"
+                    flexBasis="72%"
+                    flexGrow={1}
+                  >
+                    {(centerNavigationItems ?? []).map(buildNav('text'))}
+                  </Stack>
                 )}
-              </Stack>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="flex-start"
-                flexBasis="72%"
-                flexGrow={1}
-              >
-                {(centerNavigationItems ?? []).map(buildNav('text'))}
-              </Stack>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="flex-start"
-                spacing={0.5}
-              >
-                {(quickActions ?? []).map(buildNav('icon'))}
-              </Stack>
-            </Stack>
-          </AppBar>
+
+                {_isArrEmpty(quickActions) ? null : (
+                  <Stack
+                    component="nav"
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="flex-start"
+                    spacing={0.5}
+                  >
+                    {(quickActions ?? []).map(buildNav('icon'))}
+                  </Stack>
+                )}
+              </Toolbar>
+            </AppBar>
+          )}
         </ElevateOnScroll>
         {children}
       </Stack>

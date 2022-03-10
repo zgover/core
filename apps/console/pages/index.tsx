@@ -28,12 +28,6 @@ export function Index(props) {
 
   console.log('index props', props)
 
-
-  /*
-   * Replace the elements below with your own.
-   *
-   * Note: The corresponding styles are in the ./index.@emotion/styled file.
-   */
   return (
     <Container sx={{py: 3}} maxWidth={CONTENT_MAX_WIDTH}>
       <GridItems
@@ -49,10 +43,11 @@ export function Index(props) {
                   rowHeight={40}
                   getRowId={(row) => row.uid}
                   columns={[
-                    {field: 'uid', headerName: 'User ID'},
-                    {field: 'displayName', headerName: 'Display Name', width: 150, maxWidth: 175},
-                    {field: 'email', headerName: 'E-Mail', width: 175, maxWidth: 200},
-                    {field: 'emailVerified', headerName: 'E-Verified', maxWidth: 100},
+                    {field: 'uid', headerName: 'User ID', type: 'string'},
+                    {field: 'displayName', headerName: 'Display Name', type: 'string', width: 150, maxWidth: 175},
+                    {field: 'email', headerName: 'E-Mail', type: 'string', width: 175, maxWidth: 200},
+                    {field: 'emailVerified', headerName: 'E-Verified', type: 'boolean', maxWidth: 100},
+                    {field: 'created', headerName: 'Created', type: 'date', maxWidth: 100},
                   ]}
                   rows={[]}
                 />

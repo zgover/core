@@ -66,6 +66,11 @@ export const consoleOverrides: ThemeOptions['components'] = {
       },
     },
   },
+  MuiAppBar: {
+    defaultProps: {
+      enableColorOnDark: true,
+    },
+  },
   MuiTooltip: {
     defaultProps: {
       arrow: true,

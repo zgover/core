@@ -58,41 +58,6 @@ BesignerSvgLogo.defaultProps = {
 }
 
 
-// forwardRef<any, MuiSvgIconProps>(
-//   function RefRenderFn({sx, ...props}, ref) {
-//     return (
-//       <MuiSvgIcon
-//         ref={ref}
-//         viewBox={AGLYN_SVG_LOGO.viewBox}
-//         aria-label={'Aglyn Logo'}
-//         sx={mergeSxProps({width: 'unset', height: 'unset'}, sx)}
-//         {...props}
-//       >
-//         <path d={AGLYN_SVG_LOGO.path} />
-//       </MuiSvgIcon>
-//     )
-//   },
-// )
-// AglynSvgLogo.displayName = 'AglynSvgLogo'
-
-// export const BesignerSvgLogo = forwardRef<any, MuiSvgIconProps>(
-//   function RefRenderFn({sx, ...props}, ref) {
-//     return (
-//       <MuiSvgIcon
-//         ref={ref}
-//         viewBox={BESIGNER_SVG_LOGO.viewBox}
-//         aria-label={'Besigner Logo'}
-//         sx={mergeSxProps({width: 'unset', height: 'unset'}, sx)}
-//         {...props}
-//       >
-//         <path d={BESIGNER_SVG_LOGO.path} />
-//       </MuiSvgIcon>
-//     )
-//   },
-// )
-// BesignerSvgLogo.displayName = 'BesignerSvgLogo'
-
-
 const aglynSvgIconClassKey = generateComponentClassKeys('AglynSvgIcon', [
   'rectBg',
   'a1',
@@ -153,10 +118,26 @@ export const AglynSvgIcon = styled(forwardRef<any, AglynSvgIconProps>(
   },
 ), {
   name: 'AglynSvgIcon',
-  shouldForwardProp(propName) {
-    return !_isEqualitySameType(propName, 'rectBgColor', 'a1Color', 'a2Color', 'a3Color', 'rounded', 'bordered')
-  },
-})<AglynSvgIconProps>(({theme, rectBgColor, a1Color, a2Color, a3Color, rounded, bordered}) => ({
+  shouldForwardProp: (
+    (propName) => !_isEqualitySameType(
+      propName,
+      'rectBgColor',
+      'a1Color',
+      'a2Color',
+      'a3Color',
+      'rounded',
+      'bordered',
+    )
+  ),
+})<AglynSvgIconProps>(({
+  theme,
+  rectBgColor,
+  a1Color,
+  a2Color,
+  a3Color,
+  rounded,
+  bordered
+}) => ({
   borderRadius: !rounded ? undefined : theme.shape.appIconBorderRadius,
   border: !bordered ? undefined : `1px solid ${theme.palette.divider}`,
   [`& .${aglynSvgIconClassKey.rectBg}`]: {

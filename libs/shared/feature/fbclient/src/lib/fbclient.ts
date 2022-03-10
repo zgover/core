@@ -27,12 +27,14 @@ import {
   getAuth,
   GoogleAuthProvider,
 } from 'firebase/auth'
+import {connectFirestoreEmulator, type Firestore, getFirestore} from 'firebase/firestore'
 
 
 export let firebaseApp: FirebaseApp
 export let firebaseAuth: Auth
 export let appCheck: AppCheck
 export let googleOAuthProvider: AuthProvider
+export let firestoreDb: Firestore
 
 export const getFirebaseAuth = (app?: FirebaseApp) => {
   if (app) return getAuth(app)
@@ -65,10 +67,10 @@ export const getFirebaseAuth = (app?: FirebaseApp) => {
     catch (error) {
       console.error(error)
     }
-  }
 
-  if (IS_DEVELOPMENT) {
-    connectAuthEmulator(firebaseAuth, 'http://localhost:9099')
+    if (IS_DEVELOPMENT) {
+      connectAuthEmulator(firebaseAuth, 'http://localhost:9099')
+    }
   }
 
   if (!appCheck) {
@@ -80,6 +82,14 @@ export const getFirebaseAuth = (app?: FirebaseApp) => {
     //   // tokens as needed.
     //   // isTokenAutoRefreshEnabled: true,
     // })
+  }
+
+  if (!firestoreDb) {
+    firestoreDb = getFirestore(firebaseApp)
+
+    if (IS_DEVELOPMENT) {
+      connectFirestoreEmulator(firestoreDb, 'localhost', 8080)
+    }
   }
 })()
 

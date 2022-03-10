@@ -15,24 +15,65 @@
  * limitations under the License.
  */
 
-import {ICON_VARIANT_PAGES} from '@aglyn/shared-data-enums'
+import {
+  ICON_VARIANT_MODIFY_DELETE,
+  ICON_VARIANT_MODIFY_EDIT,
+  ICON_VARIANT_PAGES,
+} from '@aglyn/shared-data-enums'
+import {firestoreDb} from '@aglyn/shared-feature-fbclient'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Container} from '@mui/material'
+import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
+import {collection} from 'firebase/firestore'
+import {useCollection} from 'react-firebase-hooks/firestore'
+import DataTableComponent from '../components/data-table.component'
+import WidgetCardComponent from '../components/widget-card.component'
 import {CONTENT_MAX_WIDTH} from '../constants/shared'
 import LayoutDashboardComponent from '../layouts/layout-dashboard.component'
 
 
+const columns: GridColumns = [
+  {
+    field: 'actions',
+    type: 'actions',
+    width: 100,
+    getActions: () => [
+      <GridActionsCellItem
+        key="action-edit"
+        icon={<MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />}
+        label="Edit"
+      />,
+      <GridActionsCellItem
+        key="action-delete"
+        icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
+        label="Delete"
+      />,
+    ],
+  },
+  {field: 'id', headerName: 'ID', type: 'string'},
+  {field: 'updatedAt', headerName: 'Updated', type: 'date'},
+  {field: 'createdAt', headerName: 'Created', type: 'date'},
+]
+
 export function Pages(props) {
 
-  console.log('Pages props', props)
+  const [value, loading, error] = useCollection(
+    collection(firestoreDb, 'pages'),
+  )
 
-
-  /*
-   * Replace the elements below with your own.
-   *
-   * Note: The corresponding styles are in the ./index.@emotion/styled file.
-   */
+  console.log('Pages props', props, value, loading, error)
   return (
     <Container sx={{py: 3}} maxWidth={CONTENT_MAX_WIDTH}>
+
+      <WidgetCardComponent>
+        <DataTableComponent
+          rowHeight={40}
+          getRowId={(row) => row.id}
+          columns={columns}
+          noRowsLabel="No pages"
+          rows={value?.docs || []}
+        />
+      </WidgetCardComponent>
 
 
     </Container>
@@ -46,7 +87,7 @@ Pages.layoutProps = {
   },
   LayoutDashboardComponent: {
     header: {
-      children: 'My Pages',
+      children: 'Pages',
       icon: {path: ICON_VARIANT_PAGES.path},
     },
     breadcrumbItems: [
