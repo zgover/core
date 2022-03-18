@@ -16,8 +16,8 @@
  */
 
 import {ICON_VARIANT_PAGES} from '@aglyn/shared-data-enums'
-import {AppLink} from '@aglyn/shared-ui-jsx'
-import {Container} from '@mui/material'
+import {AppLink, GridItems} from '@aglyn/shared-ui-jsx'
+import {Container, ListItemText} from '@mui/material'
 import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
 import {useFirestore, useFirestoreDocDataOnce} from 'reactfire'
@@ -36,6 +36,29 @@ export function ScreenDetails(props) {
   const {status, data: screen} = useFirestoreDocDataOnce(screenRef, {
     idField: '$id', // this field will be added to the object created from each document
   })
+
+  const details = [
+    {
+      key: 'details-dname',
+      primary: 'Display name:',
+      secondary: `${screen?.displayName ?? ''}`,
+    },
+    {
+      key: 'details-desc',
+      primary: 'Description:',
+      secondary: `${screen?.description ?? ''}`,
+    },
+    {
+      key: 'details-datec',
+      primary: 'Date created:',
+      secondary: `${screen?.createdAt?.toDate?.() || ''}`,
+    },
+    {
+      key: 'details-dateu',
+      primary: 'Date updated:',
+      secondary: `${screen?.updatedAt?.toDate?.() || ''}`,
+    },
+  ]
 
   console.log('Screens props', props, status, screen)
 
@@ -68,9 +91,42 @@ export function ScreenDetails(props) {
     >
       <Container sx={{py: 3}} maxWidth={CONTENT_MAX_WIDTH}>
 
-        <WidgetCardComponent>
-          {JSON.stringify(screen, null, 2)}
-        </WidgetCardComponent>
+        <GridItems
+          spacing={3}
+          items={[
+            {
+              xs: 12, md: 6, lg: 4,
+              children: (
+                <WidgetCardComponent
+                  header={'Basic Details'}
+                  contentGutterX
+                  contentGutterY
+                  contentBordered
+                >
+                  {details.map((item) => (
+                    <ListItemText {...item} />
+                  ))}
+                </WidgetCardComponent>
+              ),
+            },
+            {
+              xs: 12, md: 6, lg: 8,
+              children: (
+                <WidgetCardComponent
+                  header={'Basic Details'}
+                  contentGutterX
+                  contentGutterY
+                  contentBordered
+                >
+                  <pre>
+                  {JSON.stringify(screen, null, 2)}
+                  </pre>
+                </WidgetCardComponent>
+              ),
+            },
+          ]}
+        />
+
 
       </Container>
     </LayoutDashboardComponent>

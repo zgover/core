@@ -73,6 +73,8 @@ const Card = styled(MuiCard, {
       borderColor: theme.palette.divider,
       borderTopWidth: 1,
       borderBottomWidth: 1,
+      borderLeftWidth: 0,
+      borderRightWidth: 0,
     },
   },
   [`&.${classKeys.headerCentered}`]: {
@@ -90,7 +92,7 @@ export interface WidgetCardProps extends CardProps {
   headerCentered?: boolean
   header?: ReactNode
   actions?: CardActionsProps
-  after?: ReactNode
+  lastChildren?: ReactNode
   HeaderProps?: CardHeaderProps
   ContentProps?: CardContentProps
   ActionProps?: CardActionsProps
@@ -104,7 +106,7 @@ const WidgetCardComponent = forwardRef<any, WidgetCardProps>(
       children,
       className,
       header,
-      after,
+      lastChildren,
       ActionProps,
       HeaderProps,
       ContentProps,
@@ -148,7 +150,7 @@ const WidgetCardComponent = forwardRef<any, WidgetCardProps>(
               {...ActionProps}
             />
           ) : null}
-          {after}
+          {lastChildren}
         </ErrorBoundaryComponent>
       </Card>
     )
