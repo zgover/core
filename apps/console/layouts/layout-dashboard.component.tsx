@@ -16,63 +16,17 @@
  */
 
 import {ICON_VARIANT_HOME} from '@aglyn/shared-data-enums'
-import {mergeSxProps, styled} from '@aglyn/shared-feature-themes'
-import {
-  AppLink,
-  type AppLinkProps,
-  BackgroundImageComponent,
-  ElevateOnScroll,
-} from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps, mdiShieldLock} from '@aglyn/shared-ui-mdi-jsx'
-import {
-  AppBar,
-  Box,
-  Container,
-  Divider,
-  Grid,
-  Stack,
-  Tab as MuiTab,
-  type TabProps as MuiTabProps,
-  Tabs as MuiTabs,
-  Toolbar,
-  Typography,
-  type TypographyProps,
-} from '@mui/material'
-import {useRouter} from 'next/router'
+import {MdiIcon, mdiShieldLock} from '@aglyn/shared-ui-mdi-jsx'
+import {Box, Stack} from '@mui/material'
 import {type ReactNode, useMemo} from 'react'
-import {isElement} from 'react-is'
-import BreadcrumbsComponent, {type BreadcrumbsProps} from '../components/breadcrumbs.component'
+import DashboardHeaderComponent, {
+  type DashboardHeaderProps,
+} from '../components/dashboard-header.component'
 import FooterComponent from '../components/footer.component'
-import {CONTENT_MAX_WIDTH, TAB_HEIGHT, TOP_BAR_HEIGHT} from '../constants/shared'
+import SecondaryAppBarComponent, {
+  type SecondaryAppBarProps,
+} from '../components/secondary-app-bar.component'
 
-
-const TabItem = styled(MuiTab, {
-  name: 'AglynTabItem',
-})({
-  flexDirection: 'row',
-  minHeight: TAB_HEIGHT,
-  '& > *:first-of-type': {
-    marginBottom: 0,
-    marginRight: 1,
-  },
-  '& .MuiTab-labelIcon': {
-    minHeight: TAB_HEIGHT - 16,
-    minWidth: 'auto',
-    paddingLeft: 0,
-    paddingRight: 0,
-    marginLeft: 4,
-    '&:first-of-type': {
-      marginLeft: 0,
-    },
-  },
-})
-
-function a11yProps(index) {
-  return {
-    id: `scrollable-auto-tab-${index}`,
-    'aria-controls': `scrollable-auto-tabpanel-${index}`,
-  }
-}
 
 const defaultNavTabItems = [
   {
@@ -84,15 +38,6 @@ const defaultNavTabItems = [
     id: 'nav-tab-screens',
     label: 'Screens',
     href: '/screens',
-  },
-]
-
-const defaultBreadcrumbs = [
-  {
-    id: 'home',
-    children: 'Home',
-    href: '/',
-    icon: {path: ICON_VARIANT_HOME.path},
   },
 ]
 
@@ -113,262 +58,83 @@ const defaultTabBarTitle = (
   </Stack>
 )
 
-export type NavTabItem = Partial<AppLinkProps & MuiTabProps & {icon: MdiIconProps}>
+const defaultBreadcrumbs = [
+  {
+    id: 'home',
+    children: 'Home',
+    href: '/',
+    icon: {path: ICON_VARIANT_HOME.path},
+  },
+]
 
 export interface LayoutDashboardProps {
   children?: ReactNode
-  breadcrumbItems?: BreadcrumbsProps['items']
-  disableBreadcrumbs?: true
+  breadcrumbItems?: DashboardHeaderProps['breadcrumbItems']
+  disableBreadcrumbs?: DashboardHeaderProps['disableBreadcrumbs']
   disableDefaultBreadcrumb?: true
+  header?: DashboardHeaderProps['header']
+  headerRight?: DashboardHeaderProps['headerRight']
 
-  tabBarTitle?: ReactNode
-  navTabItems?: NavTabItem[]
-  header?: TypographyProps<any, any> & {
-    icon?: MdiIconProps | ReactNode
-  }
-  headerRight?: ReactNode
+  tabBarTitle?: SecondaryAppBarProps['tabBarTitle']
+  navTabItems?: SecondaryAppBarProps['navTabItems']
+  aside?: ReactNode
 }
 
 function LayoutDashboardComponent(props: LayoutDashboardProps) {
   const {
     children,
-    header: headerProp,
+    header,
     breadcrumbItems,
     disableBreadcrumbs,
     disableDefaultBreadcrumb,
-    tabBarTitle: tabBarTitleProp,
+    tabBarTitle,
     navTabItems,
     headerRight,
+    aside,
   } = props
-  const router = useRouter()
 
-  const {
-    children: headerChildren,
-    sx: headerSx,
-    icon: headerIcon,
-    ...header
-  } = headerProp || {}
-
-  const breadcrumbs = [
-    ...(disableDefaultBreadcrumb ? [] : defaultBreadcrumbs),
-    ...breadcrumbItems,
-  ]
-
-  const tabItems: NavTabItem[] = navTabItems ?? defaultNavTabItems
-
-  const tabValue = useMemo(() => (
-    tabItems
-      .find((i) => (i?.hrefAs || i?.href || '') === router.asPath)
-      ?.href
-    || false
-  ), [router, tabItems])
+  const breadcrumbs = useMemo(() => {
+    return [
+      ...(disableDefaultBreadcrumb ? [] : defaultBreadcrumbs),
+      ...Array.isArray(breadcrumbItems) ? breadcrumbItems : [],
+    ]
+  }, [breadcrumbItems, disableDefaultBreadcrumb])
 
   return (
     <>
-      <ElevateOnScroll threshold={TOP_BAR_HEIGHT}>
-        {({activeWithoutHysteresis}) => (
-          <AppBar
-            component="aside"
-            color="inherit"
-            position="sticky"
-            variant="elevation"
-            elevation={activeWithoutHysteresis ? 4 : 0}
-            enableColorOnDark
-          >
-            <Toolbar
-              variant="dense"
-              component="div"
-              color="inherit"
-              sx={{
-                minHeight: TAB_HEIGHT,
-                borderBottomWidth: `1px`,
-                borderBottomStyle: 'solid',
-                borderBottomColor: 'divider',
-              }}
-            >
-              <Typography
-                component={'div'}
-                variant={'h6'}
-                sx={{
-                  lineHeight: 'normal',
-                  letterSpacing: 2,
-                  fontSize: `0.95em`,
-                  fontWeight: 'fontWeightMedium',
-                  textTransform: 'uppercase',
-                  color: 'text.secondary',
-                }}
-              >
-                {tabBarTitleProp ?? defaultTabBarTitle}
-              </Typography>
-
-              <Divider
-                orientation="vertical"
-                sx={{ml: 1.25, mr: 1}}
-                flexItem
-                light
-              />
-
-              <MuiTabs
-                aria-label="area navigation"
-                indicatorColor="secondary"
-                scrollButtons="auto"
-                textColor="inherit"
-                value={tabValue || false}
-                variant="scrollable"
-                sx={{
-                  minHeight: TAB_HEIGHT,
-                  alignItems: 'center',
-                  '& .MuiTabs-flexContainer': {
-                    alignItems: 'center',
-                  },
-                  '& .MuiTabs-indicator': {
-                    height: '3px',
-                    backgroundColor: 'unset',
-                    '&:after': {
-                      borderRadius: '3px 3px 0 0',
-                      content: '" "',
-                      display: 'block',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      right: 0,
-                      mx: 'auto',
-                      width: 0.8,
-                      height: 1,
-                      backgroundColor: 'secondary.light',
-                    },
-                  },
-                }}
-              >
-                {tabItems.map(({icon, ...item}, index) => (
-                  <TabItem
-                    key={item.id ?? index}
-                    href={item.href ?? ''}
-                    value={item.href ?? index}
-                    icon={!icon?.path ? icon : <MdiIcon {...icon} />}
-                    componentVariant="button-base"
-                    anchorComponent="button"
-                    color="inherit"
-                    underline="none"
-                    // disableRipple
-                    wrapped
-                    {...a11yProps(index)}
-                    {...{component: AppLink} as any}
-                    {...item}
-                  />
-                ))}
-              </MuiTabs>
-            </Toolbar>
-          </AppBar>
-        )}
-      </ElevateOnScroll>
+      <SecondaryAppBarComponent
+        tabBarTitle={tabBarTitle ?? defaultTabBarTitle}
+        navTabItems={navTabItems ?? defaultNavTabItems}
+      />
 
       <Box
         component="main"
         sx={{flexGrow: 1}}
       >
-        <BackgroundImageComponent
-          component="header"
-          url="/_static/images/backgrounds/patterns/abstract-wave-lines.svg"
-          bgPosition="50% 90%"
-          sx={{
-            pt: 10,
-            pb: 2,
-            bgcolor: 'background.secondary',
-            color: 'text.primary',
-            borderBottomWidth: `1px`,
-            borderBottomStyle: 'solid',
-            borderBottomColor: 'divider',
-          }}
+        <DashboardHeaderComponent
+          disableBreadcrumbs={disableBreadcrumbs}
+          breadcrumbItems={breadcrumbs}
+          headerRight={headerRight}
+          header={header}
+        />
+
+        <Box
+          component="main"
+          sx={{flexGrow: 1}}
         >
-          <Container maxWidth={CONTENT_MAX_WIDTH}>
-            <Grid
-              container
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              spacing={2}
-            >
-              <Grid
-                item
-              >
-                <Typography
-                  component="h1"
-                  variant="h4"
-                  sx={mergeSxProps({
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }, headerSx)}
-                  {...header}
-                >
+          {children}
+        </Box>
 
-                  {!headerIcon || isElement(headerIcon) ? headerIcon : (
-                    <MdiIcon
-                      color="inherit"
-                      {...headerIcon}
-                      sx={mergeSxProps({
-                        padding: 1,
-                        mr: 1.75,
-                        fontSize: `1.5em`,
-                        borderWidth: `1px`,
-                        borderStyle: 'solid',
-                        borderColor: 'tertiary.dark',
-                        color: 'quaternary.contrastText',
-                        bgcolor: 'quaternary.main',
-                        borderRadius: (theme) => `${theme.shape.appIconBorderRadius}`,
-                      }, headerIcon['sx'])}
-                    />
-                  )}
-                  {headerChildren}
-                </Typography>
+        <FooterComponent />
 
-                {disableBreadcrumbs ? null : (
-                  <BreadcrumbsComponent
-                    items={breadcrumbs}
-                    sx={{
-                      my: 2,
-                      marginTop: 1,
-                      color: 'text.primary',
-                      'a': {
-                        textDecoration: 'none',
-                        ':hover': {
-                          color: 'secondary.main',
-                        },
-                      },
-                    }}
-                  />
-                )}
-              </Grid>
-
-              {headerRight && (
-                <Grid
-                  item
-                  // sm={'auto'}
-                  // xs={12}
-                  // sx={{textAlign: 'center'}}
-                >
-                  {headerRight}
-                </Grid>
-              )}
-            </Grid>
-          </Container>
-        </BackgroundImageComponent>
-
-        {children}
       </Box>
 
-      <FooterComponent />
+      {aside}
     </>
   )
 }
 LayoutDashboardComponent.displayName = 'LayoutDashboardComponent'
-LayoutDashboardComponent.defaultProps = {
-  navTabItems: undefined,
-  breadcrumbItems: [],
-  disableBreadcrumbs: false,
-  disableDefaultBreadcrumb: false,
-}
+LayoutDashboardComponent.defaultProps = {}
 
 export {LayoutDashboardComponent}
 export default LayoutDashboardComponent

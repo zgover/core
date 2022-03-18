@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type AglynTenantHostScreen, createResourceUid} from '@aglyn/core-data-framework'
+import {createResourceUid} from '@aglyn/core-data-framework'
 import {
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_EDIT,
@@ -31,7 +31,7 @@ import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Button, Container, Typography} from '@mui/material'
 import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
-import {collection, deleteDoc, doc, query, setDoc} from 'firebase/firestore'
+import {collection, deleteDoc, doc, limit, query, setDoc} from 'firebase/firestore'
 import {useCallback, useState} from 'react'
 import {useFirestore, useFirestoreCollectionData} from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
@@ -48,44 +48,14 @@ export function Screens(props) {
   const {queueLoading, loading} = useLoading()
   const {confirm} = useConfirmationContext()
   const [quickDrawerOpen, setQuickDrawerOpen] = useState<boolean>(false)
+  const handleFormOpen = useCallback(() => {setQuickDrawerOpen(true)}, [])
+  const handleFormClose = useCallback(() => {setQuickDrawerOpen(false)}, [])
   const [pageSize, setPageSize] = useState<number>(5)
   const firestore = useFirestore()
   const screensCollection = collection(firestore, 'screens')
-  const screensQuery = query(screensCollection)
-  const {status, data: screens} = useFirestoreCollectionData(screensQuery, {
-    idField: '$id', // this field will be added to the object created from each document
-  }) as unknown as {status: string, data: AglynTenantHostScreen[]}
-
-  const handleFormOpen = useCallback(() => {setQuickDrawerOpen(true)}, [])
-  const handleFormClose = useCallback(() => {setQuickDrawerOpen(false)}, [])
-  const deleteScreen = useCallback(async (id: string) => {
-    if (loading) return
-    const dequeueLoading = queueLoading()
-    await deleteDoc(doc(firestore, 'screens', id))
-      .then(() => {
-        handleFormClose()
-      })
-      .catch((error) => {
-        // setError({...error})
-      })
-      .finally(() => {
-        dequeueLoading()
-      })
-  }, [firestore, loading, queueLoading, handleFormClose])
-  const handleDeleteScreen = useCallback((id: string) => async () => {
-    await confirm({
-      title: 'Are you sure?',
-      description:
-        'You are about to delete a screen from the application, please confirm the desired option. Press \'Delete\' to confirm and delete the item. Press \'Cancel\' to void the operation and close this dialog.',
-      confirmationText: 'Delete',
-      confirmationButtonProps: {
-        color: 'error',
-      },
-    })
-      .then(() => {
-        return deleteScreen(id)
-      })
-  }, [confirm, deleteScreen])
+  const screensQuery = query(screensCollection, limit(pageSize))
+  const {status, data} = useFirestoreCollectionData(screensQuery, {idField: '$id'})
+  const screens = data || []
 
   const columns: GridColumns = [
     {
@@ -106,11 +76,11 @@ export function Screens(props) {
         />,
       ],
     },
-    {field: '$id', headerName: 'ID', type: 'string', width: 150},
-    {field: 'displayName', headerName: 'Display name', width: 200, type: 'string'},
-    {field: 'description', headerName: 'Description', width: 275, type: 'string'},
-    {field: 'updatedAt', headerName: 'Updated', width: 150, type: 'date'},
-    {field: 'createdAt', headerName: 'Created', width: 150, type: 'date'},
+    {field: '$id', headerName: 'ID', type: 'string', flex: 1, minWidth: 150},
+    {field: 'displayName', headerName: 'Display name', flex: 1, minWidth: 200, type: 'string'},
+    {field: 'description', headerName: 'Description', flex: 1, minWidth: 275, type: 'string'},
+    {field: 'updatedAt', headerName: 'Updated', flex: 1, minWidth: 150, type: 'date'},
+    {field: 'createdAt', headerName: 'Created', flex: 1, minWidth: 150, type: 'date'},
   ]
 
   const [error, setError] = useState(null)
@@ -120,18 +90,31 @@ export function Screens(props) {
     const dequeueLoading = queueLoading()
     const newId = createResourceUid()
     await setDoc(doc(firestore, 'screens', newId), {...values})
-      .then(() => {
-        handleFormClose()
-      })
+      .then(() => {handleFormClose()})
       .catch((error) => {
         console.error(error)
         setError({...error})
       })
-      .finally(() => {
-        dequeueLoading()
-      })
+      .finally(() => {dequeueLoading()})
   }, [firestore, error, loading, queueLoading, handleFormClose])
-  console.log('Screens props', props, status, screens)
+
+  const handleDeleteScreen = useCallback((id: string) => async () => {
+    let dequeueLoading
+    await confirm({
+      title: 'Are you sure?',
+      description: 'You are about to delete a screen from the application, please confirm the desired option. Press \'Delete\' to confirm and delete the item. Press \'Cancel\' to void the operation and close this dialog.',
+      confirmationText: 'Delete',
+      confirmationButtonProps: {color: 'error'},
+    })
+      .then(() => {dequeueLoading = queueLoading()})
+      .catch(() => {})
+      .then(() => {return deleteDoc(doc(firestore, 'screens', id))})
+      .then(() => {dequeueLoading && dequeueLoading()})
+      .catch(() => {})
+  }, [confirm, firestore, queueLoading])
+
+  console.log('Screens props', props, data, status, screens)
+
   return (
     <LayoutDashboardComponent
       breadcrumbItems={[
@@ -148,30 +131,15 @@ export function Screens(props) {
           variant="contained"
           onClick={handleFormOpen}
         >
-          {'Add New Screen'}
+          {'Create New Screen'}
         </Button>
       )}
-    >
-      <Container sx={{py: 3}} maxWidth={CONTENT_MAX_WIDTH}>
-
-        <WidgetCardComponent>
-          <DataTableComponent
-            rowHeight={40}
-            getRowId={(row) => row.$id}
-            columns={columns}
-            noRowsLabel="No screens"
-            rows={screens || []}
-            loading={status === 'loading'}
-            pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            rowsPerPageOptions={[5, 10, 15]}
-            pagination
-          />
-        </WidgetCardComponent>
-
+      aside={(
         <NavigationDrawerComponent
           open={quickDrawerOpen}
           anchor="right"
+          variant="temporary"
+          onClose={handleFormClose}
           appBarLeft={
             <Typography variant="h6" component="div">
               {'Create new screen'}
@@ -202,7 +170,23 @@ export function Screens(props) {
             />
           </ContainerComponent>
         </NavigationDrawerComponent>
-
+      )}
+    >
+      <Container sx={{py: 3}} maxWidth={CONTENT_MAX_WIDTH}>
+        <WidgetCardComponent>
+          <DataTableComponent
+            rowHeight={50}
+            getRowId={(row) => row.$id}
+            columns={columns}
+            noRowsLabel="No screens"
+            rows={screens}
+            loading={status === 'loading'}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            rowsPerPageOptions={[5, 10, 15]}
+            pagination
+          />
+        </WidgetCardComponent>
       </Container>
     </LayoutDashboardComponent>
   )

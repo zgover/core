@@ -70,8 +70,11 @@ const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
         ref={ref}
         sx={mergeSxProps(
           {
+            width: theme => `${theme.breakpoints.values.sm}px`,
+            flexShrink: 0,
+            maxWidth: '100%',
             '& .MuiDrawer-paper': {
-              width: theme => theme.breakpoints.values.sm,
+              width: theme => `${theme.breakpoints.values.sm}px`,
               maxWidth: '100%',
             },
           },
