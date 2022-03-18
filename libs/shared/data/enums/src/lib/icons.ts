@@ -46,6 +46,7 @@ import {
   mdiMonitor,
   mdiMonitorSmall,
   mdiOpenInNew,
+  mdiPageNextOutline,
   mdiPencil,
   mdiRedo,
   mdiShapeSquareRoundedPlus,
@@ -80,11 +81,12 @@ export const ICON_VARIANT_MODIFY_DELETE = mdiDeleteOutline
 export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
 export const ICON_VARIANT_MODIFY_DUPLICATE = mdiContentDuplicate
 export const ICON_VARIANT_MODIFY_EDIT = mdiPencil
+export const ICON_VARIANT_MODIFY_MODE_REARRANGE = mdiCursorMove
+export const ICON_VARIANT_MODIFY_MODE_SELECT = mdiCursorDefault
 export const ICON_VARIANT_MODIFY_REDO = mdiRedo
 export const ICON_VARIANT_MODIFY_UNDO = mdiUndo
 export const ICON_VARIANT_SELECT_PARENT = mdiArrowTopLeft
-export const ICON_VARIANT_MODIFY_MODE_SELECT = mdiCursorDefault
-export const ICON_VARIANT_MODIFY_MODE_REARRANGE = mdiCursorMove
+export const ICON_VARIANT_SHOW_DETAIL = mdiPageNextOutline
 // User
 export const ICON_VARIANT_APP_PREFERENCES = mdiTune
 export const ICON_VARIANT_APP_SETTINGS = mdiCog

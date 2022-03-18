@@ -18,10 +18,11 @@
 import {createResourceUid} from '@aglyn/core-data-framework'
 import {
   ICON_VARIANT_MODIFY_DELETE,
-  ICON_VARIANT_MODIFY_EDIT,
   ICON_VARIANT_PAGES,
+  ICON_VARIANT_SHOW_DETAIL,
 } from '@aglyn/shared-data-enums'
 import {
+  AppLink,
   ContainerComponent,
   NavigationDrawerComponent,
   useConfirmationContext,
@@ -31,7 +32,7 @@ import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Button, Container, Typography} from '@mui/material'
 import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
-import {collection, deleteDoc, doc, limit, query, setDoc} from 'firebase/firestore'
+import {collection, deleteDoc, doc, limit, query, setDoc, Timestamp} from 'firebase/firestore'
 import {useCallback, useState} from 'react'
 import {useFirestore, useFirestoreCollectionData} from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
@@ -57,39 +58,15 @@ export function Screens(props) {
   const {status, data} = useFirestoreCollectionData(screensQuery, {idField: '$id'})
   const screens = data || []
 
-  const columns: GridColumns = [
-    {
-      field: 'actions',
-      type: 'actions',
-      width: 100,
-      getActions: ({id}) => [
-        <GridActionsCellItem
-          key="action-edit"
-          icon={<MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />}
-          label="Edit"
-        />,
-        <GridActionsCellItem
-          key="action-delete"
-          icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
-          label="Delete"
-          onClick={handleDeleteScreen(id as string)}
-        />,
-      ],
-    },
-    {field: '$id', headerName: 'ID', type: 'string', flex: 1, minWidth: 150},
-    {field: 'displayName', headerName: 'Display name', flex: 1, minWidth: 200, type: 'string'},
-    {field: 'description', headerName: 'Description', flex: 1, minWidth: 275, type: 'string'},
-    {field: 'updatedAt', headerName: 'Updated', flex: 1, minWidth: 150, type: 'date'},
-    {field: 'createdAt', headerName: 'Created', flex: 1, minWidth: 150, type: 'date'},
-  ]
-
   const [error, setError] = useState(null)
   const handleFormSubmit = useCallback(async (values) => {
     if (loading) return
     if (error) setError(null)
     const dequeueLoading = queueLoading()
     const newId = createResourceUid()
-    await setDoc(doc(firestore, 'screens', newId), {...values})
+    const timestamp = Timestamp.now()
+    const newValues = {...values, createdAt: timestamp, updatedAt: timestamp}
+    await setDoc(doc(firestore, 'screens', newId), newValues)
       .then(() => {handleFormClose()})
       .catch((error) => {
         console.error(error)
@@ -107,11 +84,41 @@ export function Screens(props) {
       confirmationButtonProps: {color: 'error'},
     })
       .then(() => {dequeueLoading = queueLoading()})
-      .catch(() => {})
       .then(() => {return deleteDoc(doc(firestore, 'screens', id))})
-      .then(() => {dequeueLoading && dequeueLoading()})
       .catch(() => {})
+      .finally(() => {dequeueLoading && dequeueLoading()})
   }, [confirm, firestore, queueLoading])
+
+
+  const columns: GridColumns = [
+    {
+      field: 'actions',
+      type: 'actions',
+      width: 100,
+      getActions: ({id}) => [
+        <GridActionsCellItem
+          key="action-detail"
+          icon={<MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} />}
+          label="detail"
+          component={AppLink}
+          componentVariant="naked"
+          hrefAs={`/screens/${id}`}
+          href={`/screens/[screenId]`}
+        />,
+        <GridActionsCellItem
+          key="action-delete"
+          icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
+          label="Delete"
+          onClick={handleDeleteScreen(id as string)}
+        />,
+      ],
+    },
+    {field: '$id', headerName: 'ID', type: 'string', flex: 1, minWidth: 150},
+    {field: 'displayName', headerName: 'Display name', flex: 1, minWidth: 200, type: 'string'},
+    {field: 'description', headerName: 'Description', flex: 1, minWidth: 275, type: 'string'},
+    {field: 'updatedAt', headerName: 'Updated', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.()},
+    {field: 'createdAt', headerName: 'Created', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.()},
+  ]
 
   console.log('Screens props', props, data, status, screens)
 

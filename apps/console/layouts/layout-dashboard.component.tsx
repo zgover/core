@@ -125,11 +125,11 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
           {children}
         </Box>
 
+        {aside}
+
         <FooterComponent />
 
       </Box>
-
-      {aside}
     </>
   )
 }
