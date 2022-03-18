@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ export enum FontFamily {
   RALEWAY = 'Raleway',
   ROBOTO = 'Roboto',
   ROBOTO_CONDENSED = '"Roboto Condensed"',
-  Rockwell = 'Rockwell',
+  ROCKWELL = 'Rockwell',
   SANS_SERIF = 'sans-serif',
   SEGOE_UI = '"Segoe UI"',
   SEGOE_UI_EMOJI = '"Segoe UI Emoji"',
@@ -73,8 +73,6 @@ export const FALLBACK_FONT_FAMILY = [
   FontFamily.APPLE_SYSTEM,
   FontFamily.BLINK_MAC_SYSTEM_FONT,
   FontFamily.SEGOE_UI,
-  FontFamily.ROBOTO,
-  FontFamily.ROBOTO_CONDENSED,
   FontFamily.HELVETICA_NEUE,
   FontFamily.ARIAL,
   FontFamily.SANS_SERIF,

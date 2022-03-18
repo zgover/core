@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-import {type ThemeOptions} from '../../vendor/mui'
+import type {ThemeOptions} from '../../vendor/mui'
+import {FontFamily} from '../constants'
 import {useFontFamily} from '../util/use-font-family'
 
 
-const defaultFontFamily = useFontFamily('"Raleway"')
+const defaultFontFamily = useFontFamily(FontFamily.ROBOTO)
 
 export const consoleTypography: ThemeOptions['typography'] = {
   fontFamily: defaultFontFamily,

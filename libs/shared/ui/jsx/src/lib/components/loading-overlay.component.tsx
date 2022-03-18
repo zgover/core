@@ -15,70 +15,76 @@
  * limitations under the License.
  */
 
-import {alpha, styled} from '@aglyn/shared-feature-themes'
+import {alpha, mergeSxProps} from '@aglyn/shared-feature-themes'
 import {
-  Backdrop as MuiBackdrop,
-  type BackdropProps as MuiBackdropProps,
+  Box,
   CircularProgress,
   LinearProgress,
-  Typography,
+  Modal,
+  type ModalProps as MuiModalProps,
 } from '@mui/material'
-import Portal, {PortalProps as MuiPortalProps} from '@mui/material/Portal'
 import {forwardRef} from 'react'
 import {LoadingConsumer} from '../contexts/loading.context'
+import LoadingTextComponent from './loading-text.component'
 
 
-const LoadingBackdrop = styled(MuiBackdrop, {
-  name: 'AglynLoadingBackdrop',
-})(({theme}) => ({
-  backgroundColor: alpha(theme.palette.common.white, 0.48),
-  color: theme.palette.getContrastText(alpha(theme.palette.common.white, 0.36)),
-  zIndex: 9999999,
-  flexDirection: 'column',
-  backdropFilter: 'blur(5px)',
-}))
-
-const LoadingProgressBar = styled(LinearProgress, {
-  name: 'AglynLoadingProgressBar',
-})(({theme}) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  backgroundColor: alpha(theme.palette.primary.main, 0.86),
-  width: '100%',
-}))
-
-export interface LoadingOverlayComponentProps extends Partial<MuiBackdropProps>, Partial<MuiPortalProps> {}
+export interface LoadingOverlayComponentProps extends Partial<MuiModalProps<any, any>> {}
 
 const LoadingOverlayComponent = forwardRef<any, LoadingOverlayComponentProps>(
   function RefRenderFn(props, ref) {
-    const {open, children, disablePortal, container, ...rest} = props
+    const {open, children, sx, ...rest} = props
 
     return (
       <>
         {children}
-        <Portal disablePortal={disablePortal} container={container}>
-          <LoadingConsumer>
-            {({loading}) => (
-              <LoadingBackdrop
-                ref={ref}
-                open={open || loading}
-                mountOnEnter
-                unmountOnExit
-                {...rest}
+        <LoadingConsumer>
+          {({loading}) => (
+            <Modal
+              ref={ref}
+              open={open || loading || true}
+              sx={mergeSxProps({
+                zIndex: 9999999,
+                color: theme => theme.palette.text.primary,
+
+                '& .MuiBackdrop-root': {
+                  backdropFilter: 'blur(5px)',
+                  backgroundColor: theme => alpha(theme.palette.background.paper, 0.48),
+                },
+              }, sx)}
+              {...rest}
+            >
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0, right: 0, bottom: 0, left: 0,
+                  flexDirection: 'column',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <LoadingProgressBar color="secondary" />
+                <LinearProgress
+                  color="secondary"
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    backgroundColor: theme => alpha(theme.palette.primary.main, 0.86),
+                    width: '100%',
+                  }}
+                />
                 <CircularProgress color="secondary" />
-                <Typography
-                  children="Loading..."
+                <LoadingTextComponent
                   component="div"
                   variant="overline"
                   sx={{mt: 2, fontWeight: 'fontWeightBold'}}
-                />
-              </LoadingBackdrop>
-            )}
-          </LoadingConsumer>
-        </Portal>
+                >
+                  {'Loading'}
+                </LoadingTextComponent>
+              </Box>
+            </Modal>
+          )}
+        </LoadingConsumer>
       </>
     )
   },

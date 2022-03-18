@@ -16,6 +16,7 @@
  */
 
 import {ICON_VARIANT_PAGES} from '@aglyn/shared-data-enums'
+import {AppLink} from '@aglyn/shared-ui-jsx'
 import {Container} from '@mui/material'
 import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
@@ -50,9 +51,20 @@ export function ScreenDetails(props) {
         },
       ]}
       header={{
-        children: 'Screen Details',
+        children: `${screen?.displayName || 'Not Found'}`,
         icon: {path: ICON_VARIANT_PAGES.path},
       }}
+      headerRight={(
+        <AppLink
+          size="small"
+          variant="outlined"
+          componentVariant="button"
+          href={'/screens/[screenId]/besigner'}
+          hrefAs={`/screens/${screenId}/besigner`}
+        >
+          {'Besigner'}
+        </AppLink>
+      )}
     >
       <Container sx={{py: 3}} maxWidth={CONTENT_MAX_WIDTH}>
 

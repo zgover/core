@@ -17,43 +17,56 @@
 
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {AglynSvgLogo} from '@aglyn/shared-ui-jsx'
-import {Stack, type StackProps} from '@mui/material'
+import {Box, Modal, type ModalProps as MuiModalProps} from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import {forwardRef} from 'react'
 import LoadingTextComponent from './loading-text.component'
 
 
-export interface SecureLoadingOverlayProps extends StackProps {}
+export interface SecureLoadingOverlayProps extends Partial<MuiModalProps<any, any>> {}
 
 const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>(
   function RefRenderFn(props, ref) {
     const {sx, ...rest} = props
     return (
-      <Stack
+      <Modal
         ref={ref}
-        component="div"
         direction="column"
         alignItems="center"
         justifyContent="center"
         spacing={2}
         sx={mergeSxProps({
-          width: `100vw`,
-          height: `100vh`,
-          bgcolor: 'primary.main',
-          color: 'primary.contrastText',
+          zIndex: 9999999,
+          color: theme => theme.palette.text.primary,
+
+
+          '& .MuiBackdrop-root': {
+            backgroundColor: theme => theme.palette.background.paper,
+          },
         }, sx)}
         {...rest}
       >
-        <AglynSvgLogo sx={{width: 280, maxWidth: 1}} color="secondary" />
-        <CircularProgress color="secondary" />
-        <LoadingTextComponent
-          component="div"
-          variant="overline"
-          sx={{mt: 2, fontWeight: 'fontWeightBold'}}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0, right: 0, bottom: 0, left: 0,
+            flexDirection: 'column',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
-          {'One moment'}
-        </LoadingTextComponent>
-      </Stack>
+          <AglynSvgLogo sx={{width: 280, maxWidth: 1}} color="secondary" />
+          <CircularProgress color="secondary" />
+          <LoadingTextComponent
+            component="div"
+            variant="overline"
+            sx={{mt: 2, fontWeight: 'fontWeightBold'}}
+          >
+            {'One moment'}
+          </LoadingTextComponent>
+        </Box>
+      </Modal>
     )
   },
 )

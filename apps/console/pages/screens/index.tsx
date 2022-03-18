@@ -110,6 +110,7 @@ export function Screens(props) {
           icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
           label="Delete"
           onClick={handleDeleteScreen(id as string)}
+          color="error"
         />,
       ],
     },
@@ -135,7 +136,8 @@ export function Screens(props) {
       }}
       headerRight={(
         <Button
-          variant="contained"
+          size="small"
+          variant="outlined"
           onClick={handleFormOpen}
         >
           {'Create New Screen'}

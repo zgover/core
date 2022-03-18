@@ -107,8 +107,9 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
         navTabItems={navTabItems ?? defaultNavTabItems}
       />
 
-      <Box
+      <Stack
         component="main"
+        direction="column"
         sx={{flexGrow: 1}}
       >
         <DashboardHeaderComponent
@@ -125,11 +126,11 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
           {children}
         </Box>
 
-        {aside}
-
         <FooterComponent />
 
-      </Box>
+      </Stack>
+
+      {aside}
     </>
   )
 }
