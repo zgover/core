@@ -273,6 +273,7 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
           bgPosition="50% 90%"
           sx={{
             pt: 10,
+            pb: 2,
             bgcolor: 'background.secondary',
             color: 'text.primary',
             borderBottomWidth: `1px`,
@@ -343,6 +344,9 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
               {headerRight && (
                 <Grid
                   item
+                  // sm={'auto'}
+                  // xs={12}
+                  // sx={{textAlign: 'center'}}
                 >
                   {headerRight}
                 </Grid>

@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-export const DEFAULT_APP_UUN = '[DEFAULT]'
-export type DEFAULT_APP_UUN = typeof DEFAULT_APP_UUN
+import {createUid} from '@aglyn/shared-util-vendor'
+import {RESOURCE_ID_LENGTH} from '../constants/app'
 
-export const RESOURCE_ID_LENGTH = 10
+
+export function createResourceUid() {
+  return createUid(RESOURCE_ID_LENGTH)
+}
+export default createResourceUid

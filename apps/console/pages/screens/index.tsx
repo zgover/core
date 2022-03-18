@@ -15,18 +15,23 @@
  * limitations under the License.
  */
 
-import type {AglynTenantHostScreen} from '@aglyn/core-data-framework'
+import {type AglynTenantHostScreen, createResourceUid} from '@aglyn/core-data-framework'
 import {
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_EDIT,
   ICON_VARIANT_PAGES,
 } from '@aglyn/shared-data-enums'
-import {ContainerComponent, NavigationDrawerComponent} from '@aglyn/shared-ui-jsx'
+import {
+  ContainerComponent,
+  NavigationDrawerComponent,
+  useConfirmationContext,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Button, Container, Typography} from '@mui/material'
 import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
-import {collection, orderBy, query} from 'firebase/firestore'
+import {collection, doc, query, setDoc} from 'firebase/firestore'
 import {useCallback, useState} from 'react'
 import {useFirestore, useFirestoreCollectionData} from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
@@ -38,51 +43,77 @@ import LayoutConsoleComponent from '../../layouts/layout-console.component'
 import LayoutDashboardComponent from '../../layouts/layout-dashboard.component'
 
 
-const columns: GridColumns = [
-  {
-    field: 'actions',
-    type: 'actions',
-    width: 100,
-    getActions: () => [
-      <GridActionsCellItem
-        key="action-edit"
-        icon={<MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />}
-        label="Edit"
-      />,
-      <GridActionsCellItem
-        key="action-delete"
-        icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
-        label="Delete"
-      />,
-    ],
-  },
-  {field: 'id', headerName: 'ID', type: 'string'},
-  {field: 'updatedAt', headerName: 'Last Updated', type: 'date'},
-  {field: 'createdAt', headerName: 'Created', type: 'date'},
-]
-
 export function Screens(props) {
 
+  const {queueLoading, loading} = useLoading()
+  const {confirm} = useConfirmationContext()
   const [quickDrawerOpen, setQuickDrawerOpen] = useState<boolean>(false)
   const [pageSize, setPageSize] = useState<number>(5)
   const firestore = useFirestore()
   const screensCollection = collection(firestore, 'screens')
-  const screensQuery = query(screensCollection, orderBy('createdAt', 'desc'))
-
+  const screensQuery = query(screensCollection)
   const {status, data: screens} = useFirestoreCollectionData(screensQuery, {
     idField: '$id', // this field will be added to the object created from each document
   }) as unknown as {status: string, data: AglynTenantHostScreen[]}
 
-  const error = useState(null)
-  const handleFormSubmit = useCallback(async (values) => {
+  const handleFormOpen = useCallback(() => {setQuickDrawerOpen(true)}, [])
+  const handleFormClose = useCallback(() => {setQuickDrawerOpen(false)}, [])
+  const handleDeleteScreen = useCallback(async () => {
+    await confirm({
+      title: 'Are you sure?',
+      description:
+        'You are about to delete an element from the canvas, please confirm the desired option. Press \'Delete\' to confirm and delete the item. Press \'Cancel\' to void the operation and close this dialog.',
+      confirmationText: 'Delete',
+      confirmationButtonProps: {
+        color: 'error',
+      },
+    })
+  }, [confirm])
 
-  }, [])
-  const handleFormOpen = useCallback(() => {
-    setQuickDrawerOpen(true)
-  }, [])
-  const handleFormClose = useCallback(() => {
-    setQuickDrawerOpen(false)
-  }, [])
+  const columns: GridColumns = [
+    {
+      field: 'actions',
+      type: 'actions',
+      width: 100,
+      getActions: () => [
+        <GridActionsCellItem
+          key="action-edit"
+          icon={<MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />}
+          label="Edit"
+        />,
+        <GridActionsCellItem
+          key="action-delete"
+          icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
+          label="Delete"
+          onClick={handleDeleteScreen}
+        />,
+      ],
+    },
+    {field: '$id', headerName: 'ID', type: 'string', width: 150},
+    {field: 'displayName', headerName: 'Display name', width: 200, type: 'string'},
+    {field: 'description', headerName: 'Description', width: 275, type: 'string'},
+    {field: 'updatedAt', headerName: 'Updated', width: 150, type: 'date'},
+    {field: 'createdAt', headerName: 'Created', width: 150, type: 'date'},
+  ]
+
+  const [error, setError] = useState(null)
+  const handleFormSubmit = useCallback(async (values) => {
+    if (loading) return
+    if (error) setError(null)
+    const dequeueLoading = queueLoading()
+    const newId = createResourceUid()
+    await setDoc(doc(firestore, 'screens', newId), {...values})
+      .then(() => {
+        handleFormClose()
+      })
+      .catch((error) => {
+        console.error(error)
+        setError({...error})
+      })
+      .finally(() => {
+        dequeueLoading()
+      })
+  }, [firestore, error, loading, queueLoading, handleFormClose])
   console.log('Screens props', props, status, screens)
   return (
     <LayoutDashboardComponent
@@ -97,8 +128,7 @@ export function Screens(props) {
       }}
       headerRight={(
         <Button
-          variant="outlined"
-          color="primary"
+          variant="contained"
           onClick={handleFormOpen}
         >
           {'Add New Screen'}
@@ -110,7 +140,7 @@ export function Screens(props) {
         <WidgetCardComponent>
           <DataTableComponent
             rowHeight={40}
-            getRowId={(row) => row.id}
+            getRowId={(row) => row.$id}
             columns={columns}
             noRowsLabel="No screens"
             rows={screens || []}
@@ -154,7 +184,6 @@ export function Screens(props) {
               sx={{mt: 2, mb: 1}}
             />
           </ContainerComponent>
-
         </NavigationDrawerComponent>
 
       </Container>
@@ -165,7 +194,7 @@ const formSchema = {
   'fields': [
     {
       'component': 'text-field',
-      'name': 'displayName ',
+      'name': 'displayName',
       'helperText': 'Friendly name for internal reference',
       'type': 'text', 'label': 'Display name',
       'isRequired': true,
