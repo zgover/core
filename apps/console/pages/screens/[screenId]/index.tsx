@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import {ICON_VARIANT_PAGES} from '@aglyn/shared-data-enums'
+import {ICON_VARIANT_BESIGNER, ICON_VARIANT_PAGES} from '@aglyn/shared-data-enums'
 import {AppLink, GridItems} from '@aglyn/shared-ui-jsx'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Container, ListItemText} from '@mui/material'
 import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
@@ -39,22 +40,22 @@ export function ScreenDetails(props) {
 
   const details = [
     {
-      key: 'details-dname',
+      id: 'details-dname',
       primary: 'Display name:',
       secondary: `${screen?.displayName ?? ''}`,
     },
     {
-      key: 'details-desc',
+      id: 'details-desc',
       primary: 'Description:',
       secondary: `${screen?.description ?? ''}`,
     },
     {
-      key: 'details-datec',
+      id: 'details-datec',
       primary: 'Date created:',
       secondary: `${screen?.createdAt?.toDate?.() || ''}`,
     },
     {
-      key: 'details-dateu',
+      id: 'details-dateu',
       primary: 'Date updated:',
       secondary: `${screen?.updatedAt?.toDate?.() || ''}`,
     },
@@ -64,6 +65,7 @@ export function ScreenDetails(props) {
 
   return (
     <LayoutDashboardComponent
+      activeTab={'/screens'}
       breadcrumbItems={[
         {
           children: 'Screens',
@@ -84,6 +86,7 @@ export function ScreenDetails(props) {
           componentVariant="button"
           href={'/screens/[screenId]/besigner'}
           hrefAs={`/screens/${screenId}/besigner`}
+          startIcon={(<MdiIcon path={ICON_VARIANT_BESIGNER.path} />)}
         >
           {'Besigner'}
         </AppLink>
@@ -103,8 +106,8 @@ export function ScreenDetails(props) {
                   contentGutterY
                   contentBordered
                 >
-                  {details.map((item) => (
-                    <ListItemText {...item} />
+                  {details.map((item, i) => (
+                    <ListItemText key={item.id ?? i} {...item} />
                   ))}
                 </WidgetCardComponent>
               ),

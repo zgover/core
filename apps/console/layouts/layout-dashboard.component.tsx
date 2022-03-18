@@ -74,9 +74,9 @@ export interface LayoutDashboardProps {
   disableDefaultBreadcrumb?: true
   header?: DashboardHeaderProps['header']
   headerRight?: DashboardHeaderProps['headerRight']
-
   tabBarTitle?: SecondaryAppBarProps['tabBarTitle']
   navTabItems?: SecondaryAppBarProps['navTabItems']
+  activeTab?: SecondaryAppBarProps['activeTab']
   aside?: ReactNode
 }
 
@@ -91,6 +91,7 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
     navTabItems,
     headerRight,
     aside,
+    activeTab,
   } = props
 
   const breadcrumbs = useMemo(() => {
@@ -105,6 +106,7 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
       <SecondaryAppBarComponent
         tabBarTitle={tabBarTitle ?? defaultTabBarTitle}
         navTabItems={navTabItems ?? defaultNavTabItems}
+        activeTab={activeTab}
       />
 
       <Stack

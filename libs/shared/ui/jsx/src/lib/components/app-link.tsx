@@ -23,6 +23,8 @@ import {
   ButtonBase as MuiButtonBase,
   type ButtonBaseProps as MuiButtonBaseProps,
   type ButtonProps as MuiButtonProps,
+  IconButton as MuiIconButton,
+  type IconButtonProps as MuiIconButtonProps,
   Link as MuiLink,
   type LinkProps as MuiLinkProps,
 } from '@mui/material'
@@ -32,13 +34,14 @@ import {forwardRef} from 'react'
 import {NextLink, type NextLinkProps} from './next-link'
 
 
-export type AppLinkVariant = 'naked' | 'button' | 'button-base' | 'text' | 'default' | undefined | never
+export type AppLinkVariant = 'naked' | 'button' | 'button-base' | 'icon-button' | 'text' | 'default' | undefined | never
 export type AppLinkVariantDefault = Extract<AppLinkVariant, 'text' | 'default' | undefined | never>
 
 type BaseLinkProps = Omit<NextLinkProps, 'as' | 'hrefTo'>
 export type TextProps = MuiLinkProps<any, BaseLinkProps>
 export type ButtonProps = MuiButtonProps<any, BaseLinkProps>
 export type ButtonBaseProps = MuiButtonBaseProps<any, BaseLinkProps>
+export type IconButtonProps = MuiIconButtonProps<any, BaseLinkProps>
 export type NakedProps = MuiLinkProps<any, BaseLinkProps>
 export type DefaultProps = TextProps
 
@@ -48,8 +51,9 @@ export type AppLinkProps<T = AppLinkVariant> =
       ? T extends AppLinkVariantDefault ? DefaultProps & {componentVariant?: T}
         : T extends 'button' ? ButtonProps & {componentVariant: T}
           : T extends 'button-base' ? ButtonBaseProps & {componentVariant: T}
-            : T extends 'naked' ? NakedProps & {componentVariant: T}
-              : never
+            : T extends 'icon-button' ? IconButtonProps & {componentVariant: T}
+              : T extends 'naked' ? NakedProps & {componentVariant: T}
+                : never
       : never
     : (DefaultProps & {componentVariant?: undefined | never})
 
@@ -58,6 +62,7 @@ export const appLinkClassKey = generateComponentClassKeys('AglynAppLink', [
   'active',
   'variantNaked',
   'variantButton',
+  'variantIconButton',
   'variantButtonBase',
   'variantText',
 ])
@@ -81,6 +86,7 @@ const AppLink = forwardRef(
     const isNaked = variant === 'naked',
       isButton = variant === 'button',
       isButtonBase = variant === 'button-base',
+      isIconButton = variant === 'icon-button',
       isText = variant === 'text' || variant === 'default' || !variant
 
     const elemClassName = clsx({
@@ -89,6 +95,7 @@ const AppLink = forwardRef(
       [appLinkClassKey.variantNaked]: isNaked,
       [appLinkClassKey.variantButton]: isButton,
       [appLinkClassKey.variantButtonBase]: isButtonBase,
+      [appLinkClassKey.variantButtonBase]: isIconButton,
       [appLinkClassKey.variantText]: isText,
     }, className)
 
@@ -118,6 +125,18 @@ const AppLink = forwardRef(
     if (variant === 'button-base') {
       return (
         <MuiButtonBase
+          ref={ref}
+          className={elemClassName}
+          component={NextLink}
+          hrefTo={href || ''}
+          hrefAs={hrefAs}
+          {...rest}
+        />
+      )
+    }
+    if (variant === 'icon-button') {
+      return (
+        <MuiIconButton
           ref={ref}
           className={elemClassName}
           component={NextLink}

@@ -86,6 +86,7 @@ export interface SecondaryAppBarProps extends Partial<AppBarProps> {
   children?: ReactNode
   tabBarTitle?: ReactNode
   navTabItems?: NavTabItem[]
+  activeTab?: string
 }
 
 function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
@@ -93,17 +94,25 @@ function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
     children,
     tabBarTitle,
     navTabItems,
+    activeTab,
     ...rest
   } = props
   const router = useRouter()
   const tabItems: NavTabItem[] = useMemo(() => {
     return navTabItems ?? []
   }, [navTabItems])
-  const tabValue = useMemo(() => (
-    tabItems.find(
-      (i) => (i?.hrefAs || i?.href || '') === router.asPath,
-    )?.href || false
-  ), [router, tabItems])
+  const tabValue = useMemo(() => {
+    const asPath = router.asPath,
+      active = activeTab,
+      specific = typeof active !== 'undefined'
+    return tabItems.find((i) => {
+      const href = i?.href,
+        as = i?.hrefAs,
+        id = i?.id
+      if (specific) return active === href || active === as || active === id
+      return asPath === href || asPath === as || asPath === id
+    })?.href || false
+  }, [router, tabItems, activeTab])
 
   return (
     <ElevateOnScroll threshold={TOP_BAR_HEIGHT}>

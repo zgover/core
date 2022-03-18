@@ -42,6 +42,7 @@ import {
   mdiLaptop,
   mdiLoginVariant,
   mdiLogoutVariant,
+  mdiMathCompass,
   mdiMenuDown,
   mdiMonitor,
   mdiMonitorSmall,
@@ -113,3 +114,4 @@ export const ICON_VARIANT_DOCK_RIGHT_TOGGLE = mdiDockRight
 // Site area
 export const ICON_VARIANT_HOME = mdiHomeVariant
 export const ICON_VARIANT_PAGES = mdiWeb
+export const ICON_VARIANT_BESIGNER = mdiMathCompass
