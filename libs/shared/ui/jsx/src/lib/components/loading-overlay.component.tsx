@@ -22,6 +22,7 @@ import {
   LinearProgress,
   Modal,
   type ModalProps as MuiModalProps,
+  Stack,
 } from '@mui/material'
 import {forwardRef} from 'react'
 import {LoadingConsumer} from '../contexts/loading.context'
@@ -41,7 +42,7 @@ const LoadingOverlayComponent = forwardRef<any, LoadingOverlayComponentProps>(
           {({loading}) => (
             <Modal
               ref={ref}
-              open={open || loading || true}
+              open={open || loading}
               sx={mergeSxProps({
                 zIndex: 9999999,
                 color: theme => theme.palette.text.primary,
@@ -73,14 +74,21 @@ const LoadingOverlayComponent = forwardRef<any, LoadingOverlayComponentProps>(
                     width: '100%',
                   }}
                 />
-                <CircularProgress color="secondary" />
-                <LoadingTextComponent
-                  component="div"
-                  variant="overline"
-                  sx={{mt: 2, fontWeight: 'fontWeightBold'}}
+                <Stack
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  spacing={2}
                 >
-                  {'Loading'}
-                </LoadingTextComponent>
+                  <CircularProgress color="secondary" />
+                  <LoadingTextComponent
+                    component="div"
+                    variant="overline"
+                    sx={{fontWeight: 'fontWeightBold'}}
+                  >
+                    {'Loading'}
+                  </LoadingTextComponent>
+                </Stack>
               </Box>
             </Modal>
           )}

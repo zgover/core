@@ -17,7 +17,7 @@
 
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {AglynSvgLogo} from '@aglyn/shared-ui-jsx'
-import {Box, Modal, type ModalProps as MuiModalProps} from '@mui/material'
+import {Box, Modal, type ModalProps as MuiModalProps, Stack} from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import {forwardRef} from 'react'
 import LoadingTextComponent from './loading-text.component'
@@ -31,14 +31,10 @@ const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>
     return (
       <Modal
         ref={ref}
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        spacing={2}
+        open
         sx={mergeSxProps({
           zIndex: 9999999,
           color: theme => theme.palette.text.primary,
-
 
           '& .MuiBackdrop-root': {
             backgroundColor: theme => theme.palette.background.paper,
@@ -54,17 +50,25 @@ const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            flexSpacing: 2,
           }}
         >
-          <AglynSvgLogo sx={{width: 280, maxWidth: 1}} color="secondary" />
-          <CircularProgress color="secondary" />
-          <LoadingTextComponent
-            component="div"
-            variant="overline"
-            sx={{mt: 2, fontWeight: 'fontWeightBold'}}
+          <Stack
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+            spacing={2}
           >
-            {'One moment'}
-          </LoadingTextComponent>
+            <AglynSvgLogo sx={{width: 280, maxWidth: 1}} color="secondary" />
+            <CircularProgress color="secondary" />
+            <LoadingTextComponent
+              component="div"
+              variant="overline"
+              sx={{fontWeight: 'fontWeightBold'}}
+            >
+              {'One moment'}
+            </LoadingTextComponent>
+          </Stack>
         </Box>
       </Modal>
     )
