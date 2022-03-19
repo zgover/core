@@ -37,6 +37,15 @@ export const consoleOverrides: ThemeOptions['components'] = {
         padding: theme.spacing(1),
       }),
     },
+    variants: [
+      {
+        props: {variant: 'outlined'},
+        style: ({theme}) => ({
+          border: `1px solid`,
+          borderColor: `inherit`,
+        }),
+      },
+    ],
   },
   MuiLink: {
     defaultProps: {

@@ -83,12 +83,12 @@ export function ScreenDetails(props) {
         <AppLink
           size="small"
           variant="outlined"
-          componentVariant="button"
+          componentVariant="fab"
           href={'/screens/[screenId]/besigner'}
           hrefAs={`/screens/${screenId}/besigner`}
-          startIcon={(<MdiIcon path={ICON_VARIANT_BESIGNER.path} />)}
+          title={'Open with besigner'}
         >
-          {'Besigner'}
+          <MdiIcon path={ICON_VARIANT_BESIGNER.path} />
         </AppLink>
       )}
     >
