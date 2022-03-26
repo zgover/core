@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
+import {OverridableComponent} from '@mui/material/OverridableComponent'
 import type {Theme} from '@mui/material/styles'
 // eslint-disable-next-line no-restricted-imports
 import type {Shadows} from '@mui/material/styles/shadows'
 import type {WithStyles} from '@mui/styles'
 import type {ClassKeyInferable} from '@mui/styles/withStyles'
+import * as React from 'react'
 import type {ColorPropOverrides, IActionStates} from '../lib/theme.types'
+// import type {ContainerTypeMap} from '@mui/material/Container'
 
 
 //    _____     _______ ____  ____  ___ ____  _____ ____
@@ -35,6 +38,21 @@ declare module '@mui/material/Button' {
 }
 declare module '@mui/material/ButtonGroup' {
   interface ButtonGroupPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/Container' {
+  interface VariantProps {
+    props: {
+      variant?: 'vertical' | 'horizontal' | 'boxed'
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  interface ContainerTypeMap<P = {}, D extends React.ElementType = 'div'> extends VariantProps {
+    props: P & ContainerTypeMap['props']
+    defaultComponent: D
+  }
+
+  const Container: OverridableComponent<ContainerTypeMap>
 }
 declare module '@mui/material/ToggleButtonGroup' {
   interface ToggleButtonGroupPropsColorOverrides extends ColorPropOverrides {}
@@ -240,6 +258,11 @@ export {
   type TypeBackground,
   type TypeText,
 } from '@mui/material/styles/createPalette'
+
+// eslint-disable-next-line no-restricted-imports
+export {
+  type TypographyOptions,
+} from '@mui/material/styles/createTypography'
 
 // eslint-disable-next-line no-restricted-imports
 export {

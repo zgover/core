@@ -17,13 +17,12 @@
 
 import {styled} from '@aglyn/shared-feature-themes'
 import {AppLink, type AppLinkProps, ElevateOnScroll} from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps, mdiShieldLock} from '@aglyn/shared-ui-mdi-jsx'
+import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
 import {
   AppBar,
   type AppBarProps,
   Divider,
-  Stack,
   Tab as MuiTab,
   type TabProps as MuiTabProps,
   Tabs as MuiTabs,
@@ -62,23 +61,6 @@ function a11yProps(index) {
     'aria-controls': `scrollable-auto-tabpanel-${index}`,
   }
 }
-
-const defaultTabBarTitle = (
-  <Stack
-    direction="row"
-    spacing={{sm: 0.15, md: 0.5}}
-    alignItems="center"
-    typography={'subtitle2'}
-    lineHeight={'normal'}
-    sx={{color: 'tertiary.light'}}
-  >
-    <span>{'Secure'}</span>
-    <MdiIcon
-      path={mdiShieldLock.path}
-      fontSize={'small'}
-    />
-  </Stack>
-)
 
 export type NavTabItem = Partial<AppLinkProps & MuiTabProps & {icon: MdiIconProps}>
 

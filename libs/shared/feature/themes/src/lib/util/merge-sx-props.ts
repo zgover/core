@@ -30,10 +30,10 @@ export type MergeSxParameter<Theme extends object = DefaultTheme> =
 export function mergeSxProps<Theme extends DefaultTheme>(
   ...sxProps: MergeSxParameter<Theme>[]
 ): MergedSxProps<Theme> {
-  let merged: MergedSxProps<Theme> = []
+  const merged: MergedSxProps<Theme> = []
 
   for (const sx of sxProps) {
-    if (_isArr(sx)) merged = merged.concat(mergeSxProps(sx))
+    if (_isArr(sx)) merged.push(...sx as any)
     else merged.push(sx || false)
   }
 

@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {APP_CONSOLE} from '@aglyn/shared-data-enums'
+import {APP_CONSOLE, ICON_VARIANT_MENU_DOWN} from '@aglyn/shared-data-enums'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {
   AglynSvgIcon,
   AglynSvgLogo,
@@ -32,6 +33,7 @@ import {
   AppBar,
   Avatar,
   Button,
+  Divider,
   IconButton,
   type IconButtonProps,
   Stack,
@@ -40,7 +42,7 @@ import {
 } from '@mui/material'
 import Head from 'next/head'
 import {Fragment, type ReactNode} from 'react'
-import {TOP_BAR_HEIGHT} from '../constants/shared'
+import {DRAWER_WIDTH, TOP_BAR_HEIGHT} from '../constants/shared'
 
 
 // eslint-disable-next-line react/display-name
@@ -55,6 +57,7 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
     MenuProps,
     ...rest
   } = item
+  const isMenu = !_isArrEmpty(items)
   const itemKey = key || id || i
   const rendered = type === 'text' ? (
     <Button
@@ -62,8 +65,13 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
       id={id}
       color="inherit"
       startIcon={!icon?.path ? icon : (<MdiIcon {...icon} />)}
+      endIcon={!isMenu ? undefined : (<MdiIcon path={ICON_VARIANT_MENU_DOWN.path} />)}
       {...(!rest.href ? {} : {component: AppLink, componentVariant: 'button'})}
       {...rest}
+      sx={mergeSxProps({
+        '& .MuiButton-endIcon': {marginLeft: 0},
+        '& .MuiButton-endIcon>*:nth-of-type(1)': {fontSize: `1.7em`},
+      }, rest?.sx)}
     >
       {children}
     </Button>
@@ -81,17 +89,17 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
     </IconButton>
   )
 
-  return !_isArrEmpty(items) ? (
+  return isMenu ? (
     <Menu
       key={itemKey}
       items={items}
-      sx={{
+      {...MenuProps}
+      sx={mergeSxProps({
         p: {padding: 0.5, xs: 0.25},
         '&:last-child': {
           paddingLeft: 0.75,
         },
-      }}
-      {...MenuProps}
+      }, MenuProps?.sx)}
     >
       {rendered}
     </Menu>
@@ -166,12 +174,10 @@ function LayoutMainComponent(props: LayoutMainProps) {
               component="header"
               color="inherit"
               variant="elevation"
-              elevation={
-                !disableAppBarElevation && activeWithoutHysteresis ? 4 : 0
-              }
+              elevation={!disableAppBarElevation && activeWithoutHysteresis ? 4 : 0}
               position={disableAppBarElevation ? 'relative' : 'sticky'}
               sx={{
-                height: `${TOP_BAR_HEIGHT}px`,
+                height: `${TOP_BAR_HEIGHT - 1}px`,
                 borderBottomWidth: `1px`,
                 borderBottomStyle: 'solid',
                 borderBottomColor: 'divider',
@@ -184,18 +190,28 @@ function LayoutMainComponent(props: LayoutMainProps) {
                 alignItems="center"
                 justifyContent="flex-start"
                 direction="row"
+                sx={{paddingLeft: {xs: 0, md: 0}}}
+                divider={
+                  <Divider
+                    orientation="vertical"
+                    variant="middle"
+                    flexItem
+                    light
+                  />
+                }
               >
                 <Stack
-                  flexGrow={1}
                   alignItems="center"
                   direction="row"
                   justifyContent="flex-start"
                   color="inherit"
+                  width={DRAWER_WIDTH}
+                  maxWidth={{xs: '100%'}}
+                  sx={{paddingLeft: {xs: 2, md: 3}}}
                 >
                   <AppLink
                     href="/"
                     componentVariant="button-base"
-                    // anchorComponent="button"
                     color="inherit"
                     disableRipple
                   >
@@ -241,21 +257,25 @@ function LayoutMainComponent(props: LayoutMainProps) {
                   </AppLink>
                 </Stack>
 
-                {customCenter ?? (
-                  _isArrEmpty(centerNavigationItems) || customCenter ? null : (
+                <Stack
+                  alignItems="center"
+                  justifyContent="flex-start"
+                  direction="row"
+                  flexGrow={1}
+                  sx={{paddingLeft: 6}}
+                >
+                  {customCenter ?? _isArrEmpty(centerNavigationItems) ? null : (
                     <Stack
                       component="nav"
                       direction="row"
                       alignItems="center"
                       justifyContent="flex-start"
-                      flexBasis="72%"
-                      flexGrow={1}
+                      // flexBasis="72%"
                     >
                       {(centerNavigationItems ?? []).map(buildNav('text'))}
                     </Stack>
-                  )
-                )}
-
+                  )}
+                </Stack>
                 {_isArrEmpty(quickActions) ? null : (
                   <Stack
                     component="nav"

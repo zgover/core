@@ -15,15 +15,12 @@
  * limitations under the License.
  */
 
-import type {ThemeOptions} from '../../vendor/mui'
-import {FontFamily} from '../constants'
-import {useFontFamily} from '../util/use-font-family'
+import type {TypographyOptions} from '../../vendor/mui'
+import {buildFontFamilyList, FontFamily} from '../constants'
 
 
-const defaultFontFamily = useFontFamily(FontFamily.ROBOTO)
-
-export const consoleTypography: ThemeOptions['typography'] = {
-  fontFamily: defaultFontFamily,
+export const consoleTypography: TypographyOptions = {
+  fontFamily: buildFontFamilyList(FontFamily.ROBOTO).join(','),
   // fontSize: 14,
   // htmlFontSize: 16,
   // fontWeightLight: 300,

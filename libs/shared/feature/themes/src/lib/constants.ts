@@ -69,10 +69,11 @@ export enum FontFamily {
   VERDANA = 'Verdana',
 }
 
-export const FALLBACK_FONT_FAMILY = [
+export const buildFontFamilyList = (fontFamily = FontFamily.ROBOTO) => [
   FontFamily.APPLE_SYSTEM,
   FontFamily.BLINK_MAC_SYSTEM_FONT,
   FontFamily.SEGOE_UI,
+  fontFamily,
   FontFamily.HELVETICA_NEUE,
   FontFamily.ARIAL,
   FontFamily.SANS_SERIF,

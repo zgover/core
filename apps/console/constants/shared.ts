@@ -16,8 +16,10 @@
  */
 
 export const CONTENT_MAX_WIDTH = 'xl'
+export const DRAWER_WIDTH = 240
 export const TAB_HEIGHT = 40
-export const TOP_BAR_HEIGHT = 52
+export const TOP_BAR_HEIGHT = 48
+export const TABLE_ROW_HEIGHT = 48
 
 export const mainNavigation = [
   // {

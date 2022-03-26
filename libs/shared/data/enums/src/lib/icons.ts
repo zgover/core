@@ -51,6 +51,7 @@ import {
   mdiPencil,
   mdiRedo,
   mdiShapeSquareRoundedPlus,
+  mdiShieldLock,
   mdiTablet,
   mdiThemeLightDark,
   mdiTune,
@@ -115,3 +116,5 @@ export const ICON_VARIANT_DOCK_RIGHT_TOGGLE = mdiDockRight
 export const ICON_VARIANT_HOME = mdiHomeVariant
 export const ICON_VARIANT_PAGES = mdiWeb
 export const ICON_VARIANT_BESIGNER = mdiMathCompass
+// Symbolized illustrations
+export const ICON_VARIANT_SYMBOL_SECURE = mdiShieldLock

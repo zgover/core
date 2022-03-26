@@ -110,6 +110,18 @@ LayoutConsoleComponent.defaultProps = {
       id: 'center-nav-besigner',
       children: 'Besigner',
       href: '/besigner',
+      items: [
+        {
+          id: 'center-nav-home',
+          children: 'Home',
+          href: '/',
+        },
+        {
+          id: 'center-nav-besigner',
+          children: 'Besigner',
+          href: '/besigner',
+        },
+      ],
     },
   ],
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type ThemeOptions} from '../../vendor/mui'
+import type {ThemeOptions} from '../../vendor/mui'
 
 
 export const consoleOverrides: ThemeOptions['components'] = {
@@ -26,6 +26,48 @@ export const consoleOverrides: ThemeOptions['components'] = {
         height: 32,
       },
     },
+  },
+  MuiContainer: {
+    defaultProps: {
+      disableGutters: false,
+    },
+    variants: [
+      {
+        props: {variant: 'horizontal', disableGutters: false},
+        style: ({theme}) => ({
+          paddingLeft: theme.spacing(2),
+          paddingRight: theme.spacing(2),
+          [theme.breakpoints.up('md')]: {
+            paddingLeft: theme.spacing(3),
+            paddingRight: theme.spacing(3),
+          },
+        }),
+      },
+      {
+        props: {variant: 'vertical', disableGutters: false},
+        style: ({theme}) => ({
+          paddingTop: theme.spacing(2),
+          paddingBottom: theme.spacing(2),
+          paddingLeft: 'unset',
+          paddingRight: 'unset',
+          [theme.breakpoints.up('md')]: {
+            paddingTop: theme.spacing(3),
+            paddingBottom: theme.spacing(3),
+            paddingLeft: 'unset',
+            paddingRight: 'unset',
+          },
+        }),
+      },
+      {
+        props: {variant: 'boxed', disableGutters: false},
+        style: ({theme}) => ({
+          padding: theme.spacing(2),
+          [theme.breakpoints.up('md')]: {
+            padding: theme.spacing(3),
+          },
+        }),
+      },
+    ],
   },
   MuiIconButton: {
     defaultProps: {

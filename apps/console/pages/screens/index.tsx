@@ -39,7 +39,7 @@ import AuthErrorAlertComponent from '../../components/auth-error-alert.component
 import AuthFormTemplateComponent from '../../components/auth-form-template.component'
 import DataTableComponent from '../../components/data-table.component'
 import WidgetCardComponent from '../../components/widget-card.component'
-import {CONTENT_MAX_WIDTH} from '../../constants/shared'
+import {CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT} from '../../constants/shared'
 import LayoutConsoleComponent from '../../layouts/layout-console.component'
 import LayoutDashboardComponent from '../../layouts/layout-dashboard.component'
 
@@ -181,10 +181,10 @@ export function Screens(props) {
         </NavigationDrawerComponent>
       )}
     >
-      <Container sx={{py: 3}} maxWidth={CONTENT_MAX_WIDTH}>
+      <Container variant="boxed" maxWidth={CONTENT_MAX_WIDTH}>
         <WidgetCardComponent>
           <DataTableComponent
-            rowHeight={50}
+            rowHeight={TABLE_ROW_HEIGHT}
             getRowId={(row) => row.$id}
             columns={columns}
             noRowsLabel="No screens"

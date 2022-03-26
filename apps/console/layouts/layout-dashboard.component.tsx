@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {ICON_VARIANT_HOME} from '@aglyn/shared-data-enums'
-import {MdiIcon, mdiShieldLock} from '@aglyn/shared-ui-mdi-jsx'
+import {ICON_VARIANT_HOME, ICON_VARIANT_SYMBOL_SECURE} from '@aglyn/shared-data-enums'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Box, Stack} from '@mui/material'
 import {type ReactNode, useMemo} from 'react'
 import DashboardHeaderComponent, {
@@ -52,7 +52,7 @@ const defaultTabBarTitle = (
   >
     <span>{'Secure'}</span>
     <MdiIcon
-      path={mdiShieldLock.path}
+      path={ICON_VARIANT_SYMBOL_SECURE.path}
       fontSize={'small'}
     />
   </Stack>
