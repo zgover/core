@@ -16,16 +16,17 @@
  */
 
 import type {GetServerSidePropsContext} from 'next/types'
+import {buildRoute, Route} from '../../constants/route-links'
 
 
 export default () => null
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => {
-  const {resolvedUrl} = context
+  const {} = context
   return {
     redirect: {
       permanent: true,
-      destination: `${resolvedUrl}/list`,
+      destination: buildRoute(Route.SCREEN_LIST),
     },
   }
 }

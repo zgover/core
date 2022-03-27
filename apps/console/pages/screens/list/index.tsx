@@ -37,13 +37,14 @@ import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
 import {collection, doc, limit, query, setDoc, Timestamp} from 'firebase/firestore'
 import {useCallback, useState} from 'react'
 import {useFirestore, useFirestoreCollectionData} from 'reactfire'
-import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
-import AuthFormTemplateComponent from '../../../../components/auth-form-template.component'
-import DataTableComponent from '../../../../components/data-table.component'
-import WidgetCardComponent from '../../../../components/widget-card.component'
-import {CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT} from '../../../../constants/shared'
-import LayoutConsoleComponent from '../../../../layouts/layout-console.component'
-import LayoutDashboardComponent from '../../../../layouts/layout-dashboard.component'
+import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
+import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
+import DataTableComponent from '../../../components/data-table.component'
+import WidgetCardComponent from '../../../components/widget-card.component'
+import {buildRoute, Route} from '../../../constants/route-links'
+import {CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT} from '../../../constants/shared'
+import LayoutConsoleComponent from '../../../layouts/layout-console.component'
+import LayoutDashboardComponent from '../../../layouts/layout-dashboard.component'
 
 
 function Screens(props) {
@@ -106,7 +107,7 @@ function Screens(props) {
             label="detail"
             component={AppLink}
             componentVariant="naked"
-            href={`/screens/${id}/versions/${versionId}/view`}
+            href={buildRoute(Route.SCREEN_DETAILS, {screenId: id, versionId})}
           />,
           <GridActionsCellItem
             key="action-delete"
@@ -129,10 +130,11 @@ function Screens(props) {
 
   return (
     <LayoutDashboardComponent
+      activeTab={buildRoute(Route.SCREEN_LIST)}
       breadcrumbItems={[
         {
           children: 'Screens',
-          href: '/screens',
+          href: buildRoute(Route.SCREEN_LIST),
         },
       ]}
       header={{

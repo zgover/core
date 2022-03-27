@@ -289,7 +289,7 @@ addPage({
 })
 
 type AggregatedRouterProps = Pick<Router, 'asPath' | 'basePath' | 'pathname' | 'query' | 'route'>
-type DenormalizedPage = Omit<PageMeta, 'pages'> & {pages: PageMeta[]}
+type DenormalizedPage = Omit<PageMeta, 'pages'> & {pages: (PageMeta & any)[]}
 export type AggregatedPageMeta = AggregatedRouterProps & {
   pageMeta: PageMeta
   overrideMeta?: PageMeta

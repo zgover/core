@@ -21,8 +21,7 @@ import {
   AuthErrorNotice,
   type AuthResultError,
 } from '@aglyn/shared-data-enums'
-import Alert, {type AlertProps as MuiAlertProps} from '@mui/material/Alert'
-import Typography from '@mui/material/Typography'
+import {Alert, type AlertProps as MuiAlertProps, Typography} from '@mui/material'
 
 
 export interface AuthErrorAlertComponentProps extends Partial<MuiAlertProps> {

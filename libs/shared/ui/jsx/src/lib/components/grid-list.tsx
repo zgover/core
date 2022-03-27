@@ -111,7 +111,8 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
     } = props
 
     const computeItemKey = useCallback((index: number) => {
-      return items[index].id
+      const item = items[index]
+      return item?.key ?? item?.id ?? items.indexOf(item)
     }, [items])
 
     const GridContainer = useMemo(() => forwardRef<any, MuiGridProps>(

@@ -101,8 +101,12 @@ const SelectComponent = forwardRef<any, SelectProps>(
               {defaultOption?.children ?? 'None'}
             </MuiMenuItem>
           )}
-          {options.map(({children, label, value, ...item}: any, index: number) => (
-            <MuiMenuItem key={item.id ?? value ?? index} value={value} {...item}>
+          {options.map(({children, label, value, ...item}: any, key: number) => (
+            <MuiMenuItem
+              key={item.key ?? item.id ?? value ?? key}
+              value={value}
+              {...item}
+            >
               {children ?? label}
             </MuiMenuItem>
           ))}

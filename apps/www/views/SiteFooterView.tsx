@@ -88,7 +88,7 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function 
                     </Typography>
                     <Typography component="ul">
                       {items.map((item, key) => (
-                        <li key={key}>
+                        <li key={item?.key ?? item?.id ?? key}>
                           <AppLink {...item} />
                         </li>
                       ))}

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,7 @@ export const RulerGuidesComponent = React.forwardRef<any, RulerGuidesProps>(
         {children}
         <RulerComponent variant="horizontal" {...RulerComponentProps?.horizontal} />
         <RulerComponent variant="vertical" {...RulerComponentProps?.vertical} />
-        {_isArr(guides) && guides.map(({className, ...guide}, i) => (
+        {_isArr(guides) && guides.map(({...guide}, i) => (
           <GuideComponent key={guide.key ?? guide.id ?? i} {...guide} />
         ))}
       </RulerGuidesContainer>

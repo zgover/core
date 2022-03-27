@@ -140,8 +140,8 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
         }
         disablePadding
       >
-        {denormalizedAreaPages.map((item, key, arr) => (
-          <Fragment key={key}>
+        {denormalizedAreaPages.map((item, key) => (
+          <Fragment key={item?.key ?? item?.id ?? key}>
             <StyledListItem
               className={getClass(classKeys.listItem, item)}
               color="inherit"
@@ -178,9 +178,9 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
                 unmountOnExit
               >
                 <List component="div" disablePadding>
-                  {item.pages.map((item, key, arr) => (
+                  {item.pages.map((item, key) => (
                     <StyledListItem
-                      key={key}
+                      key={item?.key ?? item?.id ?? key}
                       className={getClass(classKeys.listItem, item, false)}
                       color="inherit"
                       href={item?.id}

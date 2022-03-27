@@ -123,13 +123,24 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
 
   return (
     <>
-      {details.map(({id: key, label, items}) => (
-        <Fragment key={key}>
+      {details.map(({label, items, ...item}, key) => (
+        <Fragment key={item?.key ?? item?.id ?? key}>
           <Typography variant="subtitle1" component="div" sx={{mb: 2}}>
             {label}
           </Typography>
-          {items.map(({id: key, label, value, TypographyProps, ValueTypographyProps}) => (
-            <Typography key={key} component="div" {...TypographyProps}>
+          {items.map(({
+            label,
+            value,
+            TypographyProps,
+            ValueTypographyProps,
+            ...rest
+          }, key) => (
+            <Typography
+              key={item?.key ?? item?.id ?? key}
+              component="div"
+              {...TypographyProps}
+              {...rest}
+            >
               <Typography
                 variant="caption"
                 display="inline"

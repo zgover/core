@@ -151,10 +151,10 @@ const IconSelectComponent = forwardRef<any, IconSelectProps>(
       setSelected(item.id)
     }, [setSelected])
 
-    const renderItemContent = useCallback(function RenderItemContent(item) {
+    const renderItemContent = useCallback(function RenderItemContent(item, key) {
       return (
         <Tooltip
-          key={item.id}
+          key={item.key ?? item.id ?? key}
           title={item.name}
           disableInteractive
           enterDelay={375}

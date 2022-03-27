@@ -293,7 +293,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
 
   const buildTextButton = (item, key) => (
     <AppLink
-      key={key}
+      key={item?.key ?? item?.id ?? key}
       componentVariant="button"
       color="inherit"
       sx={{p: item?.avatar ? 0.5 : undefined}}
@@ -304,11 +304,13 @@ function MainLayoutRaw(props: MainLayoutProps) {
   // eslint-disable-next-line react/display-name
   const buildNav = (id, actionBuilder) => (item, key) =>
     _isArr(item.items) ? (
-      <StyledMenu key={id + key} items={item.items}>
-        {actionBuilder(item, key)}
+      <StyledMenu key={`${id}_${item?.key ?? item?.id ?? key}`} items={item.items}>
+        {actionBuilder(item, item?.key ?? item?.id ?? key)}
       </StyledMenu>
     ) : (
-      <Fragment key={id + key}>{actionBuilder(item, key)}</Fragment>
+      <Fragment key={`${id}_${item?.key ?? item?.id ?? key}`}>
+        {actionBuilder(item, item?.key ?? item?.id ?? key)}
+      </Fragment>
     )
 
   return (
@@ -357,9 +359,9 @@ function MainLayoutRaw(props: MainLayoutProps) {
                 variant="scrollable"
               >
                 {tabBarTitle && <TabBarTitle>{tabBarTitle}</TabBarTitle>}
-                {navTabItems && navTabItems.map(({icon, ...item}, i) => (
+                {navTabItems && navTabItems.map(({icon, ...item}, key) => (
                   <TabItem
-                    key={item.id ?? item['key'] ?? i}
+                    key={item.key ?? item.id ?? key}
                     // disableRipple
                     color="inherit"
                     href={item.href ?? ''}

@@ -61,7 +61,7 @@ function AnalyticsGlobalEvents({children}) {
       logEvent(analytics, 'exception', {
         page_location: asPath,
         description: `code(${error.code || 'none'}): ${error.message || 'none'}`,
-        fatal: !error.canceled,
+        fatal: !error.cancelled,
       })
     }
     router.events.on(NextRouterEvent.ROUTE_CHANGE_COMPLETE, logPageView)

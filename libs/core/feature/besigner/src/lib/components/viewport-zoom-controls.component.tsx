@@ -164,9 +164,18 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
         {...rest}
       >
         <ButtonGroup variant="contained" color="primary" aria-label="zoom controls">
-          {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
-            <Tooltip key={id} {...tooltipProps}>
-              <Button {...buttonProps}>
+          {buttons.map(({
+            tooltipProps,
+            srOnlyProps,
+            buttonProps,
+            svgPathIconProps,
+            ...rest
+          }, key) => (
+            <Tooltip
+              key={item.key ?? item.id ?? key}
+              {...tooltipProps}
+            >
+              <Button {...buttonProps} {...rest}>
                 <MdiIcon fontSize="small" {...svgPathIconProps} />
                 <SrOnlyComponent component="span" {...srOnlyProps} />
               </Button>

@@ -24,13 +24,12 @@ export type MakeLinkElementsConfig = Array<[
 ]>
 
 export function makeLinkElements(items: MakeLinkElementsConfig): JSX.Element[] {
-  return items.map((item, i) => {
+  return items.map((item, key) => {
     const [rel, href, other] = item
-    const {id, key, ...rest} = {...other}
+    const {...rest} = {...other}
     return (
       <link
-        key={key ?? id ?? i}
-        id={id}
+        key={rest.key ?? rest.id ?? key}
         rel={rel}
         href={href}
         {...rest}

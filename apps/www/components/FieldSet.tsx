@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,12 @@ const useStyles = makeStyles<Theme, Props>((theme: Theme) =>
   }),
 )
 
-const buildOption = (option: Fields.Option) => (
-  <MenuItem key={option.value} value={option.value} children={option.label} />
+const buildOption = (option: Fields.Option, key?: any) => (
+  <MenuItem
+    key={item.key ?? item.id ?? key}
+    value={option.value}
+    children={option.label}
+  />
 )
 
 function checkboxListRow(props: ListChildComponentProps) {
@@ -94,10 +98,10 @@ export default function FieldSet(props: Props) {
   const classes = useStyles(props)
   const {fields, loading, onUpdate} = props
 
-  const getTextOrSelect = (field: Fields.FieldT) => (
+  const getTextOrSelect = (field: Fields.FieldT, key?: any) => (
     <TextField
       fullWidth
-      key={field.id}
+      key={field?.key ?? field?.id ?? key}
       name={field.id}
       type={field.type ?? 'text'}
       label={field.label}

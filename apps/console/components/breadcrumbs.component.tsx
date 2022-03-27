@@ -85,7 +85,7 @@ const BreadcrumbsComponent = forwardRef<any, BreadcrumbsProps>(
       <Breadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
         {items.map(({className, ...item}, key, arr) => (
           <BreadcrumbItemComponent
-            key={item.id ?? key}
+            key={item.key ?? item.id ?? key}
             isLast={_isLength(key, arr.length - 1)}
             centered={centered}
             {...item}

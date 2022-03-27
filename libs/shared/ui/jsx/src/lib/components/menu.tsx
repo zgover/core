@@ -169,13 +169,14 @@ export const Menu = forwardRef<any, MenuProps>(
           onClose={handleClose}
           {...menuProps}
         >
-          {items.map(({onClick, icon, children, type, endIcon, ...item}: any, key) => {
+          {items.map(({onClick, icon, children, type, endIcon, ...item}: any, i) => {
+            const key = item.key ?? item.id ?? i
 
             switch (type) {
               case 'subheader':
                 return (
                   <MuiListSubheader
-                    key={item.id ?? item.key ?? key}
+                    key={key}
                     onClick={onClick}
                     {...item as any}
                   >
@@ -186,7 +187,7 @@ export const Menu = forwardRef<any, MenuProps>(
               case 'divider':
                 return (
                   <Divider
-                    key={item.id ?? item.key ?? key}
+                    key={key}
                     onClick={onClick}
                     {...item as any}
                   >
@@ -197,7 +198,7 @@ export const Menu = forwardRef<any, MenuProps>(
               default:
                 return (
                   <MuiMenuItem
-                    key={item.id ?? item.key ?? key}
+                    key={key}
                     dense={dense}
                     onClick={(e) => {
                       handleClose()

@@ -24,13 +24,12 @@ export type MakeMetaElementsConfig = Array<[
 ]>
 
 export function makeMetaElements(items: MakeMetaElementsConfig): JSX.Element[] {
-  return items.map((item, i) => {
+  return items.map((item, key) => {
     const [name, content, other] = item
-    const {id, key, ...rest} = {...other}
+    const {...rest} = {...other}
     return (
       <meta
-        key={key ?? id ?? i}
-        id={id}
+        key={rest.key ?? rest.id ?? key}
         name={name}
         content={content}
         {...rest}

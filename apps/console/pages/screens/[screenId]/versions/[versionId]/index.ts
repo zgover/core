@@ -16,16 +16,17 @@
  */
 
 import type {GetServerSidePropsContext} from 'next/types'
+import {buildRoute, Route} from '../../../../../constants/route-links'
 
 
 export default () => null
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => {
-  const {resolvedUrl} = context
+  const {query:{screenId, versionId}} = context
   return {
     redirect: {
       permanent: true,
-      destination: `${resolvedUrl}/view`,
+      destination: buildRoute(Route.SCREEN_DETAILS, {screenId, versionId}),
     },
   }
 }

@@ -15,60 +15,18 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {AppLink, type AppLinkProps, ElevateOnScroll} from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import {ElevateOnScroll} from '@aglyn/shared-ui-jsx'
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
-import {
-  AppBar,
-  type AppBarProps,
-  Divider,
-  Tab as MuiTab,
-  type TabProps as MuiTabProps,
-  Tabs as MuiTabs,
-  Toolbar,
-  Typography,
-} from '@mui/material'
-import {useRouter} from 'next/router'
-import {Fragment, type ReactNode, useMemo} from 'react'
+import {AppBar, type AppBarProps, Divider, Toolbar, Typography} from '@mui/material'
+import {Fragment, type ReactNode} from 'react'
 import {TAB_HEIGHT, TOP_BAR_HEIGHT} from '../constants/shared'
+import AppLinkTabsComponent, {type AppLinkTabsProps} from './app-link-tabs.component'
 
-
-const TabItem = styled(MuiTab, {
-  name: 'AglynTabItem',
-})({
-  flexDirection: 'row',
-  minHeight: TAB_HEIGHT,
-  '& > *:first-of-type': {
-    marginBottom: 0,
-    marginRight: 1,
-  },
-  '& .MuiTab-labelIcon': {
-    minHeight: TAB_HEIGHT - 16,
-    minWidth: 'auto',
-    paddingLeft: 0,
-    paddingRight: 0,
-    marginLeft: 4,
-    '&:first-of-type': {
-      marginLeft: 0,
-    },
-  },
-})
-
-function a11yProps(index) {
-  return {
-    id: `scrollable-auto-tab-${index}`,
-    'aria-controls': `scrollable-auto-tabpanel-${index}`,
-  }
-}
-
-export type NavTabItem = Partial<AppLinkProps & MuiTabProps & {icon: MdiIconProps}>
 
 export interface SecondaryAppBarProps extends Partial<AppBarProps> {
-  children?: ReactNode
   tabBarTitle?: ReactNode
-  navTabItems?: NavTabItem[]
-  activeTab?: string
+  navTabItems?: AppLinkTabsProps['items']
+  activeTab?: AppLinkTabsProps['activeTab']
 }
 
 function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
@@ -79,22 +37,6 @@ function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
     activeTab,
     ...rest
   } = props
-  const router = useRouter()
-  const tabItems: NavTabItem[] = useMemo(() => {
-    return navTabItems ?? []
-  }, [navTabItems])
-  const tabValue = useMemo(() => {
-    const asPath = router.asPath,
-      active = activeTab,
-      specific = typeof active !== 'undefined'
-    return tabItems.find((i) => {
-      const href = i?.href,
-        as = i?.hrefAs,
-        id = i?.id
-      if (specific) return active === href || active === as || active === id
-      return asPath === href || asPath === as || asPath === id
-    })?.href || false
-  }, [router, tabItems, activeTab])
 
   return (
     <ElevateOnScroll threshold={TOP_BAR_HEIGHT}>
@@ -147,57 +89,11 @@ function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
 
             {children}
 
-            {!_isArrEmpty(tabItems) && (
-              <MuiTabs
-                aria-label="area navigation"
-                indicatorColor="secondary"
-                scrollButtons="auto"
-                textColor="inherit"
-                value={tabValue || false}
-                variant="scrollable"
-                sx={{
-                  minHeight: TAB_HEIGHT,
-                  alignItems: 'center',
-                  '& .MuiTabs-flexContainer': {
-                    alignItems: 'center',
-                  },
-                  '& .MuiTabs-indicator': {
-                    height: '3px',
-                    backgroundColor: 'unset',
-                    '&:after': {
-                      borderRadius: '3px 3px 0 0',
-                      content: '" "',
-                      display: 'block',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      right: 0,
-                      mx: 'auto',
-                      width: 0.8,
-                      height: 1,
-                      backgroundColor: 'secondary.light',
-                    },
-                  },
-                }}
-              >
-                {tabItems.map(({icon, ...item}, index) => (
-                  <TabItem
-                    key={item.id ?? index}
-                    href={item.href ?? ''}
-                    value={item.href ?? index}
-                    icon={!icon?.path ? icon : <MdiIcon {...icon} />}
-                    componentVariant="button-base"
-                    anchorComponent="button"
-                    color="inherit"
-                    underline="none"
-                    // disableRipple
-                    wrapped
-                    {...a11yProps(index)}
-                    {...{component: AppLink} as any}
-                    {...item}
-                  />
-                ))}
-              </MuiTabs>
+            {!_isArrEmpty(navTabItems) && (
+              <AppLinkTabsComponent
+                items={navTabItems}
+                activeTab={activeTab}
+              />
             )}
           </Toolbar>
         </AppBar>

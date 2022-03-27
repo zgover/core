@@ -28,7 +28,7 @@ import SecondaryAppBarComponent, {
 } from '../components/secondary-app-bar.component'
 
 
-const defaultNavTabItems = [
+const defaultNavTabItems: SecondaryAppBarProps['navTabItems'] = [
   {
     id: 'nav-tab-dashboard',
     label: 'Dashboard',
@@ -37,7 +37,7 @@ const defaultNavTabItems = [
   {
     id: 'nav-tab-screens',
     label: 'Screens',
-    href: '/screens',
+    href: '/screens/list',
   },
 ]
 
