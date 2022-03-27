@@ -15,15 +15,19 @@
  * limitations under the License.
  */
 
-import {PKey} from '@aglyn/shared-data-types'
-import {copy} from '../copy'
-
 
 /**
- * Deeply copy all properties of a key value map
- * @param {Record<PKey, T>} target
- * @returns {Record<PKey, T>}
+ * Push an item onto the array at the provided zero index
+ * @param array - The array to mutate and push the new elements onto
+ * @param index - The zero index to start the new elements
+ * @param items - New items to push onto the array
  */
-export function objectCopyAll<T>(target: Record<PKey, T>): Record<PKey, T> {
-  return copy(target)
+export function arrayPushAtIndex<T>(
+  array: Array<T>,
+  index: number,
+  ...items: T[]
+): Array<T> {
+  array.splice(index, 0, ...items)
+  return array
 }
+export default arrayPushAtIndex

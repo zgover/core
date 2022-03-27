@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type {AppUUN} from '@aglyn/core-data-framework'
+import type {AppUUN, CanvasSetElementsPayload} from '@aglyn/core-data-framework'
 import {
   AglynAppContextComponent,
   ElementComponentsContextProvider,
@@ -38,17 +38,17 @@ const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
 export interface BesignerComponentProps extends WorkspaceEditorComponentProps {
   noSsr?: boolean
   appName?: AppUUN
+  canvasElements?: CanvasSetElementsPayload
 }
 
 const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(
   function RefRenderFn(props, ref) {
-    const {noSsr, appName, ...rest} = props
+    const {noSsr, appName, canvasElements, ...rest} = props
     const Wrapper = noSsr ? NoSsr : Fragment
-
 
     return (
       <Wrapper>
-        <AglynAppContextComponent appName={appName}>
+        <AglynAppContextComponent canvasElements={canvasElements} appName={appName}>
           <BesignerDndContext>
             <ElementComponentsContextProvider>
               <ElementsContextProvider>

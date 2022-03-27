@@ -22,8 +22,8 @@ import {LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import dynamic from 'next/dynamic'
 import {useEffect} from 'react'
 // import {useEffect} from 'react-hooks'
-import '../../../../constants/app-setup'
-import LayoutConsoleComponent from '../../../../layouts/layout-console.component'
+import '../../constants/app-setup'
+import LayoutConsoleComponent from '../../layouts/layout-console.component'
 
 
 const AglynBesigner = dynamic<BesignerComponentProps>(

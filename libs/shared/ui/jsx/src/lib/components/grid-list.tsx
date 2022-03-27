@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,18 @@
  * limitations under the License.
  */
 
-import {AnyProps, EmptyObj, MapKey, PKey} from '@aglyn/shared-data-types'
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import Card from '@mui/material/Card'
-import Grid, {GridProps as MuiGridProps} from '@mui/material/Grid'
+import type {MapKey} from '@aglyn/shared-data-types'
+import {
+  generateComponentClassKeys,
+  mergeSxProps,
+  styled,
+  type SxProps,
+} from '@aglyn/shared-feature-themes'
+import {ContainerComponent, type ContainerProps} from '@aglyn/shared-ui-jsx'
+import {Box, type BoxProps, Card, Grid, type GridProps as MuiGridProps} from '@mui/material'
 import clsx from 'clsx'
-import {forwardRef, HTMLAttributes, HTMLProps, memo, ReactNode, useCallback, useMemo} from 'react'
-import {VirtuosoGrid, VirtuosoGridHandle, VirtuosoGridProps} from 'react-virtuoso'
+import {forwardRef, type ReactNode, useCallback, useMemo} from 'react'
+import {VirtuosoGrid, type VirtuosoGridHandle, type VirtuosoGridProps} from 'react-virtuoso'
 
 
 const classKey = generateComponentClassKeys('AglynGridList', [
@@ -31,45 +36,56 @@ const classKey = generateComponentClassKeys('AglynGridList', [
   'gridItem',
 ])
 
-const ItemContent = styled(Card, {
-  name: 'AglynGridListItemContent',
-})({
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  textAlign: 'center',
-  flexDirection: 'column',
-  justifyContent: 'space-evenly',
-})
-const ItemDisplacement = styled('div', {
-  name: 'AglynGridListItemDisplacement',
-})({
-  height: 0,
-  position: 'relative',
-  paddingTop: `${(3 / 4) * 100}%`, // 4:3
-})
-const ItemWrapper = styled(forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+const ItemWrapper = styled(forwardRef<any, BoxProps>(
   function RefRenderFn(props, ref) {
-    const {children, className, ...rest} = props
+    const {children, className, sx, ...rest} = props
     return (
-      <ItemDisplacement ref={ref} className={clsx(classKey.itemWrapper, className)} {...rest}>
-        <ItemContent className={classKey.itemContent}>
+      <Box
+        ref={ref}
+        className={clsx(classKey.itemWrapper, className)}
+        sx={mergeSxProps({
+          height: 0,
+          position: 'relative',
+          paddingTop: `${(3 / 4) * 100}%`, // 4:3
+        }, sx)}
+        {...rest}
+      >
+        <Card
+          className={classKey.itemContent}
+          sx={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            textAlign: 'center',
+            flexDirection: 'column',
+            justifyContent: 'space-evenly',
+          }}
+        >
           {children}
-        </ItemContent>
-      </ItemDisplacement>
+        </Card>
+      </Box>
     )
   },
 ), {
   name: 'AglynItemWrapper',
 })({})
 
+export type VirtualizedGridProps = VirtuosoGridProps & {
+  sx?: SxProps
+  as?: any
+}
+const VirtualizedGrid = styled(VirtuosoGrid, {
+  name: 'AglynVirtualizedGrid',
+})<VirtualizedGridProps>({})
+
 export type GridListItemData<P = any> = {id: MapKey} & P
 
+
 /* eslint-disable-next-line */
-export interface GridListProps extends Partial<VirtuosoGridProps> {
+export interface GridListProps extends Partial<VirtualizedGridProps> {
   items?: GridListItemData[]
   renderItemContent?: (
     item: GridListProps['items'][number],
@@ -78,7 +94,8 @@ export interface GridListProps extends Partial<VirtuosoGridProps> {
   ) => ReactNode
   GridContainerProps?: MuiGridProps
   GridItemProps?: MuiGridProps
-  ListWrapperProps?: HTMLProps<HTMLDivElement>
+  ListWrapperProps?: ContainerProps
+  sx?: SxProps
 }
 
 export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
@@ -99,9 +116,10 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
 
     const GridContainer = useMemo(() => forwardRef<any, MuiGridProps>(
       function RefRenderFn({className, ...props}, ref) {
-        const {className: gridClassName, ...restGridProps} = GridContainerProps
+        const {className: gridClassName, children, ...restGridProps} = GridContainerProps
         return (
-          <div {...ListWrapperProps}>
+          <ContainerComponent gutterY {...ListWrapperProps}>
+            {children}
             <Grid
               ref={ref}
               className={clsx(classKey.gridContainer, gridClassName, className)}
@@ -109,7 +127,7 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
               {...restGridProps}
               {...props}
             />
-          </div>
+          </ContainerComponent>
         )
       },
     ), [ListWrapperProps, GridContainerProps])
@@ -143,7 +161,7 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
     }, [items, renderItemContent])
 
     return (
-      <VirtuosoGrid
+      <VirtualizedGrid
         ref={ref}
         computeItemKey={computeItemKey}
         itemContent={handleItemContent}

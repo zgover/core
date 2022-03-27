@@ -16,13 +16,7 @@
  */
 
 import type {AuthResultError} from '@aglyn/shared-data-enums'
-import {
-  FIELD_SCHEMA_EMAIL,
-  FIELD_SCHEMA_FIRST_NAME,
-  FIELD_SCHEMA_LAST_NAME,
-  FIELD_SCHEMA_PASSWORD,
-  FIELD_SCHEMA_PASSWORD_CONFIRM,
-} from '@aglyn/shared-data-forms'
+import {FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD} from '@aglyn/shared-data-forms'
 import {AppLink, useLoading} from '@aglyn/shared-ui-jsx'
 import type {FormSchema} from '@aglyn/shared-ui-jsx-forms'
 import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
@@ -30,44 +24,38 @@ import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Button, Divider, Stack, Typography} from '@mui/material'
 import {
   browserLocalPersistence,
-  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   setPersistence,
+  signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth'
 import {useCallback, useState} from 'react'
 import {useAuth} from 'reactfire'
-import AuthErrorAlertComponent from '../components/auth-error-alert.component'
-import AuthFormTemplateComponent from '../components/auth-form-template.component'
-import LayoutAuthFormComponent from '../layouts/layout-auth-form.component'
-import LayoutUnauthenticatedComponent from '../layouts/layout-unauthenticated.component'
+import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
+import AuthFormTemplateComponent from '../../components/auth-form-template.component'
+import LayoutAuthFormComponent from '../../layouts/layout-auth-form.component'
+import LayoutUnauthenticatedComponent from '../../layouts/layout-unauthenticated.component'
 
 
 const googleOAuthProvider = new GoogleAuthProvider()
 
 const formSchema: FormSchema = {
-  fields: [
-    FIELD_SCHEMA_FIRST_NAME,
-    FIELD_SCHEMA_LAST_NAME,
-    FIELD_SCHEMA_EMAIL,
-    FIELD_SCHEMA_PASSWORD,
-    FIELD_SCHEMA_PASSWORD_CONFIRM,
-  ],
+  fields: [FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD],
 }
 
-function Signup() {
+function SignIn() {
   const {queueLoading, loading} = useLoading()
   const firebaseAuth = useAuth()
   const [error, setError] = useState<AuthResultError>(null)
 
-  const handleSignUp = useCallback(async (values?: any) => {
+  const handleSignIn = useCallback(async (values?: any) => {
     if (loading) return
     if (error) setError(null)
     const dequeueLoading = queueLoading()
     await setPersistence(firebaseAuth, browserLocalPersistence)
       .then(() => {
         if (values) {
-          return createUserWithEmailAndPassword(
+          return signInWithEmailAndPassword(
             firebaseAuth,
             values[FIELD_SCHEMA_EMAIL.name],
             values[FIELD_SCHEMA_PASSWORD.name],
@@ -85,11 +73,11 @@ function Signup() {
   }, [error, firebaseAuth, loading, queueLoading])
 
   const handleFormSubmit = useCallback(async (values) => {
-    await handleSignUp(values)
-  }, [handleSignUp])
+    await handleSignIn(values)
+  }, [handleSignIn])
   const handleGoogleButtonClick = useCallback(async () => {
-    await handleSignUp()
-  }, [handleSignUp])
+    await handleSignIn()
+  }, [handleSignIn])
 
   return (
     <LayoutAuthFormComponent
@@ -99,21 +87,21 @@ function Signup() {
           variant="body2"
           alignSelf="flex-end"
         >
-          <AppLink href="/signin">
-            {'Sign in'}
+          <AppLink href="/signup">
+            {'Create account'}
           </AppLink>
         </Typography>
       }
-      headingTop={'Sign up'}
-      headingBottom={'Create a new Aglyn Account'}
+      headingTop={'Sign in'}
+      headingBottom={'Use your Aglyn account'}
       paperAfter={
         <Typography
           component="div"
           variant="body2"
         >
-          {'Already have an account? '}
-          <AppLink href="/signin">
-            {'Sign in'}
+          {'Having trouble logging in? '}
+          <AppLink href="/account-recovery">
+            {'Account recovery'}
           </AppLink>
         </Typography>
       }
@@ -136,7 +124,7 @@ function Signup() {
         variant="middle"
         sx={{my: 3}}
       >
-        {'Or sign up with'}
+        {'Or sign in with'}
       </Divider>
 
       <Stack
@@ -157,7 +145,7 @@ function Signup() {
     </LayoutAuthFormComponent>
   )
 }
-Signup.displayName = 'Page:Signup'
-Signup.layoutComponent = LayoutUnauthenticatedComponent
+SignIn.displayName = 'Page:SignIn'
+SignIn.layoutComponent = LayoutUnauthenticatedComponent
 
-export default Signup
+export default SignIn

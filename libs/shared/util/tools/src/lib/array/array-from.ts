@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 
 /**
  * Shallow copy iterable or array like
- * @param {Iterable<T> | ArrayLike<T>} iterable
- * @param {(v: T, k: number) => U} callbackFn
- * @param thisArg
- * @returns {U[]}
+ * @param iterable - An iterable object to convert to an array.
+ * @param callbackFn - A mapping function to call on every element of the array.
+ * @param thisArg - Value of 'this' used to invoke the callbackFn
  */
 export function arrayFrom<T, U>(
   iterable: Iterable<T> | ArrayLike<T>,
   callbackFn?: (v: T, k: number) => U,
-  thisArg?: any
+  thisArg?: any,
 ): U[] {
   return Array.from(iterable, callbackFn, thisArg)
 }
+export default arrayFrom

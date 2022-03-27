@@ -17,7 +17,6 @@
 
 export * from './types'
 
-export * from './hooks/use-continue-query-decoded'
-export * from './hooks/use-continue-query-encoded'
+export * from './hooks/use-next-url'
 
 export * from './security/csrf'

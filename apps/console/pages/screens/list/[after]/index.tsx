@@ -17,6 +17,7 @@
 
 import {createResourceUid} from '@aglyn/core-data-framework'
 import {
+  ICON_VARIANT_CLOSE,
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_PAGES,
   ICON_VARIANT_SHOW_DETAIL,
@@ -25,26 +26,27 @@ import {
   AppLink,
   ContainerComponent,
   NavigationDrawerComponent,
+  SrOnlyComponent,
   useConfirmationContext,
   useLoading,
 } from '@aglyn/shared-ui-jsx'
 import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {Button, Typography} from '@mui/material'
+import {Button, IconButton, Typography} from '@mui/material'
 import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
-import {collection, deleteDoc, doc, limit, query, setDoc, Timestamp} from 'firebase/firestore'
+import {collection, doc, limit, query, setDoc, Timestamp} from 'firebase/firestore'
 import {useCallback, useState} from 'react'
 import {useFirestore, useFirestoreCollectionData} from 'reactfire'
-import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
-import AuthFormTemplateComponent from '../../components/auth-form-template.component'
-import DataTableComponent from '../../components/data-table.component'
-import WidgetCardComponent from '../../components/widget-card.component'
-import {CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT} from '../../constants/shared'
-import LayoutConsoleComponent from '../../layouts/layout-console.component'
-import LayoutDashboardComponent from '../../layouts/layout-dashboard.component'
+import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
+import AuthFormTemplateComponent from '../../../../components/auth-form-template.component'
+import DataTableComponent from '../../../../components/data-table.component'
+import WidgetCardComponent from '../../../../components/widget-card.component'
+import {CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT} from '../../../../constants/shared'
+import LayoutConsoleComponent from '../../../../layouts/layout-console.component'
+import LayoutDashboardComponent from '../../../../layouts/layout-dashboard.component'
 
 
-export function Screens(props) {
+function Screens(props) {
 
   const {queueLoading, loading} = useLoading()
   const {confirm} = useConfirmationContext()
@@ -75,7 +77,7 @@ export function Screens(props) {
       .finally(() => {dequeueLoading()})
   }, [firestore, error, loading, queueLoading, handleFormClose])
 
-  const handleDeleteScreen = useCallback((id: string) => async () => {
+  const handleDeleteScreen = useCallback((id: string, versionId: string) => async () => {
     let dequeueLoading
     await confirm({
       title: 'Are you sure?',
@@ -84,7 +86,7 @@ export function Screens(props) {
       confirmationButtonProps: {color: 'error'},
     })
       .then(() => {dequeueLoading = queueLoading()})
-      .then(() => {return deleteDoc(doc(firestore, 'screens', id))})
+      .then(() => {return setDoc(doc(firestore, 'screens', id, 'deletedAt'), Timestamp.now())})
       .catch(() => {})
       .finally(() => {dequeueLoading && dequeueLoading()})
   }, [confirm, firestore, queueLoading])
@@ -95,24 +97,26 @@ export function Screens(props) {
       field: 'actions',
       type: 'actions',
       width: 100,
-      getActions: ({id}) => [
-        <GridActionsCellItem
-          key="action-detail"
-          icon={<MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} />}
-          label="detail"
-          component={AppLink}
-          componentVariant="naked"
-          hrefAs={`/screens/${id}`}
-          href={`/screens/[screenId]`}
-        />,
-        <GridActionsCellItem
-          key="action-delete"
-          icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
-          label="Delete"
-          onClick={handleDeleteScreen(id as string)}
-          color="error"
-        />,
-      ],
+      getActions: ({id, row}) => {
+        const versionId = row.versionId as string
+        return [
+          <GridActionsCellItem
+            key="action-detail"
+            icon={<MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} />}
+            label="detail"
+            component={AppLink}
+            componentVariant="naked"
+            href={`/screens/${id}/versions/${versionId}/view`}
+          />,
+          <GridActionsCellItem
+            key="action-delete"
+            icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
+            label="Delete"
+            onClick={handleDeleteScreen(id as string, versionId as string)}
+            color="error"
+          />,
+        ]
+      },
     },
     {field: '$id', headerName: 'ID', type: 'string', flex: 1, minWidth: 150},
     {field: 'displayName', headerName: 'Display name', flex: 1, minWidth: 200, type: 'string'},
@@ -128,6 +132,7 @@ export function Screens(props) {
       breadcrumbItems={[
         {
           children: 'Screens',
+          href: '/screens',
         },
       ]}
       header={{
@@ -137,7 +142,7 @@ export function Screens(props) {
       headerRight={(
         <Button
           size="small"
-          variant="outlined"
+          variant="contained"
           onClick={handleFormOpen}
         >
           {'Create New Screen'}
@@ -149,15 +154,26 @@ export function Screens(props) {
           anchor="right"
           variant="temporary"
           onClose={handleFormClose}
-          appBarLeft={
-            <Typography variant="h6" component="div">
-              {'Create new screen'}
-            </Typography>
-          }
+          appBarLeft={(
+            <>
+              <IconButton
+                color="inherit"
+                edge="start"
+                onClick={handleFormClose}
+                sx={{mr: 2}}
+              >
+                <MdiIcon path={ICON_VARIANT_CLOSE.path} />
+                <SrOnlyComponent>close drawer</SrOnlyComponent>
+              </IconButton>
+              <Typography variant="h6" component="div">
+                {'Create new screen'}
+              </Typography>
+            </>
+          )}
           appBarRight={
             <Button
               variant="outlined"
-              color="primary"
+              color="inherit"
               onClick={handleFormClose}
             >
               {'Cancel'}

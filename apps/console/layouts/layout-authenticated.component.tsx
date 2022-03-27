@@ -16,7 +16,7 @@
  */
 
 import {SecureLoadingOverlayComponent, useLoading} from '@aglyn/shared-ui-jsx'
-import {useContinueQueryEncoded} from '@aglyn/shared-util-next'
+import {nextParam, useNextUrl} from '@aglyn/shared-util-next'
 import {useRouter} from 'next/router'
 import {Fragment, type ReactNode, useEffect} from 'react'
 import {useSigninCheck} from 'reactfire'
@@ -32,7 +32,7 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
   const {children, requireEmailVerification} = props
   const {queueLoading} = useLoading()
   const router = useRouter()
-  const continueRoute = useContinueQueryEncoded()
+  const [next] = useNextUrl()
   const {status, data: signInCheckResult} = useSigninCheck()
   const authLoading = status === 'loading'
   const signedIn = signInCheckResult?.signedIn === true
@@ -47,11 +47,11 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
     return void 0
 
     function pushToRequestAuth(path: string) {
-      return void router.push(`${path}?continue=${continueRoute}`)
+      return void router.push(`${path}?${nextParam(next)}`)
     }
   }, [
     authLoading,
-    continueRoute,
+    next,
     emailVerified,
     queueLoading,
     requireEmailVerification,

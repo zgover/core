@@ -32,9 +32,9 @@ import type {
 import type {IAglynAppController} from './aglyn-app.types'
 import type {ContextDomain, ContextEvent, ContextStore} from './aglyn-contexts.types'
 import type {
-   AglynElementNormalized,
-   AglynElementsById,
-   AglynElementsList,
+  AglynElementNormalized,
+  AglynElementsById,
+  AglynElementsList,
 } from './aglyn-elements.types'
 import type {
   AglynModuleModelOptions,
@@ -44,21 +44,21 @@ import type {
 
 
 export type ElementsDataStore = {
+  future: AglynElementsById[]
   past: AglynElementsById[]
   present: AglynElementsById
-  future: AglynElementsById[]
 }
 
 export interface ElementsDataStoreApi {
-  undo: ContextEvent<any>
   redo: ContextEvent<any>
-  setElements: ContextEvent<CanvasSetElementsPayload>
+  undo: ContextEvent<any>
   addElement: ContextEvent<CanvasAddElementPayload>
-  updateElement: ContextEvent<CanvasUpdateElementPayload>
-  setElement: ContextEvent<CanvasSetElementPayload>
   deleteElement: ContextEvent<CanvasDeleteElementPayload>
-  moveElement: ContextEvent<CanvasMoveElementPayload>
   duplicateElement: ContextEvent<CanvasDuplicateElementPayload>
+  moveElement: ContextEvent<CanvasMoveElementPayload>
+  setElement: ContextEvent<CanvasSetElementPayload>
+  setElements: ContextEvent<CanvasSetElementsPayload>
+  updateElement: ContextEvent<CanvasUpdateElementPayload>
 }
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
@@ -66,27 +66,27 @@ export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
 }
 
 export interface IAglynCanvasController extends IAglynModuleModel<AglynCanvasControllerOptions> {
-  readonly domain: ContextDomain
-  readonly events: ElementsDataStoreApi
   readonly context: ContextStore<ElementsDataStore>
   readonly denormalizedElementsStore: ContextStore<AglynElementsById>
+  readonly domain: ContextDomain
+  readonly events: ElementsDataStoreApi
   readonly normalizedElementsStore: ContextStore<AglynElementsList>
 
-  getStore(payload?: CanvasGetApiEventsPayload): ContextStore<ElementsDataStore>
   getApiEvents(payload?: CanvasGetApiEventsPayload): ElementsDataStoreApi
   getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynElementsById>
   getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynElementsList>
+  getStore(payload?: CanvasGetApiEventsPayload): ContextStore<ElementsDataStore>
 
-  undo(payload?: CanvasUndoPayload): this
   redo(payload?: CanvasRedoPayload): this
+  undo(payload?: CanvasUndoPayload): this
 
-  setElements(payload: CanvasSetElementsPayload): this
   addElement(payload: CanvasAddElementPayload): this
-  updateElement(payload: CanvasUpdateElementPayload): this
-  setElement(payload: CanvasSetElementPayload): this
   deleteElement(payload: CanvasDeleteElementPayload): this
-  moveElement(payload: CanvasMoveElementPayload): this
   duplicateElement(payload: CanvasDuplicateElementPayload): this
+  moveElement(payload: CanvasMoveElementPayload): this
+  setElement(payload: CanvasSetElementPayload): this
+  setElements(payload: CanvasSetElementsPayload): this
+  updateElement(payload: CanvasUpdateElementPayload): this
 }
 
 export interface AglynCanvasControllerT extends AglynModuleModelT<AglynCanvasControllerOptions> {

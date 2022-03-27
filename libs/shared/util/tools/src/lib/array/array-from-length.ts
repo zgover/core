@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,8 @@
  * limitations under the License.
  */
 
-import {arrayMutate, MutatedArray} from './array-mutate'
 
-
-/**
- *
- *
- * @export
- * @template T
- * @param {number} index
- * @param {Array<T>} array
- * @param {(T | Array<T>)} items
- * @returns {MutatedArray<Array<T>>}
- * @param options
- */
-export function arrayAddAtIndex<T>(
-  index: number,
-  array: Array<T>,
-  items: T | Array<T>,
-  options?: {replace?: boolean; copy?: boolean},
-): MutatedArray<T> {
-  const {replace = false, copy} = {...options}
-  return arrayMutate(index, array, items, {replace, copy})
+export function arrayFromLength<T>(length: number): Array<T> {
+  return [...new Array(length)]
 }
+export default arrayFromLength

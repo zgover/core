@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import {AglynComponentsContext} from '@aglyn/core-feature-renderer'
 import {type ElementType, Fragment, type ReactNode, useCallback, useState} from 'react'
 import {
   ComponentsDrawerComponent,
-  type ComponentsDrawerComponentProps,
+  type ComponentsDrawerProps,
 } from '../components/components-drawer.component'
 import {
   buildOptions,
@@ -30,10 +30,10 @@ import {
 
 
 export interface ComponentsDrawerContextProviderProps
-  extends Partial<ComponentsDrawerComponentProps> {
+  extends Partial<ComponentsDrawerProps> {
   defaultOptions?: ElementDrawerOptions
   children?: ReactNode
-  component?: ElementType<ComponentsDrawerComponentProps>
+  component?: ElementType<ComponentsDrawerProps>
 }
 
 function ComponentsDrawerContextProvider(props: ComponentsDrawerContextProviderProps) {
@@ -45,22 +45,13 @@ function ComponentsDrawerContextProvider(props: ComponentsDrawerContextProviderP
   const isOpen = resolveReject.length === 2
 
   const handleClose = useCallback((e, reason) => {
+    reject({reason})
     setResolveReject([])
-  }, [])
-  const handleCancel = useCallback(
-    (e, reason) => {
-      reject({reason})
-      handleClose(e, reason)
-    },
-    [reject, handleClose],
-  )
-  const handleConfirm = useCallback(
-    (e, item) => {
-      resolve({option: item})
-      handleClose(e, 'resolved')
-    },
-    [resolve, handleClose, resolveReject],
-  )
+  }, [reject])
+  const handleConfirm = useCallback((e, item) => {
+    resolve({option: item})
+    setResolveReject([])
+  }, [resolve])
 
   const elementDrawer = useCallback(
     (options: ElementDrawerOptions = {}) => {
@@ -83,8 +74,7 @@ function ComponentsDrawerContextProvider(props: ComponentsDrawerContextProviderP
             open={isOpen}
             options={options}
             onClose={handleClose}
-            onCancel={handleCancel}
-            onConfirm={handleConfirm}
+            onItemSelect={handleConfirm}
             items={templateBlocks}
             {...rest}
           />

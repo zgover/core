@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,63 +14,63 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {PKey} from '@aglyn/shared-data-types'
+
+export type CopyTarget<Target, ArrIndex, MapKey, MapValue, SetValue> =
+  Target extends ReadonlyArray<ArrIndex>
+    ? Target /*ReadonlyArray<ArrIndex>*/
+    : Target extends Map<MapKey, MapValue>
+      ? Target /*Map<MapKey, MapValue>*/
+      : Target extends Set<SetValue>
+        ? Target /*Set<SetValue>*/
+        : Target extends Record<infer K, infer V>
+          ? Target /*Record<K, V>*/
+          : Target
+
+export type ObjectAssignFn = {
+  <T, U>(target: T, source: U): (T & U)
+  <T, U, V>(target: T, source1: U, source2: V): (T & U & V)
+  <T, U, V, W>(target: T, source1: U, source2: V, source3: W): (T & U & V & W)
+  (target: object, ...sources: any[]): any
+}
+
+const objectAssign: ObjectAssignFn = Object.assign ?? defaultObjectAssign
 
 
-export type CopyTarget<T, U, K, V, X> = T extends ReadonlyArray<U>
-  ? ReadonlyArray<U>
-  : T extends Map<K, V>
-    ? Map<K, V>
-    : T extends Set<X>
-      ? Set<X>
-      : T extends Record<PKey, unknown>
-        ? T
-        : any
-
-
-const getType: <T>(obj: T) => string = <T>(obj: T): string => (toString.call(obj) as string).slice(8, -1)
-const defaultAssign: <T, S>(target: T, source: S) => (T & S) = <T, S>(
-  target: T,
-  source: S,
-): T & S => {
+function defaultObjectAssign<T, U>(target: T, source: U): T & U {
   getAllKeys(source).forEach((key: string): void => {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
       target[key] = source[key]
     }
   })
-  return target as T & S
+  return target as T & U
 }
-const objectAssign: {
-  <T, U>(target: T, source: U): (T & U); <T, U, V>(
-    target: T,
-    source1: U,
-    source2: V,
-  ): (T & U & V); <T, U, V, W>(
-    target: T,
-    source1: U,
-    source2: V,
-    source3: W,
-  ): (T & U & V & W); (target: object, ...sources: any[]): any
-} = Object.assign ?? defaultAssign
-const getAllKeys: (obj) => string[] =
-  typeof Object.getOwnPropertySymbols === 'function'
-    ? (obj): string[] => Object.keys(obj).concat(Object.getOwnPropertySymbols(obj) as any)
-    : (obj): string[] => Object.keys(obj)
+
+function getType<T>(obj: T): string {
+  return String(obj).slice(8, -1)
+}
+
+function getAllKeys<T>(obj: T): (string | symbol)[] {
+  const definedPropertySymbols = typeof Object.getOwnPropertySymbols === 'function'
+  const getOwnPropertySymbols = definedPropertySymbols ? Object.getOwnPropertySymbols : () => []
+  return Object.keys(obj).concat(getOwnPropertySymbols.call(null, obj))
+}
 
 /**
- * Immutable copy
- * @see inspiration {@link https://github.com/kolodny/immutability-helper/blob/master/index.ts}
- * @param {CopyTarget<T, U, K, V, X>} value
- * @returns {any}
+ * Immutable deep copy
+ * @param value - Any value to create a copy of
+ * @see Inspired by {@link https://github.com/kolodny/immutability-helper/blob/master/index.ts}
  */
-export function copy<T, U, K, V, X>(value: CopyTarget<T, U, K, V, X>): CopyTarget<T, U, K, V, X> {
+export function copy<Target, ArrIndex, MapKey, MapValue, SetValue>(
+  value: Target,
+): CopyTarget<Target, ArrIndex, MapKey, MapValue, SetValue> {
   return Array.isArray(value)
-    ? objectAssign(value.constructor(value.length), value)
+    ? objectAssign.call(null, value.constructor(value.length), value)
     : getType(value) === 'Map'
-      ? new Map(value as Map<K, V>)
+      ? new Map(value as unknown as Map<MapKey, MapValue>)
       : getType(value) === 'Set'
-        ? new Set(value as Set<X>)
+        ? new Set(value as unknown as Set<SetValue>)
         : value && typeof value === 'object'
-          ? (objectAssign(Object.create(Object.getPrototypeOf(value)), value) as T)
-          : (value as T)
+          ? (objectAssign(Object.create(Object.getPrototypeOf(value)), value) as Target)
+          : (value as Target)
 }
+export default copy

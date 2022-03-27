@@ -53,15 +53,23 @@ export function normalizeComponentElementData(
   parentId: ElementId,
 ): AglynElementsList {
   const elemData: AglynElementsList = []
-  const elems: AglynElementsById = _isStrT(elements.$id)
-    ? {[elements.$id]: {...elements}} as AglynElementsById
-    : {...elements} as AglynElementsById
 
-  elemData.push(
-    ...(elems[parentId].elements || []).map(($id: any) =>
-      normalizeData(elems[$id], elems),
-    ),
-  )
+  if (elements) {
+    try {
+      const elems: AglynElementsById = _isStrT(elements.$id)
+        ? {[elements.$id]: {...elements}} as AglynElementsById
+        : {...elements} as AglynElementsById
+
+      elemData.push(
+        ...(elems[parentId]?.elements || []).map(($id: any) =>
+          normalizeData(elems[$id], elems),
+        ),
+      )
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
 
   return elemData
 }

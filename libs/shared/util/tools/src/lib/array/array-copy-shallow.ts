@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,18 @@
  * limitations under the License.
  */
 
-import {arrayAddAtIndex} from './array-add-at-index'
-import {arrayMutate} from './array-mutate'
-
 
 /**
- *
- *
- * @export
- * @template K
- * @template T
- * @template U
- * @param {T} array
- * @param {(K | any)} currentIndex
- * @param {(K | any)} newIndex
- * @returns {T}
+ * Shallow copy iterable or array like, shortcut for Array.from
+ * @param iterable - An iterable object to convert to an array
+ * @param callbackFn - A mapping function to call on every element of the array
+ * @param thisArg - Value of 'this' used to invoke the callbackFn
  */
-export function arrayReorder<K extends number & keyof T, T extends Array<U>, U>(
-  array: T,
-  currentIndex: K | any,
-  newIndex: K | any,
-): T {
-  const arr = arrayMutate(currentIndex, array)
-  return arrayAddAtIndex(newIndex, arr.items, arr.deleted).items as T
+export function arrayCopyShallow<T, U>(
+  iterable: Iterable<T> | ArrayLike<T>,
+  callbackFn?: (v: T, k: number) => U,
+  thisArg?: any,
+): U[] {
+  return Array.from(iterable, callbackFn, thisArg)
 }
+export default arrayCopyShallow

@@ -15,26 +15,18 @@
  * limitations under the License.
  */
 
-import {useRouter} from 'next/router'
-import {useMemo} from 'react'
-import type {ContinueRouteData} from '../types'
+import LayoutAuthenticatedComponent from '../../layouts/layout-authenticated.component'
 
 
-export function useContinueQueryEncoded() {
-  const router = useRouter()
+function Hosts() {
 
-  return useMemo(() => {
-    const href = typeof location !== 'undefined'
-        ? location.pathname
-        : router.pathname,
-      asPath = router.asPath
+  return (
+    <>
 
-    return useContinueQueryEncoded.encodeContinueQuery({href, asPath})
-  }, [router])
+    </>
+  )
 }
+Hosts.displayName = 'Page:Hosts'
+Hosts.layoutComponent = LayoutAuthenticatedComponent
 
-useContinueQueryEncoded.encodeContinueQuery = (query: ContinueRouteData): string => {
-  return encodeURIComponent(JSON.stringify(query))
-}
-
-export default useContinueQueryEncoded
+export default Hosts

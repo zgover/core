@@ -17,7 +17,7 @@
 
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {BackgroundImageComponent, type BackgroundImageComponentProps} from '@aglyn/shared-ui-jsx'
-import {useContinueQueryDecoded} from '@aglyn/shared-util-next'
+import {useNextUrl} from '@aglyn/shared-util-next'
 import {Stack} from '@mui/material'
 import {useRouter} from 'next/router'
 import {useEffect} from 'react'
@@ -43,7 +43,7 @@ function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps)
   const authLoading = status === 'loading'
   const signedIn = signInCheckResult?.signedIn === true
   const emailVerified = signInCheckResult?.user?.emailVerified
-  const [, pushContinue] = useContinueQueryDecoded()
+  const [, , pushNext] = useNextUrl()
 
   useEffect(() => {
     if (authLoading) return void 0
@@ -52,12 +52,12 @@ function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps)
     if (isSignOut) return void router.push('/signin')
     if (requireEmailVerification && !emailVerified) return void router.push('/validate-email')
 
-    return void pushContinue('/')
+    return void pushNext('/')
   }, [
     authLoading,
     emailVerified,
     isSignOut,
-    pushContinue,
+    pushNext,
     requireEmailVerification,
     router,
     signedIn,

@@ -15,9 +15,4 @@
  * limitations under the License.
  */
 
-
-export type ContinueRouteData = {
-  href: string,
-  pathname?: string,
-  asPath?: string,
-}
+export {}

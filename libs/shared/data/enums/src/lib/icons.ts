@@ -23,6 +23,7 @@ import {
   mdiBookVariantMultiple,
   mdiCellphone,
   mdiCheck,
+  mdiClose,
   mdiCodeArray,
   mdiCodeBracesBox,
   mdiCodeString,
@@ -78,7 +79,7 @@ export const ICON_VARIANT_TREE_VIEW = mdiFileTree
 export const ICON_VARIANT_ARRAY = mdiCodeArray
 export const ICON_VARIANT_OBJECT = mdiCodeBracesBox
 export const ICON_VARIANT_STRING = mdiCodeString
-// Modification
+// Action
 export const ICON_VARIANT_MODIFY_ADD = mdiShapeSquareRoundedPlus
 export const ICON_VARIANT_MODIFY_DELETE = mdiDeleteOutline
 export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
@@ -90,6 +91,7 @@ export const ICON_VARIANT_MODIFY_REDO = mdiRedo
 export const ICON_VARIANT_MODIFY_UNDO = mdiUndo
 export const ICON_VARIANT_SELECT_PARENT = mdiArrowTopLeft
 export const ICON_VARIANT_SHOW_DETAIL = mdiPageNextOutline
+export const ICON_VARIANT_CLOSE = mdiClose
 // User
 export const ICON_VARIANT_APP_PREFERENCES = mdiTune
 export const ICON_VARIANT_APP_SETTINGS = mdiCog

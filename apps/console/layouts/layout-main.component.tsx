@@ -230,7 +230,15 @@ function LayoutMainComponent(props: LayoutMainProps) {
                         }),
                       }}
                     >
-                      <AglynSvgIcon rounded bordered sx={{fontSize: `1.75em`, ml: -0.5}} />
+                      <AglynSvgIcon
+                        sx={{
+                          ml: -0.15,
+                          height: '32px',
+                          width: '32px',
+                        }}
+                        bordered
+                        rounded
+                      />
                       <AglynSvgLogo
                         color="secondary"
                         sx={{

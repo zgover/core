@@ -161,17 +161,17 @@ export const FIELD_SCHEMA_ORGANIZATION_NAME: FieldSchema = {
   ],
 }
 
-export const FIELD_SCHEMA_COMMENTS_SHORT: FieldSchema = {
+export const FIELD_SCHEMA_MESSAGE_SHORT: FieldSchema = {
   component: FieldComponentType.TEXT_FIELD,
-  name: 'comments',
-  label: 'Comments',
+  name: 'message',
+  label: 'Additional details',
   type: 'text',
 }
 
-export const FIELD_SCHEMA_COMMENTS_LONG: FieldSchema = {
+export const FIELD_SCHEMA_MESSAGE_LONG: FieldSchema = {
   component: FieldComponentType.TEXTAREA,
-  name: 'comments',
-  label: 'Comments',
+  name: 'message',
+  label: 'Additional details',
   type: 'text',
   rows: 2,
 }

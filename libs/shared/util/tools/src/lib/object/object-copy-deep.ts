@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
+import copy from '../copy'
+
+
 /**
- * Create KeyValueMap from an array of tuple with key and value
- * @param {[key: K, value: V][]} array
- * @returns {{[P in K]: V}}
+ * Copy deep
+ * @param target - Object map to create a deep copy of
  */
-export function arrayTuplesToObject<K extends keyof any, V>(array: [key: K, value: V][]): { [P in K]: V } {
-  return Object.assign({}, ...array.map(([key, val]) => ({[key]: val})))
+export function objectCopyDeep<K extends keyof any, T>(target: Record<K, T>): typeof target {
+  return copy(target)
 }
+export default objectCopyDeep

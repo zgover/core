@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,14 @@
  * limitations under the License.
  */
 
-import {arrayMutate, MutatedArray} from './array-mutate'
-
 
 /**
- *
- *
- * @export
- * @template T
- * @param {number} index
- * @param {Array<T>} array
- * @returns {MutatedArray<T>}
+ * Remove an item from the array at the provided zero index
+ * @param array - Array list to remove the item from
+ * @param index - Index of item to remove
  */
-export function arrayRemoveAtIndex<T>(index: number, array: Array<T>): MutatedArray<T> {
-  return arrayMutate(index, array)
+export function arrayRemoveAtIndex<T>(array: Array<T>, index: number): Array<T> {
+  array.splice(index, 1)
+  return array
 }
+export default arrayRemoveAtIndex

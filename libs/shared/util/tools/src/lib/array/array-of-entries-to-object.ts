@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
+
+export type ArrayEntriesIndex<K extends keyof any, V> = [key: K, value: V]
+
 /**
- * Shallow assign, copy and update with multiple arrays
- * @param array - Base array to copy and update
- * @param others - One or more arrays to merge
+ * Create KeyValueMap from an array of tuple with key and value
+ * @param entries - Array of tuples 0:key, 1:val to map into a new object
  */
-export function arrayUpdate<T>(
-  array: Array<T>,
-  ...others: (Array<T> | Record<string, unknown>)[]
-): Array<T> {
-  return Object.assign(array, ...others)
+export function arrayOfEntriesToObject<K extends keyof any, V>(
+  entries: ArrayEntriesIndex<K, V>[],
+): Record<K, V> {
+  return Object.assign({}, ...entries.map(([key, val]) => ({[key]: val})))
 }
-export default arrayUpdate
+export default arrayOfEntriesToObject

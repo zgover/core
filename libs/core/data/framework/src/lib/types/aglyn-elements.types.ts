@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
-import {type Conditional, type JSXElementType, type KeyValueMap} from '@aglyn/shared-data-types'
-import {type CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
-import {type BundleUId, type ComponentId} from './aglyn-components.types'
+import type {Conditional, JSXElementType, KeyValueMap} from '@aglyn/shared-data-types'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import type {BoxProps} from '@aglyn/shared-feature-themes'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import type {ElementType} from 'react'
+import type {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
+import type {BundleUId, ComponentId} from './aglyn-components.types'
 
 
 export type ElementId = string
@@ -28,14 +32,14 @@ export type AglynElementsById<T = AglynElementDenormalized> = KeyValueMap<Elemen
 export type AglynElementsList<T = AglynElementNormalized> = Array<T>
 export type AglynElementHierarchy<$ID extends ElementId = ElementId> = [root: CANVAS_ROOT_ELEMENT_ID, ...parentIds: [...ElementId[], $ID]]
 
-export interface AglynElement<P = any, Denormalized extends boolean = true, BoxProps extends {sx: any} = any> {
+export interface AglynElement<P = any, Denormalized extends boolean = true, D extends ElementType = any> {
   readonly $id: ElementId
   readonly componentId: ComponentId
   readonly bundleId?: BundleUId
   parentId?: ElementId
   displayName?: string
   description?: string
-  props?: Omit<BoxProps, 'sx'> & P
+  props?: Omit<BoxProps<D, P>, 'sx'>
   sx?: BoxProps['sx']
   elements?: Conditional<Denormalized, true, AglynElementsList<ElementId>, AglynElementsList>
 }

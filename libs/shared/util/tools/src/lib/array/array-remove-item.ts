@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,17 @@
  * limitations under the License.
  */
 
-import {arraySafe} from './array-safe'
-
 
 /**
- *
- *
- * @export
- * @template T
- * @param {T} item
- * @param {Array<T>} array
- * @returns {Array<T>}
+ * Remove an item using strict equality when match
+ * @param array - Array to mutate and remove the match
+ * @param item - Item to search for strict equality comparison
  */
-export function arrayRemoveItem<T>(item: T, array: Array<T>): Array<T> {
-  return arraySafe(array).filter((i) => i !== item)
+export function arrayRemoveItem<T>(array: Array<T>, item: T): Array<T> {
+  const index = array.indexOf(item)
+  if (index >= 0) {
+    array.splice(index, 1)
+  }
+  return array
 }
+export default arrayRemoveItem

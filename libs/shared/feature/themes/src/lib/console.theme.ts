@@ -111,7 +111,7 @@ export const ordinalSecondaryDark: SecondaryRecord = {
   main: '#03A9F4',
   light: '#40C4FF',
   dark: '#026CA0',
-  contrastText: '#000000',
+  contrastText: '#FFFFFF',
 }
 
 export const ordinalTertiaryLight: TertiaryRecord = {
@@ -242,6 +242,11 @@ const baseOptions: ThemeOptions = {
             filter: 'grayscale(1) opacity(0.65)',
           },
         },
+      },
+    },
+    MuiFab: {
+      defaultProps: {
+        color: 'secondary',
       },
     },
     MuiIconButton: {

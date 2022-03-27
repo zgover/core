@@ -36,7 +36,7 @@ const Breadcrumbs = styled(MuiBreadcrumbs, {
   minHeight: theme.spacing(4),
 
   [`& .${classKeys.item}`]: {
-    color: 'inherit',
+    color: theme.palette.text.primary,
     display: 'flex',
     fontWeight: theme.typography.fontWeightRegular,
     transition: theme.transitions.create('color', {
@@ -54,7 +54,7 @@ const Breadcrumbs = styled(MuiBreadcrumbs, {
       textDecoration: 'none',
       cursor: 'default',
       pointerEvents: 'default',
-      filter: 'grayscale(1) opacity(0.7)',
+      color: theme.palette.text.secondary,
     },
     [`&.${classKeys.centered}`]: {
       alignItems: 'center',

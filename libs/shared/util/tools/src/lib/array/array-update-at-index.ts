@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,14 @@
  * limitations under the License.
  */
 
-import {arrayMutate, MutatedArray} from './array-mutate'
 
 
-/**
- *
- *
- * @export
- * @template T
- * @param {(number | any)} index
- * @param {Array<T>} array
- * @param {T} item
- * @returns {MutatedArray<T>}
- */
 export function arrayUpdateAtIndex<T>(
-  index: number | any,
   array: Array<T>,
-  item: T,
-): MutatedArray<T> {
-  return arrayMutate(index, array, item)
+  index: number | any,
+  elem: T,
+): Array<T> {
+  array.splice(index, 1, elem)
+  return array
 }
+export default arrayUpdateAtIndex

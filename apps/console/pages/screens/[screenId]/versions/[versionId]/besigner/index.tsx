@@ -19,11 +19,14 @@ import {getApp} from '@aglyn/core-data-framework'
 import type {BesignerComponentProps} from '@aglyn/core-feature-besigner'
 import {HAS_BROWSER} from '@aglyn/shared-data-enums'
 import {LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
+import {Stack, Typography} from '@mui/material'
+import {doc} from 'firebase/firestore'
 import dynamic from 'next/dynamic'
+import {useRouter} from 'next/router'
 import {useEffect} from 'react'
-// import {useEffect} from 'react-hooks'
-import '../constants/app-setup'
-import LayoutConsoleComponent from '../layouts/layout-console.component'
+import {useFirestore, useFirestoreDocDataOnce} from 'reactfire'
+import '../../../../../../constants/app-setup'
+import LayoutConsoleComponent from '../../../../../../layouts/layout-console.component'
 
 
 const AglynBesigner = dynamic<BesignerComponentProps>(
@@ -32,8 +35,14 @@ const AglynBesigner = dynamic<BesignerComponentProps>(
 )
 
 function Besigner(props) {
+  const {query: {screenId, versionId}} = useRouter()
+  const firestore = useFirestore()
+  const screenRef = doc(firestore, 'screen', `${screenId}`, 'version', `${versionId}`)
+  const {status, data: screen} = useFirestoreDocDataOnce(screenRef, {idField: '$id'})
+  const elements = screen?.elements || {}
 
   console.log('Besigner,', props.tenant, props)
+  console.log('Besigner data,', status, screen)
 
 
   useEffect(() => {
@@ -42,9 +51,21 @@ function Besigner(props) {
     }
   }, [])
 
-  return (
+  return status === 'error' ? (
+    <Stack
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Typography>
+        {'Not found'}
+      </Typography>
+    </Stack>
+  ) : status === 'loading' ? (
+    <LoadingOverlayComponent open />
+  ) : (
     <AglynBesigner
       sx={{flexGrow: 1, position: 'unset'}}
+      canvasElements={{elements: elements}}
     />
   )
 }

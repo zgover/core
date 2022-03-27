@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type ElementsDataStore, type ElementsDataStoreApi} from '@aglyn/core-data-framework'
+import type {ElementsDataStore, ElementsDataStoreApi} from '@aglyn/core-data-framework'
 import {createContext, useContext} from 'react'
 
 
@@ -26,15 +26,16 @@ export interface ElementsContextType extends ElementsDataStoreApi {
 }
 
 export const ElementsContext = createContext<ElementsContextType>({
-  elements: {},
-  undo: (() => {}) as any,
-  redo: (() => {}) as any,
-  setElements: (() => {}) as any,
   addElement: (() => {}) as any,
-  updateElement: (() => {}) as any,
   deleteElement: (() => {}) as any,
-  moveElement: (() => {}) as any,
   duplicateElement: (() => {}) as any,
+  elements: {},
+  moveElement: (() => {}) as any,
+  redo: (() => {}) as any,
+  setElement: (() => {}) as any,
+  setElements: (() => {}) as any,
+  undo: (() => {}) as any,
+  updateElement: (() => {}) as any,
 })
 ElementsContext.displayName = 'ElementsContext'
 

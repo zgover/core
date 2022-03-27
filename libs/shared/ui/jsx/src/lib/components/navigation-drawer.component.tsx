@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import {generateComponentClassKeys, mergeSxProps} from '@aglyn/shared-feature-themes'
 
 import {
   AppBar,
@@ -29,10 +29,20 @@ import {
   Toolbar,
   type ToolbarProps,
 } from '@mui/material'
+import clsx from 'clsx'
 import {forwardRef, type ReactNode, type Ref, useState} from 'react'
 import useCombinedRefs from '../hooks/use-combined-refs'
 import ElevateOnScroll from './elevate-on-scroll'
 
+
+const classKeys = generateComponentClassKeys('AglynNavigationDrawer', [
+  'root',
+  'appBar',
+  'toolbar',
+  'appBarLeft',
+  'appBarRight',
+  'content',
+])
 
 /* eslint-disable-next-line */
 export interface NavigationDrawerProps extends Partial<DrawerProps> {
@@ -50,6 +60,7 @@ const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
   function RefRenderFn(props, ref) {
     const {
       children,
+      className,
       contentRef,
       appBarLeft,
       appBarRight,
@@ -68,6 +79,7 @@ const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
     return (
       <Drawer
         ref={ref}
+        className={clsx(classKeys.root, className)}
         sx={mergeSxProps(
           {
             width: theme => `${theme.breakpoints.values.sm}px`,
@@ -85,12 +97,13 @@ const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
         <ElevateOnScroll target={localContentRef}>
           {({activeWithoutHysteresis}) => (
             <AppBar
-              color="default"
+              color="inherit"
               position="relative"
               variant="elevation"
               elevation={activeWithoutHysteresis ? 4 : 0}
+              enableColorOnDark
               {...AppBarProps}
-
+              className={clsx(classKeys.appBar, AppBarProps?.className)}
               sx={mergeSxProps(
                 {
                   borderBottomWidth: 1,
@@ -100,18 +113,33 @@ const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
                 AppBarProps?.sx,
               )}
             >
-              <Toolbar {...ToolbarProps}>
+              <Toolbar
+                {...ToolbarProps}
+                       className={clsx(classKeys.toolbar, ToolbarProps?.className)}
+              >
                 <Stack
-                  direction="row"
-                  justifyContent="space-between"
                   alignItems="center"
+                  justifyContent="space-between"
+                  direction="row"
                   spacing={2}
                   width={1}
                 >
-                  <Stack {...AppBarLeftProps}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="flex-start"
+                    {...AppBarLeftProps}
+                    className={clsx(classKeys.appBarLeft, AppBarLeftProps?.className)}
+                  >
                     {appBarLeft}
                   </Stack>
-                  <Stack {...AppBarRightProps}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="flex-start"
+                    {...AppBarRightProps}
+                    className={clsx(classKeys.appBarRight, AppBarRightProps?.className)}
+                  >
                     {appBarRight}
                   </Stack>
                 </Stack>
@@ -122,14 +150,12 @@ const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
         <Box
           ref={useCombinedRefs(setLocalContentRef, contentRef)}
           {...ContentProps}
-          sx={mergeSxProps(
-            {
-              height: '100%',
-              width: '100%',
-              overflow: 'auto',
-            },
-            ContentProps?.sx,
-          )}
+          className={clsx(classKeys.content, ContentProps?.className)}
+          sx={mergeSxProps({
+            height: '100%',
+            width: '100%',
+            overflow: 'auto',
+          }, ContentProps?.sx)}
         >
           {children}
         </Box>

@@ -67,10 +67,10 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public toString(): string {
     return getStaticField(Symbol.toStringTag, this)
   }
-  public toJSON(): Dictionary {
+  public toJSON() {
     return {
       namespace: this.namespace,
-      created: this.#createdAt,
+      created: this.#createdAt.toJSON(),
     }
   }
 

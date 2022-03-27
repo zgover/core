@@ -53,11 +53,18 @@ export function denormalizeComponentElementData(
   elements: AglynElementNormalized | AglynElementsList,
   parentId?: ElementId,
 ): AglynElementsById {
-  let elemData
+  let elemData = {}
 
-  (_isArr(elements) ? elements : [elements]).forEach((element) => {
-    elemData = denormalizeData(element, parentId, elemData)
-  })
+  if (elements) {
+    try {
+      (_isArr(elements) ? elements : [elements]).forEach((element) => {
+        elemData = denormalizeData(element, parentId, elemData)
+      })
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
 
   return elemData
 }

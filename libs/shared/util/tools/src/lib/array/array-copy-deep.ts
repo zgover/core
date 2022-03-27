@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {copy} from '../copy'
+import copy from '../copy'
 
 
 /**
  * Deeply copy everything in iterable or array
- * @param {Iterable<T> | ArrayLike<T>} target
- * @returns {typeof target}
+ * @param target - Iterable list to deep copy
  */
-export function arrayCopyAll<T>(target: Iterable<T> | ArrayLike<T>): typeof target {
+export function arrayCopyDeep<T>(target: Iterable<T> | ArrayLike<T>): typeof target {
   return copy(target)
 }
+export default arrayCopyDeep

@@ -166,7 +166,7 @@ export interface AglynTenantHostLayout {
   $id: LayoutUid
   hostId?: HostUid
   layoutId?: LayoutUid
-  version?: VersionUid
+  versionId?: VersionUid
   versions?: Array<VersionUid>
   displayName?: string
   description?: string

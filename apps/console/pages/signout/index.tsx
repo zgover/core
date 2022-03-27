@@ -20,8 +20,8 @@ import {CircularProgress} from '@mui/material'
 import {signOut} from 'firebase/auth'
 import {useEffect} from 'react'
 import {useAuth} from 'reactfire'
-import LayoutAuthFormComponent from '../layouts/layout-auth-form.component'
-import LayoutUnauthenticatedComponent from '../layouts/layout-unauthenticated.component'
+import LayoutAuthFormComponent from '../../layouts/layout-auth-form.component'
+import LayoutUnauthenticatedComponent from '../../layouts/layout-unauthenticated.component'
 
 
 function SignOut() {

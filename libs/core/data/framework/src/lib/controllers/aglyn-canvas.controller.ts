@@ -48,10 +48,10 @@ import type {
   AglynElementsList,
 } from '../types/aglyn-elements.types'
 import type {AglynModuleEffectListener} from '../types/aglyn-module.types'
-import {denormalizeComponentElementData} from '../util/denormalize-component-element-data'
+import denormalizeComponentElementData from '../util/denormalize-component-element-data'
 import {handleRedoEvent} from '../util/handle-state-modification-history-redo'
 import {handleUndoEvent} from '../util/handle-state-modification-history-undo'
-import {normalizeComponentElementData} from '../util/normalize-component-element-data'
+import normalizeComponentElementData from '../util/normalize-component-element-data'
 import {
   handleCanvasAddElement,
   handleCanvasApiChangeEvent,
@@ -100,13 +100,13 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
       present: denormalizeComponentElementData(this.options.initialElements || [], CANVAS_ROOT_ELEMENT_ID),
       future: [] as AglynElementsById[],
     }, {name: `${this.namespace}:canvas-elements`})
-    persist({store: this.#context})
     this.#denormalizedElementsStore = this.#context.map((elements) => {
       return elements.present
     })
     this.#normalizedElementsStore = this.#context.map((elements) => {
       return normalizeComponentElementData(elements.present, CANVAS_ROOT_ELEMENT_ID)
     })
+    persist({store: this.#denormalizedElementsStore})
 
     this.#events = createApi(this.#context, {
       undo: handleUndoEvent,
@@ -124,7 +124,6 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   public toJSON() {
     return {
       ...super.toJSON(),
-      ...this.#context,
     }
   }
 

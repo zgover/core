@@ -16,29 +16,40 @@
  */
 
 import {ICON_VARIANT_BESIGNER, ICON_VARIANT_PAGES} from '@aglyn/shared-data-enums'
-import {AppLink, ContainerComponent, GridItems} from '@aglyn/shared-ui-jsx'
+import {AppLink, ContainerComponent, GridItems, useLoading} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {ListItemText} from '@mui/material'
 import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
-import {useFirestore, useFirestoreDocDataOnce} from 'reactfire'
-import WidgetCardComponent from '../../../components/widget-card.component'
-import {CONTENT_MAX_WIDTH} from '../../../constants/shared'
-import LayoutConsoleComponent from '../../../layouts/layout-console.component'
-import LayoutDashboardComponent from '../../../layouts/layout-dashboard.component'
+import {useEffect} from 'react'
+import {useFirestore, useFirestoreDocData} from 'reactfire'
+import WidgetCardComponent from '../../../../../../components/widget-card.component'
+import {CONTENT_MAX_WIDTH} from '../../../../../../constants/shared'
+import LayoutConsoleComponent from '../../../../../../layouts/layout-console.component'
+import LayoutDashboardComponent from '../../../../../../layouts/layout-dashboard.component'
 
 
-export function ScreenDetails(props) {
+function ScreenDetails(props) {
 
-  const {query} = useRouter()
-  const screenId = query.screenId as string
+  const {query: {screenId, versionId}} = useRouter()
   const firestore = useFirestore()
-  const screenRef = doc(firestore, 'screens', `${screenId}`)
-  const {status, data: screen} = useFirestoreDocDataOnce(screenRef, {
-    idField: '$id', // this field will be added to the object created from each document
-  })
+  const screenRef = doc(firestore, 'screen', `${screenId}`)
+  const {queueLoading} = useLoading()
+  const {status, data: screen} = useFirestoreDocData(screenRef, {idField: '$id'})
+
+  useEffect(() => {
+    if (status === 'loading') {
+      const dequeue = queueLoading()
+      return () => dequeue && dequeue()
+    }
+  }, [status, queueLoading])
 
   const details = [
+    {
+      id: 'details-id',
+      primary: 'Unique ID:',
+      secondary: `${screen?.$id ?? ''}`,
+    },
     {
       id: 'details-dname',
       primary: 'Display name:',
@@ -58,6 +69,11 @@ export function ScreenDetails(props) {
       id: 'details-dateu',
       primary: 'Date updated:',
       secondary: `${screen?.updatedAt?.toDate?.() || ''}`,
+    },
+    {
+      id: 'details-vers',
+      primary: 'Version ID:',
+      secondary: `${screen?.versionId || ''}`,
     },
   ]
 
@@ -82,13 +98,13 @@ export function ScreenDetails(props) {
       headerRight={(
         <AppLink
           size="small"
-          variant="outlined"
+          variant="extended"
           componentVariant="fab"
-          href={'/screens/[screenId]/besigner'}
-          hrefAs={`/screens/${screenId}/besigner`}
+          href={`/screens/${screen?.$id}/versions/${screen?.versionId}/besigner`}
           title={'Open with besigner'}
         >
-          <MdiIcon path={ICON_VARIANT_BESIGNER.path} />
+          <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} sx={{mr: 0.5}} />
+          Besigner
         </AppLink>
       )}
     >
@@ -116,7 +132,7 @@ export function ScreenDetails(props) {
               xs: 12, md: 6, lg: 8,
               children: (
                 <WidgetCardComponent
-                  header={'Basic Details'}
+                  header={'Raw JSON'}
                   contentGutterX
                   contentGutterY
                   contentBordered

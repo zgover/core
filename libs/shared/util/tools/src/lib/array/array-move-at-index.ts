@@ -15,15 +15,20 @@
  * limitations under the License.
  */
 
+
 /**
- * Shallow assign, copy and update with multiple arrays
- * @param array - Base array to copy and update
- * @param others - One or more arrays to merge
+ * Move an element in the array
+ * @param array - The array to mutate and reorder
+ * @param index - Current index of the item to move
+ * @param newIndex - New index for the item to be moved to
  */
-export function arrayUpdate<T>(
-  array: Array<T>,
-  ...others: (Array<T> | Record<string, unknown>)[]
-): Array<T> {
-  return Object.assign(array, ...others)
+export function arrayMoveAtIndex<K extends number & keyof T, T extends Array<U>, U>(
+  array: T,
+  index: K | any,
+  newIndex: K | any,
+): T {
+  const item = array.splice(index, 1)[0]
+  array.splice(newIndex, 0, item)
+  return array
 }
-export default arrayUpdate
+export default arrayMoveAtIndex

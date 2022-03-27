@@ -24,9 +24,7 @@ import {type AnchorHTMLAttributes, forwardRef} from 'react'
 export interface NextAnchorProps extends AnchorHTMLAttributes<HTMLAnchorElement> {}
 
 // Add support for the sx prop
-export const NextAnchor = styled('a', {
-  name: 'AglynNextLink',
-})<NextAnchorProps>({})
+export const NextAnchor = styled('a', {name: 'AglynNextLink'})<NextAnchorProps>({})
 NextAnchor.displayName = 'Anchor'
 
 export type NextLinkBaseProps =

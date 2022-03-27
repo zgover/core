@@ -15,15 +15,17 @@
  * limitations under the License.
  */
 
-/**
- * Shallow assign, copy and update with multiple arrays
- * @param array - Base array to copy and update
- * @param others - One or more arrays to merge
- */
-export function arrayUpdate<T>(
-  array: Array<T>,
-  ...others: (Array<T> | Record<string, unknown>)[]
-): Array<T> {
-  return Object.assign(array, ...others)
+import type {GetServerSidePropsContext} from 'next/types'
+
+
+export default () => null
+
+export const getServerSideProps = (context: GetServerSidePropsContext) => {
+  const {resolvedUrl} = context
+  return {
+    redirect: {
+      permanent: true,
+      destination: `${resolvedUrl}/list`,
+    },
+  }
 }
-export default arrayUpdate

@@ -15,87 +15,22 @@
  * limitations under the License.
  */
 
-import type {AglynComponentElementTemplate} from '@aglyn/core-data-framework'
-import {ICON_VARIANT_ENTITY_BLOCK} from '@aglyn/shared-data-enums'
+import {ICON_VARIANT_CLOSE} from '@aglyn/shared-data-enums'
 import type {AnyProps} from '@aglyn/shared-data-types'
-import {styled} from '@aglyn/shared-feature-themes'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {
-  CardIconListItem,
-  GridList as JsxGridList,
-  NavigationDrawerComponent as JsxNavbarDrawer,
+  NavigationDrawerComponent,
   type NavigationDrawerProps,
   SrOnlyComponent,
 } from '@aglyn/shared-ui-jsx'
 import type {FormSchema} from '@aglyn/shared-ui-jsx-forms'
-import {mdiClose, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
-import {forwardRef, type MouseEvent, useCallback} from 'react'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {Button, IconButton, Typography} from '@mui/material'
+import {forwardRef, type MouseEvent, useCallback, useState} from 'react'
 import type {ElementDrawerOptions} from '../contexts/element-drawer-context'
-
-
-const ComponentsDrawer = styled(JsxNavbarDrawer, {
-  name: 'AglynComponentsDrawer',
-})<NavigationDrawerProps>(({theme}) => ({
-  '& .AglynNavigationDrawer-content': {
-    backgroundColor: theme.palette.background.default,
-    overflow: 'auto',
-  },
-  '& > .MuiDrawer-paper': {
-    margin: '0 auto',
-    height: '100%',
-    maxHeight: '100vh',
-    [theme.breakpoints.up('sm')]: {
-      height: theme.breakpoints.values.sm,
-    },
-  },
-  '& .MuiDrawer-paper': {
-    height: 480,
-    width: 480,
-    margin: '0 auto',
-  },
-}))
-
-
-const ComponentsDrawerGridList = styled(JsxGridList, {
-  name: 'AglynComponentsDrawerGridList',
-})(({theme}) => ({
-  overflowX: 'hidden',
-  '& .AglynGridList-gridContainer': {
-    padding: theme.spacing(0, 2),
-    marginTop: theme.spacing(0),
-    marginLeft: theme.spacing(-2),
-  },
-  '& .AglynGridList-itemContent': {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    textAlign: 'center',
-    flexDirection: 'column',
-    justifyContent: 'space-evenly',
-  },
-}))
-
-
-const AppBarTitle = styled(Typography, {
-  name: 'AglynAppBarTitle',
-})(({theme}) => ({
-  fontSize: theme.typography.pxToRem(20),
-}))
-
-
-const ItemIcon = styled(MdiIcon, {
-  name: 'AglynItemIcon',
-})(({theme}) => ({
-  fontSize: theme.typography.pxToRem(64),
-  padding: theme.spacing(1.5),
-  borderRadius: '50%',
-  backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.quaternary.main,
-  overflow: 'visible',
-}))
+import ComponentsGridListComponent, {
+  type ComponentsGridListProps,
+} from './components-grid-list.component'
 
 
 export interface ComponentsDrawerOptionsProps extends ElementDrawerOptions {
@@ -104,106 +39,113 @@ export interface ComponentsDrawerOptionsProps extends ElementDrawerOptions {
   selectedElementProps?: AnyProps
 }
 
-export interface ComponentsDrawerComponentProps extends Partial<NavigationDrawerProps> {
+export interface ComponentsDrawerProps extends Partial<NavigationDrawerProps> {
   options?: ComponentsDrawerOptionsProps
-  items?: AglynComponentElementTemplate[]
-  onCancel?: {bivarianceHack<T>(event: MouseEvent<T>, reason: 'canceled'): void}['bivarianceHack']
-  onConfirm?: {
-    bivarianceHack<T>(event: null | MouseEvent<T>, data: unknown): void
-  }['bivarianceHack']
+  items?: ComponentsGridListProps['items']
+  onItemSelect?: ComponentsGridListProps['onItemSelect']
   onDelete?: {bivarianceHack<T>(event: MouseEvent<T>, data: unknown): void}['bivarianceHack']
+  onClose?: {
+    bivarianceHack(
+      event: any,
+      reason: 'backdropClick' | 'escapeKeyDown' | 'cancelIconClick' | 'cancelButtonClick',
+    ): void
+  }['bivarianceHack']
 }
 
-export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerComponentProps>(
+const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerProps>(
   function RefRenderFn(props, ref) {
-    const {options, onConfirm, onClose, onCancel, onDelete, items, ...rest} = props
+    const {options, onItemSelect, onClose, onDelete, items, sx, ...rest} = props
 
     const {title} = {...options}
-    const handleDrawerClose = useCallback(
-      (e, reason) => {
-        onClose?.call(null, e, reason)
-      },
-      [onClose],
-    )
-    const handleDrawerCancel = useCallback(
-      (e) => {
-        onCancel?.call(null, e, 'canceled')
-      },
-      [onCancel],
-    )
-    const handleItemClick = useCallback(
-      (e, item) => {
-        onConfirm?.call(null, e, {type: 'selection', data: item})
-      },
-      [onConfirm],
-    )
+    const [columns, setColumns] = useState(4)
+    const handleColumnChange = useCallback((columns: number) => (e) => {
+      setColumns(columns)
+    }, [])
+    const handleDrawerClose = useCallback((e, reason) => {
+      onClose?.call(null, e, reason)
+    }, [onClose])
+    const handleDrawerCancelButton = useCallback((e) => {
+      handleDrawerClose.call(null, e, 'cancelButtonClick')
+    }, [handleDrawerClose])
+    const handleDrawerCancelIcon = useCallback((e) => {
+      handleDrawerClose.call(null, e, 'cancelIconClick')
+    }, [handleDrawerClose])
+    const handleOnItemSelect = useCallback((...args) => {
+      onItemSelect?.call(null, ...args)
+    }, [onItemSelect])
 
     const appBarLeft = (
       <>
-        <IconButton color="inherit" edge="start" onClick={handleDrawerCancel} sx={{mr: 2}}>
-          <MdiIcon path={mdiClose.path} />
+        <IconButton color="inherit" edge="start" onClick={handleDrawerCancelIcon} sx={{mr: 2}}>
+          <MdiIcon path={ICON_VARIANT_CLOSE.path} />
           <SrOnlyComponent>close drawer</SrOnlyComponent>
         </IconButton>
-        <AppBarTitle color="inherit" variant="h6">
+        <Typography
+          color="inherit"
+          variant="h6"
+          sx={{
+            fontSize: theme => theme.typography.pxToRem(20),
+          }}
+        >
           {title}
-        </AppBarTitle>
+        </Typography>
       </>
     )
 
     const appBarRight = (
-      <Button color="inherit" onClick={handleDrawerCancel} sx={{mr: -1.2}}>
+      <Button color="inherit" onClick={handleDrawerCancelButton} sx={{mr: -1.2}}>
         Cancel
       </Button>
     )
 
-    const renderItemContent = useCallback(
-      ({icon, ...item}: AglynComponentElementTemplate) => (
-        <CardIconListItem
-          item={item}
-          label={item.label}
-          onActionClick={handleItemClick}
-          preview={
-            <>
-              {!icon?.path && icon ? icon : (
-                <ItemIcon
-                  color="primary"
-                  {...icon}
-                  path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
-                />
-              )}
-
-            </>
-          }
-        />
-      ),
-      [handleItemClick],
-    )
-
     return (
-      <ComponentsDrawer
+      <NavigationDrawerComponent
         ref={ref}
         anchor="bottom"
         variant="temporary"
         appBarLeft={appBarLeft}
         appBarRight={appBarRight}
-        onClose={handleDrawerCancel}
+        onClose={handleDrawerClose}
         AppBarProps={{color: 'inherit'}}
+        sx={mergeSxProps({
+          '& .AglynNavigationDrawer-content': {
+            backgroundColor: 'background.default',
+            overflow: 'auto',
+          },
+          '& > .MuiDrawer-paper': {
+            margin: '0 auto',
+            maxHeight: '100vh',
+            height: ({
+              xs: '100%',
+              sm: '50%',
+            }),
+          },
+          '& .MuiDrawer-paper': {
+            margin: '0 auto',
+            maxHeight: {sm: '100%'},
+            height: {xs: '100%', sm: '720px'},
+            maxWidth: {sm: '100%'},
+            width: theme => ({
+              xs: '100%',
+              sm: theme.breakpoints.values.sm,
+            }),
+          },
+        }, sx)}
         {...rest}
       >
-        <ComponentsDrawerGridList
-          GridContainerProps={{spacing: 2}}
-          GridItemProps={{xs: 6, sm: 4}}
-          renderItemContent={renderItemContent}
-          items={items}
-        />
-      </ComponentsDrawer>
+       <ComponentsGridListComponent
+         onItemSelect={handleOnItemSelect}
+         items={items}
+       />
+      </NavigationDrawerComponent>
     )
   },
 )
 
-ComponentsDrawerComponent.displayName = 'ComponentsDrawerComponent'
+ComponentsDrawerComponent.displayName = 'AglynComponentsDrawerComponent'
 ComponentsDrawerComponent.defaultProps = {
   items: [],
 }
 
+export {ComponentsDrawerComponent}
 export default ComponentsDrawerComponent

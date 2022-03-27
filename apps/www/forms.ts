@@ -140,9 +140,9 @@ export namespace Fields {
     errorMessage: null,
     required: true,
   }
-  export const commentsField: FieldT = {
-    id: 'comments',
-    label: 'Comments',
+  export const messageField: FieldT = {
+    id: 'message',
+    label: 'Additional Details',
     type: 'text',
     status: FieldStatus.NONE,
   }
@@ -164,11 +164,11 @@ export namespace Fields {
   }
   export const permissionForm: FieldGroup = {
     [Fields.nameField.id]: Fields.nameField,
-    [Fields.commentsField.id]: Fields.commentsField,
+    [Fields.messageField.id]: Fields.messageField,
   }
   export const roleForm: FieldGroup = {
     [Fields.nameField.id]: Fields.nameField,
-    [Fields.commentsField.id]: Fields.commentsField,
+    [Fields.messageField.id]: Fields.messageField,
   }
 
 }
@@ -183,7 +183,7 @@ export namespace DdfForms {
       {
         component: 'text-field',
         name: 'first-name',
-        label: 'First Name',
+        label: 'First name',
         placeholder: 'Type your first name',
         variant: 'outlined',
         validate: [
@@ -195,7 +195,7 @@ export namespace DdfForms {
       {
         component: 'text-field',
         name: 'last-name',
-        label: 'Last Name',
+        label: 'Last name',
         placeholder: 'Type your first name',
         variant: 'outlined',
         validate: [
@@ -223,7 +223,7 @@ export namespace DdfForms {
       {
         component: 'text-field',
         name: 'email',
-        label: 'Email',
+        label: 'Work e-mail',
         placeholder: 'Type your business email',
         variant: 'outlined',
         isRequired: true,
@@ -238,8 +238,8 @@ export namespace DdfForms {
       },
       {
         component: 'textarea',
-        name: 'comments',
-        label: 'Comments',
+        name: 'message',
+        label: 'Additional details',
         helperText: 'Type a short description of your inquiry',
         variant: 'outlined',
         rows: 4,

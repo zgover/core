@@ -17,8 +17,8 @@
 
 import {NormalizedData, NormalizedModel} from '@aglyn/shared-data-types'
 import {_isNum, _isObj} from '@aglyn/shared-util-guards'
+import {arrayMoveAtIndex} from './array/array-move-at-index'
 import {arrayRemoveItem} from './array/array-remove-item'
-import {arrayReorder} from './array/array-reorder'
 import {objectDeleteProperty} from './object/object-delete-property'
 
 
@@ -156,7 +156,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
       model.allIds.push(id)
     }
     else if (_isNum(index) && currentIndex !== index) {
-      model.allIds = arrayReorder(model.allIds, currentIndex, index)
+      model.allIds = arrayMoveAtIndex(model.allIds, currentIndex, index)
     }
 
     return model

@@ -15,18 +15,5 @@
  * limitations under the License.
  */
 
-import LayoutAuthenticatedComponent from '../layouts/layout-authenticated.component'
 
-
-function Hosts() {
-
-  return (
-    <>
-
-    </>
-  )
-}
-Hosts.displayName = 'Page:Hosts'
-Hosts.layoutComponent = LayoutAuthenticatedComponent
-
-export default Hosts
+export {default} from './[after]'

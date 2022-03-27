@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {arrayAddAtIndex, arrayRemoveItem, arrayReorder} from '@aglyn/shared-util-tools'
+import {arrayMoveAtIndex, arrayPushAtIndex, arrayRemoveItem} from '@aglyn/shared-util-tools'
 import {objectDeepMerge} from '@aglyn/shared-util-vendor'
 import {
   type CanvasAddElementPayload,
@@ -54,8 +54,8 @@ export const handleCanvasSetElements = (
   payload: CanvasSetElementsPayload,
 ) => {
 
-  const {elements} = payload
-  return elements
+  const {elements} = payload || {}
+  return elements || {}
 }
 export const handleCanvasAddElement = (
   state: AglynElementsById,
@@ -75,7 +75,7 @@ export const handleCanvasAddElement = (
     ...newData,
     [parentId]: {
       ...state[parentId],
-      elements: arrayAddAtIndex(
+      elements: arrayPushAtIndex(
         index === -1 ? siblingIds.length : index,
         state[parentId]?.elements || [],
         newData[parentId]?.elements || [],
@@ -145,7 +145,7 @@ export const handleCanvasMoveElement = (
     console.log('reordering')
     response[parentId] = {
       ...response[parentId],
-      elements: arrayReorder(
+      elements: arrayMoveAtIndex(
         siblingIds,
         siblingIds.indexOf($id),
         index === -1 ? siblingIds.length : index,
@@ -156,7 +156,7 @@ export const handleCanvasMoveElement = (
     console.log('moving')
     response[parentId] = {
       ...response[parentId],
-      elements: arrayAddAtIndex(
+      elements: arrayPushAtIndex(
         index === -1 ? siblingIds.length : index,
         siblingIds,
         $id,

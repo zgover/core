@@ -24,7 +24,7 @@ import LayoutConsoleComponent from '../layouts/layout-console.component'
 import LayoutDashboardComponent from '../layouts/layout-dashboard.component'
 
 
-export function Index(props) {
+function Index(props) {
 
   console.log('index props', props)
 

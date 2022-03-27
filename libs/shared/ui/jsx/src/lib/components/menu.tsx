@@ -104,7 +104,10 @@ export const Menu = forwardRef<any, MenuProps>(
       })
     }, [context, onChildClick])
     const open = Boolean(state.anchorEl || state.mouseY)
-    const cloned = cloneElement(child, {onClick: handleClick})
+    const cloned = cloneElement(child, {
+      onClick: handleClick,
+      'aria-expanded': open ? 'true' : 'false',
+    })
 
     const {PaperProps, ...menuProps} = MenuProps || {} as any
     const {sx: paperSx, ...paperProps} = PaperProps || {} as any
