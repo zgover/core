@@ -17,10 +17,9 @@
 
 import {IS_DEVELOPMENT} from '@aglyn/shared-data-enums'
 import {DEFAULT_RECAPTCHA_API_KEY, defaultFirebaseAppOptions} from '@aglyn/shared-feature-fbclient'
-import {SecureLoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
-import {getDisplayName} from '@aglyn/shared-util-tools'
+import {NextRouterEvent, SecureLoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import {NoSsr} from '@mui/material'
-import {getAnalytics} from 'firebase/analytics'
+import {getAnalytics, logEvent, setUserId, setUserProperties} from 'firebase/analytics'
 import type {FirebaseApp, FirebaseOptions} from 'firebase/app'
 import {initializeAppCheck, ReCaptchaV3Provider} from 'firebase/app-check'
 import {connectAuthEmulator, getAuth} from 'firebase/auth'
@@ -30,7 +29,9 @@ import {
   enableIndexedDbPersistence,
   getFirestore,
 } from 'firebase/firestore'
+import {useRouter} from 'next/router'
 import type {ReactNode} from 'react'
+import {useEffect} from 'react'
 import {
   AnalyticsProvider,
   AppCheckProvider,
@@ -38,61 +39,57 @@ import {
   DatabaseProvider,
   FirebaseAppProvider,
   FirestoreProvider,
+  useAnalytics,
   useFirebaseApp,
+  useUser,
 } from 'reactfire'
 // import {getDatabase, connectDatabaseEmulator} from 'firebase/database'
 
 
-console.log('displayname FirebaseAppProvider', getDisplayName(FirebaseAppProvider))
+function AnalyticsGlobalEvents({children}) {
+  const analytics = useAnalytics()
+  const router = useRouter()
+  const user = useUser()
 
-export type FirebaseAppProviderOptions = {
-  firebaseApp?: FirebaseApp
-  firebaseConfig?: FirebaseOptions
-  appName?: string
-  suspense?: boolean
-}
+  useEffect(() => {
+    const logPageView = (asPath) => {
+      logEvent(analytics, 'page_view', {
+        page_location: asPath,
+      })
+    }
+    const logRouteError = (error, asPath) => {
+      logEvent(analytics, 'exception', {
+        page_location: asPath,
+        description: `code(${error.code || 'none'}): ${error.message || 'none'}`,
+        fatal: !error.canceled,
+      })
+    }
+    router.events.on(NextRouterEvent.ROUTE_CHANGE_COMPLETE, logPageView)
+    router.events.on(NextRouterEvent.ROUTE_CHANGE_ERROR, logRouteError)
+    return () => {
+      router.events.off(NextRouterEvent.ROUTE_CHANGE_COMPLETE, logPageView)
+      router.events.off(NextRouterEvent.ROUTE_CHANGE_ERROR, logRouteError)
+    }
+  }, [router, analytics])
 
-export interface LayoutFirebaseAppComponentProps {
-  children?: ReactNode
-}
-
-function LayoutFirebaseAppComponent(props: LayoutFirebaseAppComponentProps) {
-  const {children} = props
-
-  return (
-    <>
-      {children}
-    </>
-  )
-}
-LayoutFirebaseAppComponent.displayName = 'LayoutFirebaseAppComponent'
-LayoutFirebaseAppComponent.getLayout = (children) => {
-  return (
-    <GetLayout>
-      {children}
-    </GetLayout>
-  )
-}
-LayoutFirebaseAppComponent.layoutProps = {
-  FirebaseAppProvider: {
-    firebaseConfig: defaultFirebaseAppOptions,
-  },
-}
-
-export {LayoutFirebaseAppComponent}
-export default LayoutFirebaseAppComponent
+  useEffect(() => {
+    const {uid, emailVerified, providerId, tenantId} = user?.data || {}
+    const setAnalyticsUserId = () => {
+      setUserId(analytics, uid)
+    }
+    const setAnalyticsUserProperties = () => {
+      setUserProperties(analytics, {
+        emailVerified, providerId, tenantId,
+      })
+    }
+    if (uid) {
+      setAnalyticsUserId()
+      setAnalyticsUserProperties()
+    }
+  }, [analytics, user])
 
 
-function GetLayout({children}) {
-  return (
-    <FirebaseAppProvider firebaseConfig={defaultFirebaseAppOptions}>
-      <NoSsr>
-        <GetInnerLayout>
-          {children}
-        </GetInnerLayout>
-      </NoSsr>
-    </FirebaseAppProvider>
-  )
+  return children
 }
 
 let connectedFirestore = null
@@ -178,3 +175,35 @@ function GetInnerLayout({children}) {
     </AnalyticsProvider>
   )
 }
+
+
+export type FirebaseAppProviderOptions = {
+  firebaseApp?: FirebaseApp
+  firebaseConfig?: FirebaseOptions
+  appName?: string
+  suspense?: boolean
+}
+
+export interface LayoutFirebaseAppComponentProps {
+  children?: ReactNode
+}
+
+function LayoutFirebaseAppComponent(props: LayoutFirebaseAppComponentProps) {
+  const {children} = props
+
+  return (
+    <FirebaseAppProvider firebaseConfig={defaultFirebaseAppOptions}>
+      <NoSsr>
+        <GetInnerLayout>
+          <AnalyticsGlobalEvents>
+            {children}
+          </AnalyticsGlobalEvents>
+        </GetInnerLayout>
+      </NoSsr>
+    </FirebaseAppProvider>
+  )
+}
+LayoutFirebaseAppComponent.displayName = 'LayoutFirebaseAppComponent'
+
+export {LayoutFirebaseAppComponent}
+export default LayoutFirebaseAppComponent

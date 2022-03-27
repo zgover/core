@@ -22,6 +22,7 @@ import type {FormSchema} from '@aglyn/shared-ui-jsx-forms'
 import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Button, Divider, Stack, Typography} from '@mui/material'
+import {logEvent} from 'firebase/analytics'
 import {
   browserLocalPersistence,
   GoogleAuthProvider,
@@ -30,7 +31,7 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import {useCallback, useState} from 'react'
-import {useAuth} from 'reactfire'
+import {useAnalytics, useAuth} from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../components/auth-form-template.component'
 import LayoutAuthFormComponent from '../../layouts/layout-auth-form.component'
@@ -47,6 +48,7 @@ function SignIn() {
   const {queueLoading, loading} = useLoading()
   const firebaseAuth = useAuth()
   const [error, setError] = useState<AuthResultError>(null)
+  const analytics = useAnalytics()
 
   const handleSignIn = useCallback(async (values?: any) => {
     if (loading) return
@@ -62,6 +64,11 @@ function SignIn() {
           )
         }
         return signInWithPopup(firebaseAuth, googleOAuthProvider)
+      })
+      .then((user) => {
+        logEvent(analytics, 'login', {
+          method: user.providerId,
+        })
       })
       .catch((error) => {
         console.error(error)

@@ -20,7 +20,6 @@ import {nextParam, useNextUrl} from '@aglyn/shared-util-next'
 import {useRouter} from 'next/router'
 import {Fragment, type ReactNode, useEffect} from 'react'
 import {useSigninCheck} from 'reactfire'
-import LayoutFirebaseAppComponent from './layout-firebase-app.component'
 
 
 export interface LayoutAuthenticatedComponentProps {
@@ -67,7 +66,6 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
   )
 }
 LayoutAuthenticatedComponent.displayName = 'AglynLayoutAuthenticated'
-LayoutAuthenticatedComponent.layoutComponent = LayoutFirebaseAppComponent
 
 export {LayoutAuthenticatedComponent}
 export default LayoutAuthenticatedComponent

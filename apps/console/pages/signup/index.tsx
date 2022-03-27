@@ -28,6 +28,7 @@ import type {FormSchema} from '@aglyn/shared-ui-jsx-forms'
 import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Button, Divider, Stack, Typography} from '@mui/material'
+import {logEvent} from 'firebase/analytics'
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
@@ -36,7 +37,7 @@ import {
   signInWithPopup,
 } from 'firebase/auth'
 import {useCallback, useState} from 'react'
-import {useAuth} from 'reactfire'
+import {useAnalytics, useAuth} from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../components/auth-form-template.component'
 import LayoutAuthFormComponent from '../../layouts/layout-auth-form.component'
@@ -59,6 +60,7 @@ function SignUp() {
   const {queueLoading, loading} = useLoading()
   const firebaseAuth = useAuth()
   const [error, setError] = useState<AuthResultError>(null)
+  const analytics = useAnalytics()
 
   const handleSignUp = useCallback(async (values?: any) => {
     if (loading) return
@@ -75,6 +77,11 @@ function SignUp() {
         }
         return signInWithPopup(firebaseAuth, googleOAuthProvider)
       })
+      .then((user) => {
+        logEvent(analytics, 'sign_up', {
+          method: user.providerId,
+        })
+      })
       .catch((error) => {
         console.error(error)
         setError({...error, credential: GoogleAuthProvider.credentialFromError(error)})
@@ -82,7 +89,7 @@ function SignUp() {
       .finally(() => {
         dequeueLoading()
       })
-  }, [error, firebaseAuth, loading, queueLoading])
+  }, [analytics, error, firebaseAuth, loading, queueLoading])
 
   const handleFormSubmit = useCallback(async (values) => {
     await handleSignUp(values)

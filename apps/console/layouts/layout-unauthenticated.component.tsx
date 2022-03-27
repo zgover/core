@@ -22,7 +22,6 @@ import {Stack} from '@mui/material'
 import {useRouter} from 'next/router'
 import {useEffect} from 'react'
 import {useSigninCheck} from 'reactfire'
-import LayoutFirebaseAppComponent from './layout-firebase-app.component'
 
 
 export interface LayoutRequestAuthenticationProps extends Partial<BackgroundImageComponentProps> {
@@ -92,7 +91,6 @@ function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps)
   )
 }
 LayoutUnauthenticatedComponent.displayName = 'AglynLayoutUnauthenticated'
-LayoutUnauthenticatedComponent.layoutComponent = LayoutFirebaseAppComponent
 
 export {LayoutUnauthenticatedComponent}
 export default LayoutUnauthenticatedComponent
