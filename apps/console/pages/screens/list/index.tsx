@@ -99,6 +99,7 @@ function Screens(props) {
       type: 'actions',
       width: 100,
       getActions: ({id, row}) => {
+        const screenId = id as string
         const versionId = row.versionId as string
         return [
           <GridActionsCellItem
@@ -107,13 +108,13 @@ function Screens(props) {
             label="detail"
             component={AppLink}
             componentVariant="naked"
-            href={buildRoute(Route.SCREEN_DETAILS, {screenId: id, versionId})}
+            href={buildRoute(Route.SCREEN_DETAILS, {screenId, versionId})}
           />,
           <GridActionsCellItem
             key="action-delete"
             icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
             label="Delete"
-            onClick={handleDeleteScreen(id as string, versionId as string)}
+            onClick={handleDeleteScreen(screenId, versionId)}
             color="error"
           />,
         ]
