@@ -27,6 +27,6 @@ function Hosts() {
   )
 }
 Hosts.displayName = 'Page:Hosts'
-Hosts.layoutComponent = AuthenticatedLayout
+Hosts.layouts = [AuthenticatedLayout]
 
 export default Hosts

@@ -41,7 +41,7 @@ export interface BesignerComponentProps extends WorkspaceEditorComponentProps {
   canvasElements?: CanvasSetElementsPayload
 }
 
-const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(
+const BesignerComponent = forwardRef<any, BesignerComponentProps>(
   function RefRenderFn(props, ref) {
     const {noSsr, appName, canvasElements, ...rest} = props
     const Wrapper = noSsr ? NoSsr : Fragment
@@ -68,11 +68,9 @@ const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(
   },
 )
 
-BesignerComponentRaw.displayName = 'BesignerComponentRaw'
-BesignerComponentRaw.aglyn = true
-BesignerComponentRaw.defaultProps = {}
+BesignerComponent.displayName = 'BesignerComponent'
+BesignerComponent.aglyn = true
+BesignerComponent.defaultProps = {}
 
-export const BesignerComponent = BesignerComponentRaw /*createWithThemeProvider({
- theme: [consoleThemeLight, consoleThemeDark],
- })(BesignerComponentRaw)*/
+export {BesignerComponent}
 export default BesignerComponent

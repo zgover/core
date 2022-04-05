@@ -24,6 +24,7 @@ import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
 import {useEffect} from 'react'
 import {useFirestore, useFirestoreDoc, useFirestoreDocData} from 'reactfire'
+import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import ConsoleLayout from '../../../../../../components/layouts/console.layout'
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../../../../../../components/widget-card.component'
@@ -192,9 +193,9 @@ function ScreenDetails(props) {
   )
 }
 ScreenDetails.displayName = 'Page:ScreenDetails'
-ScreenDetails.layoutComponent = ConsoleLayout
+ScreenDetails.layouts = [AuthenticatedLayout, ConsoleLayout]
 ScreenDetails.layoutProps = {
-  LayoutConsoleComponent: {
+  ConsoleLayout: {
     title: 'Screen Details',
   },
 }

@@ -16,11 +16,11 @@
  */
 
 import type {AnyProps} from '@aglyn/shared-data-types'
-import {copy} from '@aglyn/shared-util-tools'
+import {copy, getDisplayName} from '@aglyn/shared-util-tools'
 import {objectDeepMerge} from '@aglyn/shared-util-vendor'
 import type {NextPage} from 'next'
 import type {AppProps as NextAppProps} from 'next/app'
-import type {ReactElement} from 'react'
+import type {ElementType, ReactElement} from 'react'
 
 
 export type NextPageGetLayoutFn = (
@@ -30,13 +30,13 @@ export type NextPageGetLayoutFn = (
 
 export type NextPageMemberLayout = {
   getLayout?: NextPageGetLayoutFn
+  layouts?: ElementType<any>[]
+  layoutProps?: { [P in NextPageWithLayout['displayName']]: AnyProps };
+  /** @deprecated use layouts */
   layoutComponent?: NextPageWithLayout
-  layoutProps?: {
-    [P in NextPageWithLayout['displayName']]: AnyProps
-  }
 }
 
-export type NextPageWithLayout<Props = AnyProps, InitialProps = Props> =
+export type   NextPageWithLayout<Props = AnyProps, InitialProps = Props> =
   & NextPage<Props, InitialProps>
   & NextPageMemberLayout
 
@@ -46,7 +46,7 @@ export type NextAppWithLayoutProps<Props = AnyProps, InitialProps = Props> = Nex
   defaultGetLayout?: NextPageGetLayoutFn,
 }
 
-const GET_LAYOUT_NOOP = (page: ReactElement) => page
+const GET_LAYOUT_NOOP = (page: ReactElement, props?: any) => page
 
 export function getNextPageLayout<Props, InitialProps>(
   props: NextAppWithLayoutProps<Props, InitialProps>,
@@ -55,6 +55,21 @@ export function getNextPageLayout<Props, InitialProps>(
 
   if (Component.getLayout) {
     return Component.getLayout
+  }
+
+  if (Component.layouts) {
+    const layout = Component.layouts.reduce((page, OuterComponent) => {
+      const displayName = getDisplayName(OuterComponent)
+      const layoutProps = Component.layoutProps?.[displayName] || undefined
+
+      return (innerPage, props) => page((
+        <OuterComponent {...layoutProps}>
+          {innerPage}
+        </OuterComponent>
+      ), props)
+    }, defaultGetLayout || GET_LAYOUT_NOOP)
+
+    return layout
   }
 
   if (Component.layoutComponent) {

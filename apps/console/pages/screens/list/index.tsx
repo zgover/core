@@ -41,6 +41,7 @@ import {useFirestore, useFirestoreCollectionData} from 'reactfire'
 import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
 import DataTableComponent from '../../../components/data-table.component'
+import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import ConsoleLayout from '../../../components/layouts/console.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../../../components/widget-card.component'
@@ -278,9 +279,9 @@ const formSchema = {
   ],
 }
 Screens.displayName = 'Page:Screens'
-Screens.layoutComponent = ConsoleLayout
+Screens.layouts = [AuthenticatedLayout, ConsoleLayout]
 Screens.layoutProps = {
-  LayoutConsoleComponent: {
+  ConsoleLayout: {
     title: 'App Screens',
   },
 }

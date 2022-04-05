@@ -80,7 +80,8 @@ export interface NextEmotionDocumentComponentProps extends LangParam {}
  */
 class NextEmotionDocumentComponent<P extends NextEmotionDocumentComponentProps> extends NextDocument<P> {
 
-  static displayName = '_Document'
+  public static displayName = 'NextEmotionDocumentComponent'
+  public static readonly aglyn = true
 
   /**
    * Returns the context object with the addition of {@link renderPage}
@@ -157,9 +158,6 @@ class NextEmotionDocumentComponent<P extends NextEmotionDocumentComponentProps> 
     )
   }
 }
-
-NextEmotionDocumentComponent.displayName = 'NextEmotionDocumentComponent'
-NextEmotionDocumentComponent.aglyn = true
 
 export {NextEmotionDocumentComponent}
 export default NextEmotionDocumentComponent

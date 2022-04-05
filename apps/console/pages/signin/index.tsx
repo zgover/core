@@ -153,6 +153,6 @@ function SignIn() {
   )
 }
 SignIn.displayName = 'Page:SignIn'
-SignIn.layoutComponent = UnauthenticatedLayout
+SignIn.layouts = [UnauthenticatedLayout]
 
 export default SignIn

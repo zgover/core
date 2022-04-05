@@ -26,6 +26,7 @@ import dynamic from 'next/dynamic'
 import {useRouter} from 'next/router'
 import {useEffect} from 'react'
 import {useFirestore, useFirestoreDocDataOnce} from 'reactfire'
+import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import ConsoleLayout from '../../../../../../components/layouts/console.layout'
 import '../../../../../../constants/app-setup'
 
@@ -82,9 +83,9 @@ function Besigner(props) {
 }
 
 Besigner.displayName = 'Page:Besigner'
-Besigner.layoutComponent = ConsoleLayout
+Besigner.layouts = [AuthenticatedLayout, ConsoleLayout]
 Besigner.layoutProps = {
-  LayoutConsoleComponent: {
+  ConsoleLayout: {
     title: 'Besigner',
     appBarSuffix: 'Besigner',
   },

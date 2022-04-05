@@ -18,6 +18,7 @@
 import {ICON_VARIANT_HOME} from '@aglyn/shared-data-enums'
 import {ContainerComponent, GridItems} from '@aglyn/shared-ui-jsx'
 import DataTableComponent from '../components/data-table.component'
+import AuthenticatedLayout from '../components/layouts/authenticated.layout'
 import ConsoleLayout from '../components/layouts/console.layout'
 import DashboardLayout from '../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../components/widget-card.component'
@@ -76,9 +77,9 @@ function Index(props) {
   )
 }
 Index.displayName = 'Page:Index'
-Index.layoutComponent = ConsoleLayout
+Index.layouts = [AuthenticatedLayout, ConsoleLayout]
 Index.layoutProps = {
-  LayoutConsoleComponent: {
+  ConsoleLayout: {
     title: 'My Dashboard',
   },
 }

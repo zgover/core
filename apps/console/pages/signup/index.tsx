@@ -165,6 +165,6 @@ function SignUp() {
   )
 }
 SignUp.displayName = 'Page:SignUp'
-SignUp.layoutComponent = UnauthenticatedLayout
+SignUp.layouts = [UnauthenticatedLayout]
 
 export default SignUp

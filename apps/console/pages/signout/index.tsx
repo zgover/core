@@ -47,9 +47,9 @@ function SignOut() {
   )
 }
 SignOut.displayName = 'Page:SignOut'
-SignOut.layoutComponent = UnauthenticatedLayout
+SignOut.layouts = [UnauthenticatedLayout]
 SignOut.layoutProps = {
-  LayoutUnauthenticatedComponent: {
+  UnauthenticatedLayout: {
     isSignOut: true,
   },
 }

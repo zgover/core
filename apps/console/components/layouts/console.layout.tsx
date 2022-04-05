@@ -28,7 +28,6 @@ import {_isArr} from '@aglyn/shared-util-guards'
 import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
 import {useUser} from 'reactfire'
 import {Route} from '../../constants/route-links'
-import AuthenticatedLayout from './authenticated.layout'
 import MainLayout, {type MainLayoutProps} from './main.layout'
 
 
@@ -92,6 +91,26 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
           ],
         },
       ]}
+      disableAppBarElevation
+      centerNavigationItems={[
+        {
+          id: 'center-nav-dashboard',
+          children: 'Home',
+          href: Route.SCREEN_DASHBOARD,
+        },
+        // {
+        //   id: 'center-nav-app',
+        //   children: 'Website',
+        //   // href: '/besigner',
+        //   items: [
+        //     {
+        //       id: 'center-nav-screens',
+        //       children: 'View Screens',
+        //       href: Route.SCREEN_LIST,
+        //     },
+        //   ],
+        // },
+      ]}
       {...rest}
     >
       {children}
@@ -101,29 +120,6 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
 
 ConsoleLayout.displayName = 'ConsoleLayout'
 ConsoleLayout.aglyn = true
-ConsoleLayout.defaultProps = {
-  disableAppBarElevation: true,
-  centerNavigationItems: [
-    {
-      id: 'center-nav-dashboard',
-      children: 'Home',
-      href: Route.SCREEN_DASHBOARD,
-    },
-    // {
-    //   id: 'center-nav-app',
-    //   children: 'Website',
-    //   // href: '/besigner',
-    //   items: [
-    //     {
-    //       id: 'center-nav-screens',
-    //       children: 'View Screens',
-    //       href: Route.SCREEN_LIST,
-    //     },
-    //   ],
-    // },
-  ],
-}
-ConsoleLayout.layoutComponent = AuthenticatedLayout
 
 export {ConsoleLayout}
 export default ConsoleLayout
