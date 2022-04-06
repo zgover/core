@@ -37,7 +37,7 @@ import {
   Typography,
 } from '@mui/material'
 
-import {forwardRef, type HTMLProps, useCallback, useMemo, useState} from 'react'
+import {forwardRef, type HTMLAttributes, useCallback, useMemo, useState} from 'react'
 import {validationMessage} from '../utils/validation-message'
 
 import {useFieldApi, type UseFieldApiConfig} from '../vendor/data-driven-forms'
@@ -87,7 +87,7 @@ const GridListWrapper = styled('div', {
   },
 }))
 
-export interface IconSelectProps extends HTMLProps<HTMLDivElement> {
+export interface IconSelectProps extends HTMLAttributes<HTMLDivElement> {
   initialValue?: string
   classes?: Partial<typeof classKeys>
 }

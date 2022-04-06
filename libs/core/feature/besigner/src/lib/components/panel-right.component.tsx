@@ -133,7 +133,8 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
             value,
             TypographyProps,
             ValueTypographyProps,
-          }: any,) => (
+            ...item
+          }: any) => (
             <Typography
               key={item.key}
               component="div"

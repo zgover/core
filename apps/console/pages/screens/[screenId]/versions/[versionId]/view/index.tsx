@@ -78,7 +78,7 @@ function ScreenDetails(props) {
     {
       key: 'id',
       id: 'details-id',
-      primary: 'Unique ID:',
+      primary: 'Screen ID:',
       secondary: screen?.$id,
       icon: {path: ICON_VARIANT_PRIMARY_KEY.path}
     },
@@ -190,6 +190,7 @@ function ScreenDetails(props) {
                             borderRadius: 1,
                             minWidth: 'unset',
                             marginRight: 2,
+                            color: 'tertiary.main'
                           }}
                         >
                           <MdiIcon {...icon}/>
