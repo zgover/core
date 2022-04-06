@@ -66,26 +66,26 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
   const failoverText = 'n/a'
   const details = useMemo(() => [
     {
-      id: 'element-overview',
+      key: 'element-overview',
       label: 'Element Overview',
       items: [
         {
-          id: 'component-display-name',
+          key: 'component-display-name',
           label: 'Type',
           value: schema?.displayName,
         },
         {
-          id: 'component-title',
+          key: 'component-title',
           label: 'Title',
           value: schema?.title,
         },
         {
-          id: 'component-subtitle',
+          key: 'component-subtitle',
           label: 'Subtitle',
           value: schema?.subtitle,
         },
         {
-          id: 'component-description',
+          key: 'component-description',
           label: 'Description',
           value: schema?.description,
           TypographyProps: {gutterBottom: true},
@@ -93,26 +93,26 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
       ],
     },
     {
-      id: 'unique-identifiers',
+      key: 'unique-identifiers',
       label: 'Unique Identifiers',
       items: [
         {
-          id: 'element-id',
+          key: 'element-id',
           label: 'Element ID',
           value: $id,
         },
         {
-          id: 'parent-id',
+          key: 'parent-id',
           label: 'Parent Element ID',
           value: parentId,
         },
         {
-          id: 'component-id',
+          key: 'component-id',
           label: 'Component ID',
           value: componentId,
         },
         {
-          id: 'bundle-id',
+          key: 'bundle-id',
           label: 'Bundle ID',
           value: bundleId,
           ValueTypographyProps: {},
@@ -123,8 +123,8 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
 
   return (
     <>
-      {details.map(({label, items, ...item}, key) => (
-        <Fragment key={item?.['key'] ?? item?.id ?? key}>
+      {details.map(({label, items, ...item}) => (
+        <Fragment key={item.key}>
           <Typography variant="subtitle1" component="div" sx={{mb: 2}}>
             {label}
           </Typography>
@@ -133,10 +133,9 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
             value,
             TypographyProps,
             ValueTypographyProps,
-            ...item
-          }: any, key) => (
+          }: any,) => (
             <Typography
-              key={item?.['key'] ?? item?.id ?? key}
+              key={item.key}
               component="div"
               {...TypographyProps}
             >
@@ -169,6 +168,33 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
     </>
   )
 }
+
+const defaultTabContent = (
+  <Typography variant="subtitle1" component="div" align="center">
+    No element selected...
+  </Typography>
+)
+
+const tabs = [
+  {
+    value: BesignerPanelTabFlag.ELEMENT_INFO,
+    tab: {
+      icon: {path: ICON_VARIANT_DETAILS.path}
+    },
+    panel: {
+      Component: ElementInfo,
+    }
+  },
+  {
+    value: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
+    tab: {
+      icon: {path: ICON_VARIANT_PROPERTIES.path},
+    },
+    panel: {
+      Component: ElementPropsForm,
+    }
+  },
+]
 
 export interface PanelRightComponentProps extends WorkspacePanelComponentProps {}
 
@@ -213,40 +239,30 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
               indicatorColor="secondary"
               textColor="secondary"
             >
-              <MuiTab
-                value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_INFO)}
-                icon={<MdiIcon path={ICON_VARIANT_DETAILS.path} />}
-              />
-              <MuiTab
-                value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_PROPS_FORM)}
-                icon={<MdiIcon path={ICON_VARIANT_PROPERTIES.path} />}
-              />
+              {tabs.map(({value, tab: {icon, ...tab}}) => (
+                <MuiTab
+                  key={value}
+                  value={numberToHexadecimal(value)}
+                  icon={<MdiIcon {...icon} />}
+                  {...tab}
+                />
+              ))}
             </MuiTabList>
           </Box>
 
-          <TabPanel value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_INFO)}>
-            <TabPanelInner>
-              {selected?.$id ? (
-                <ElementInfo $id={selected?.$id} />
-              ) : (
-                <Typography variant="subtitle1" component="div" align="center">
-                  No element selected...
-                </Typography>
-              )}
-            </TabPanelInner>
-          </TabPanel>
-
-          <TabPanel value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENT_PROPS_FORM)}>
-            <TabPanelInner>
-              {selected?.$id ? (
-                <ElementPropsForm $id={selected?.$id} />
-              ) : (
-                <Typography variant="subtitle1" component="div" align="center">
-                  No element selected...
-                </Typography>
-              )}
-            </TabPanelInner>
-          </TabPanel>
+          {tabs.map(({value, panel: {Component, ...panel}}) => (
+            <TabPanel
+              key={value}
+              value={numberToHexadecimal(value)}
+              {...panel}
+            >
+              <TabPanelInner>
+                {!selected?.$id ? defaultTabContent : (
+                  <Component $id={selected?.$id} />
+                )}
+              </TabPanelInner>
+            </TabPanel>
+          ))}
         </MuiTabContext>
 
         {children}

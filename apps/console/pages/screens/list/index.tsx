@@ -159,8 +159,8 @@ function Screens(props) {
     {field: '$id', headerName: 'ID', type: 'string', minWidth: 150},
     {field: 'displayName', headerName: 'Display name', minWidth: 220, type: 'string'},
     {field: 'description', headerName: 'Description', flex: 1, minWidth: 275, type: 'string'},
-    {field: 'updatedAt', headerName: 'Updated', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.()},
-    {field: 'createdAt', headerName: 'Created', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.()},
+    {field: 'updatedAt', headerName: 'Updated', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.().toLocaleTimeString() || '--'},
+    {field: 'createdAt', headerName: 'Created', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.().toLocaleTimeString() || '--'},
   ]
 
   console.log('Screens props', props, data, status, screens)

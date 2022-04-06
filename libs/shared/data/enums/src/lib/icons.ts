@@ -17,10 +17,13 @@
 
 import {
   mdiAccountSettings,
+  mdiAlphabetical,
   mdiArrowExpandHorizontal,
   mdiArrowTopLeft,
   mdiBookVariant,
   mdiBookVariantMultiple,
+  mdiCalendar,
+  mdiCalendarClock,
   mdiCellphone,
   mdiCheck,
   mdiClose,
@@ -40,7 +43,9 @@ import {
   mdiFileTree,
   mdiFormDropdown,
   mdiHomeVariant,
+  mdiIdentifier,
   mdiInformationVariant,
+  mdiKeyVariant,
   mdiLaptop,
   mdiLoginVariant,
   mdiLogoutVariant,
@@ -65,21 +70,25 @@ import {
 } from '@aglyn/shared-ui-mdi-jsx'
 
 
-// Blocks and symbols
-export const ICON_VARIANT_ENTITY_BLOCK = mdiCubeOutline
-// Data
-export const ICON_VARIANT_COLLECTION = mdiBookVariantMultiple
-export const ICON_VARIANT_DOCUMENT = mdiBookVariant
-export const ICON_VARIANT_PROPERTY = mdiVariable
-// Data-sets
-export const ICON_VARIANT_DETAILS = mdiInformationVariant
-export const ICON_VARIANT_PROPERTIES = mdiFormDropdown
-export const ICON_VARIANT_TREE_VIEW = mdiFileTree
 // Data-Type
 export const ICON_VARIANT_ARRAY = mdiCodeArray
+export const ICON_VARIANT_COLLECTION = mdiBookVariantMultiple
+export const ICON_VARIANT_DATE = mdiCalendar
+export const ICON_VARIANT_DATE_TIME = mdiCalendarClock
+export const ICON_VARIANT_DOCUMENT = mdiBookVariant
+export const ICON_VARIANT_ENTITY_BLOCK = mdiCubeOutline
+export const ICON_VARIANT_IDENTIFIER = mdiIdentifier
 export const ICON_VARIANT_OBJECT = mdiCodeBracesBox
+export const ICON_VARIANT_PRIMARY_KEY = mdiKeyVariant
+export const ICON_VARIANT_PROPERTY = mdiVariable
 export const ICON_VARIANT_STRING = mdiCodeString
-// Action
+export const ICON_VARIANT_TEXT = mdiAlphabetical
+// Action + Navigation
+export const ICON_VARIANT_CLOSE = mdiClose
+export const ICON_VARIANT_DOCK_BOTTOM_TOGGLE = mdiDockBottom
+export const ICON_VARIANT_DOCK_LEFT_TOGGLE = mdiDockLeft
+export const ICON_VARIANT_DOCK_RIGHT_TOGGLE = mdiDockRight
+export const ICON_VARIANT_MENU_DOWN = mdiMenuDown
 export const ICON_VARIANT_MODIFY_ADD = mdiShapeSquareRoundedPlus
 export const ICON_VARIANT_MODIFY_DELETE = mdiDeleteOutline
 export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
@@ -89,15 +98,22 @@ export const ICON_VARIANT_MODIFY_MODE_REARRANGE = mdiCursorMove
 export const ICON_VARIANT_MODIFY_MODE_SELECT = mdiCursorDefault
 export const ICON_VARIANT_MODIFY_REDO = mdiRedo
 export const ICON_VARIANT_MODIFY_UNDO = mdiUndo
+export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
 export const ICON_VARIANT_SELECT_PARENT = mdiArrowTopLeft
 export const ICON_VARIANT_SHOW_DETAIL = mdiPageNextOutline
-export const ICON_VARIANT_CLOSE = mdiClose
-// User
+// Areas + Pages
 export const ICON_VARIANT_APP_PREFERENCES = mdiTune
 export const ICON_VARIANT_APP_SETTINGS = mdiCog
+export const ICON_VARIANT_BESIGNER = mdiMathCompass
+export const ICON_VARIANT_HOME = mdiHomeVariant
+export const ICON_VARIANT_PAGES = mdiWeb
 export const ICON_VARIANT_SIGN_IN = mdiLoginVariant
 export const ICON_VARIANT_SIGN_OUT = mdiLogoutVariant
 export const ICON_VARIANT_USER_SETTINGS = mdiAccountSettings
+// Views + Panels
+export const ICON_VARIANT_DETAILS = mdiInformationVariant
+export const ICON_VARIANT_PROPERTIES = mdiFormDropdown
+export const ICON_VARIANT_TREE_VIEW = mdiFileTree
 // Theme mode
 export const ICON_VARIANT_THEME_DARK = mdiWeatherNight
 export const ICON_VARIANT_THEME_LIGHT = mdiWhiteBalanceSunny
@@ -109,16 +125,6 @@ export const ICON_VARIANT_MOBILE = mdiCellphone
 export const ICON_VARIANT_MONITOR_LARGE = mdiMonitor
 export const ICON_VARIANT_MONITOR_SMALL = mdiMonitorSmall
 export const ICON_VARIANT_TABLET = mdiTablet
-// Navigation
-export const ICON_VARIANT_MENU_DOWN = mdiMenuDown
-export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
-export const ICON_VARIANT_DOCK_LEFT_TOGGLE = mdiDockLeft
-export const ICON_VARIANT_DOCK_BOTTOM_TOGGLE = mdiDockBottom
-export const ICON_VARIANT_DOCK_RIGHT_TOGGLE = mdiDockRight
-// Site area
-export const ICON_VARIANT_HOME = mdiHomeVariant
-export const ICON_VARIANT_PAGES = mdiWeb
-export const ICON_VARIANT_BESIGNER = mdiMathCompass
-// Symbolized illustrations
-export const ICON_VARIANT_SYMBOL_SECURE = mdiShieldLock
+// Symbols + Status
 export const ICON_VARIANT_SYMBOL_CONFIRMED = mdiCheck
+export const ICON_VARIANT_SYMBOL_SECURE = mdiShieldLock

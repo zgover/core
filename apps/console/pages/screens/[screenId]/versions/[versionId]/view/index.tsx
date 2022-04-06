@@ -15,11 +15,18 @@
  * limitations under the License.
  */
 
-import {ICON_VARIANT_BESIGNER, ICON_VARIANT_PAGES} from '@aglyn/shared-data-enums'
+import {
+  ICON_VARIANT_BESIGNER,
+  ICON_VARIANT_DATE_TIME,
+  ICON_VARIANT_IDENTIFIER,
+  ICON_VARIANT_PAGES,
+  ICON_VARIANT_PRIMARY_KEY,
+  ICON_VARIANT_TEXT,
+} from '@aglyn/shared-data-enums'
 import {AppLink, ContainerComponent, GridItems, useLoading} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {useSnackbar} from '@aglyn/shared-ui-snackstack'
-import {ListItemText} from '@mui/material'
+import {List, ListItem, ListItemIcon, ListItemText} from '@mui/material'
 import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
 import {useEffect} from 'react'
@@ -32,7 +39,7 @@ import {buildRoute, Route} from '../../../../../../constants/route-links'
 import {CONTENT_MAX_WIDTH} from '../../../../../../constants/shared'
 
 
-const whiteSpace = <>&nbsp;</>
+const whiteSpace = '--'
 
 function ScreenDetails(props) {
 
@@ -73,42 +80,49 @@ function ScreenDetails(props) {
       id: 'details-id',
       primary: 'Unique ID:',
       secondary: screen?.$id,
+      icon: {path: ICON_VARIANT_PRIMARY_KEY.path}
     },
     {
       key: 'displayName',
       id: 'details-dname',
       primary: 'Display name:',
       secondary: screen?.displayName,
+      icon: {path: ICON_VARIANT_TEXT.path}
     },
     {
       key: 'description',
       id: 'details-desc',
       primary: 'Description:',
       secondary: screen?.description,
+      icon: {path: ICON_VARIANT_TEXT.path}
     },
     {
       key: 'dateCreated',
       id: 'details-datec',
       primary: 'Date created:',
-      secondary: screen?.createdAt?.toDate?.()?.toString(),
+      secondary: screen?.createdAt?.toDate?.()?.toLocaleString(),
+      icon: {path: ICON_VARIANT_DATE_TIME.path}
     },
     {
       key: 'dateUpdated',
       id: 'details-dateu',
-      primary: 'Date updated:',
-      secondary: screen?.updatedAt?.toDate?.()?.toString(),
+      primary: 'Last updated:',
+      secondary: screen?.updatedAt?.toDate?.()?.toLocaleString(),
+      icon: {path: ICON_VARIANT_DATE_TIME.path}
     },
     {
       key: 'dateDeleted',
       id: 'details-dated',
       primary: 'Date deleted:',
-      secondary: screen?.deletedAt?.toDate?.()?.toString(),
+      secondary: screen?.deletedAt?.toDate?.()?.toLocaleString(),
+      icon: {path: ICON_VARIANT_DATE_TIME.path}
     },
     {
       key: 'versionId',
       id: 'details-vers',
       primary: 'Version ID:',
       secondary: screen?.versionId,
+      icon: {path: ICON_VARIANT_IDENTIFIER.path}
     },
   ]
 
@@ -154,18 +168,40 @@ function ScreenDetails(props) {
               children: (
                 <WidgetCardComponent
                   header={'Basic Details'}
-                  contentGutterX
+                  // contentGutterX
                   contentGutterY
                   contentBordered
                 >
-                  {details.map(({primary, secondary, ...item}, key) => (
-                    <ListItemText
-                      key={item.key ?? item.id ?? key}
-                      primary={primary || whiteSpace}
-                      secondary={secondary || whiteSpace}
-                      {...item}
-                    />
-                  ))}
+                  <List
+                    dense
+                    disablePadding
+                  >
+                    {details.map(({primary, secondary, icon, ...item}, key) => (
+                      <ListItem
+                        key={item.key ?? item.id ?? key}
+                        alignItems="flex-start"
+                        dense
+                      >
+                        <ListItemIcon
+                          sx={{
+                            border: `1px solid`,
+                            borderColor: 'divider',
+                            padding: 1,
+                            borderRadius: 1,
+                            minWidth: 'unset',
+                            marginRight: 2,
+                          }}
+                        >
+                          <MdiIcon {...icon}/>
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={primary || whiteSpace}
+                          secondary={secondary || whiteSpace}
+                          {...item}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
                 </WidgetCardComponent>
               ),
             },

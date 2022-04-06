@@ -21,7 +21,7 @@ import {
   ElementComponentsContextProvider,
   ElementsContextProvider,
 } from '@aglyn/core-feature-renderer'
-import {ConfirmationProviderComponent, LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
+import {LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import {NoSsr} from '@mui/material'
 import dynamic from 'next/dynamic'
 import {forwardRef, Fragment} from 'react'
@@ -52,13 +52,9 @@ const BesignerComponent = forwardRef<any, BesignerComponentProps>(
           <BesignerDndContext>
             <ElementComponentsContextProvider>
               <ElementsContextProvider>
-                <ConfirmationProviderComponent>
-                  <ComponentsDrawerContextProvider>
-                    {/*<SnackbarProvider maxSnack={3}>*/}
-                    <WorkspaceEditorComponent ref={ref} {...rest} />
-                    {/*</SnackbarProvider>*/}
-                  </ComponentsDrawerContextProvider>
-                </ConfirmationProviderComponent>
+                <ComponentsDrawerContextProvider>
+                  <WorkspaceEditorComponent ref={ref} {...rest} />
+                </ComponentsDrawerContextProvider>
               </ElementsContextProvider>
             </ElementComponentsContextProvider>
           </BesignerDndContext>
