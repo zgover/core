@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type AnyProps, type Dictionary, RequiredPickAlt} from '@aglyn/shared-data-types'
+import {type AnyProps, type Dictionary, type RequiredPickAlt} from '@aglyn/shared-data-types'
 import {EmitterFn} from '@aglyn/shared-util-emitter'
 import {
   type createEffect as createEffectorEffect,
@@ -43,7 +43,6 @@ import {
 import {
   type AglynElementDenormalized,
   type AglynElementNormalized,
-  type AglynElementsById,
   type ElementId,
 } from '../types/aglyn-elements.types'
 import {type AglynExtensionOptions, type IAglynExtension} from '../types/aglyn-extension.types'
@@ -202,7 +201,7 @@ export type CommandsTriggerPayload = PayloadData<{commandId: CommandUId} & Dicti
 export type CanvasUndoPayload = PayloadData<any>
 export type CanvasRedoPayload = PayloadData<any>
 export type CanvasGetStorePayload = PayloadData<any>
-export type CanvasSetElementsPayload = PayloadData<{elements: AglynElementsById}>
+export type CanvasSetElementsPayload = PayloadData<{type: 'normal' | 'denormal', elements: AglynElementDenormalized | AglynElementNormalized}>
 export type CanvasGetElementsDenormalizedPayload = PayloadData<any>
 export type CanvasGetElementsNormalizedPayload = PayloadData<any>
 export type CanvasGetApiEventsPayload = PayloadData<any>

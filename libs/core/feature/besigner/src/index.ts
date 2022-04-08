@@ -16,4 +16,4 @@
  */
 
 export * from './lib/besigner'
-export default import('./lib/components/besigner.component')
+export default './lib/components/besigner.component'

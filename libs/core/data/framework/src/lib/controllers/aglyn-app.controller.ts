@@ -92,6 +92,7 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     super(options)
     this.#appName = options.appName || DEFAULT_APP_UUN
   }
+
   public setupModules() {
     const appName = this.#appName
     this.logger.debug(AglynAppEventFlag.APP_CREATING, {appName})
@@ -155,7 +156,7 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
       const namespace = mod.namespace
       this.logger.debug(flagBefore, {namespace})
       this.emitter.emit(flagBefore, {namespace})
-      isInit ? mod.aglynOnInit(this) : mod.aglynOnDestroy(this)
+      isInit ? mod.onInitialize(this) : mod.onDestroy(this)
       this.logger.debug(flagAfter, {namespace})
       this.emitter.emit(flagAfter, {namespace})
     }
@@ -174,7 +175,7 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     }
   }
 
-  public aglynOnInit(): void {
+  public onInitialize(): void {
     this.logger.debug(AglynAppEventFlag.APP_INITIALIZING, {appName: this.#appName})
     this.emitter.emit(AglynAppEventFlag.APP_INITIALIZING, {appName: this.#appName})
 
@@ -183,7 +184,7 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     this.logger.debug(AglynAppEventFlag.APP_INITIALIZED, {appName: this.#appName})
     this.emitter.emit(AglynAppEventFlag.APP_INITIALIZED, {appName: this.#appName})
   }
-  public aglynOnDestroy(): void {
+  public onDestroy(): void {
     this.logger.debug(AglynAppEventFlag.APP_DESTROYING, {appName: this.#appName})
     this.emitter.emit(AglynAppEventFlag.APP_DESTROYING, {appName: this.#appName})
 

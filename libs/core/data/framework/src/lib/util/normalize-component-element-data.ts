@@ -16,6 +16,7 @@
  */
 
 import {_isStrT} from '@aglyn/shared-util-guards'
+import {arraySafe} from '@aglyn/shared-util-tools'
 import {
   type AglynElementDenormalized,
   type AglynElementNormalized,
@@ -30,13 +31,20 @@ const normalizeData = (
   flatMap: AglynElementsById = {},
   elemData: AglynElementsList = [],
 ): AglynElementNormalized => {
-  const {elements, ...rest} = element
-
   return {
-    ...rest,
-    elements: (elements || []).map($id => (
-      normalizeData(flatMap[$id], flatMap, elemData)
-    )),
+    ...element,
+    elements: arraySafe(element.elements).reduce(
+      (accumulator, $id) => {
+        const element = flatMap[$id]
+
+        if (element) {
+          return [...accumulator, normalizeData(element, flatMap, elemData)]
+        }
+
+        return accumulator
+      },
+      []
+    ),
   }
 }
 

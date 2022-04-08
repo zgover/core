@@ -51,7 +51,7 @@ function ScreenDetails(props) {
   const {queueLoading} = useLoading()
   const docData2 = useFirestoreDoc(screenRef, {idField: '$id'})
   const docData = useFirestoreDocData(screenRef, {idField: '$id'})
-  const {status, data: screen, hasEmitted} = docData
+  const {status, data: screen} = docData
   const besignerUrl = buildRoute(Route.SCREEN_BESIGNER, {screenId, versionId})
   const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 

@@ -15,18 +15,35 @@
  * limitations under the License.
  */
 
-import type {Dictionary} from './basic'
 
-
-export type iJSONMapKey = string
-export type iJSONListIndex = number
-export type iJSONPrimitive = string | number | boolean | undefined | null | symbol
-export type iJSONMap = {[key: iJSONMapKey]: iJSONValue}
-export type iJSONList = ArrayLike<iJSONValue>
-export type iJSONValue = iJSONPrimitive | iJSONMap | iJSONList
-export type iJSON = iJSONValue | Record<iJSONMapKey, iJSONValue> | ArrayLike<iJSONValue>
-
-/** Implements a toJSON method */
-export interface Serializable<T = iJSON> {
-  toJSON?(): T
+export enum CssUnit {
+  CH = "ch",
+  CENTIMETERS = "cm",
+  DEG = "deg",
+  DPCM = "dpcm",
+  DPI = "dpi",
+  DPPX = "dppx",
+  EM = "em",
+  EX = "ex",
+  FR = "fr",
+  GRAD = "grad",
+  HZ = "Hz",
+  INCHES = "in",
+  K_HZ = "kHz",
+  MILLIMETERS = "mm",
+  MS = "ms",
+  PICAS = "pc",
+  POINTS = "pt",
+  PIXELS = "px",
+  Q = "Q",
+  RAD = "rad",
+  REM = "rem",
+  S = "s",
+  TURN = "turn",
+  VIEWPORT_HEIGHT = "vh",
+  VIEWPORT_MAX = "vmax",
+  VIEWPORT_MIN = "vmin",
+  VIEWPORT_WIDTH = "vw",
+  X = "x",
+  PERCENT = "%",
 }

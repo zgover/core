@@ -18,12 +18,12 @@
 import {getStaticField} from '@aglyn/shared-util-tools'
 import {MODULE_TYPE, OF_KIND, OF_TYPE} from '../constants/symbol'
 import {type IAglynAppController} from '../types/aglyn-app.types'
-import {AglynBaseModel} from './aglyn-base.model'
 import {
   type AglynModuleEffectListener,
   type AglynModuleModelOptions,
   type IAglynModuleModel,
 } from '../types/aglyn-module.types'
+import {AglynBaseModel} from './aglyn-base.model'
 
 
 const TAG = 'AglynModule'
@@ -50,7 +50,7 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
   #setup() {}
 
   public toString(): string {
-    return `${super.toString()}['${this.app.getName()}']`
+    return `[${super.toString()} ${this.app.getName()}]`
   }
   public toJSON() {
     return {
@@ -61,11 +61,11 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
     }
   }
 
-  public aglynOnInit(app?: IAglynAppController): this {
+  public onInitialize(): this {
     this.listeners.forEach(([flag, method]) => this.app.getEmitter().on(flag, method))
     return this
   }
-  public aglynOnDestroy(app?: IAglynAppController): this {
+  public onDestroy(): this {
     this.listeners.forEach(([flag, method]) => this.app.getEmitter().off(flag, method))
     return this
   }

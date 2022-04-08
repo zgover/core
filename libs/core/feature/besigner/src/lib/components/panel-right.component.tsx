@@ -22,7 +22,11 @@ import {
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import {ICON_VARIANT_DETAILS, ICON_VARIANT_PROPERTIES} from '@aglyn/shared-data-enums'
+import {
+  ICON_VARIANT_ELEMENT_DETAILS,
+  ICON_VARIANT_ELEMENT_PROPERTIES,
+  ICON_VARIANT_ELEMENT_STYLES,
+} from '@aglyn/shared-data-enums'
 import {alpha, mergeSxProps, styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
@@ -32,6 +36,7 @@ import {forwardRef, Fragment, useCallback, useMemo} from 'react'
 import useAglynBesignerPanelValue from '../hooks/use-aglyn-besigner-panel-value'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 import ElementPropsForm from './element-props-form.component'
+import ElementStylesForm from './element-styles-form.component'
 import {
   WorkspacePanelComponent,
   type WorkspacePanelComponentProps,
@@ -180,7 +185,7 @@ const tabs = [
   {
     value: BesignerPanelTabFlag.ELEMENT_INFO,
     tab: {
-      icon: {path: ICON_VARIANT_DETAILS.path}
+      icon: {path: ICON_VARIANT_ELEMENT_DETAILS.path}
     },
     panel: {
       Component: ElementInfo,
@@ -189,10 +194,19 @@ const tabs = [
   {
     value: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
     tab: {
-      icon: {path: ICON_VARIANT_PROPERTIES.path},
+      icon: {path: ICON_VARIANT_ELEMENT_PROPERTIES.path},
     },
     panel: {
       Component: ElementPropsForm,
+    }
+  },
+  {
+    value: BesignerPanelTabFlag.ELEMENT_STYLES,
+    tab: {
+      icon: {path: ICON_VARIANT_ELEMENT_STYLES.path},
+    },
+    panel: {
+      Component: ElementStylesForm,
     }
   },
 ]

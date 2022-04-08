@@ -20,8 +20,8 @@ import {AglynErrorEventFlag} from '../constants/error'
 import {AglynLifecycleFlag, nextLifecycleIsValid} from '../constants/lifecycle'
 import {EXTENSION_TYPE, OF_KIND} from '../constants/symbol'
 import {type IAglynAppController} from '../types/aglyn-app.types'
-import {type ExtensionUUN} from '../types/aglyn-extensions.types'
 import {type AglynExtensionOptions, type IAglynExtension} from '../types/aglyn-extension.types'
+import {type ExtensionUUN} from '../types/aglyn-extensions.types'
 import {AglynModuleModel} from './aglyn-module.model'
 
 
@@ -66,8 +66,8 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
     }
   }
 
-  public aglynOnInit(app: IAglynAppController): this {
-    super.aglynOnInit(app)
+  public onInitialize(app: IAglynAppController): this {
+    super.onInitialize(app)
     return this
   }
 
@@ -85,8 +85,8 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
     return this
   }
 
-  public aglynOnDestroy(app: IAglynAppController): this {
-    super.aglynOnDestroy(app)
+  public onDestroy(app: IAglynAppController): this {
+    super.onDestroy(app)
     return this
   }
 

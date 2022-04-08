@@ -33,11 +33,11 @@ export interface AglynLifecycleObserver<T = any> {
   /**
    * Should be invoked once immediately after instantiation
    */
-  aglynOnInit?(props?: T): void
+  onInitialize?(props?: T): void
   /**
    * Should be invoked once as last step before garbage collection
    */
-  aglynOnDestroy?(props?: T): void
+  onDestroy?(props?: T): void
 }
 
 export interface AglynLoadableObserver<T1 = any, T2 = T1> extends AglynLifecycleObserver<T1> {

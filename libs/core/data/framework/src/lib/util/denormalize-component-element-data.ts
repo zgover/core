@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {_isArr} from '@aglyn/shared-util-guards'
+import {arraySafe} from '@aglyn/shared-util-tools'
+import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import {
   type AglynElementNormalized,
   type AglynElementsById,
@@ -29,11 +30,16 @@ const denormalizeData = (
   parentId: ElementId,
   flatMap: AglynElementsById = {},
 ): AglynElementsById => {
-  const {elements, ...rest} = element
-  flatMap[rest.$id] = {...rest, parentId, elements: []}
-  flatMap[parentId] = {
-    ...flatMap[parentId],
-    elements: (flatMap[parentId]?.elements || []).concat(rest.$id),
+  const {elements, parentId: pidEl, ...rest} = element
+  const pid = parentId || pidEl || CANVAS_ROOT_ELEMENT_ID
+  flatMap[rest.$id] = {
+    ...rest,
+    parentId: pid,
+    elements: []
+  }
+  flatMap[pid] = {
+    ...flatMap[pid],
+    elements: [...arraySafe(flatMap[pid]?.elements), rest.$id],
   }
   elements?.forEach((child) => {
     denormalizeData(child, rest.$id, flatMap)
@@ -53,13 +59,17 @@ export function denormalizeComponentElementData(
   elements: AglynElementNormalized | AglynElementsList,
   parentId?: ElementId,
 ): AglynElementsById {
-  let elemData = {}
+  const elemData: AglynElementsById = {}
 
   if (elements) {
     try {
-      (_isArr(elements) ? elements : [elements]).forEach((element) => {
-        elemData = denormalizeData(element, parentId, elemData)
-      })
+      arraySafe(elements, [elements]).reduce(
+        (accumulator, element) => ({
+          ...accumulator,
+          ...denormalizeData(element, parentId, elemData)
+        }),
+        elemData
+      )
     }
     catch (error) {
       console.error(error)

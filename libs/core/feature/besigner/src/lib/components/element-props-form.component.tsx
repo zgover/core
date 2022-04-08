@@ -35,7 +35,10 @@ import useComponentFormSchema from '../hooks/use-component-form-schema'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 
-const FormTemplate = forwardRef<any, FormTemplateRenderProps>(
+/**
+ * @TODO ⚠️ remove and reimplement following PR merge https://github.com/data-driven-forms/react-forms/pull/1218
+ */
+export const ElementPropsFormTemplate = forwardRef<any, FormTemplateRenderProps>(
   function RefRenderFn(props, ref) {
     const {formFields, schema, ...rest} = props
     const {handleSubmit} = useFormApi()
@@ -68,8 +71,8 @@ const FormTemplate = forwardRef<any, FormTemplateRenderProps>(
     )
   },
 )
-FormTemplate.displayName = 'FormTemplate'
-FormTemplate.aglyn = true
+ElementPropsFormTemplate.displayName = 'ElementPropsFormTemplate'
+ElementPropsFormTemplate.aglyn = true
 
 export interface ElementPropsFormProps extends FormRendererProps {
   $id?: ElementId
@@ -97,7 +100,7 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
       <>
         <FormRenderer
           ref={ref}
-          FormTemplate={FormTemplate}
+          FormTemplate={ElementPropsFormTemplate}
           componentMapper={simpleComponentMapper}
           onCancel={handleFormCancel}
           onSubmit={handleElementSave}

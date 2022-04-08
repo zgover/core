@@ -55,6 +55,7 @@ import {
   mdiMonitorSmall,
   mdiOpenInNew,
   mdiPageNextOutline,
+  mdiPaletteOutline,
   mdiPencil,
   mdiRedo,
   mdiShapeSquareRoundedPlus,
@@ -111,9 +112,10 @@ export const ICON_VARIANT_SIGN_IN = mdiLoginVariant
 export const ICON_VARIANT_SIGN_OUT = mdiLogoutVariant
 export const ICON_VARIANT_USER_SETTINGS = mdiAccountSettings
 // Views + Panels
-export const ICON_VARIANT_DETAILS = mdiInformationVariant
-export const ICON_VARIANT_PROPERTIES = mdiFormDropdown
-export const ICON_VARIANT_TREE_VIEW = mdiFileTree
+export const ICON_VARIANT_ELEMENT_DETAILS = mdiInformationVariant
+export const ICON_VARIANT_ELEMENT_PROPERTIES = mdiFormDropdown
+export const ICON_VARIANT_ELEMENT_TREE_VIEW = mdiFileTree
+export const ICON_VARIANT_ELEMENT_STYLES = mdiPaletteOutline
 // Theme mode
 export const ICON_VARIANT_THEME_DARK = mdiWeatherNight
 export const ICON_VARIANT_THEME_LIGHT = mdiWhiteBalanceSunny

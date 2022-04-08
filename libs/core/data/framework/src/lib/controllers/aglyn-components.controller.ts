@@ -30,8 +30,6 @@ import {
   type ComponentUnregisterPayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
-import {isAglynComponentElement} from '../util/aglyn-is'
 import {type IAglynAppController} from '../types/aglyn-app.types'
 import {
   type AglynComponentElementTemplate,
@@ -51,6 +49,8 @@ import {
   type InstanceSchemas,
   type InstanceTemplates,
 } from '../types/aglyn-components.types'
+import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
+import {isAglynComponentElement} from '../util/aglyn-is'
 
 
 const TAG = 'AglynComponents'
@@ -93,9 +93,9 @@ export class AglynComponentsController extends AglynModuleModel<AglynComponentsC
   public toJSON() {
     return {
       ...super.toJSON(),
-      componentIds: this.components?.keys(),
-      bundles: this.bundles,
-      schemas: this.schemas,
+      componentIds: this.components?.keys() as any,
+      bundles: this.bundles as any,
+      schemas: this.schemas as any,
     }
   }
 

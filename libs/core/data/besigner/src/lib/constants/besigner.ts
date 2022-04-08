@@ -30,7 +30,8 @@ export enum BesignerPanelViewFlag {
 export enum BesignerPanelTabFlag {
   ELEMENT_INFO = 0x1,
   ELEMENT_PROPS_FORM = 0x2,
-  ELEMENTS_TREE = 0x3
+  ELEMENTS_TREE = 0x3,
+  ELEMENT_STYLES = 0x4,
 }
 
 export enum DndDragSourceTypeFlag {

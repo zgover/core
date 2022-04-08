@@ -1,0 +1,113 @@
+/**
+ * @license
+ * Copyright 2022 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {type ElementId, FieldComponentType, updateCanvasElement} from '@aglyn/core-data-framework'
+import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
+import {componentMapper, FormRenderer, type FormRendererProps} from '@aglyn/shared-ui-jsx-forms'
+import Button from '@mui/material/Button'
+import FormControl from '@mui/material/FormControl'
+import {type ChangeEvent, forwardRef, useCallback} from 'react'
+import useComponentFormSchema from '../hooks/use-component-form-schema'
+import useDeleteElementCallback from '../hooks/use-delete-element-callback'
+import {ElementPropsFormTemplate} from './element-props-form.component'
+
+
+export interface ElementStylesFormProps extends FormRendererProps {
+  $id?: ElementId
+}
+
+const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
+  function RefRenderFn(props, ref) {
+    const {$id, ...rest} = props
+    const {getApp} = useAglynAppContext()
+    const deleteElementCallback = useDeleteElementCallback({$id})
+    const componentId = useAglynElementData($id, 'componentId')
+    const bundleId = useAglynElementData($id, 'bundleId')
+    const elemStyles = useAglynElementData($id, 'sx')
+    const formSchema = useComponentFormSchema({componentId, bundleId})
+
+    const handleFormCancel = useCallback((e, reason) => {}, [])
+    const handleElementSave = useCallback((values) => {
+      updateCanvasElement(getApp(), {element: {$id, sx: {...values}}})
+    }, [$id, getApp])
+    const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {
+      deleteElementCallback(e)
+    }, [deleteElementCallback])
+
+    return (
+      <>
+        <FormRenderer
+          ref={ref}
+          FormTemplate={ElementPropsFormTemplate}
+          componentMapper={componentMapper}
+          onCancel={handleFormCancel}
+          onSubmit={handleElementSave}
+          initialValues={elemStyles}
+          schema={{
+            fields: [
+              {
+                component: FieldComponentType.SELECT,
+                name: 'display',
+                label: 'Display Variant',
+                description: 'The display property specifies the display behavior (the type of rendering box) of an element.',
+                options: [
+                  {value: '', label: 'Default'},
+                  {value: 'block', label: 'Block'},
+                  {value: 'inline', label: 'Inline'},
+                  {value: 'content', label: 'Contents'},
+                  {value: 'list-item', label: 'List Item'},
+                  {value: 'inline-block', label: 'Inline Block'},
+                  {value: 'flex', label: 'Flex'},
+                  {value: 'inline-flex', label: 'Inline Flex'},
+                  {value: 'grid', label: 'Grid'},
+                  {value: 'inline-grid', label: 'Inline Grid'},
+                  {value: 'table', label: 'Table'},
+                  {value: 'inline-table', label: 'Inline Table'},
+                  {value: 'table-caption', label: 'Table Caption'},
+                  {value: 'table-column', label: 'Table Column'},
+                  {value: 'table-column-group', label: 'Table Column Group'},
+                  {value: 'table-cell', label: 'Table Cell'},
+                  {value: 'table-row', label: 'Table Row'},
+                  {value: 'table-row-group', label: 'Table Row Group'},
+                  {value: 'table-header-group', label: 'Table Header Group'},
+                  {value: 'table-footer-group', label: 'Table Footer Group'},
+                  {value: 'none', label: 'None'},
+                  {value: 'initial', label: 'Initial'},
+                  {value: 'unset', label: 'Unset'},
+                ]
+              }
+            ]
+          }}
+          clearOnUnmount
+          subscription={{values: true}}
+          {...rest}
+        />
+
+        <FormControl margin="none" fullWidth>
+          <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
+            Delete Element
+          </Button>
+        </FormControl>
+      </>
+    )
+  },
+)
+ElementStylesForm.displayName = 'ElementStylesForm'
+ElementStylesForm.aglyn = true
+
+export {ElementStylesForm}
+export default ElementStylesForm

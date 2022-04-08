@@ -95,9 +95,13 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   #setup() {
     this.#domain = this.app.contexts.domain.domain(this.namespace)
 
+    const presentElements = denormalizeComponentElementData(
+      this.options.initialElements || [],
+      CANVAS_ROOT_ELEMENT_ID
+    )
     this.#context = this.#domain.createStore<ElementsDataStore>({
       past: [] as AglynElementsById[],
-      present: denormalizeComponentElementData(this.options.initialElements || [], CANVAS_ROOT_ELEMENT_ID),
+      present: presentElements,
       future: [] as AglynElementsById[],
     }, {name: `${this.namespace}:canvas-elements`})
     this.#denormalizedElementsStore = this.#context.map((elements) => {

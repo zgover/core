@@ -27,7 +27,6 @@ import {
   type CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
 import {type IAglynAppController} from '../types/aglyn-app.types'
 import {
   type AglynCommander,
@@ -36,6 +35,7 @@ import {
   type CommandUId,
   type IAglynCommandsController,
 } from '../types/aglyn-commands.types'
+import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
 
 
 const TAG = 'AglynCommands'
@@ -69,7 +69,7 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
   public toJSON() {
     return {
       ...super.toJSON(),
-      commands: [...this.#commander.all.values()],
+      commands: this.#commander.all.entries() as any,
     }
   }
 

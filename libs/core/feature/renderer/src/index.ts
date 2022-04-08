@@ -16,4 +16,4 @@
  */
 
 export * from './lib/renderer'
-export default import('./lib/components/trunk.component')
+export default './lib/components/trunk.component'

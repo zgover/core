@@ -45,7 +45,7 @@ export function deleteApp(appName?: AppUUN): void {
   const app = getApp(appName || DEFAULT_APP_UUN)
   AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETING, {appName})
   AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETING, {appName})
-  app.aglynOnDestroy?.()
+  app.onDestroy?.()
   _INTERNAL_APPS_.delete(appName)
   app.setDeleted(true)
   AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETED, {appName})
@@ -65,7 +65,7 @@ export function initializeApp(opts?: AglynAppOptions): IAglynAppController {
   app.setupExtensions()
   _INTERNAL_APPS_.set(appName, app)
 
-  app.aglynOnInit()
+  app.onInitialize()
 
   return app
 }

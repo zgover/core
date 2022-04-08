@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import {type Dictionary} from '@aglyn/shared-data-types'
 import {Timestamp} from '@aglyn/shared-util-timestamp'
 import {getStaticField} from '@aglyn/shared-util-tools'
 import {AGLYN_EMITTER, type AglynEmitter} from '../constants/emitter'
@@ -47,20 +46,19 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public get emitter(): AglynEmitter {return this.#emitter}
 
   protected constructor(options: O) {
-    this.#options = {...options}
+    this.#options = options
     this.#createdAt = Timestamp.now()
     this.#setup()
   }
+
   #setup() {
     const namespace = this.namespace
-
     const errorFactory = this.#options.errorFactory || AGLYN_ERROR
-    this.#errorFactory = !namespace ? errorFactory : errorFactory.childFactory(namespace)
-
-    this.#emitter = this.#options.emitter || AGLYN_EMITTER
-
     const logger = this.#options.logger || AGLYN_LOGGER
     const logLevel = this.#options.logLevel
+
+    this.#errorFactory = !namespace ? errorFactory : errorFactory.childFactory(namespace)
+    this.#emitter = this.#options.emitter || AGLYN_EMITTER
     this.#logger = !logLevel ? logger : logger.setLogLevel(logLevel)
   }
 

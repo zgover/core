@@ -31,17 +31,17 @@ import {
 import {AGLYN_ERROR, AglynErrorEventFlag} from '../constants/error'
 import {AglynLifecycleFlag} from '../constants/lifecycle'
 import {AglynExtension} from '../models/aglyn-extension.model'
-import {type IAglynExtension} from '../types/aglyn-extension.types'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
-import {isAglynExtension, isAglynModule} from '../util/aglyn-is'
 import {type IAglynAppController} from '../types/aglyn-app.types'
+import {type IAglynExtension} from '../types/aglyn-extension.types'
 import {
   type AglynExtensionMap,
   type AglynExtensionsControllerOptions,
   type ExtensionUUN,
   type IAglynExtensionsController,
 } from '../types/aglyn-extensions.types'
+import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
+import {isAglynExtension, isAglynModule} from '../util/aglyn-is'
 
 
 const TAG = 'AglynExtensions'
@@ -83,14 +83,14 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
   public toJSON() {
     return {
       ...super.toJSON(),
-      extensions: this.extensions.keys(),
+      extensions: this.extensions.keys() as any,
     }
   }
 
-  public aglynOnDestroy(): this {
+  public onDestroy(): this {
     this.unloadAllExtensions()
     this.destroyAllExtensions()
-    super.aglynOnDestroy()
+    super.onDestroy()
     return this
   }
 
@@ -164,7 +164,7 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
       extension.lifecycle = AglynLifecycleFlag.INITIALIZING
       this.logger.debug(AglynAppEventFlag.EXTENSION_INITIALIZING, {extensionName})
       this.emitter.emit(AglynAppEventFlag.EXTENSION_INITIALIZING, {extensionName})
-      extension.aglynOnInit?.(this.app)
+      extension.onInitialize?.(this.app)
       extension.lifecycle = AglynLifecycleFlag.INITIALIZED
       this.logger.debug(AglynAppEventFlag.EXTENSION_INITIALIZED, {extensionName})
       this.emitter.emit(AglynAppEventFlag.EXTENSION_INITIALIZED, {extensionName})
@@ -230,7 +230,7 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
       extension.lifecycle = AglynLifecycleFlag.DESTROYING
       this.logger.debug(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
       this.emitter.emit(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
-      extension.aglynOnDestroy?.(this.app)
+      extension.onDestroy?.(this.app)
       this.#extensions.delete(extensionName)
       extension.lifecycle = AglynLifecycleFlag.DESTROYED
       this.logger.debug(AglynAppEventFlag.EXTENSION_DESTROYED, {extensionName})

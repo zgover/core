@@ -37,11 +37,13 @@ const AglynBesigner = dynamic<BesignerComponentProps>(
 )
 
 function Besigner(props) {
-  const {query: {screenId, versionId}} = useRouter()
+  const {query} = useRouter()
+  const screenId = `${query.screenId}`
+  const versionId = `${query.versionId}`
   const firestore = useFirestore()
-  const screenRef = doc(firestore, 'screen', `${screenId}`, 'version', `${versionId}`)
-  const {status, data: screen, hasEmitted} = useFirestoreDocDataOnce(screenRef, {idField: '$id'})
-  const elements = screen?.elements || {}
+  const screenRef = doc(firestore, 'screens', screenId, 'versions', versionId)
+  const {status, data: screen} = useFirestoreDocDataOnce(screenRef, {idField: '$id'})
+  const elements = screen?.elements
   const {enqueueSnackbar, closeSnackbar} = useSnackbar()
 
   console.log('Besigner,', props.tenant, props)

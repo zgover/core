@@ -90,7 +90,7 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
   public toJSON() {
     return {
       ...super.toJSON(),
-      ...this.#stores,
+      contexts: this.#stores.entries() as any,
     }
   }
 
