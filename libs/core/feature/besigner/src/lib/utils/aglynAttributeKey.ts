@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
  * limitations under the License.
  */
 
-import {render} from '@testing-library/react'
+export const ELEMENT_ATTRIBUTE_PREFIX = 'data-aglyn-'
+export type ELEMENT_ATTRIBUTE_PREFIX = typeof ELEMENT_ATTRIBUTE_PREFIX
 
-import TrunkComponent from './trunk.component'
+export const aglynAttributeKey = (name: string): `${ELEMENT_ATTRIBUTE_PREFIX}${typeof name}` => {
+  return `${ELEMENT_ATTRIBUTE_PREFIX}${name}`
+}
 
-
-describe('TrunkComponent', () => {
-  it('should render successfully', () => {
-    const {baseElement} = render(<TrunkComponent />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export default aglynAttributeKey

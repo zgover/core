@@ -17,3 +17,4 @@
 
 export * from './constants'
 export * from './components/besigner.component'
+export * from './utils/aglynAttributeKey'

@@ -17,8 +17,8 @@
 
 import type {ComponentId} from '@aglyn/core-data-framework'
 import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
-import {forwardRef, Fragment} from 'react'
-import {LeafComponent} from './leaf.component'
+import {forwardRef, Fragment, useMemo} from 'react'
+import LeafComponent from './leaf.component'
 
 
 export interface BranchComponentProps extends OverrideableComponentProps {
@@ -35,7 +35,11 @@ const BranchComponent = forwardRef<any, BranchComponentProps>(
       children,
       ...rest
     } = props
-    const Leaf = leafComponent || LeafComponent
+
+    const Leaf = useMemo(() => (
+      leafComponent || LeafComponent
+    ), [leafComponent]);
+
     return (
       <Component ref={ref} {...rest}>
         {children}

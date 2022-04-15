@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-import aglynAttributeKey from './utils/aglynAttributeKey'
+import {render} from '@testing-library/react'
+
+import TreeRootComponent from './tree-root.component'
 
 
-export const DEFAULT_LEFT_DRAWER_WIDTH = 240
-
-export const ELEMENT_ID_KEY = aglynAttributeKey('element-id')
-export const ELEMENT_COMPONENT_ID_KEY = aglynAttributeKey('component-id')
-export const ELEMENT_BUNDLE_ID_KEY = aglynAttributeKey('bundle-id')
-export const ELEMENT_SELECTED_KEY = aglynAttributeKey('selected')
-export const ELEMENT_HOVERED_KEY = aglynAttributeKey('hovered')
+describe('TreeRootComponent', () => {
+  it('should render successfully', () => {
+    const {baseElement} = render(<TreeRootComponent />)
+    expect(baseElement).toBeTruthy()
+  })
+})

@@ -76,6 +76,7 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
 )
 
 ElementLeafComponent.displayName = 'Besigner.LeafComponent'
+ElementLeafComponent.aglyn = true
 ElementLeafComponent.defaultProps = {}
 
 export {ElementLeafComponent}

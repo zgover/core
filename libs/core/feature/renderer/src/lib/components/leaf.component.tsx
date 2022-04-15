@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-import {type ComponentId} from '@aglyn/core-data-framework'
+import type {ComponentId} from '@aglyn/core-data-framework'
+import {ReactIs} from '@aglyn/shared-ui-jsx'
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
-import Box, {type BoxProps} from '@mui/material/Box'
+import {Box} from '@mui/material'
+import type {BoxProps} from '@mui/material/Box'
 import clsx from 'clsx'
-import {forwardRef} from 'react'
+import {forwardRef, useMemo} from 'react'
 import useAglynElementComponent from '../hooks/use-aglyn-element-component'
 import useAglynElementData from '../hooks/use-aglyn-element-data'
 import useAglynElementResolvedProps from '../hooks/use-aglyn-element-resolved-props'
@@ -36,42 +38,49 @@ const LeafComponent = forwardRef<any, LeafComponentProps>(
     const {
       $id,
       leafComponent,
-      children: childrenProp,
-      className: classNameProp,
+      children,
+      className,
       ...rest
     } = props
 
-    const leaf = leafComponent || LeafComponent
-    const elements = useAglynElementData($id, 'elements')
-    const Component = useAglynElementComponent<any, any>($id)
-    const {children, className: classNameElem, ...elemProps} = useAglynElementResolvedProps($id)
-    const className = clsx(classNameProp, classNameElem)
 
+    const component = useAglynElementComponent<any, any>($id)
+    const Component = useMemo(() => (
+      ReactIs.isValidElementType(component) ? component : Box
+    ), [component])
+    const elements = useAglynElementData($id, 'elements')
+    const {
+      children: resolvedPropsChildren,
+      className: resolvedPropsClassName,
+      ...elemProps
+    } = useAglynElementResolvedProps($id)
 
     return (
-      <Box
+      <Component
         ref={ref}
-        className={className}
-        component={Component}
+        key={$id}
+        className={clsx(className, resolvedPropsClassName)}
         {...elemProps}
         {...rest}
       >
         {children}
-        {childrenProp}
-        {!_isArrEmpty(elements || []) ? (
+        {resolvedPropsChildren}
+        {_isArrEmpty(elements) ? null : (
           <BranchComponent
-            leafComponent={leaf}
+            key={`${$id}-branch`}
+            leafComponent={leafComponent || LeafComponent}
             elements={elements}
           />
-        ) : null}
-      </Box>
+        )}
+      </Component>
     )
   },
 )
 
-LeafComponent.displayName = 'Renderer.LeafComponent'
+LeafComponent.displayName = 'LeafComponent'
+LeafComponent.aglyn = true
 LeafComponent.defaultProps = {
-  children: null,
+  children: undefined,
 }
 
 type LeafComponent = typeof LeafComponent

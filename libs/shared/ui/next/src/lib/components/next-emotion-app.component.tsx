@@ -39,17 +39,17 @@ export interface NextEmotionAppComponentProps {
  *
  * 1. (if-exists) getInitialProps _app.tsx {@link NextEmotionAppComponent.getInitialProps}
  * 2. (if-exists) getInitialProps page {@link NextPageWithLayout.getInitialProps}
- * 3. getInitialProps _document.tsx {@link NextEmotionDocumentComponent.getInitialProps}
+ * 3. getInitialProps _document.tsx {@link _EmotionDocumentComponent.getInitialProps}
  * 4. render _app.tsx {@link NextEmotionAppComponent.render}
  * 5. render page {@link NextPageWithLayout.render}
- * 6. render _document.tsx {@link NextEmotionDocumentComponent.render}
+ * 6. render _document.tsx {@link _EmotionDocumentComponent.render}
  *
  * __Server-side (w/ error)__
  *
- * 1. (if-exists) getInitialProps _document.tsx {@link NextEmotionDocumentComponent.getInitialProps}
+ * 1. (if-exists) getInitialProps _document.tsx {@link _EmotionDocumentComponent.getInitialProps}
  * 2. render _app.tsx {@link NextEmotionAppComponent.render}
  * 3. render page {@link NextPageWithLayout.render}
- * 4. render _document.tsx {@link NextEmotionDocumentComponent.render}
+ * 4. render _document.tsx {@link _EmotionDocumentComponent.render}
  *
  * __Client-side__
  * 1. (if-exists) getInitialProps _app.tsx {@link NextEmotionAppComponent.getInitialProps}
@@ -57,12 +57,12 @@ export interface NextEmotionAppComponentProps {
  * 3. render _app.tsx {@link NextEmotionAppComponent.render}
  * 4. render page {@link NextPageWithLayout.render}
  *
- * @see {@link NextEmotionDocumentComponent}
+ * @see {@link _EmotionDocumentComponent}
  */
 function NextEmotionAppComponent(props: NextEmotionAppComponentProps) {
   const {
     emotionCache = clientSideEmotionCache,
-    children
+    children,
   } = props
 
   return (

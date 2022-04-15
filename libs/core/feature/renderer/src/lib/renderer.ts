@@ -19,7 +19,7 @@ export {default as dynamicLoader} from 'next/dynamic'
 
 export * from './components/leaf.component'
 export * from './components/branch.component'
-export * from './components/trunk.component'
+export * from './components/tree-root.component'
 export * from './components/error-boundary.component'
 
 export * from './contexts/aglyn-app-context'

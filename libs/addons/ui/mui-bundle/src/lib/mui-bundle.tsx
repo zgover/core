@@ -25,6 +25,7 @@ import list, {schema as listSchema} from './components/list'
 import listItem, {schema as listItemSchema} from './components/list-item'
 import listItemText, {schema as listItemTextSchema} from './components/list-item-text'
 import toolbar, {schema as toolbarSchema} from './components/toolbar'
+import typography, {schema as typographySchema} from './components/typography'
 
 import {BUNDLE_ID} from './constants/bundle-common'
 
@@ -36,6 +37,7 @@ export const components: ComponentRegisterPayload[] = [
   createAglynComponent(listItemSchema, listItem),
   createAglynComponent(listItemTextSchema, listItemText),
   createAglynComponent(toolbarSchema, toolbar),
+  createAglynComponent(typographySchema, typography),
 ]
 
 
