@@ -52,6 +52,7 @@
     "@mui/types": "^7.1.2",
     "@mui/utils": "^5.4.4",
     "@mui/x-data-grid": "^5.6.0",
+    "@nrwl/next": "13.8.4",
     "@tippyjs/react": "^4.2.6",
     "change-case": "^4.1.2",
     "clsx": "^1.1.1",

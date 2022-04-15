@@ -76,7 +76,7 @@
           }
         }
       },
-      "tags": []
+      "tags": ["sc:app", "sc:app:private"]
     },
     "admin-e2e": {
       "root": "apps/admin-e2e",
@@ -103,7 +103,7 @@
           }
         }
       },
-      "tags": [],
+      "tags": ["sc:app", "sc:app:private"],
       "implicitDependencies": ["admin"]
     },
     "api": {
@@ -158,7 +158,7 @@
           }
         }
       },
-      "tags": []
+      "tags": ["sc:app", "sc:app:private"]
     },
     "api-e2e": {
       "root": "apps/api-e2e",
@@ -185,7 +185,7 @@
           }
         }
       },
-      "tags": [],
+      "tags": ["sc:app", "sc:app:private"],
       "implicitDependencies": ["api"]
     },
     "console": {
@@ -246,7 +246,7 @@
           }
         }
       },
-      "tags": ["sc:app", "sc:app:console"]
+      "tags": ["sc:app", "sc:app:private"]
     },
     "console-e2e": {
       "root": "apps/console-e2e",
@@ -274,7 +274,7 @@
           "outputs": ["{options.outputFile}"]
         }
       },
-      "tags": ["sc:app", "sc:app:console"],
+      "tags": ["sc:app", "sc:app:private"],
       "implicitDependencies": ["console"]
     },
     "core-data-besigner": {
@@ -939,6 +939,7 @@
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
     },
+    "silo": "apps/silo",
     "tenant": {
       "root": "apps/tenant",
       "sourceRoot": "apps/tenant",
@@ -992,7 +993,7 @@
           }
         }
       },
-      "tags": ["sc:app", "sc:app:tenant"]
+      "tags": ["sc:app", "sc:app:public"]
     },
     "tenant-e2e": {
       "root": "apps/tenant-e2e",
@@ -1019,7 +1020,7 @@
           }
         }
       },
-      "tags": [],
+      "tags": ["sc:app", "sc:app:public"],
       "implicitDependencies": ["tenant"]
     },
     "www": {
@@ -1080,7 +1081,7 @@
           }
         }
       },
-      "tags": ["sc:app", "sc:app:www"]
+      "tags": ["sc:app", "sc:app:public"]
     },
     "www-e2e": {
       "root": "apps/www-e2e",
@@ -1108,7 +1109,7 @@
           "outputs": ["{options.outputFile}"]
         }
       },
-      "tags": ["sc:app", "sc:app:www"],
+      "tags": ["sc:app", "sc:app:public"],
       "implicitDependencies": ["www"]
     }
   }

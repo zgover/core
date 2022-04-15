@@ -18,13 +18,13 @@
                 ]
               },
               {
-                "sourceTag": "sc:app:www",
+                "sourceTag": "sc:app:private",
                 "onlyDependOnLibsWithTags": [
                   "*"
                 ]
               },
               {
-                "sourceTag": "sc:app:console",
+                "sourceTag": "sc:app:public",
                 "onlyDependOnLibsWithTags": [
                   "*"
                 ]

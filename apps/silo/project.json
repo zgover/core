@@ -1,0 +1,46 @@
+{
+  "root": "apps/silo",
+  "sourceRoot": "apps/silo",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "root": "apps/silo",
+        "outputPath": "dist/apps/silo"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/next:server",
+      "options": {
+        "buildTarget": "silo:build",
+        "dev": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "silo:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nrwl/next:export",
+      "options": {
+        "buildTarget": "silo:build:production"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/silo/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": ["sc:app", "sc:app:private"]
+}
