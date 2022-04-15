@@ -15,13 +15,16 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
+import type {ClientRectObject, Rect} from '../dom'
 
 
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function getElementRectAsClientRect(rect: Rect): ClientRectObject {
+  return {
+    ...rect,
+    left: rect.x,
+    top: rect.y,
+    right: rect.x + rect.width,
+    bottom: rect.y + rect.height,
+  }
 }
-
-export default getElementComputedStyle
+export default getElementRectAsClientRect

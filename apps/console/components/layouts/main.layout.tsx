@@ -28,7 +28,8 @@ import {
   type MenuProps,
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {_isArr, _isArrEmpty} from '@aglyn/shared-util-guards'
+import {useNextPageTitle} from '@aglyn/shared-ui-next'
+import {_isArrEmpty} from '@aglyn/shared-util-guards'
 import {
   AppBar,
   Avatar,
@@ -40,7 +41,6 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import Head from 'next/head'
 import {Fragment, type ReactNode} from 'react'
 import {DRAWER_WIDTH, TOP_BAR_HEIGHT} from '../../constants/shared'
 
@@ -149,20 +149,14 @@ function MainLayout(props: MainLayoutProps) {
     disableAppBarElevation,
   } = props
 
+  useNextPageTitle({
+    screen: title || APP_CONSOLE.TITLE,
+    suffix: APP_CONSOLE.AFFIX,
+    separator: ` ${APP_CONSOLE.SEP} `,
+  })
 
   return (
     <Fragment>
-      <Head>
-        <title>
-          {!title
-            ? APP_CONSOLE.TITLE
-            : [
-              ..._isArr(title) ? title : [title],
-              APP_CONSOLE.AFFIX,
-            ].join(` ${APP_CONSOLE.SEP} `)
-          }
-        </title>
-      </Head>
       <Stack
         alignItems="stretch"
         flexDirection="column"
@@ -272,7 +266,7 @@ function MainLayout(props: MainLayoutProps) {
                   flexGrow={1}
                   sx={{paddingLeft: 6}}
                 >
-                  {customCenter ?? _isArrEmpty(centerNavigationItems) ? null : (
+                  {(!customCenter && _isArrEmpty(centerNavigationItems)) ? null : (
                     <Stack
                       component="nav"
                       direction="row"
@@ -280,7 +274,7 @@ function MainLayout(props: MainLayoutProps) {
                       justifyContent="flex-start"
                       // flexBasis="72%"
                     >
-                      {(centerNavigationItems ?? []).map(buildNav('text'))}
+                      {customCenter || (centerNavigationItems.map(buildNav('text')))}
                     </Stack>
                   )}
                 </Stack>

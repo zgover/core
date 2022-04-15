@@ -24,10 +24,15 @@ export interface NextPageDecoratedLayoutComponentProps<Props, InitialProps> exte
  * Decorate next page with defined layout
  * Uses the getLayout defined at the page level, if available
  */
-export function NextPageDecoratedLayoutComponent<Props, InitialProps>(
+function NextPageDecoratedLayoutComponent<Props, InitialProps>(
   props: NextPageDecoratedLayoutComponentProps<Props, InitialProps>,
 ) {
   const Component = props.Component
   return getNextPageLayout(props)((<Component {...props.pageProps} />), props)
 }
+
+NextPageDecoratedLayoutComponent.displayName = 'NextPageDecoratedLayoutComponent'
+NextPageDecoratedLayoutComponent.aglyn = true
+
+export {NextPageDecoratedLayoutComponent}
 export default NextPageDecoratedLayoutComponent

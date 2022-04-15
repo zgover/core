@@ -15,13 +15,5 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
-
-
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
-}
-
-export default getElementComputedStyle
+export const clippingParents = 'clippingParents'
+export const viewport = 'viewport'

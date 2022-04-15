@@ -15,13 +15,10 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
 
-
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function eventHasViewportCoordinates(
+  event: Event,
+): event is Event & Pick<PointerEvent, 'clientX' | 'clientY'> {
+  return 'clientX' in event && 'clientY' in event
 }
-
-export default getElementComputedStyle
+export default eventHasViewportCoordinates

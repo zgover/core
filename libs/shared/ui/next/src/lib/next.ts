@@ -16,10 +16,12 @@
  */
 
 
+export * from './components/_app.component'
 export * from './components/image.component'
-export * from './components/next-app-wrapper.component'
 export * from './components/next-emotion-app.component'
 export * from './components/next-emotion-document.component'
 export * from './components/next-page-decorated-layout.component'
+
+export * from './contexts/next-page-title.component'
 
 export * from './utils/get-next-page-layout'

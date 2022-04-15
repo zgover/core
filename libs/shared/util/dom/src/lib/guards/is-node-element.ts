@@ -14,14 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import getNodeWindow from '../get-node-window'
 
-import {getNodeWindow} from './get-node-window'
 
-
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function isNodeElement(node): node is Element {
+  const OwnElement = getNodeWindow(node)['Element']
+  return node instanceof OwnElement || node instanceof Element
 }
 
-export default getElementComputedStyle
+export default isNodeElement

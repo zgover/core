@@ -15,57 +15,32 @@
  * limitations under the License.
  */
 
-import {APP_TENANT, IS_PRODUCTION} from '@aglyn/shared-data-enums'
-import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
-import {Fragment, useEffect, useMemo} from 'react'
+import {APP_CONSOLE, IS_PRODUCTION} from '@aglyn/shared-data-enums'
+import {_AppComponent, type _AppProps} from '@aglyn/shared-ui-next'
+import {Fragment} from 'react'
 
 
-export interface _AppProps<Props, InitialProps>
-  extends NextEmotionAppComponentProps<Props, InitialProps> {}
+export interface _Props<Props, InitialProps> extends _AppProps<Props, InitialProps> {}
 
-function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
-  const {NextAppWrapperProps, ...rest} = props
-  const {
-    metaElements: wrapperMetaElements,
-    linkElements: wrapperLinkElements,
-    headChildren: wrapperHeadChildren,
-    documentTitle: wrapperDocumentTitle,
-    ...nextAppWrapperProps
-  } = NextAppWrapperProps || {}
-  const documentTitle = useMemo(
-    () => wrapperDocumentTitle || APP_TENANT.TITLE,
-    [wrapperDocumentTitle],
-  )
-  const headChildren = useMemo(
-    () => (
-      <Fragment>
-        {!IS_PRODUCTION ? null : <Fragment></Fragment>}
-        {wrapperHeadChildren}
-      </Fragment>
-    ),
-    [wrapperHeadChildren],
-  )
-  const metaElements: any = useMemo(
-    () => [
-      ['viewport', 'width=device-width, initial-scale=1'],
-      ['description', APP_TENANT.DESCRIPTION],
-      ...(wrapperMetaElements || []),
-    ],
-    [wrapperMetaElements],
-  )
-  const linkElements = useMemo(() => [...(wrapperLinkElements || [])], [wrapperLinkElements])
+function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
+  const {headChildren, ...rest} = props
 
-  useEffect(() => {}, [])
 
   return (
-    <NextEmotionAppComponent
-      NextAppWrapperProps={{
-        documentTitle,
-        headChildren,
-        metaElements,
-        linkElements,
-        ...nextAppWrapperProps,
-      }}
+    <_AppComponent
+      metaElements={[
+        ['viewport', 'width=device-width, initial-scale=1'],
+        ['description', APP_CONSOLE.DESCRIPTION],
+      ]}
+      headChildren={(
+        <Fragment>
+          {!IS_PRODUCTION ? null : (
+            <Fragment>
+            </Fragment>
+          )}
+          {headChildren}
+        </Fragment>
+      )}
       {...rest}
     />
   )

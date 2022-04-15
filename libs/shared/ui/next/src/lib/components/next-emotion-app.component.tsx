@@ -16,22 +16,15 @@
  */
 
 import {CacheProvider, createEmotionCache, type EmotionCache} from '@aglyn/shared-feature-themes'
-import {
-  NextAppWrapperComponent,
-  type NextAppWrapperComponentProps,
-} from './next-app-wrapper.component'
-import {
-  NextPageDecoratedLayoutComponent,
-  type NextPageDecoratedLayoutComponentProps,
-} from './next-page-decorated-layout.component'
+import type {ReactNode} from 'react'
 
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
-export interface NextEmotionAppComponentProps<Props, InitialProps> extends NextPageDecoratedLayoutComponentProps<Props, InitialProps> {
+export interface NextEmotionAppComponentProps {
   emotionCache?: EmotionCache
-  NextAppWrapperProps?: Omit<NextAppWrapperComponentProps, 'children'>
+  children?: ReactNode
 }
 
 /**
@@ -66,18 +59,15 @@ export interface NextEmotionAppComponentProps<Props, InitialProps> extends NextP
  *
  * @see {@link NextEmotionDocumentComponent}
  */
-function NextEmotionAppComponent<Props, InitialProps>(props: NextEmotionAppComponentProps<Props, InitialProps>) {
+function NextEmotionAppComponent(props: NextEmotionAppComponentProps) {
   const {
     emotionCache = clientSideEmotionCache,
-    NextAppWrapperProps,
-    ...rest
+    children
   } = props
 
   return (
     <CacheProvider value={emotionCache}>
-      <NextAppWrapperComponent {...NextAppWrapperProps}>
-        <NextPageDecoratedLayoutComponent {...rest} />
-      </NextAppWrapperComponent>
+      {children}
     </CacheProvider>
   )
 }

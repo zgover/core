@@ -15,13 +15,8 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
-
-
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function isElementWindow(element): element is typeof window {
+  return Object.prototype.toString.call(element) === '[object Window]'
 }
 
-export default getElementComputedStyle
+export default isElementWindow

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,18 @@
  * limitations under the License.
  */
 
-export function getIframeDocument(element: HTMLIFrameElement): Document {
-  if (Object.prototype.hasOwnProperty.call(element, 'contentDocument')) {
-    return element.contentDocument
-  }
-  if (Object.prototype.hasOwnProperty.call(element, 'contentWindow')) {
-    return element.contentWindow.document
+import getNodeWindow from '../get-node-window'
+
+
+export function isKeyboardEvent(
+  event: Event | undefined | null,
+): event is KeyboardEvent {
+  if (!event) {
+    return false
   }
 
-  return window.frames[element.id ?? (element.id = 'iframe')].document
+  const {KeyboardEvent} = getNodeWindow(event.target)
+
+  return KeyboardEvent && event instanceof KeyboardEvent
 }
+export default isKeyboardEvent

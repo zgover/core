@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import getNodeWindow from '../get-node-window'
 
-import {getNodeWindow} from './get-node-window'
 
-
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function isNodeShadowRoot(node): node is ShadowRoot {
+  // IE 11 has no ShadowRoot
+  if (typeof ShadowRoot === 'undefined') {
+    return false
+  }
+  const OwnElement = getNodeWindow(node)['ShadowRoot']
+  return node instanceof OwnElement || node instanceof ShadowRoot
 }
-
-export default getElementComputedStyle
+export default isNodeShadowRoot

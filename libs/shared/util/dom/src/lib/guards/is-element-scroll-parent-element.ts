@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import getElementComputedStyle from '../get-element-computed-style'
 
-import {getNodeWindow} from './get-node-window'
 
-
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function isElementScrollParentElement(element: Element): boolean {
+  // Firefox wants us to check `-x` and `-y` variations as well
+  const {overflow, overflowX, overflowY} = getElementComputedStyle(element)
+  return /auto|scroll|overlay|hidden/.test(overflow + overflowY + overflowX)
 }
 
-export default getElementComputedStyle
+export default isElementScrollParentElement

@@ -76,7 +76,7 @@ export interface NextEmotionDocumentComponentProps extends LangParam {}
  * 2. (if-exists) getInitialProps page {@link NextPageWithLayout.getInitialProps}
  * 3. render _app.tsx {@link NextEmotionAppComponent.render}
  * 4. render page {@link NextPageWithLayout.render}
- * @see {@link NextAppWrapperComponent}
+ * @see {@link NextAppThemedComponent}
  */
 class NextEmotionDocumentComponent<P extends NextEmotionDocumentComponentProps> extends NextDocument<P> {
 
@@ -111,6 +111,7 @@ class NextEmotionDocumentComponent<P extends NextEmotionDocumentComponentProps> 
     const emotionStyles = extractCriticalToChunks(initialProps.html)
     const emotionStyleTags = emotionStyles.styles.map((style) => (
       <style
+        id={`emotion-server-${style.key}`}
         key={style.key}
         data-emotion={`${style.key} ${style.ids.join(' ')}`}
         // eslint-disable-next-line react/no-danger

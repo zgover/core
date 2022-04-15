@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import getElementNodeName from '../get-element-node-name'
 
-export const clippingParents = 'clippingParents'
-export const viewport = 'viewport'
-export type Boundary =
-  | HTMLElement
-  | Array<HTMLElement>
-  | typeof clippingParents;
-export type RootBoundary = typeof viewport | 'document'
+
+export function isNodeTableElement(node): node is HTMLTableElement | HTMLTableCellElement {
+  return ['table', 'td', 'th'].indexOf(getElementNodeName(node)) >= 0
+}
+export default isNodeTableElement

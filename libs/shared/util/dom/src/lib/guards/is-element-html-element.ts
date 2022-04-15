@@ -15,13 +15,16 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
+import getNodeWindow from '../get-node-window'
+import isElementWindow from './is-element-window'
 
 
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function isElementHTMLElement(node: Node | Window): node is HTMLElement {
+  if (isElementWindow(node)) {
+    return false
+  }
+
+  return node instanceof getNodeWindow(node).HTMLElement
 }
 
-export default getElementComputedStyle
+export default isElementHTMLElement

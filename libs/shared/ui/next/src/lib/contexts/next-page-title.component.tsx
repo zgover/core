@@ -1,0 +1,111 @@
+/**
+ * @license
+ * Copyright 2022 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+  $pageTitle,
+  type PageTitleObject,
+  setScreenName,
+  setScreenNumber,
+  setScreenSeparator,
+  setScreenSuffix,
+  setScreenTitle,
+} from '@aglyn/shared-util-dom'
+import Head from 'next/head'
+import {createContext, type ReactNode, useContext, useEffect, useMemo} from 'react'
+import {useObservable} from 'react-use'
+
+
+export interface NextPageTitleContextValue {
+  title: ReactNode
+  setScreenNumber(value?: number): void
+  setScreenName(value: ReactNode, page?: number): void
+  setScreenSuffix(value: ReactNode): void
+  setScreenSeparator(value: string): void
+  setScreenTitle(values: PageTitleObject)
+}
+
+export const NextPageTitleContext = createContext<NextPageTitleContextValue>({
+  title: 'My App',
+  setScreenName,
+  setScreenSeparator,
+  setScreenSuffix,
+  setScreenNumber,
+  setScreenTitle,
+})
+
+export const useNextPageTitleContext = () => {
+  return useContext(NextPageTitleContext)
+}
+
+export const useNextPageTitle = (values: PageTitleObject) => {
+  const {
+    title, setScreenTitle,
+  } = useNextPageTitleContext()
+
+  useEffect(() => {
+    setScreenTitle(values)
+  }, [values, setScreenTitle])
+
+  return title
+}
+
+export const NextPageTitle = () => {
+  const title = useObservable($pageTitle)
+  return (
+    <title>{title}</title>
+  )
+}
+
+export interface NextPageTitleContextProps {
+  children?: ReactNode
+}
+
+const NextPageTitleComponent = (props: NextPageTitleContextProps) => {
+  const {
+    children,
+  } = props
+
+  const title = useObservable($pageTitle)
+  const state = useMemo(() => ({
+    title,
+    setScreenName,
+    setScreenSeparator,
+    setScreenSuffix,
+    setScreenNumber,
+    setScreenTitle,
+  }), [title])
+
+
+  return (
+    <NextPageTitleContext.Provider value={state}>
+      <Head>
+        <title>{title}</title>
+      </Head>
+      {children}
+    </NextPageTitleContext.Provider>
+  )
+}
+NextPageTitleComponent.displayName = 'NextPageTitleComponent'
+NextPageTitleComponent.aglyn = true
+NextPageTitleComponent.defaultProps = {
+  initialScreen: 'Welcome',
+  initialSuffix: 'My App',
+  initialSeparator: ' – ',
+}
+
+export {NextPageTitleComponent}
+export default NextPageTitleComponent

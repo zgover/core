@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getNodeWindow, isNodeShadowRoot} from '@aglyn/shared-util-dom'
+
+import isNodeShadowRoot from './is-node-shadow-root'
 
 
-export function eventHasViewportRelativeCoordinates(
-  event: Event,
-): event is Event & Pick<PointerEvent, 'clientX' | 'clientY'> {
-  return 'clientX' in event && 'clientY' in event
-}
-
-export function isEventKeyboardEvent(
-  event: Event | undefined | null,
-): event is KeyboardEvent {
-  if (!event) {
-    return false
-  }
-
-  const {KeyboardEvent} = getNodeWindow(event.target)
-
-  return KeyboardEvent && event instanceof KeyboardEvent
-}
-
-
-export function isEventTouchEvent(
-  event: Event | undefined | null,
-): event is TouchEvent {
-  if (!event) {
-    return false
-  }
-
-  const {TouchEvent} = getNodeWindow(event.target)
-
-  return TouchEvent && event instanceof TouchEvent
-}
-
-export function parentElementContainsChildElement(parent: Element, child: Element) {
+export function elementContainsChildElement(parent: Element, child: Element) {
   const rootNode = child.getRootNode && child.getRootNode()
 
   // First, attempt with faster native method
@@ -70,3 +40,4 @@ export function parentElementContainsChildElement(parent: Element, child: Elemen
   // Give up, the result is false
   return false
 }
+export default elementContainsChildElement

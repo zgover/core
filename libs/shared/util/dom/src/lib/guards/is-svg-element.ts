@@ -13,12 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */ import getNodeWindow from '../get-node-window'
 
-export * from './aglyn'
-export * from './applications'
-export * from './firebase-auth'
-export * from './global'
-export * from './html-head'
-export * from './http'
-export * from './icons'
+
+export function isSVGElement(node: Node): node is SVGElement {
+  return node instanceof getNodeWindow(node).SVGElement
+}
+export default isSVGElement

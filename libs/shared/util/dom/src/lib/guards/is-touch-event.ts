@@ -15,13 +15,18 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
+import getNodeWindow from '../get-node-window'
 
 
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function isTouchEvent(
+  event: Event | undefined | null,
+): event is TouchEvent {
+  if (!event) {
+    return false
+  }
+
+  const {TouchEvent} = getNodeWindow(event.target)
+
+  return TouchEvent && event instanceof TouchEvent
 }
-
-export default getElementComputedStyle
+export default isTouchEvent

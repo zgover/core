@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
+import getNodeWindow from '../get-node-window'
 
 
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+export function isNodeDocument(node: Node): node is Document {
+  const {Document} = getNodeWindow(node)
+
+  return node instanceof Document
 }
-
-export default getElementComputedStyle
+export default isNodeDocument

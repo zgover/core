@@ -27,6 +27,7 @@ import {
   Menu,
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import {useNextPageTitle} from '@aglyn/shared-ui-next'
 import {_isArr, _isArrEmpty, _isObj} from '@aglyn/shared-util-guards'
 import {
   AppBar,
@@ -43,7 +44,6 @@ import {
   Typography,
 } from '@mui/material'
 import {cyan} from '@mui/material/colors'
-import Head from 'next/head'
 import {useRouter} from 'next/router'
 import {type ElementType, Fragment, type ReactNode} from 'react'
 // import {BreadcrumbsComponent, BreadcrumbsProps} from '../components/BreadcrumbsComponent'
@@ -258,7 +258,7 @@ export interface MainLayoutProps {
   // currentUserContext: CurrentUserContextType
 }
 
-function MainLayoutRaw(props: MainLayoutProps) {
+function MainLayout(props: MainLayoutProps) {
   const router = useRouter()
   const {
     children,
@@ -313,17 +313,14 @@ function MainLayoutRaw(props: MainLayoutProps) {
       </Fragment>
     )
 
+  useNextPageTitle({
+    screen: title || APP_WWW.TITLE,
+    suffix: APP_WWW.AFFIX,
+    separator: ` ${APP_WWW.SEP} `,
+  })
+
   return (
     <Fragment>
-      <Head>
-        {!title
-          ? APP_WWW.TITLE
-          : [
-            ..._isArr(title) ? title : [title],
-            APP_WWW.AFFIX,
-          ].join(` ${APP_WWW.SEP} `)
-        }
-      </Head>
       <AppBar component="header" elevation={3} color="transparent" position="fixed">
         <InnerAppBarTop component={'div'} elevation={0} color="primary" position="relative">
           <ContainerComponent maxWidth={NAVIGATION_MAX_WIDTH} disableGutters>
@@ -368,10 +365,10 @@ function MainLayoutRaw(props: MainLayoutProps) {
                     icon={<MdiIcon {...icon} />}
                     label={item.label}
                     underline="none"
-                    value={item.href ?? i}
+                    value={item.key ?? item.id ?? key}
                     wrapped
                     {...{component: AppLink} as any}
-                    {...a11yProps(i)}
+                    {...a11yProps(item.key ?? item.id ?? key)}
                     {...item}
                   />
                 ))}
@@ -431,13 +428,13 @@ function MainLayoutRaw(props: MainLayoutProps) {
   )
 }
 
-MainLayoutRaw.displayName = 'MainLayoutRaw'
-MainLayoutRaw.aglyn = true
-MainLayoutRaw.defaultProps = {
+MainLayout.displayName = 'MainLayout'
+MainLayout.aglyn = true
+MainLayout.defaultProps = {
   footerNavItems: tailNavigation as any,
   // aggregatedPageMeta: {} as any,
   // currentUserContext: {} as any,
 }
 
-export const MainLayout = /*withCurrentUserContext(withAggregatedPageMeta(*/MainLayoutRaw/*))*/
+export {MainLayout}
 export default MainLayout

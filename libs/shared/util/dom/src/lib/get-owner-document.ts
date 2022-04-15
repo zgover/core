@@ -14,7 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isElementHTMLElement, isElementWindow, isNodeDocument, isNodeObject} from './guards/node-is'
+import {isElementHTMLElement} from './guards/is-element-html-element'
+import {isElementWindow} from './guards/is-element-window'
+import {isNodeObject} from './guards/is-node-object'
+import isNodeDocument from './guards/is-node-window-document'
 
 
 export function getOwnerDocument(target: Event['target']): Document {

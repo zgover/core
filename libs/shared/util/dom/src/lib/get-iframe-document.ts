@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
-import {getNodeWindow} from './get-node-window'
+export function getIframeDocument(element: HTMLIFrameElement): Document {
+  if (Object.prototype.hasOwnProperty.call(element, 'contentDocument')) {
+    return element.contentDocument
+  }
+  if (Object.prototype.hasOwnProperty.call(element, 'contentWindow')) {
+    return element.contentWindow.document
+  }
 
-
-export function getElementComputedStyle(
-  element: Element,
-): CSSStyleDeclaration {
-  return getNodeWindow(element).getComputedStyle(element)
+  return window.frames[element.id ?? (element.id = 'iframe')].document
 }
 
-export default getElementComputedStyle
+export default getIframeDocument
