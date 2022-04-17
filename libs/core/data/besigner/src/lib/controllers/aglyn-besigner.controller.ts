@@ -114,7 +114,7 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     this.#context._domain = this.app.contexts.domain.domain(this.namespace)
 
     this.#context._store = this.#context._domain.createStore<BesignerContextStores>(
-      objectDeepMergeFillIn(copy(DEFAULT_CONTEXT), this.options.defaults || {}),
+      objectDeepMergeFillIn(copy(DEFAULT_CONTEXT), {...this.options.defaults}),
       {name: `${this.namespace}:store`},
     )
     persist({store: this.#context._store})

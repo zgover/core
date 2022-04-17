@@ -27,8 +27,8 @@ import {
 import {styled} from '@aglyn/shared-feature-themes'
 import {ErrorBoundaryComponent, type ErrorBoundaryProps, ReactIs} from '@aglyn/shared-ui-jsx'
 import {copy, getDisplayName} from '@aglyn/shared-util-tools'
-import {hoistNonReactStatics, pascalCase} from '@aglyn/shared-util-vendor'
-import {forwardRef, type ReactNode, useMemo} from 'react'
+import {pascalCase} from '@aglyn/shared-util-vendor'
+import {forwardRef, type ReactNode} from 'react'
 
 
 export function createAglynStyledComponent<P>(
@@ -48,16 +48,13 @@ export function createAglynComponent<P>(
   const displayName = getDisplayName(component, pascalCase(componentId))
   const shouldNotBeStyled = emotion?.disable
 
-  const CreateAglynComponent = forwardRef<any, P>(
-    function RefRenderFn(props, ref) {
+  const Component = (shouldNotBeStyled ? component : createAglynStyledComponent<P>(component, {
+    name: displayName,
+    ...emotion?.options,
+  }))
 
-      const Component = useMemo(() => {
-        if (shouldNotBeStyled) return component
-        return createAglynStyledComponent<P>(component, {
-          name: displayName,
-          ...emotion?.options,
-        })
-      }, [])
+  const AglynComponent = forwardRef<any, P>(
+    function RefRenderFn(props, ref) {
 
       return (
         <ErrorBoundaryComponent
@@ -73,16 +70,16 @@ export function createAglynComponent<P>(
     },
   ) as IAglynComponent<P>
 
-  CreateAglynComponent.displayName = `CreateAglynComponent(${displayName})`
-  CreateAglynComponent.componentId = componentId
-  CreateAglynComponent.bundleId = bundleId
-  CreateAglynComponent.aglyn = true
-  CreateAglynComponent[OF_TYPE] = MODULE_TYPE
-  CreateAglynComponent[OF_KIND] = COMPONENT_ELEMENT_TYPE
-  CreateAglynComponent && hoistNonReactStatics(CreateAglynComponent)
+  AglynComponent.displayName = `AglynComponent(${displayName})`
+  AglynComponent.componentId = componentId
+  AglynComponent.bundleId = bundleId
+  AglynComponent.aglyn = true
+  AglynComponent[OF_TYPE] = MODULE_TYPE
+  AglynComponent[OF_KIND] = COMPONENT_ELEMENT_TYPE
+  // hoistNonReactStatics(CreateAglynComponent, component)
 
   return {
-    component: CreateAglynComponent,
+    component: AglynComponent,
     schema,
   }
 }

@@ -16,15 +16,13 @@
  */
 
 import {
-  duplicateCanvasElement,
-} from '@aglyn/core-data-framework'
-import {
   type BesignerCanvasState,
   BesignerPanelTabFlag,
   setBesignerCanvasHovered,
   setBesignerCanvasSelected,
   setBesignerPanels,
 } from '@aglyn/core-data-besigner'
+import {duplicateCanvasElement} from '@aglyn/core-data-framework'
 import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
 import {type KeyOf} from '@aglyn/shared-data-types'
 import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Popper'
@@ -94,6 +92,8 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
     const state = useAglynBesignerStoreState('canvas', store)
     const $id = state?.$id
     const parentId = useAglynElementData($id, 'parentId')
+
+    console.log('parent id', parentId, $id, state, store, variant, id)
 
 
     const handleDuplicateClick = useCallback((e: ChangeEvent<unknown>) => {
