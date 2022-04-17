@@ -18,7 +18,7 @@
 import {_isObj, _isStrEmpty} from '@aglyn/shared-util-guards'
 import {_INTERNAL_APPS_} from '../constants/_internal'
 import {DEFAULT_APP_UUN} from '../constants/app'
-import {AGLYN_EMITTER, AglynAppEventFlag} from '../constants/emitter'
+import {AGLYN_EMITTER, AglynEventStateFlag} from '../constants/emitter'
 import {AGLYN_ERROR, AglynErrorEventFlag} from '../constants/error'
 import {AGLYN_LOGGER} from '../constants/logger'
 import {AglynAppController} from '../controllers/aglyn-app.controller'
@@ -43,13 +43,13 @@ export function getApp(name?: AppUUN): IAglynAppController {
 
 export function deleteApp(appName?: AppUUN): void {
   const app = getApp(appName || DEFAULT_APP_UUN)
-  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETING, {appName})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETING, {appName})
+  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETING, {appName})
+  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETING, {appName})
   app.onDestroy?.()
   _INTERNAL_APPS_.delete(appName)
   app.setDeleted(true)
-  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETED, {appName})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETED, {appName})
+  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETED, {appName})
+  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETED, {appName})
 }
 
 export function initializeApp(opts?: AglynAppOptions): IAglynAppController {

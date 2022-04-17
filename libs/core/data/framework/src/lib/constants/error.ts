@@ -20,6 +20,7 @@ import {type ErrorTagMessages, NsErrorFactory} from '@aglyn/shared-util-errors'
 import {type AppUUN} from '../types/aglyn-app.types'
 import {type ExtensionUUN} from '../types/aglyn-extensions.types'
 import {type PayloadData, type PayloadParams} from '../types/generic.types'
+import {AglynLifecycleFlag} from './lifecycle'
 
 
 export enum AglynErrorEventFlag {
@@ -29,7 +30,9 @@ export enum AglynErrorEventFlag {
   APP_BAD_NAME = 'error:app:bad-name',
   APP_BAD_INSTANCE = 'error:app:bad-instance',
 
-  MODULE_MISSING_MEMBER = 'error:app:module:missing-member',
+  MODULE_MISSING_MEMBER = 'error:module:missing-member',
+  MODULE_INVALID_LIFECYCLE = 'error:module:invalid-lifecycle',
+
 
   EXTENSION_NONE = 'error:module:extensions:no-extension',
   EXTENSION_BAD_MODULE_LOADER = 'error:module:extensions:bad-loader',
@@ -43,7 +46,8 @@ export interface AglynErrorEventParams extends Record<AglynErrorEventType, unkno
   [AglynErrorEventFlag.APP_DELETED]: PayloadData<{appName: AppUUN}>
   [AglynErrorEventFlag.APP_BAD_INSTANCE]: PayloadData<{appName: AppUUN}>
 
-  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: PayloadData<{extensionName: ExtensionUUN, memberMethod: string}>
+  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: PayloadData<{moduleName: ExtensionUUN, memberMethod: string}>
+  [AglynErrorEventFlag.MODULE_INVALID_LIFECYCLE]: PayloadData<{now: AglynLifecycleFlag, prev: AglynLifecycleFlag}>
 
   [AglynErrorEventFlag.EXTENSION_NONE]: PayloadData<{extensionName: ExtensionUUN}>
   [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: PayloadData<{appName: AppUUN}>
@@ -58,8 +62,9 @@ export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof Ag
   [AglynErrorEventFlag.APP_BAD_INSTANCE]: 'AglynApp.{$appName}() takes either no argument or a AglynApp instance.',
 
   [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: 'Module \'{$namespace}\' must implement member method AglynModule.{$memberMethod}()',
+  [AglynErrorEventFlag.MODULE_INVALID_LIFECYCLE]: 'Inappropriate lifecycle \'{$now}\' during lifecycle \'{$prev}\'',
 
-  [AglynErrorEventFlag.EXTENSION_NONE]: 'No AppExtension \'{$extensionName}\' has been registered on AglynApp \'{$appName}\'',
+  [AglynErrorEventFlag.EXTENSION_NONE]: 'No AppExtension \'{$moduleName}\' has been registered on AglynApp \'{$appName}\'',
   [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: 'Invalid module loader has been provided',
   [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: 'Bad AglynExtension module \'{$namespace}\' provided on AglynApp \'{$appName}\'',
 }

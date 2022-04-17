@@ -17,7 +17,7 @@
 
 import {Timestamp} from '@aglyn/shared-util-timestamp'
 import {getStaticField} from '@aglyn/shared-util-tools'
-import {AGLYN_EMITTER, type AglynEmitter} from '../constants/emitter'
+import {AGLYN_EMITTER, type AglynEmitter, AglynEventStateFlag} from '../constants/emitter'
 import {AGLYN_ERROR, type AglynErrorFactory} from '../constants/error'
 import {AGLYN_LOGGER, type AglynLogger} from '../constants/logger'
 import {type AglynBaseModelOptions, type IAglynBaseModel} from '../types/aglyn-base.types'
@@ -60,6 +60,52 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
     this.#errorFactory = !namespace ? errorFactory : errorFactory.childFactory(namespace)
     this.#emitter = this.#options.emitter || AGLYN_EMITTER
     this.#logger = !logLevel ? logger : logger.setLogLevel(logLevel)
+  }
+
+  private handleEvent(flag: AglynEventStateFlag): this {
+    this.logger.debug(flag, {namespace: this.namespace})
+    this.emitter.emit(flag, {namespace: this.namespace})
+    return this
+  }
+
+  public onInitialize(): this {
+    return this
+  }
+  public _initialize(props?: never): this {
+    this.handleEvent(AglynEventStateFlag.MODULE_INITIALIZING)
+    this.onInitialize()
+    this.handleEvent(AglynEventStateFlag.MODULE_INITIALIZED)
+    return this
+  }
+
+  public onActivate(): this {
+    return this
+  }
+  public _activate(props?: never): this {
+    this.handleEvent(AglynEventStateFlag.MODULE_ACTIVATING)
+    this.onActivate()
+    this.handleEvent(AglynEventStateFlag.MODULE_ACTIVATED)
+    return this
+  }
+
+  public onDeactivate(): this {
+    return this
+  }
+  public _deactivate(props?: never): this {
+    this.handleEvent(AglynEventStateFlag.MODULE_DEACTIVATING)
+    this.onDeactivate()
+    this.handleEvent(AglynEventStateFlag.MODULE_DEACTIVATED)
+    return this
+  }
+
+  public onDestroy(): this {
+    return this
+  }
+  public _destroy(props?: never): this {
+    this.handleEvent(AglynEventStateFlag.MODULE_DESTROYING)
+    this.onDestroy()
+    this.handleEvent(AglynEventStateFlag.MODULE_DESTROYED)
+    return this
   }
 
   public toString(): string {

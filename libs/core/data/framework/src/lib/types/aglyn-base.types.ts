@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import {type Serializable, type StringLike} from '@aglyn/shared-data-types'
-import {type LogLevelString} from '@aglyn/shared-util-logger'
-import {type Timestamp} from '@aglyn/shared-util-timestamp'
-import {type AglynEmitter} from '../constants/emitter'
-import {type AglynErrorFactory} from '../constants/error'
-import {type AglynLogger} from '../constants/logger'
-import {type AglynLifecycleObserver} from './generic.types'
+import type {Serializable, StringLike} from '@aglyn/shared-data-types'
+import type {LogLevelString} from '@aglyn/shared-util-logger'
+import type {Timestamp} from '@aglyn/shared-util-timestamp'
+import type {AglynEmitter} from '../constants/emitter'
+import type {AglynErrorFactory} from '../constants/error'
+import type {AglynLogger} from '../constants/logger'
+import type {AglynLifecycleObserver, AglynLoadableObserver} from './generic.types'
 
 
 export interface AglynBaseModelOptions {
@@ -31,7 +31,9 @@ export interface AglynBaseModelOptions {
   logger?: AglynLogger
 }
 
-export interface IAglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions, LO = never> extends StringLike, Serializable, AglynLifecycleObserver<LO> {
+export interface IAglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions, LO = never>
+  extends StringLike, Serializable, AglynLifecycleObserver<LO>, AglynLoadableObserver<LO> {
+
   readonly [Symbol.toStringTag]: string
   readonly namespace: string
   readonly createdAt: Timestamp

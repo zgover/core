@@ -24,8 +24,6 @@ import arrayRemoveItem from './array-remove-item'
 import arrayUpdateAtIndex from './array-update-at-index'
 
 
-export {}
-
 declare global {
   interface Array<T> {
     copyShallow(): Array<T>
@@ -38,26 +36,42 @@ declare global {
   }
 }
 
-if (!Array.prototype.remove) {
-  Array.prototype.copyDeep = function <T>(this: T[]): T[] {
-    return arrayCopyDeep(this)
-  }
+export {}
+
+if (!Array.prototype.copyShallow) {
   Array.prototype.copyShallow = function <T>(this: T[]): T[] {
     return arrayCopyShallow(this)
   }
+}
+if (!Array.prototype.moveAtIndex) {
   Array.prototype.moveAtIndex = function <T>(this: T[], index: number, newIndex: number): T[] {
     return arrayMoveAtIndex(this, index, newIndex)
   }
+}
+if (!Array.prototype.pushAtIndex) {
   Array.prototype.pushAtIndex = function <T>(this: T[], index: number, ...elems: T[]): T[] {
     return arrayPushAtIndex(this, index, ...elems)
   }
+}
+
+if (!Array.prototype.remove) {
   Array.prototype.remove = function <T>(this: T[], elem: T): T[] {
     return arrayRemoveItem(this, elem)
   }
+}
+if (!Array.prototype.removeAtIndex) {
   Array.prototype.removeAtIndex = function <T>(this: T[], elem: T): T[] {
     return arrayRemoveAtIndex(this, elem)
   }
+}
+if (!Array.prototype.replaceAtIndex) {
   Array.prototype.replaceAtIndex = function <T>(this: T[], index: number, elem: T): T[] {
     return arrayUpdateAtIndex(this, index, elem)
+  }
+}
+
+if (!Array.prototype.copyDeep) {
+  Array.prototype.copyDeep = function <T>(this: T[]): T[] {
+    return arrayCopyDeep(this)
   }
 }

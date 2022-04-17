@@ -24,7 +24,7 @@ import {
   _INTERNAL_EXTENSIONS_,
 } from '../constants/_internal'
 import {DEFAULT_APP_UUN} from '../constants/app'
-import {AglynAppEffectFlag, AglynAppEventFlag} from '../constants/emitter'
+import {AglynEventStateFlag, AglynEventTriggerFlag} from '../constants/emitter'
 import {AGLYN_PLATFORM, AglynPlatform} from '../constants/platform'
 import {AglynVersion, SDK_VERSION} from '../constants/version'
 import {AglynBaseModel} from '../models/aglyn-base.model'
@@ -95,8 +95,8 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
 
   public setupModules() {
     const appName = this.#appName
-    this.logger.debug(AglynAppEventFlag.APP_CREATING, {appName})
-    this.emitter.emit(AglynAppEventFlag.APP_CREATING, {appName})
+    this.logger.debug(AglynEventStateFlag.APP_CREATING, {appName})
+    this.emitter.emit(AglynEventStateFlag.APP_CREATING, {appName})
 
     _INTERNAL_CONTEXTS_.set(
       this.#appName,
@@ -123,8 +123,8 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
       }),
     )
 
-    this.logger.debug(AglynAppEventFlag.APP_CREATED, {appName})
-    this.emitter.emit(AglynAppEventFlag.APP_CREATED, {appName})
+    this.logger.debug(AglynEventStateFlag.APP_CREATED, {appName})
+    this.emitter.emit(AglynEventStateFlag.APP_CREATED, {appName})
     return this
   }
   public setupExtensions() {
@@ -147,11 +147,11 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     const {type} = opts
     const isInit = type === 'init',
       flagBefore = isInit
-        ? AglynAppEventFlag.APP_MODULE_INITIALIZING
-        : AglynAppEventFlag.APP_MODULE_DESTROYING,
+        ? AglynEventStateFlag.MODULE_INITIALIZING
+        : AglynEventStateFlag.MODULE_DESTROYING,
       flagAfter = isInit
-        ? AglynAppEventFlag.APP_MODULE_INITIALIZED
-        : AglynAppEventFlag.APP_MODULE_DESTROYED
+        ? AglynEventStateFlag.MODULE_INITIALIZED
+        : AglynEventStateFlag.MODULE_DESTROYED
     for (const mod of modules) {
       const namespace = mod.namespace
       this.logger.debug(flagBefore, {namespace})
@@ -176,22 +176,22 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
   }
 
   public onInitialize(): void {
-    this.logger.debug(AglynAppEventFlag.APP_INITIALIZING, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_INITIALIZING, {appName: this.#appName})
+    this.logger.debug(AglynEventStateFlag.APP_INITIALIZING, {appName: this.#appName})
+    this.emitter.emit(AglynEventStateFlag.APP_INITIALIZING, {appName: this.#appName})
 
     this.#initializeAppModules()
 
-    this.logger.debug(AglynAppEventFlag.APP_INITIALIZED, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_INITIALIZED, {appName: this.#appName})
+    this.logger.debug(AglynEventStateFlag.APP_INITIALIZED, {appName: this.#appName})
+    this.emitter.emit(AglynEventStateFlag.APP_INITIALIZED, {appName: this.#appName})
   }
   public onDestroy(): void {
-    this.logger.debug(AglynAppEventFlag.APP_DESTROYING, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_DESTROYING, {appName: this.#appName})
+    this.logger.debug(AglynEventStateFlag.APP_DESTROYING, {appName: this.#appName})
+    this.emitter.emit(AglynEventStateFlag.APP_DESTROYING, {appName: this.#appName})
 
     this.#destroyAppModules()
 
-    this.logger.debug(AglynAppEventFlag.APP_DESTROYED, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_DESTROYED, {appName: this.#appName})
+    this.logger.debug(AglynEventStateFlag.APP_DESTROYED, {appName: this.#appName})
+    this.emitter.emit(AglynEventStateFlag.APP_DESTROYED, {appName: this.#appName})
   }
 
   public getName(): AppUUN {
@@ -219,7 +219,7 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     this.#deleted = Boolean(value)
     return this
   }
-  public effect<U>(data: AglynEffectOptions<AglynAppEffectFlag, U>) {
+  public effect<U>(data: AglynEffectOptions<AglynEventTriggerFlag, U>) {
     const {type, payload} = data
     this.emitter.emit(type, payload as any)
     return this

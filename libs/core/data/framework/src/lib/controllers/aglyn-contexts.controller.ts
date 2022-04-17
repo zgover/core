@@ -19,7 +19,7 @@ import {_hasOwnProperty, _isObj} from '@aglyn/shared-util-guards'
 import {getProperty} from '@aglyn/shared-util-tools'
 import {createDomain as createEffectorDomain} from 'effector'
 import {
-  AglynAppEffectFlag,
+  AglynEventTriggerFlag,
   type ContextsCreateEffectPayload,
   type ContextsCreateEventPayload,
   type ContextsCreateStorePayload,
@@ -57,12 +57,12 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return [
-      [AglynAppEffectFlag.CONTEXTS_CREATE_STORE, this.createStore],
-      [AglynAppEffectFlag.CONTEXTS_CREATE_EVENT, this.createEvent],
-      [AglynAppEffectFlag.CONTEXTS_CREATE_EFFECT, this.createEffect],
-      [AglynAppEffectFlag.CONTEXTS_GET_STORE, this.getStore],
-      [AglynAppEffectFlag.CONTEXTS_SET_STORE, this.setStore],
-      [AglynAppEffectFlag.CONTEXTS_DELETE_STORE, this.deleteStore],
+      [AglynEventTriggerFlag.CONTEXTS_CREATE_STORE, this.createStore],
+      [AglynEventTriggerFlag.CONTEXTS_CREATE_EVENT, this.createEvent],
+      [AglynEventTriggerFlag.CONTEXTS_CREATE_EFFECT, this.createEffect],
+      [AglynEventTriggerFlag.CONTEXTS_GET_STORE, this.getStore],
+      [AglynEventTriggerFlag.CONTEXTS_SET_STORE, this.setStore],
+      [AglynEventTriggerFlag.CONTEXTS_DELETE_STORE, this.deleteStore],
     ]
   }
 

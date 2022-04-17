@@ -17,11 +17,11 @@
 
 import {getStaticField} from '@aglyn/shared-util-tools'
 import {MODULE_TYPE, OF_KIND, OF_TYPE} from '../constants/symbol'
-import {type IAglynAppController} from '../types/aglyn-app.types'
-import {
-  type AglynModuleEffectListener,
-  type AglynModuleModelOptions,
-  type IAglynModuleModel,
+import type {IAglynAppController} from '../types/aglyn-app.types'
+import type {
+  AglynModuleEffectListener,
+  AglynModuleModelOptions,
+  IAglynModuleModel,
 } from '../types/aglyn-module.types'
 import {AglynBaseModel} from './aglyn-base.model'
 
@@ -29,7 +29,9 @@ import {AglynBaseModel} from './aglyn-base.model'
 const TAG = 'AglynModule'
 const NS = 'aglyn.core.data.framework.model.module'
 
-export abstract class AglynModuleModel<O extends AglynModuleModelOptions = AglynModuleModelOptions> extends AglynBaseModel<O> implements IAglynModuleModel<O> {
+export abstract class AglynModuleModel<O extends AglynModuleModelOptions = AglynModuleModelOptions>
+  extends AglynBaseModel<O>
+  implements IAglynModuleModel<O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly [OF_TYPE]: number | symbol = MODULE_TYPE
@@ -45,9 +47,32 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
 
   protected constructor(protected app: IAglynAppController, options: O) {
     super(options)
-    this.#setup()
   }
-  #setup() {}
+
+  public setupListeners(): this {
+    this.listeners.forEach(
+      ([flag, method]) => this.app.getEmitter().on(flag, method),
+    )
+    return this
+  }
+  public breakdownListeners(): this {
+    this.listeners.forEach(
+      ([flag, method]) => this.app.getEmitter().off(flag, method),
+    )
+    return this
+  }
+
+  public onInitialize(): this {
+    super.onInitialize()
+    this.setupListeners()
+    return this
+  }
+
+  public onDestroy(): this {
+    super.onInitialize()
+    this.breakdownListeners()
+    return this
+  }
 
   public toString(): string {
     return `[${super.toString()} ${this.app.getName()}]`
@@ -55,19 +80,7 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
   public toJSON() {
     return {
       ...super.toJSON(),
-      [OF_TYPE]: this[OF_TYPE],
-      [OF_KIND]: this[OF_KIND],
-      namespace: this.namespace,
     }
-  }
-
-  public onInitialize(): this {
-    this.listeners.forEach(([flag, method]) => this.app.getEmitter().on(flag, method))
-    return this
-  }
-  public onDestroy(): this {
-    this.listeners.forEach(([flag, method]) => this.app.getEmitter().off(flag, method))
-    return this
   }
 }
 

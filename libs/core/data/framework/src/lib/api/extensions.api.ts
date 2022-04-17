@@ -16,10 +16,10 @@
  */
 
 import {_INTERNAL_EXTENSIONS_} from '../constants/_internal'
-import {AglynAppEffectFlag, type AglynModuleEffectPayload} from '../constants/emitter'
+import {AglynEventTriggerFlag, type AglynEventTriggerPayload} from '../constants/emitter'
 import {type IAglynAppController} from '../types/aglyn-app.types'
-import {type IAglynExtensionsController} from '../types/aglyn-extensions.types'
 import {type IAglynExtension} from '../types/aglyn-extension.types'
+import {type IAglynExtensionsController} from '../types/aglyn-extensions.types'
 import {_validateAppArg} from './app.api'
 
 
@@ -43,28 +43,28 @@ export function getExtensions(app: IAglynAppController): IAglynExtension[] {
 }
 export function registerExtension(
   app: IAglynAppController,
-  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_REGISTER],
+  data: AglynEventTriggerPayload[AglynEventTriggerFlag.EXTENSION_REGISTER],
 ): void {
   const extensionController = _getExtensionController(app)
   extensionController.registerExtension(data)
 }
 export function unregisterExtension(
   app: IAglynAppController,
-  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_DESTROY],
+  data: AglynEventTriggerPayload[AglynEventTriggerFlag.EXTENSION_DESTROY],
 ): void {
   const extensionController = _getExtensionController(app)
   extensionController.destroyExtension(data)
 }
 export function loadExtension(
   app: IAglynAppController,
-  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_LOAD],
+  data: AglynEventTriggerPayload[AglynEventTriggerFlag.EXTENSION_ACTIVATE],
 ) {
   const extensionController = _getExtensionController(app)
   extensionController.loadExtension(data)
 }
 export function unloadExtension(
   app: IAglynAppController,
-  data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_UNLOAD],
+  data: AglynEventTriggerPayload[AglynEventTriggerFlag.EXTENSION_DEACTIVATE],
 ) {
   const extensionController = _getExtensionController(app)
   extensionController.loadExtension(data)

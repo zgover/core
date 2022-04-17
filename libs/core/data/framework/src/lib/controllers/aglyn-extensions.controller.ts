@@ -19,8 +19,8 @@
 import {type MutableShallow} from '@aglyn/shared-data-types'
 import {_isCtor} from '@aglyn/shared-util-guards'
 import {
-  AglynAppEffectFlag,
-  AglynAppEventFlag,
+  AglynEventStateFlag,
+  AglynEventTriggerFlag,
   type ExtensionDestroyPayload,
   type ExtensionHandleLoaderPayload,
   type ExtensionInitializePayload,
@@ -58,11 +58,11 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return [
-      [AglynAppEffectFlag.EXTENSION_REGISTER, this.registerExtension],
-      [AglynAppEffectFlag.EXTENSION_INITIALIZE, this.initializeExtension],
-      [AglynAppEffectFlag.EXTENSION_LOAD, this.loadExtension],
-      [AglynAppEffectFlag.EXTENSION_UNLOAD, this.unloadExtension],
-      [AglynAppEffectFlag.EXTENSION_DESTROY, this.destroyExtension],
+      [AglynEventTriggerFlag.EXTENSION_REGISTER, this.registerExtension],
+      [AglynEventTriggerFlag.EXTENSION_INITIALIZE, this.initializeExtension],
+      [AglynEventTriggerFlag.EXTENSION_ACTIVATE, this.loadExtension],
+      [AglynEventTriggerFlag.EXTENSION_DEACTIVATE, this.unloadExtension],
+      [AglynEventTriggerFlag.EXTENSION_DESTROY, this.destroyExtension],
     ]
   }
 
@@ -103,7 +103,7 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
     }
     if (!isAglynModule(module) || !isAglynExtension(module) || !_isCtor(module)) {
       throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE, {
-        appName, extensionName: module?.['extensionName'] ?? 'unknown',
+        appName, extensionName: module?.['moduleName'] ?? 'unknown',
       })
     }
     const instance = new module({...options, app: this.app})
@@ -141,12 +141,12 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
     const extensionName = extension?.extensionName
     if (extensionName && isAglynExtension(extension)) {
       extension.lifecycle = AglynLifecycleFlag.REGISTERING
-      this.logger.debug(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_REGISTERED, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_REGISTERED, {extensionName})
       this.#extensions.set(extensionName, extension)
       extension.lifecycle = AglynLifecycleFlag.REGISTERED
-      this.logger.debug(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_REGISTERED, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_REGISTERED, {extensionName})
     }
     else {
       // TODO: throw errorFactory error
@@ -162,12 +162,12 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
     const extensionName = extension?.extensionName
     if (extensionName && isAglynExtension(extension)) {
       extension.lifecycle = AglynLifecycleFlag.INITIALIZING
-      this.logger.debug(AglynAppEventFlag.EXTENSION_INITIALIZING, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_INITIALIZING, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_INITIALIZING, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_INITIALIZING, {extensionName})
       extension.onInitialize?.(this.app)
       extension.lifecycle = AglynLifecycleFlag.INITIALIZED
-      this.logger.debug(AglynAppEventFlag.EXTENSION_INITIALIZED, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_INITIALIZED, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_INITIALIZED, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_INITIALIZED, {extensionName})
     }
     else {
       // TODO: throw errorFactory error
@@ -189,12 +189,12 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
       )
     ) {
       extension.lifecycle = AglynLifecycleFlag.LOADING
-      this.logger.debug(AglynAppEventFlag.EXTENSION_LOADING, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_LOADING, {extensionName})
-      extension.aglynOnLoad?.(this.app)
+      this.logger.debug(AglynEventStateFlag.EXTENSION_ACTIVATING, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_ACTIVATING, {extensionName})
+      extension.onActivate?.(this.app)
       extension.lifecycle = AglynLifecycleFlag.LOADED
-      this.logger.debug(AglynAppEventFlag.EXTENSION_LOADED, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_LOADED, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_ACTIVATED, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_ACTIVATED, {extensionName})
     }
     else {
       // TODO: throw errorFactory error
@@ -209,12 +209,12 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
     const extension = this.#extensions.get(extensionName) as MutableShallow<IAglynExtension>
     if (extension) {
       extension.lifecycle = AglynLifecycleFlag.UNLOADING
-      this.logger.debug(AglynAppEventFlag.EXTENSION_UNLOADING, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_UNLOADING, {extensionName})
-      extension.aglynOnUnload?.(this.app)
+      this.logger.debug(AglynEventStateFlag.EXTENSION_DEACTIVATING, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_DEACTIVATING, {extensionName})
+      extension.onDeactivate?.(this.app)
       extension.lifecycle = AglynLifecycleFlag.UNLOADED
-      this.logger.debug(AglynAppEventFlag.EXTENSION_UNLOADED, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_UNLOADED, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_DEACTIVATED, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_DEACTIVATED, {extensionName})
     }
     else {
       // TODO: throw errorFactory error
@@ -228,13 +228,13 @@ export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsC
     const extension = this.#extensions.get(extensionName)
     if (extension) {
       extension.lifecycle = AglynLifecycleFlag.DESTROYING
-      this.logger.debug(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_DESTROYING, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_DESTROYING, {extensionName})
       extension.onDestroy?.(this.app)
       this.#extensions.delete(extensionName)
       extension.lifecycle = AglynLifecycleFlag.DESTROYED
-      this.logger.debug(AglynAppEventFlag.EXTENSION_DESTROYED, {extensionName})
-      this.emitter.emit(AglynAppEventFlag.EXTENSION_DESTROYED, {extensionName})
+      this.logger.debug(AglynEventStateFlag.EXTENSION_DESTROYED, {extensionName})
+      this.emitter.emit(AglynEventStateFlag.EXTENSION_DESTROYED, {extensionName})
     }
     else {
       // TODO: throw errorFactory error

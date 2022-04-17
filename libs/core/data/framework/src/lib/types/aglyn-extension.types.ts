@@ -15,34 +15,35 @@
  * limitations under the License.
  */
 
-import {type AglynLifecycleFlag} from '../constants/lifecycle'
-import {type IAglynAppController} from './aglyn-app.types'
-import {type ExtensionUUN} from './aglyn-extensions.types'
-import {
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type IAglynModuleModel,
+import type {AglynLifecycleFlag} from '../constants/lifecycle'
+import type {IAglynAppController} from './aglyn-app.types'
+import type {ExtensionUUN} from './aglyn-extensions.types'
+import type {
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  IAglynModuleModel,
 } from './aglyn-module.types'
-import {type AglynLoadableObserver} from './generic.types'
 
 
 export interface AglynExtensionOptions extends AglynModuleModelOptions {
   autoload?: boolean
 }
 
-export interface IAglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends IAglynModuleModel<O>, AglynLoadableObserver<IAglynAppController> {
+export interface IAglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
+  extends IAglynModuleModel<O> {
+
   readonly extensionName: string
   readonly lifecycleHistory: AglynLifecycleFlag[]
   lifecycle: AglynLifecycleFlag
-
   getExtensionName(): ExtensionUUN
   getContext(): T
   setContext(value: T): this
 }
 
-export interface AglynExtensionT<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModelT<O> {
-  readonly extensionName: string
+export interface AglynExtensionT<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
+  extends AglynModuleModelT<O> {
 
+  readonly extensionName: string
   new(app: IAglynAppController, options: O): IAglynExtension<T, O>
   getExtensionName(): ExtensionUUN
 }

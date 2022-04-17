@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type AglynAppEffectFlag} from '../constants/emitter'
+import {type AglynEventTriggerFlag} from '../constants/emitter'
 import {type AglynPlatform} from '../constants/platform'
 import {type AglynVersion} from '../constants/version'
 import {
@@ -77,7 +77,7 @@ export interface IAglynAppController<Options extends AglynAppOptions = AglynAppO
   getContextsController(): IAglynContextsController
   getCommandsController(): IAglynCommandsController
   getComponentsController(): IAglynComponentsController
-  effect(data: AglynEffectOptions<AglynAppEffectFlag>): this
+  effect(data: AglynEffectOptions<AglynEventTriggerFlag>): this
 }
 
 export interface AglynAppControllerT<Options extends AglynAppOptions = AglynAppOptions> extends AglynBaseModelT<Options> {
