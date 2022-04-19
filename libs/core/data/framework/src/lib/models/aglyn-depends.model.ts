@@ -56,16 +56,18 @@ const mixinHasInstance = (mixin) => {
   if (!Symbol.hasInstance) {
     return mixin
   }
-  mixin[Symbol.hasInstance] = function(o) {
-    const originalMixin = this[_originalMixin]
-    while (o != null) {
-      if (_hasOwnProperty(_mixinRef, o) && o[_mixinRef] === originalMixin) {
-        return true
+  Object.defineProperty(mixin, Symbol.hasInstance, {
+    value: function(o) {
+      const originalMixin = this[_originalMixin]
+      while (o != null) {
+        if (_hasOwnProperty(_mixinRef, o) && o[_mixinRef] === originalMixin) {
+          return true
+        }
+        o = Object.getPrototypeOf(o)
       }
-      o = Object.getPrototypeOf(o)
-    }
-    return false
-  }
+      return false
+    },
+  })
   return mixin
 }
 
