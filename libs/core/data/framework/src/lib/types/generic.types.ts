@@ -41,11 +41,11 @@ export interface AglynLifecycleObserver<T = any> {
   /**
    * @private
    */
-  _initialize(props?: T): void
+  __initialize__(props?: T): void
   /**
    * @private
    */
-  _destroy(props?: T): void
+  __destroy__(props?: T): void
 }
 
 export interface AglynLoadableObserver<T = any> {
@@ -60,11 +60,11 @@ export interface AglynLoadableObserver<T = any> {
   /**
    * @private
    */
-  _activate(props?: T): void
+  __activate__(props?: T): void
   /**
    * @private
    */
-  _deactivate(props?: T): void
+  __deactivate__(props?: T): void
 }
 
 export interface ModificationHistoryState<T> {

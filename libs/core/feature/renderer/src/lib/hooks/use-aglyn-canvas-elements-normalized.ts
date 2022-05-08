@@ -16,13 +16,12 @@
  */
 
 import {type AglynElementsList, getCanvasNormalizedElementsStore} from '@aglyn/core-data-framework'
-import {useStoreMap} from 'effector-react'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
 export function useAglynCanvasElementsNormalized(): AglynElementsList {
   const app = useAglynAppContext()
-  const store = getCanvasNormalizedElementsStore(app)
-  return useStoreMap(store, (store) => store)
+  return useSubscribable(getCanvasNormalizedElementsStore(app))
 }
 export default useAglynCanvasElementsNormalized

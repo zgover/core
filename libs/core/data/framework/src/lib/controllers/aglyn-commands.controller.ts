@@ -39,12 +39,12 @@ import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
 
 
 const TAG = 'AglynCommands'
-const NS = 'aglyn.core.data.framework.module.commands'
+const NS = 'com.aglyn.core.data.framework.controller.commands'
 
 export class AglynCommandsController extends AglynModuleModel<AglynCommandsControllerOptions> implements IAglynCommandsController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   #commander: AglynCommander = EmitterFn()
   #resolvers: Map<CommandUId, AglynCommandResolver> = new Map()

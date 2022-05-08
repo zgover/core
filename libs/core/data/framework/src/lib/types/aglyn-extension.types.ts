@@ -32,7 +32,7 @@ export interface AglynExtensionOptions extends AglynModuleModelOptions {
 export interface IAglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
   extends IAglynModuleModel<O> {
 
-  readonly extensionName: string
+  readonly extensionName: ExtensionUUN
   readonly lifecycleHistory: AglynLifecycleFlag[]
   lifecycle: AglynLifecycleFlag
   getExtensionName(): ExtensionUUN
@@ -43,7 +43,7 @@ export interface IAglynExtension<T = any, O extends AglynExtensionOptions = Agly
 export interface AglynExtensionT<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
   extends AglynModuleModelT<O> {
 
-  readonly extensionName: string
+  readonly extensionName: ExtensionUUN
   new(app: IAglynAppController, options: O): IAglynExtension<T, O>
   getExtensionName(): ExtensionUUN
 }

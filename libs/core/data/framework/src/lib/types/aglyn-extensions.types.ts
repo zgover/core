@@ -23,13 +23,13 @@ import {
   type ExtensionRegisterPayload,
   type ExtensionUnloadPayload,
 } from '../constants/emitter'
+import {type IAglynAppController} from './aglyn-app.types'
 import {type AglynExtensionT, type IAglynExtension} from './aglyn-extension.types'
 import {
   type AglynModuleModelOptions,
   type AglynModuleModelT,
   type IAglynModuleModel,
 } from './aglyn-module.types'
-import {type IAglynAppController} from './aglyn-app.types'
 
 
 export type ExtensionUUN = string
@@ -37,21 +37,23 @@ export type AglynExtensionLoader = () => Promise<AglynExtensionT>
 export type AglynExtensionMap = Map<ExtensionUUN, IAglynExtension>
 
 export interface AglynExtensionsControllerOptions extends AglynModuleModelOptions {
-  initialExtensions?: ExtensionHandleLoaderPayload[]
+  defaults: {
+    extensions?: ExtensionHandleLoaderPayload[]
+  }
 }
 
 export interface IAglynExtensionsController extends IAglynModuleModel<AglynExtensionsControllerOptions> {
-  extensions: IAglynExtension[]
+  readonly extensions: Readonly<IAglynExtension[]>
 
   handleLoader(payload: ExtensionHandleLoaderPayload): IAglynExtension
   registerExtension(payload: ExtensionRegisterPayload): this
   initializeExtension(payload: ExtensionInitializePayload): this
-  loadExtension(payload: ExtensionLoadPayload): this
-  unloadExtension(payload: ExtensionUnloadPayload): this
+  activateExtension(payload: ExtensionLoadPayload): this
+  deactivateExtension(payload: ExtensionUnloadPayload): this
   destroyExtension(payload: ExtensionDestroyPayload): this
   getExtensionByName(name: string): IAglynExtension
-  getAllExtensions(): IAglynExtension[]
-  unloadAllExtensions(): this
+  getAllExtensions(): Readonly<IAglynExtension[]>
+  deactivateAllExtensions(): this
   destroyAllExtensions(): this
 }
 

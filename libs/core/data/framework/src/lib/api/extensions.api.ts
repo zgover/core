@@ -60,12 +60,12 @@ export function loadExtension(
   data: AglynEventTriggerPayload[AglynEventTriggerFlag.EXTENSION_ACTIVATE],
 ) {
   const extensionController = _getExtensionController(app)
-  extensionController.loadExtension(data)
+  extensionController.activateExtension(data)
 }
 export function unloadExtension(
   app: IAglynAppController,
   data: AglynEventTriggerPayload[AglynEventTriggerFlag.EXTENSION_DEACTIVATE],
 ) {
   const extensionController = _getExtensionController(app)
-  extensionController.loadExtension(data)
+  extensionController.activateExtension(data)
 }

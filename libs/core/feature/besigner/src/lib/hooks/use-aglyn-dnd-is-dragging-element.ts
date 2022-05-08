@@ -18,19 +18,16 @@
 import type {IBesignerAppController} from '@aglyn/core-data-besigner'
 import type {ElementId} from '@aglyn/core-data-framework'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {useEffect, useState} from 'react'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 
 
 export function useAglynDndIsDraggingElement($id: ElementId): boolean {
   const app = useAglynAppContext() as IBesignerAppController
-  const [value, setValue] = useState(false)
-  useEffect(() => {
-    const subscription = app.besigner?.__store__.dnd?.subscribe((dnd) => {
-      setValue($id && dnd.active?.$id === $id)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [$id, app])
+  const value = useSubscribable<boolean>(
+    app.besigner?.dnd, false,
+    (dnd) => $id && dnd.active?.$id === $id,
+    [$id],
+  )
 
   return value
 }

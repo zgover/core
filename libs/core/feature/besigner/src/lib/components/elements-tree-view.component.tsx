@@ -22,9 +22,13 @@ import {
   useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/core-feature-renderer'
-import {ICON_VARIANT_ENTITY_BLOCK} from '@aglyn/shared-data-enums'
+import {
+  ICON_VARIANT_COLLAPSABLE_CLOSE,
+  ICON_VARIANT_COLLAPSABLE_OPEN,
+  ICON_VARIANT_ENTITY_BLOCK,
+} from '@aglyn/shared-data-enums'
 import {alpha, styled} from '@aglyn/shared-feature-themes'
-import {mdiChevronDown, mdiChevronRight, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
 import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeItem'
 import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
@@ -76,8 +80,8 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
       <TreeItem
         ref={ref}
         nodeId={$id}
-        collapseIcon={<MdiIcon path={mdiChevronDown.path} />}
-        expandIcon={<MdiIcon path={mdiChevronRight.path} />}
+        collapseIcon={<MdiIcon path={ICON_VARIANT_COLLAPSABLE_CLOSE.path} />}
+        expandIcon={<MdiIcon path={ICON_VARIANT_COLLAPSABLE_OPEN.path} />}
         onMouseOver={handleOnMouseOver}
         label={
           <>

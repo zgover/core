@@ -15,30 +15,26 @@
  * limitations under the License.
  */
 
-import type {ContextStore, IAglynAppController} from '@aglyn/core-data-framework'
+import type {IAglynAppController} from '@aglyn/core-data-framework'
+import {BehaviorSubject} from 'rxjs'
 import {_INTERNAL_BESIGNERS_} from '../constants/_internal'
 import type {
   BesignerClosePanelPayload,
   BesignerGetStorePayload,
   BesignerOpenPanelPayload,
   BesignerSetCanvasHoveredPayload,
-  BesignerSetCanvasSelectedPayload,
-  BesignerSetDndPayload,
-  BesignerSetFlagPayload,
-  BesignerSetPanelsPayload,
-} from '../constants/emitter'
-import {
   BesignerSetCanvasItemPayload,
   BesignerSetCanvasPayload,
+  BesignerSetCanvasSelectedPayload,
   BesignerSetDndItemPayload,
+  BesignerSetDndPayload,
+  BesignerSetFlagPayload,
   BesignerSetFlagsPayload,
   BesignerSetPanelPayload,
+  BesignerSetPanelsPayload,
   BesignerTogglePanelPayload,
 } from '../constants/emitter'
-import type {
-  BesignerContextStores,
-  IAglynBesignerController,
-} from '../controllers/aglyn-besigner.types'
+import type {BesignerContext, IAglynBesignerController} from '../controllers/aglyn-besigner.types'
 import type {IBesignerAppController} from '../controllers/besigner-app.types'
 import {_validateBesignerAppArg} from './app.api'
 
@@ -48,10 +44,10 @@ export function _getBesignerController(app: IAglynAppController): IAglynBesigner
   return _INTERNAL_BESIGNERS_.get(app.getName())
 }
 
-export function getBesignerStore<K extends keyof BesignerContextStores>(
+export function getBesignerStore<K extends keyof BesignerContext>(
   app: IAglynAppController,
   payload: BesignerGetStorePayload<K>,
-): ContextStore<BesignerContextStores[K]> {
+): BehaviorSubject<BesignerContext[K]> {
   const besignerController = _getBesignerController(app as IBesignerAppController)
   return besignerController.getStore(payload)
 }

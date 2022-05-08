@@ -19,7 +19,7 @@
 import type {IBesignerAppController} from '@aglyn/core-data-besigner'
 import type {ElementId} from '@aglyn/core-data-framework'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {useEffect, useState} from 'react'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 
 
 export type AglynDndElementStatus = [
@@ -29,17 +29,14 @@ export type AglynDndElementStatus = [
 
 export function useAglynDndElementStatus($id: ElementId): AglynDndElementStatus {
   const app = useAglynAppContext() as IBesignerAppController
-  const [value, setValue] = useState<AglynDndElementStatus>([false, false])
-  useEffect(() => {
-    const subscription = app.besigner?.__store__.dnd?.subscribe((dnd) => {
-      setValue([
-        Boolean($id && dnd.active?.$id === $id),
-        Boolean($id && dnd.over?.$id === $id),
-      ])
-    })
-
-    return () => subscription.unsubscribe()
-  }, [$id, app])
+  const value = useSubscribable<AglynDndElementStatus>(
+    app.besigner?.dnd, [false, false],
+    (dnd) => [
+      Boolean($id && dnd.active?.$id === $id),
+      Boolean($id && dnd.over?.$id === $id),
+    ],
+    [$id],
+  )
 
   return value
 }

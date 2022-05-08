@@ -4,9 +4,14 @@
     {
       "tagName": "@license",
       "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@ignore",
+      "syntaxKind": "modifier"
     }
   ],
   "supportForTags": {
-    "@license": true
+    "@license": true,
+    "@ignore": true
   }
 }

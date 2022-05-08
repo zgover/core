@@ -54,12 +54,12 @@ import {isAglynComponentElement} from '../util/aglyn-is'
 
 
 const TAG = 'AglynComponents'
-const NS = 'aglyn.core.data.framework.module.components'
+const NS = 'com.aglyn.core.data.framework.controller.components'
 
 export class AglynComponentsController extends AglynModuleModel<AglynComponentsControllerOptions> implements IAglynComponentsController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   #context: ComponentsRegistryContext = {
     bundles: new Map(),

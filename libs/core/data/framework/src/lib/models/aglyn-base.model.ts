@@ -15,21 +15,27 @@
  * limitations under the License.
  */
 
+import {_isArr} from '@aglyn/shared-util-guards'
 import {Timestamp} from '@aglyn/shared-util-timestamp'
 import {getStaticField} from '@aglyn/shared-util-tools'
-import {AGLYN_EMITTER, type AglynEmitter, AglynEventStateFlag} from '../constants/emitter'
+import {
+  AGLYN_EMITTER,
+  type AglynEmitter,
+  type AglynEventPayloads,
+  AglynEventStateFlag,
+} from '../constants/emitter'
 import {AGLYN_ERROR, type AglynErrorFactory} from '../constants/error'
 import {AGLYN_LOGGER, type AglynLogger} from '../constants/logger'
-import {type AglynBaseModelOptions, type IAglynBaseModel} from '../types/aglyn-base.types'
+import type {AglynBaseModelOptions, IAglynBaseModel} from '../types/aglyn-base.types'
 
 
 const TAG = 'AglynBaseModel'
-const NS = 'aglyn.core.data.framework.model.base'
+const NS = 'com.aglyn.core.data.framework.model.base'
 
 export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> implements IAglynBaseModel<O> {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   readonly #options: O = null
   readonly #createdAt: Timestamp
@@ -62,49 +68,89 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
     this.#logger = !logLevel ? logger : logger.setLogLevel(logLevel)
   }
 
-  private handleEvent(flag: AglynEventStateFlag): this {
-    this.logger.debug(flag, {namespace: this.namespace})
-    this.emitter.emit(flag, {namespace: this.namespace})
+  #doEvent<F extends AglynEventStateFlag>(flag: F, payload?: AglynEventPayloads[F]): this {
+    this.logger.debug(flag, {
+      __namespace__: this.namespace,
+      __timestamp__: Timestamp.now().valueOf(),
+      ...payload || {namespace: this.namespace},
+    })
+    this.emitter.emit(flag, payload || {namespace: this.namespace})
     return this
   }
+  #handleEvent<F1 extends AglynEventStateFlag, F2 extends AglynEventStateFlag>(
+    flags: [before: F1, after: F2],
+    payload: undefined | AglynEventPayloads[F1 | F2] | [
+      before: AglynEventPayloads[F1],
+      after: AglynEventPayloads[F2]
+    ],
+    handler: () => AglynEventPayloads[F2] | void,
+  ): this {
+    const [beforeFlag, afterFlag] = flags
+    const beforePayload = _isArr(payload) ? payload[0] : payload
+    this.#doEvent(beforeFlag, beforePayload)
+    const res = handler()
+    const afterPayload = res || (_isArr(payload) ? payload[1] || payload[0] : payload)
+    this.#doEvent(afterFlag, afterPayload)
+    return this
+  }
+  protected handleEvent<F1 extends AglynEventStateFlag, F2 extends AglynEventStateFlag>(
+    flags: [before: F1, after: F2],
+    payload: undefined | AglynEventPayloads[F1 | F2] | [
+      before: AglynEventPayloads[F1],
+      after: AglynEventPayloads[F2]
+    ],
+    handler: () => AglynEventPayloads[F2] | void,
+  ): this {
+    this.#handleEvent(flags, payload, handler)
+    return this
+  }
+
 
   public onInitialize(): this {
     return this
   }
-  public _initialize(props?: never): this {
-    this.handleEvent(AglynEventStateFlag.MODULE_INITIALIZING)
-    this.onInitialize()
-    this.handleEvent(AglynEventStateFlag.MODULE_INITIALIZED)
+  /** @ignore */
+  public __initialize__(props?: never): this {
+    this.#handleEvent([
+      AglynEventStateFlag.MODULE_INITIALIZING,
+      AglynEventStateFlag.MODULE_INITIALIZED,
+    ], undefined, () => {this.onInitialize()})
     return this
   }
 
   public onActivate(): this {
     return this
   }
-  public _activate(props?: never): this {
-    this.handleEvent(AglynEventStateFlag.MODULE_ACTIVATING)
-    this.onActivate()
-    this.handleEvent(AglynEventStateFlag.MODULE_ACTIVATED)
+  /** @ignore */
+  public __activate__(props?: never): this {
+    this.#handleEvent([
+      AglynEventStateFlag.MODULE_ACTIVATING,
+      AglynEventStateFlag.MODULE_ACTIVATED,
+    ], undefined, () => {this.onActivate()})
     return this
   }
 
   public onDeactivate(): this {
     return this
   }
-  public _deactivate(props?: never): this {
-    this.handleEvent(AglynEventStateFlag.MODULE_DEACTIVATING)
-    this.onDeactivate()
-    this.handleEvent(AglynEventStateFlag.MODULE_DEACTIVATED)
+  /** @ignore */
+  public __deactivate__(props?: never): this {
+    this.#handleEvent([
+      AglynEventStateFlag.MODULE_DEACTIVATING,
+      AglynEventStateFlag.MODULE_DEACTIVATED,
+    ], undefined, () => {this.onDeactivate()})
     return this
   }
 
   public onDestroy(): this {
     return this
   }
-  public _destroy(props?: never): this {
-    this.handleEvent(AglynEventStateFlag.MODULE_DESTROYING)
-    this.onDestroy()
-    this.handleEvent(AglynEventStateFlag.MODULE_DESTROYED)
+  /** @ignore */
+  public __destroy__(props?: never): this {
+    this.#handleEvent([
+      AglynEventStateFlag.MODULE_DESTROYING,
+      AglynEventStateFlag.MODULE_DESTROYED,
+    ], undefined, () => {this.onDestroy()})
     return this
   }
 

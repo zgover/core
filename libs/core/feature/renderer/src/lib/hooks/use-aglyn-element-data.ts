@@ -21,7 +21,7 @@ import {
   getCanvasDenormalizedElementsStore,
 } from '@aglyn/core-data-framework'
 import {type AnyProps, type Conditional, type EmptyObj} from '@aglyn/shared-data-types'
-import {useStoreMap} from 'effector-react'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
@@ -48,14 +48,13 @@ export function useAglynElementData<P = EmptyObj,
 ): UseAglynElementData<P, K> {
 
   const app = useAglynAppContext()
-  const store = getCanvasDenormalizedElementsStore(app)
-  return useStoreMap({
-    store,
-    keys: [$id, key],
-    fn: (store, [$id, key]) => {
+  return useSubscribable(
+    getCanvasDenormalizedElementsStore(app), undefined,
+    (store) => {
       if (!key) {return store?.[$id] || null}
       return store?.[$id]?.[key] || null
     },
-  }) as UseAglynElementData<P, K>
+    [$id, key],
+  ) as UseAglynElementData<P, K>
 }
 export default useAglynElementData

@@ -21,7 +21,7 @@ import {
   getCanvasDenormalizedElementsStore,
   getComponentElementHierarchy,
 } from '@aglyn/core-data-framework'
-import {useStoreMap} from 'effector-react'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
@@ -29,12 +29,10 @@ export function useAglynCanvasElementHierarchy<T extends ElementId>(
   $id: T,
 ): AglynElementHierarchy<T> {
   const app = useAglynAppContext()
-  const store = getCanvasDenormalizedElementsStore(app)
-
-  return useStoreMap({
-    store,
-    keys: [$id],
-    fn: (state, [$id]) => getComponentElementHierarchy($id, state),
-  }) as AglynElementHierarchy<T>
+  return useSubscribable(
+    getCanvasDenormalizedElementsStore(app), [] as any,
+    (state) => getComponentElementHierarchy($id, state),
+    [$id],
+  ) as AglynElementHierarchy<T>
 }
 export default useAglynCanvasElementHierarchy

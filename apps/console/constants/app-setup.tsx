@@ -87,7 +87,9 @@ try {
       logLevel: 'debug',
       modulesOptions: {
         canvas: {
-          initialElements: samplePageData,
+          defaults: {
+            present: samplePageData,
+          },
         },
       },
     })

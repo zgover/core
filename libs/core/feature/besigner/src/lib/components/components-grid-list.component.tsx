@@ -71,7 +71,7 @@ const ComponentsGridListComponent = forwardRef<any, ComponentsGridListProps>(
         label={item.label}
         onActionClick={handleItemClick}
       >
-        {!icon?.path && icon ? icon : (
+        {!icon?.path && icon ? icon as any : (
           <MdiIcon
             color="quaternary"
             {...icon}

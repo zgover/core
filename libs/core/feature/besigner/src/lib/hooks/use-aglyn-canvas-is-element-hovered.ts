@@ -16,21 +16,19 @@
  */
 
 import type {IBesignerAppController} from '@aglyn/core-data-besigner'
+import {BesignerCanvasHoveredElement} from '@aglyn/core-data-besigner'
 import type {ElementId} from '@aglyn/core-data-framework'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {useEffect, useState} from 'react'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 
 
 export function useAglynCanvasElementIsHovered($id: ElementId): boolean {
   const app = useAglynAppContext() as IBesignerAppController
-  const [value, setValue] = useState(false)
-  useEffect(() => {
-    const subscription = app.besigner?.__store__.canvas?.subscribe((value) => {
-      setValue($id && value?.hovered?.$id === $id)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [$id, app])
+  const value = useSubscribable<BesignerCanvasHoveredElement>(
+    app.besigner?.canvas, false,
+    (canvas) => $id && canvas?.hovered?.$id === $id,
+    [$id],
+  )
 
   return value
 }

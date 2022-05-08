@@ -55,7 +55,7 @@ export function getCanvasDenormalizedElementsStore(
   payload?: CanvasGetElementsDenormalizedPayload,
 ) {
   const canvasController = _getCanvasController(app)
-  return canvasController.getDenormalizedElementsStore(payload)
+  return canvasController.getDenormalizedElements(payload)
 }
 
 export function getCanvasNormalizedElementsStore(
@@ -63,7 +63,7 @@ export function getCanvasNormalizedElementsStore(
   payload?: CanvasGetElementsNormalizedPayload,
 ) {
   const canvasController = _getCanvasController(app)
-  return canvasController.getNormalizedElementsStore(payload)
+  return canvasController.getNormalizedElements(payload)
 }
 
 export function getCanvasApiEvents(
@@ -71,7 +71,7 @@ export function getCanvasApiEvents(
   payload?: CanvasGetApiEventsPayload,
 ) {
   const canvasController = _getCanvasController(app)
-  return canvasController.getApiEvents(payload)
+  return canvasController.getApi(payload)
 }
 
 

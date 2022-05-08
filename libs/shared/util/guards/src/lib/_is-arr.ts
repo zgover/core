@@ -17,11 +17,7 @@
 
 /**
  * Shortcut for Array.isArray
- *
- * @export
- * @param {*} val
- * @returns {val is any[]}
  */
-export function _isArr<T>(val: unknown): val is T[] {
+export function _isArr(val: any): val is any[] {
   return Array.isArray(val)
 }

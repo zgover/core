@@ -15,14 +15,20 @@
  * limitations under the License.
  */
 
+import type {BehaviorSubject, Observable} from 'rxjs'
 import type {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,
   CanvasDuplicateElementPayload,
-  CanvasGetApiEventsPayload,
   CanvasGetElementsDenormalizedPayload,
+  CanvasGetElementsFuturePayload,
   CanvasGetElementsNormalizedPayload,
+  CanvasGetElementsPastPayload,
+  CanvasGetElementsPresentPayload,
+  CanvasGetStatePayload,
+  CanvasGetStorePayload,
   CanvasMoveElementPayload,
+  CanvasNextStatePayload,
   CanvasRedoPayload,
   CanvasSetElementPayload,
   CanvasSetElementsPayload,
@@ -30,12 +36,8 @@ import type {
   CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import type {IAglynAppController} from './aglyn-app.types'
-import type {ContextDomain, ContextEvent, ContextStore} from './aglyn-contexts.types'
-import type {
-  AglynElementNormalized,
-  AglynElementsById,
-  AglynElementsList,
-} from './aglyn-elements.types'
+import type {ContextEvent} from './aglyn-contexts.types'
+import type {AglynElementsDenormalized, AglynElementsNormalized} from './aglyn-elements.types'
 import type {
   AglynModuleModelOptions,
   AglynModuleModelT,
@@ -43,10 +45,11 @@ import type {
 } from './aglyn-module.types'
 
 
-export type ElementsDataStore = {
-  future: AglynElementsById[]
-  past: AglynElementsById[]
-  present: AglynElementsById
+export type CanvasContext = {
+  future: AglynElementsDenormalized[]
+  past: AglynElementsDenormalized[]
+  present: AglynElementsDenormalized
+  readonly normalized?: AglynElementsNormalized
 }
 
 export interface ElementsDataStoreApi {
@@ -62,23 +65,45 @@ export interface ElementsDataStoreApi {
 }
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
-  initialElements: AglynElementNormalized[]
+  defaults?: {
+    present?: AglynElementsNormalized
+  }
 }
 
 export interface IAglynCanvasController extends IAglynModuleModel<AglynCanvasControllerOptions> {
-  readonly context: ContextStore<ElementsDataStore>
-  readonly denormalizedElementsStore: ContextStore<AglynElementsById>
-  readonly domain: ContextDomain
-  readonly events: ElementsDataStoreApi
-  readonly normalizedElementsStore: ContextStore<AglynElementsList>
+  readonly __store__: {
+    [K in keyof CanvasContext]: K extends 'normalized'
+      ? Observable<CanvasContext[K]>
+      : BehaviorSubject<CanvasContext[K]>
+  }
+  readonly pastElements: this['__store__']['past']
+  readonly futureElements: this['__store__']['future']
+  readonly presentElements: this['__store__']['present']
+  readonly denormalizedElements: this['__store__']['present']
+  readonly normalizedElements: this['__store__']['normalized']
 
-  getApiEvents(payload?: CanvasGetApiEventsPayload): ElementsDataStoreApi
-  getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynElementsById>
-  getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynElementsList>
-  getStore(payload?: CanvasGetApiEventsPayload): ContextStore<ElementsDataStore>
+  getStore<K extends keyof CanvasContext>(payload: CanvasGetStorePayload<K>): this['__store__'][K]
+  getState(payload?: CanvasGetStatePayload): CanvasContext
+  nextState(payload: CanvasNextStatePayload): this
 
-  redo(payload?: CanvasRedoPayload): this
+  getPastElements(payload?: CanvasGetElementsPastPayload): this['__store__']['past']
+  getFutureElements(payload?: CanvasGetElementsFuturePayload): this['__store__']['future']
+  getPresentElements(payload?: CanvasGetElementsPresentPayload): this['__store__']['present']
+  getDenormalizedElements(payload?: CanvasGetElementsDenormalizedPayload): this['__store__']['present']
+  getNormalizedElements(payload?: CanvasGetElementsNormalizedPayload): this['__store__']['normalized']
+  getApi(payload?: CanvasGetElementsNormalizedPayload): Pick<this,
+    'undo' |
+    'redo' |
+    'addElement' |
+    'deleteElement' |
+    'duplicateElement' |
+    'moveElement' |
+    'setElement' |
+    'setElements' |
+    'updateElement'>
+
   undo(payload?: CanvasUndoPayload): this
+  redo(payload?: CanvasRedoPayload): this
 
   addElement(payload: CanvasAddElementPayload): this
   deleteElement(payload: CanvasDeleteElementPayload): this

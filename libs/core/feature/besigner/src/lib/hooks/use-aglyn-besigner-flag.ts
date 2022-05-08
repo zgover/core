@@ -24,8 +24,9 @@ import {
   setBesignerFlag,
 } from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback} from 'react'
 
 
 export function useAglynBesignerFlag<K extends BesignerFlagKey>(
@@ -40,15 +41,12 @@ export function useAglynBesignerFlag<K extends BesignerFlagKey>(
   ) => void
 ] {
   const app = useAglynAppContext() as IBesignerAppController
-  const [value, setValue] = useState<BesignerFlagValue<K> | undefined>(undefined)
   const setFlag = useAglynBesignerSetFlag().bind(null, flag)
-
-  useEffect(() => {
-    const subscription = app.besigner?.__store__.flags?.subscribe((flags) => {
-      setValue(flags[flag])
-    })
-    return () => subscription.unsubscribe()
-  }, [app, flag])
+  const value = useSubscribable<BesignerFlagValue<K>>(
+    app.besigner?.flags, undefined,
+    (flags) => flags?.[flag],
+    [flag],
+  )
 
   return [value, setFlag]
 }

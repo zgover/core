@@ -27,16 +27,16 @@ import {AglynBaseModel} from './aglyn-base.model'
 
 
 const TAG = 'AglynModule'
-const NS = 'aglyn.core.data.framework.model.module'
+const NS = 'com.aglyn.core.data.framework.model.module'
 
 export abstract class AglynModuleModel<O extends AglynModuleModelOptions = AglynModuleModelOptions>
   extends AglynBaseModel<O>
   implements IAglynModuleModel<O> {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly [OF_TYPE]: number | symbol = MODULE_TYPE
-  public static readonly [OF_KIND]: number | symbol = undefined
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get [OF_TYPE](): number | symbol {return MODULE_TYPE}
+  public static get [OF_KIND](): number | symbol {return undefined}
+  public static get namespace(): string {return NS}
 
   public get [OF_TYPE](): number | symbol {return getStaticField(OF_TYPE, this)}
   public get [OF_KIND](): number | symbol {return getStaticField(OF_KIND, this)}

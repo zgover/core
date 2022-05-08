@@ -21,8 +21,6 @@ import type {
   AglynModuleModelT,
   BundleUId,
   ComponentId,
-  ContextDomain,
-  ContextStore,
   ElementId,
   IAglynAppController,
   IAglynModuleModel,
@@ -43,22 +41,20 @@ import type {
   BesignerGetStorePayload,
   BesignerOpenPanelPayload,
   BesignerSetCanvasHoveredPayload,
-  BesignerSetCanvasSelectedPayload,
-  BesignerSetDndPayload,
-  BesignerSetFlagPayload,
-  BesignerSetPanelsPayload,
-} from '../constants/emitter'
-import {
   BesignerSetCanvasItemPayload,
   BesignerSetCanvasPayload,
+  BesignerSetCanvasSelectedPayload,
   BesignerSetDndItemPayload,
+  BesignerSetDndPayload,
+  BesignerSetFlagPayload,
   BesignerSetFlagsPayload,
   BesignerSetPanelPayload,
+  BesignerSetPanelsPayload,
   BesignerTogglePanelPayload,
 } from '../constants/emitter'
 
 
-export type BesignerContextStores = {
+export type BesignerContext = {
   flags: {
     debug: boolean
     logLevel: LogLevelString
@@ -86,22 +82,22 @@ export type BesignerContextStores = {
     over?: BesignerDndElementBaseData<DndDropLinealTypeFlag>
   }
 }
-export type BesignerFlagsState = BesignerContextStores['flags']
+export type BesignerFlagsState = BesignerContext['flags']
 export type BesignerFlagKey = keyof BesignerFlagsState
 export type BesignerFlagValue<K extends BesignerFlagKey = BesignerFlagKey> = BesignerFlagsState[K]
-export type BesignerCanvasState = BesignerContextStores['canvas']
+export type BesignerCanvasState = BesignerContext['canvas']
 export type BesignerCanvasItemKey = keyof BesignerCanvasState
 export type BesignerCanvasItemValue<K extends BesignerCanvasItemKey = BesignerCanvasItemKey> = BesignerCanvasState[K]
 export type BesignerCanvasSelectedElement = BesignerCanvasItemValue<'selected'>
 export type BesignerCanvasHoveredElement = BesignerCanvasItemValue<'hovered'>
-export type BesignerPanelsState = BesignerContextStores['panels']
+export type BesignerPanelsState = BesignerContext['panels']
 export type BesignerPanelKey = keyof BesignerPanelsState
 export type BesignerPanelValue<K extends BesignerPanelKey = BesignerPanelKey> = BesignerPanelsState[K]
-export type BesignerDndState = BesignerContextStores['dnd']
+export type BesignerDndState = BesignerContext['dnd']
 export type BesignerDndItemKey = keyof BesignerDndState
 export type BesignerDndItemValue<K extends BesignerDndItemKey = BesignerDndItemKey> = BesignerDndState[K]
-export type BesignerDndElementActive = BesignerContextStores['dnd']['active']
-export type BesignerDndElementOver = BesignerContextStores['dnd']['over']
+export type BesignerDndElementActive = BesignerContext['dnd']['active']
+export type BesignerDndElementOver = BesignerContext['dnd']['over']
 export type BesignerPanelItem = {
   id?: BesignerPanelViewFlag
   size?: number | string
@@ -116,38 +112,20 @@ export type BesignerDndElementBaseData<T extends DndDragSourceTypeFlag | DndDrop
   hierarchy?: AglynComponentHierarchy
 }
 
-export type BesignerNestedStores<K extends keyof BesignerContextStores = keyof BesignerContextStores> = {
-  [P in K]: ContextStore<BesignerContextStores[P]>
-}
-
-export interface BesignerContext {
-  _domain: ContextDomain
-  _store: ContextStore<BesignerContextStores>
-  stores: BesignerNestedStores
-  events: any
-}
-
 export interface AglynBesignerControllerOptions extends AglynModuleModelOptions {
-  defaults?: Partial<BesignerContextStores>
+  defaults?: Partial<BesignerContext>
 }
 
 export interface IAglynBesignerController extends IAglynModuleModel<AglynBesignerControllerOptions> {
   readonly __store__: {
-    canvas: BehaviorSubject<BesignerCanvasState>,
-    dnd: BehaviorSubject<BesignerDndState>,
-    flags: BehaviorSubject<BesignerFlagsState>,
-    panels: BehaviorSubject<BesignerPanelsState>,
+    [K in keyof BesignerContext]: BehaviorSubject<BesignerContext[K]>
   }
-  readonly _domain: ContextDomain
-  readonly _store: ContextStore<BesignerContextStores>
-  readonly canvas: BehaviorSubject<BesignerCanvasState>
-  readonly dnd: BehaviorSubject<BesignerDndState>
-  readonly events: any
-  readonly flags: BehaviorSubject<BesignerFlagsState>
-  readonly panels: BehaviorSubject<BesignerPanelsState>
-  readonly stores: BesignerNestedStores
+  readonly canvas: this['__store__']['canvas']
+  readonly dnd: this['__store__']['dnd']
+  readonly flags: this['__store__']['flags']
+  readonly panels: this['__store__']['panels']
 
-  getStore<K extends keyof BesignerContextStores>(payload: BesignerGetStorePayload<K>): ContextStore<BesignerContextStores[K]>
+  getStore<K extends keyof BesignerContext>(payload: BesignerGetStorePayload<K>): BehaviorSubject<BesignerContext[K]>
 
   closePanel(payload: BesignerClosePanelPayload): this
   openPanel(payload: BesignerOpenPanelPayload): this

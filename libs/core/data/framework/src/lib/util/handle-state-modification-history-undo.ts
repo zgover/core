@@ -16,7 +16,7 @@
  */
 
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
-import {type ModificationHistoryState} from '../types/generic.types'
+import type {ModificationHistoryState} from '../types/generic.types'
 
 
 export const handleUndoEvent = <S>(state: ModificationHistoryState<S>) => {

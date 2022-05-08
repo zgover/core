@@ -18,17 +18,17 @@
 import {_hasOwnProperty} from '@aglyn/shared-util-guards'
 import {arrayMoveAtIndex, arrayPushAtIndex, arrayRemoveItem, copy} from '@aglyn/shared-util-tools'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
-import {
-  type CanvasAddElementPayload,
-  type CanvasDeleteElementPayload,
-  type CanvasDuplicateElementPayload,
-  type CanvasMoveElementPayload,
-  type CanvasSetElementPayload,
-  type CanvasSetElementsPayload,
-  type CanvasUpdateElementPayload,
+import type {
+  CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
+  CanvasMoveElementPayload,
+  CanvasSetElementPayload,
+  CanvasSetElementsPayload,
+  CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {type ElementsDataStore} from '../types/aglyn-canvas.types'
-import {type AglynElementsById, type ElementId} from '../types/aglyn-elements.types'
+import type {CanvasContext} from '../types/aglyn-canvas.types'
+import type {AglynElementsDenormalized, ElementId} from '../types/aglyn-elements.types'
 import {createComponentElementDataCopy} from './create-component-element-data-copy'
 import {deleteComponentElement} from './delete-component-element'
 import {denormalizeComponentElementData} from './denormalize-component-element-data'
@@ -36,12 +36,12 @@ import {getComponentElementHierarchy} from './get-component-element-hierarchy'
 import {handleStateModificationHistoryChange} from './handle-state-modification-history-change'
 
 
-type CanvasApiEventHandler<S extends ElementsDataStore, P> = (
-  state: ElementsDataStore['present'],
+type CanvasApiEventHandler<S extends CanvasContext, P> = (
+  state: CanvasContext['present'],
   payload: P,
-) => ElementsDataStore['present']
+) => CanvasContext['present']
 
-export const handleCanvasApiChangeEvent = <S extends ElementsDataStore, P>(
+export const handleCanvasApiChangeEvent = <S extends CanvasContext, P>(
   fn: CanvasApiEventHandler<S, P>,
 ) => (
   state: S, payload: P,
@@ -51,7 +51,7 @@ export const handleCanvasApiChangeEvent = <S extends ElementsDataStore, P>(
 
 
 export const handleCanvasSetElements = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasSetElementsPayload,
 ) => {
 
@@ -59,7 +59,7 @@ export const handleCanvasSetElements = (
   return elements || {}
 }
 export const handleCanvasAddElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasAddElementPayload,
 ) => {
 
@@ -70,7 +70,8 @@ export const handleCanvasAddElement = (
 
   if (_hasOwnProperty(payload.parentId, state)) {
     parentId = payload.parentId
-  } else {
+  }
+  else {
     console.error('Element must have a valid parent, falling back to root')
     parentId = CANVAS_ROOT_ELEMENT_ID
   }
@@ -95,7 +96,7 @@ export const handleCanvasAddElement = (
 
 
 export const handleCanvasUpdateElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasUpdateElementPayload,
 ) => {
 
@@ -107,12 +108,12 @@ export const handleCanvasUpdateElement = (
       ...state[element.$id],
       ...element,
     },
-  } as ElementsDataStore['present']
+  } as CanvasContext['present']
 }
 
 
 export const handleCanvasSetElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasSetElementPayload,
 ) => {
 
@@ -122,12 +123,12 @@ export const handleCanvasSetElement = (
     [element.$id]: {
       ...element,
     },
-  } as ElementsDataStore['present']
+  } as CanvasContext['present']
 }
 
 
 export const handleCanvasMoveElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasMoveElementPayload,
 ) => {
 
@@ -192,7 +193,7 @@ export const handleCanvasMoveElement = (
 
 
 export const handleCanvasDuplicateElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasDuplicateElementPayload,
 ) => {
 
@@ -208,7 +209,7 @@ export const handleCanvasDuplicateElement = (
   })
 }
 export const handleCanvasDeleteElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasDeleteElementPayload,
 ) => {
 

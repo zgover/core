@@ -23,12 +23,12 @@ import type {BesignerAppOptions, IBesignerAppController} from './besigner-app.ty
 
 
 const TAG = 'BesignerApp'
-const NS = 'aglyn.core.data.besigner.app'
+const NS = 'com.aglyn.core.data.besigner.controller.app'
 
 export class BesignerAppController extends AglynAppController<BesignerAppOptions> implements IBesignerAppController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   #besignerController: IAglynBesignerController = null
 

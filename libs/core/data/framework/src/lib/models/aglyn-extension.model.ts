@@ -26,17 +26,16 @@ import {AglynModuleModel} from './aglyn-module.model'
 
 
 const TAG = 'AglynExtension'
-const NS = 'aglyn.core.data.framework.model.extension'
+const NS = 'com.aglyn.core.data.framework.model.extension'
 
 export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
   extends AglynModuleModel<O>
   implements IAglynExtension<T, O> {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly [OF_KIND]: number | symbol = EXTENSION_TYPE
-  public static readonly extensionName: string = 'unknown'
-
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get [OF_KIND](): number | symbol {return EXTENSION_TYPE}
   public static get namespace(): string {return `${NS}::${this.extensionName}`}
+  public static get extensionName(): string {return 'unknown'}
 
   #context?: T = null
   #lifecycle?: AglynLifecycleFlag[] = [AglynLifecycleFlag.UNREGISTERED]

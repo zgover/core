@@ -18,57 +18,61 @@
 import {arraySafe} from '@aglyn/shared-util-tools'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import {
+  type AglynElementDenormalized,
   type AglynElementNormalized,
-  type AglynElementsById,
-  type AglynElementsList,
+  type AglynElementsDenormalized,
+  type AglynElementsNormalized,
   type ElementId,
 } from '../types/aglyn-elements.types'
 
 
 const denormalizeData = (
   element: AglynElementNormalized,
-  parentId: ElementId,
-  flatMap: AglynElementsById = {},
-): AglynElementsById => {
-  const {elements, parentId: pidEl, ...rest} = element
-  const pid = parentId || pidEl || CANVAS_ROOT_ELEMENT_ID
-  flatMap[rest.$id] = {
-    ...rest,
-    parentId: pid,
-    elements: []
+  parent?: ElementId,
+  accumulator: AglynElementsDenormalized = {},
+): AglynElementsDenormalized => {
+  if (element && element?.$id) {
+    updateElementMap(parent || element.parentId)
   }
-  flatMap[pid] = {
-    ...flatMap[pid],
-    elements: [...arraySafe(flatMap[pid]?.elements), rest.$id],
+  return accumulator
+
+  function updateElementMap(parentId: ElementId) {
+    const el = element as unknown as AglynElementDenormalized
+    const childElements = [...arraySafe(el.elements)]
+    accumulator[el.$id] = el
+    el.parentId = parentId || CANVAS_ROOT_ELEMENT_ID
+    el.elements = childElements.map((child) => {
+      denormalizeData(child, el.$id, accumulator)
+      return child?.$id
+    })
   }
-  elements?.forEach((child) => {
-    denormalizeData(child, rest.$id, flatMap)
-  })
-  return flatMap
 }
 
 export function denormalizeComponentElementData(
   element: AglynElementNormalized,
   parentId?: ElementId,
-): AglynElementsById
+): AglynElementsDenormalized
 export function denormalizeComponentElementData(
-  elements: AglynElementsList,
+  elements: AglynElementsNormalized,
   parentId?: ElementId,
-): AglynElementsById
+): AglynElementsDenormalized
 export function denormalizeComponentElementData(
-  elements: AglynElementNormalized | AglynElementsList,
+  elements: AglynElementNormalized | AglynElementsNormalized,
   parentId?: ElementId,
-): AglynElementsById {
-  const elemData: AglynElementsById = {}
+): AglynElementsDenormalized {
+  const elemData: AglynElementsDenormalized = {}
 
   if (elements) {
     try {
-      arraySafe(elements, [elements]).reduce(
+      arraySafe(
+        elements as AglynElementsNormalized,
+        [elements] as [AglynElementNormalized],
+      ).reduce(
         (accumulator, element) => ({
           ...accumulator,
-          ...denormalizeData(element, parentId, elemData)
+          ...denormalizeData(element, parentId, elemData),
         }),
-        elemData
+        elemData,
       )
     }
     catch (error) {

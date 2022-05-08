@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {
   $pageTitle,
   type PageTitleObject,
@@ -26,7 +27,6 @@ import {
 } from '@aglyn/shared-util-dom'
 import Head from 'next/head'
 import {createContext, type ReactNode, useContext, useEffect, useMemo} from 'react'
-import {useObservable} from 'react-use'
 
 
 export interface NextPageTitleContextValue {
@@ -72,7 +72,7 @@ const NextPageTitleComponent = (props: NextPageTitleContextProps) => {
     children,
   } = props
 
-  const title = useObservable($pageTitle)
+  const title = useSubscribable($pageTitle)
   const state = useMemo(() => ({
     title,
     setScreenName,

@@ -71,7 +71,7 @@ module.exports = {
               },
               {
                 sourceTag: 'aglyn:renderer',
-                onlyDependOnLibsWithTags: ['scope:framework', 'scope:shared'],
+                onlyDependOnLibsWithTags: ['aglyn:framework', 'scope:shared'],
               },
               {
                 sourceTag: '*',

@@ -16,29 +16,26 @@
  */
 
 import {
-  type AglynElementsById,
+  type AglynElementsDenormalized,
   getCanvasDenormalizedElementsStore,
 } from '@aglyn/core-data-framework'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
-import {useStoreMap} from 'effector-react'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
-export function useAglynCanvasElementsDenormalized(): AglynElementsById
+export function useAglynCanvasElementsDenormalized(): AglynElementsDenormalized
 export function useAglynCanvasElementsDenormalized<Result>(
-  callbackFn: (state: AglynElementsById) => Result,
+  callbackFn: (state: AglynElementsDenormalized) => Result,
 ): Result
 export function useAglynCanvasElementsDenormalized<Result>(
-  callbackFn?: (state: AglynElementsById) => Result,
-): Result | AglynElementsById {
+  callbackFn?: (state: AglynElementsDenormalized) => Result,
+): Result | AglynElementsDenormalized {
   const app = useAglynAppContext()
-  const store = getCanvasDenormalizedElementsStore(app)
-  return useStoreMap({
-    store,
-    keys: [callbackFn],
-    fn: (state: AglynElementsById, [callbackFn]) => {
-      return _isFnT(callbackFn) ? (callbackFn(state) as Result) : state
-    },
-  }) as Result | AglynElementsById
+  return useSubscribable(
+    getCanvasDenormalizedElementsStore(app), undefined,
+    (state) => _isFnT(callbackFn) ? (callbackFn(state) as Result) : state,
+    [callbackFn],
+  ) as Result | AglynElementsDenormalized
 }
 export default useAglynCanvasElementsDenormalized

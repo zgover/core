@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import type {ElementsDataStore, ElementsDataStoreApi} from '@aglyn/core-data-framework'
+import type {CanvasContext, ElementsDataStoreApi} from '@aglyn/core-data-framework'
 import {createContext, useContext} from 'react'
 
 
 export type UseElementsContextType = () => ElementsContextType
 
 export interface ElementsContextType extends ElementsDataStoreApi {
-  elements: ElementsDataStore['present']
+  elements: CanvasContext['present']
 }
 
 export const ElementsContext = createContext<ElementsContextType>({

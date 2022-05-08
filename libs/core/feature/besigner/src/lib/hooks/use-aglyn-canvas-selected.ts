@@ -23,8 +23,9 @@ import {
   setBesignerCanvasSelected,
 } from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback} from 'react'
 
 
 export function useAglynCanvasSelected(): [
@@ -37,16 +38,11 @@ export function useAglynCanvasSelected(): [
   ) => void
 ] {
   const app = useAglynAppContext() as IBesignerAppController
-  const [value, setValue] = useState<BesignerCanvasSelectedElement | undefined>(undefined)
+  const value = useSubscribable<BesignerCanvasSelectedElement>(
+    app.besigner?.canvas, undefined,
+    (canvas) => canvas?.selected,
+  )
   const setSelected = useAglynCanvasSetSelected()
-
-  useEffect(() => {
-    const subscription = app.besigner?.__store__.canvas?.subscribe((canvas) => {
-      setValue(canvas?.selected)
-    })
-    return () => subscription.unsubscribe()
-  }, [app])
-
 
   return [value, setSelected]
 }

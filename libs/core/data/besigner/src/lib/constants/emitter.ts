@@ -21,7 +21,7 @@ import type {
   BesignerCanvasHoveredElement,
   BesignerCanvasSelectedElement,
   BesignerCanvasState,
-  BesignerContextStores,
+  BesignerContext,
   BesignerDndState,
   BesignerFlagsState,
   BesignerPanelKey,
@@ -46,7 +46,7 @@ export enum BesignerAppEffectFlag {
 }
 
 
-export type BesignerGetStorePayload<K extends keyof BesignerContextStores = any> = PayloadData<{store: K}>
+export type BesignerGetStorePayload<K extends keyof BesignerContext = any> = PayloadData<{store: K}>
 export type BesignerSetFlagPayload<K extends keyof BesignerFlagsState = any> = PayloadData<{
   flag: K, value: (
     prev: BesignerFlagValue<K>,

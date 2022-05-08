@@ -22,7 +22,7 @@
           }
         }
       },
-      "tags": ["scope:lib", "aglyn:addons"]
+      "tags": ["scope:lib", "scope:aglyn", "scope:ui", "aglyn:addons"]
     },
     "admin": {
       "root": "apps/admin",
@@ -103,7 +103,7 @@
           }
         }
       },
-      "tags": ["scope:app", "scope:private"],
+      "tags": ["scope:app", "scope:private", "scope:e2e"],
       "implicitDependencies": ["admin"]
     },
     "api": {
@@ -185,7 +185,7 @@
           }
         }
       },
-      "tags": ["scope:app", "scope:private"],
+      "tags": ["scope:app", "scope:private", "scope:e2e"],
       "implicitDependencies": ["api"]
     },
     "console": {
@@ -274,7 +274,7 @@
           "outputs": ["{options.outputFile}"]
         }
       },
-      "tags": ["scope:app", "scope:private"],
+      "tags": ["scope:app", "scope:private", "scope:e2e"],
       "implicitDependencies": ["console"]
     },
     "core-data-besigner": {
@@ -488,7 +488,7 @@
           }
         }
       },
-      "tags": ["scope:lib", "scope:shared", "scope:util"]
+      "tags": ["scope:lib", "scope:shared", "scope:data"]
     },
     "shared-feature-fbclient": {
       "root": "libs/shared/feature/fbclient",
@@ -541,7 +541,7 @@
           }
         }
       },
-      "tags": ["scope:lib", "scope:shared", "scope:ui"]
+      "tags": ["scope:lib", "scope:shared", "scope:feature"]
     },
     "shared-ui-jsx": {
       "root": "libs/shared/ui/jsx",
@@ -714,7 +714,7 @@
           }
         }
       },
-      "tags": ["scope:lib", "scope:shared", "scope:feature"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-errors": {
       "root": "libs/shared/util/errors",
@@ -828,7 +828,7 @@
           }
         }
       },
-      "tags": ["scope:lib", "scope:shared", "scope:feature"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-next": {
       "root": "libs/shared/util/next",
@@ -892,7 +892,7 @@
           }
         }
       },
-      "tags": ["scope:lib", "scope:shared", "scope:feature"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-tools": {
       "root": "libs/shared/util/tools",
@@ -1021,7 +1021,7 @@
           }
         }
       },
-      "tags": ["scope:app", "scope:public"],
+      "tags": ["scope:app", "scope:public", "scope:e2e"],
       "implicitDependencies": ["tenant"]
     },
     "www": {
@@ -1110,7 +1110,7 @@
           "outputs": ["{options.outputFile}"]
         }
       },
-      "tags": ["scope:app", "scope:public"],
+      "tags": ["scope:app", "scope:public", "scope:e2e"],
       "implicitDependencies": ["www"]
     }
   }

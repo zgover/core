@@ -16,6 +16,7 @@
  */
 
 import {type AnyProps, type Dictionary, type RequiredPickAlt} from '@aglyn/shared-data-types'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {EmitterFn} from '@aglyn/shared-util-emitter'
 import {
   type createEffect as createEffectorEffect,
@@ -23,6 +24,7 @@ import {
 } from 'effector'
 
 import {type AppUUN} from '../types/aglyn-app.types'
+import {CanvasContext} from '../types/aglyn-canvas.types'
 import {
   type AglynCommandListener,
   type AglynCommandResolver,
@@ -69,6 +71,7 @@ export enum AglynEventStateFlag {
   MODULE_DESTROYING = 'event:module:destroying', // 7
   MODULE_DESTROYED = 'event:module:destroyed', // 8
 
+  EXTENSION_REGISTERING = 'event:extensions:registering-extension',
   EXTENSION_REGISTERED = 'event:extensions:registered-extension',
   EXTENSION_INITIALIZING = 'event:extensions:initializing-extension',
   EXTENSION_INITIALIZED = 'event:extensions:initialized-extension',
@@ -159,10 +162,15 @@ export type CommandsRegisterListenerPayload = PayloadData<{commandId?: CommandUI
 export type CommandsUnregisterListenerPayload = PayloadData<{commandId?: CommandUId, listener: AglynCommandListener}>
 export type CommandsTriggerPayload = PayloadData<{commandId: CommandUId} & Dictionary>
 
-export type CanvasUndoPayload = PayloadData<any>
-export type CanvasRedoPayload = PayloadData<any>
-export type CanvasGetStorePayload = PayloadData<any>
+export type CanvasUndoPayload = PayloadData<{times?: number} | {first?: boolean}>
+export type CanvasRedoPayload = PayloadData<{times?: number} | {last?: boolean}>
+export type CanvasGetStorePayload<K extends keyof CanvasContext = any> = PayloadData<{store: K}>
+export type CanvasGetStatePayload = PayloadData<any>
+export type CanvasNextStatePayload = PayloadData<CanvasContext>
 export type CanvasSetElementsPayload = PayloadData<{type: 'normal' | 'denormal', elements: AglynElementDenormalized | AglynElementNormalized}>
+export type CanvasGetElementsPastPayload = PayloadData<any>
+export type CanvasGetElementsFuturePayload = PayloadData<any>
+export type CanvasGetElementsPresentPayload = PayloadData<any>
 export type CanvasGetElementsDenormalizedPayload = PayloadData<any>
 export type CanvasGetElementsNormalizedPayload = PayloadData<any>
 export type CanvasGetApiEventsPayload = PayloadData<any>
@@ -192,15 +200,16 @@ export type ModuleDeactivatedPayload = PayloadData<{namespace: string}>
 export type ModuleDestroyingPayload = PayloadData<{namespace: string}>
 export type ModuleDestroyedPayload = PayloadData<{namespace: string}>
 
-export type ExtensionRegisteredPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionInitializingPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionInitializedPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionActivatingPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionActivatedPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionDeactivatingPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionDeactivatedPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionDestroyingPayload = PayloadData<{extensionName: ExtensionUUN}>
-export type ExtensionDestroyedPayload = PayloadData<{extensionName: ExtensionUUN}>
+export type ExtensionRegisteringPayload = PayloadData<{namespace: string}>
+export type ExtensionRegisteredPayload = PayloadData<{namespace: string}>
+export type ExtensionInitializingPayload = PayloadData<{namespace: string}>
+export type ExtensionInitializedPayload = PayloadData<{namespace: string}>
+export type ExtensionActivatingPayload = PayloadData<{namespace: string}>
+export type ExtensionActivatedPayload = PayloadData<{namespace: string}>
+export type ExtensionDeactivatingPayload = PayloadData<{namespace: string}>
+export type ExtensionDeactivatedPayload = PayloadData<{namespace: string}>
+export type ExtensionDestroyingPayload = PayloadData<{namespace: string}>
+export type ExtensionDestroyedPayload = PayloadData<{namespace: string}>
 
 export type CommandResolverTriggeringPayload = PayloadData<{commandId: CommandUId}>
 export type CommandResolverTriggeredPayload = PayloadData<{commandId: CommandUId}>
@@ -239,6 +248,7 @@ export interface AglynEventStatePayload extends Record<AglynEventStateFlag, Agly
   [AglynEventStateFlag.MODULE_DESTROYING]: ModuleDestroyingPayload
   [AglynEventStateFlag.MODULE_DESTROYED]: ModuleDestroyedPayload
 
+  [AglynEventStateFlag.EXTENSION_REGISTERING]: ExtensionRegisteringPayload
   [AglynEventStateFlag.EXTENSION_REGISTERED]: ExtensionRegisteredPayload
   [AglynEventStateFlag.EXTENSION_INITIALIZING]: ExtensionInitializingPayload
   [AglynEventStateFlag.EXTENSION_INITIALIZED]: ExtensionInitializedPayload

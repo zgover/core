@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ export enum AglynLifecycleFlag {
   REGISTERED = LifecycleFlag.REGISTER | LifecycleFlag.UP,
   INITIALIZING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.SPINNING_UP,
   INITIALIZED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.UP,
-  LOADING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.SPINNING_UP,
-  LOADED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.UP,
+  ACTIVATING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.SPINNING_UP,
+  ACTIVATED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.UP,
   UNLOADING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.SPINNING_DOWN,
-  UNLOADED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.DOWN,
+  DEACTIVATED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.DOWN,
   DESTROYING = LifecycleFlag.DESTROY | LifecycleFlag.SPINNING_DOWN,
   DESTROYED = LifecycleFlag.DESTROY | LifecycleFlag.DOWN,
 }
@@ -69,27 +69,27 @@ export function nextLifecycleIsValid(current: AglynLifecycleFlag, next: AglynLif
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.INITIALIZING):
 
     // LOADING
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.LOADING)
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.ACTIVATING)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.INITIALIZED):
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.LOADING)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.UNLOADED):
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.ACTIVATING)
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.DEACTIVATED):
 
     // LOADED
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.LOADED)
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.ACTIVATED)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.INITIALIZED):
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.LOADED)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.LOADING):
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.LOADED)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.UNLOADED):
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.ACTIVATED)
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.ACTIVATING):
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.ACTIVATED)
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.DEACTIVATED):
 
     // UNLOADING
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.UNLOADING)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.LOADED):
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.ACTIVATED):
 
     // UNLOADED
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.UNLOADED)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.LOADED):
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.UNLOADED)
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DEACTIVATED)
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.ACTIVATED):
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DEACTIVATED)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.UNLOADING):
 
     // DESTROYING
@@ -98,7 +98,7 @@ export function nextLifecycleIsValid(current: AglynLifecycleFlag, next: AglynLif
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYING)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.INITIALIZED):
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYING)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.UNLOADED):
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.DEACTIVATED):
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYING)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.DESTROYING):
 
@@ -106,9 +106,9 @@ export function nextLifecycleIsValid(current: AglynLifecycleFlag, next: AglynLif
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.INITIALIZED):
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.LOADED):
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.ACTIVATED):
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.UNLOADED):
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.DEACTIVATED):
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.DESTROYING):
 

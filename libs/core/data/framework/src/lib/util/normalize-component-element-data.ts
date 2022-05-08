@@ -15,63 +15,63 @@
  * limitations under the License.
  */
 
-import {_isStrT} from '@aglyn/shared-util-guards'
+import {_hasOwnProperty, _isStrT} from '@aglyn/shared-util-guards'
 import {arraySafe} from '@aglyn/shared-util-tools'
-import {
-  type AglynElementDenormalized,
-  type AglynElementNormalized,
-  type AglynElementsById,
-  type AglynElementsList,
-  type ElementId,
+import type {
+  AglynElementDenormalized,
+  AglynElementNormalized,
+  AglynElementsList,
+  AglynElementsNormalized,
+  ElementId,
 } from '../types/aglyn-elements.types'
+import {AglynElementsDenormalized} from '../types/aglyn-elements.types'
 
 
 const normalizeData = (
   element: AglynElementDenormalized,
-  flatMap: AglynElementsById = {},
+  flatMap: AglynElementsDenormalized = {},
   elemData: AglynElementsList = [],
 ): AglynElementNormalized => {
-  return {
-    ...element,
-    elements: arraySafe(element.elements).reduce(
-      (accumulator, $id) => {
-        const element = flatMap[$id]
-
-        if (element) {
-          return [...accumulator, normalizeData(element, flatMap, elemData)]
-        }
-
-        return accumulator
-      },
-      []
-    ),
+  if (element) {
+    const el = element as unknown as AglynElementNormalized
+    el.elements = [...arraySafe(el?.elements)].reduce((accumulator, $id) => {
+      if (_hasOwnProperty($id, flatMap)) {
+        return [
+          ...accumulator,
+          normalizeData(flatMap[$id], flatMap, elemData),
+        ].filter(Boolean)
+      }
+      return accumulator
+    }, [])
+    return el
   }
+  return undefined
 }
 
 export function normalizeComponentElementData(
   element: AglynElementDenormalized,
   parentId: ElementId,
-): AglynElementsList
+): AglynElementsNormalized
 export function normalizeComponentElementData(
-  elements: AglynElementsById,
+  elements: AglynElementsDenormalized,
   parentId: ElementId,
-): AglynElementsList
+): AglynElementsNormalized
 export function normalizeComponentElementData(
-  elements: AglynElementDenormalized | AglynElementsById,
+  elements: AglynElementDenormalized | AglynElementsDenormalized,
   parentId: ElementId,
-): AglynElementsList {
-  const elemData: AglynElementsList = []
+): AglynElementsNormalized {
+  const elemData: AglynElementsNormalized = []
 
   if (elements) {
     try {
-      const elems: AglynElementsById = _isStrT(elements.$id)
-        ? {[elements.$id]: {...elements}} as AglynElementsById
-        : {...elements} as AglynElementsById
+      const elems = elements?.$id && _isStrT(elements?.$id)
+        ? {[elements.$id]: {...elements}} as AglynElementsDenormalized
+        : {...elements} as AglynElementsDenormalized
 
       elemData.push(
         ...(elems[parentId]?.elements || []).map(($id: any) =>
-          normalizeData(elems[$id], elems),
-        ),
+          normalizeData(elems[$id], elems, elemData),
+        ).filter(Boolean),
       )
     }
     catch (error) {

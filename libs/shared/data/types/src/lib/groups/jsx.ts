@@ -15,21 +15,22 @@
  * limitations under the License.
  */
 
-import {
-  type Requireable as PropTypesRequireable,
-  type ValidationMap as PropTypesValidationMap,
-  type Validator as PropTypesValidator,
+import type {
+  Requireable as PropTypesRequireable,
+  ValidationMap as PropTypesValidationMap,
+  Validator as PropTypesValidator,
 } from 'prop-types'
-import {type Component} from 'react'
-import {type AnyObj, type DistributiveOmit, type EmptyObj} from './basic'
+import type {Component} from 'react'
+import type {AnyObj, DistributiveOmit, EmptyObj} from './basic'
 
 
 export type JSXKey = string | number
 
-export type JSXText = string | symbol
+export type JSXText = string | number
 export type JSXChild = JSXElement | JSXText
-export type JSXFragment = EmptyObj | JSXNodeArray
+export type JSXFragment = Iterable<JSXNode>
 export type JSXNode = JSXChild | JSXFragment | JSXPortal | boolean | null | undefined
+export type JSXNodeList = JSXNode[] | Iterable<JSXNode>
 
 export type JSXIntrinsicElements = JSX.IntrinsicElements
 export type JSXIntrinsicAttributes = JSX.IntrinsicAttributes

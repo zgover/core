@@ -29,26 +29,26 @@ import {
   type ContextsSetStorePayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type IAglynAppController} from '../types/aglyn-app.types'
-import {
-  type AglynContextsControllerOptions,
-  type ContextDomain,
-  type ContextEffect,
-  type ContextEvent,
-  type ContextStore,
-  type ContextStoreUid,
-  type IAglynContextsController,
+import type {IAglynAppController} from '../types/aglyn-app.types'
+import type {
+  AglynContextsControllerOptions,
+  ContextDomain,
+  ContextEffect,
+  ContextEvent,
+  ContextStore,
+  ContextStoreUid,
+  IAglynContextsController,
 } from '../types/aglyn-contexts.types'
-import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
+import type {AglynModuleEffectListener} from '../types/aglyn-module.types'
 
 
 const TAG = 'AglynContexts'
-const NS = 'aglyn.core.data.framework.module.contexts'
+const NS = 'com.aglyn.core.data.framework.controller.contexts'
 
 export class AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> implements IAglynContextsController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()

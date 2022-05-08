@@ -15,18 +15,24 @@
  * limitations under the License.
  */
 
-import {createApi} from 'effector'
-import {persist} from 'effector-storage/local'
+import {copy} from '@aglyn/shared-util-tools'
+import {objectDeepMerge} from '@aglyn/shared-util-vendor'
+import {BehaviorSubject, Observable} from 'rxjs'
+import {map} from 'rxjs/operators'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import type {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,
   CanvasDuplicateElementPayload,
-  CanvasGetApiEventsPayload,
   CanvasGetElementsDenormalizedPayload,
+  CanvasGetElementsFuturePayload,
   CanvasGetElementsNormalizedPayload,
+  CanvasGetElementsPastPayload,
+  CanvasGetElementsPresentPayload,
+  CanvasGetStatePayload,
   CanvasGetStorePayload,
   CanvasMoveElementPayload,
+  CanvasNextStatePayload,
   CanvasRedoPayload,
   CanvasSetElementPayload,
   CanvasSetElementsPayload,
@@ -37,16 +43,9 @@ import {AglynModuleModel} from '../models/aglyn-module.model'
 import type {IAglynAppController} from '../types/aglyn-app.types'
 import type {
   AglynCanvasControllerOptions,
-  ElementsDataStore,
-  ElementsDataStoreApi,
+  CanvasContext,
   IAglynCanvasController,
 } from '../types/aglyn-canvas.types'
-import type {ContextDomain, ContextStore} from '../types/aglyn-contexts.types'
-import type {
-  AglynElementNormalized,
-  AglynElementsById,
-  AglynElementsList,
-} from '../types/aglyn-elements.types'
 import type {AglynModuleEffectListener} from '../types/aglyn-module.types'
 import denormalizeComponentElementData from '../util/denormalize-component-element-data'
 import {handleRedoEvent} from '../util/handle-state-modification-history-redo'
@@ -65,24 +64,34 @@ import {
 
 
 const TAG = 'AglynCanvas'
-const NS = 'aglyn.core.data.framework.module.canvas'
+const NS = 'com.aglyn.core.data.framework.controller.canvas'
 
 export class AglynCanvasController extends AglynModuleModel<AglynCanvasControllerOptions> implements IAglynCanvasController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
-  #domain: ContextDomain = null
-  #context: ContextStore<ElementsDataStore> = null
-  #events: ElementsDataStoreApi = null
-  #denormalizedElementsStore: ContextStore<AglynElementsById> = null
-  #normalizedElementsStore: ContextStore<AglynElementNormalized[]> = null
+  public readonly __store__: {
+    [K in keyof CanvasContext]: K extends 'normalized'
+      ? Observable<CanvasContext[K]>
+      : BehaviorSubject<CanvasContext[K]>
+  }
 
-  public get domain(): ContextDomain {return this.#domain}
-  public get events(): ElementsDataStoreApi {return this.#events}
-  public get context(): ContextStore<ElementsDataStore> {return this.#context}
-  public get denormalizedElementsStore(): ContextStore<AglynElementsById> {return this.#denormalizedElementsStore}
-  public get normalizedElementsStore(): ContextStore<AglynElementsList> {return this.#normalizedElementsStore}
+  public get pastElements(): this['__store__']['past'] {
+    return this.__store__.past
+  }
+  public get futureElements(): this['__store__']['future'] {
+    return this.__store__.future
+  }
+  public get presentElements(): this['__store__']['present'] {
+    return this.__store__.present
+  }
+  public get denormalizedElements(): this['__store__']['present'] {
+    return this.__store__.present
+  }
+  public get normalizedElements(): this['__store__']['normalized'] {
+    return this.__store__.normalized
+  }
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return []
@@ -90,40 +99,33 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
   constructor(app: IAglynAppController, options: AglynCanvasControllerOptions) {
     super(app, options)
+    const optionsDefaults = copy(options.defaults || {})
+    const state = objectDeepMerge({
+      past: [],
+      future: [],
+      present: [],
+    }, optionsDefaults)
+
+    const present = new BehaviorSubject(
+      denormalizeComponentElementData(
+        state.present || [],
+        CANVAS_ROOT_ELEMENT_ID,
+      ),
+    )
+
+    this.__store__ = {
+      past: new BehaviorSubject(state.past),
+      future: new BehaviorSubject(state.future),
+      present: present,
+      normalized: present.pipe(
+        // throttleTime(20, undefined, {leading: false, trailing: true}),
+        map((present) => normalizeComponentElementData(present || {}, CANVAS_ROOT_ELEMENT_ID)),
+      ),
+    }
+
     this.#setup()
   }
-  #setup() {
-    this.#domain = this.app.contexts.domain.domain(this.namespace)
-
-    const presentElements = denormalizeComponentElementData(
-      this.options.initialElements || [],
-      CANVAS_ROOT_ELEMENT_ID
-    )
-    this.#context = this.#domain.createStore<ElementsDataStore>({
-      past: [] as AglynElementsById[],
-      present: presentElements,
-      future: [] as AglynElementsById[],
-    }, {name: `${this.namespace}:canvas-elements`})
-    this.#denormalizedElementsStore = this.#context.map((elements) => {
-      return elements.present
-    })
-    this.#normalizedElementsStore = this.#context.map((elements) => {
-      return normalizeComponentElementData(elements.present, CANVAS_ROOT_ELEMENT_ID)
-    })
-    persist({store: this.#context})
-
-    this.#events = createApi(this.#context, {
-      undo: handleUndoEvent,
-      redo: handleRedoEvent,
-      setElements: handleCanvasApiChangeEvent(handleCanvasSetElements),
-      addElement: handleCanvasApiChangeEvent(handleCanvasAddElement),
-      updateElement: handleCanvasApiChangeEvent(handleCanvasUpdateElement),
-      setElement: handleCanvasApiChangeEvent(handleCanvasSetElement),
-      moveElement: handleCanvasApiChangeEvent(handleCanvasMoveElement),
-      duplicateElement: handleCanvasApiChangeEvent(handleCanvasDuplicateElement),
-      deleteElement: handleCanvasApiChangeEvent(handleCanvasDeleteElement),
-    })
-  }
+  #setup() {}
 
   public toJSON() {
     return {
@@ -131,52 +133,107 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     }
   }
 
-  public getStore(payload?: CanvasGetStorePayload): ContextStore<ElementsDataStore> {
-    return this.#context
+  public getStore<K extends keyof CanvasContext>(payload: CanvasGetStorePayload<K>): this['__store__'][K] {
+    const {store} = payload
+    return this.__store__?.[store]
   }
-  public getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynElementsById> {
-    return this.#denormalizedElementsStore
+  public getState(payload?: CanvasGetStatePayload): CanvasContext {
+    return {
+      past: this.__store__?.past?.getValue(),
+      future: this.__store__?.future?.getValue(),
+      present: this.__store__?.present?.getValue(),
+    }
   }
-  public getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynElementsList> {
-    return this.#normalizedElementsStore
+  public nextState(payload: CanvasNextStatePayload): this {
+    const {past, future, present} = payload
+    this.__store__?.past?.next(past)
+    this.__store__?.future?.next(future)
+    this.__store__?.present?.next(present)
+    return this
   }
-  public getApiEvents(payload?: CanvasGetApiEventsPayload): ElementsDataStoreApi {
-    return this.#events
+
+  public getPastElements(payload?: CanvasGetElementsPastPayload): this['__store__']['past'] {
+    return this.__store__?.['past']
   }
+  public getFutureElements(payload?: CanvasGetElementsFuturePayload): this['__store__']['future'] {
+    return this.__store__?.['future']
+  }
+  public getPresentElements(payload?: CanvasGetElementsPresentPayload): this['__store__']['present'] {
+    return this.__store__?.['present']
+  }
+  public getDenormalizedElements(payload?: CanvasGetElementsDenormalizedPayload): this['__store__']['present'] {
+    return this.__store__?.['present']
+  }
+  public getNormalizedElements(payload?: CanvasGetElementsNormalizedPayload): this['__store__']['normalized'] {
+    return this.__store__?.['normalized']
+  }
+  public getApi(payload?: CanvasGetElementsNormalizedPayload): Pick<this,
+    'undo' |
+    'redo' |
+    'addElement' |
+    'deleteElement' |
+    'duplicateElement' |
+    'moveElement' |
+    'setElement' |
+    'setElements' |
+    'updateElement'> {
+    return {
+      undo: this.undo.bind(this),
+      redo: this.redo.bind(this),
+      addElement: this.addElement.bind(this),
+      deleteElement: this.deleteElement.bind(this),
+      duplicateElement: this.duplicateElement.bind(this),
+      moveElement: this.moveElement.bind(this),
+      setElement: this.setElement.bind(this),
+      setElements: this.setElements.bind(this),
+      updateElement: this.updateElement.bind(this),
+    }
+  }
+
+
   public undo(payload?: CanvasUndoPayload): this {
-    this.#events.undo(payload)
+    const state = handleUndoEvent(this.getState())
+    this.nextState(state)
     return this
   }
   public redo(payload?: CanvasRedoPayload): this {
-    this.#events.redo(payload)
-    return this
-  }
-  public setElements(payload: CanvasSetElementsPayload): this {
-    this.#events.setElements(payload)
+    const state = handleRedoEvent(this.getState())
+    this.nextState(state)
     return this
   }
   public addElement(payload: CanvasAddElementPayload): this {
-    this.#events.addElement(payload)
-    return this
-  }
-  public updateElement(payload: CanvasUpdateElementPayload): this {
-    this.#events.updateElement(payload)
-    return this
-  }
-  public setElement(payload: CanvasSetElementPayload): this {
-    this.#events.setElement(payload)
+    const state = handleCanvasApiChangeEvent(handleCanvasAddElement)(this.getState(), payload)
+    this.nextState(state)
     return this
   }
   public deleteElement(payload: CanvasDeleteElementPayload): this {
-    this.#events.deleteElement(payload)
-    return this
-  }
-  public moveElement(payload: CanvasMoveElementPayload): this {
-    this.#events.moveElement(payload)
+    const state = handleCanvasApiChangeEvent(handleCanvasDeleteElement)(this.getState(), payload)
+    this.nextState(state)
     return this
   }
   public duplicateElement(payload: CanvasDuplicateElementPayload): this {
-    this.#events.duplicateElement(payload)
+    const state = handleCanvasApiChangeEvent(handleCanvasDuplicateElement)(this.getState(), payload)
+    this.nextState(state)
+    return this
+  }
+  public moveElement(payload: CanvasMoveElementPayload): this {
+    const state = handleCanvasApiChangeEvent(handleCanvasMoveElement)(this.getState(), payload)
+    this.nextState(state)
+    return this
+  }
+  public setElement(payload: CanvasSetElementPayload): this {
+    const state = handleCanvasApiChangeEvent(handleCanvasSetElement)(this.getState(), payload)
+    this.nextState(state)
+    return this
+  }
+  public setElements(payload: CanvasSetElementsPayload): this {
+    const state = handleCanvasApiChangeEvent(handleCanvasSetElements)(this.getState(), payload)
+    this.nextState(state)
+    return this
+  }
+  public updateElement(payload: CanvasUpdateElementPayload): this {
+    const state = handleCanvasApiChangeEvent(handleCanvasUpdateElement)(this.getState(), payload)
+    this.nextState(state)
     return this
   }
 }

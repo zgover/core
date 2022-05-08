@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import {type AglynElementsById, type ElementsDataStoreApi} from '@aglyn/core-data-framework'
+import type {AglynElementsDenormalized, ElementsDataStoreApi} from '@aglyn/core-data-framework'
 import {useAglynCanvasApiEvents} from './use-aglyn-canvas-api-events'
 import {useAglynCanvasElementsDenormalized} from './use-aglyn-canvas-elements-denormalized'
 
 
 export type CanvasElementWithApi = [
-  elements: AglynElementsById,
+  elements: AglynElementsDenormalized,
   api: ElementsDataStoreApi
 ]
 

@@ -54,12 +54,12 @@ type BaseAppT = <T extends AglynBaseModelT>(model: T) => new<Options>(...any: Co
 const BaseApp: ReturnType<BaseAppT> = AglynDependencyManager(AglynBaseModel)
 
 const TAG = 'AglynApp'
-const NS = 'aglyn.core.data.framework.controller.app'
+const NS = 'com.aglyn.core.data.framework.controller.app'
 
 export class AglynAppController<Options extends AglynAppOptions = AglynAppOptions> extends BaseApp<Options> implements IAglynAppController<Options> {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly version: AglynVersion = SDK_VERSION
 
@@ -169,8 +169,7 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
   }
 
   public toString(): string {
-    console.log('app name', this.#appName)
-    return `${this[Symbol.toStringTag]}(name: '${this.#appName}')`
+    return `[object ${this[Symbol.toStringTag]}(name: '${this.#appName}')]`
   }
   public toJSON() {
     return {

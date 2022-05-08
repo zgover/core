@@ -16,8 +16,8 @@
  */
 
 import type {ComparisonOperator} from '@aglyn/shared-data-types'
-import {compare} from '@aglyn/shared-util-tools'
 import {_isNum} from './_is-num'
+import compare from './utils/compare'
 
 
 /**

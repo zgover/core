@@ -23,8 +23,9 @@ import {
   setBesignerCanvasHovered,
 } from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback} from 'react'
 
 
 export function useAglynCanvasHovered(): [
@@ -37,15 +38,11 @@ export function useAglynCanvasHovered(): [
   ) => void
 ] {
   const app = useAglynAppContext() as IBesignerAppController
-  const [value, setValue] = useState<BesignerCanvasHoveredElement | undefined>(undefined)
+  const value = useSubscribable<BesignerCanvasHoveredElement>(
+    app.besigner?.canvas, undefined,
+    (canvas) => canvas?.hovered,
+  )
   const setHovered = useAglynCanvasSetHovered()
-
-  useEffect(() => {
-    const subscription = app.besigner?.canvas.__store__.canvas?.subscribe((canvas) => {
-      setValue(canvas?.hovered)
-    })
-    return () => subscription.unsubscribe()
-  }, [app])
 
 
   return [value, setHovered]

@@ -25,7 +25,11 @@ import type {
   HostScreenVisibility,
   HostViewFormat,
 } from '../constants/tenancy'
-import type {AglynElementsById, AglynElementsList} from './aglyn-elements.types'
+import type {
+  AglynElementsDenormalized,
+  AglynElementsList,
+  AglynElementsNormalized,
+} from './aglyn-elements.types'
 
 
 export type UserUid = string
@@ -188,7 +192,7 @@ export interface AglynTenantHostScreenVersion<T extends HostViewFormat = HostVie
   breadcrumb?: string
   image?: HostMediaUid
   format?: T
-  elements?: Conditional<T, HostViewFormat.NORMALIZED, AglynElementsList, AglynElementsById>
+  elements?: Conditional<T, HostViewFormat.NORMALIZED, AglynElementsList, AglynElementsDenormalized>
 }
 
 /** Hosted in tenants' host project */
@@ -199,5 +203,5 @@ export interface AglynTenantHostLayoutVersion<T extends HostViewFormat = HostVie
   createdAt?: TimestampSeconds
   updatedAt?: TimestampSeconds
   format?: T
-  elements?: Conditional<T, HostViewFormat.NORMALIZED, AglynElementsList, AglynElementsById>
+  elements?: Conditional<T, HostViewFormat.NORMALIZED, AglynElementsNormalized, AglynElementsDenormalized>
 }

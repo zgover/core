@@ -2,7 +2,7 @@
   "root": "libs/core/feature/canvas-designer",
   "sourceRoot": "libs/core/feature/canvas-designer/src",
   "projectType": "library",
-  "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:feature", "sc:lib:core:feature:paid"],
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:canvas-designer"],
   "targets": {
     "build": {
       "executor": "@nrwl/web:rollup",

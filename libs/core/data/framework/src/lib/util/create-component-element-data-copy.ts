@@ -16,14 +16,18 @@
  */
 
 import {copy} from '@aglyn/shared-util-tools'
-import {AglynElementNormalized, AglynElementsById, ElementId} from '../types/aglyn-elements.types'
+import type {
+  AglynElementNormalized,
+  AglynElementsDenormalized,
+  ElementId,
+} from '../types/aglyn-elements.types'
 import {createComponentElementData} from './create-component-element-data'
 import {normalizeComponentElementData} from './normalize-component-element-data'
 
 
 export const createComponentElementDataCopy = (
   $id: ElementId,
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
 ): AglynElementNormalized => {
   const element = copy(state[$id])
   const parentElements = normalizeComponentElementData(state, element.parentId)
