@@ -60,10 +60,10 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     [K in keyof BesignerContext]: BehaviorSubject<BesignerContext[K]>
   }
 
-  public get canvas(): this['__store__']['canvas'] {return this.__store__.canvas}
-  public get dnd(): this['__store__']['dnd'] {return this.__store__.dnd}
-  public get flags(): this['__store__']['flags'] {return this.__store__.flags}
-  public get panels(): this['__store__']['panels'] {return this.__store__.panels}
+  public get canvas(): this['__store__']['canvas'] {return this.__store__?.canvas}
+  public get dnd(): this['__store__']['dnd'] {return this.__store__?.dnd}
+  public get flags(): this['__store__']['flags'] {return this.__store__?.flags}
+  public get panels(): this['__store__']['panels'] {return this.__store__?.panels}
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return []
@@ -127,103 +127,102 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     payload: BesignerGetStorePayload<K>,
   ): BehaviorSubject<BesignerContext[K]> {
     const {store} = payload
-    return this.__store__[store]
+    return this.__store__?.[store]
   }
 
 
   public setFlag(payload: BesignerSetFlagPayload): this {
     const {flag, value} = payload || {}
-    const prev = this.__store__.flags.getValue()
+    const prev = this.__store__?.flags?.getValue()
     const now = {...prev, [flag]: value(prev?.[flag], prev)}
-    this.__store__.flags.next(now)
+    this.__store__?.flags?.next(now)
     return this
   }
   public setFlags(payload: BesignerSetFlagsPayload): this {
     const {flags} = payload || {}
-    const prev = this.__store__.flags.getValue()
+    const prev = this.__store__?.flags?.getValue()
     const now = flags(prev)
-    this.__store__.flags.next(now)
+    this.__store__?.flags?.next(now)
     return this
   }
   public setPanel(payload: BesignerSetPanelPayload): this {
     const {panel, value} = payload || {}
-    const prev = this.__store__.panels.getValue()
+    const prev = this.__store__?.panels?.getValue()
     const now = {...prev, [panel]: value(prev?.[panel], prev)}
-    this.__store__.panels.next(now)
+    this.__store__?.panels?.next(now)
     return this
   }
   public setPanels(payload: BesignerSetPanelsPayload): this {
     const {panels} = payload || {}
-    const prev = this.__store__.panels.getValue()
+    const prev = this.__store__?.panels?.getValue()
     const now = panels(prev)
-    this.__store__.panels.next(now)
+    this.__store__?.panels?.next(now)
     return this
   }
   public togglePanel(payload: BesignerTogglePanelPayload): this {
     const {panel} = payload || {}
-    const prev = this.__store__.panels.getValue()
-    const now = {
-      ...prev, [panel]: {
-        ...prev?.[panel], toggled: !prev?.[panel]?.toggled,
-      },
-    }
-    this.__store__.panels.next(now)
+    const prev = this.__store__?.panels?.getValue()
+    const prevPanel = prev?.[panel]
+    const now = {...prev, [panel]: {...prevPanel, toggled: !prevPanel?.toggled}}
+    this.__store__?.panels?.next(now)
     return this
   }
   public openPanel(payload: BesignerOpenPanelPayload): this {
     const {panel} = payload || {}
-    const prev = this.__store__.panels.getValue()
-    const now = {...prev, [panel]: {...prev?.[panel], toggled: true}}
-    this.__store__.panels.next(now)
+    const prev = this.__store__?.panels?.getValue()
+    const prevPanel = prev?.[panel]
+    const now = {...prev, [panel]: {...prevPanel, toggled: true}}
+    this.__store__?.panels?.next(now)
     return this
   }
   public closePanel(payload: BesignerClosePanelPayload): this {
     const {panel} = payload || {}
-    const prev = this.__store__.panels.getValue()
-    const now = {...prev, [panel]: {...prev?.[panel], toggled: false}}
-    this.__store__.panels.next(now)
+    const prev = this.__store__?.panels?.getValue()
+    const prevPanel = prev?.[panel]
+    const now = {...prev, [panel]: {...prevPanel, toggled: false}}
+    this.__store__?.panels?.next(now)
     return this
   }
   public setDndItem(payload: BesignerSetDndItemPayload): this {
     const {item, value} = payload || {}
-    const prev = this.__store__.dnd.getValue()
+    const prev = this.__store__?.dnd?.getValue()
     const now = {...prev, [item]: value(prev?.[item], prev)}
-    this.__store__.dnd.next(now)
+    this.__store__?.dnd?.next(now)
     return this
   }
   public setDnd(payload: BesignerSetDndPayload): this {
     const {dnd} = payload || {}
-    const prev = this.__store__.dnd.getValue()
+    const prev = this.__store__?.dnd?.getValue()
     const now = dnd(prev)
-    this.__store__.dnd.next(now)
+    this.__store__?.dnd?.next(now)
     return this
   }
   public setCanvasItem(payload: BesignerSetCanvasItemPayload): this {
     const {item, value} = payload || {}
-    const prev = this.__store__.canvas.getValue()
+    const prev = this.__store__?.canvas?.getValue()
     const now = {...prev, [item]: value(prev?.[item], prev)}
-    this.__store__.canvas.next(now)
+    this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvas(payload: BesignerSetCanvasPayload): this {
     const {canvas} = payload || {}
-    const prev = this.__store__.canvas.getValue()
+    const prev = this.__store__?.canvas?.getValue()
     const now = canvas(prev)
-    this.__store__.canvas.next(now)
+    this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this {
     const {selected} = payload || {}
-    const prev = this.__store__.canvas.getValue()
+    const prev = this.__store__?.canvas?.getValue()
     const now = {...prev, selected: selected(prev?.selected, prev)}
-    this.__store__.canvas.next(now)
+    this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvasHovered(payload: BesignerSetCanvasHoveredPayload): this {
     const {hovered} = payload || {}
-    const prev = this.__store__.canvas.getValue()
+    const prev = this.__store__?.canvas?.getValue()
     const now = {...prev, hovered: hovered(prev?.hovered, prev)}
-    this.__store__.canvas.next(now)
+    this.__store__?.canvas?.next(now)
     return this
   }
 }

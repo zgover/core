@@ -78,19 +78,19 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   }
 
   public get pastElements(): this['__store__']['past'] {
-    return this.__store__.past
+    return this.__store__?.past
   }
   public get futureElements(): this['__store__']['future'] {
-    return this.__store__.future
+    return this.__store__?.future
   }
   public get presentElements(): this['__store__']['present'] {
-    return this.__store__.present
+    return this.__store__?.present
   }
   public get denormalizedElements(): this['__store__']['present'] {
-    return this.__store__.present
+    return this.__store__?.present
   }
   public get normalizedElements(): this['__store__']['normalized'] {
-    return this.__store__.normalized
+    return this.__store__?.normalized
   }
 
   protected get listeners(): AglynModuleEffectListener<any>[] {

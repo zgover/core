@@ -21,10 +21,10 @@ import {_isArr} from '@aglyn/shared-util-guards'
 /**
  * Safe array, will always return an array
  */
-export const arraySafe = <T, U = T>(
-  val: T[],
-  or?: U,
-) => {
+export const arraySafe = <T = any>(
+  val: unknown,
+  or?: unknown,
+): T[] => {
   if (_isArr(val)) return val
   if (_isArr(or)) return or
   return []

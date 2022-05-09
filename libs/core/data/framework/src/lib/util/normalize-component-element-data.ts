@@ -15,70 +15,70 @@
  * limitations under the License.
  */
 
-import {_hasOwnProperty, _isStrT} from '@aglyn/shared-util-guards'
 import {arraySafe} from '@aglyn/shared-util-tools'
+import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import type {
   AglynElementDenormalized,
   AglynElementNormalized,
-  AglynElementsList,
+  AglynElementsDenormalized,
   AglynElementsNormalized,
   ElementId,
 } from '../types/aglyn-elements.types'
-import {AglynElementsDenormalized} from '../types/aglyn-elements.types'
 
 
 const normalizeData = (
   element: AglynElementDenormalized,
-  flatMap: AglynElementsDenormalized = {},
-  elemData: AglynElementsList = [],
-): AglynElementNormalized => {
-  if (element) {
-    const el = element as unknown as AglynElementNormalized
-    el.elements = [...arraySafe(el?.elements)].reduce((accumulator, $id) => {
-      if (_hasOwnProperty($id, flatMap)) {
-        return [
-          ...accumulator,
-          normalizeData(flatMap[$id], flatMap, elemData),
-        ].filter(Boolean)
-      }
-      return accumulator
-    }, [])
-    return el
+  denormalized: AglynElementsDenormalized = {},
+  accumulator: AglynElementsNormalized = [],
+): AglynElementsNormalized => {
+  if (element?.$id) {
+    const _element = element as unknown as AglynElementNormalized
+    const childIds: ElementId[] = [...arraySafe(element.elements)]
+    delete _element.parentId
+    _element.elements = []
+    for (const $id of childIds) {
+      if (!$id || !denormalized[$id]) continue
+      const child = denormalized[$id]
+      normalizeData(child, denormalized, _element.elements)
+    }
+    accumulator.push(_element)
   }
-  return undefined
+  return accumulator
 }
 
 export function normalizeComponentElementData(
   element: AglynElementDenormalized,
-  parentId: ElementId,
 ): AglynElementsNormalized
 export function normalizeComponentElementData(
   elements: AglynElementsDenormalized,
-  parentId: ElementId,
 ): AglynElementsNormalized
 export function normalizeComponentElementData(
-  elements: AglynElementDenormalized | AglynElementsDenormalized,
-  parentId: ElementId,
+  data: AglynElementDenormalized | AglynElementsDenormalized,
+  parentId: ElementId = CANVAS_ROOT_ELEMENT_ID,
 ): AglynElementsNormalized {
-  const elemData: AglynElementsNormalized = []
+  const normalized: AglynElementsNormalized = []
+  if (!data) return normalized
 
-  if (elements) {
-    try {
-      const elems = elements?.$id && _isStrT(elements?.$id)
-        ? {[elements.$id]: {...elements}} as AglynElementsDenormalized
-        : {...elements} as AglynElementsDenormalized
-
-      elemData.push(
-        ...(elems[parentId]?.elements || []).map(($id: any) =>
-          normalizeData(elems[$id], elems, elemData),
-        ).filter(Boolean),
-      )
+  try {
+    let denormalized: AglynElementsDenormalized
+    // If received a denormalized element
+    if (data.$id) {
+      const _element = data as AglynElementDenormalized
+      denormalized = {[_element.$id]: _element}
+      return normalizeData(_element, denormalized, normalized)
     }
-    catch (error) {
-      console.error(error)
+
+    // If received a denormalized map of elements by id
+    denormalized = data as AglynElementsDenormalized
+    const parent = denormalized[parentId] ||= {$id: parentId} as AglynElementDenormalized
+    for (const $id of parent.elements ||= []) {
+      normalizeData(denormalized[$id], denormalized, normalized)
     }
   }
+  catch (error) {
+    console.error(error)
+  }
 
-  return elemData
+  return normalized
 }
 export default normalizeComponentElementData

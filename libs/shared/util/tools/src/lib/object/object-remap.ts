@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type {Conditional, NUN, OmitIndexOfType, PKey} from '@aglyn/shared-data-types'
 
 
@@ -45,23 +46,23 @@ export type RemapOutput<T extends RemapTarget<K, V>,
  * @param {ThisType<T>} thisArg
  * @returns {RemapOutput<typeof target, K, V, U, typeof options>}
  */
-export function objectRemap<K extends PKey, V, U = V, T = unknown>(
+export function objectRemap<K extends PKey, V, U = V, T = RemapTarget<K, V>>(
   target: RemapTarget<K, V>,
   callbackFn: RemapCallback<K, V, U>,
   options?: RemapOptions,
   thisArg?: ThisType<T>,
 ): RemapOutput<typeof target, K, V, U, typeof options> {
   type ThisArg = Conditional<typeof thisArg, NUN, typeof target, typeof thisArg>
-  type Ouput = RemapOutput<typeof target, K, V, U, typeof options>
+  type Output = RemapOutput<typeof target, K, V, U, typeof options>
   const {deleteUndefined} = {...options}
-  const _target: Ouput = {} as Ouput
-  const _thisArg: ThisArg = thisArg ?? _target
+  const remapped = {} as Output
+  const _thisArg = (thisArg ?? remapped) as ThisArg
 
   for (const key in target) {
     if (Object.prototype.hasOwnProperty.call(target, key)) {
-      _target[key] = callbackFn.call(_thisArg, target[key], key, target)
-      if (deleteUndefined && _target[key] === undefined) {
-        delete _target[key]
+      remapped[key] = callbackFn.call(_thisArg, target[key], key, target)
+      if (options?.deleteUndefined && remapped[key] === undefined) {
+        delete remapped[key]
       }
     }
   }

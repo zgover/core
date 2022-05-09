@@ -26,15 +26,21 @@ import type {BundleUId, ComponentId} from './aglyn-components.types'
 
 export type ElementId = string
 export type AglynElementType<P = any> = JSXElementType<P>
+export type AglynElementsById<T = AglynElement> = {
+  [K in (T extends AglynElement<any, any> ? T['$id'] : never)]: T & {$id: K}
+}
+export type AglynElementsList<T = AglynElement> = T[]
 export type AglynElementDenormalized<P = any, D extends ElementType = any> = AglynElement<P, true, D>
 export type AglynElementNormalized<P = any, D extends ElementType = any> = AglynElement<P, false, D>
 export type AglynElementsDenormalized = AglynElementsById<AglynElementDenormalized>
 export type AglynElementsNormalized = AglynElementsList<AglynElementNormalized>
-export type AglynElementsById<T = AglynElement> = {
-  [K in (T extends AglynElement<any, any> ? T['$id'] : never)]: T & {$id: K}
-}
-export type AglynElementsList<T = AglynElement> = Conditional<T, AglynElement<any, any>, T>
-export type AglynElementHierarchy<$ID extends ElementId = ElementId> = [root?: CANVAS_ROOT_ELEMENT_ID, ...parentIds: [...ElementId[], $ID]]
+export type AglynElementHierarchy<$ID extends (Conditional<ElementId, CANVAS_ROOT_ELEMENT_ID, never, ElementId>) = ElementId> = [
+  root?: CANVAS_ROOT_ELEMENT_ID,
+  ...rootDescendents: [
+    ...elementAncestors: (Conditional<ElementId, CANVAS_ROOT_ELEMENT_ID, never, ElementId>)[],
+    element: $ID
+  ]
+]
 
 export interface AglynElement<P = any, Denormalized extends boolean = true, D extends ElementType = any> {
   readonly $id: ElementId
@@ -45,5 +51,5 @@ export interface AglynElement<P = any, Denormalized extends boolean = true, D ex
   description?: string
   props?: Omit<BoxProps<D, P>, 'sx'>
   sx?: BoxProps['sx']
-  elements?: Conditional<Denormalized, true, ElementId[], AglynElementsList>
+  elements?: Conditional<Denormalized, true, ElementId[], AglynElementsNormalized>
 }

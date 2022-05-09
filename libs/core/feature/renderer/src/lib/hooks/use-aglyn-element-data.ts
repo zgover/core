@@ -51,6 +51,7 @@ export function useAglynElementData<P = EmptyObj,
   return useSubscribable(
     getCanvasDenormalizedElementsStore(app), undefined,
     (store) => {
+      console.log('useAglynElementData', $id, store)
       if (!key) {return store?.[$id] || null}
       return store?.[$id]?.[key] || null
     },
