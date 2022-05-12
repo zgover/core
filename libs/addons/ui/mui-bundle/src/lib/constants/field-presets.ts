@@ -78,7 +78,7 @@ export const FIELD_SIZE: AglynComponentField = {
 export const FIELD_POSITION: AglynComponentField = {
   name: 'position',
   description: 'The positioning type. The behavior of the different options is described in the MDN web docs. Note: sticky is not universally supported and will fall back to static when unavailable.',
-  component: FieldComponentType.SELECT,
+  component: 'text-field',
   label: 'Position',
   options: [
     {value: '', label: 'Default'},

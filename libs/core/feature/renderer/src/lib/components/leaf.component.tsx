@@ -45,9 +45,10 @@ const LeafComponent = forwardRef<any, LeafComponentProps>(
 
 
     const component = useAglynElementComponent<any, any>($id)
-    const Component = useMemo(() => (
-      ReactIs.isValidElementType(component) ? component : Box
-    ), [component])
+    const Component = useMemo(() => {
+      console.log('ReactIs.isValidElementType(component)', ReactIs.isValidElementType(component), component)
+      return component && ReactIs.isValidElementType(component) ? component : Box
+    }, [component])
     const elements = useAglynElementData($id, 'elements')
     const {
       children: resolvedPropsChildren,

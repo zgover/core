@@ -15,17 +15,21 @@
  * limitations under the License.
  */
 
-import type {Conditional, JSXElementType} from '@aglyn/shared-data-types'
+import type {Conditional} from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type {BoxProps} from '@aglyn/shared-feature-themes'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type {ElementType} from 'react'
+import {ComponentClass, ComponentProps, JSXElementConstructor} from 'react'
 import type {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import type {BundleUId, ComponentId} from './aglyn-components.types'
 
 
 export type ElementId = string
-export type AglynElementType<P = any> = JSXElementType<P>
+export type AglynElementType<P extends ComponentProps<C> | any = any, C extends keyof JSX.IntrinsicElements | JSXElementConstructor<any> = any> =
+  | ComponentClass<P>
+  | JSX.ElementConstructor<P>
+  | keyof JSX.IntrinsicElements[keyof JSX.IntrinsicElements]
 export type AglynElementsById<T = AglynElement> = {
   [K in (T extends AglynElement<any, any> ? T['$id'] : never)]: T & {$id: K}
 }

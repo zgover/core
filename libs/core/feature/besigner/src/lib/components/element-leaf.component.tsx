@@ -21,8 +21,16 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
-import debounce from 'lodash-es/throttle'
-import {type ChangeEvent, forwardRef, useCallback, useEffect, useRef, useTransition} from 'react'
+import debounce from 'lodash-es/debounce'
+import {
+  type ChangeEvent,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useTransition,
+} from 'react'
 import {useRenderedCanvasElements} from '../contexts/rendered-canvas-elements'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasElementIsSelected from '../hooks/use-aglyn-canvas-is-element-selected'
@@ -37,7 +45,7 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const {$id, leafComponent, ...rest} = props
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
-    const leaf = leafComponent || ElementLeafComponent
+    const leaf = useMemo(() => leafComponent || ElementLeafComponent, [leafComponent])
     const isSelected = useAglynCanvasElementIsSelected($id)
     const setHovered = useAglynCanvasSetHovered()
     const setSelected = useAglynCanvasSetSelected()
@@ -48,10 +56,11 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const throttleUpdate = useCallback(debounce((callback: () => void) => {
       startTransition(() => {callback()})
-    }, 150, {trailing: true, leading: true}), [])
+    }, 200, {trailing: true, leading: false}), [])
 
     useEffect(() => {
       setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
+      console.log('setElementRef', $id, elemRef)
       return () => deleteElementRef($id)
     }, [$id, deleteElementRef, dragHandleRef, setElementRef])
 

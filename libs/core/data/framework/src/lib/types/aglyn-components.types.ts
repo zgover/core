@@ -15,42 +15,43 @@
  * limitations under the License.
  */
 
-import {
-  type Dictionary,
-  type JSXForwardRefExoticComponent,
-  type JSXPropsWithoutRef,
-  type JSXRefAttributes,
-  type OrUndef,
-  type ResolveProps,
+import type {
+  Dictionary,
+  JSXForwardRefExoticComponent,
+  JSXPropsWithoutRef,
+  JSXRefAttributes,
+  OrUndef,
+  ResolveProps,
 } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {type BoxProps, type StyledOptions} from '@aglyn/shared-feature-themes'
-import {
-  type ConditionDefinition,
-  type DataType,
-  type FieldActions,
-  type ResolvePropsFunction,
-  type Validator,
+import type {BoxProps, StyledOptions} from '@aglyn/shared-feature-themes'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import type {
+  ConditionDefinition,
+  DataType,
+  FieldActions,
+  ResolvePropsFunction,
+  Validator,
 } from '@aglyn/shared-ui-jsx-forms'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {type ComponentsLinealDirectiveFlag, type FieldComponentType} from '../constants/components'
-import {
-  type ComponentGetPayload,
-  type ComponentRegisterPayload,
-  type ComponentsBundleGetPayload,
-  type ComponentsBundleRegisterPayload,
-  type ComponentsBundleUnregisterPayload,
-  type ComponentSchemaGetPayload,
-  type ComponentUnregisterPayload,
+import type {MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import type {ComponentsLinealDirectiveFlag, FieldComponentType} from '../constants/components'
+import type {
+  ComponentGetPayload,
+  ComponentRegisterPayload,
+  ComponentsBundleGetPayload,
+  ComponentsBundleRegisterPayload,
+  ComponentsBundleUnregisterPayload,
+  ComponentSchemaGetPayload,
+  ComponentUnregisterPayload,
 } from '../constants/emitter'
-import {type OF_KIND, type OF_TYPE, type SYMBOL_TYPE} from '../constants/symbol'
-import {type IAglynAppController} from './aglyn-app.types'
-import {type AglynElementDenormalized} from './aglyn-elements.types'
-import {
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type IAglynModuleModel,
+import type {OF_KIND, OF_TYPE, SYMBOL_TYPE} from '../constants/symbol'
+import type {IAglynAppController} from './aglyn-app.types'
+import type {AglynElementDenormalized} from './aglyn-elements.types'
+import type {
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  IAglynModuleModel,
 } from './aglyn-module.types'
 
 

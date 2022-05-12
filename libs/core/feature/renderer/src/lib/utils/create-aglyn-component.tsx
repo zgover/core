@@ -26,42 +26,36 @@ import {
 } from '@aglyn/core-data-framework'
 import {styled} from '@aglyn/shared-feature-themes'
 import {ErrorBoundaryComponent, type ErrorBoundaryProps, ReactIs} from '@aglyn/shared-ui-jsx'
+import {_isStrT} from '@aglyn/shared-util-guards'
 import {copy, getDisplayName} from '@aglyn/shared-util-tools'
-import {pascalCase} from '@aglyn/shared-util-vendor'
-import {forwardRef, type ReactNode} from 'react'
+import {hoistNonReactStatics, pascalCase} from '@aglyn/shared-util-vendor'
+import {forwardRef, type ReactNode, useMemo} from 'react'
 
 
-export function createAglynStyledComponent<P>(
-  ...args: Parameters<typeof styled>
-) {
-  const [component, styledOptions] = args
-  return styled(component, {...styledOptions})<P>({})
-}
-
-export function createAglynComponent<P>(
+export function createAglynComponent<P = any, C = any>(
   schema: AglynComponentSchema<P>,
-  component: Parameters<typeof styled>[0],
+  component: C | any,
   options?: Partial<ErrorBoundaryProps>,
 ): ComponentRegisterPayload<P> {
-  const {componentId, bundleId, emotion} = copy(schema)
-  const {onCatch, fallback} = {...options}
-  const displayName = getDisplayName(component, pascalCase(componentId))
-  const shouldNotBeStyled = emotion?.disable
-
-  const Component = (shouldNotBeStyled ? component : createAglynStyledComponent<P>(component, {
-    name: displayName,
-    ...emotion?.options,
-  }))
+  const {componentId, bundleId, emotion} = schema
+  const pascalId = pascalCase(componentId)
+  const displayName = _isStrT(component) ? pascalId : getDisplayName(component, pascalId)
 
   const AglynComponent = forwardRef<any, P>(
     function RefRenderFn(props, ref) {
 
+      const Component = useMemo(() => {
+        const cmp = !emotion?.disable ? component : styled(component, {
+          name: displayName,
+          ...emotion?.options,
+        })({})
+        return cmp
+      }, [])
+      const isValidElement = ReactIs.isValidElementType(Component)
+
       return (
-        <ErrorBoundaryComponent
-          fallback={fallback}
-          onCatch={onCatch}
-        >
-          {!ReactIs.isValidElementType(Component) ? (Component as unknown as ReactNode) : (
+        <ErrorBoundaryComponent {...options}>
+          {!isValidElement ? (Component as unknown as ReactNode) : (
             <Component ref={ref} {...props as P} />
           )}
         </ErrorBoundaryComponent>
@@ -75,11 +69,11 @@ export function createAglynComponent<P>(
   AglynComponent.aglyn = true
   AglynComponent[OF_TYPE] = MODULE_TYPE
   AglynComponent[OF_KIND] = COMPONENT_ELEMENT_TYPE
-  // hoistNonReactStatics(CreateAglynComponent, component)
+  hoistNonReactStatics(AglynComponent, component)
 
   return {
     component: AglynComponent,
-    schema,
+    schema: copy(schema),
   }
 }
 

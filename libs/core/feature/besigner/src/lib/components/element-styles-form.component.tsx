@@ -42,7 +42,12 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
-      updateCanvasElement(app, {element: {$id, sx: {...values}}})
+      updateCanvasElement(app, {
+        $id, update: (element) => ({
+          ...element,
+          sx: {...element.sx, ...values},
+        }),
+      })
     }, [$id, app])
     const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {
       deleteElementCallback(e)
@@ -92,8 +97,6 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
               },
             ],
           }}
-          clearOnUnmount
-          subscription={{values: true}}
           {...rest}
         />
 

@@ -26,6 +26,7 @@ import {
   useFormApi,
 } from '@aglyn/shared-ui-jsx-forms'
 import {mdiContentSave, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {NoSsr} from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
@@ -88,29 +89,38 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
     const bundleId = useAglynElementData($id, 'bundleId')
     const elemProps = useAglynElementData($id, 'props')
     const formSchema = useComponentFormSchema({componentId, bundleId})
+    console.log('useAglynElementData ElementPropsForm', $id, elemProps, formSchema)
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
-      updateCanvasElement(app, {element: {$id, props: {...values}}})
+      updateCanvasElement(app, {
+        $id, update: (element) => ({
+          ...element,
+          props: {...element.props, ...values},
+        }),
+      })
     }, [$id, app])
     const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {
       deleteElementCallback(e)
     }, [deleteElementCallback])
 
+    console.log('ElementPropsForm', $id, elemProps, formSchema)
+
     return (
       <>
-        <FormRenderer
-          ref={ref}
-          FormTemplate={ElementPropsFormTemplate}
-          componentMapper={simpleComponentMapper}
-          onCancel={handleFormCancel}
-          onSubmit={handleElementSave}
-          initialValues={elemProps}
-          schema={formSchema}
-          clearOnUnmount
-          subscription={{values: true}}
-          {...rest}
-        />
+        <NoSsr>
+
+          <FormRenderer
+            ref={ref}
+            FormTemplate={ElementPropsFormTemplate}
+            componentMapper={simpleComponentMapper}
+            onCancel={handleFormCancel}
+            onSubmit={handleElementSave}
+            initialValues={elemProps}
+            schema={formSchema}
+            {...rest}
+          />
+        </NoSsr>
 
         <FormControl margin="none" fullWidth>
           <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>

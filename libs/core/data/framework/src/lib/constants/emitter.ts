@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type AnyProps, type Dictionary, type PartialWithRequired} from '@aglyn/shared-data-types'
+import {type AnyProps, type Dictionary} from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {EmitterFn} from '@aglyn/shared-util-emitter'
 import {
@@ -176,7 +176,7 @@ export type CanvasGetElementsNormalizedPayload = PayloadData<any>
 export type CanvasGetApiEventsPayload = PayloadData<any>
 export type CanvasAddElementPayload = PayloadData<{parentId: ElementId, index: number, element: AglynElementNormalized}>
 export type CanvasGetElementPayload = PayloadData<{$id: ElementId}>
-export type CanvasUpdateElementPayload = PayloadData<{element: PartialWithRequired<AglynElementDenormalized, '$id'>}>
+export type CanvasUpdateElementPayload = PayloadData<{$id: ElementId, update: (element: AglynElementDenormalized) => AglynElementDenormalized}>
 export type CanvasSetElementPayload = PayloadData<{element: AglynElementDenormalized}>
 export type CanvasDeleteElementPayload = PayloadData<{$id: ElementId}>
 export type CanvasMoveElementPayload = PayloadData<{$id: ElementId, parentId: ElementId, index: number}>

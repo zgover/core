@@ -16,6 +16,6 @@
  */
 
 export function optionIsEqualToValue(option: any, value: any) {
-  return option.value === value
+  return option.value == value
 }
 export default optionIsEqualToValue

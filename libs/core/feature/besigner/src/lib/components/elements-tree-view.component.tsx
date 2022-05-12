@@ -32,7 +32,7 @@ import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
 import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeItem'
 import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
-import debounce from 'lodash-es/throttle'
+import debounce from 'lodash-es/debounce'
 import {forwardRef, useCallback, useMemo, useState, useTransition} from 'react'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
@@ -75,7 +75,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const throttleUpdate = useCallback(debounce((callback: () => void) => {
       startTransition(() => {callback()})
-    }, 150, {trailing: true, leading: true}), [])
+    }, 200, {trailing: true, leading: false}), [])
 
     const handleOnMouseOver = useCallback((e) => {
       e.stopPropagation()
@@ -145,7 +145,7 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const throttleUpdate = useCallback(debounce((callback: () => void) => {
       startTransition(() => {callback()})
-    }, 150, {trailing: true, leading: true}), [])
+    }, 200, {trailing: true, leading: false}), [])
 
     const handleTreeItemSelect = useCallback((e, $id) => {
       e.stopPropagation()

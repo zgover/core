@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {copy} from '@aglyn/shared-util-tools'
 import {DEFAULT_PROPS_FORM_SCHEMA} from '../constants/components'
 import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
 
@@ -22,12 +23,14 @@ import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.type
 export const buildComponentPropsFormSchema = (
   formSchema?: AglynComponentPropsFormSchema,
 ): AglynComponentPropsFormSchema => {
+  const defaults = copy(DEFAULT_PROPS_FORM_SCHEMA)
+  const schema = copy(formSchema)
   return {
-    ...DEFAULT_PROPS_FORM_SCHEMA,
-    ...formSchema,
+    ...defaults,
+    ...schema,
     fields: [
-      ...DEFAULT_PROPS_FORM_SCHEMA.fields || [],
-      ...formSchema?.fields || [],
+      ...defaults.fields,
+      ...schema?.fields || [],
     ],
   }
 }

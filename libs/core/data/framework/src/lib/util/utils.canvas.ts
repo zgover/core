@@ -86,7 +86,9 @@ export const handleCanvasAddElement = (
     state[$id] = element
   }
   // Add the new element to the parents' elements property
-  arrayPushAtIndex(state[parentId].elements ||= [], index, element.$id)
+  const parentElements = state[parentId].elements ||= []
+  if (index === -1) parentElements.push(element.$id)
+  else arrayPushAtIndex(state[parentId].elements ||= [], index, element.$id)
   return state
 }
 
@@ -95,10 +97,7 @@ export const handleCanvasUpdateElement = (
   state: AglynElementsDenormalized,
   payload: CanvasUpdateElementPayload,
 ): AglynElementsDenormalized => {
-  state[payload.element?.$id] = {
-    ...state[payload.element?.$id],
-    ...payload.element,
-  }
+  state[payload.$id] = payload.update(state[payload.$id])
   return state
 }
 
@@ -148,7 +147,8 @@ export const handleCanvasMoveElement = (
     // Remove from current parent
     arrayRemoveItem(state[currentParentId]?.elements || [], $id)
     // Add to new parent
-    arrayPushAtIndex(state[parentId]?.elements || [], index, $id)
+    if (index === -1) (state[parentId]?.elements || []).push($id)
+    else arrayPushAtIndex(state[parentId]?.elements || [], index, $id)
   }
 
   return state

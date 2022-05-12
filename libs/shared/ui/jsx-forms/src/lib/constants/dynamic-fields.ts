@@ -41,57 +41,57 @@ export const FieldIconSelect = dynamic<IconSelectProps>(
 )
 export const FieldSelect = dynamic<SelectProps<any>>(
   () => import('@data-driven-forms/mui-component-mapper/select').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldSwitch = dynamic<SwitchProps>(
   () => import('@data-driven-forms/mui-component-mapper/switch').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldTextField = dynamic<TextFieldProps>(
   () => import('@data-driven-forms/mui-component-mapper/text-field').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldTextarea = dynamic<TextareaProps>(
   () => import('@data-driven-forms/mui-component-mapper/textarea').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldPlainText = dynamic<PlainTextProps>(
   () => import('@data-driven-forms/mui-component-mapper/plain-text').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldSlider = dynamic<SliderProps>(
   () => import('@data-driven-forms/mui-component-mapper/slider').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldTimePicker = dynamic<TimePickerProps>(
   () => import('@data-driven-forms/mui-component-mapper/time-picker').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldDatePicker = dynamic<DatePickerProps>(
   () => import('@data-driven-forms/mui-component-mapper/date-picker').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldRadio = dynamic<RadioProps>(
   () => import('@data-driven-forms/mui-component-mapper/radio').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldCheckbox = dynamic<CheckboxProps>(
   () => import('@data-driven-forms/mui-component-mapper/checkbox').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldFieldArray = dynamic<FieldArrayProps>(
   () => import('@data-driven-forms/mui-component-mapper/field-array').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldTabs = dynamic<TabsProps>(
   () => import('@data-driven-forms/mui-component-mapper/tabs').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldWizard = dynamic<WizardProps>(
   () => import('@data-driven-forms/mui-component-mapper/wizard').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )
 export const FieldDualListSelect = dynamic<DualListSelectProps>(
   () => import('@data-driven-forms/mui-component-mapper/dual-list-select').then((mod) => mod.default),
-  {ssr: false},
+  // {ssr: false},
 )

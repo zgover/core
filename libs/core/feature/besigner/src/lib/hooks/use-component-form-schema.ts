@@ -23,6 +23,8 @@ import {
 } from '@aglyn/core-data-framework'
 import {useAglynComponentSchema} from '@aglyn/core-feature-renderer'
 
+import {useMemo} from 'react'
+
 
 export interface UseComponentFormSchema extends AglynComponentPropsFormSchema {}
 
@@ -38,7 +40,9 @@ export const useComponentFormSchema = (
   const componentSchema = useAglynComponentSchema(componentId, bundleId)
   const formSchema = componentSchema?.formSchema
 
-  return buildComponentPropsFormSchema(formSchema)
+  return useMemo(() => {
+    return buildComponentPropsFormSchema(formSchema)
+  }, [formSchema])
 }
 
 export default useComponentFormSchema

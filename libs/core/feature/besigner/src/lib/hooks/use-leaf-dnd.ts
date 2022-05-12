@@ -30,7 +30,7 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {numberToHexadecimal} from '@aglyn/shared-util-tools'
-import debounce from 'lodash-es/throttle'
+import debounce from 'lodash-es/debounce'
 import {useCallback, useEffect, useMemo, useTransition} from 'react'
 import {
   type DragElementWrapper,
@@ -85,7 +85,7 @@ export function useLeafDnd(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const throttleUpdate = useCallback(debounce((callback: () => void) => {
     startTransition(() => {callback()})
-  }, 150, {trailing: true, leading: true}), [])
+  }, 200, {trailing: true, leading: false}), [])
 
   const app = useAglynAppContext()
   const setHovered = useAglynCanvasSetHovered()
@@ -114,6 +114,7 @@ export function useLeafDnd(
   const handleDragEnd = useCallback((
     active: BesignerDndElementActive,
     over?: BesignerDndElementOver,
+    monitor?: DropTargetMonitor,
   ) => {
     throttleUpdate(() => {
       console.log('handleDragEnd', active, over)
@@ -190,7 +191,7 @@ export function useLeafDnd(
       if (monitor.isOver({shallow: true})) {
         startTransition(() => {
           console.log('drop collection', active, dropItem)
-          handleDragEnd(active, dropItem)
+          handleDragEnd(active, dropItem, monitor)
         })
       }
       return dropItem

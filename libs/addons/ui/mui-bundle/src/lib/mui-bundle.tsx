@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {ComponentRegisterPayload, createComponentsBundle} from '@aglyn/core-data-framework'
+import {type ComponentRegisterPayload, createComponentsBundle} from '@aglyn/core-data-framework'
 import {createAglynComponent} from '@aglyn/core-feature-renderer'
 import {mdiViewArray} from '@aglyn/shared-ui-mdi-jsx'
 

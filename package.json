@@ -37,8 +37,8 @@
     "vercel:build:app:console": "npx nx build console --prod --verbose --outputPath=./dist/apps/console"
   },
   "dependencies": {
-    "@data-driven-forms/mui-component-mapper": "^3.17.3",
-    "@data-driven-forms/react-form-renderer": "^3.17.3",
+    "@data-driven-forms/mui-component-mapper": "^3.18.0",
+    "@data-driven-forms/react-form-renderer": "^3.18.0",
     "@emotion/cache": "^11.7.1",
     "@emotion/react": "11.9.0",
     "@emotion/server": "11.4.0",

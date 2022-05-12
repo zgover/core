@@ -46,12 +46,11 @@ export function useAglynElementData<P = EmptyObj,
   property?: K,
 ): UseAglynElementData<P, K> {
   const app = useAglynAppContext()
-  const subscribable = getCanvasDenormalizedElementsStore(app)
-  return useSubscribable(subscribable, undefined, (store) => {
+  return useSubscribable(getCanvasDenormalizedElementsStore(app), undefined, (store) => {
     const element = store?.[$id]
     return property
       ? element?.[property]
       : element
-  }, [$id, property, app, subscribable]) as UseAglynElementData<P, K>
+  }, [$id, property, app]) as UseAglynElementData<P, K>
 }
 export default useAglynElementData

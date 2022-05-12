@@ -16,7 +16,8 @@
  */
 
 import {setBesignerCanvasHovered} from '@aglyn/core-data-besigner'
-import {TreeRootComponent, useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {CANVAS_ROOT_ELEMENT_ID} from '@aglyn/core-data-framework'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {createTheme, styled, ThemeProvider} from '@aglyn/shared-feature-themes'
 import Box from '@mui/material/Box'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
@@ -69,8 +70,9 @@ const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
               onMouseLeave={handleMouseLeave}
               sx={{minHeight: 1, width: 1, bgcolor: 'background.paper'}}
             >
-              <TreeRootComponent
+              <ElementLeafComponent
                 leafComponent={ElementLeafComponent}
+                $id={CANVAS_ROOT_ELEMENT_ID}
                 sx={{minHeight: 1}}
               />
             </Box>
