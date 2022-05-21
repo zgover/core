@@ -20,17 +20,8 @@ import {
   type LeafComponentProps,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
-import debounce from 'lodash-es/debounce'
-import {
-  type ChangeEvent,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useTransition,
-} from 'react'
+import {useCombinedRefs, useDebouncedTransition} from '@aglyn/shared-ui-jsx'
+import {type ChangeEvent, forwardRef, useCallback, useEffect, useMemo, useRef} from 'react'
 import {useRenderedCanvasElements} from '../contexts/rendered-canvas-elements'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasElementIsSelected from '../hooks/use-aglyn-canvas-is-element-selected'
@@ -52,11 +43,7 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const leaf = useMemo(() => leafComponent || ElementLeafComponent, [leafComponent])
     const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
     const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
-    const [, startTransition] = useTransition()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const throttleUpdate = useCallback(debounce((callback: () => void) => {
-      startTransition(() => {callback()})
-    }, 200, {trailing: true, leading: false}), [])
+    const [, debounceUpdate] = useDebouncedTransition(200, {trailing: true, leading: false}, [])
 
     useEffect(() => {
       setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
@@ -67,17 +54,17 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
 
     const handleOnMouseOver = useCallback((e: ChangeEvent<any>) => {
       e.stopPropagation()
-      throttleUpdate(() => {
+      debounceUpdate(() => {
         setHovered({$id})
       })
-    }, [$id, setHovered, throttleUpdate])
+    }, [$id, setHovered, debounceUpdate])
     const handleOnMouseDown = useCallback((e: ChangeEvent<any>) => {
       e.preventDefault()
       e.stopPropagation()
-      throttleUpdate(() => {
+      debounceUpdate(() => {
         setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
       })
-    }, [$id, setSelected, throttleUpdate])
+    }, [$id, setSelected, debounceUpdate])
 
     console.log('leaf component besigner', rest)
 

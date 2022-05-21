@@ -28,12 +28,18 @@ import {
   ICON_VARIANT_ENTITY_BLOCK,
 } from '@aglyn/shared-data-enums'
 import {alpha, styled} from '@aglyn/shared-feature-themes'
+import {useDebouncedTransition} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
-import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeItem'
-import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
-import debounce from 'lodash-es/debounce'
-import {forwardRef, useCallback, useMemo, useState, useTransition} from 'react'
+import {
+  type SingleSelectTreeViewProps,
+  TreeItem as MuiTreeItem,
+  treeItemClasses,
+  type TreeItemProps,
+  TreeView as MuiTreeView,
+} from '@mui/lab'
+import {Box} from '@mui/material'
+import {forwardRef, useCallback, useMemo, useState} from 'react'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
@@ -71,18 +77,14 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
       label = useAglynElementLabel($id),
       icon = useAglynComponentSchema(componentId, bundleId)?.icon
     const setHovered = useAglynCanvasSetHovered()
-    const [, startTransition] = useTransition()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const throttleUpdate = useCallback(debounce((callback: () => void) => {
-      startTransition(() => {callback()})
-    }, 200, {trailing: true, leading: false}), [])
+    const [, debounceUpdate] = useDebouncedTransition(200, {trailing: true, leading: false}, [])
 
     const handleOnMouseOver = useCallback((e) => {
       e.stopPropagation()
-      throttleUpdate(() => {
+      debounceUpdate(() => {
         setHovered({$id})
       })
-    }, [$id, setHovered])
+    }, [$id, setHovered, debounceUpdate])
 
     return (
       <TreeItem
@@ -94,10 +96,8 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
         label={
           <>
             {!icon?.path && icon ? icon : (
-              <MdiIcon
-                color="quaternary"
-                {...icon}
-                path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
+              <Box
+                component="span"
                 sx={[
                   {
                     fontSize: 20,
@@ -114,7 +114,29 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
                   },
                   ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
                 ]}
-              />
+              >
+                <MdiIcon
+                  color="quaternary"
+                  {...icon}
+                  path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
+                  sx={[
+                    {
+                      fontSize: 20,
+                      marginLeft: -0.25,
+                      marginRight: 0.5,
+                      marginBottom: -0.5,
+                      padding: 0.26,
+                      borderRadius: '0.25em',
+                      backgroundColor: 'background.default',
+                      border: 1,
+                      borderColor: 'divider',
+                      boxShadow: 1,
+                      color: 'quaternary',
+                    },
+                    ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
+                  ]}
+                />
+              </Box>
             )}
             {label}
           </>
@@ -141,36 +163,32 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     const allExpanded = useMemo(() => [
       ...selectedHierarchy, ...expanded,
     ], [selectedHierarchy, expanded])
-    const [, startTransition] = useTransition()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const throttleUpdate = useCallback(debounce((callback: () => void) => {
-      startTransition(() => {callback()})
-    }, 200, {trailing: true, leading: false}), [])
+    const [, debounceUpdate] = useDebouncedTransition(200, {trailing: true, leading: false}, [])
 
     const handleTreeItemSelect = useCallback((e, $id) => {
       e.stopPropagation()
       e.preventDefault()
-      throttleUpdate(() => {
+      debounceUpdate(() => {
         setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
       })
-    }, [setSelected, throttleUpdate])
+    }, [setSelected, debounceUpdate])
 
 
     const handleTreeItemFocus = useCallback((e, $id) => {
       e.stopPropagation()
-      throttleUpdate(() => {
+      debounceUpdate(() => {
         setHovered({$id})
       })
-    }, [setHovered, throttleUpdate])
+    }, [setHovered, debounceUpdate])
 
 
     const handleTreeItemToggle = useCallback((e, ids: ElementId[]) => {
       e.stopPropagation()
       e.preventDefault()
-      throttleUpdate(() => {
+      debounceUpdate(() => {
         setExpanded(ids)
       })
-    }, [throttleUpdate])
+    }, [debounceUpdate])
 
     return (
       <TreeView

@@ -158,6 +158,7 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
                   borderRadius: '0.3em',
                   px: 0.5, py: 0.15,
                   wordBreak: 'break-word',
+                  fontSize: '0.8rem',
                 }), ValueTypographyProps?.sx)}
               >
                 {value || <i>{failoverText}</i>}
@@ -182,6 +183,8 @@ const tabs = [
     value: BesignerPanelTabFlag.ELEMENT_INFO,
     tab: {
       icon: {path: ICON_VARIANT_ELEMENT_DETAILS.path},
+      iconPosition: ('top' as const),
+      label: 'Info',
     },
     panel: {
       Component: ElementInfo,
@@ -191,6 +194,8 @@ const tabs = [
     value: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
     tab: {
       icon: {path: ICON_VARIANT_ELEMENT_PROPERTIES.path},
+      iconPosition: ('top' as const),
+      label: 'Attributes',
     },
     panel: {
       Component: ElementPropsForm,
@@ -200,6 +205,8 @@ const tabs = [
     value: BesignerPanelTabFlag.ELEMENT_STYLES,
     tab: {
       icon: {path: ICON_VARIANT_ELEMENT_STYLES.path},
+      iconPosition: ('top' as const),
+      label: 'Styles',
     },
     panel: {
       Component: ElementStylesForm,
@@ -246,6 +253,13 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
                   key={value}
                   value={numberToHexadecimal(value)}
                   icon={<MdiIcon {...icon} />}
+                  sx={{
+                    minHeight: 'unset',
+                    textTransform: 'lowercase',
+                    fontSize: theme => theme.typography.pxToRem(12),
+                    lineHeight: 0.8,
+                    pt: 1,
+                  }}
                   {...tab}
                 />
               ))}

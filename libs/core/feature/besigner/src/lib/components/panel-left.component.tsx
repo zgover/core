@@ -66,6 +66,20 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
   },
 )
 
+const tabs = [
+  {
+    value: BesignerPanelTabFlag.ELEMENTS_TREE,
+    tab: {
+      icon: {path: ICON_VARIANT_ELEMENT_TREE_VIEW.path},
+      iconPosition: ('top' as const),
+      label: 'Hierarchy',
+    },
+    panel: {
+      Component: ElementsTree,
+    },
+  },
+]
+
 export interface PanelLeftComponentProps extends WorkspacePanelComponentProps {}
 
 const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
@@ -99,18 +113,35 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
               indicatorColor="secondary"
               textColor="secondary"
             >
-              <MuiTab
-                value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENTS_TREE)}
-                icon={<MdiIcon path={ICON_VARIANT_ELEMENT_TREE_VIEW.path} />}
-              />
+              {tabs.map(({value, tab: {icon, ...tab}}) => (
+                <MuiTab
+                  key={value}
+                  value={numberToHexadecimal(value)}
+                  icon={<MdiIcon {...icon} />}
+                  sx={{
+                    minHeight: 'unset',
+                    textTransform: 'lowercase',
+                    fontSize: theme => theme.typography.pxToRem(12),
+                    lineHeight: 0.8,
+                    pt: 1,
+                  }}
+                  {...tab}
+                />
+              ))}
             </MuiTabList>
           </Box>
 
-          <TabPanel value={numberToHexadecimal(BesignerPanelTabFlag.ELEMENTS_TREE)}>
-            <TabPanelInner>
-              <ElementsTree />
-            </TabPanelInner>
-          </TabPanel>
+          {tabs.map(({value, panel: {Component, ...panel}}) => (
+            <TabPanel
+              key={value}
+              value={numberToHexadecimal(value)}
+              {...panel}
+            >
+              <TabPanelInner>
+                <Component />
+              </TabPanelInner>
+            </TabPanel>
+          ))}
 
         </MuiTabContext>
 
