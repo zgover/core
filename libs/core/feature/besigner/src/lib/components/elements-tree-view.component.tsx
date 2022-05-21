@@ -28,9 +28,9 @@ import {
   ICON_VARIANT_ENTITY_BLOCK,
 } from '@aglyn/shared-data-enums'
 import {alpha, styled} from '@aglyn/shared-feature-themes'
-import {useDebouncedTransition} from '@aglyn/shared-ui-jsx'
+import {isReactElement, useDebouncedTransition} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {_isArr} from '@aglyn/shared-util-guards'
+import {_isArr, _isObjT} from '@aglyn/shared-util-guards'
 import {
   type SingleSelectTreeViewProps,
   TreeItem as MuiTreeItem,
@@ -38,7 +38,7 @@ import {
   type TreeItemProps,
   TreeView as MuiTreeView,
 } from '@mui/lab'
-import {Box} from '@mui/material'
+import {Box, Stack} from '@mui/material'
 import {forwardRef, useCallback, useMemo, useState} from 'react'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
@@ -86,6 +86,43 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
       })
     }, [$id, setHovered, debounceUpdate])
 
+    const itemIcon = useMemo(() => {
+      if (!icon?.path && icon && (!_isObjT(icon) || isReactElement(icon))) {
+        return icon
+      }
+
+      return (
+        <Box
+          component="div"
+          sx={[
+            {
+              fontSize: 14,
+              marginLeft: -0.5,
+              marginRight: 0.75,
+              padding: 0.2,
+              borderRadius: '0.25em',
+              backgroundColor: 'background.default',
+              border: 1,
+              borderColor: 'divider',
+              boxShadow: 1,
+              color: 'quaternary',
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: 'column',
+            },
+            ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
+          ]}
+        >
+          <MdiIcon
+            color="quaternary"
+            fontSize="inherit"
+            {...icon}
+            path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
+          />
+        </Box>
+      )
+    }, [icon])
+
     return (
       <TreeItem
         ref={ref}
@@ -94,52 +131,12 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
         expandIcon={<MdiIcon path={ICON_VARIANT_COLLAPSABLE_OPEN.path} />}
         onMouseOver={handleOnMouseOver}
         label={
-          <>
-            {!icon?.path && icon ? icon : (
-              <Box
-                component="span"
-                sx={[
-                  {
-                    fontSize: 20,
-                    marginLeft: -0.25,
-                    marginRight: 0.5,
-                    marginBottom: -0.5,
-                    padding: 0.26,
-                    borderRadius: '0.25em',
-                    backgroundColor: 'background.default',
-                    border: 1,
-                    borderColor: 'divider',
-                    boxShadow: 1,
-                    color: 'quaternary',
-                  },
-                  ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
-                ]}
-              >
-                <MdiIcon
-                  color="quaternary"
-                  {...icon}
-                  path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
-                  sx={[
-                    {
-                      fontSize: 20,
-                      marginLeft: -0.25,
-                      marginRight: 0.5,
-                      marginBottom: -0.5,
-                      padding: 0.26,
-                      borderRadius: '0.25em',
-                      backgroundColor: 'background.default',
-                      border: 1,
-                      borderColor: 'divider',
-                      boxShadow: 1,
-                      color: 'quaternary',
-                    },
-                    ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
-                  ]}
-                />
-              </Box>
-            )}
-            {label}
-          </>
+          <Stack direction="row" alignItems="center">
+            {itemIcon}
+            <div>
+              {label}
+            </div>
+          </Stack>
         }
         {...rest}
       >

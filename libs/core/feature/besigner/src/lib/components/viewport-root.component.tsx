@@ -54,7 +54,7 @@ const AglynViewport = styled(Stack, {
     overflow: 'hidden',
     // position: 'relative',
     boxShadow: theme.shadowsInset[3],
-    minHeight: '100%',
+    // minHeight: '100%',
     backgroundColor: bg,
     background: [
       `${gradient}(${s.rot}, ${sq} ${s.line}, ${o} ${s.line})`,

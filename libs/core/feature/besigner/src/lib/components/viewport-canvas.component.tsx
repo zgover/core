@@ -35,7 +35,7 @@ const ViewportCanvas = styled('div', {
   name: 'AglynViewportCanvas',
 })({
   flexGrow: 1,
-  minHeight: '100%',
+  // minHeight: '100%',
   width: '100%',
   overflowY: 'auto',
   overflowX: 'auto',

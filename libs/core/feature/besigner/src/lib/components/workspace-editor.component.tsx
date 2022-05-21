@@ -68,21 +68,6 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
         {...rest}
       >
         <Stack
-          direction="column"
-          justifyContent="flex-start"
-          alignItems="stretch"
-          id="aglyn:besigner-header"
-          component="header"
-          spacing={0}
-          sx={{
-            zIndex: 1,
-          }}
-        >
-          {/*<AppBarPrimaryComponent />*/}
-          <AppBarSecondaryComponent />
-        </Stack>
-
-        <Stack
           direction="row"
           alignItems="stretch"
           justifyContent="space-between"
@@ -90,14 +75,26 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
           component="main"
           flexGrow={1}
           spacing={0}
-          sx={{
-            overflow: 'hidden',
-            zIndex: 0,
-          }}
+          sx={{overflow: 'hidden', zIndex: 0}}
         >
           <PanelLeftComponent />
 
-          <ViewportRootComponent />
+          <Stack
+            direction="column"
+            alignItems="stretch"
+            justifyContent="space-between"
+            id="aglyn:besigner-viewport"
+            component="main"
+            flexGrow={1}
+            spacing={0}
+            sx={{overflow: 'hidden', zIndex: 0}}
+          >
+            <AppBarSecondaryComponent />
+
+            <ViewportRootComponent />
+
+
+          </Stack>
 
           <PanelRightComponent />
         </Stack>

@@ -43,6 +43,7 @@ const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponentProps>(
         aria-label="secondary app toolbar"
         position="static"
         color="inherit"
+        component="header"
         elevation={0}
         sx={mergeSxProps({
           top: 0,
@@ -53,7 +54,7 @@ const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponentProps>(
         }, sx)}
         {...rest}
       >
-        <MuiToolbar variant="dense">
+        <MuiToolbar variant="dense" sx={{pr: {xs: 2, sm: 2}}}>
           <Stack
             direction="row"
             alignItems="center"
