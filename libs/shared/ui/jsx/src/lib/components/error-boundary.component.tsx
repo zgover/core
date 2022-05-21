@@ -14,7 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, type ErrorInfo, forwardRef, type ReactNode} from 'react'
+
+import {getDisplayName} from '@aglyn/shared-util-tools'
+import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
+import {
+  Component,
+  type ComponentType,
+  type ErrorInfo,
+  forwardRef,
+  type ForwardRefExoticComponent,
+  type PropsWithoutRef,
+  type ReactNode,
+  type RefAttributes,
+} from 'react'
 
 
 export interface ErrorBoundaryProps {
@@ -77,10 +89,31 @@ const ErrorBoundaryComponent = forwardRef<ErrorBoundaryComponentClass, ErrorBoun
         {children}
       </ErrorBoundaryComponentClass>
     )
-  }
+  },
 )
 ErrorBoundaryComponent.displayName = 'ErrorBoundaryComponent'
 ErrorBoundaryComponent.aglyn = true
+
+export function withErrorBoundary<P, T>(
+  WrappedComponent: ComponentType<P>,
+  options?: ErrorBoundaryProps,
+): ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<T>> {
+
+  const displayName = getDisplayName(WrappedComponent)
+  const WithErrorBoundary = forwardRef<T, P>(
+    function RefRenderFn(props, ref) {
+      return (
+        <ErrorBoundaryComponentClass {...options}>
+          <WrappedComponent ref={ref} {...props} />
+        </ErrorBoundaryComponentClass>
+      )
+    },
+  )
+  WithErrorBoundary.displayName = `WithErrorBoundary(${displayName})`
+  hoistNonReactStatics(WithErrorBoundary, WrappedComponent)
+
+  return WithErrorBoundary
+}
 
 export {ErrorBoundaryComponent}
 export default ErrorBoundaryComponent

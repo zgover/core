@@ -16,7 +16,7 @@
  */
 
 import type {ComponentId} from '@aglyn/core-data-framework'
-import {ReactIs} from '@aglyn/shared-ui-jsx'
+import {isValidElementType} from '@aglyn/shared-ui-jsx'
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
 import {Box, type BoxProps} from '@mui/material'
 import clsx from 'clsx'
@@ -47,8 +47,7 @@ const LeafComponent = forwardRef<any, LeafComponentProps>(
     const elements = useAglynElementData($id, 'elements')
     const component = useAglynElementComponent<any, any>($id)
     const Component = useMemo(() => {
-      console.log('ReactIs.isValidElementType(component)', $id, ReactIs.isValidElementType(component), component)
-      return component && ReactIs.isValidElementType(component) ? component : Box
+      return component && isValidElementType(component) ? component : Box
     }, [component])
 
     return (

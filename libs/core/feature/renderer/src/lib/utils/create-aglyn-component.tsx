@@ -25,11 +25,10 @@ import {
   OF_TYPE,
 } from '@aglyn/core-data-framework'
 import {styled} from '@aglyn/shared-feature-themes'
-import {ErrorBoundaryComponent, type ErrorBoundaryProps, ReactIs} from '@aglyn/shared-ui-jsx'
-import {_isStrT} from '@aglyn/shared-util-guards'
-import {copy, getDisplayName} from '@aglyn/shared-util-tools'
+import {type ErrorBoundaryProps, withErrorBoundary} from '@aglyn/shared-ui-jsx'
+import {copy} from '@aglyn/shared-util-tools'
 import {hoistNonReactStatics, pascalCase} from '@aglyn/shared-util-vendor'
-import {forwardRef, type ReactNode, useMemo} from 'react'
+import {forwardRef} from 'react'
 
 
 export function createAglynComponent<P = any, C = any>(
@@ -38,32 +37,21 @@ export function createAglynComponent<P = any, C = any>(
   options?: Partial<ErrorBoundaryProps>,
 ): ComponentRegisterPayload<P> {
   const {componentId, bundleId, emotion} = schema
-  const pascalId = pascalCase(componentId)
-  const displayName = _isStrT(component) ? pascalId : getDisplayName(component, pascalId)
+  const pascalId = `${bundleId ? pascalCase(bundleId) + '-' : ''}${pascalCase(componentId)}`
+
+  const Component = emotion?.disable ? component : styled(component, emotion?.options)(
+    ({}),
+  )
 
   const AglynComponent = forwardRef<any, P>(
     function RefRenderFn(props, ref) {
-
-      const Component = useMemo(() => {
-        const cmp = !emotion?.disable ? component : styled(component, {
-          name: displayName,
-          ...emotion?.options,
-        })({})
-        return cmp
-      }, [])
-      const isValidElement = ReactIs.isValidElementType(Component)
-
       return (
-        <ErrorBoundaryComponent {...options}>
-          {!isValidElement ? (Component as unknown as ReactNode) : (
-            <Component ref={ref} {...props as P} />
-          )}
-        </ErrorBoundaryComponent>
+        <Component ref={ref} {...props} />
       )
     },
   ) as IAglynComponent<P>
 
-  AglynComponent.displayName = `AglynComponent(${displayName})`
+  AglynComponent.displayName = `AglynComponent(${pascalId})`
   AglynComponent.componentId = componentId
   AglynComponent.bundleId = bundleId
   AglynComponent.aglyn = true
@@ -72,7 +60,7 @@ export function createAglynComponent<P = any, C = any>(
   hoistNonReactStatics(AglynComponent, component)
 
   return {
-    component: AglynComponent,
+    component: withErrorBoundary(AglynComponent, options) as IAglynComponent<P>,
     schema: copy(schema),
   }
 }
