@@ -17,6 +17,7 @@
 
 export * from './types'
 
+export * from './components/color-picker.component'
 export * from './components/icon-select.component'
 export * from './components/select.component'
 export * from './components/switch.component'

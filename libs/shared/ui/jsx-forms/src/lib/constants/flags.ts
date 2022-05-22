@@ -22,6 +22,7 @@ export enum FieldComponentType {
   SUB_FORM = 'sub-form',
   RADIO = 'radio',
   TABS = 'tabs',
+  COLOR_PICKER = 'color-picker',
   TAB_ITEM = 'tab-item',
   DATE_PICKER = 'date-picker',
   TIME_PICKER = 'time-picker',

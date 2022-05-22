@@ -21,10 +21,51 @@ import {componentMapper, FormRenderer, type FormRendererProps} from '@aglyn/shar
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import {type ChangeEvent, forwardRef, useCallback} from 'react'
-import useComponentFormSchema from '../hooks/use-component-form-schema'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 import {ElementPropsFormTemplate} from './element-props-form.component'
 
+
+const stylesSchema = {
+  fields: [
+    {
+      component: FieldComponentType.SELECT,
+      name: 'display',
+      label: 'Display Variant',
+      description: 'The display property specifies the display behavior (the type of rendering box) of an element.',
+      options: [
+        {value: '', label: 'Default'},
+        {value: 'block', label: 'Block'},
+        {value: 'inline', label: 'Inline'},
+        {value: 'content', label: 'Contents'},
+        {value: 'list-item', label: 'List Item'},
+        {value: 'inline-block', label: 'Inline Block'},
+        {value: 'flex', label: 'Flex'},
+        {value: 'inline-flex', label: 'Inline Flex'},
+        {value: 'grid', label: 'Grid'},
+        {value: 'inline-grid', label: 'Inline Grid'},
+        {value: 'table', label: 'Table'},
+        {value: 'inline-table', label: 'Inline Table'},
+        {value: 'table-caption', label: 'Table Caption'},
+        {value: 'table-column', label: 'Table Column'},
+        {value: 'table-column-group', label: 'Table Column Group'},
+        {value: 'table-cell', label: 'Table Cell'},
+        {value: 'table-row', label: 'Table Row'},
+        {value: 'table-row-group', label: 'Table Row Group'},
+        {value: 'table-header-group', label: 'Table Header Group'},
+        {value: 'table-footer-group', label: 'Table Footer Group'},
+        {value: 'none', label: 'None'},
+        {value: 'initial', label: 'Initial'},
+        {value: 'unset', label: 'Unset'},
+      ],
+    },
+    {
+      component: FieldComponentType.COLOR_PICKER,
+      name: 'color',
+      label: 'Text Color',
+      description: 'The text color of descendents',
+    },
+  ],
+}
 
 export interface ElementStylesFormProps extends FormRendererProps {
   $id?: ElementId
@@ -35,10 +76,7 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
     const {$id, ...rest} = props
     const app = useAglynAppContext()
     const deleteElementCallback = useDeleteElementCallback({$id})
-    const componentId = useAglynElementData($id, 'componentId')
-    const bundleId = useAglynElementData($id, 'bundleId')
     const elemStyles = useAglynElementData($id, 'sx')
-    const formSchema = useComponentFormSchema({componentId, bundleId})
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
@@ -62,41 +100,7 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
           onCancel={handleFormCancel}
           onSubmit={handleElementSave}
           initialValues={elemStyles}
-          schema={{
-            fields: [
-              {
-                component: FieldComponentType.SELECT,
-                name: 'display',
-                label: 'Display Variant',
-                description: 'The display property specifies the display behavior (the type of rendering box) of an element.',
-                options: [
-                  {value: '', label: 'Default'},
-                  {value: 'block', label: 'Block'},
-                  {value: 'inline', label: 'Inline'},
-                  {value: 'content', label: 'Contents'},
-                  {value: 'list-item', label: 'List Item'},
-                  {value: 'inline-block', label: 'Inline Block'},
-                  {value: 'flex', label: 'Flex'},
-                  {value: 'inline-flex', label: 'Inline Flex'},
-                  {value: 'grid', label: 'Grid'},
-                  {value: 'inline-grid', label: 'Inline Grid'},
-                  {value: 'table', label: 'Table'},
-                  {value: 'inline-table', label: 'Inline Table'},
-                  {value: 'table-caption', label: 'Table Caption'},
-                  {value: 'table-column', label: 'Table Column'},
-                  {value: 'table-column-group', label: 'Table Column Group'},
-                  {value: 'table-cell', label: 'Table Cell'},
-                  {value: 'table-row', label: 'Table Row'},
-                  {value: 'table-row-group', label: 'Table Row Group'},
-                  {value: 'table-header-group', label: 'Table Header Group'},
-                  {value: 'table-footer-group', label: 'Table Footer Group'},
-                  {value: 'none', label: 'None'},
-                  {value: 'initial', label: 'Initial'},
-                  {value: 'unset', label: 'Unset'},
-                ],
-              },
-            ],
-          }}
+          schema={stylesSchema}
           {...rest}
         />
 

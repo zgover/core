@@ -687,7 +687,7 @@
           }
         }
       },
-      "tags": ["scope:lib", "scope:shared", "scope:feature"]
+      "tags": ["scope:lib", "scope:shared", "scope:ui"]
     },
     "shared-util-dom": {
       "root": "libs/shared/util/dom",

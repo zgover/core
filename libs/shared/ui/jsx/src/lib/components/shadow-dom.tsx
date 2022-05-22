@@ -22,11 +22,11 @@ import {getDisplayName} from '@aglyn/shared-util-tools'
 import {hoistNonReactStatics, paramCase} from '@aglyn/shared-util-vendor'
 import React, {
   forwardRef,
-  ForwardRefExoticComponent,
-  PropsWithoutRef,
-  ReactNode,
-  ReactPortal,
-  RefAttributes,
+  type ForwardRefExoticComponent,
+  type PropsWithoutRef,
+  type ReactNode,
+  type ReactPortal,
+  type RefAttributes,
   useEffect,
   useRef,
   useState,
@@ -60,6 +60,7 @@ export type ShadowDomRootProps = ShadowRootInit & {
   id?: string | number
   styleSheets?: string[]
   adoptedStyleSheets?: string[]
+  children?: ReactNode
 }
 export type ShadowDomRootExoticComponent<T, P> = ForwardRefExoticComponent<PropsWithoutRef<ShadowDomRootProps> & RefAttributes<T>>
 
@@ -118,7 +119,7 @@ export function createShadowDomRoot<T, P>(
           ) : null}
         </Component>
       )
-    }
+    },
   )
 
   ShadowDomRoot.displayName = `ShadowDomRoot(${displayName})`

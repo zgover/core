@@ -18,6 +18,7 @@
 import type {ComponentMapper} from '../vendor/data-driven-forms'
 import {
   FIELD_MAP_CHECKBOX,
+  FIELD_MAP_COLOR_PICKER,
   FIELD_MAP_DATE_PICKER,
   FIELD_MAP_DUAL_LIST_SELECT,
   FIELD_MAP_FIELD_ARRAY,
@@ -52,6 +53,7 @@ export const componentMapper: ComponentMapper = {
   [FieldComponentType.WIZARD]: FIELD_MAP_WIZARD,
   [FieldComponentType.DUAL_LIST_SELECT]: FIELD_MAP_DUAL_LIST_SELECT,
   [FieldComponentType.ICON_PICKER]: FIELD_MAP_ICON_PICKER,
+  [FieldComponentType.COLOR_PICKER]: FIELD_MAP_COLOR_PICKER,
 }
 
 export const simpleComponentMapper = {
@@ -78,4 +80,5 @@ export const pickerComponentMapper = {
   [FieldComponentType.TIME_PICKER]: FIELD_MAP_TIME_PICKER,
   [FieldComponentType.DATE_PICKER]: FIELD_MAP_DATE_PICKER,
   [FieldComponentType.ICON_PICKER]: FIELD_MAP_ICON_PICKER,
+  [FieldComponentType.COLOR_PICKER]: FIELD_MAP_COLOR_PICKER,
 }

@@ -27,7 +27,7 @@ export default {
     // '<rootDir>/libs/shared/data/brand',
     // '<rootDir>/libs/shared/data/mdi',
     // '<rootDir>/libs/shared/data/types',
-    // ,
+    // '<rootDir>/libs/shared/ui/theme',
     // '<rootDir>/libs/shared/ui/jsx',
     // '<rootDir>/libs/shared/ui/mdi-jsx',
     // '<rootDir>/libs/shared/ui/next',

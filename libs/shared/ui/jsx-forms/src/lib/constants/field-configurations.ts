@@ -19,6 +19,7 @@ import type {FieldComponentMap} from '../types'
 import optionIsEqualToValue from '../utils/option-is-equal-to-value'
 import {
   FieldCheckbox,
+  FieldColorPicker,
   FieldDatePicker,
   FieldDualListSelect,
   FieldFieldArray,
@@ -107,4 +108,8 @@ export const FIELD_MAP_ICON_PICKER: FieldComponentMap = {
   component: FieldIconSelect,
   isClearable: true,
   isOptionEqualToValue: optionIsEqualToValue,
+}
+export const FIELD_MAP_COLOR_PICKER: FieldComponentMap = {
+  size: fieldSharedOptions.size,
+  component: FieldColorPicker,
 }

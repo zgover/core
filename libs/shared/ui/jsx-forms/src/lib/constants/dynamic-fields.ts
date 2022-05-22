@@ -32,11 +32,16 @@ import type {
   WizardProps,
 } from '@data-driven-forms/mui-component-mapper'
 import dynamic from 'next/dynamic'
+import type {ColorPickerProps} from '../components/color-picker.component'
 import type {IconSelectProps} from '../components/icon-select.component'
 
 
 export const FieldIconSelect = dynamic<IconSelectProps>(
   () => import('../components/icon-select.component').then((mod) => mod.default),
+  {ssr: false},
+)
+export const FieldColorPicker = dynamic<ColorPickerProps>(
+  () => import('../components/color-picker.component').then((mod) => mod.default),
   {ssr: false},
 )
 export const FieldSelect = dynamic<SelectProps<any>>(
