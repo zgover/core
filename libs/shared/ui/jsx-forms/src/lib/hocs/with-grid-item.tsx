@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import type {EmptyObj} from '@aglyn/shared-data-types'
+import type { EmptyObj } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
-import {getDisplayName} from '@aglyn/shared-util-tools'
-import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
-import MuiGrid, {type GridProps as MuiGridProps} from '@mui/material/Grid'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { getDisplayName } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
+import MuiGrid, { type GridProps as MuiGridProps } from '@mui/material/Grid'
 import {
   type ComponentType,
   type ElementType,
@@ -30,37 +30,32 @@ import {
   type RefAttributes,
 } from 'react'
 
-
 export interface GridWrappedMergeProps {
   FieldGridProps?: Partial<MuiGridProps>
 }
 
-export type GridWrappedComponentProps<D extends ElementType = any, P = EmptyObj> =
-  PropsWithoutRef<P & GridWrappedMergeProps>
-  & RefAttributes<D>
+export type GridWrappedComponentProps<D extends ElementType = any, P = EmptyObj> = PropsWithoutRef<
+  P & GridWrappedMergeProps
+> &
+  RefAttributes<D>
 
 export interface GridWrappedExoticComponent<D extends ElementType = any, P = EmptyObj>
   extends ForwardRefExoticComponent<GridWrappedComponentProps<D, P>> {}
 
-export function withGridItem<P>(WrappedComponent: ComponentType<P>): GridWrappedExoticComponent<any, P> {
+export function withGridItem<P>(
+  WrappedComponent: ComponentType<P>
+): GridWrappedExoticComponent<any, P> {
   const displayName = getDisplayName(WrappedComponent)
-  const WithGridItem = forwardRef<any, P & GridWrappedMergeProps>(
-    function RefRenderFn(props, ref) {
-      const {FieldGridProps, ...rest} = props
-      const {sx, ...gridProps} = FieldGridProps || {} as MuiGridProps
+  const WithGridItem = forwardRef<any, P & GridWrappedMergeProps>(function RefRenderFn(props, ref) {
+    const { FieldGridProps, ...rest } = props
+    const { sx, ...gridProps } = FieldGridProps || ({} as MuiGridProps)
 
-      return (
-        <MuiGrid
-          ref={ref}
-          item
-          sx={mergeSxProps({position: 'relative'}, sx)}
-          {...gridProps}
-        >
-          <WrappedComponent {...rest as P} />
-        </MuiGrid>
-      )
-    },
-  )
+    return (
+      <MuiGrid ref={ref} item sx={mergeSxProps({ position: 'relative' }, sx)} {...gridProps}>
+        <WrappedComponent {...(rest as P)} />
+      </MuiGrid>
+    )
+  })
   WithGridItem.displayName = `WithGridItem(${displayName})`
   hoistNonReactStatics(WithGridItem, WrappedComponent)
   return WithGridItem

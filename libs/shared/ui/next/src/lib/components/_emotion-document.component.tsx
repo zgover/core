@@ -15,17 +15,13 @@
  * limitations under the License.
  */
 
-import {IS_PRODUCTION, LINK_PREF, LINK_PRIORITY, META_PREF} from '@aglyn/shared-data-enums'
-import {
-  createEmotionCache,
-  createEmotionServer,
-  type EmotionCache,
-} from '@aglyn/shared-feature-themes'
-import {makeLinkElements, makeMetaElements} from '@aglyn/shared-ui-jsx'
-import {getDisplayName} from '@aglyn/shared-util-tools'
-import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
+import { IS_PRODUCTION, LINK_PREF, LINK_PRIORITY, META_PREF } from '@aglyn/shared-data-enums'
+import { createEmotionCache, createEmotionServer, type EmotionCache } from '@aglyn/shared-ui-theme'
+import { makeLinkElements, makeMetaElements } from '@aglyn/shared-ui-jsx'
+import { getDisplayName } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import crypto from 'crypto'
-import type {AppType, Enhancer} from 'next/dist/shared/lib/utils'
+import type { AppType, Enhancer } from 'next/dist/shared/lib/utils'
 import NextDocument, {
   type DocumentContext,
   type DocumentInitialProps,
@@ -34,15 +30,14 @@ import NextDocument, {
   Main,
   NextScript,
 } from 'next/document'
-import {Children, type ComponentType} from 'react'
-
+import { Children, type ComponentType } from 'react'
 
 const cspHashOf = (text: string) => {
   const hash = crypto.createHash('sha256')
   hash.update(text)
   return `'sha256-${hash.digest('base64')}'`
 }
-export type LangParam = {lang?: string}
+export type LangParam = { lang?: string }
 export type InitPropsResponse = Promise<DocumentInitialProps & LangParam>
 
 export interface _EmotionDocumentProps extends LangParam {}
@@ -79,20 +74,19 @@ export interface _EmotionDocumentProps extends LangParam {}
  * @see {@link NextAppThemedComponent}
  */
 class _EmotionDocumentComponent<P extends _EmotionDocumentProps> extends NextDocument<P> {
-
   public static displayName = '_EmotionDocumentComponent'
   public static readonly aglyn = true
   public static defaultLanguage = 'en'
 
   public static EmotionStyleElement(props) {
-    const {key, css, ids} = props
+    const { key, css, ids } = props
     return (
       <style
         id={`emotion-server-${key}`}
         key={key}
         data-emotion={`${key} ${ids.join(' ')}`}
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{__html: css}}
+        dangerouslySetInnerHTML={{ __html: css }}
       />
     )
   }
@@ -104,11 +98,11 @@ class _EmotionDocumentComponent<P extends _EmotionDocumentProps> extends NextDoc
 
   public static useWithEmotionCache(cache?: EmotionCache): Enhancer<AppType> {
     return function withEmotionCache<P>(
-      Component: ComponentType<P & {emotionCache?: EmotionCache}>
+      Component: ComponentType<P & { emotionCache?: EmotionCache }>
     ): ComponentType<P> {
       const displayName = getDisplayName(Component)
       function WithEmotionCache(props: P) {
-        return (<Component emotionCache={cache} {...props} />)
+        return <Component emotionCache={cache} {...props} />
       }
       WithEmotionCache.displayName = `WithEmotionCache(${displayName})`
       hoistNonReactStatics(WithEmotionCache, Component)
@@ -123,40 +117,40 @@ class _EmotionDocumentComponent<P extends _EmotionDocumentProps> extends NextDoc
    * rendering logic synchronously to support server-rendering wrappers
    */
   static async getInitialProps(ctx: DocumentContext): InitPropsResponse {
-    const {renderPage, query} = ctx
+    const { renderPage, query } = ctx
     const lang = this.getDocumentLanguage(query)
     const emotionCache: EmotionCache = createEmotionCache()
-    const {extractCriticalToChunks} = createEmotionServer(emotionCache)
+    const { extractCriticalToChunks } = createEmotionServer(emotionCache)
     const withEmotionCache = this.useWithEmotionCache(emotionCache)
 
-    ctx.renderPage = () => renderPage({
-      enhanceApp: withEmotionCache,
-    })
+    ctx.renderPage = () =>
+      renderPage({
+        enhanceApp: withEmotionCache,
+      })
 
-    const {styles: initialStyles, ...initialProps} = await NextDocument.getInitialProps(ctx)
-    const {styles: emotionStyles} = extractCriticalToChunks(initialProps.html)
+    const { styles: initialStyles, ...initialProps } = await NextDocument.getInitialProps(ctx)
+    const { styles: emotionStyles } = extractCriticalToChunks(initialProps.html)
 
-    const styles = Children
-      .toArray(initialStyles)
+    const styles = Children.toArray(initialStyles)
       // Styles fragment is rendered after the app and page rendering finish.
       .concat(emotionStyles.map(this.EmotionStyleElement))
 
     return {
       ...initialProps,
       lang,
-      styles
+      styles,
     }
   }
 
   public render(): JSX.Element {
-    const {lang} = this.props
+    const { lang } = this.props
 
     let csp = `default-src 'self'; script-src 'self' ${cspHashOf(
-      NextScript.getInlineScriptSource(this.props),
+      NextScript.getInlineScriptSource(this.props)
     )}`
     if (IS_PRODUCTION) {
       csp = `default-src 'self' aglyn.com *.aglyn.com' ${cspHashOf(
-        NextScript.getInlineScriptSource(this.props),
+        NextScript.getInlineScriptSource(this.props)
       )}`
     }
 
@@ -178,5 +172,5 @@ class _EmotionDocumentComponent<P extends _EmotionDocumentProps> extends NextDoc
   }
 }
 
-export {_EmotionDocumentComponent}
+export { _EmotionDocumentComponent }
 export default _EmotionDocumentComponent

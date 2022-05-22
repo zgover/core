@@ -16,37 +16,42 @@
  */
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
-import {Box, Modal, type ModalProps as MuiModalProps, Stack} from '@mui/material'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { Box, Modal, type ModalProps as MuiModalProps, Stack } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
-import {forwardRef} from 'react'
-import {AglynSvgLogo} from '../const/svg-icons'
+import { forwardRef } from 'react'
+import { AglynSvgLogo } from '../const/svg-icons'
 import LoadingTextComponent from './loading-text.component'
-
 
 export interface SecureLoadingOverlayProps extends Partial<MuiModalProps<any, any>> {}
 
 const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>(
   function RefRenderFn(props, ref) {
-    const {sx, ...rest} = props
+    const { sx, ...rest } = props
     return (
       <Modal
         ref={ref}
         open
-        sx={mergeSxProps({
-          zIndex: 'blocking',
-          color: 'text.primary',
+        sx={mergeSxProps(
+          {
+            zIndex: 'blocking',
+            color: 'text.primary',
 
-          '& .MuiBackdrop-root': {
-            backgroundColor: theme => theme.palette.background.paper,
+            '& .MuiBackdrop-root': {
+              backgroundColor: (theme) => theme.palette.background.paper,
+            },
           },
-        }, sx)}
+          sx
+        )}
         {...rest}
       >
         <Box
           sx={{
             position: 'absolute',
-            top: 0, right: 0, bottom: 0, left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
             flexDirection: 'column',
             display: 'flex',
             alignItems: 'center',
@@ -54,18 +59,13 @@ const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>
             flexSpacing: 2,
           }}
         >
-          <Stack
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-            spacing={2}
-          >
-            <AglynSvgLogo sx={{width: 280, maxWidth: 1}} color="secondary" />
+          <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
+            <AglynSvgLogo sx={{ width: 280, maxWidth: 1 }} color="secondary" />
             <CircularProgress color="secondary" />
             <LoadingTextComponent
               component="div"
               variant="overline"
-              sx={{fontWeight: 'fontWeightBold'}}
+              sx={{ fontWeight: 'fontWeightBold' }}
             >
               {'One moment'}
             </LoadingTextComponent>
@@ -73,10 +73,10 @@ const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>
         </Box>
       </Modal>
     )
-  },
+  }
 )
 SecureLoadingOverlayComponent.displayName = 'SecureLoadingOverlayComponent'
 SecureLoadingOverlayComponent.aglyn = true
 
-export {SecureLoadingOverlayComponent}
+export { SecureLoadingOverlayComponent }
 export default SecureLoadingOverlayComponent

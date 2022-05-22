@@ -15,46 +15,44 @@
  * limitations under the License.
  */
 
-import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-enums'
+import { APP_WWW, IS_PRODUCTION } from '@aglyn/shared-data-enums'
 import {
   consoleThemeDark,
   consoleThemeLight,
   createWithThemeProvider,
-} from '@aglyn/shared-feature-themes'
-import {_AppComponent, type _AppProps} from '@aglyn/shared-ui-next'
-import {Fragment} from 'react'
+} from '@aglyn/shared-ui-theme'
+import { _AppComponent, type _AppProps } from '@aglyn/shared-ui-next'
+import { Fragment } from 'react'
 import HsEmbedScript from '../components/hs-embed-script'
 import VisitorQueueScript from '../components/visitor-queue-script'
-import {withAppController} from '../lib/aglyn-deprecated/lib/controllers/app-controller'
-
+import { withAppController } from '../lib/aglyn-deprecated/lib/controllers/app-controller'
 
 let app
 if (!app) {
   const previewProduction = true
-  app = withAppController(IS_PRODUCTION || previewProduction ? {} : {
-    authEmulator: 'http://localhost:9099/',
-    firestoreEmulator: {host: 'localhost', port: 8082},
-  })
+  app = withAppController(
+    IS_PRODUCTION || previewProduction
+      ? {}
+      : {
+          authEmulator: 'http://localhost:9099/',
+          firestoreEmulator: { host: 'localhost', port: 8082 },
+        }
+  )
 }
 const withThemeProvider = createWithThemeProvider({
   theme: [consoleThemeLight, consoleThemeDark],
 })
 
 const MainComponent = withThemeProvider((props: any) => {
-  const {children} = props
+  const { children } = props
 
-  return (
-    <>
-      {children}
-    </>
-  )
+  return <>{children}</>
 })
 
 export interface _Props<Props, InitialProps> extends _AppProps<Props, InitialProps> {}
 
 function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
-  const {headChildren, ...rest} = props
-
+  const { headChildren, ...rest } = props
 
   return (
     <_AppComponent
@@ -63,7 +61,7 @@ function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
         ['viewport', 'width=device-width, initial-scale=1'],
         ['description', APP_WWW.DESCRIPTION],
       ]}
-      headChildren={(
+      headChildren={
         <Fragment>
           {!IS_PRODUCTION ? null : (
             <Fragment>
@@ -73,7 +71,7 @@ function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
           )}
           {headChildren}
         </Fragment>
-      )}
+      }
       {...rest}
     />
   )

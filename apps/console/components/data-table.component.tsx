@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, mergeSxProps, styled} from '@aglyn/shared-feature-themes'
+import { generateComponentClassKeys, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import {
   Box,
   type BoxProps,
@@ -28,8 +28,7 @@ import {
   GridOverlay,
   type GridOverlayProps,
 } from '@mui/x-data-grid'
-import {forwardRef} from 'react'
-
+import { forwardRef } from 'react'
 
 const classKeys = generateComponentClassKeys('DataTableComponent', [
   'label',
@@ -43,7 +42,7 @@ const classKeys = generateComponentClassKeys('DataTableComponent', [
 
 const StyledGridOverlay = styled(GridOverlay, {
   name: 'AglynNoRowsOverlay',
-})(({theme}) => ({
+})(({ theme }) => ({
   flexDirection: 'column',
   [`& .${classKeys.label}`]: {
     marginTop: theme.spacing(1),
@@ -103,9 +102,7 @@ const noRowsOverlay = (label: string) =>
             </g>
           </g>
         </svg>
-        <div className={classKeys.label}>
-          {label ?? 'No Items'}
-        </div>
+        <div className={classKeys.label}>{label ?? 'No Items'}</div>
       </StyledGridOverlay>
     )
   }
@@ -117,7 +114,7 @@ const AppLoaderOverlayView = (props: LoadingOverlayViewProps = {}) =>
   function AppLoaderOverlayView() {
     return (
       <GridOverlay>
-        <div style={{position: 'absolute', top: 0, width: '100%'}}>
+        <div style={{ position: 'absolute', top: 0, width: '100%' }}>
           <LinearProgress color="secondary" {...props.LinearProgressProps} />
         </div>
       </GridOverlay>
@@ -133,24 +130,27 @@ export interface DataTableProps extends Partial<MuiDataGridProps> {
   noRowsLabel?: string
 }
 
-const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      rows = [],
-      columns = [],
-      loading,
-      RootBoxProps,
-      noRowsLabel,
-      LoadingOverlayViewProps,
-      children,
-      sx,
-      components,
-      ...rest
-    } = props
-    return (
-      <Box
-        ref={ref}
-        sx={mergeSxProps({
+const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const {
+    rows = [],
+    columns = [],
+    loading,
+    RootBoxProps,
+    noRowsLabel,
+    LoadingOverlayViewProps,
+    children,
+    sx,
+    components,
+    ...rest
+  } = props
+  return (
+    <Box
+      ref={ref}
+      sx={mergeSxProps(
+        {
           height: 400,
           width: '100%',
           display: 'flex',
@@ -163,29 +163,30 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
               },
             },
           },
-        }, sx)}
-        {...RootBoxProps}
-      >
-        <DataGrid
-          sx={{flexGrow: 1}}
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          components={{
-            NoRowsOverlay: noRowsOverlay(noRowsLabel),
-            LoadingOverlay: AppLoaderOverlayView(LoadingOverlayViewProps),
-            ...components,
-          }}
-          {...rest}
-        />
-        {children}
-      </Box>
-    )
-  },
-)
+        },
+        sx
+      )}
+      {...RootBoxProps}
+    >
+      <DataGrid
+        sx={{ flexGrow: 1 }}
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        components={{
+          NoRowsOverlay: noRowsOverlay(noRowsLabel),
+          LoadingOverlay: AppLoaderOverlayView(LoadingOverlayViewProps),
+          ...components,
+        }}
+        {...rest}
+      />
+      {children}
+    </Box>
+  )
+})
 
 DataTableComponent.displayName = 'DataTableComponent'
 DataTableComponent.aglyn = true
 
-export {DataTableComponent}
+export { DataTableComponent }
 export default DataTableComponent

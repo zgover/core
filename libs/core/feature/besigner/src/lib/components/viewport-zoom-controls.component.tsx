@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {SrOnlyComponent} from '@aglyn/shared-ui-jsx'
+import { styled } from '@aglyn/shared-ui-theme'
+import { SrOnlyComponent } from '@aglyn/shared-ui-jsx'
 import {
   mdiFitToPage,
   MdiIcon,
@@ -24,8 +24,8 @@ import {
   mdiMagnifyMinus,
   mdiMagnifyPlus,
 } from '@aglyn/shared-ui-mdi-jsx'
-import {_isFnT} from '@aglyn/shared-util-guards'
-import {truthy} from '@aglyn/shared-util-tools'
+import { _isFnT } from '@aglyn/shared-util-guards'
+import { truthy } from '@aglyn/shared-util-tools'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Tooltip from '@mui/material/Tooltip'
@@ -37,10 +37,9 @@ import {
   useCallback,
 } from 'react'
 
-
 const ViewportZoomControls = styled('div', {
   name: 'AglynViewportZoomControls',
-})(({theme}) => ({
+})(({ theme }) => ({
   display: 'none',
   position: 'absolute',
   bottom: theme.spacing(1),
@@ -86,7 +85,7 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
           onZoomReset(e)
         }
       },
-      [onZoomReset],
+      [onZoomReset]
     )
 
     const handleZoomDecrease = useCallback(
@@ -95,7 +94,7 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
           onZoomDecrease(e)
         }
       },
-      [onZoomDecrease],
+      [onZoomDecrease]
     )
 
     const handleZoomIncrease = useCallback(
@@ -104,7 +103,7 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
           onZoomIncrease(e)
         }
       },
-      [onZoomIncrease],
+      [onZoomIncrease]
     )
 
     const buttons = [
@@ -162,33 +161,22 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
     ]
 
     return (
-      <ViewportZoomControls
-        ref={ref}
-        id="aglyn:viewport-zoom-controls"
-        {...rest}
-      >
+      <ViewportZoomControls ref={ref} id="aglyn:viewport-zoom-controls" {...rest}>
         <ButtonGroup variant="contained" color="primary" aria-label="zoom controls">
-          {buttons.map(({
-            tooltipProps,
-            srOnlyProps,
-            buttonProps,
-            svgPathIconProps,
-            ...item
-          }, key) => (
-            <Tooltip
-              key={item.key ?? item.id ?? key}
-              {...tooltipProps}
-            >
-              <Button {...buttonProps}>
-                <MdiIcon fontSize="small" {...svgPathIconProps} />
-                <SrOnlyComponent component="span" {...srOnlyProps} />
-              </Button>
-            </Tooltip>
-          ))}
+          {buttons.map(
+            ({ tooltipProps, srOnlyProps, buttonProps, svgPathIconProps, ...item }, key) => (
+              <Tooltip key={item.key ?? item.id ?? key} {...tooltipProps}>
+                <Button {...buttonProps}>
+                  <MdiIcon fontSize="small" {...svgPathIconProps} />
+                  <SrOnlyComponent component="span" {...srOnlyProps} />
+                </Button>
+              </Tooltip>
+            )
+          )}
         </ButtonGroup>
       </ViewportZoomControls>
     )
-  },
+  }
 )
 
 ViewportZoomControlsComponent.displayName = 'ViewportZoomControlsComponent'

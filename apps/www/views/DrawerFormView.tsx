@@ -20,26 +20,25 @@ import {
   createStyles,
   type ExtendPropsOfWithStyles,
   withStyles,
-} from '@aglyn/shared-feature-themes'
-import {NavigationDrawerComponent, type NavigationDrawerProps} from '@aglyn/shared-ui-jsx'
-import {mdiClose, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {_isStrT} from '@aglyn/shared-util-guards'
-import {objectRemap} from '@aglyn/shared-util-tools'
-import {Box, Button} from '@mui/material'
+} from '@aglyn/shared-ui-theme'
+import { NavigationDrawerComponent, type NavigationDrawerProps } from '@aglyn/shared-ui-jsx'
+import { mdiClose, MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { _isStrT } from '@aglyn/shared-util-guards'
+import { objectRemap } from '@aglyn/shared-util-tools'
+import { Box, Button } from '@mui/material'
 import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
-import {ChangeEventHandler, forwardRef, Fragment, MouseEventHandler} from 'react'
+import { ChangeEventHandler, forwardRef, Fragment, MouseEventHandler } from 'react'
 import FieldSet from '../components/FieldSet'
-import {Fields} from '../forms'
-
+import { Fields } from '../forms'
 
 export const drawerFormViewStyles = (theme) =>
   createStyles({
-    closeButton: {marginRight: theme.spacing(2)},
-    pt2: {paddingTop: theme.spacing(2)},
-    wrapper: {position: 'relative'},
+    closeButton: { marginRight: theme.spacing(2) },
+    pt2: { paddingTop: theme.spacing(2) },
+    wrapper: { position: 'relative' },
     loadingBar: {
       position: 'absolute',
       backgroundColor: alpha(theme.palette.primary.main, 0.86),
@@ -121,7 +120,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
       <div className={classes.wrapper}>
         {loading && (
           <Fragment>
-            <LinearProgress classes={{root: classes.loadingBar}} color="secondary" />
+            <LinearProgress classes={{ root: classes.loadingBar }} color="secondary" />
           </Fragment>
         )}
 
@@ -140,7 +139,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
                     {JSON.stringify(
                       objectRemap(fields, (f) => f.value ?? ''),
                       null,
-                      2,
+                      2
                     )}
                   </pre>
                 </Box>
@@ -153,4 +152,4 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
   )
 })
 
-export default withStyles(drawerFormViewStyles, {name: 'DrawerFormView'})(DrawerFormView)
+export default withStyles(drawerFormViewStyles, { name: 'DrawerFormView' })(DrawerFormView)

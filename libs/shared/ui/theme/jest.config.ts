@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'shared-feature-themes',
+  displayName: 'shared-ui-theme',
   preset: '../../../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,5 +11,5 @@ export default {
     '^.+\\.[tj]sx?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../../../coverage/libs/shared/feature/themes',
+  coverageDirectory: '../../../../coverage/libs/shared/ui/theme',
 }

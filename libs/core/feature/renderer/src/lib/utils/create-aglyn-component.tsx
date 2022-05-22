@@ -24,32 +24,25 @@ import {
   OF_KIND,
   OF_TYPE,
 } from '@aglyn/core-data-framework'
-import {styled} from '@aglyn/shared-feature-themes'
-import {type ErrorBoundaryProps, withErrorBoundary} from '@aglyn/shared-ui-jsx'
-import {copy} from '@aglyn/shared-util-tools'
-import {hoistNonReactStatics, pascalCase} from '@aglyn/shared-util-vendor'
-import {forwardRef} from 'react'
-
+import { styled } from '@aglyn/shared-ui-theme'
+import { type ErrorBoundaryProps, withErrorBoundary } from '@aglyn/shared-ui-jsx'
+import { copy } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics, pascalCase } from '@aglyn/shared-util-vendor'
+import { forwardRef } from 'react'
 
 export function createAglynComponent<P = any, C = any>(
   schema: AglynComponentSchema<P>,
   component: C | any,
-  options?: Partial<ErrorBoundaryProps>,
+  options?: Partial<ErrorBoundaryProps>
 ): ComponentRegisterPayload<P> {
-  const {componentId, bundleId, emotion} = schema
+  const { componentId, bundleId, emotion } = schema
   const pascalId = `${bundleId ? pascalCase(bundleId) + '-' : ''}${pascalCase(componentId)}`
 
-  const Component = emotion?.disable ? component : styled(component, emotion?.options)(
-    ({}),
-  )
+  const Component = emotion?.disable ? component : styled(component, emotion?.options)({})
 
-  const AglynComponent = forwardRef<any, P>(
-    function RefRenderFn(props, ref) {
-      return (
-        <Component ref={ref} {...props} />
-      )
-    },
-  ) as IAglynComponent<P>
+  const AglynComponent = forwardRef<any, P>(function RefRenderFn(props, ref) {
+    return <Component ref={ref} {...props} />
+  }) as IAglynComponent<P>
 
   AglynComponent.displayName = `AglynComponent(${pascalId})`
   AglynComponent.componentId = componentId

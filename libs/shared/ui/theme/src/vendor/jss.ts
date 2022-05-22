@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2021 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,5 @@
  * limitations under the License.
  */
 
-import emotionCache, {
-  type EmotionCache,
-  type Options as CreateEmotionCacheOptions,
-} from '@emotion/cache'
-
-
-export type {CreateEmotionCacheOptions, EmotionCache}
-
-export {
-  CacheProvider,
-  withEmotionCache,
-} from '@emotion/react'
-
-export {default as createEmotionServer, type EmotionServer} from '@emotion/server/create-instance'
-
-export function createEmotionCache(options?: Partial<CreateEmotionCacheOptions>): EmotionCache {
-  return emotionCache({
-    key: 'css',
-    ...options,
-  })
-}
+export * as JSS from 'jss'
+export { default as jssRtl } from 'jss-rtl'

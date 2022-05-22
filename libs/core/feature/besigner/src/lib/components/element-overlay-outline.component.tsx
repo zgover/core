@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
-import {type ElementId} from '@aglyn/core-data-framework'
-import {alpha, generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import {getElementClientRectBounding, type VirtualElement} from '@aglyn/shared-util-dom'
-import Box, {type BoxProps} from '@mui/material/Box'
+import { type ElementId } from '@aglyn/core-data-framework'
+import { alpha, generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import { getElementClientRectBounding, type VirtualElement } from '@aglyn/shared-util-dom'
+import Box, { type BoxProps } from '@mui/material/Box'
 import clsx from 'clsx'
-import {forwardRef, useMemo} from 'react'
+import { forwardRef, useMemo } from 'react'
 import useAglynCanvasElementStatus from '../hooks/use-aglyn-canvas-element-status'
 import useAglynDndElementStatus from '../hooks/use-aglyn-dnd-element-status'
-
 
 const classKeys = generateComponentClassKeys('AglynElementOverlayOutline', [
   'open',
@@ -35,7 +34,7 @@ const classKeys = generateComponentClassKeys('AglynElementOverlayOutline', [
 
 const ElementOverlayOutline = styled(Box, {
   name: 'AglynElementOverlayOutline',
-})(({theme}) => ({
+})(({ theme }) => ({
   pointerEvents: 'none',
   position: 'absolute',
   left: 0,
@@ -79,7 +78,6 @@ const ElementOverlayOutline = styled(Box, {
       cursor: 'no-drop',
     },
   },
-
 }))
 
 export interface ElementOverlayOutlineProps extends BoxProps {
@@ -89,22 +87,28 @@ export interface ElementOverlayOutlineProps extends BoxProps {
 
 const ElementOverlayOutlineComponent = forwardRef<any, ElementOverlayOutlineProps>(
   function RefRenderFn(props, ref) {
-    const {className: classNameProp, $id, anchorEl, ...rest} = props
+    const { className: classNameProp, $id, anchorEl, ...rest } = props
 
     const [isDragging, isDraggingOver] = useAglynDndElementStatus($id)
-    const {isSelfSelected, isSelfHovered} = useAglynCanvasElementStatus($id)
+    const { isSelfSelected, isSelfHovered } = useAglynCanvasElementStatus($id)
     const rect = anchorEl && getElementClientRectBounding(anchorEl)
-    const style = useMemo(() => ({
-      width: rect?.width,
-      height: rect?.height,
-    }), [rect])
+    const style = useMemo(
+      () => ({
+        width: rect?.width,
+        height: rect?.height,
+      }),
+      [rect]
+    )
 
-    const className = clsx({
-      [classKeys.draggingSelf]: Boolean(isDragging),
-      [classKeys.draggingOver]: Boolean(isDraggingOver),
-      [classKeys.hoveringSelf]: Boolean(isSelfHovered),
-      [classKeys.selectedSelf]: Boolean(isSelfSelected),
-    }, classNameProp)
+    const className = clsx(
+      {
+        [classKeys.draggingSelf]: Boolean(isDragging),
+        [classKeys.draggingOver]: Boolean(isDraggingOver),
+        [classKeys.hoveringSelf]: Boolean(isSelfHovered),
+        [classKeys.selectedSelf]: Boolean(isSelfSelected),
+      },
+      classNameProp
+    )
 
     return (
       <ElementOverlayOutline
@@ -115,12 +119,12 @@ const ElementOverlayOutlineComponent = forwardRef<any, ElementOverlayOutlineProp
         {...rest}
       />
     )
-  },
+  }
 )
 
 ElementOverlayOutlineComponent.displayName = 'ElementOverlayOutlineComponent'
 ElementOverlayOutlineComponent.aglyn = true
 ElementOverlayOutlineComponent.defaultProps = {}
 
-export {ElementOverlayOutlineComponent}
+export { ElementOverlayOutlineComponent }
 export default ElementOverlayOutlineComponent

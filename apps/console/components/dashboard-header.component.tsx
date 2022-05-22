@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   BackgroundImageComponent,
   type BackgroundImageComponentProps,
   ContainerComponent,
 } from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {Grid, Typography, type TypographyProps} from '@mui/material'
-import {type ReactNode, useMemo} from 'react'
-import {isElement} from 'react-is'
-import BreadcrumbsComponent, {type BreadcrumbsProps} from '../components/breadcrumbs.component'
-import {CONTENT_MAX_WIDTH} from '../constants/shared'
-
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { Grid, Typography, type TypographyProps } from '@mui/material'
+import { type ReactNode, useMemo } from 'react'
+import { isElement } from 'react-is'
+import BreadcrumbsComponent, { type BreadcrumbsProps } from '../components/breadcrumbs.component'
+import { CONTENT_MAX_WIDTH } from '../constants/shared'
 
 export interface DashboardHeaderProps extends Partial<BackgroundImageComponentProps> {
   children?: ReactNode
@@ -49,12 +48,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
     ...rest
   } = props
 
-  const {
-    children: headerChildren,
-    sx: headerSx,
-    icon: headerIcon,
-    ...header
-  } = headerProp || {}
+  const { children: headerChildren, sx: headerSx, icon: headerIcon, ...header } = headerProp || {}
 
   const breadcrumbs = useMemo(() => {
     return Array.isArray(breadcrumbItems) ? breadcrumbItems : []
@@ -84,35 +78,40 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
           alignItems="center"
           spacing={2}
         >
-          <Grid
-            item
-          >
+          <Grid item>
             <Typography
               component="h1"
               variant="h4"
-              sx={mergeSxProps({
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }, headerSx)}
+              sx={mergeSxProps(
+                {
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                },
+                headerSx
+              )}
               {...header}
             >
-
-              {!headerIcon || isElement(headerIcon) ? headerIcon : (
+              {!headerIcon || isElement(headerIcon) ? (
+                headerIcon
+              ) : (
                 <MdiIcon
                   color="inherit"
                   {...headerIcon}
-                  sx={mergeSxProps({
-                    padding: 1,
-                    mr: 1.75,
-                    fontSize: `1.5em`,
-                    borderWidth: `1px`,
-                    borderStyle: 'solid',
-                    borderColor: 'tertiary.dark',
-                    color: 'quaternary.contrastText',
-                    bgcolor: 'quaternary.main',
-                    borderRadius: (theme) => `${theme.shape.appIconBorderRadius}`,
-                  }, headerIcon['sx'])}
+                  sx={mergeSxProps(
+                    {
+                      padding: 1,
+                      mr: 1.75,
+                      fontSize: `1.5em`,
+                      borderWidth: `1px`,
+                      borderStyle: 'solid',
+                      borderColor: 'tertiary.dark',
+                      color: 'quaternary.contrastText',
+                      bgcolor: 'quaternary.main',
+                      borderRadius: (theme) => `${theme.shape.appIconBorderRadius}`,
+                    },
+                    headerIcon['sx']
+                  )}
                 />
               )}
               {headerChildren}
@@ -125,7 +124,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
                   my: 2,
                   marginTop: 1,
                   color: 'text.primary',
-                  'a': {
+                  a: {
                     textDecoration: 'none',
                     ':hover': {
                       color: 'secondary.main',
@@ -136,11 +135,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
             )}
           </Grid>
 
-          {headerRight && (
-            <Grid item>
-              {headerRight}
-            </Grid>
-          )}
+          {headerRight && <Grid item>{headerRight}</Grid>}
         </Grid>
         {children}
       </ContainerComponent>
@@ -155,5 +150,5 @@ DashboardHeaderComponent.defaultProps = {
   disableDefaultBreadcrumb: false,
 }
 
-export {DashboardHeaderComponent}
+export { DashboardHeaderComponent }
 export default DashboardHeaderComponent

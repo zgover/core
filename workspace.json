@@ -539,29 +539,6 @@
       },
       "tags": ["scope:lib", "scope:shared", "scope:feature"]
     },
-    "shared-feature-themes": {
-      "root": "libs/shared/feature/themes",
-      "sourceRoot": "libs/shared/feature/themes/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/shared/feature/themes/**/*.ts"]
-          },
-          "outputs": ["{options.outputFile}"]
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/shared/feature/themes"],
-          "options": {
-            "jestConfig": "libs/shared/feature/themes/jest.config.ts",
-            "passWithNoTests": true
-          }
-        }
-      },
-      "tags": ["scope:lib", "scope:shared", "scope:feature"]
-    },
     "shared-ui-jsx": {
       "root": "libs/shared/ui/jsx",
       "sourceRoot": "libs/shared/ui/jsx/src",
@@ -688,6 +665,29 @@
           }
         }
       }
+    },
+    "shared-ui-theme": {
+      "root": "libs/shared/ui/theme",
+      "sourceRoot": "libs/shared/ui/theme/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/shared/ui/theme/**/*.ts"]
+          },
+          "outputs": ["{options.outputFile}"]
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/ui/theme"],
+          "options": {
+            "jestConfig": "libs/shared/ui/theme/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:feature"]
     },
     "shared-util-dom": {
       "root": "libs/shared/util/dom",

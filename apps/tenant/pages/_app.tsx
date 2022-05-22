@@ -15,35 +15,29 @@
  * limitations under the License.
  */
 
-import {APP_CONSOLE, IS_PRODUCTION} from '@aglyn/shared-data-enums'
+import { APP_CONSOLE, IS_PRODUCTION } from '@aglyn/shared-data-enums'
 import {
   consoleThemeDark,
   consoleThemeLight,
   createWithThemeProvider,
-} from '@aglyn/shared-feature-themes'
-import {_AppComponent, type _AppProps} from '@aglyn/shared-ui-next'
-import {Fragment} from 'react'
-
+} from '@aglyn/shared-ui-theme'
+import { _AppComponent, type _AppProps } from '@aglyn/shared-ui-next'
+import { Fragment } from 'react'
 
 const withThemeProvider = createWithThemeProvider({
   theme: [consoleThemeLight, consoleThemeDark],
 })
 
 const MainComponent = withThemeProvider((props: any) => {
-  const {children} = props
+  const { children } = props
 
-  return (
-    <>
-      {children}
-    </>
-  )
+  return <>{children}</>
 })
 
 export interface _Props<Props, InitialProps> extends _AppProps<Props, InitialProps> {}
 
 function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
-  const {headChildren, ...rest} = props
-
+  const { headChildren, ...rest } = props
 
   return (
     <_AppComponent
@@ -52,15 +46,12 @@ function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
         ['viewport', 'width=device-width, initial-scale=1'],
         ['description', APP_CONSOLE.DESCRIPTION],
       ]}
-      headChildren={(
+      headChildren={
         <Fragment>
-          {!IS_PRODUCTION ? null : (
-            <Fragment>
-            </Fragment>
-          )}
+          {!IS_PRODUCTION ? null : <Fragment></Fragment>}
           {headChildren}
         </Fragment>
-      )}
+      }
       {...rest}
     />
   )

@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {AppLink, ContainerComponent, GridItems} from '@aglyn/shared-ui-jsx'
-import {Box, Link as MuiLink, Typography} from '@mui/material'
+import { styled } from '@aglyn/shared-ui-theme'
+import { AppLink, ContainerComponent, GridItems } from '@aglyn/shared-ui-jsx'
+import { Box, Link as MuiLink, Typography } from '@mui/material'
 import NextImage from 'next/image'
-import {type ElementType, forwardRef, type HTMLAttributes} from 'react'
-import {footerNavigation} from '../const'
-
+import { type ElementType, forwardRef, type HTMLAttributes } from 'react'
+import { footerNavigation } from '../const'
 
 const FooterElement = styled('footer', {
   name: 'FooterElement',
@@ -35,13 +34,13 @@ export interface SiteFooterViewProps extends HTMLAttributes<HTMLDivElement> {
 
 const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function RefRenderFn(
   props,
-  ref,
+  ref
 ) {
-  const {children, className: propClass, ...rest} = props
+  const { children, className: propClass, ...rest } = props
 
   return (
     <FooterElement ref={ref} {...rest}>
-      <Box sx={{pt: 4}}>
+      <Box sx={{ pt: 4 }}>
         {children && <ContainerComponent maxWidth="lg">{children}</ContainerComponent>}
         <ContainerComponent maxWidth="lg">
           <GridItems
@@ -77,7 +76,7 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function 
                   </>
                 ),
               },
-              ...footerNavigation.map(({items, ...item}, key) => ({
+              ...footerNavigation.map(({ items, ...item }, key) => ({
                 xs: 12 as any,
                 sm: 6 as any,
                 md: 3 as any,
@@ -106,5 +105,5 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function 
 
 SiteFooterView.displayName = 'SiteFooterView'
 SiteFooterView.aglyn = true
-export {SiteFooterView}
+export { SiteFooterView }
 export default SiteFooterView

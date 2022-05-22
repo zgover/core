@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, mergeSxProps} from '@aglyn/shared-feature-themes'
+import { generateComponentClassKeys, mergeSxProps } from '@aglyn/shared-ui-theme'
 
 import {
   AppBar,
@@ -30,10 +30,9 @@ import {
   type ToolbarProps,
 } from '@mui/material'
 import clsx from 'clsx'
-import {forwardRef, type ReactNode, type Ref, useState} from 'react'
+import { forwardRef, type ReactNode, type Ref, useState } from 'react'
 import useCombinedRefs from '../hooks/use-combined-refs'
 import ElevateOnScroll from './elevate-on-scroll'
-
 
 const classKeys = generateComponentClassKeys('AglynNavigationDrawer', [
   'root',
@@ -56,117 +55,118 @@ export interface NavigationDrawerProps extends Partial<DrawerProps> {
   AppBarRightProps?: StackProps
 }
 
-const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      children,
-      className,
-      contentRef,
-      appBarLeft,
-      appBarRight,
-      sx,
-      AppBarProps,
-      ToolbarProps,
-      ContentProps,
-      AppBarLeftProps,
-      AppBarRightProps,
-      ...rest
-    } = props
+const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const {
+    children,
+    className,
+    contentRef,
+    appBarLeft,
+    appBarRight,
+    sx,
+    AppBarProps,
+    ToolbarProps,
+    ContentProps,
+    AppBarLeftProps,
+    AppBarRightProps,
+    ...rest
+  } = props
 
-    // const localContentRef = useRef<any>()
-    const [localContentRef, setLocalContentRef] = useState<any>()
+  // const localContentRef = useRef<any>()
+  const [localContentRef, setLocalContentRef] = useState<any>()
 
-    return (
-      <Drawer
-        ref={ref}
-        className={clsx(classKeys.root, className)}
-        sx={mergeSxProps(
-          {
-            width: theme => `${theme.breakpoints.values.sm}px`,
-            flexShrink: 0,
+  return (
+    <Drawer
+      ref={ref}
+      className={clsx(classKeys.root, className)}
+      sx={mergeSxProps(
+        {
+          width: (theme) => `${theme.breakpoints.values.sm}px`,
+          flexShrink: 0,
+          maxWidth: '100%',
+          '& .MuiDrawer-paper': {
+            width: (theme) => `${theme.breakpoints.values.sm}px`,
             maxWidth: '100%',
-            '& .MuiDrawer-paper': {
-              width: theme => `${theme.breakpoints.values.sm}px`,
-              maxWidth: '100%',
-            },
           },
-          sx,
-        )}
-        {...rest}
-      >
-        <ElevateOnScroll target={localContentRef}>
-          {({activeWithoutHysteresis}) => (
-            <AppBar
-              color="inherit"
-              position="relative"
-              variant="elevation"
-              elevation={activeWithoutHysteresis ? 4 : 0}
-              enableColorOnDark
-              {...AppBarProps}
-              className={clsx(classKeys.appBar, AppBarProps?.className)}
-              sx={mergeSxProps(
-                {
-                  borderBottomWidth: 1,
-                  borderBottomStyle: 'solid',
-                  borderBottomColor: 'divider',
-                },
-                AppBarProps?.sx,
-              )}
-            >
-              <Toolbar
-                {...ToolbarProps}
-                       className={clsx(classKeys.toolbar, ToolbarProps?.className)}
+        },
+        sx
+      )}
+      {...rest}
+    >
+      <ElevateOnScroll target={localContentRef}>
+        {({ activeWithoutHysteresis }) => (
+          <AppBar
+            color="inherit"
+            position="relative"
+            variant="elevation"
+            elevation={activeWithoutHysteresis ? 4 : 0}
+            enableColorOnDark
+            {...AppBarProps}
+            className={clsx(classKeys.appBar, AppBarProps?.className)}
+            sx={mergeSxProps(
+              {
+                borderBottomWidth: 1,
+                borderBottomStyle: 'solid',
+                borderBottomColor: 'divider',
+              },
+              AppBarProps?.sx
+            )}
+          >
+            <Toolbar {...ToolbarProps} className={clsx(classKeys.toolbar, ToolbarProps?.className)}>
+              <Stack
+                alignItems="center"
+                justifyContent="space-between"
+                direction="row"
+                spacing={2}
+                width={1}
               >
                 <Stack
-                  alignItems="center"
-                  justifyContent="space-between"
                   direction="row"
-                  spacing={2}
-                  width={1}
+                  alignItems="center"
+                  justifyContent="flex-start"
+                  {...AppBarLeftProps}
+                  className={clsx(classKeys.appBarLeft, AppBarLeftProps?.className)}
                 >
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="flex-start"
-                    {...AppBarLeftProps}
-                    className={clsx(classKeys.appBarLeft, AppBarLeftProps?.className)}
-                  >
-                    {appBarLeft}
-                  </Stack>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="flex-start"
-                    {...AppBarRightProps}
-                    className={clsx(classKeys.appBarRight, AppBarRightProps?.className)}
-                  >
-                    {appBarRight}
-                  </Stack>
+                  {appBarLeft}
                 </Stack>
-              </Toolbar>
-            </AppBar>
-          )}
-        </ElevateOnScroll>
-        <Box
-          ref={useCombinedRefs(setLocalContentRef, contentRef)}
-          {...ContentProps}
-          className={clsx(classKeys.content, ContentProps?.className)}
-          sx={mergeSxProps({
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                  {...AppBarRightProps}
+                  className={clsx(classKeys.appBarRight, AppBarRightProps?.className)}
+                >
+                  {appBarRight}
+                </Stack>
+              </Stack>
+            </Toolbar>
+          </AppBar>
+        )}
+      </ElevateOnScroll>
+      <Box
+        ref={useCombinedRefs(setLocalContentRef, contentRef)}
+        {...ContentProps}
+        className={clsx(classKeys.content, ContentProps?.className)}
+        sx={mergeSxProps(
+          {
             height: '100%',
             width: '100%',
             overflow: 'auto',
-          }, ContentProps?.sx)}
-        >
-          {children}
-        </Box>
-      </Drawer>
-    )
-  },
-)
+          },
+          ContentProps?.sx
+        )}
+      >
+        {children}
+      </Box>
+    </Drawer>
+  )
+})
 
 NavigationDrawerComponent.displayName = 'NavigationDrawerComponent'
 NavigationDrawerComponent.aglyn = true
 NavigationDrawerComponent.defaultProps = {}
 
-export {NavigationDrawerComponent}
+export { NavigationDrawerComponent }
 export default NavigationDrawerComponent

@@ -15,12 +15,17 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, mergeSxProps} from '@aglyn/shared-feature-themes'
-import {Box, Card, CardActionArea, type CardProps as MuiCardProps, Typography} from '@mui/material'
+import { generateComponentClassKeys, mergeSxProps } from '@aglyn/shared-ui-theme'
+import {
+  Box,
+  Card,
+  CardActionArea,
+  type CardProps as MuiCardProps,
+  Typography,
+} from '@mui/material'
 import clsx from 'clsx'
-import {forwardRef, type MouseEvent, type ReactNode, useCallback} from 'react'
-import type {GridListItemData} from './grid-list'
-
+import { forwardRef, type MouseEvent, type ReactNode, useCallback } from 'react'
+import type { GridListItemData } from './grid-list'
 
 const cardClasses = generateComponentClassKeys('AglynCardIconListItem', [
   'actionArea',
@@ -39,99 +44,96 @@ export interface CardIconListItemProps extends Partial<MuiCardProps> {
   }['bivarianceHack']
 }
 
-export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      className,
-      children,
-      selected,
-      item,
-      label,
-      onActionClick,
-      preview,
-      sx,
-      ...rest
-    } = props
-    const isSelected = Boolean(selected)
-    const handleClick = useCallback(
-      (e) => {
-        onActionClick && onActionClick(e, item)
-      },
-      [item, onActionClick],
-    )
-    return (
-      <Card
-        ref={ref}
-        className={clsx({
+export const CardIconListItem = forwardRef<any, CardIconListItemProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const { className, children, selected, item, label, onActionClick, preview, sx, ...rest } = props
+  const isSelected = Boolean(selected)
+  const handleClick = useCallback(
+    (e) => {
+      onActionClick && onActionClick(e, item)
+    },
+    [item, onActionClick]
+  )
+  return (
+    <Card
+      ref={ref}
+      className={clsx(
+        {
           [cardClasses.selected]: isSelected,
-        }, className)}
-        sx={mergeSxProps({
+        },
+        className
+      )}
+      sx={mergeSxProps(
+        {
           [`&.${cardClasses.selected}`]: {
             [`& .${cardClasses.actionArea}`]: {
               backgroundColor: 'secondary.main',
               color: 'secondary.contrastText',
             },
           },
-        }, sx)}
-        {...rest}
+        },
+        sx
+      )}
+      {...rest}
+    >
+      <CardActionArea
+        disabled={isSelected}
+        onClick={handleClick}
+        className={cardClasses.actionArea}
+        sx={{
+          height: 0,
+          position: 'relative',
+          paddingTop: `${(3 / 4) * 100}%`, // 16:9
+        }}
       >
-        <CardActionArea
-          disabled={isSelected}
-          onClick={handleClick}
-          className={cardClasses.actionArea}
+        <Box
+          className={cardClasses.wrapper}
           sx={{
-            height: 0,
-            position: 'relative',
-            paddingTop: `${(3 / 4) * 100}%`, // 16:9
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%',
           }}
         >
           <Box
-            className={cardClasses.wrapper}
+            className={cardClasses.content}
             sx={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
               width: '100%',
               height: '100%',
+              display: 'flex',
+              textAlign: 'center',
+              flexDirection: 'column',
+              justifyContent: 'space-evenly',
+              padding: 0.5,
             }}
           >
-            <Box
-              className={cardClasses.content}
-              sx={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                textAlign: 'center',
-                flexDirection: 'column',
-                justifyContent: 'space-evenly',
-                padding: 0.5,
-              }}
-            >
-              <span>
-                {children}
-                {preview}
-              </span>
-              {label && (
-                <Typography
-                  component="span"
-                  display="block"
-                  variant="subtitle2"
-                  sx={{
-                    lineHeight: 1.43,
-                    fontSize: (theme) => theme.typography.pxToRem(10),
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {label}
-                </Typography>
-              )}
-            </Box>
+            <span>
+              {children}
+              {preview}
+            </span>
+            {label && (
+              <Typography
+                component="span"
+                display="block"
+                variant="subtitle2"
+                sx={{
+                  lineHeight: 1.43,
+                  fontSize: (theme) => theme.typography.pxToRem(10),
+                  textTransform: 'uppercase',
+                }}
+              >
+                {label}
+              </Typography>
+            )}
           </Box>
-        </CardActionArea>
-      </Card>
-    )
-  }
-)
+        </Box>
+      </CardActionArea>
+    </Card>
+  )
+})
 
 CardIconListItem.displayName = 'CardIconListItem'
 CardIconListItem.aglyn = true

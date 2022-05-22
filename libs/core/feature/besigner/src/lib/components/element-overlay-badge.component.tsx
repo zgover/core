@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-import {type ElementId, isRootElementId} from '@aglyn/core-data-framework'
+import { type ElementId, isRootElementId } from '@aglyn/core-data-framework'
 import {
   ICON_VARIANT_MODIFY_DRAG,
   ICON_VARIANT_MODIFY_DUPLICATE,
   ICON_VARIANT_MODIFY_EDIT,
   ICON_VARIANT_SELECT_PARENT,
 } from '@aglyn/shared-data-enums'
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
-import {SrOnlyComponent, type SrOnlyComponentProps} from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { SrOnlyComponent, type SrOnlyComponentProps } from '@aglyn/shared-ui-jsx'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import {
   Button as MuiButton,
   ButtonGroup as MuiButtonGroup,
@@ -33,9 +33,8 @@ import {
   Tooltip as MuiTooltip,
   type TooltipProps,
 } from '@mui/material'
-import {type ChangeEvent, forwardRef, useCallback} from 'react'
-import type {DragElementWrapper} from 'react-dnd'
-
+import { type ChangeEvent, forwardRef, useCallback } from 'react'
+import type { DragElementWrapper } from 'react-dnd'
 
 export interface BadgeButtonProps extends Omit<TooltipProps, 'children'> {
   children?: SrOnlyComponentProps['children']
@@ -44,35 +43,33 @@ export interface BadgeButtonProps extends Omit<TooltipProps, 'children'> {
   SrOnlyProps?: SrOnlyComponentProps
 }
 
-export const BadgeButton = forwardRef<any, BadgeButtonProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      children,
-      ButtonProps,
-      icon,
-      SrOnlyProps,
-      ...rest
-    } = props
+export const BadgeButton = forwardRef<any, BadgeButtonProps>(function RefRenderFn(props, ref) {
+  const { children, ButtonProps, icon, SrOnlyProps, ...rest } = props
 
-    return (
-      <MuiTooltip ref={ref} {...rest}>
-        <MuiButton
-          {...ButtonProps}
-          sx={mergeSxProps({
-            pt: 0.5, pb: 0.5, pl: 0.585, pr: 0.585,
+  return (
+    <MuiTooltip ref={ref} {...rest}>
+      <MuiButton
+        {...ButtonProps}
+        sx={mergeSxProps(
+          {
+            pt: 0.5,
+            pb: 0.5,
+            pl: 0.585,
+            pr: 0.585,
             fontSize: 16,
-            '&.MuiButtonGroup-grouped': {minWidth: 30},
-          }, ButtonProps?.sx)}
-        >
-          <MdiIcon fontSize="inherit" {...icon} />
-          <SrOnlyComponent component="span" {...SrOnlyProps}>
-            {children}
-          </SrOnlyComponent>
-        </MuiButton>
-      </MuiTooltip>
-    )
-  },
-)
+            '&.MuiButtonGroup-grouped': { minWidth: 30 },
+          },
+          ButtonProps?.sx
+        )}
+      >
+        <MdiIcon fontSize="inherit" {...icon} />
+        <SrOnlyComponent component="span" {...SrOnlyProps}>
+          {children}
+        </SrOnlyComponent>
+      </MuiButton>
+    </MuiTooltip>
+  )
+})
 
 export interface ElementOverlayBadgeButtonsComponentProps extends ButtonGroupProps {
   $id: ElementId
@@ -97,31 +94,40 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
       ...rest
     } = props
 
+    const handleDuplicateClick = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        onDuplicateClick && onDuplicateClick(e)
+      },
+      [onDuplicateClick]
+    )
 
-    const handleDuplicateClick = useCallback((e: ChangeEvent<unknown>) => {
-      onDuplicateClick && onDuplicateClick(e)
-    }, [onDuplicateClick])
+    const handleModifyClick = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        onModifyClick && onModifyClick(e)
+      },
+      [onModifyClick]
+    )
 
+    const handleSelectParentClick = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        onSelectParentClick && onSelectParentClick(e)
+      },
+      [onSelectParentClick]
+    )
 
-    const handleModifyClick = useCallback((e: ChangeEvent<unknown>) => {
-      onModifyClick && onModifyClick(e)
-    }, [onModifyClick])
+    const handleParentHover = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        onHoverParent && onHoverParent(e)
+      },
+      [onHoverParent]
+    )
 
-
-    const handleSelectParentClick = useCallback((e: ChangeEvent<unknown>) => {
-      onSelectParentClick && onSelectParentClick(e)
-    }, [onSelectParentClick])
-
-
-    const handleParentHover = useCallback((e: ChangeEvent<unknown>) => {
-      onHoverParent && onHoverParent(e)
-    }, [onHoverParent])
-
-
-    const handleHoverParentLeave = useCallback((e: ChangeEvent<unknown>) => {
-      onHoverParentLeave && onHoverParentLeave(e)
-    }, [onHoverParentLeave])
-
+    const handleHoverParentLeave = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        onHoverParentLeave && onHoverParentLeave(e)
+      },
+      [onHoverParentLeave]
+    )
 
     return (
       <MuiButtonGroup
@@ -132,16 +138,15 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
         aria-label="element controls"
         {...rest}
       >
-
         {!isRootElementId($id) && (
           <BadgeButton
             title="Drag"
             children="drag"
             ButtonProps={{
               ref: dragHandleRef,
-              sx: {'&, &:hover': {cursor: 'move'}},
+              sx: { '&, &:hover': { cursor: 'move' } },
             }}
-            icon={{path: ICON_VARIANT_MODIFY_DRAG.path, color: 'secondary'}}
+            icon={{ path: ICON_VARIANT_MODIFY_DRAG.path, color: 'secondary' }}
           />
         )}
 
@@ -149,8 +154,8 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
           <BadgeButton
             title="Duplicate"
             children="duplicate"
-            ButtonProps={{onClick: handleDuplicateClick}}
-            icon={{path: ICON_VARIANT_MODIFY_DUPLICATE.path}}
+            ButtonProps={{ onClick: handleDuplicateClick }}
+            icon={{ path: ICON_VARIANT_MODIFY_DUPLICATE.path }}
           />
         )}
 
@@ -158,7 +163,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
           title="Modify"
           children="modify"
           onClick={handleModifyClick}
-          icon={{path: ICON_VARIANT_MODIFY_EDIT.path}}
+          icon={{ path: ICON_VARIANT_MODIFY_EDIT.path }}
         />
 
         {!isRootElementId($id) && (
@@ -170,16 +175,15 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
               onMouseEnter: handleParentHover,
               onMouseLeave: handleHoverParentLeave,
             }}
-            icon={{path: ICON_VARIANT_SELECT_PARENT.path}}
+            icon={{ path: ICON_VARIANT_SELECT_PARENT.path }}
           />
         )}
-
       </MuiButtonGroup>
     )
-  },
+  }
 )
 ElementOverlayBadgeComponent.displayName = 'ElementOverlayBadgeComponent'
 ElementOverlayBadgeComponent.aglyn = true
 
-export {ElementOverlayBadgeComponent}
+export { ElementOverlayBadgeComponent }
 export default ElementOverlayBadgeComponent

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {Conditional, OverrideableComponentProps} from '@aglyn/shared-data-types'
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
-import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
+import { Conditional, OverrideableComponentProps } from '@aglyn/shared-data-types'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import {
   Box,
   type BoxProps as MuiBoxProps,
@@ -44,7 +44,6 @@ import {
   useState,
 } from 'react'
 
-
 const ITEM_HEIGHT = 48
 const defaultState = {
   anchorEl: null,
@@ -53,14 +52,25 @@ const defaultState = {
 }
 
 type ItemTypes = 'item' | 'divider' | 'subheader' | undefined | never
-type ItemTypeProps = MuiMenuItemProps & {type?: 'item', icon?: MdiIconProps, endIcon?: MdiIconProps}
-type DividerTypeProps = DividerProps & {type: 'divider'}
-type SubheaderTypeProps = MuiListSubheaderProps & {type: 'subheader'}
-export type MenuItemProps<T extends ItemTypes = ItemTypes> =
-  OverrideableComponentProps &
-  Conditional<T, 'divider', DividerTypeProps,
-    Conditional<T, 'subheader', SubheaderTypeProps,
-      Conditional<T, 'item' | undefined | never, ItemTypeProps, ItemTypeProps>>>
+type ItemTypeProps = MuiMenuItemProps & {
+  type?: 'item'
+  icon?: MdiIconProps
+  endIcon?: MdiIconProps
+}
+type DividerTypeProps = DividerProps & { type: 'divider' }
+type SubheaderTypeProps = MuiListSubheaderProps & { type: 'subheader' }
+export type MenuItemProps<T extends ItemTypes = ItemTypes> = OverrideableComponentProps &
+  Conditional<
+    T,
+    'divider',
+    DividerTypeProps,
+    Conditional<
+      T,
+      'subheader',
+      SubheaderTypeProps,
+      Conditional<T, 'item' | undefined | never, ItemTypeProps, ItemTypeProps>
+    >
+  >
 
 /* eslint-disable-next-line */
 export interface MenuProps extends MuiBoxProps {
@@ -72,25 +82,16 @@ export interface MenuProps extends MuiBoxProps {
   horizontalOrigin?: MuiMenuProps['anchorOrigin']['horizontal']
 }
 
-export const Menu = forwardRef<any, MenuProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      children,
-      items,
-      context,
-      className,
-      sx,
-      dense,
-      MenuProps,
-      horizontalOrigin,
-      ...rest
-    } = props
+export const Menu = forwardRef<any, MenuProps>(function RefRenderFn(props, ref) {
+  const { children, items, context, className, sx, dense, MenuProps, horizontalOrigin, ...rest } =
+    props
 
-    const [state, setState] = useState(defaultState)
-    const child = Children.only(children)
-    const onChildClick = child.props?.onClick?.bind(null) as MouseEventHandler
-    const handleClose = () => setState(defaultState)
-    const handleClick = useCallback((event: MouseEvent<any>) => {
+  const [state, setState] = useState(defaultState)
+  const child = Children.only(children)
+  const onChildClick = child.props?.onClick?.bind(null) as MouseEventHandler
+  const handleClose = () => setState(defaultState)
+  const handleClick = useCallback(
+    (event: MouseEvent<any>) => {
       if (onChildClick) {
         onChildClick.call(null, event)
       }
@@ -102,137 +103,143 @@ export const Menu = forwardRef<any, MenuProps>(
         mouseX: event.clientX - 2,
         mouseY: event.clientY - 4,
       })
-    }, [context, onChildClick])
-    const open = Boolean(state.anchorEl || state.mouseY)
-    const cloned = cloneElement(child, {
-      onClick: handleClick,
-      'aria-expanded': open ? 'true' : 'false',
-    })
+    },
+    [context, onChildClick]
+  )
+  const open = Boolean(state.anchorEl || state.mouseY)
+  const cloned = cloneElement(child, {
+    onClick: handleClick,
+    'aria-expanded': open ? 'true' : 'false',
+  })
 
-    const {PaperProps, ...menuProps} = MenuProps || {} as any
-    const {sx: paperSx, ...paperProps} = PaperProps || {} as any
-    const arrowPlacement = horizontalOrigin === 'right'
-      ? {right: 14}
+  const { PaperProps, ...menuProps } = MenuProps || ({} as any)
+  const { sx: paperSx, ...paperProps } = PaperProps || ({} as any)
+  const arrowPlacement =
+    horizontalOrigin === 'right'
+      ? { right: 14 }
       : horizontalOrigin === 'center'
-        ? {right: 'auto', left: 'auto'}
-        : {left: 14}
+      ? { right: 'auto', left: 'auto' }
+      : { left: 14 }
 
-    return (
-      <Box
-        ref={ref}
-        component={'div'}
-        onContextMenu={context && handleClick}
-        sx={mergeSxProps(context && {cursor: 'context-menu'}, sx)}
-        {...rest}
+  return (
+    <Box
+      ref={ref}
+      component={'div'}
+      onContextMenu={context && handleClick}
+      sx={mergeSxProps(context && { cursor: 'context-menu' }, sx)}
+      {...rest}
+    >
+      {cloned}
+      <MuiMenu
+        anchorEl={context ? undefined : state.anchorEl}
+        anchorReference={context ? 'anchorPosition' : undefined}
+        anchorPosition={
+          !context || !state.mouseY
+            ? undefined
+            : {
+                top: state.mouseY,
+                left: state.mouseX,
+              }
+        }
+        anchorOrigin={
+          context
+            ? undefined
+            : {
+                vertical: 'bottom',
+                horizontal: horizontalOrigin || 'left',
+              }
+        }
+        transformOrigin={
+          context
+            ? undefined
+            : {
+                vertical: 'top',
+                horizontal: horizontalOrigin || 'left',
+              }
+        }
+        PaperProps={
+          context
+            ? undefined
+            : {
+                elevation: 0,
+                sx: mergeSxProps(
+                  {
+                    maxHeight: ITEM_HEIGHT * 4.5,
+                    width: '30ch',
+                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                    backgroundColor: 'background.secondary',
+                    marginTop: 0.5,
+                    '&:before': {
+                      content: '""',
+                      display: 'block',
+                      position: 'absolute',
+                      top: 0,
+                      width: 10,
+                      height: 10,
+                      bgcolor: 'background.secondary',
+                      transform: 'translateY(-50%) rotate(45deg)',
+                      zIndex: 0,
+                      ...arrowPlacement,
+                    },
+                  },
+                  paperSx
+                ),
+                ...paperProps,
+              }
+        }
+        // getContentAnchorEl={null}
+        open={open}
+        onClose={handleClose}
+        {...menuProps}
       >
-        {cloned}
-        <MuiMenu
-          anchorEl={context ? undefined : state.anchorEl}
-          anchorReference={context ? 'anchorPosition' : undefined}
-          anchorPosition={!context || !state.mouseY ? undefined : {
-            top: state.mouseY,
-            left: state.mouseX,
-          }}
-          anchorOrigin={context ? undefined : {
-            vertical: 'bottom',
-            horizontal: horizontalOrigin || 'left',
-          }}
-          transformOrigin={context ? undefined : {
-            vertical: 'top',
-            horizontal: horizontalOrigin || 'left',
-          }}
-          PaperProps={context ? undefined : {
-            elevation: 0,
-            sx: mergeSxProps({
-              maxHeight: ITEM_HEIGHT * 4.5,
-              width: '30ch',
-              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-              backgroundColor: 'background.secondary',
-              marginTop: 0.5,
-              '&:before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: 0,
-                width: 10,
-                height: 10,
-                bgcolor: 'background.secondary',
-                transform: 'translateY(-50%) rotate(45deg)',
-                zIndex: 0,
-                ...arrowPlacement,
-              },
-            }, paperSx),
-            ...paperProps,
-          }}
-          // getContentAnchorEl={null}
-          open={open}
-          onClose={handleClose}
-          {...menuProps}
-        >
-          {items.map(({onClick, icon, children, type, endIcon, ...item}: any, i) => {
-            const key = item.key ?? item.id ?? i
+        {items.map(({ onClick, icon, children, type, endIcon, ...item }: any, i) => {
+          const key = item.key ?? item.id ?? i
 
-            switch (type) {
-              case 'subheader':
-                return (
-                  <MuiListSubheader
-                    key={key}
-                    onClick={onClick}
-                    {...item as any}
-                  >
+          switch (type) {
+            case 'subheader':
+              return (
+                <MuiListSubheader key={key} onClick={onClick} {...(item as any)}>
+                  {children}
+                </MuiListSubheader>
+              )
+            case 'divider':
+              return (
+                <Divider key={key} onClick={onClick} {...(item as any)}>
+                  {children}
+                </Divider>
+              )
+            case 'item':
+            default:
+              return (
+                <MuiMenuItem
+                  key={key}
+                  dense={dense}
+                  onClick={(e) => {
+                    handleClose()
+                    onClick && onClick(e)
+                  }}
+                  {...item}
+                >
+                  {!icon?.path || !icon ? null : (
+                    <ListItemIcon>
+                      {!icon?.path ? icon : <MdiIcon fontSize="small" {...icon} />}
+                    </ListItemIcon>
+                  )}
+                  <ListItemText>{children}</ListItemText>
 
-                    {children}
-                  </MuiListSubheader>
-                )
-              case 'divider':
-                return (
-                  <Divider
-                    key={key}
-                    onClick={onClick}
-                    {...item as any}
-                  >
-                    {children}
-                  </Divider>
-                )
-              case 'item':
-              default:
-                return (
-                  <MuiMenuItem
-                    key={key}
-                    dense={dense}
-                    onClick={(e) => {
-                      handleClose()
-                      onClick && onClick(e)
-                    }}
-                    {...item}
-                  >
-                    {!icon?.path || !icon ? null : (
-                      <ListItemIcon>
-                        {!icon?.path ? icon : (
-                          <MdiIcon fontSize="small" {...icon} />
-                        )}
-                      </ListItemIcon>
-                    )}
-                    <ListItemText>
-                      {children}
-                    </ListItemText>
-
-                    {!endIcon?.path || !endIcon ? null : (
-                      <Typography variant="body2" color="text.secondary">
-                        {!endIcon?.path ? endIcon : (
-                          <MdiIcon fontSize="small" {...endIcon} />
-                        )}
-                      </Typography>
-                    )}
-                  </MuiMenuItem>
-                )
-            }
-          })}
-        </MuiMenu>
-      </Box>
-    )
-  },
-)
+                  {!endIcon?.path || !endIcon ? null : (
+                    <Typography variant="body2" color="text.secondary">
+                      {!endIcon?.path ? endIcon : <MdiIcon fontSize="small" {...endIcon} />}
+                    </Typography>
+                  )}
+                </MuiMenuItem>
+              )
+          }
+        })}
+      </MuiMenu>
+    </Box>
+  )
+})
 
 Menu.displayName = 'Menu'
 Menu.aglyn = true

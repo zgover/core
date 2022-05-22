@@ -15,18 +15,17 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import {AppLink, type AppLinkProps} from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {_isLength} from '@aglyn/shared-util-guards'
-import {truthy} from '@aglyn/shared-util-tools'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import { AppLink, type AppLinkProps } from '@aglyn/shared-ui-jsx'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { _isLength } from '@aglyn/shared-util-guards'
+import { truthy } from '@aglyn/shared-util-tools'
 import MuiBreadcrumbs, {
   type BreadcrumbsProps as MuiBreadcrumbsProps,
 } from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
-import {forwardRef, useMemo} from 'react'
-
+import { forwardRef, useMemo } from 'react'
 
 const classKeys = generateComponentClassKeys('AglynBreadcrumbs', [
   'item',
@@ -38,7 +37,7 @@ const classKeys = generateComponentClassKeys('AglynBreadcrumbs', [
 
 const StyledBreadcrumbs = styled(MuiBreadcrumbs, {
   name: 'AglynBreadcrumbs',
-})(({theme}) => ({
+})(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   minHeight: theme.spacing(4),
@@ -73,16 +72,13 @@ export interface BreadcrumbsProps extends MuiBreadcrumbsProps {
   centerIcons?: boolean
 }
 
-export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(
-  function RefRenderFn(props, ref) {
-    const {centerIcons, children, items, ...rest} = props
+export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(function RefRenderFn(props, ref) {
+  const { centerIcons, children, items, ...rest } = props
 
-    const MemoedItem = useMemo(() => {
-      const Component = forwardRef<any, BreadcrumbItemProps & {isLast: boolean}>(function RefRenderFn(
-        itemProps,
-        ref,
-      ) {
-        const {icon, className, isLast, disabled, ...item} = itemProps
+  const MemoedItem = useMemo(() => {
+    const Component = forwardRef<any, BreadcrumbItemProps & { isLast: boolean }>(
+      function RefRenderFn(itemProps, ref) {
+        const { icon, className, isLast, disabled, ...item } = itemProps
         const isDisabled = truthy(disabled || isLast)
         const itemClass = clsx(
           classKeys.item,
@@ -91,7 +87,7 @@ export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(
             [classKeys.centered]: Boolean(centerIcons),
             [classKeys.last]: Boolean(isLast),
           },
-          className,
+          className
         )
         const iconClass = clsx(classKeys.icon, icon?.className)
 
@@ -103,26 +99,26 @@ export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(
             {item.children}
           </ItemComponent>
         )
-      })
-      Component.displayName = 'Component'
-Component.aglyn = true
-      return Component
-    }, [centerIcons])
-
-    return (
-      <StyledBreadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
-        {items.map(({...item}, key, arr) => (
-          <MemoedItem
-            key={item.key ?? item.id ?? key}
-            isLast={_isLength(key, arr.length - 1)}
-            {...item}
-          />
-        ))}
-        {children}
-      </StyledBreadcrumbs>
+      }
     )
-  },
-)
+    Component.displayName = 'Component'
+    Component.aglyn = true
+    return Component
+  }, [centerIcons])
+
+  return (
+    <StyledBreadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
+      {items.map(({ ...item }, key, arr) => (
+        <MemoedItem
+          key={item.key ?? item.id ?? key}
+          isLast={_isLength(key, arr.length - 1)}
+          {...item}
+        />
+      ))}
+      {children}
+    </StyledBreadcrumbs>
+  )
+})
 
 Breadcrumbs.displayName = 'Breadcrumbs'
 Breadcrumbs.aglyn = true

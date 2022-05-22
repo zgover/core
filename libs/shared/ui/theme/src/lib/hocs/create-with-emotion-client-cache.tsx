@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-import {getDisplayName} from '@aglyn/shared-util-tools'
-import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
-import type {ComponentType} from 'react'
+import { getDisplayName } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
+import type { ComponentType } from 'react'
 import {
   CacheProvider,
   createEmotionCache,
   type CreateEmotionCacheOptions,
   type EmotionCache,
 } from '../../vendor/emotion'
-
 
 export type InjectedEmotionCacheProps = {
   emotionCache?: EmotionCache
@@ -36,14 +35,14 @@ export type WithEmotionClientCacheOptions = {
 }
 
 export function createWithEmotionClientCache(options: WithEmotionClientCacheOptions) {
-  const {emotionCache, emotionCacheOptions} = options
+  const { emotionCache, emotionCacheOptions } = options
   const defaultEmotionCache = emotionCache || createEmotionCache(emotionCacheOptions)
 
   return function withEmotionClientCache<P>(WrappedComponent: ComponentType<P>) {
     const displayName = getDisplayName(WrappedComponent)
 
     function WithEmotionClientCache(props: InjectedEmotionCacheProps & P) {
-      const {emotionCache, ...rest} = props
+      const { emotionCache, ...rest } = props
       const cache = emotionCache || defaultEmotionCache
 
       return (

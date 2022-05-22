@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
-import {BackgroundImageComponent, type BackgroundImageComponentProps} from '@aglyn/shared-ui-jsx'
-import {useContinueUrl} from '@aglyn/shared-util-next'
-import {Stack} from '@mui/material'
-import {useRouter} from 'next/router'
-import {useEffect} from 'react'
-import {useSigninCheck} from 'reactfire'
-
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { BackgroundImageComponent, type BackgroundImageComponentProps } from '@aglyn/shared-ui-jsx'
+import { useContinueUrl } from '@aglyn/shared-util-next'
+import { Stack } from '@mui/material'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { useSigninCheck } from 'reactfire'
 
 export interface UnauthenticatedLayoutProps extends Partial<BackgroundImageComponentProps> {
   requireEmailVerification?: boolean
@@ -30,15 +29,9 @@ export interface UnauthenticatedLayoutProps extends Partial<BackgroundImageCompo
 }
 
 function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
-  const {
-    children,
-    sx,
-    requireEmailVerification,
-    isSignOut,
-    ...rest
-  } = props
+  const { children, sx, requireEmailVerification, isSignOut, ...rest } = props
   const router = useRouter()
-  const {status, data: signInCheckResult} = useSigninCheck()
+  const { status, data: signInCheckResult } = useSigninCheck()
   const authLoading = status === 'loading'
   const signedIn = signInCheckResult?.signedIn === true
   const emailVerified = signInCheckResult?.user?.emailVerified
@@ -52,29 +45,24 @@ function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
     if (requireEmailVerification && !emailVerified) return void router.push('/validate-email')
 
     return void pushNext('/')
-  }, [
-    authLoading,
-    emailVerified,
-    isSignOut,
-    pushNext,
-    requireEmailVerification,
-    router,
-    signedIn,
-  ])
+  }, [authLoading, emailVerified, isSignOut, pushNext, requireEmailVerification, router, signedIn])
 
   return (
     <BackgroundImageComponent
       url="/_static/images/backgrounds/patterns/abstract-wave-lines.svg"
-      sx={mergeSxProps({
-        minHeight: '100vh',
-        bgcolor: 'background.default',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: {xs: 2, md: 3},
-        color: 'text.primary',
-      }, sx)}
+      sx={mergeSxProps(
+        {
+          minHeight: '100vh',
+          bgcolor: 'background.default',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: { xs: 2, md: 3 },
+          color: 'text.primary',
+        },
+        sx
+      )}
       {...rest}
     >
       <Stack
@@ -93,5 +81,5 @@ function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
 UnauthenticatedLayout.displayName = 'UnauthenticatedLayout'
 UnauthenticatedLayout.aglyn = true
 
-export {UnauthenticatedLayout}
+export { UnauthenticatedLayout }
 export default UnauthenticatedLayout

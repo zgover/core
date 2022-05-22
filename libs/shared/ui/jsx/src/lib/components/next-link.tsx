@@ -15,62 +15,58 @@
  * limitations under the License.
  */
 
-import type {OverrideableComponentProps, ReplaceKey} from '@aglyn/shared-data-types'
-import {styled} from '@aglyn/shared-feature-themes'
-import Link, {type LinkProps} from 'next/link'
-import {type AnchorHTMLAttributes, forwardRef} from 'react'
-
+import type { OverrideableComponentProps, ReplaceKey } from '@aglyn/shared-data-types'
+import { styled } from '@aglyn/shared-ui-theme'
+import Link, { type LinkProps } from 'next/link'
+import { type AnchorHTMLAttributes, forwardRef } from 'react'
 
 export interface NextAnchorProps extends AnchorHTMLAttributes<HTMLAnchorElement> {}
 
 // Add support for the sx prop
-export const NextAnchor = styled('a', {name: 'AglynNextLink'})<NextAnchorProps>({})
+export const NextAnchor = styled('a', { name: 'AglynNextLink' })<NextAnchorProps>({})
 NextAnchor.displayName = 'NextAnchor'
 NextAnchor.aglyn = true
 
-export type NextLinkBaseProps =
-  Omit<NextAnchorProps, 'href'>
-  & Omit<LinkProps, 'as' | 'href'>
-  & ReplaceKey<OverrideableComponentProps, 'component', 'anchorComponent'>
+export type NextLinkBaseProps = Omit<NextAnchorProps, 'href'> &
+  Omit<LinkProps, 'as' | 'href'> &
+  ReplaceKey<OverrideableComponentProps, 'component', 'anchorComponent'>
 
 export interface NextLinkProps extends NextLinkBaseProps, NextLinkBaseProps {
   hrefTo?: LinkProps['href']
   hrefAs?: LinkProps['as']
 }
 
-const NextLink = forwardRef<any, NextLinkProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      as: _1,
-      href: _2,
-      hrefAs,
-      hrefTo,
-      replace,
-      scroll,
-      passHref,
-      shallow,
-      prefetch,
-      locale,
-      anchorComponent: Anchor,
-      ...rest
-    } = props as LinkProps & NextLinkProps
+const NextLink = forwardRef<any, NextLinkProps>(function RefRenderFn(props, ref) {
+  const {
+    as: _1,
+    href: _2,
+    hrefAs,
+    hrefTo,
+    replace,
+    scroll,
+    passHref,
+    shallow,
+    prefetch,
+    locale,
+    anchorComponent: Anchor,
+    ...rest
+  } = props as LinkProps & NextLinkProps
 
-    return (
-      <Link
-        as={hrefAs}
-        href={hrefTo}
-        locale={locale}
-        passHref={passHref}
-        prefetch={prefetch}
-        replace={replace}
-        scroll={scroll}
-        shallow={shallow}
-      >
-        <Anchor ref={ref} {...rest} />
-      </Link>
-    )
-  },
-)
+  return (
+    <Link
+      as={hrefAs}
+      href={hrefTo}
+      locale={locale}
+      passHref={passHref}
+      prefetch={prefetch}
+      replace={replace}
+      scroll={scroll}
+      shallow={shallow}
+    >
+      <Anchor ref={ref} {...rest} />
+    </Link>
+  )
+})
 
 NextLink.displayName = 'NextLink'
 NextLink.aglyn = true
@@ -79,5 +75,5 @@ NextLink.defaultProps = {
   anchorComponent: NextAnchor,
 }
 
-export {NextLink}
+export { NextLink }
 export default NextLink

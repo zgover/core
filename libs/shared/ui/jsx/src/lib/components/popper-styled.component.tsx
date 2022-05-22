@@ -15,27 +15,23 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import {_isEqualitySameType} from '@aglyn/shared-util-guards'
-import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Popper'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import { _isEqualitySameType } from '@aglyn/shared-util-guards'
+import MuiPopper, { type PopperProps as MuiPopperProps } from '@mui/material/Popper'
 import clsx from 'clsx'
-import {forwardRef, HTMLAttributes} from 'react'
+import { forwardRef, HTMLAttributes } from 'react'
 
+const classKeys = generateComponentClassKeys('AglynPopperStyled', ['arrow'])
 
-const classKeys = generateComponentClassKeys('AglynPopperStyled', [
-  'arrow',
-])
-
-export const PopperStyledArrowComponent = styled(forwardRef<any, HTMLAttributes<HTMLDivElement>>(
-  function RefRenderFn(props, ref) {
-    const {className, ...rest} = props
-    return (
-      <div ref={ref} className={clsx(classKeys.arrow, className)} {...rest} />
-    )
-  },
-), {
-  name: 'AglynPopperArrow',
-})({
+export const PopperStyledArrowComponent = styled(
+  forwardRef<any, HTMLAttributes<HTMLDivElement>>(function RefRenderFn(props, ref) {
+    const { className, ...rest } = props
+    return <div ref={ref} className={clsx(classKeys.arrow, className)} {...rest} />
+  }),
+  {
+    name: 'AglynPopperArrow',
+  }
+)({
   position: 'absolute',
   fontSize: 7,
   width: '3em',
@@ -58,7 +54,7 @@ export interface PopperStyledComponentProps extends MuiPopperProps {
 const PopperStyledComponent = styled(MuiPopper, {
   name: 'AglynPopperStyled',
   shouldForwardProp: (prop) => !_isEqualitySameType(prop, 'disableArrow', 'arrowGap'),
-})<PopperStyledComponentProps>(({theme, disableArrow, arrowGap}) => ({
+})<PopperStyledComponentProps>(({ theme, disableArrow, arrowGap }) => ({
   zIndex: 1,
   '& > div': {
     position: 'relative',
@@ -133,5 +129,5 @@ PopperStyledComponent.defaultProps = {
   arrowGap: 2,
 }
 
-export {PopperStyledComponent}
+export { PopperStyledComponent }
 export default PopperStyledComponent

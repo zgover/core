@@ -15,16 +15,19 @@
  * limitations under the License.
  */
 
-
 type PFX = 'Aglyn'
 type Sep = '-'
-export type ElementClass<ClassKey extends string, Prefix extends string = PFX> = `${Prefix}${Sep}${ClassKey}`
-export type GlobalClassKey = keyof (typeof globalClassKey)
-export type GlobalElementClass<ClassKey extends GlobalClassKey = GlobalClassKey> = ElementClass<ClassKey>
-export type ComponentClass<ClassKey extends string, Prefix extends string> =
-  ClassKey extends GlobalClassKey
-    ? GlobalElementClass<ClassKey>
-    : ElementClass<ClassKey, Prefix>
+export type ElementClass<
+  ClassKey extends string,
+  Prefix extends string = PFX
+> = `${Prefix}${Sep}${ClassKey}`
+export type GlobalClassKey = keyof typeof globalClassKey
+export type GlobalElementClass<ClassKey extends GlobalClassKey = GlobalClassKey> =
+  ElementClass<ClassKey>
+export type ComponentClass<
+  ClassKey extends string,
+  Prefix extends string
+> = ClassKey extends GlobalClassKey ? GlobalElementClass<ClassKey> : ElementClass<ClassKey, Prefix>
 
 export type ClassKeyMap<ClassKey extends string, Prefix extends string> = {
   [P in ClassKey]: ComponentClass<P, Prefix>
@@ -48,17 +51,14 @@ export const globalClassKey = {
   wrapper: makeClassKey('wrapper'),
 }
 
-function makeClassKey<ClassKey extends string, Prefix extends string>(
-  key: ClassKey,
-  pre?: Prefix,
-) {
+function makeClassKey<ClassKey extends string, Prefix extends string>(key: ClassKey, pre?: Prefix) {
   if (pre) return `${pre}${sep}${key}` as ElementClass<ClassKey, Prefix>
   return `${pfx}${sep}${key}` as ElementClass<ClassKey, PFX>
 }
 
 function generateComponentClass<ClassKey extends string, Prefix extends string>(
   key: ClassKey,
-  componentName: Prefix,
+  componentName: Prefix
 ) {
   if (key in globalClassKey) {
     return globalClassKey[key as GlobalClassKey] as ComponentClass<ClassKey, PFX>
@@ -66,10 +66,10 @@ function generateComponentClass<ClassKey extends string, Prefix extends string>(
   return makeClassKey(key, componentName) as ComponentClass<ClassKey, Prefix>
 }
 
-export function generateComponentClassKeys<ClassKey extends string | GlobalClassKey, Prefix extends string>(
-  componentName: Prefix,
-  classKeys: ClassKey[],
-) {
+export function generateComponentClassKeys<
+  ClassKey extends string | GlobalClassKey,
+  Prefix extends string
+>(componentName: Prefix, classKeys: ClassKey[]) {
   const result = {} as ClassKeyMap<ClassKey, Prefix>
 
   classKeys.forEach((key) => {

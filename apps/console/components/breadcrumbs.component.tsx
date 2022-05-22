@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {_isLength} from '@aglyn/shared-util-guards'
+import { styled } from '@aglyn/shared-ui-theme'
+import { _isLength } from '@aglyn/shared-util-guards'
 import {
   Breadcrumbs as MuiBreadcrumbs,
   type BreadcrumbsProps as MuiBreadcrumbsProps,
 } from '@mui/material'
-import {forwardRef} from 'react'
+import { forwardRef } from 'react'
 import BreadcrumbItemComponent, {
   type BreadcrumbItemProps,
   classKeys,
 } from './breadcrumb-item.component'
 
-
 const Breadcrumbs = styled(MuiBreadcrumbs, {
   name: 'AglynBreadcrumbs',
-})(({theme}) => ({
+})(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   minHeight: theme.spacing(4),
@@ -72,30 +71,23 @@ export interface BreadcrumbsProps extends MuiBreadcrumbsProps {
   centered?: boolean
 }
 
-const BreadcrumbsComponent = forwardRef<any, BreadcrumbsProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      centered,
-      children,
-      items,
-      ...rest
-    } = props
+const BreadcrumbsComponent = forwardRef<any, BreadcrumbsProps>(function RefRenderFn(props, ref) {
+  const { centered, children, items, ...rest } = props
 
-    return (
-      <Breadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
-        {items.map(({className, ...item}, key, arr) => (
-          <BreadcrumbItemComponent
-            key={item.key ?? item.id ?? key}
-            isLast={_isLength(key, arr.length - 1)}
-            centered={centered}
-            {...item}
-          />
-        ))}
-        {children}
-      </Breadcrumbs>
-    )
-  },
-)
+  return (
+    <Breadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
+      {items.map(({ className, ...item }, key, arr) => (
+        <BreadcrumbItemComponent
+          key={item.key ?? item.id ?? key}
+          isLast={_isLength(key, arr.length - 1)}
+          centered={centered}
+          {...item}
+        />
+      ))}
+      {children}
+    </Breadcrumbs>
+  )
+})
 
 BreadcrumbsComponent.displayName = 'BreadcrumbsComponent'
 BreadcrumbsComponent.aglyn = true
@@ -103,5 +95,5 @@ BreadcrumbsComponent.defaultProps = {
   items: [],
 }
 
-export {BreadcrumbsComponent}
+export { BreadcrumbsComponent }
 export default BreadcrumbsComponent

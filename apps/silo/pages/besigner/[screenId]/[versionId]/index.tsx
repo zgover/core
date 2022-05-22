@@ -15,27 +15,24 @@
  * limitations under the License.
  */
 
-import {getApp} from '@aglyn/core-data-framework'
-import type {BesignerComponentProps} from '@aglyn/core-feature-besigner'
-import {HAS_BROWSER} from '@aglyn/shared-data-enums'
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
-import {LOADING_OVERLAY_ELEMENT} from '@aglyn/shared-ui-jsx'
+import { getApp } from '@aglyn/core-data-framework'
+import type { BesignerComponentProps } from '@aglyn/core-feature-besigner'
+import { HAS_BROWSER } from '@aglyn/shared-data-enums'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { LOADING_OVERLAY_ELEMENT } from '@aglyn/shared-ui-jsx'
 import dynamic from 'next/dynamic'
-import {useEffect} from 'react'
+import { useEffect } from 'react'
 import '../../../../constants/app-setup'
-
 
 const AglynBesigner = dynamic<BesignerComponentProps>(
   () => import('@aglyn/core-feature-besigner').then((mod) => mod.BesignerComponent),
-  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
+  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT }
 )
 
 export interface BesignerProps extends BesignerComponentProps {}
 
-
 function BesignerComponent(props: BesignerProps) {
-  const {sx, ...rest} = props
-
+  const { sx, ...rest } = props
 
   useEffect(() => {
     if (HAS_BROWSER()) {
@@ -43,15 +40,10 @@ function BesignerComponent(props: BesignerProps) {
     }
   }, [])
 
-  return (
-    <AglynBesigner
-      sx={mergeSxProps({flexGrow: 1, position: 'unset'}, sx)}
-      {...rest}
-    />
-  )
+  return <AglynBesigner sx={mergeSxProps({ flexGrow: 1, position: 'unset' }, sx)} {...rest} />
 }
 
 BesignerComponent.displayName = 'BesignerComponent'
 
-export {BesignerComponent}
+export { BesignerComponent }
 export default BesignerComponent

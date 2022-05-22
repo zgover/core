@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import {ErrorBoundaryComponent} from '@aglyn/shared-ui-jsx'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import { ErrorBoundaryComponent } from '@aglyn/shared-ui-jsx'
 import {
   Card as MuiCard,
   CardActions as MuiCardActions,
@@ -28,8 +28,7 @@ import {
   type CardProps,
 } from '@mui/material'
 import clsx from 'clsx'
-import {forwardRef, type ReactNode} from 'react'
-
+import { forwardRef, type ReactNode } from 'react'
 
 const classKeys = generateComponentClassKeys('AglynWidgetCard', [
   'contentGutterX',
@@ -40,7 +39,7 @@ const classKeys = generateComponentClassKeys('AglynWidgetCard', [
 
 const Card = styled(MuiCard, {
   name: 'AglynWidgetCard',
-})(({theme}) => ({
+})(({ theme }) => ({
   '& .MuiCardContent-root': {
     padding: 0,
     ':last-child': {
@@ -98,67 +97,50 @@ export interface WidgetCardProps extends CardProps {
   ActionProps?: CardActionsProps
 }
 
-const WidgetCardComponent = forwardRef<any, WidgetCardProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      actions,
-      classes,
-      children,
-      className,
-      header,
-      lastChildren,
-      ActionProps,
-      HeaderProps,
-      ContentProps,
-      contentGutterX,
-      contentGutterY,
-      headerCentered,
-      contentBordered,
-      ...rest
-    } = props
+const WidgetCardComponent = forwardRef<any, WidgetCardProps>(function RefRenderFn(props, ref) {
+  const {
+    actions,
+    classes,
+    children,
+    className,
+    header,
+    lastChildren,
+    ActionProps,
+    HeaderProps,
+    ContentProps,
+    contentGutterX,
+    contentGutterY,
+    headerCentered,
+    contentBordered,
+    ...rest
+  } = props
 
-    const cardClassName = clsx({
+  const cardClassName = clsx(
+    {
       [classKeys.contentGutterX]: Boolean(contentGutterX),
       [classKeys.contentGutterY]: Boolean(contentGutterY),
       [classKeys.contentBordered]: Boolean(contentBordered),
       [classKeys.headerCentered]: Boolean(HeaderProps?.subheader || headerCentered),
-    }, className)
+    },
+    className
+  )
 
-    return (
-      <Card
-        ref={ref}
-        className={cardClassName}
-        {...rest}
-      >
-        <ErrorBoundaryComponent>
-          {header || HeaderProps ? (
-            <MuiCardHeader
-              title={header}
-              titleTypographyProps={{variant: 'h6'}}
-              {...HeaderProps}
-            />
-          ) : null}
-          {children || ContentProps ? (
-            <MuiCardContent
-              children={children}
-              {...ContentProps}
-            />
-          ) : null}
-          {actions || ActionProps ? (
-            <MuiCardActions
-              children={actions}
-              {...ActionProps}
-            />
-          ) : null}
-          {lastChildren}
-        </ErrorBoundaryComponent>
-      </Card>
-    )
-  },
-)
+  return (
+    <Card ref={ref} className={cardClassName} {...rest}>
+      <ErrorBoundaryComponent>
+        {header || HeaderProps ? (
+          <MuiCardHeader title={header} titleTypographyProps={{ variant: 'h6' }} {...HeaderProps} />
+        ) : null}
+        {children || ContentProps ? <MuiCardContent children={children} {...ContentProps} /> : null}
+        {actions || ActionProps ? <MuiCardActions children={actions} {...ActionProps} /> : null}
+        {lastChildren}
+      </ErrorBoundaryComponent>
+    </Card>
+  )
+})
 
 WidgetCardComponent.displayName = 'WidgetCardComponent'
 WidgetCardComponent.aglyn = true
 
-export {WidgetCardComponent}
+export { WidgetCardComponent }
 export default WidgetCardComponent

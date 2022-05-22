@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import {AppLink} from '@aglyn/shared-ui-jsx'
-import {mdiChevronDown, mdiChevronUp, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import { AppLink } from '@aglyn/shared-ui-jsx'
+import { mdiChevronDown, mdiChevronUp, MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import {
   Collapse,
   IconButton,
@@ -28,12 +28,11 @@ import {
   ListSubheader,
 } from '@mui/material'
 import clsx from 'clsx'
-import {forwardRef, Fragment, useCallback, useState} from 'react'
+import { forwardRef, Fragment, useCallback, useState } from 'react'
 import WidgetCardComponent, {
   type WidgetCardProps,
 } from '../../console/components/widget-card.component'
-import {type AggregatedPageMeta, withAggregatedPageMeta} from '../lib/app-pages'
-
+import { type AggregatedPageMeta, withAggregatedPageMeta } from '../lib/app-pages'
 
 const classKeys = generateComponentClassKeys('AreaManageNavigationListWidgetView', [
   'listItem',
@@ -46,7 +45,7 @@ const classKeys = generateComponentClassKeys('AreaManageNavigationListWidgetView
 
 const StyledListItem = styled(ListItemButton, {
   name: 'AglynListItem',
-})<ListItemButtonProps<AppLink>>(({theme}) => ({
+})<ListItemButtonProps<AppLink>>(({ theme }) => ({
   position: 'relative',
   [`&.${classKeys.active}`]: {
     '&:before': {
@@ -83,9 +82,11 @@ export interface AreaManageNavigationListWidgetViewProps extends Partial<WidgetC
   aggregatedPageMeta: AggregatedPageMeta
 }
 
-const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
-  AreaManageNavigationListWidgetViewProps>(function RefRenderFn(props, ref) {
-  const {aggregatedPageMeta, ...rest} = props
+const AreaManageNavigationListWidgetViewRaw = forwardRef<
+  any,
+  AreaManageNavigationListWidgetViewProps
+>(function RefRenderFn(props, ref) {
+  const { aggregatedPageMeta, ...rest } = props
   const {
     pathname,
     pageMeta,
@@ -94,7 +95,7 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
     denormalizedAreaPages,
   } = aggregatedPageMeta
   const [activeCollapse, setActiveCollapse] = useState(
-    subArea?.id ?? pageMeta?.dynamic ? pageMeta?.parent : pageMeta?.id,
+    subArea?.id ?? pageMeta?.dynamic ? pageMeta?.parent : pageMeta?.id
   )
   const openAreaCollapse = (id) => (e) => {
     e.preventDefault()
@@ -105,7 +106,7 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
     (item) => {
       return Boolean(activeCollapse === item?.id)
     },
-    [activeCollapse],
+    [activeCollapse]
   )
 
   const isActive = useCallback(
@@ -113,7 +114,7 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
       const path = pageMeta.dynamic ? pageMeta.parent : pathname
       return Boolean(path === item?.id)
     },
-    [pathname, pageMeta],
+    [pathname, pageMeta]
   )
 
   const isChildActive = useCallback(
@@ -121,7 +122,7 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
       const path = pageMeta.dynamic ? pageMeta.parent : pathname
       return Boolean(item.pages?.some((i) => path === i?.id))
     },
-    [pathname, pageMeta],
+    [pathname, pageMeta]
   )
 
   const getClass = (itemClass, item, topLvl = true) =>
@@ -136,7 +137,7 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
     <WidgetCardComponent ref={ref} {...rest}>
       <List
         subheader={
-          <ListSubheader children={'Manage Navigation'} sx={{fontWeight: 'fontWeightMedium'}} />
+          <ListSubheader children={'Manage Navigation'} sx={{ fontWeight: 'fontWeightMedium' }} />
         }
         disablePadding
       >
@@ -205,6 +206,6 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
 AreaManageNavigationListWidgetViewRaw.displayName = 'AreaManageNavigationListWidgetViewRaw'
 AreaManageNavigationListWidgetViewRaw.aglyn = true
 export const AreaManageNavigationListWidgetView = withAggregatedPageMeta(
-  AreaManageNavigationListWidgetViewRaw,
+  AreaManageNavigationListWidgetViewRaw
 )
 export default AreaManageNavigationListWidgetView

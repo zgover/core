@@ -15,25 +15,23 @@
  * limitations under the License.
  */
 
-import type {OverridableComponent} from '@mui/material/OverridableComponent'
-import type {Theme} from '@mui/material/styles'
+import type { OverridableComponent } from '@mui/material/OverridableComponent'
+import type { Theme } from '@mui/material/styles'
 // eslint-disable-next-line no-restricted-imports
-import type {CSSProperties} from '@mui/material/styles/createMixins'
+import type { CSSProperties } from '@mui/material/styles/createMixins'
 // eslint-disable-next-line no-restricted-imports
-import type {Shadows} from '@mui/material/styles/shadows'
-import type {WithStyles} from '@mui/styles'
-import type {ClassKeyInferable} from '@mui/styles/withStyles'
+import type { Shadows } from '@mui/material/styles/shadows'
+import type { WithStyles } from '@mui/styles'
+import type { ClassKeyInferable } from '@mui/styles/withStyles'
 import * as React from 'react'
-import type {ColorPropOverrides, IActionStates} from '../lib/theme.types'
+import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
 // import type {ContainerTypeMap} from '@mui/material/Container'
-
 
 //    _____     _______ ____  ____  ___ ____  _____ ____
 //   / _ \ \   / / ____|  _ \|  _ \|_ _|  _ \| ____/ ___|
 //  | | | \ \ / /|  _| | |_) | |_) || || | | |  _| \___ \
 //  | |_| |\ V / | |___|  _ <|  _ < | || |_| | |___ ___) |
 //   \___/  \_/  |_____|_| \_\_| \_\___|____/|_____|____/
-
 
 declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides extends ColorPropOverrides {}
@@ -102,7 +100,6 @@ declare module '@mui/material/styles/createMixins' {
   }
 }
 declare module '@mui/material/styles' {
-
   /**
    * START EXAMPLE – MODULE AUGMENTATION ↓
    * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
@@ -178,16 +175,16 @@ declare module '@mui/material/styles' {
 
   interface DefaultTheme extends Theme {}
 
-
-  type ExtendPropsOfWithStyles<P extends {classes?: ClassNameMap<string>},
+  type ExtendPropsOfWithStyles<
+    P extends { classes?: ClassNameMap<string> },
     StylesType extends ClassKeyInferable<any, any>,
-    IncludeTheme extends boolean | undefined = false> = P & WithStyles<StylesType, IncludeTheme>
+    IncludeTheme extends boolean | undefined = false
+  > = P & WithStyles<StylesType, IncludeTheme>
 }
 
 declare module '@mui/styles' {
   interface DefaultTheme extends Theme {}
 }
-
 
 //   _______  ______   ___  ____ _____ ____
 //  | ____\ \/ /  _ \ / _ \|  _ \_   _/ ___|
@@ -195,10 +192,7 @@ declare module '@mui/styles' {
 //  | |___ /  \|  __/| |_| |  _ < | |  ___) |
 //  |_____/_/\_\_|    \___/|_| \_\|_| |____/
 
-
-export {
-  type Overwrite,
-} from '@mui/types'
+export { type Overwrite } from '@mui/types'
 
 export {
   type ShapeOptions,
@@ -210,8 +204,8 @@ export {
   type BoxProps,
 } from '@mui/system'
 
-export {darkScrollbar} from '@mui/material'
-export {visuallyHidden} from '@mui/utils'
+export { darkScrollbar } from '@mui/material'
+export { visuallyHidden } from '@mui/utils'
 
 export {
   type Breakpoint,
@@ -270,7 +264,6 @@ export {
   experimental_sx as sx,
 } from '@mui/material/styles'
 
-
 // eslint-disable-next-line no-restricted-imports
 export {
   type ColorPartial,
@@ -280,22 +273,15 @@ export {
 } from '@mui/material/styles/createPalette'
 
 // eslint-disable-next-line no-restricted-imports
-export {
-  type TypographyOptions,
-} from '@mui/material/styles/createTypography'
+export { type TypographyOptions } from '@mui/material/styles/createTypography'
 
 // eslint-disable-next-line no-restricted-imports
-export {
-  type Shadows,
-} from '@mui/material/styles/shadows'
+export { type Shadows } from '@mui/material/styles/shadows'
 
-export {
-  type ClassKeyInferable,
-  type CreateCSSProperties,
-} from '@mui/styles/withStyles'
+export { type ClassKeyInferable, type CreateCSSProperties } from '@mui/styles/withStyles'
 
 // eslint-disable-next-line no-restricted-imports
-export {type Shape} from '@mui/system/createTheme/shape'
+export { type Shape } from '@mui/system/createTheme/shape'
 
 export {
   type BaseCreateCSSProperties,

@@ -15,14 +15,18 @@
  * limitations under the License.
  */
 
-import {BesignerPanelTabFlag} from '@aglyn/core-data-besigner'
-import {ICON_VARIANT_ELEMENT_TREE_VIEW} from '@aglyn/shared-data-enums'
-import {styled} from '@aglyn/shared-feature-themes'
-import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
-import {TabContext as MuiTabContext, TabList as MuiTabList, TabPanel as MuiTabPanel} from '@mui/lab'
-import {Box, Button, Tab as MuiTab} from '@mui/material'
-import {forwardRef, useCallback} from 'react'
+import { BesignerPanelTabFlag } from '@aglyn/core-data-besigner'
+import { ICON_VARIANT_ELEMENT_TREE_VIEW } from '@aglyn/shared-data-enums'
+import { styled } from '@aglyn/shared-ui-theme'
+import { MdiIcon, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'
+import { numberFromHexadecimal, numberToHexadecimal } from '@aglyn/shared-util-tools'
+import {
+  TabContext as MuiTabContext,
+  TabList as MuiTabList,
+  TabPanel as MuiTabPanel,
+} from '@mui/lab'
+import { Box, Button, Tab as MuiTab } from '@mui/material'
+import { forwardRef, useCallback } from 'react'
 import useAddElementCallback from '../hooks/use-add-element-callback'
 import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
 import ElementsTreeViewComponent, {
@@ -32,10 +36,9 @@ import WorkspacePanelComponent, {
   type WorkspacePanelComponentProps,
 } from './workspace-panel.component'
 
-
 const TabPanelInner = styled('div', {
   name: 'AglynTabPanelInner',
-})(({theme}) => ({
+})(({ theme }) => ({
   width: '100%',
   height: '100%',
 }))
@@ -47,31 +50,32 @@ const TabPanel = styled(MuiTabPanel, {
   height: '100%',
 })
 
-const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
-  function RefRenderFn(props, ref) {
-    const handleAddElementClick = useAddElementCallback()
-    return (
-      <ElementsTreeViewComponent ref={ref} {...props}>
-        <Box sx={{px: 0.5, pb: 1, pt: 1}}>
-          <Button
-            color="secondary"
-            startIcon={<MdiIcon fontSize="inherit" path={mdiPlus.path} />}
-            onClick={handleAddElementClick}
-          >
-            Add Element
-          </Button>
-        </Box>
-      </ElementsTreeViewComponent>
-    )
-  },
-)
+const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const handleAddElementClick = useAddElementCallback()
+  return (
+    <ElementsTreeViewComponent ref={ref} {...props}>
+      <Box sx={{ px: 0.5, pb: 1, pt: 1 }}>
+        <Button
+          color="secondary"
+          startIcon={<MdiIcon fontSize="inherit" path={mdiPlus.path} />}
+          onClick={handleAddElementClick}
+        >
+          Add Element
+        </Button>
+      </Box>
+    </ElementsTreeViewComponent>
+  )
+})
 
 const tabs = [
   {
     value: BesignerPanelTabFlag.ELEMENTS_TREE,
     tab: {
-      icon: {path: ICON_VARIANT_ELEMENT_TREE_VIEW.path},
-      iconPosition: ('top' as const),
+      icon: { path: ICON_VARIANT_ELEMENT_TREE_VIEW.path },
+      iconPosition: 'top' as const,
       label: 'Hierarchy',
     },
     panel: {
@@ -82,77 +86,76 @@ const tabs = [
 
 export interface PanelLeftComponentProps extends WorkspacePanelComponentProps {}
 
-const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
-  function RefRenderFn(props, ref) {
-    const {children, ...rest} = props
+const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const { children, ...rest } = props
 
-    const [panel, setPanel] = useAglynBesignerPanel('panelLeft')
-    const {toggled, tab, size} = panel || {}
-    const value = tab || BesignerPanelTabFlag.ELEMENTS_TREE
+  const [panel, setPanel] = useAglynBesignerPanel('panelLeft')
+  const { toggled, tab, size } = panel || {}
+  const value = tab || BesignerPanelTabFlag.ELEMENTS_TREE
 
-    const handleTabChange = useCallback((e, val) => {
-      setPanel((panel) => ({...panel, tab: numberFromHexadecimal(val)}))
-    }, [setPanel])
+  const handleTabChange = useCallback(
+    (e, val) => {
+      setPanel((panel) => ({ ...panel, tab: numberFromHexadecimal(val) }))
+    },
+    [setPanel]
+  )
 
-    return (
-      <WorkspacePanelComponent
-        ref={ref}
-        id="aglyn:panel-left"
-        aria-label="left toolbox panel"
-        size={size}
-        open={toggled}
-        anchor="left"
-        component="aside"
-        {...rest}
-      >
-        <MuiTabContext value={numberToHexadecimal(value)}>
-          <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-            <MuiTabList
-              onChange={handleTabChange}
-              variant="fullWidth"
-              indicatorColor="secondary"
-              textColor="secondary"
-            >
-              {tabs.map(({value, tab: {icon, ...tab}}) => (
-                <MuiTab
-                  key={value}
-                  value={numberToHexadecimal(value)}
-                  icon={<MdiIcon {...icon} />}
-                  sx={{
-                    minHeight: 'unset',
-                    fontSize: theme => theme.typography.pxToRem(12),
-                    lineHeight: 0.8,
-                    pt: 1,
-                  }}
-                  {...tab}
-                />
-              ))}
-            </MuiTabList>
-          </Box>
+  return (
+    <WorkspacePanelComponent
+      ref={ref}
+      id="aglyn:panel-left"
+      aria-label="left toolbox panel"
+      size={size}
+      open={toggled}
+      anchor="left"
+      component="aside"
+      {...rest}
+    >
+      <MuiTabContext value={numberToHexadecimal(value)}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <MuiTabList
+            onChange={handleTabChange}
+            variant="fullWidth"
+            indicatorColor="secondary"
+            textColor="secondary"
+          >
+            {tabs.map(({ value, tab: { icon, ...tab } }) => (
+              <MuiTab
+                key={value}
+                value={numberToHexadecimal(value)}
+                icon={<MdiIcon {...icon} />}
+                sx={{
+                  minHeight: 'unset',
+                  fontSize: (theme) => theme.typography.pxToRem(12),
+                  lineHeight: 0.8,
+                  pt: 1,
+                }}
+                {...tab}
+              />
+            ))}
+          </MuiTabList>
+        </Box>
 
-          {tabs.map(({value, panel: {Component, ...panel}}) => (
-            <TabPanel
-              key={value}
-              value={numberToHexadecimal(value)}
-              {...panel}
-            >
-              <TabPanelInner>
-                <Component />
-              </TabPanelInner>
-            </TabPanel>
-          ))}
+        {tabs.map(({ value, panel: { Component, ...panel } }) => (
+          <TabPanel key={value} value={numberToHexadecimal(value)} {...panel}>
+            <TabPanelInner>
+              <Component />
+            </TabPanelInner>
+          </TabPanel>
+        ))}
+      </MuiTabContext>
 
-        </MuiTabContext>
-
-        {children}
-      </WorkspacePanelComponent>
-    )
-  },
-)
+      {children}
+    </WorkspacePanelComponent>
+  )
+})
 
 PanelLeftComponent.displayName = 'PanelLeftComponent'
 PanelLeftComponent.aglyn = true
 PanelLeftComponent.defaultProps = {}
 
-export {PanelLeftComponent}
+export { PanelLeftComponent }
 export default PanelLeftComponent

@@ -24,7 +24,7 @@ import type {
   ResolveProps,
 } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type {BoxProps, StyledOptions} from '@aglyn/shared-feature-themes'
+import type { BoxProps, StyledOptions } from '@aglyn/shared-ui-theme'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type {
   ConditionDefinition,
@@ -34,8 +34,8 @@ import type {
   Validator,
 } from '@aglyn/shared-ui-jsx-forms'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type {MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import type {ComponentsLinealDirectiveFlag, FieldComponentType} from '../constants/components'
+import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import type { ComponentsLinealDirectiveFlag, FieldComponentType } from '../constants/components'
 import type {
   ComponentGetPayload,
   ComponentRegisterPayload,
@@ -45,20 +45,19 @@ import type {
   ComponentSchemaGetPayload,
   ComponentUnregisterPayload,
 } from '../constants/emitter'
-import type {OF_KIND, OF_TYPE, SYMBOL_TYPE} from '../constants/symbol'
-import type {IAglynAppController} from './aglyn-app.types'
-import type {AglynElementDenormalized} from './aglyn-elements.types'
+import type { OF_KIND, OF_TYPE, SYMBOL_TYPE } from '../constants/symbol'
+import type { IAglynAppController } from './aglyn-app.types'
+import type { AglynElementDenormalized } from './aglyn-elements.types'
 import type {
   AglynModuleModelOptions,
   AglynModuleModelT,
   IAglynModuleModel,
 } from './aglyn-module.types'
 
-
 export type BundleUId = string
 export type ComponentId = string
 export type TemplateId = string
-export type ComponentIdOrBundleTuple = (ComponentId | [ComponentId, BundleUId])
+export type ComponentIdOrBundleTuple = ComponentId | [ComponentId, BundleUId]
 
 export type ComponentsRegistryKeys = ComponentIdOrBundleTuple[]
 export type ComponentsRegistryValues = IAglynComponent[]
@@ -68,12 +67,14 @@ export type InstanceComponents = Map<ComponentIdOrBundleTuple, IAglynComponent>
 export type InstanceSchemas = Map<ComponentIdOrBundleTuple, AglynComponentSchema>
 export type InstanceTemplates = Map<TemplateId, AglynComponentElementTemplate>
 
-export type ComponentsLinealOrder<T extends ComponentsLinealDirectiveFlag = ComponentsLinealDirectiveFlag> = [
+export type ComponentsLinealOrder<
+  T extends ComponentsLinealDirectiveFlag = ComponentsLinealDirectiveFlag
+> = [
   directiveType: T,
   directiveDefinition:
     | ComponentId[]
-    | {bundles?: BundleUId[], components: ComponentId[]}
-    | {bundles: BundleUId[], components?: ComponentId[]}
+    | { bundles?: BundleUId[]; components: ComponentId[] }
+    | { bundles: BundleUId[]; components?: ComponentId[] }
 ]
 
 export type AglynComponentElementTemplate = {
@@ -97,7 +98,8 @@ export type ComponentsRegistryContext = {
   templates: InstanceTemplates
 }
 
-export interface IAglynComponent<P = any, T = any> extends JSXForwardRefExoticComponent<JSXPropsWithoutRef<P> & JSXRefAttributes<T>> {
+export interface IAglynComponent<P = any, T = any>
+  extends JSXForwardRefExoticComponent<JSXPropsWithoutRef<P> & JSXRefAttributes<T>> {
   [OF_TYPE]?: SYMBOL_TYPE
   [OF_KIND]?: SYMBOL_TYPE
   aglyn?: boolean
@@ -109,7 +111,7 @@ export interface AglynComponentField extends Dictionary<any> {
   name: string
   component: string | FieldComponentType
   validate?: Validator[]
-  condition?: ConditionDefinition | (ConditionDefinition[])
+  condition?: ConditionDefinition | ConditionDefinition[]
   initializeOnMount?: boolean
   dataType?: DataType
   initialValue?: any
@@ -119,7 +121,6 @@ export interface AglynComponentField extends Dictionary<any> {
   resolveProps?: ResolvePropsFunction
   description?: string
 }
-
 
 export interface AglynComponentTemplateData<P = any> {
   readonly componentId: ComponentId
@@ -148,15 +149,15 @@ export interface AglynComponentSchema<P = any> {
   }
   resolveProps?: ResolveProps<AglynElementDenormalized<P>>
   // Besigner feature flags
-  actions?: {disable?: boolean}
-  badge?: {disable?: boolean}
-  duplication?: {disable?: boolean}
-  dragging?: {disable?: boolean}
-  dropping?: {disable?: boolean}
-  editing?: {disable?: boolean}
-  outline?: {disable?: boolean}
-  removal?: {disable?: boolean}
-  selection?: {disable?: boolean}
+  actions?: { disable?: boolean }
+  badge?: { disable?: boolean }
+  duplication?: { disable?: boolean }
+  dragging?: { disable?: boolean }
+  dropping?: { disable?: boolean }
+  editing?: { disable?: boolean }
+  outline?: { disable?: boolean }
+  removal?: { disable?: boolean }
+  selection?: { disable?: boolean }
   templates?: AglynComponentElementTemplate[]
   formSchema?: {
     fields: AglynComponentField[]
@@ -176,7 +177,8 @@ export interface AglynComponentsBundle {
 
 export interface AglynComponentsControllerOptions extends AglynModuleModelOptions {}
 
-export interface IAglynComponentsController extends IAglynModuleModel<AglynComponentsControllerOptions> {
+export interface IAglynComponentsController
+  extends IAglynModuleModel<AglynComponentsControllerOptions> {
   readonly bundles: InstanceBundles
   readonly components: InstanceComponents
   readonly schemas: InstanceSchemas
@@ -190,7 +192,7 @@ export interface IAglynComponentsController extends IAglynModuleModel<AglynCompo
   getComponent<P, T>(payload: ComponentGetPayload): OrUndef<IAglynComponent<P, T>>
   getComponentSchema(payload: ComponentSchemaGetPayload): OrUndef<AglynComponentSchema>
   getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynComponentsBundle>
-  buildMapKey(data: {componentId: ComponentId, bundleId: BundleUId}): string
+  buildMapKey(data: { componentId: ComponentId; bundleId: BundleUId }): string
 
   registerComponent(payload: ComponentRegisterPayload): this
   registerBundle(payload: ComponentsBundleRegisterPayload): this
@@ -199,9 +201,10 @@ export interface IAglynComponentsController extends IAglynModuleModel<AglynCompo
   unregisterBundle(payload: ComponentsBundleUnregisterPayload): this
 }
 
-export interface AglynComponentsControllerT extends AglynModuleModelT<AglynComponentsControllerOptions> {
-  new(
+export interface AglynComponentsControllerT
+  extends AglynModuleModelT<AglynComponentsControllerOptions> {
+  new (
     app: IAglynAppController,
-    options: AglynComponentsControllerOptions,
+    options: AglynComponentsControllerOptions
   ): IAglynComponentsController
 }

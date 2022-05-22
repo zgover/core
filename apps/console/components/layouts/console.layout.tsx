@@ -22,41 +22,33 @@ import {
   ICON_VARIANT_THEME_SYSTEM,
   ICON_VARIANT_USER_SETTINGS,
 } from '@aglyn/shared-data-enums'
-import {useThemeMode} from '@aglyn/shared-feature-themes'
-import {AppLink} from '@aglyn/shared-ui-jsx'
-import {_isArr} from '@aglyn/shared-util-guards'
-import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
-import {useUser} from 'reactfire'
-import {Route} from '../../constants/route-links'
-import MainLayout, {type MainLayoutProps} from './main.layout'
+import { useThemeMode } from '@aglyn/shared-ui-theme'
+import { AppLink } from '@aglyn/shared-ui-jsx'
+import { _isArr } from '@aglyn/shared-util-guards'
+import { gravatarUrlFromEmail } from '@aglyn/shared-util-tools'
+import { useUser } from 'reactfire'
+import { Route } from '../../constants/route-links'
+import MainLayout, { type MainLayoutProps } from './main.layout'
 
-
-export interface ConsoleLayoutProps extends MainLayoutProps {
-}
+export interface ConsoleLayoutProps extends MainLayoutProps {}
 
 function ConsoleLayout(props: ConsoleLayoutProps) {
-  const {
-    title,
-    children,
-    quickActions,
-    ...rest
-  } = props
-  const {data: user} = useUser()
+  const { title, children, quickActions, ...rest } = props
+  const { data: user } = useUser()
   const [, toggleThemeMode, themeSetting] = useThemeMode()
-  const friendlyThemeMode = themeSetting === 'light' || themeSetting === 'dark'
-    ? themeSetting
-    : 'device default'
+  const friendlyThemeMode =
+    themeSetting === 'light' || themeSetting === 'dark' ? themeSetting : 'device default'
 
   return (
     <MainLayout
-      title={title ? [..._isArr(title) ? title : [title], 'Secure'] : 'Secure'}
+      title={title ? [...(_isArr(title) ? title : [title]), 'Secure'] : 'Secure'}
       appBarSuffix="Console"
       quickActions={[
-        ...quickActions || [],
+        ...(quickActions || []),
         {
           title: 'Manage account',
-          MenuProps: {dense: true, horizontalOrigin: 'right'},
-          sx: {p: 0.5},
+          MenuProps: { dense: true, horizontalOrigin: 'right' },
+          sx: { p: 0.5 },
           edge: 'end',
           avatar: {
             src: user?.photoURL || gravatarUrlFromEmail(user?.email),
@@ -67,8 +59,11 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
               // component: 'button',
               children: `Theme mode: ${friendlyThemeMode}`,
               icon: {
-                path: themeSetting === 'dark' ? ICON_VARIANT_THEME_DARK.path
-                  : themeSetting === 'light' ? ICON_VARIANT_THEME_LIGHT.path
+                path:
+                  themeSetting === 'dark'
+                    ? ICON_VARIANT_THEME_DARK.path
+                    : themeSetting === 'light'
+                    ? ICON_VARIANT_THEME_LIGHT.path
                     : ICON_VARIANT_THEME_SYSTEM.path,
               },
               'aria-label': 'switch theme mode',
@@ -77,7 +72,7 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
               children: 'Settings',
               component: AppLink,
               href: Route.ACCOUNT_MANAGE_SETTINGS,
-              icon: {path: ICON_VARIANT_USER_SETTINGS.path},
+              icon: { path: ICON_VARIANT_USER_SETTINGS.path },
             },
             {
               type: 'divider',
@@ -86,7 +81,7 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
               children: 'Sign out',
               component: AppLink,
               href: Route.AUTH_SIGN_OUT,
-              icon: {path: ICON_VARIANT_SIGN_OUT.path},
+              icon: { path: ICON_VARIANT_SIGN_OUT.path },
             },
           ],
         },
@@ -121,5 +116,5 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
 ConsoleLayout.displayName = 'ConsoleLayout'
 ConsoleLayout.aglyn = true
 
-export {ConsoleLayout}
+export { ConsoleLayout }
 export default ConsoleLayout

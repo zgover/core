@@ -16,9 +16,8 @@
  */
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {CacheProvider, createEmotionCache, type EmotionCache} from '@aglyn/shared-feature-themes'
-import type {ReactNode} from 'react'
-
+import { CacheProvider, createEmotionCache, type EmotionCache } from '@aglyn/shared-ui-theme'
+import type { ReactNode } from 'react'
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
@@ -61,19 +60,12 @@ export interface NextEmotionAppComponentProps {
  * @see {@link _EmotionDocumentComponent}
  */
 function NextEmotionAppComponent(props: NextEmotionAppComponentProps) {
-  const {
-    emotionCache = clientSideEmotionCache,
-    children,
-  } = props
+  const { emotionCache = clientSideEmotionCache, children } = props
 
-  return (
-    <CacheProvider value={emotionCache}>
-      {children}
-    </CacheProvider>
-  )
+  return <CacheProvider value={emotionCache}>{children}</CacheProvider>
 }
 NextEmotionAppComponent.displayName = 'NextEmotionAppComponent'
 NextEmotionAppComponent.aglyn = true
 
-export {NextEmotionAppComponent}
+export { NextEmotionAppComponent }
 export default NextEmotionAppComponent

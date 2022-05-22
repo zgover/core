@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys} from '@aglyn/shared-feature-themes'
-import {AppLink, type AppLinkProps, type AppLinkVariant} from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {truthy} from '@aglyn/shared-util-tools'
-import {Typography} from '@mui/material'
+import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
+import { AppLink, type AppLinkProps, type AppLinkVariant } from '@aglyn/shared-ui-jsx'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { truthy } from '@aglyn/shared-util-tools'
+import { Typography } from '@mui/material'
 import clsx from 'clsx'
-import {forwardRef} from 'react'
-
+import { forwardRef } from 'react'
 
 export const classKeys = generateComponentClassKeys('AglynBreadcrumbItem', [
   'item',
@@ -39,46 +38,34 @@ export type BreadcrumbItemProps<T extends AppLinkVariant = AppLinkVariant> = App
   centered?: boolean
 }
 
-const BreadcrumbItemComponent = forwardRef(
-  function RefRenderFn<T extends AppLinkVariant>(props: BreadcrumbItemProps<T>, ref) {
-    const {
-      icon,
-      className,
-      isLast,
-      disabled,
-      children,
-      centered,
-      ...rest
-    } = props
-    const itemClass = clsx(classKeys.item, {
+const BreadcrumbItemComponent = forwardRef(function RefRenderFn<T extends AppLinkVariant>(
+  props: BreadcrumbItemProps<T>,
+  ref
+) {
+  const { icon, className, isLast, disabled, children, centered, ...rest } = props
+  const itemClass = clsx(
+    classKeys.item,
+    {
       [classKeys.disabled]: truthy(disabled || isLast),
       [classKeys.centered]: Boolean(centered),
       [classKeys.last]: Boolean(isLast),
-    }, className)
-    const iconClass = clsx(classKeys.icon, icon?.className)
+    },
+    className
+  )
+  const iconClass = clsx(classKeys.icon, icon?.className)
 
-    const ItemComponent = isLast ? Typography : AppLink
+  const ItemComponent = isLast ? Typography : AppLink
 
-    return (
-      <ItemComponent
-        ref={ref}
-        className={itemClass}
-        {...rest}
-      >
-        {!icon?.path ? icon : (
-          <MdiIcon
-            {...icon}
-            className={iconClass}
-          />
-        )}
-        {children}
-      </ItemComponent>
-    )
-  },
-)
+  return (
+    <ItemComponent ref={ref} className={itemClass} {...rest}>
+      {!icon?.path ? icon : <MdiIcon {...icon} className={iconClass} />}
+      {children}
+    </ItemComponent>
+  )
+})
 BreadcrumbItemComponent.displayName = 'BreadcrumbItemComponent'
 BreadcrumbItemComponent.aglyn = true
 BreadcrumbItemComponent.defaultProps = {}
 
-export {BreadcrumbItemComponent}
+export { BreadcrumbItemComponent }
 export default BreadcrumbItemComponent

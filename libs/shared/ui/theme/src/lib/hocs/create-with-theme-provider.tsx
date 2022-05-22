@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import type {JSXComponentType} from '@aglyn/shared-data-types'
-import {_isArr, _isNull, _isStrT} from '@aglyn/shared-util-guards'
-import {getDisplayName} from '@aglyn/shared-util-tools'
-import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
-import {CssBaseline, useMediaQuery} from '@mui/material'
-import {get as getCookie, set as setCookie} from 'js-cookie'
+import type { JSXComponentType } from '@aglyn/shared-data-types'
+import { _isArr, _isNull, _isStrT } from '@aglyn/shared-util-guards'
+import { getDisplayName } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
+import { CssBaseline, useMediaQuery } from '@mui/material'
+import { get as getCookie, set as setCookie } from 'js-cookie'
 import {
   createContext,
   forwardRef,
@@ -30,14 +30,13 @@ import {
   useMemo,
   useState,
 } from 'react'
-import {createTheme, type Theme, ThemeProvider} from '../../vendor/mui'
-
+import { createTheme, type Theme, ThemeProvider } from '../../vendor/mui'
 
 export type ThemeMode = 'light' | 'dark' | null
 export type UseThemeMode = [
   themeMode: ThemeMode,
   toggleThemeMode: (event: SyntheticEvent<any>, to?: ThemeMode) => void,
-  themeMode: ThemeMode,
+  themeMode: ThemeMode
 ]
 
 export const COOKIE_THEME_KEY = 'theme-color-scheme'
@@ -61,25 +60,34 @@ export function useThemeModeState(): UseThemeMode {
 
   const themeMode = useMemo<ThemeMode>(() => {
     const cookieMode = getCookieThemeMode()
-    return localMode || cookieMode || (
-      prefersDark ? 'dark' : 'light'
-    )
+    return localMode || cookieMode || (prefersDark ? 'dark' : 'light')
   }, [prefersDark, localMode])
 
-  const toggleThemeMode = useCallback((event: SyntheticEvent<any>, to?: ThemeMode) => {
-    const newMode = _isStrT(to) || _isNull(to)
-      ? _isNull(to) ? null : (to === 'dark' ? 'dark' : 'light')
-      : _isNull(localMode) ? 'light'
-        : localMode === 'light' ? 'dark'
-          : localMode === 'dark' ? null
-            : null
-    setCookie(COOKIE_THEME_KEY, newMode, {expires: 365})
-    setLocalMode(newMode)
-  }, [localMode])
+  const toggleThemeMode = useCallback(
+    (event: SyntheticEvent<any>, to?: ThemeMode) => {
+      const newMode =
+        _isStrT(to) || _isNull(to)
+          ? _isNull(to)
+            ? null
+            : to === 'dark'
+            ? 'dark'
+            : 'light'
+          : _isNull(localMode)
+          ? 'light'
+          : localMode === 'light'
+          ? 'dark'
+          : localMode === 'dark'
+          ? null
+          : null
+      setCookie(COOKIE_THEME_KEY, newMode, { expires: 365 })
+      setLocalMode(newMode)
+    },
+    [localMode]
+  )
 
   return useMemo(
     () => [themeMode, toggleThemeMode, localMode],
-    [themeMode, toggleThemeMode, localMode],
+    [themeMode, toggleThemeMode, localMode]
   )
 }
 
@@ -89,42 +97,40 @@ export type WithThemeProviderOptions = {
 }
 
 function createWithThemeProvider(options: WithThemeProviderOptions) {
-  const {theme, disableCssBaseline} = options
-  const [lightTheme, darkTheme] = !_isArr(theme) ? [
-    theme, createTheme({...theme, palette: {...theme?.palette, mode: 'dark'}}),
-  ] : theme
+  const { theme, disableCssBaseline } = options
+  const [lightTheme, darkTheme] = !_isArr(theme)
+    ? [theme, createTheme({ ...theme, palette: { ...theme?.palette, mode: 'dark' } })]
+    : theme
 
   return function withThemeProvider<P>(WrappedComponent: JSXComponentType<P>) {
     const displayName = getDisplayName(WrappedComponent)
 
-    const WithThemeProvider = forwardRef<any, P>(
-      function RefRenderFn(props, ref) {
-        const {...rest} = props
-        const ThemeModeState = useThemeModeState()
-        const activeTheme = useMemo<Theme>(() => {
-          const themeMode = ThemeModeState[0]
-          return themeMode === 'dark' ? darkTheme : lightTheme
-        }, [ThemeModeState])
-        return (
-          <ThemeContextDispatch.Provider value={ThemeModeState}>
-            <ThemeProvider theme={activeTheme}>
-              {disableCssBaseline ? (
+    const WithThemeProvider = forwardRef<any, P>(function RefRenderFn(props, ref) {
+      const { ...rest } = props
+      const ThemeModeState = useThemeModeState()
+      const activeTheme = useMemo<Theme>(() => {
+        const themeMode = ThemeModeState[0]
+        return themeMode === 'dark' ? darkTheme : lightTheme
+      }, [ThemeModeState])
+      return (
+        <ThemeContextDispatch.Provider value={ThemeModeState}>
+          <ThemeProvider theme={activeTheme}>
+            {disableCssBaseline ? (
+              <WrappedComponent ref={ref} {...rest} />
+            ) : (
+              <CssBaseline enableColorScheme>
                 <WrappedComponent ref={ref} {...rest} />
-              ) : (
-                <CssBaseline enableColorScheme>
-                  <WrappedComponent ref={ref} {...rest} />
-                </CssBaseline>
-              )}
-            </ThemeProvider>
-          </ThemeContextDispatch.Provider>
-        )
-      },
-    )
+              </CssBaseline>
+            )}
+          </ThemeProvider>
+        </ThemeContextDispatch.Provider>
+      )
+    })
     WithThemeProvider.displayName = `WithThemeProvider(${displayName})`
     hoistNonReactStatics(WithThemeProvider, WrappedComponent)
 
     return WithThemeProvider
   }
 }
-export {createWithThemeProvider}
+export { createWithThemeProvider }
 export default createWithThemeProvider

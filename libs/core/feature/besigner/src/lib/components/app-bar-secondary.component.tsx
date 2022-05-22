@@ -15,26 +15,25 @@
  * limitations under the License.
  */
 
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   AppBar as MuiAppBar,
   type AppBarProps as MuiAppBarProps,
   Stack,
   Toolbar as MuiToolbar,
 } from '@mui/material'
-import {forwardRef} from 'react'
+import { forwardRef } from 'react'
 import AddControlsComponent from './add-controls.component'
 import DevicePreviewControlsComponent from './device-preview-controls.component'
 import HistoryControlsComponent from './history-controls.component'
 import InteractControlsComponent from './interact-controls.component'
 import PanelControlsComponent from './panel-controls.component'
 
-
 export interface AppBarSecondaryComponentProps extends Partial<MuiAppBarProps> {}
 
 const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponentProps>(
   function RefRenderFn(props, ref) {
-    const {children, sx, ...rest} = props
+    const { children, sx, ...rest } = props
 
     return (
       <MuiAppBar
@@ -45,16 +44,19 @@ const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponentProps>(
         color="inherit"
         component="header"
         elevation={0}
-        sx={mergeSxProps({
-          top: 0,
-          borderBottomWidth: '1px',
-          borderBottomStyle: 'solid',
-          borderBottomColor: 'divider',
-          [`& .MuiToolbar-root`]: {minHeight: 40},
-        }, sx)}
+        sx={mergeSxProps(
+          {
+            top: 0,
+            borderBottomWidth: '1px',
+            borderBottomStyle: 'solid',
+            borderBottomColor: 'divider',
+            [`& .MuiToolbar-root`]: { minHeight: 40 },
+          },
+          sx
+        )}
         {...rest}
       >
-        <MuiToolbar variant="dense" sx={{pr: {xs: 2, sm: 2}}}>
+        <MuiToolbar variant="dense" sx={{ pr: { xs: 2, sm: 2 } }}>
           <Stack
             direction="row"
             alignItems="center"
@@ -63,7 +65,7 @@ const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponentProps>(
             spacing={1}
           >
             <AddControlsComponent />
-            <HistoryControlsComponent sx={{flexGrow: 1}} />
+            <HistoryControlsComponent sx={{ flexGrow: 1 }} />
             <DevicePreviewControlsComponent />
             <InteractControlsComponent />
             <PanelControlsComponent />
@@ -72,12 +74,12 @@ const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponentProps>(
         </MuiToolbar>
       </MuiAppBar>
     )
-  },
+  }
 )
 
 AppBarSecondaryComponent.displayName = 'AppBarSecondaryComponent'
 AppBarSecondaryComponent.aglyn = true
 AppBarSecondaryComponent.defaultProps = {}
 
-export {AppBarSecondaryComponent}
+export { AppBarSecondaryComponent }
 export default AppBarSecondaryComponent

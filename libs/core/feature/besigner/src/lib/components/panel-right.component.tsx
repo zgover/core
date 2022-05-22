@@ -15,20 +15,24 @@
  * limitations under the License.
  */
 
-import {BesignerPanelTabFlag} from '@aglyn/core-data-besigner'
-import type {ElementId} from '@aglyn/core-data-framework'
-import {useAglynComponentSchema, useAglynElementData} from '@aglyn/core-feature-renderer'
+import { BesignerPanelTabFlag } from '@aglyn/core-data-besigner'
+import type { ElementId } from '@aglyn/core-data-framework'
+import { useAglynComponentSchema, useAglynElementData } from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_ELEMENT_DETAILS,
   ICON_VARIANT_ELEMENT_PROPERTIES,
   ICON_VARIANT_ELEMENT_STYLES,
 } from '@aglyn/shared-data-enums'
-import {alpha, mergeSxProps, styled} from '@aglyn/shared-feature-themes'
-import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
-import {TabContext as MuiTabContext, TabList as MuiTabList, TabPanel as MuiTabPanel} from '@mui/lab'
-import {Box, Divider, Tab as MuiTab, Typography} from '@mui/material'
-import {forwardRef, Fragment, useCallback, useMemo} from 'react'
+import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
+import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { numberFromHexadecimal, numberToHexadecimal } from '@aglyn/shared-util-tools'
+import {
+  TabContext as MuiTabContext,
+  TabList as MuiTabList,
+  TabPanel as MuiTabPanel,
+} from '@mui/lab'
+import { Box, Divider, Tab as MuiTab, Typography } from '@mui/material'
+import { forwardRef, Fragment, useCallback, useMemo } from 'react'
 import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 import ElementPropsForm from './element-props-form.component'
@@ -37,10 +41,9 @@ import WorkspacePanelComponent, {
   type WorkspacePanelComponentProps,
 } from './workspace-panel.component'
 
-
 const TabPanelInner = styled('div', {
   name: 'AglynTabPanelInner',
-})(({theme}) => ({
+})(({ theme }) => ({
   padding: theme.spacing(2),
   width: '100%',
 }))
@@ -53,112 +56,105 @@ const TabPanel = styled(MuiTabPanel, {
 })
 const DividerSpacer = styled(Divider, {
   name: 'AglynDividerSpacer',
-})(({theme}) => ({
+})(({ theme }) => ({
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(2),
 }))
 
-const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
+const ElementInfo = function ElementInfo({ $id }: { $id: ElementId }) {
   const componentId = useAglynElementData($id, 'componentId')
   const bundleId = useAglynElementData($id, 'bundleId')
   const parentId = useAglynElementData($id, 'parentId')
   const schema = useAglynComponentSchema(componentId, bundleId)
   const failoverText = 'n/a'
-  const details = useMemo(() => [
-    {
-      key: 'element-overview',
-      label: 'Element Overview',
-      items: [
-        {
-          key: 'component-display-name',
-          label: 'Type',
-          value: schema?.displayName,
-        },
-        {
-          key: 'component-title',
-          label: 'Title',
-          value: schema?.title,
-        },
-        {
-          key: 'component-subtitle',
-          label: 'Subtitle',
-          value: schema?.subtitle,
-        },
-        {
-          key: 'component-description',
-          label: 'Description',
-          value: schema?.description,
-          TypographyProps: {gutterBottom: true},
-        },
-      ],
-    },
-    {
-      key: 'unique-identifiers',
-      label: 'Unique Identifiers',
-      items: [
-        {
-          key: 'element-id',
-          label: 'Element ID',
-          value: $id,
-        },
-        {
-          key: 'parent-id',
-          label: 'Parent Element ID',
-          value: parentId,
-        },
-        {
-          key: 'component-id',
-          label: 'Component ID',
-          value: componentId,
-        },
-        {
-          key: 'bundle-id',
-          label: 'Bundle ID',
-          value: bundleId,
-          ValueTypographyProps: {},
-        },
-      ],
-    },
-  ], [$id, bundleId, componentId, schema, parentId])
+  const details = useMemo(
+    () => [
+      {
+        key: 'element-overview',
+        label: 'Element Overview',
+        items: [
+          {
+            key: 'component-display-name',
+            label: 'Type',
+            value: schema?.displayName,
+          },
+          {
+            key: 'component-title',
+            label: 'Title',
+            value: schema?.title,
+          },
+          {
+            key: 'component-subtitle',
+            label: 'Subtitle',
+            value: schema?.subtitle,
+          },
+          {
+            key: 'component-description',
+            label: 'Description',
+            value: schema?.description,
+            TypographyProps: { gutterBottom: true },
+          },
+        ],
+      },
+      {
+        key: 'unique-identifiers',
+        label: 'Unique Identifiers',
+        items: [
+          {
+            key: 'element-id',
+            label: 'Element ID',
+            value: $id,
+          },
+          {
+            key: 'parent-id',
+            label: 'Parent Element ID',
+            value: parentId,
+          },
+          {
+            key: 'component-id',
+            label: 'Component ID',
+            value: componentId,
+          },
+          {
+            key: 'bundle-id',
+            label: 'Bundle ID',
+            value: bundleId,
+            ValueTypographyProps: {},
+          },
+        ],
+      },
+    ],
+    [$id, bundleId, componentId, schema, parentId]
+  )
 
   return (
     <>
-      {details.map(({label, items, ...item}) => (
+      {details.map(({ label, items, ...item }) => (
         <Fragment key={item.key}>
-          <Typography variant="subtitle1" component="div" sx={{mb: 2}}>
+          <Typography variant="subtitle1" component="div" sx={{ mb: 2 }}>
             {label}
           </Typography>
-          {items.map(({
-            label,
-            value,
-            TypographyProps,
-            ValueTypographyProps,
-            ...item
-          }: any) => (
-            <Typography
-              key={item.key}
-              component="div"
-              {...TypographyProps}
-            >
-              <Typography
-                variant="caption"
-                display="inline"
-                sx={{textTransform: 'uppercase'}}
-              >
+          {items.map(({ label, value, TypographyProps, ValueTypographyProps, ...item }: any) => (
+            <Typography key={item.key} component="div" {...TypographyProps}>
+              <Typography variant="caption" display="inline" sx={{ textTransform: 'uppercase' }}>
                 <b>{label}:</b>
               </Typography>{' '}
               <Typography
                 variant="body1"
                 display="inline"
                 {...ValueTypographyProps}
-                sx={mergeSxProps((theme) => ({
-                  bgcolor: alpha(theme.palette.secondary.light, 0.18),
-                  border: `1px solid ${alpha(theme.palette.secondary.light, 0.72)}`,
-                  borderRadius: '0.3em',
-                  px: 0.5, py: 0.15,
-                  wordBreak: 'break-word',
-                  fontSize: '0.8rem',
-                }), ValueTypographyProps?.sx)}
+                sx={mergeSxProps(
+                  (theme) => ({
+                    bgcolor: alpha(theme.palette.secondary.light, 0.18),
+                    border: `1px solid ${alpha(theme.palette.secondary.light, 0.72)}`,
+                    borderRadius: '0.3em',
+                    px: 0.5,
+                    py: 0.15,
+                    wordBreak: 'break-word',
+                    fontSize: '0.8rem',
+                  }),
+                  ValueTypographyProps?.sx
+                )}
               >
                 {value || <i>{failoverText}</i>}
               </Typography>
@@ -181,8 +177,8 @@ const tabs = [
   {
     value: BesignerPanelTabFlag.ELEMENT_INFO,
     tab: {
-      icon: {path: ICON_VARIANT_ELEMENT_DETAILS.path},
-      iconPosition: ('top' as const),
+      icon: { path: ICON_VARIANT_ELEMENT_DETAILS.path },
+      iconPosition: 'top' as const,
       label: 'Info',
     },
     panel: {
@@ -192,8 +188,8 @@ const tabs = [
   {
     value: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
     tab: {
-      icon: {path: ICON_VARIANT_ELEMENT_PROPERTIES.path},
-      iconPosition: ('top' as const),
+      icon: { path: ICON_VARIANT_ELEMENT_PROPERTIES.path },
+      iconPosition: 'top' as const,
       label: 'Attributes',
     },
     panel: {
@@ -203,8 +199,8 @@ const tabs = [
   {
     value: BesignerPanelTabFlag.ELEMENT_STYLES,
     tab: {
-      icon: {path: ICON_VARIANT_ELEMENT_STYLES.path},
-      iconPosition: ('top' as const),
+      icon: { path: ICON_VARIANT_ELEMENT_STYLES.path },
+      iconPosition: 'top' as const,
       label: 'Styles',
     },
     panel: {
@@ -215,75 +211,73 @@ const tabs = [
 
 export interface PanelRightComponentProps extends WorkspacePanelComponentProps {}
 
-export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
-  function RefRenderFn(props, ref) {
-    const {children, ...rest} = props
+export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const { children, ...rest } = props
 
-    const [selected] = useAglynCanvasSelected()
-    const [panel, setPanel] = useAglynBesignerPanel('panelRight')
-    const {toggled, tab, size} = panel || {}
-    const value = tab || BesignerPanelTabFlag.ELEMENT_INFO
+  const [selected] = useAglynCanvasSelected()
+  const [panel, setPanel] = useAglynBesignerPanel('panelRight')
+  const { toggled, tab, size } = panel || {}
+  const value = tab || BesignerPanelTabFlag.ELEMENT_INFO
 
-    const handleTabChange = useCallback((e, val) => {
-      setPanel((panel) => ({...panel, tab: numberFromHexadecimal(val)}))
-    }, [setPanel])
+  const handleTabChange = useCallback(
+    (e, val) => {
+      setPanel((panel) => ({ ...panel, tab: numberFromHexadecimal(val) }))
+    },
+    [setPanel]
+  )
 
-    return (
-      <WorkspacePanelComponent
-        ref={ref}
-        id="aglyn:panel-right"
-        aria-label="right toolbox panel"
-        size={size}
-        open={toggled}
-        anchor="right"
-        component="aside"
-        {...rest}
-      >
-        <MuiTabContext value={numberToHexadecimal(value)}>
-          <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-            <MuiTabList
-              onChange={handleTabChange}
-              variant="fullWidth"
-              indicatorColor="secondary"
-              textColor="secondary"
-            >
-              {tabs.map(({value, tab: {icon, ...tab}}) => (
-                <MuiTab
-                  key={value}
-                  value={numberToHexadecimal(value)}
-                  icon={<MdiIcon {...icon} />}
-                  sx={{
-                    minHeight: 'unset',
-                    fontSize: theme => theme.typography.pxToRem(12),
-                    lineHeight: 0.8,
-                    pt: 1,
-                  }}
-                  {...tab}
-                />
-              ))}
-            </MuiTabList>
-          </Box>
+  return (
+    <WorkspacePanelComponent
+      ref={ref}
+      id="aglyn:panel-right"
+      aria-label="right toolbox panel"
+      size={size}
+      open={toggled}
+      anchor="right"
+      component="aside"
+      {...rest}
+    >
+      <MuiTabContext value={numberToHexadecimal(value)}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <MuiTabList
+            onChange={handleTabChange}
+            variant="fullWidth"
+            indicatorColor="secondary"
+            textColor="secondary"
+          >
+            {tabs.map(({ value, tab: { icon, ...tab } }) => (
+              <MuiTab
+                key={value}
+                value={numberToHexadecimal(value)}
+                icon={<MdiIcon {...icon} />}
+                sx={{
+                  minHeight: 'unset',
+                  fontSize: (theme) => theme.typography.pxToRem(12),
+                  lineHeight: 0.8,
+                  pt: 1,
+                }}
+                {...tab}
+              />
+            ))}
+          </MuiTabList>
+        </Box>
 
-          {tabs.map(({value, panel: {Component, ...panel}}) => (
-            <TabPanel
-              key={value}
-              value={numberToHexadecimal(value)}
-              {...panel}
-            >
-              <TabPanelInner>
-                {!selected?.$id ? defaultTabContent : (
-                  <Component $id={selected?.$id} />
-                )}
-              </TabPanelInner>
-            </TabPanel>
-          ))}
-        </MuiTabContext>
+        {tabs.map(({ value, panel: { Component, ...panel } }) => (
+          <TabPanel key={value} value={numberToHexadecimal(value)} {...panel}>
+            <TabPanelInner>
+              {!selected?.$id ? defaultTabContent : <Component $id={selected?.$id} />}
+            </TabPanelInner>
+          </TabPanel>
+        ))}
+      </MuiTabContext>
 
-        {children}
-      </WorkspacePanelComponent>
-    )
-  },
-)
+      {children}
+    </WorkspacePanelComponent>
+  )
+})
 
 PanelRightComponent.displayName = 'PanelRightComponent'
 PanelRightComponent.aglyn = true

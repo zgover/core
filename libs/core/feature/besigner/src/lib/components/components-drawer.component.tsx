@@ -15,23 +15,22 @@
  * limitations under the License.
  */
 
-import {ICON_VARIANT_CLOSE} from '@aglyn/shared-data-enums'
-import type {AnyProps} from '@aglyn/shared-data-types'
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import { ICON_VARIANT_CLOSE } from '@aglyn/shared-data-enums'
+import type { AnyProps } from '@aglyn/shared-data-types'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   NavigationDrawerComponent,
   type NavigationDrawerProps,
   SrOnlyComponent,
 } from '@aglyn/shared-ui-jsx'
-import type {FormSchema} from '@aglyn/shared-ui-jsx-forms'
-import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {Button, IconButton, Typography} from '@mui/material'
-import {forwardRef, type MouseEvent, useCallback, useState} from 'react'
-import type {ElementDrawerOptions} from '../contexts/element-drawer-context'
+import type { FormSchema } from '@aglyn/shared-ui-jsx-forms'
+import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { Button, IconButton, Typography } from '@mui/material'
+import { forwardRef, type MouseEvent, useCallback, useState } from 'react'
+import type { ElementDrawerOptions } from '../contexts/element-drawer-context'
 import ComponentsGridListComponent, {
   type ComponentsGridListProps,
 } from './components-grid-list.component'
-
 
 export interface ComponentsDrawerOptionsProps extends ElementDrawerOptions {
   type?: 'browse-site-components' | 'edit-element-traits'
@@ -43,71 +42,89 @@ export interface ComponentsDrawerProps extends Partial<NavigationDrawerProps> {
   options?: ComponentsDrawerOptionsProps
   items?: ComponentsGridListProps['items']
   onItemSelect?: ComponentsGridListProps['onItemSelect']
-  onDelete?: {bivarianceHack<T>(event: MouseEvent<T>, data: unknown): void}['bivarianceHack']
+  onDelete?: { bivarianceHack<T>(event: MouseEvent<T>, data: unknown): void }['bivarianceHack']
   onClose?: {
     bivarianceHack(
       event: any,
-      reason: 'backdropClick' | 'escapeKeyDown' | 'cancelIconClick' | 'cancelButtonClick',
+      reason: 'backdropClick' | 'escapeKeyDown' | 'cancelIconClick' | 'cancelButtonClick'
     ): void
   }['bivarianceHack']
 }
 
-const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerProps>(
-  function RefRenderFn(props, ref) {
-    const {options, onItemSelect, onClose, onDelete, items, sx, ...rest} = props
+const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const { options, onItemSelect, onClose, onDelete, items, sx, ...rest } = props
 
-    const {title} = {...options}
-    const [columns, setColumns] = useState(4)
-    const handleColumnChange = useCallback((columns: number) => (e) => {
+  const { title } = { ...options }
+  const [columns, setColumns] = useState(4)
+  const handleColumnChange = useCallback(
+    (columns: number) => (e) => {
       setColumns(columns)
-    }, [])
-    const handleDrawerClose = useCallback((e, reason) => {
+    },
+    []
+  )
+  const handleDrawerClose = useCallback(
+    (e, reason) => {
       onClose?.call(null, e, reason)
-    }, [onClose])
-    const handleDrawerCancelButton = useCallback((e) => {
+    },
+    [onClose]
+  )
+  const handleDrawerCancelButton = useCallback(
+    (e) => {
       handleDrawerClose.call(null, e, 'cancelButtonClick')
-    }, [handleDrawerClose])
-    const handleDrawerCancelIcon = useCallback((e) => {
+    },
+    [handleDrawerClose]
+  )
+  const handleDrawerCancelIcon = useCallback(
+    (e) => {
       handleDrawerClose.call(null, e, 'cancelIconClick')
-    }, [handleDrawerClose])
-    const handleOnItemSelect = useCallback((...args) => {
+    },
+    [handleDrawerClose]
+  )
+  const handleOnItemSelect = useCallback(
+    (...args) => {
       onItemSelect?.call(null, ...args)
-    }, [onItemSelect])
+    },
+    [onItemSelect]
+  )
 
-    const appBarLeft = (
-      <>
-        <IconButton color="inherit" edge="start" onClick={handleDrawerCancelIcon} sx={{mr: 2}}>
-          <MdiIcon path={ICON_VARIANT_CLOSE.path} />
-          <SrOnlyComponent>close drawer</SrOnlyComponent>
-        </IconButton>
-        <Typography
-          color="inherit"
-          variant="h6"
-          sx={{
-            fontSize: theme => theme.typography.pxToRem(20),
-          }}
-        >
-          {title}
-        </Typography>
-      </>
-    )
+  const appBarLeft = (
+    <>
+      <IconButton color="inherit" edge="start" onClick={handleDrawerCancelIcon} sx={{ mr: 2 }}>
+        <MdiIcon path={ICON_VARIANT_CLOSE.path} />
+        <SrOnlyComponent>close drawer</SrOnlyComponent>
+      </IconButton>
+      <Typography
+        color="inherit"
+        variant="h6"
+        sx={{
+          fontSize: (theme) => theme.typography.pxToRem(20),
+        }}
+      >
+        {title}
+      </Typography>
+    </>
+  )
 
-    const appBarRight = (
-      <Button color="inherit" onClick={handleDrawerCancelButton} sx={{mr: -1.2}}>
-        Cancel
-      </Button>
-    )
+  const appBarRight = (
+    <Button color="inherit" onClick={handleDrawerCancelButton} sx={{ mr: -1.2 }}>
+      Cancel
+    </Button>
+  )
 
-    return (
-      <NavigationDrawerComponent
-        ref={ref}
-        anchor="bottom"
-        variant="temporary"
-        appBarLeft={appBarLeft}
-        appBarRight={appBarRight}
-        onClose={handleDrawerClose}
-        AppBarProps={{color: 'inherit'}}
-        sx={mergeSxProps({
+  return (
+    <NavigationDrawerComponent
+      ref={ref}
+      anchor="bottom"
+      variant="temporary"
+      appBarLeft={appBarLeft}
+      appBarRight={appBarRight}
+      onClose={handleDrawerClose}
+      AppBarProps={{ color: 'inherit' }}
+      sx={mergeSxProps(
+        {
           '& .AglynNavigationDrawer-content': {
             backgroundColor: 'background.default',
             overflow: 'auto',
@@ -115,32 +132,30 @@ const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerProps>(
           '& > .MuiDrawer-paper': {
             margin: '0 auto',
             maxHeight: '100vh',
-            height: ({
+            height: {
               xs: '100%',
               sm: '50%',
-            }),
+            },
           },
           '& .MuiDrawer-paper': {
             margin: '0 auto',
-            maxHeight: {sm: '100%'},
-            height: {xs: '100%', sm: '720px'},
-            maxWidth: {sm: '100%'},
-            width: theme => ({
+            maxHeight: { sm: '100%' },
+            height: { xs: '100%', sm: '720px' },
+            maxWidth: { sm: '100%' },
+            width: (theme) => ({
               xs: '100%',
               sm: theme.breakpoints.values.sm,
             }),
           },
-        }, sx)}
-        {...rest}
-      >
-       <ComponentsGridListComponent
-         onItemSelect={handleOnItemSelect}
-         items={items}
-       />
-      </NavigationDrawerComponent>
-    )
-  },
-)
+        },
+        sx
+      )}
+      {...rest}
+    >
+      <ComponentsGridListComponent onItemSelect={handleOnItemSelect} items={items} />
+    </NavigationDrawerComponent>
+  )
+})
 
 ComponentsDrawerComponent.displayName = 'ComponentsDrawerComponent'
 ComponentsDrawerComponent.aglyn = true
@@ -148,5 +163,5 @@ ComponentsDrawerComponent.defaultProps = {
   items: [],
 }
 
-export {ComponentsDrawerComponent}
+export { ComponentsDrawerComponent }
 export default ComponentsDrawerComponent

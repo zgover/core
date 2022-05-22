@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {APP_CONSOLE, ICON_VARIANT_MENU_DOWN} from '@aglyn/shared-data-enums'
-import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import { APP_CONSOLE, ICON_VARIANT_MENU_DOWN } from '@aglyn/shared-data-enums'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   AglynSvgIcon,
   AglynSvgLogo,
@@ -27,9 +27,9 @@ import {
   type MenuItemProps,
   type MenuProps,
 } from '@aglyn/shared-ui-jsx'
-import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {useNextPageTitle} from '@aglyn/shared-ui-next'
-import {_isArrEmpty} from '@aglyn/shared-util-guards'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { useNextPageTitle } from '@aglyn/shared-ui-next'
+import { _isArrEmpty } from '@aglyn/shared-util-guards'
 import {
   AppBar,
   Avatar,
@@ -41,72 +41,60 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import {Fragment, type ReactNode} from 'react'
-import {DRAWER_WIDTH, TOP_BAR_HEIGHT} from '../../constants/shared'
-
+import { Fragment, type ReactNode } from 'react'
+import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {
-  const {
-    avatar,
-    icon,
-    children,
-    id,
-    key,
-    items,
-    MenuProps,
-    ...rest
-  } = item
+  const { avatar, icon, children, id, key, items, MenuProps, ...rest } = item
   const isMenu = !_isArrEmpty(items)
   const itemKey = key || id || i
-  const rendered = type === 'text' ? (
-    <Button
-      key={key}
-      id={id}
-      color="inherit"
-      startIcon={!icon?.path ? icon : (<MdiIcon {...icon} />)}
-      endIcon={!isMenu ? undefined : (<MdiIcon path={ICON_VARIANT_MENU_DOWN.path} />)}
-      {...(!rest.href ? {} : {component: AppLink, componentVariant: 'button'})}
-      {...rest}
-      sx={mergeSxProps({
-        '& .MuiButton-endIcon': {marginLeft: 0},
-        '& .MuiButton-endIcon>*:nth-of-type(1)': {fontSize: `1.7em`},
-      }, rest?.sx)}
-    >
-      {children}
-    </Button>
-  ) : (
-    <IconButton
-      key={itemKey}
-      color="inherit"
-      {...rest}
-    >
-      {!avatar
-        ? !icon?.path ? icon : (<MdiIcon {...icon} />)
-        : (<Avatar {...avatar} />)
-      }
-      {children}
-    </IconButton>
-  )
+  const rendered =
+    type === 'text' ? (
+      <Button
+        key={key}
+        id={id}
+        color="inherit"
+        startIcon={!icon?.path ? icon : <MdiIcon {...icon} />}
+        endIcon={!isMenu ? undefined : <MdiIcon path={ICON_VARIANT_MENU_DOWN.path} />}
+        {...(!rest.href ? {} : { component: AppLink, componentVariant: 'button' })}
+        {...rest}
+        sx={mergeSxProps(
+          {
+            '& .MuiButton-endIcon': { marginLeft: 0 },
+            '& .MuiButton-endIcon>*:nth-of-type(1)': { fontSize: `1.7em` },
+          },
+          rest?.sx
+        )}
+      >
+        {children}
+      </Button>
+    ) : (
+      <IconButton key={itemKey} color="inherit" {...rest}>
+        {!avatar ? !icon?.path ? icon : <MdiIcon {...icon} /> : <Avatar {...avatar} />}
+        {children}
+      </IconButton>
+    )
 
   return isMenu ? (
     <Menu
       key={itemKey}
       items={items}
       {...MenuProps}
-      sx={mergeSxProps({
-        p: {padding: 0.5, xs: 0.25},
-        '&:last-child': {
-          paddingLeft: 0.75,
+      sx={mergeSxProps(
+        {
+          p: { padding: 0.5, xs: 0.25 },
+          '&:last-child': {
+            paddingLeft: 0.75,
+          },
         },
-      }, MenuProps?.sx)}
+        MenuProps?.sx
+      )}
     >
       {rendered}
     </Menu>
   ) : (
-    <Fragment key={itemKey}>
-      {rendered}
-    </Fragment>
+    <Fragment key={itemKey}>{rendered}</Fragment>
   )
 }
 
@@ -157,13 +145,9 @@ function MainLayout(props: MainLayoutProps) {
 
   return (
     <Fragment>
-      <Stack
-        alignItems="stretch"
-        flexDirection="column"
-        minHeight="100vh"
-      >
+      <Stack alignItems="stretch" flexDirection="column" minHeight="100vh">
         <ElevateOnScroll>
-          {({activeWithoutHysteresis}) => (
+          {({ activeWithoutHysteresis }) => (
             <AppBar
               component="header"
               color="inherit"
@@ -175,7 +159,7 @@ function MainLayout(props: MainLayoutProps) {
                 borderBottomWidth: `1px`,
                 borderBottomStyle: 'solid',
                 borderBottomColor: 'divider',
-                zIndex: theme => theme.zIndex.appBar + 5,
+                zIndex: (theme) => theme.zIndex.appBar + 5,
               }}
             >
               <Toolbar
@@ -184,15 +168,8 @@ function MainLayout(props: MainLayoutProps) {
                 alignItems="center"
                 justifyContent="flex-start"
                 direction="row"
-                sx={{paddingLeft: {xs: 0, md: 0}}}
-                divider={
-                  <Divider
-                    orientation="vertical"
-                    variant="middle"
-                    flexItem
-                    light
-                  />
-                }
+                sx={{ paddingLeft: { xs: 0, md: 0 } }}
+                divider={<Divider orientation="vertical" variant="middle" flexItem light />}
               >
                 <Stack
                   alignItems="center"
@@ -200,15 +177,10 @@ function MainLayout(props: MainLayoutProps) {
                   justifyContent="flex-start"
                   color="inherit"
                   width={DRAWER_WIDTH}
-                  maxWidth={{xs: '100%'}}
-                  sx={{paddingLeft: {xs: 2, md: 3}}}
+                  maxWidth={{ xs: '100%' }}
+                  sx={{ paddingLeft: { xs: 2, md: 3 } }}
                 >
-                  <AppLink
-                    href="/"
-                    componentVariant="button-base"
-                    color="inherit"
-                    disableRipple
-                  >
+                  <AppLink href="/" componentVariant="button-base" color="inherit" disableRipple>
                     <Stack
                       component="span"
                       alignItems="center"
@@ -255,7 +227,6 @@ function MainLayout(props: MainLayoutProps) {
                         </Typography>
                       )}
                     </Stack>
-
                   </AppLink>
                 </Stack>
 
@@ -264,9 +235,9 @@ function MainLayout(props: MainLayoutProps) {
                   justifyContent="flex-start"
                   direction="row"
                   flexGrow={1}
-                  sx={{paddingLeft: 6}}
+                  sx={{ paddingLeft: 6 }}
                 >
-                  {(!customCenter && _isArrEmpty(centerNavigationItems)) ? null : (
+                  {!customCenter && _isArrEmpty(centerNavigationItems) ? null : (
                     <Stack
                       component="nav"
                       direction="row"
@@ -274,7 +245,7 @@ function MainLayout(props: MainLayoutProps) {
                       justifyContent="flex-start"
                       // flexBasis="72%"
                     >
-                      {customCenter || (centerNavigationItems.map(buildNav('text')))}
+                      {customCenter || centerNavigationItems.map(buildNav('text'))}
                     </Stack>
                   )}
                 </Stack>
@@ -303,5 +274,5 @@ MainLayout.displayName = 'MainLayout'
 MainLayout.aglyn = true
 MainLayout.defaultProps = {}
 
-export {MainLayout}
+export { MainLayout }
 export default MainLayout

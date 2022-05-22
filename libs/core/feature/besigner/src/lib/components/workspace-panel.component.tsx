@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
-import {_isEqualitySameType} from '@aglyn/shared-util-guards'
-import Box, {type BoxProps as MuiBoxProps} from '@mui/material/Box'
-import MuiDrawer, {type DrawerProps as MuiDrawerProps} from '@mui/material/Drawer'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import { _isEqualitySameType } from '@aglyn/shared-util-guards'
+import Box, { type BoxProps as MuiBoxProps } from '@mui/material/Box'
+import MuiDrawer, { type DrawerProps as MuiDrawerProps } from '@mui/material/Drawer'
 import clsx from 'clsx'
-import {forwardRef} from 'react'
-import {DEFAULT_LEFT_DRAWER_WIDTH} from '../constants'
-
+import { forwardRef } from 'react'
+import { DEFAULT_LEFT_DRAWER_WIDTH } from '../constants'
 
 const classKeys = generateComponentClassKeys('AglynWorkspacePanel', [
   'drawer',
@@ -42,10 +41,10 @@ const WorkspacePanel = styled(Box, {
   shouldForwardProp(propName: any) {
     return !_isEqualitySameType(propName, 'size')
   },
-})<WorkspacePanelProps>(({theme, size}) => {
-  const calcSize = (size || DEFAULT_LEFT_DRAWER_WIDTH)
+})<WorkspacePanelProps>(({ theme, size }) => {
+  const calcSize = size || DEFAULT_LEFT_DRAWER_WIDTH
 
-  return ({
+  return {
     zIndex: theme.zIndex.appBar,
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
@@ -110,7 +109,7 @@ const WorkspacePanel = styled(Box, {
         position: 'unset',
       },
     },
-  })
+  }
 })
 
 export interface WorkspacePanelComponentProps extends WorkspacePanelProps {
@@ -119,49 +118,47 @@ export interface WorkspacePanelComponentProps extends WorkspacePanelProps {
   anchor?: MuiDrawerProps['anchor']
 }
 
-const WorkspacePanelComponent = forwardRef<any, WorkspacePanelComponentProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      children,
-      className: classNameProp,
-      DrawerProps,
-      size,
-      open: openProp,
-      anchor,
-      id,
-      ...rest
-    } = props
-    const open = Boolean(openProp)
-    const {className: drawerClassName, open: _, ...drawerProps} = {...DrawerProps}
-    const className = clsx({
+const WorkspacePanelComponent = forwardRef<any, WorkspacePanelComponentProps>(function RefRenderFn(
+  props,
+  ref
+) {
+  const {
+    children,
+    className: classNameProp,
+    DrawerProps,
+    size,
+    open: openProp,
+    anchor,
+    id,
+    ...rest
+  } = props
+  const open = Boolean(openProp)
+  const { className: drawerClassName, open: _, ...drawerProps } = { ...DrawerProps }
+  const className = clsx(
+    {
       [classKeys.open]: open,
       [classKeys.anchorLeft]: anchor === 'left',
       [classKeys.anchorRight]: anchor === 'right',
       [classKeys.anchorTop]: anchor === 'top',
       [classKeys.anchorBottom]: anchor === 'bottom',
-    }, classNameProp)
+    },
+    classNameProp
+  )
 
-    return (
-      <WorkspacePanel
-        ref={ref}
-        id={id}
-        size={size}
-        className={className}
-        {...rest}
+  return (
+    <WorkspacePanel ref={ref} id={id} size={size} className={className} {...rest}>
+      <MuiDrawer
+        variant="persistent"
+        open={open}
+        anchor={anchor}
+        className={clsx(classKeys.drawer, drawerClassName)}
+        {...drawerProps}
       >
-        <MuiDrawer
-          variant="persistent"
-          open={open}
-          anchor={anchor}
-          className={clsx(classKeys.drawer, drawerClassName)}
-          {...drawerProps}
-        >
-          {children}
-        </MuiDrawer>
-      </WorkspacePanel>
-    )
-  },
-)
+        {children}
+      </MuiDrawer>
+    </WorkspacePanel>
+  )
+})
 
 WorkspacePanelComponent.displayName = 'WorkspacePanelComponent'
 WorkspacePanelComponent.aglyn = true
@@ -169,5 +166,5 @@ WorkspacePanelComponent.defaultProps = {
   anchor: 'left',
 }
 
-export {WorkspacePanelComponent}
+export { WorkspacePanelComponent }
 export default WorkspacePanelComponent

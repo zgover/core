@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import type {BoxProps} from '@mui/material'
-
+import { styled } from '@aglyn/shared-ui-theme'
+import type { BoxProps } from '@mui/material'
 
 export interface EllipsisPulseProps extends BoxProps {
   color?: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' | 'inherit' | string
@@ -25,27 +24,27 @@ export interface EllipsisPulseProps extends BoxProps {
 
 const EllipsisPulseComponent = styled('span', {
   name: 'AglynEllipsisPulse',
-})<EllipsisPulseProps>(({theme, color}) => {
-
-  const clr = !color || color === 'inherit'
-    ? theme.palette.primary.main
-    : color === 'primary'
+})<EllipsisPulseProps>(({ theme, color }) => {
+  const clr =
+    !color || color === 'inherit'
+      ? theme.palette.primary.main
+      : color === 'primary'
       ? theme.palette.primary.main
       : color === 'secondary'
-        ? theme.palette.secondary.main
-        : color === 'error'
-          ? theme.palette.error.main
-          : color === 'info'
-            ? theme.palette.info.main
-            : color === 'success'
-              ? theme.palette.success.main
-              : color === 'warning'
-                ? theme.palette.warning.main
-                : typeof color === 'string'
-                  ? color
-                  : theme.palette.primary.main
+      ? theme.palette.secondary.main
+      : color === 'error'
+      ? theme.palette.error.main
+      : color === 'info'
+      ? theme.palette.info.main
+      : color === 'success'
+      ? theme.palette.success.main
+      : color === 'warning'
+      ? theme.palette.warning.main
+      : typeof color === 'string'
+      ? color
+      : theme.palette.primary.main
 
-  return ({
+  return {
     position: 'absolute',
 
     '&:after': {
@@ -56,16 +55,16 @@ const EllipsisPulseComponent = styled('span', {
     },
 
     '@keyframes dotPulseAfter': {
-      '0%': {content: '""'},
-      '25%': {content: '"."'},
-      '50%': {content: '".."'},
-      '75%': {content: '"..."'},
-      '100%': {content: '""'},
+      '0%': { content: '""' },
+      '25%': { content: '"."' },
+      '50%': { content: '".."' },
+      '75%': { content: '"..."' },
+      '100%': { content: '""' },
     },
-  })
+  }
 })
 EllipsisPulseComponent.displayName = 'EllipsisPulseComponent'
 EllipsisPulseComponent.aglyn = true
 
-export {EllipsisPulseComponent}
+export { EllipsisPulseComponent }
 export default EllipsisPulseComponent

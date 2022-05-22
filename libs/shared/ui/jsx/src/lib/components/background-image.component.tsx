@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-import {CSSObject, styled} from '@aglyn/shared-feature-themes'
-import {_isEqualitySameType} from '@aglyn/shared-util-guards'
-import {Box, type BoxProps as MuiBoxProps} from '@mui/material'
-
+import { CSSObject, styled } from '@aglyn/shared-ui-theme'
+import { _isEqualitySameType } from '@aglyn/shared-util-guards'
+import { Box, type BoxProps as MuiBoxProps } from '@mui/material'
 
 interface OverrideProps {
   url: string
@@ -35,7 +34,7 @@ const BackgroundImageComponent = styled(Box, {
   shouldForwardProp(propName) {
     return !_isEqualitySameType(propName, 'url', 'parallax', 'bgPosition', 'bgSize')
   },
-})<BackgroundImageComponentProps>(({url, parallax, bgRepeat, bgPosition, bgSize}) => ({
+})<BackgroundImageComponentProps>(({ url, parallax, bgRepeat, bgPosition, bgSize }) => ({
   backgroundColor: 'inherit',
   backgroundRepeat: bgRepeat,
   backgroundPosition: bgPosition,
@@ -52,5 +51,5 @@ BackgroundImageComponent.defaultProps = {
   bgSize: 'cover',
 }
 
-export {BackgroundImageComponent}
+export { BackgroundImageComponent }
 export default BackgroundImageComponent

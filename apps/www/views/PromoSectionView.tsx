@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {AppLink, type AppLinkProps} from '@aglyn/shared-ui-jsx'
+import { styled } from '@aglyn/shared-ui-theme'
+import { AppLink, type AppLinkProps } from '@aglyn/shared-ui-jsx'
 import Typography from '@mui/material/Typography'
-import {forwardRef, type ReactNode} from 'react'
-import {BackgroundImage, type BackgroundImageProps} from '../components/BackgroundImage'
-
+import { forwardRef, type ReactNode } from 'react'
+import { BackgroundImage, type BackgroundImageProps } from '../components/BackgroundImage'
 
 const StyledBackgroundImage = styled(BackgroundImage, {
   name: 'BackgroundImage',
-})(({theme}) => ({
+})(({ theme }) => ({
   textAlign: 'center',
   marginTop: theme.spacing(4),
   marginBottom: theme.spacing(8),
@@ -43,43 +42,24 @@ export interface PromoSectionViewProps extends BackgroundImageProps {
   link: AppLinkProps<'button'>
 }
 
-const PromoSectionView = forwardRef<any, PromoSectionViewProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      children,
-      className: propClass,
-      link,
-      heading,
-      backgroundUrl,
-      ...rest
-    } = props
+const PromoSectionView = forwardRef<any, PromoSectionViewProps>(function RefRenderFn(props, ref) {
+  const { children, className: propClass, link, heading, backgroundUrl, ...rest } = props
 
-    return (
-      <StyledBackgroundImage
-        ref={ref}
-        url={backgroundUrl}
-        parallax
-        {...rest}
-      >
-        <Typography
-          variant="h3"
-          variantMapping={{'h3': 'h2'}}
-          children={heading}
-          gutterBottom
-        />
-        <AppLink
-          size="large"
-          variant="contained"
-          color="primary"
-          componentVariant="button"
-          {...link}
-        />
-      </StyledBackgroundImage>
-    )
-  },
-)
+  return (
+    <StyledBackgroundImage ref={ref} url={backgroundUrl} parallax {...rest}>
+      <Typography variant="h3" variantMapping={{ h3: 'h2' }} children={heading} gutterBottom />
+      <AppLink
+        size="large"
+        variant="contained"
+        color="primary"
+        componentVariant="button"
+        {...link}
+      />
+    </StyledBackgroundImage>
+  )
+})
 
 PromoSectionView.displayName = 'PromoSectionView'
 PromoSectionView.aglyn = true
-export {PromoSectionView}
+export { PromoSectionView }
 export default PromoSectionView

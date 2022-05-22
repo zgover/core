@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import type {InferElementTypeProps} from '@aglyn/shared-data-types'
-import {jssPreset, StylesProvider, useTheme} from '@aglyn/shared-feature-themes'
+import type { InferElementTypeProps } from '@aglyn/shared-data-types'
+import { jssPreset, StylesProvider, useTheme } from '@aglyn/shared-ui-theme'
 
-import {create, type Jss, type JssOptions} from 'jss'
+import { create, type Jss, type JssOptions } from 'jss'
 import rtl from 'jss-rtl'
 import React, {
   Children,
@@ -36,7 +36,6 @@ import ReactFrameComponent from 'react-frame-component'
 
 import useCombinedRefs from '../hooks/use-combined-refs'
 
-
 export type FrameComponentProps = InferElementTypeProps<typeof ReactFrameComponent>
 export type SandboxFrameDocument = HTMLIFrameElement['contentDocument']
 export type SandboxFrameWindow = HTMLIFrameElement['contentWindow']
@@ -49,7 +48,8 @@ type State = {
 }
 
 /* eslint-disable-next-line */
-export interface SandboxFrameProps extends Omit<FrameComponentProps, 'contentDidMount' | 'contentDidUpdate'> {
+export interface SandboxFrameProps
+  extends Omit<FrameComponentProps, 'contentDidMount' | 'contentDidUpdate'> {
   onContentDidMount?: (state: State) => void
   onContentDidUpdate?: (state: State) => void
   jssPlugins?: JssOptions['plugins']
@@ -62,7 +62,7 @@ export interface SandboxFrameProps extends Omit<FrameComponentProps, 'contentDid
  */
 export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(function RefRenderFn(
   props,
-  ref,
+  ref
 ) {
   const theme = useTheme()
   const {
@@ -91,12 +91,12 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(fun
         {/* JSS Insertion Point */}
         <style
           ref={styleRef}
-          dangerouslySetInnerHTML={{__html: baseStyles}}
+          dangerouslySetInnerHTML={{ __html: baseStyles }}
           id={'sandbox-frame-jss'}
         />
       </Fragment>
     ),
-    [title, baseStyles],
+    [title, baseStyles]
   )
   const handleContentDidMount = useCallback(() => {
     const instance = frameRef.current

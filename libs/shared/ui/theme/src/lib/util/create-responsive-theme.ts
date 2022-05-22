@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import {createTheme, responsiveFontSizes, type Theme, type ThemeOptions} from '../../vendor/mui'
-
+import { createTheme, responsiveFontSizes, type Theme, type ThemeOptions } from '../../vendor/mui'
 
 export type CreateResponsiveThemeOptions = {
   themeOptions?: ThemeOptions
@@ -70,7 +69,7 @@ export type CreateResponsiveThemeOptions = {
  * @returns {Theme}
  */
 export function createResponsiveTheme(options: CreateResponsiveThemeOptions): Theme {
-  const {themeOptions, responsiveFontSizesOptions} = options
+  const { themeOptions, responsiveFontSizesOptions } = options
   let theme = createTheme(themeOptions)
 
   theme = responsiveFontSizes(theme, {

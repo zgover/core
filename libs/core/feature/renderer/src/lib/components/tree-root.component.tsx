@@ -15,36 +15,26 @@
  * limitations under the License.
  */
 
-import {CANVAS_ROOT_ELEMENT_ID} from '@aglyn/core-data-framework'
-import {styled} from '@aglyn/shared-feature-themes'
-import {forwardRef} from 'react'
-import LeafComponent, {type LeafComponentProps} from './leaf.component'
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-framework'
+import { styled } from '@aglyn/shared-ui-theme'
+import { forwardRef } from 'react'
+import LeafComponent, { type LeafComponentProps } from './leaf.component'
 
-
-const TreeRootBranch = styled(
-  LeafComponent,
-  {name: 'AglynRootBranch'}
-)<LeafComponentProps>({})
+const TreeRootBranch = styled(LeafComponent, { name: 'AglynRootBranch' })<LeafComponentProps>({})
 
 TreeRootBranch.displayName = 'TreeRootBranch'
 
-
 export interface TreeRootProps extends LeafComponentProps {}
 
-const TreeRootComponent = forwardRef<any, TreeRootProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      children,
-      ...rest
-    } = props
+const TreeRootComponent = forwardRef<any, TreeRootProps>(function RefRenderFn(props, ref) {
+  const { children, ...rest } = props
 
-    return (
-      <TreeRootBranch ref={ref} key={rest.$id} {...rest}>
-        {children}
-      </TreeRootBranch>
-    )
-  },
-)
+  return (
+    <TreeRootBranch ref={ref} key={rest.$id} {...rest}>
+      {children}
+    </TreeRootBranch>
+  )
+})
 
 TreeRootComponent.displayName = 'TreeRootComponent'
 TreeRootComponent.aglyn = true
@@ -52,5 +42,5 @@ TreeRootComponent.defaultProps = {
   $id: CANVAS_ROOT_ELEMENT_ID,
 }
 
-export {TreeRootComponent, TreeRootBranch}
+export { TreeRootComponent, TreeRootBranch }
 export default TreeRootComponent

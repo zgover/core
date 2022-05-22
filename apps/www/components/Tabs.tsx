@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {alpha, styled} from '@aglyn/shared-feature-themes'
-import {GridButtons} from '@aglyn/shared-ui-jsx'
+import { alpha, styled } from '@aglyn/shared-ui-theme'
+import { GridButtons } from '@aglyn/shared-ui-jsx'
 import {
   mdiChartSankeyVariant,
   mdiCheckNetwork,
@@ -31,8 +31,7 @@ import Box from '@mui/material/Box'
 import MuiTab from '@mui/material/Tab'
 import MuiTabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import {type ReactNode, type SyntheticEvent, useCallback, useState} from 'react'
-
+import { type ReactNode, type SyntheticEvent, useCallback, useState } from 'react'
 
 interface TabPanelProps {
   children?: ReactNode
@@ -41,7 +40,7 @@ interface TabPanelProps {
 }
 
 function TabPanel(props: TabPanelProps) {
-  const {children, value, index, ...other} = props
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -69,7 +68,7 @@ function a11yProps(index: any) {
 
 const TabsContainer = styled(Box, {
   name: 'AglynTabsContainer',
-})(({theme}) => ({
+})(({ theme }) => ({
   flexGrow: 1,
   // backgroundColor: theme.palette.background.paper,
   backgroundColor: alpha(theme.palette.primary.light, 0.12),
@@ -105,11 +104,11 @@ export default function Tabs() {
         <GridButtons
           items={[
             {
-              sx: {height: 1, width: 1},
+              sx: { height: 1, width: 1 },
               variant: 'contained',
               color: 'secondary',
               children: (
-                <Box sx={{textAlign: 'center'}}>
+                <Box sx={{ textAlign: 'center' }}>
                   <div>
                     <MdiIcon fontSize="large" path={mdiFileDocumentMultiple.path} />
                   </div>
@@ -125,11 +124,11 @@ export default function Tabs() {
         <GridButtons
           items={[
             {
-              sx: {height: 1, width: 1},
+              sx: { height: 1, width: 1 },
               variant: 'contained',
               color: 'secondary',
               children: (
-                <Box sx={{textAlign: 'center'}}>
+                <Box sx={{ textAlign: 'center' }}>
                   <div>
                     <MdiIcon fontSize="large" path={mdiVariable.path} />
                   </div>
@@ -138,11 +137,11 @@ export default function Tabs() {
               ),
             },
             {
-              sx: {height: 1, width: 1},
+              sx: { height: 1, width: 1 },
               variant: 'contained',
               color: 'secondary',
               children: (
-                <Box sx={{textAlign: 'center'}}>
+                <Box sx={{ textAlign: 'center' }}>
                   <div>
                     <MdiIcon fontSize="large" path={mdiCheckNetwork.path} />
                   </div>
@@ -151,11 +150,11 @@ export default function Tabs() {
               ),
             },
             {
-              sx: {height: 1, width: 1},
+              sx: { height: 1, width: 1 },
               variant: 'contained',
               color: 'secondary',
               children: (
-                <Box sx={{textAlign: 'center'}}>
+                <Box sx={{ textAlign: 'center' }}>
                   <div>
                     <MdiIcon fontSize="large" path={mdiChartSankeyVariant.path} />
                   </div>
