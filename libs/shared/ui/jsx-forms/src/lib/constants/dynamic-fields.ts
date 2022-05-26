@@ -34,6 +34,7 @@ import type {
 import dynamic from 'next/dynamic'
 import type {ColorPickerProps} from '../components/color-picker.component'
 import type {IconSelectProps} from '../components/icon-select.component'
+import type {ToggleButtonProps} from '../components/toggle-button.component'
 
 
 export const FieldIconSelect = dynamic<IconSelectProps>(
@@ -42,6 +43,10 @@ export const FieldIconSelect = dynamic<IconSelectProps>(
 )
 export const FieldColorPicker = dynamic<ColorPickerProps>(
   () => import('../components/color-picker.component').then((mod) => mod.default),
+  {ssr: false},
+)
+export const FieldToggleButton = dynamic<ToggleButtonProps>(
+  () => import('../components/toggle-button.component').then((mod) => mod.default),
   {ssr: false},
 )
 export const FieldSelect = dynamic<SelectProps<any>>(

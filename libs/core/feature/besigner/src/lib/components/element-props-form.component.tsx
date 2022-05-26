@@ -44,10 +44,27 @@ export const ElementPropsFormTemplate = forwardRef<any, FormTemplateRenderProps>
   function RefRenderFn(props, ref) {
     const {formFields, schema, ...rest} = props
     const {handleSubmit} = useFormApi()
+    console.log('form rest', rest)
     return (
-      <form ref={ref} onSubmit={handleSubmit} noValidate {...rest}>
+      <form
+        ref={ref}
+        onSubmit={handleSubmit}
+        onChange={handleSubmit}
+        onBlur={handleSubmit}
+        noValidate
+        {...rest}
+      >
         {schema.title}
         <Grid spacing={2} container>
+          {/*{Children.map(formFields as any, (child) => {*/}
+          {/*  console.log('child', child, child?.props)*/}
+          {/*  const originalOnChange = child.props.onChange?.bind(undefined)*/}
+          {/*  child.props.onChange = (...args) => {*/}
+          {/*    handleSubmit()*/}
+          {/*    originalOnChange(...args)*/}
+          {/*  }*/}
+          {/*  return child*/}
+          {/*})}*/}
           {formFields as unknown as ReactNode}
         </Grid>
         <FormSpy>
@@ -108,21 +125,30 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
 
           <FormRenderer
             ref={ref}
-            FormTemplate={ElementPropsFormTemplate}
             componentMapper={simpleComponentMapper}
             onCancel={handleFormCancel}
             onSubmit={handleElementSave}
             initialValues={elemProps}
             schema={formSchema}
             {...rest}
-          />
-        </NoSsr>
+          >
+            {({formFields, schema, ...rest}) => (
+              <>
+                <ElementPropsFormTemplate
+                  formFields={formFields}
+                  schema={schema}
+                  {...rest}
+                />
 
-        <FormControl margin="none" fullWidth>
-          <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
-            Delete Element
-          </Button>
-        </FormControl>
+                <FormControl margin="none" fullWidth>
+                  <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
+                    Delete Element
+                  </Button>
+                </FormControl>
+              </>
+            )}
+          </FormRenderer>
+        </NoSsr>
       </>
     )
   },

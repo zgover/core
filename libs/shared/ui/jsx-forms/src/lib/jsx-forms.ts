@@ -24,6 +24,7 @@ export * from './components/switch.component'
 export * from './components/text-field.component'
 export * from './components/textarea.component'
 export * from './components/grid-form-template.component'
+export * from './components/toggle-button.component'
 
 export * from './constants/component-mappers'
 export * from './constants/dynamic-fields'

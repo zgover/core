@@ -32,6 +32,7 @@ import {
   FIELD_MAP_TEXT_FIELD,
   FIELD_MAP_TEXTAREA,
   FIELD_MAP_TIME_PICKER,
+  FIELD_MAP_TOGGLE_BUTTON,
   FIELD_MAP_WIZARD,
 } from './field-configurations'
 import {FieldComponentType} from './flags'
@@ -54,6 +55,7 @@ export const componentMapper: ComponentMapper = {
   [FieldComponentType.DUAL_LIST_SELECT]: FIELD_MAP_DUAL_LIST_SELECT,
   [FieldComponentType.ICON_PICKER]: FIELD_MAP_ICON_PICKER,
   [FieldComponentType.COLOR_PICKER]: FIELD_MAP_COLOR_PICKER,
+  [FieldComponentType.TOGGLE_BUTTON]: FIELD_MAP_TOGGLE_BUTTON,
 }
 
 export const simpleComponentMapper = {

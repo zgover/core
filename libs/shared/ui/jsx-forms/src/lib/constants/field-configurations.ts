@@ -33,6 +33,7 @@ import {
   FieldTextarea,
   FieldTextField,
   FieldTimePicker,
+  FieldToggleButton,
   FieldWizard,
 } from './dynamic-fields'
 
@@ -112,6 +113,13 @@ export const FIELD_MAP_ICON_PICKER: FieldComponentMap = {
 export const FIELD_MAP_COLOR_PICKER: FieldComponentMap = {
   ...fieldSharedOptions,
   component: FieldColorPicker,
+  FormControlProps: {
+    ...fieldSharedOptions,
+  },
+}
+export const FIELD_MAP_TOGGLE_BUTTON: FieldComponentMap = {
+  ...fieldSharedOptions,
+  component: FieldToggleButton,
   FormControlProps: {
     ...fieldSharedOptions,
   },

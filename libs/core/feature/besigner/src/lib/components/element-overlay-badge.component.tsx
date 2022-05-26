@@ -208,7 +208,9 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
           />
         )}
 
-        <MoveButtons $id={$id} />
+        {!isRootElementId($id) && (
+          <MoveButtons $id={$id} />
+        )}
       </MuiButtonGroup>
     )
   },

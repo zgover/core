@@ -44,7 +44,6 @@ const Swatch = styled('span', {
   shouldForwardProp: (propName) => propName !== 'color',
 })<{color: string}>(({theme, color}) => ({
   width: 22, height: 22,
-  border: `1px solid ${theme.palette.divider}`,
   display: 'flex',
   backgroundColor: color,
   borderRadius: '50%',
@@ -139,28 +138,6 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
       ...rest
     } = useFieldApi(props as any)
 
-    console.log('value', {
-      input,
-      isReadOnly,
-      isDisabled,
-      placeholder,
-      isRequired,
-      label,
-      helperText,
-      description,
-      validateOnMount,
-      meta,
-      inputProps,
-      InputProps,
-      FormFieldGridProps,
-      FormControlProps,
-      ColorPickerProps,
-      defaultValue,
-      onChange,
-      onBlur,
-      onFocus,
-    })
-
     const id = `color-picker-${useId()}`
     const invalid = validationError(meta, validateOnMount)
     const hasError = Boolean(invalid)
@@ -183,7 +160,7 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
     }, [handleChange])
 
     const popperRef = useRef<HTMLDivElement | null>(null)
-    const [fieldRef, setFieldRef] = useState<HTMLInputElement | null>(null)
+    const [fieldRef, setFieldRef] = useState<HTMLDivElement | null>(null)
     const [open, setOpen] = useState(false)
 
     const handleClickAway = useCallback((e) => setOpen(false), [])
@@ -234,7 +211,7 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
               open={Boolean(fieldRef && open)}
               anchorEl={fieldRef}
               sx={{zIndex: 'tooltip', maxWidth: 320}}
-              disablePortal
+              // disablePortal
             >
               <FieldColorPicker
                 {...ColorPickerProps}

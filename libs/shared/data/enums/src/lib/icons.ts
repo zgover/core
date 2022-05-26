@@ -20,6 +20,8 @@ import {
   mdiAlphabetical,
   mdiArrowDown,
   mdiArrowExpandHorizontal,
+  mdiArrowLeft,
+  mdiArrowRight,
   mdiArrowUp,
   mdiArrowUpRight,
   mdiBookVariant,
@@ -91,6 +93,8 @@ export const ICON_VARIANT_TEXT = mdiAlphabetical
 
 // Action + Navigation
 export const ICON_VARIANT_CLOSE = mdiClose
+export const ICON_VARIANT_LEFT = mdiArrowLeft
+export const ICON_VARIANT_RIGHT = mdiArrowRight
 export const ICON_VARIANT_COLLAPSABLE_CLOSE = mdiChevronDown
 export const ICON_VARIANT_COLLAPSABLE_OPEN = mdiChevronRight
 export const ICON_VARIANT_DOCK_BOTTOM_TOGGLE = mdiDockBottom

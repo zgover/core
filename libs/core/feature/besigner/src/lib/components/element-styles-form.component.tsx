@@ -17,7 +17,9 @@
 
 import {type ElementId, FieldComponentType, updateCanvasElement} from '@aglyn/core-data-framework'
 import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
+import {ICON_VARIANT_CLOSE, ICON_VARIANT_LEFT, ICON_VARIANT_RIGHT} from '@aglyn/shared-data-enums'
 import {componentMapper, FormRenderer, type FormRendererProps} from '@aglyn/shared-ui-jsx-forms'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import {type ChangeEvent, forwardRef, useCallback} from 'react'
@@ -77,6 +79,25 @@ const stylesSchema = {
         xs: 12,
         sm: 6,
       },
+    },
+    {
+      component: FieldComponentType.RADIO,
+      name: 'float',
+      label: 'Float',
+      options: [
+        {
+          value: '',
+          label: <MdiIcon path={ICON_VARIANT_CLOSE.path} />,
+        },
+        {
+          value: 'left',
+          label: <MdiIcon path={ICON_VARIANT_LEFT.path} />,
+        },
+        {
+          value: 'right',
+          label: <MdiIcon path={ICON_VARIANT_RIGHT.path} />,
+        },
+      ],
     },
   ],
 }
