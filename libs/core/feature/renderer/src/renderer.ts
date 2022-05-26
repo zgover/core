@@ -38,6 +38,7 @@ export * from './lib/hooks/use-aglyn-element-data'
 export * from './lib/hooks/use-aglyn-element-label'
 export * from './lib/hooks/use-aglyn-element-parent-position'
 export * from './lib/hooks/use-aglyn-element-resolved-props'
+export * from './lib/hooks/use-aglyn-site-theme'
 export * from './lib/hooks/with-aglyn-element-data'
 
 export * from './lib/utils/create-aglyn-component'

@@ -28,6 +28,7 @@ import {
   InputAdornment,
   type InputAdornmentProps,
   Popper,
+  type PopperProps,
   TextField as MuiTextField,
   type TextFieldProps,
 } from '@mui/material'
@@ -98,9 +99,11 @@ const FieldColorPicker = forwardRef<any, Partial<SketchPickerProps>>(
 FieldColorPicker.displayName = 'AglynFieldColorPicker'
 
 type InternalColorPickerProps = Partial<TextFieldProps> & {
-  FormFieldGridProps: GridProps;
-  ColorPickerProps: Partial<SketchPickerProps>
-  FormControlProps: Partial<MuiFormControlProps>
+  FormFieldGridProps?: GridProps;
+  ColorPickerProps?: Partial<SketchPickerProps>
+  FormControlProps?: Partial<MuiFormControlProps>
+  PopperProps?: Partial<PopperProps>
+  presetColors?: string[]
 }
 
 export type ColorPickerProps = InternalColorPickerProps & UseFieldApiComponentConfig
@@ -126,15 +129,17 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
       description,
       validateOnMount,
       meta,
-      inputProps,
-      InputProps,
-      FormFieldGridProps,
-      FormControlProps,
-      ColorPickerProps,
       defaultValue,
       onChange,
       onBlur,
       onFocus,
+      inputProps,
+      InputProps,
+      presetColors,
+      FormFieldGridProps,
+      FormControlProps,
+      ColorPickerProps,
+      PopperProps,
       ...rest
     } = useFieldApi(props as any)
 
@@ -210,13 +215,15 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
               ref={popperRef}
               open={Boolean(fieldRef && open)}
               anchorEl={fieldRef}
-              sx={{zIndex: 'tooltip', maxWidth: 320}}
-              // disablePortal
+              sx={{zIndex: 'tooltip', maxWidth: 280}}
+              disablePortal
+              {...PopperProps}
             >
               <FieldColorPicker
                 {...ColorPickerProps}
                 color={value}
                 onChange={handleColorChange}
+                presetColors={presetColors}
               />
             </Popper>
           </div>
@@ -228,6 +235,7 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
 
 ColorPickerComponent.defaultProps = {
   FormFieldGridProps: {},
+  PopperProps: {},
   ColorPickerProps: {},
 }
 

@@ -15,16 +15,13 @@
  * limitations under the License.
  */
 
-import type{ElementId} from '@aglyn/core-data-framework'
-import useAglynComponentSchema from './use-aglyn-component-schema'
-import useAglynElementData from './use-aglyn-element-data'
+import {createTheme} from '@aglyn/shared-ui-theme'
+import {useMemo} from 'react'
 
 
-export function useAglynElementLabel($id: ElementId) {
-  const displayName = useAglynElementData($id, 'displayName')
-  const componentId = useAglynElementData($id, 'componentId')
-  const bundleId = useAglynElementData($id, 'bundleId')
-  const schema = useAglynComponentSchema(componentId, bundleId)
-  return displayName || schema?.displayName || $id
+export function useAglynSiteTheme() {
+  return useMemo(() => {
+    return createTheme({palette: {}})
+  }, [])
 }
-export default useAglynElementLabel
+export default useAglynSiteTheme

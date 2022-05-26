@@ -16,18 +16,21 @@
  */
 
 import {type ElementId, FieldComponentType, updateCanvasElement} from '@aglyn/core-data-framework'
-import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
-import {ICON_VARIANT_CLOSE, ICON_VARIANT_LEFT, ICON_VARIANT_RIGHT} from '@aglyn/shared-data-enums'
+import {
+  useAglynAppContext,
+  useAglynElementData,
+  useAglynSiteTheme,
+} from '@aglyn/core-feature-renderer'
 import {componentMapper, FormRenderer, type FormRendererProps} from '@aglyn/shared-ui-jsx-forms'
-import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {objectFlatten} from '@aglyn/shared-util-vendor'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
-import {type ChangeEvent, forwardRef, useCallback} from 'react'
+import {type ChangeEvent, forwardRef, useCallback, useMemo} from 'react'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 import {ElementPropsFormTemplate} from './element-props-form.component'
 
 
-const stylesSchema = {
+const stylesSchema = (presetColors) => ({
   fields: [
     {
       component: FieldComponentType.SELECT,
@@ -65,6 +68,7 @@ const stylesSchema = {
       name: 'color',
       label: 'Text Color',
       description: 'The text color of the element',
+      presetColors,
       FormFieldGridProps: {
         xs: 12,
         sm: 6,
@@ -75,32 +79,25 @@ const stylesSchema = {
       name: 'backgroundColor',
       label: 'Background Color',
       description: 'The background color of the element',
+      presetColors,
       FormFieldGridProps: {
         xs: 12,
         sm: 6,
       },
     },
     {
-      component: FieldComponentType.RADIO,
+      component: FieldComponentType.SELECT,
       name: 'float',
       label: 'Float',
       options: [
-        {
-          value: '',
-          label: <MdiIcon path={ICON_VARIANT_CLOSE.path} />,
-        },
-        {
-          value: 'left',
-          label: <MdiIcon path={ICON_VARIANT_LEFT.path} />,
-        },
-        {
-          value: 'right',
-          label: <MdiIcon path={ICON_VARIANT_RIGHT.path} />,
-        },
+        {value: '', label: 'Default'},
+        {value: 'none', label: 'None'},
+        {value: 'left', label: 'Left'},
+        {value: 'right', label: 'Right'},
       ],
     },
   ],
-}
+})
 
 export interface ElementStylesFormProps extends FormRendererProps {
   $id?: ElementId
@@ -112,6 +109,15 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
     const app = useAglynAppContext()
     const deleteElementCallback = useDeleteElementCallback({$id})
     const elemStyles = useAglynElementData($id, 'sx')
+    const siteTheme = useAglynSiteTheme()
+
+    const schema = useMemo(() => {
+      const flatMap = objectFlatten(siteTheme.palette)
+      const values = Object.entries(flatMap)
+        .map(([name, value]) => ({color: value, title: name}))
+        .filter((i) => Boolean(String(i.color).match(/^(rgb|#)/)?.[0]))
+      return stylesSchema(values)
+    }, [siteTheme])
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
@@ -134,7 +140,7 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
           onCancel={handleFormCancel}
           onSubmit={handleElementSave}
           initialValues={elemStyles}
-          schema={stylesSchema}
+          schema={schema}
           {...rest}
         />
 

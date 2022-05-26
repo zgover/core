@@ -17,11 +17,11 @@
 
 import {setBesignerCanvasHovered} from '@aglyn/core-data-besigner'
 import {CANVAS_ROOT_ELEMENT_ID} from '@aglyn/core-data-framework'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {createTheme, styled, ThemeProvider} from '@aglyn/shared-ui-theme'
+import {useAglynAppContext, useAglynSiteTheme} from '@aglyn/core-feature-renderer'
+import {styled, ThemeProvider} from '@aglyn/shared-ui-theme'
 import Box from '@mui/material/Box'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
-import {type ComponentProps, forwardRef, useCallback, useMemo} from 'react'
+import {type ComponentProps, forwardRef, useCallback} from 'react'
 import ElementLeafComponent from './element-leaf.component'
 import ElementOverlayPopperComponent from './element-overlay-popper.component'
 
@@ -52,9 +52,7 @@ const Elements = () => {
 }
 
 const ThemedElementContainer = () => {
-  const hostTheme = useMemo(() => {
-    return createTheme({palette: {}})
-  }, [])
+  const hostTheme = useAglynSiteTheme()
   return (
     <ThemeProvider theme={hostTheme}>
       <Elements />
