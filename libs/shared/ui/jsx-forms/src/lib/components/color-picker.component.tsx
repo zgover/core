@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {styled} from '@aglyn/shared-ui-theme'
 import {FormFieldGrid, validationError} from '@data-driven-forms/mui-component-mapper'
 import {useFieldApi, type UseFieldApiComponentConfig} from '@data-driven-forms/react-form-renderer'
 import {
@@ -39,6 +40,16 @@ interface TextFieldColorSwatchProps extends Partial<InputAdornmentProps> {
   IconButtonProps?: Partial<IconButtonProps>
 }
 
+const Swatch = styled('span', {
+  shouldForwardProp: (propName) => propName !== 'color',
+})<{color: string}>(({theme, color}) => ({
+  width: 22, height: 22,
+  border: `1px solid ${theme.palette.divider}`,
+  display: 'flex',
+  backgroundColor: color,
+  borderRadius: '50%',
+}))
+
 const TextFieldColorSwatch = forwardRef<any, TextFieldColorSwatchProps>(
   function RefRenderFn(props, ref) {
     const {color, IconButtonProps, ...rest} = props
@@ -55,15 +66,13 @@ const TextFieldColorSwatch = forwardRef<any, TextFieldColorSwatchProps>(
           {...IconButtonProps}
         >
           <Box
-            width={22}
-            height={22}
+            padding={0.35}
             border={1}
-            borderRadius={1}
-            borderColor="divider"
-            display="flex"
-            bgcolor={color}
-            component="span"
-          />
+            borderColor={'divider'}
+            borderRadius="50%"
+          >
+            <Swatch color={color} />
+          </Box>
         </IconButton>
       </InputAdornment>
     )
@@ -159,7 +168,7 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
     const value = input?.value || defaultValue || ''
 
     const handleChange = useCallback((value: RGBColor | string, e: any) => {
-      const val = getStrValue(value || '')
+      const val = getStrValue(value || '') || ''
       input?.onChange && input?.onChange(val)
       inputProps?.onChange && inputProps?.onChange(e, val)
       onChange && onChange(e, val)
@@ -203,7 +212,7 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
               helperText={invalid || ((meta.touched || validateOnMount) && meta.warning) || helperText || description}
               disabled={isDisabled}
               label={label}
-              placeholder={placeholder}
+              placeholder={placeholder || 'default'}
               required={isRequired}
               onChange={handleTextChange}
               onFocus={handleFocus}
@@ -222,9 +231,9 @@ const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
             <Popper
               id={id}
               ref={popperRef}
-              open={fieldRef && open}
+              open={Boolean(fieldRef && open)}
               anchorEl={fieldRef}
-              sx={{zIndex: 'tooltip', maxWidth: '90%'}}
+              sx={{zIndex: 'tooltip', maxWidth: 320}}
               disablePortal
             >
               <FieldColorPicker

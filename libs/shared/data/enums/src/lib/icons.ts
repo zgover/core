@@ -18,8 +18,10 @@
 import {
   mdiAccountSettings,
   mdiAlphabetical,
+  mdiArrowDown,
   mdiArrowExpandHorizontal,
-  mdiArrowTopLeft,
+  mdiArrowUp,
+  mdiArrowUpRight,
   mdiBookVariant,
   mdiBookVariantMultiple,
   mdiCalendar,
@@ -89,12 +91,12 @@ export const ICON_VARIANT_TEXT = mdiAlphabetical
 
 // Action + Navigation
 export const ICON_VARIANT_CLOSE = mdiClose
+export const ICON_VARIANT_COLLAPSABLE_CLOSE = mdiChevronDown
+export const ICON_VARIANT_COLLAPSABLE_OPEN = mdiChevronRight
 export const ICON_VARIANT_DOCK_BOTTOM_TOGGLE = mdiDockBottom
 export const ICON_VARIANT_DOCK_LEFT_TOGGLE = mdiDockLeft
 export const ICON_VARIANT_DOCK_RIGHT_TOGGLE = mdiDockRight
 export const ICON_VARIANT_MENU_DOWN = mdiMenuDown
-export const ICON_VARIANT_COLLAPSABLE_CLOSE = mdiChevronDown
-export const ICON_VARIANT_COLLAPSABLE_OPEN = mdiChevronRight
 export const ICON_VARIANT_MODIFY_ADD = mdiShapeSquareRoundedPlus
 export const ICON_VARIANT_MODIFY_DELETE = mdiDeleteOutline
 export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
@@ -102,10 +104,12 @@ export const ICON_VARIANT_MODIFY_DUPLICATE = mdiContentDuplicate
 export const ICON_VARIANT_MODIFY_EDIT = mdiPencil
 export const ICON_VARIANT_MODIFY_MODE_REARRANGE = mdiCursorMove
 export const ICON_VARIANT_MODIFY_MODE_SELECT = mdiCursorDefault
+export const ICON_VARIANT_MODIFY_MOVE_DOWN = mdiArrowDown
+export const ICON_VARIANT_MODIFY_MOVE_UP = mdiArrowUp
 export const ICON_VARIANT_MODIFY_REDO = mdiRedo
 export const ICON_VARIANT_MODIFY_UNDO = mdiUndo
 export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
-export const ICON_VARIANT_SELECT_PARENT = mdiArrowTopLeft
+export const ICON_VARIANT_SELECT_PARENT = mdiArrowUpRight
 export const ICON_VARIANT_SHOW_DETAIL = mdiPageNextOutline
 
 // Areas + Pages

@@ -33,7 +33,7 @@ export const GridFormTemplateComponent = forwardRef<any, GridFormTemplateProps>(
       <form ref={ref} onSubmit={handleSubmit} noValidate>
         {schema.title}
         <Grid spacing={2} container>
-          {formFields}
+          {formFields as any}
         </Grid>
         <FormSpy>
           {({submitting, validating, pristine, valid}) => (

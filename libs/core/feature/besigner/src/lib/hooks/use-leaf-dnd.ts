@@ -198,8 +198,15 @@ export function useLeafDnd(
       hierarchy,
     })
     isOverSelf && handleDragOver(dropItem)
-    console.log('useEffect isOverSelf', dropItem, isOverSelf)
-  }, [$id, bundleId, componentId, dropType, handleDragOver, hierarchy, isOverSelf])
+  }, [
+    $id,
+    bundleId,
+    componentId,
+    dropType,
+    handleDragOver,
+    hierarchy,
+    isOverSelf
+  ])
 
   return [dragHandleRef, dragPreviewRef, dropRef]
 }

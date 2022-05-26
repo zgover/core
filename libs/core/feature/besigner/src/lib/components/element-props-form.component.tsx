@@ -89,22 +89,18 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
     const bundleId = useAglynElementData($id, 'bundleId')
     const elemProps = useAglynElementData($id, 'props')
     const formSchema = useComponentFormSchema({componentId, bundleId})
-    console.log('useAglynElementData ElementPropsForm', $id, elemProps, formSchema)
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
       updateCanvasElement(app, {
-        $id, update: (element) => ({
-          ...element,
-          props: {...element.props, ...values},
-        }),
+        $id, update: (element) => {
+          return ({...element, props: {...values}})
+        },
       })
     }, [$id, app])
     const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {
       deleteElementCallback(e)
     }, [deleteElementCallback])
-
-    console.log('ElementPropsForm', $id, elemProps, formSchema)
 
     return (
       <>

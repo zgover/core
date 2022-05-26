@@ -62,7 +62,7 @@ const stylesSchema = {
       component: FieldComponentType.COLOR_PICKER,
       name: 'color',
       label: 'Text Color',
-      description: 'The text color of descendents',
+      description: 'The text color of the element',
       FormFieldGridProps: {
         xs: 12,
         sm: 6,
@@ -72,7 +72,7 @@ const stylesSchema = {
       component: FieldComponentType.COLOR_PICKER,
       name: 'backgroundColor',
       label: 'Background Color',
-      description: 'The background color of descendents',
+      description: 'The background color of the element',
       FormFieldGridProps: {
         xs: 12,
         sm: 6,
@@ -95,10 +95,9 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
       updateCanvasElement(app, {
-        $id, update: (element) => ({
-          ...element,
-          sx: {...element.sx, ...values},
-        }),
+        $id, update: (element) => {
+          return ({...element, sx: {...values}})
+        },
       })
     }, [$id, app])
     const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {

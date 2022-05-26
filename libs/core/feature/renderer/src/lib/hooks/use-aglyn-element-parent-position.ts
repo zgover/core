@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
  */
 
 import {type ElementId} from '@aglyn/core-data-framework'
+import {useMemo} from 'react'
 import {useAglynElementData} from './use-aglyn-element-data'
 
 
 export type useAglynElementParentPosition = [
   indexInParent: number,
+  isFirstElement: boolean,
+  isLastElement: boolean,
   parentId: ElementId,
   parentElementIds: ElementId[],
 ]
@@ -31,9 +34,18 @@ export function useAglynElementParentPosition(
   const parentId = useAglynElementData($id, 'parentId')
   const parentElements = useAglynElementData(parentId, 'elements') || []
   const indexInParent = parentElements.indexOf($id)
+  const length = parentElements.length
+  const [isFirst, isLast] = useMemo(() => {
+    return [
+      indexInParent === 0,
+      indexInParent === length + 1,
+    ]
+  }, [indexInParent, length])
 
   return [
     indexInParent,
+    isFirst,
+    isLast,
     parentId,
     parentElements,
   ]
