@@ -100,37 +100,35 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
   }
 
   public setupModules() {
-    const appName = this.#appName
-    this.logger.debug(AglynEventStateFlag.APP_CREATING, {appName})
-    this.emitter.emit(AglynEventStateFlag.APP_CREATING, {appName})
-
-    _INTERNAL_CONTEXTS_.set(
-      this.#appName,
-      this.#contextsController = new AglynContextsController(this, {
-        ...this.options.modulesOptions?.contexts,
-      }),
-    )
-    _INTERNAL_COMMANDS_.set(
-      this.#appName,
-      this.#commandsController = new AglynCommandsController(this, {
-        ...this.options.modulesOptions?.commands,
-      }),
-    )
-    _INTERNAL_COMPONENTS_.set(
-      this.#appName,
-      this.#componentsController = new AglynComponentsController(this, {
-        ...this.options.modulesOptions?.components,
-      }),
-    )
-    _INTERNAL_CANVAS_.set(
-      this.#appName,
-      this.#canvasController = new AglynCanvasController(this, {
-        ...this.options.modulesOptions?.canvas,
-      }),
-    )
-
-    this.logger.debug(AglynEventStateFlag.APP_CREATED, {appName})
-    this.emitter.emit(AglynEventStateFlag.APP_CREATED, {appName})
+    this.handleEvent([
+      AglynEventStateFlag.APP_CREATING,
+      AglynEventStateFlag.APP_CREATED,
+    ], {appName: this.#appName}, () => {
+      _INTERNAL_CONTEXTS_.set(
+        this.#appName,
+        this.#contextsController = new AglynContextsController(this, {
+          ...this.options.modulesOptions?.contexts,
+        }),
+      )
+      _INTERNAL_COMMANDS_.set(
+        this.#appName,
+        this.#commandsController = new AglynCommandsController(this, {
+          ...this.options.modulesOptions?.commands,
+        }),
+      )
+      _INTERNAL_COMPONENTS_.set(
+        this.#appName,
+        this.#componentsController = new AglynComponentsController(this, {
+          ...this.options.modulesOptions?.components,
+        }),
+      )
+      _INTERNAL_CANVAS_.set(
+        this.#appName,
+        this.#canvasController = new AglynCanvasController(this, {
+          ...this.options.modulesOptions?.canvas,
+        }),
+      )
+    })
     return this
   }
   public setupExtensions() {
@@ -181,23 +179,17 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
   }
 
   public onInitialize(): this {
-    this.logger.debug(AglynEventStateFlag.APP_INITIALIZING, {appName: this.#appName})
-    this.emitter.emit(AglynEventStateFlag.APP_INITIALIZING, {appName: this.#appName})
-
-    this.#initializeAppModules()
-
-    this.logger.debug(AglynEventStateFlag.APP_INITIALIZED, {appName: this.#appName})
-    this.emitter.emit(AglynEventStateFlag.APP_INITIALIZED, {appName: this.#appName})
+    this.handleEvent([
+      AglynEventStateFlag.APP_INITIALIZING,
+      AglynEventStateFlag.APP_INITIALIZED,
+    ], {appName: this.#appName}, () => {this.#initializeAppModules()})
     return this
   }
   public onDestroy(): this {
-    this.logger.debug(AglynEventStateFlag.APP_DESTROYING, {appName: this.#appName})
-    this.emitter.emit(AglynEventStateFlag.APP_DESTROYING, {appName: this.#appName})
-
-    this.#destroyAppModules()
-
-    this.logger.debug(AglynEventStateFlag.APP_DESTROYED, {appName: this.#appName})
-    this.emitter.emit(AglynEventStateFlag.APP_DESTROYED, {appName: this.#appName})
+    this.handleEvent([
+      AglynEventStateFlag.APP_DESTROYING,
+      AglynEventStateFlag.APP_DESTROYED,
+    ], {appName: this.#appName}, () => {this.#destroyAppModules()})
     return this
   }
 

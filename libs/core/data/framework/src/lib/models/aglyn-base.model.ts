@@ -111,7 +111,7 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
   }
   /** @ignore */
   public __initialize__(props?: never): this {
-    this.#handleEvent([
+    this.handleEvent([
       AglynEventStateFlag.MODULE_INITIALIZING,
       AglynEventStateFlag.MODULE_INITIALIZED,
     ], undefined, () => {this.onInitialize()})
@@ -123,7 +123,7 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
   }
   /** @ignore */
   public __activate__(props?: never): this {
-    this.#handleEvent([
+    this.handleEvent([
       AglynEventStateFlag.MODULE_ACTIVATING,
       AglynEventStateFlag.MODULE_ACTIVATED,
     ], undefined, () => {this.onActivate()})
@@ -135,7 +135,7 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
   }
   /** @ignore */
   public __deactivate__(props?: never): this {
-    this.#handleEvent([
+    this.handleEvent([
       AglynEventStateFlag.MODULE_DEACTIVATING,
       AglynEventStateFlag.MODULE_DEACTIVATED,
     ], undefined, () => {this.onDeactivate()})
@@ -147,7 +147,7 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
   }
   /** @ignore */
   public __destroy__(props?: never): this {
-    this.#handleEvent([
+    this.handleEvent([
       AglynEventStateFlag.MODULE_DESTROYING,
       AglynEventStateFlag.MODULE_DESTROYED,
     ], undefined, () => {this.onDestroy()})
@@ -167,9 +167,11 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
   public getOptions(): O {
     return this.#options
   }
+
   public getCreatedAt(): Timestamp {
     return this.#createdAt
   }
+
   public getErrorFactory(): AglynErrorFactory {
     return this.#errorFactory
   }
@@ -177,6 +179,7 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
     this.#errorFactory = value
     return this
   }
+
   public getEmitter(): AglynEmitter {
     return this.#emitter
   }
@@ -184,6 +187,7 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
     this.#emitter = value
     return this
   }
+
   public getLogger(): AglynLogger {
     return this.#logger
   }
