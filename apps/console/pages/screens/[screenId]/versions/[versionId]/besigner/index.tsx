@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import '@aglyn/core-feature-singleton'
 import {LOADING_OVERLAY_ELEMENT} from '@aglyn/shared-ui-jsx'
 import {useNextPageTitle} from '@aglyn/shared-ui-next'
 import {useSnackbar} from '@aglyn/shared-ui-snackstack'

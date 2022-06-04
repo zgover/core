@@ -29,6 +29,8 @@ export const FIREBASE_AUTH_EMULATOR_ENABLED = process.env.FIREBASE_AUTH_EMULATOR
 export const FIREBASE_STORAGE_EMULATOR_ENABLED = process.env.FIREBASE_STORAGE_EMULATOR_ENABLED === 'true'
 export const FIREBASE_DATABASE_EMULATOR_ENABLED = process.env.FIREBASE_DATABASE_EMULATOR_ENABLED === 'true'
 
+export const AGLYN_SILOED_HOST = String(process.env.AGLYN_SILOED_HOST || '')
+
 export const HAS_WINDOW = () => typeof window !== 'undefined'
 export const HAS_DOCUMENT = () => typeof document !== 'undefined'
 export const HAS_BROWSER = () => typeof process['browser'] !== 'undefined'

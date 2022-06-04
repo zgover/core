@@ -418,6 +418,7 @@
       },
       "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:renderer"]
     },
+    "core-feature-singleton": "libs/core/feature/singleton",
     "shared-data-enums": {
       "root": "libs/shared/data/enums",
       "sourceRoot": "libs/shared/data/enums/src",

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import type { ScreenUid, VersionUid } from '@aglyn/core-data-framework'
-import { mergeSxProps, styled, type SxProps } from '@aglyn/shared-ui-theme'
-import { type IframeHTMLAttributes } from 'react'
+import type {ScreenUid, VersionUid} from '@aglyn/core-data-framework'
+import {AGLYN_SILOED_HOST} from '@aglyn/shared-data-enums'
+import {mergeSxProps, styled, type SxProps} from '@aglyn/shared-ui-theme'
+import {type IframeHTMLAttributes, useMemo} from 'react'
 
-const host = process.env.AGLYN_SILOED_HOST
 
 const BesignerFrame = styled('iframe', {
   name: 'AglynBesignerFrame',
@@ -36,12 +36,19 @@ export interface BesignerProps extends IframeHTMLAttributes<HTMLIFrameElement> {
 }
 
 function BesignerIframeComponent(props: BesignerProps) {
-  const { sx, screenId, versionId, ...rest } = props
+  const {sx, screenId, versionId, ...rest} = props
+
+  const host = useMemo(() => {
+    if (AGLYN_SILOED_HOST.startsWith('//') || AGLYN_SILOED_HOST.startsWith('http')) {
+      return AGLYN_SILOED_HOST
+    }
+    return `//${AGLYN_SILOED_HOST}`
+  }, [])
 
   return (
     <BesignerFrame
       sx={mergeSxProps(sx)}
-      src={`//${host}/besigner/${screenId}/${versionId}`}
+      src={`${host}/besigner/${screenId}/${versionId}`}
       {...rest}
     />
   )
@@ -49,5 +56,5 @@ function BesignerIframeComponent(props: BesignerProps) {
 
 BesignerIframeComponent.displayName = 'BesignerIframeComponent'
 
-export { BesignerIframeComponent }
+export {BesignerIframeComponent}
 export default BesignerIframeComponent
