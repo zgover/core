@@ -74,29 +74,39 @@ export type IfTrueOrNonDist<TRUE, ELSE> = ConditionalNonDist<TRUE, true, ELSE>
 /** From T, make all top level keys mutable (removes readonly status) */
 export type MutableShallow<T> = { -readonly [P in keyof T]: T[P] }
 
-/** From T, make all top level keys mutable (adds readonly status) */
+/** From T, make all top level keys immutable (adds readonly status) */
 export type ImmutableShallow<T> = { readonly [P in keyof T]: T[P] }
 
-/** From T, make all keys mutable including nested objects/arrays (removes readonly) */
+/** From T, make all keys mutable (removes readonly) */
 export type MutableDeep<T> = {
-  -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U>
-    ? MutableDeep<U>[]
-    : T[P] extends ReadonlySet<infer U>
-      ? MutableDeep<Set<U>>
-      : T[P] extends ReadonlyMap<infer K, infer U>
-        ? MutableDeep<Map<K, U>>
+  -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? MutableDeep<U>[]
+    : T[P] extends ReadonlySet<infer U> ? MutableDeep<Set<U>>
+      : T[P] extends ReadonlyMap<infer K, infer U> ? MutableDeep<Map<K, U>>
         : MutableDeep<T[P]>
 }
 
-/** From T, make all top level keys mutable (adds readonly status) */
+/** From T, make all top level and second level keys mutable (removes readonly) */
+export type MutableSlightlyDeep<T> = {
+  -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? MutableShallow<U>[]
+    : T[P] extends ReadonlySet<infer U> ? MutableShallow<Set<U>>
+      : T[P] extends ReadonlyMap<infer K, infer U> ? MutableShallow<Map<K, U>>
+        : MutableShallow<T[P]>
+}
+
+/** From T, make all keys immutable (adds readonly status) */
 export type ImmutableDeep<T> = {
-  readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U>
-    ? MutableDeep<U>[]
-    : T[P] extends ReadonlySet<infer U>
-      ? MutableDeep<Set<U>>
-      : T[P] extends ReadonlyMap<infer K, infer U>
-        ? MutableDeep<Map<K, U>>
-        : MutableDeep<T[P]>
+  readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? ImmutableDeep<U>[]
+    : T[P] extends ReadonlySet<infer U> ? ImmutableDeep<Set<U>>
+      : T[P] extends ReadonlyMap<infer K, infer U> ? ImmutableDeep<Map<K, U>>
+        : ImmutableDeep<T[P]>
+}
+
+/** From T, make all top level and second keys mutable (adds readonly status) */
+export type ImmutableSlightlyDeep<T> = {
+  readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U> ? ImmutableShallow<U>[]
+    : T[P] extends ReadonlySet<infer U> ? ImmutableShallow<Set<U>>
+      : T[P] extends ReadonlyMap<infer K, infer U> ? ImmutableShallow<Map<K, U>>
+        : ImmutableShallow<T[P]>
 }
 
 /** From T, make mutable properties whose keys are in union K (make specific keys mutable) */
@@ -153,7 +163,7 @@ export type ReplaceIndex<T, K extends keyof T, V> = Omit<T, K> & {
 }
 
 /** With L (left), spread properties with R (right) (e.g. [...L, ...R], {...L, ...R}) */
-export type Spreaded<L, R> = /* With L (left), omit keys not in union with keys of R (right)*/
+export type Spreaded<L, R = never> = /* With L (left), omit keys not in union with keys of R (right)*/
   Omit<L, keyof R> &
   /* With R (right), omit keys in union with partial types*/
   Omit<R, ExtractPartialKeys<R>> &

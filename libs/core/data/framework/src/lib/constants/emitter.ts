@@ -82,9 +82,13 @@ export enum AglynEventStateFlag {
   EXTENSION_DESTROYING = 'event:extensions:destroying-extension',
   EXTENSION_DESTROYED = 'event:extensions:destroyed-extension',
 
+  COMMAND_RESOLVER_SETTING = 'event:commands:setting-resolver',
   COMMAND_RESOLVER_SET = 'event:commands:set-resolver',
+  COMMAND_LISTENER_REGISTERING = 'event:commands:registering-listener',
   COMMAND_LISTENER_REGISTERED = 'event:commands:registered-listener',
+  COMMAND_RESOLVER_REMOVING = 'event:commands:unregistering-resolver',
   COMMAND_RESOLVER_REMOVED = 'event:commands:unregistered-resolver',
+  COMMAND_LISTENER_UNREGISTERING = 'event:commands:unregistering-listener',
   COMMAND_LISTENER_UNREGISTERED = 'event:commands:unregistered-listener',
   COMMAND_RESOLVER_TRIGGERING = 'event:commands:triggering-resolver',
   COMMAND_RESOLVER_TRIGGERED = 'event:commands:triggered-resolver',
@@ -211,13 +215,17 @@ export type ExtensionDeactivatedPayload = PayloadData<{namespace: string}>
 export type ExtensionDestroyingPayload = PayloadData<{namespace: string}>
 export type ExtensionDestroyedPayload = PayloadData<{namespace: string}>
 
+export type CommandResolverSettingPayload = PayloadData<{commandId: CommandUId}>
+export type CommandResolverSetPayload = PayloadData<{commandId: CommandUId}>
 export type CommandResolverTriggeringPayload = PayloadData<{commandId: CommandUId}>
 export type CommandResolverTriggeredPayload = PayloadData<{commandId: CommandUId}>
-export type CommandResolverSetPayload = PayloadData<{commandId: CommandUId}>
+export type CommandResolverRemovingPayload = PayloadData<{commandId: CommandUId}>
 export type CommandResolverRemovedPayload = PayloadData<{commandId: CommandUId}>
 export type CommandListenersTriggeringPayload = PayloadData<{commandId: CommandUId}>
 export type CommandListenersTriggeredPayload = PayloadData<{commandId: CommandUId}>
+export type CommandListenerRegisteringPayload = PayloadData<{commandId: CommandUId}>
 export type CommandListenerRegisteredPayload = PayloadData<{commandId: CommandUId}>
+export type CommandListenerUnregisteringPayload = PayloadData<{commandId: CommandUId}>
 export type CommandListenerUnregisteredPayload = PayloadData<{commandId: CommandUId}>
 
 export type ComponentRegisteringPayload = PayloadData<{componentId: ComponentId, bundleId?: BundleUId}>
@@ -259,13 +267,17 @@ export interface AglynEventStatePayload extends Record<AglynEventStateFlag, Agly
   [AglynEventStateFlag.EXTENSION_DESTROYING]: ExtensionDestroyingPayload
   [AglynEventStateFlag.EXTENSION_DESTROYED]: ExtensionDestroyedPayload
 
+  [AglynEventStateFlag.COMMAND_RESOLVER_SETTING]: CommandResolverSettingPayload
+  [AglynEventStateFlag.COMMAND_RESOLVER_SET]: CommandResolverSetPayload
+  [AglynEventStateFlag.COMMAND_RESOLVER_REMOVING]: CommandResolverRemovingPayload
+  [AglynEventStateFlag.COMMAND_RESOLVER_REMOVED]: CommandResolverRemovedPayload
   [AglynEventStateFlag.COMMAND_RESOLVER_TRIGGERING]: CommandResolverTriggeringPayload
   [AglynEventStateFlag.COMMAND_RESOLVER_TRIGGERED]: CommandResolverTriggeredPayload
-  [AglynEventStateFlag.COMMAND_RESOLVER_SET]: CommandResolverSetPayload
-  [AglynEventStateFlag.COMMAND_RESOLVER_REMOVED]: CommandResolverRemovedPayload
   [AglynEventStateFlag.COMMAND_LISTENERS_TRIGGERING]: CommandListenersTriggeringPayload
   [AglynEventStateFlag.COMMAND_LISTENERS_TRIGGERED]: CommandListenersTriggeredPayload
+  [AglynEventStateFlag.COMMAND_LISTENER_REGISTERING]: CommandListenerRegisteringPayload
   [AglynEventStateFlag.COMMAND_LISTENER_REGISTERED]: CommandListenerRegisteredPayload
+  [AglynEventStateFlag.COMMAND_LISTENER_UNREGISTERING]: CommandListenerUnregisteringPayload
   [AglynEventStateFlag.COMMAND_LISTENER_UNREGISTERED]: CommandListenerUnregisteredPayload
 
   [AglynEventStateFlag.COMPONENT_REGISTERING]: ComponentRegisteringPayload

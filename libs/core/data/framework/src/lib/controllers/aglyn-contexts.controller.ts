@@ -121,6 +121,7 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
     }
     else {
       // TODO: throw errorFactory error
+      throw new Error(`Invalid storeId: ${storeId}`)
     }
     return this
   }

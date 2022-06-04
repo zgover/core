@@ -70,8 +70,8 @@ export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOpti
 
   #doEvent<F extends AglynEventStateFlag>(flag: F, payload?: AglynEventPayloads[F]): this {
     this.logger.debug(flag, {
-      __namespace__: this.namespace,
-      __timestamp__: Timestamp.now().valueOf(),
+      namespace: this.namespace,
+      timestamp: Timestamp.now().valueOf(),
       ...payload || {namespace: this.namespace},
     })
     this.emitter.emit(flag, payload || {namespace: this.namespace})

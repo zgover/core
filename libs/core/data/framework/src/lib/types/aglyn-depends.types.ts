@@ -19,23 +19,29 @@
 export type AglynDependencyUid = string
 
 export enum AglynDependencyStatus {
-  WAITING = 0x01,
-  LOADED = 0x02,
+  WAITING = 'waiting',
+  LOADING = 'loading',
+  LOADED = 'loaded',
+  UNLOADING = 'unloading',
 }
+
+export type AglynDependencyStatuses = Record<AglynDependencyUid, AglynDependencyStatus>
+export type AglynDependenciesById = Record<AglynDependencyUid, AglynDependency>
+export type AglynDependencyDependencies = Record<AglynDependencyUid, true>
+export type AglynDependents = Record<AglynDependencyUid, true>
+export type AglynDependencyDependents = Record<AglynDependencyUid, AglynDependents>
 
 export interface AglynDependency {
   id: AglynDependencyUid
-  dependencies?: Record<AglynDependencyUid, true>
+  dependencies?: AglynDependencyDependencies
   load(...args: any[]): void
   destroy(...args: any[]): void
 }
 
 export interface AglynDependencyMap {
-  status: Record<AglynDependencyUid, AglynDependencyStatus>
-  dependents: Record<AglynDependencyUid, {
-    [DependentUid in AglynDependencyUid]: true
-  }>
-  __: Record<AglynDependencyUid, AglynDependency>
+  status: AglynDependencyStatuses
+  dependents: AglynDependencyDependents
+  __: AglynDependenciesById
 }
 
 export interface IAglynDependencyManager {
@@ -43,6 +49,6 @@ export interface IAglynDependencyManager {
   dependencyLoaded(id: AglynDependencyUid): boolean
   dependencyWaiting(id: AglynDependencyUid): boolean
   addDependency(dependency: AglynDependency): this
-  getDependency(id: AglynDependencyUid): AglynDependency | undefined
+  dependency(id: AglynDependencyUid): AglynDependency | undefined
   removeDependency(id: AglynDependencyUid): this
 }

@@ -142,27 +142,21 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
   }
 
   #initializeAppModules(): void {
-    this.#moduleLifecycleChange(this.modules, {type: 'init'})
+    for (const mod of this.modules) {
+      const namespace = mod.namespace
+      this.handleEvent([
+        AglynEventStateFlag.MODULE_INITIALIZING,
+        AglynEventStateFlag.MODULE_INITIALIZED
+      ], {namespace}, () => {mod.onInitialize(this)})
+    }
   }
   #destroyAppModules(): void {
-    this.#moduleLifecycleChange(this.modules, {type: 'destroy'})
-  }
-  #moduleLifecycleChange(modules: IAglynModuleModel[], opts: {type: 'init' | 'destroy'}) {
-    const {type} = opts
-    const isInit = type === 'init',
-      flagBefore = isInit
-        ? AglynEventStateFlag.MODULE_INITIALIZING
-        : AglynEventStateFlag.MODULE_DESTROYING,
-      flagAfter = isInit
-        ? AglynEventStateFlag.MODULE_INITIALIZED
-        : AglynEventStateFlag.MODULE_DESTROYED
-    for (const mod of modules) {
+    for (const mod of this.modules) {
       const namespace = mod.namespace
-      this.logger.debug(flagBefore, {namespace})
-      this.emitter.emit(flagBefore, {namespace})
-      isInit ? mod.onInitialize(this) : mod.onDestroy(this)
-      this.logger.debug(flagAfter, {namespace})
-      this.emitter.emit(flagAfter, {namespace})
+      this.handleEvent([
+        AglynEventStateFlag.MODULE_DESTROYING,
+        AglynEventStateFlag.MODULE_DESTROYED
+      ], {namespace}, () => {mod.onDestroy(this)})
     }
   }
 
