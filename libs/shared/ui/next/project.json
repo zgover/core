@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/ui/next/src",
+  "projectType": "library",
+  "tags": ["scope:lib", "scope:shared", "scope:ui"],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/ui/next/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/ui/next"],
+      "options": {
+        "jestConfig": "libs/shared/ui/next/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

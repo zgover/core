@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/util/next/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared/util/next",
+        "tsConfig": "libs/shared/util/next/tsconfig.lib.json",
+        "packageJson": "libs/shared/util/next/package.json",
+        "main": "libs/shared/util/next/src/index.ts",
+        "assets": ["libs/shared/util/next/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/util/next/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["scope:lib", "scope:shared", "scope:util"]
+}

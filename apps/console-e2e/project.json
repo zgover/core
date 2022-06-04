@@ -1,0 +1,28 @@
+{
+  "sourceRoot": "apps/console-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/console-e2e/cypress.json",
+        "tsConfig": "apps/console-e2e/tsconfig.e2e.json",
+        "devServerTarget": "console:serve"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "console:serve:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["apps/console-e2e/**/*.{js,ts}"]
+      },
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": ["scope:app", "scope:private", "scope:e2e"],
+  "implicitDependencies": ["console"]
+}

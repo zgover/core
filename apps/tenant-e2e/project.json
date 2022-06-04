@@ -1,0 +1,27 @@
+{
+  "sourceRoot": "apps/tenant-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/tenant-e2e/cypress.json",
+        "devServerTarget": "tenant:serve"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "tenant:serve:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/tenant-e2e/**/*.{js,ts}"]
+      }
+    }
+  },
+  "tags": ["scope:app", "scope:public", "scope:e2e"],
+  "implicitDependencies": ["tenant"]
+}
