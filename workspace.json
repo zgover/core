@@ -15,6 +15,7 @@
     "core-feature-canvas-designer": "libs/core/feature/canvas-designer",
     "core-feature-renderer": "libs/core/feature/renderer",
     "core-feature-singleton": "libs/core/feature/singleton",
+    "core-ui-renderer": "libs/core/ui/renderer",
     "shared-data-enums": "libs/shared/data/enums",
     "shared-data-forms": "libs/shared/data/forms",
     "shared-data-mdi": "libs/shared/data/mdi",

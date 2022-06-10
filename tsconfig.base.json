@@ -40,6 +40,7 @@
       "@aglyn/core-feature-canvas-designer": ["libs/core/feature/canvas-designer/src/index.ts"],
       "@aglyn/core-feature-renderer": ["libs/core/feature/renderer/src/index.ts"],
       "@aglyn/core-feature-singleton": ["libs/core/feature/singleton/src/index.ts"],
+      "@aglyn/core-ui-renderer": ["libs/core/ui/renderer/src/index.ts"],
       "@aglyn/shared-data-brand": ["libs/shared/data/brand/src/index.ts"],
       "@aglyn/shared-data-enums": ["libs/shared/data/enums/src/index.ts"],
       "@aglyn/shared-data-fbenums": ["libs/shared/data/fbenums/src/index.ts"],

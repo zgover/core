@@ -15,37 +15,37 @@
  * limitations under the License.
  */
 
-import type {ComponentId} from '@aglyn/core-data-framework'
+import type {AglynElement} from '@aglyn/core-data-framework'
 import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
 import {forwardRef, Fragment, useMemo} from 'react'
-import LeafComponent from './leaf.component'
+import LeafComponent, {LeafComponentType} from './leaf.component'
 
 
-export interface BranchComponentProps extends OverrideableComponentProps {
-  leafComponent?: LeafComponent
-  elements?: ComponentId[]
+export interface TreeProps extends OverrideableComponentProps {
+  LeafComponent?: LeafComponentType
+  elements?: AglynElement[]
 }
 
-const BranchComponent = forwardRef<any, BranchComponentProps>(
+const TreeComponent = forwardRef<any, TreeProps>(
   function RefRenderFn(props, ref) {
     const {
       component: Component,
-      leafComponent,
+      LeafComponent: LeafOverride,
       elements,
       ...rest
     } = props
 
     const Leaf = useMemo(() => (
-      leafComponent || LeafComponent
-    ), [leafComponent]);
+      LeafOverride || 'div'
+    ), [LeafOverride])
 
     return (
       <Component ref={ref} {...rest}>
-        {elements.map(($id) => (
-          <Leaf
-            key={$id}
-            $id={$id}
-            leafComponent={Leaf}
+        {Array.isArray(elements) && elements.map((element) => (
+          <LeafComponent
+            key={element?.$id}
+            element={element}
+            component={Leaf}
           />
         ))}
       </Component>
@@ -53,13 +53,12 @@ const BranchComponent = forwardRef<any, BranchComponentProps>(
   },
 )
 
-BranchComponent.displayName = 'BranchComponent'
-BranchComponent.aglyn = true
-BranchComponent.defaultProps = {
+TreeComponent.displayName = 'TreeComponent'
+TreeComponent.aglyn = true
+TreeComponent.defaultProps = {
   component: Fragment,
   children: null,
-  elements: [],
 }
 
-export {BranchComponent}
-export default BranchComponent
+export {TreeComponent}
+export default TreeComponent
