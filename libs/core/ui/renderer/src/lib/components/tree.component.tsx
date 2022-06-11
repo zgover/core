@@ -18,29 +18,29 @@
 import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
 import {forwardRef, Fragment} from 'react'
 import {LeafComponentContext} from '../contexts/leaf-context'
-import type {LeafType} from './leaf.component'
+import {TreeContext} from '../contexts/tree-context'
+import type {TreeType} from '../definitions/tree'
 
 
-export interface TreeProps<T extends LeafType = any> extends OverrideableComponentProps {
-  items?: LeafType[]
+export interface TreeProps<T extends TreeType = any> extends OverrideableComponentProps {
+  data?: T
 }
 
 const TreeComponent = forwardRef<any, TreeProps>(
   function RefRenderFn(props, ref) {
-    const {
-      component: Component,
-      items,
-      ...rest
-    } = props
+    const {component: Component, data, ...rest} = props
+    const {items} = data
 
     return (
-      <Component ref={ref} {...rest}>
-        {Array.isArray(items) && items.map((item) => (
-          <LeafComponentContext.Consumer>
-            {(Leaf) => <Leaf key={item.id} data={item} />}
-          </LeafComponentContext.Consumer>
-        ))}
-      </Component>
+      <TreeContext.Provider value={data}>
+        <Component ref={ref} {...rest}>
+          {Array.isArray(items) && items.map((item) => (
+            <LeafComponentContext.Consumer>
+              {(Leaf) => <Leaf key={item.id} data={item} />}
+            </LeafComponentContext.Consumer>
+          ))}
+        </Component>
+      </TreeContext.Provider>
     )
   },
 )
@@ -49,7 +49,7 @@ TreeComponent.displayName = 'TreeComponent'
 TreeComponent.defaultProps = {
   component: Fragment,
   children: null,
-  items: [],
+  data: {items: []},
 }
 
 export {TreeComponent}

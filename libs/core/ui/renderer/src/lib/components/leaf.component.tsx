@@ -16,17 +16,13 @@
  */
 
 import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
-import {forwardRef, type ForwardRefExoticComponent} from 'react'
+import {forwardRef} from 'react'
+import {LeafContext} from '../contexts/leaf-context'
+import type {LeafType} from '../definitions/leaf'
 
 
-export interface LeafType {
-  id: string | number
-}
-
-export type LeafComponentType<P extends LeafProps = any> = ForwardRefExoticComponent<P>
-
-export interface LeafProps extends OverrideableComponentProps {
-  data: LeafType
+export interface LeafProps<T extends LeafType = any> extends OverrideableComponentProps {
+  data: T
 }
 
 const LeafComponent = forwardRef<any, LeafProps>(

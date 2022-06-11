@@ -16,13 +16,13 @@
  */
 
 import {createContext, useContext} from 'react'
-import type {LeafComponentType, LeafType} from '../components/leaf.component'
 import LeafComponent from '../components/leaf.component'
+import type {LeafComponentType, LeafType} from '../definitions/leaf'
 
 
 export const LeafComponentContext = createContext<LeafComponentType>(LeafComponent)
 export const useLeafComponentContext = () => useContext(LeafComponentContext)
 
 
-export const LeafDataContext = createContext<LeafType | null>(null)
-export const useLeafDataContext = () => useContext(LeafDataContext)
+export const LeafContext = createContext<LeafType | null>(null)
+export const useLeafContext = () => useContext(LeafContext)

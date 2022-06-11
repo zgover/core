@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-export * from './lib/components/leaf.component'
-export * from './lib/components/tree.component'
+import {createContext, useContext} from 'react'
+import TreeComponent from '../components/tree.component'
+import type {TreeComponentType, TreeType} from '../definitions/tree'
 
-export * from './lib/contexts/leaf-context'
-export * from './lib/contexts/tree-context'
 
-export * from './lib/definitions/leaf'
-export * from './lib/definitions/tree'
+export const TreeComponentContext = createContext<TreeComponentType>(TreeComponent)
+export const useTreeComponentContext = () => useContext(TreeComponentContext)
+
+
+export const TreeContext = createContext<TreeType | null>(null)
+export const useTreeContext = () => useContext(TreeContext)

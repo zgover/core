@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-export * from './lib/components/leaf.component'
-export * from './lib/components/tree.component'
+import type {ForwardRefExoticComponent} from 'react'
+import type {LeafProps} from '../components/leaf.component'
 
-export * from './lib/contexts/leaf-context'
-export * from './lib/contexts/tree-context'
 
-export * from './lib/definitions/leaf'
-export * from './lib/definitions/tree'
+export interface LeafType {
+  id: string | number
+}
+
+export type LeafComponentType<P extends LeafProps = any> = ForwardRefExoticComponent<P>
