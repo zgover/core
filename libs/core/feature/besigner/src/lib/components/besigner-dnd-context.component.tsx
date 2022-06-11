@@ -39,7 +39,7 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
     delay: 0,
     delayTouchStart: 0,
     delayMouseStart: 0,
-    touchSlop: 2,
+    touchSlop: 0,
     ...options,
   }
 

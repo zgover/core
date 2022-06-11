@@ -47,7 +47,7 @@ const InnerLeafComponent = forwardRef<any, ElementLeafComponentProps>(
       e.stopPropagation()
       setHovered({$id})
     }, [$id, setHovered])
-    const handleOnMouseUp = useCallback((e: ChangeEvent<any>) => {
+    const handleOnMouseDown = useCallback((e: ChangeEvent<any>) => {
       e.preventDefault()
       e.stopPropagation()
       setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
@@ -62,7 +62,7 @@ const InnerLeafComponent = forwardRef<any, ElementLeafComponentProps>(
         $id={$id}
         leafComponent={leaf}
         onMouseOver={handleOnMouseOver}
-        onMouseUp={handleOnMouseUp}
+        onMouseDown={handleOnMouseDown}
         data-aglyn-element-id={$id}
         data-aglyn-element-component={componentId}
         data-aglyn-element-bundle={bundleId}
@@ -86,7 +86,7 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     useIsomorphicLayoutEffect(() => {
       setElementRef($id, {$id, element, dragHandle})
       return () => deleteElementRef($id)
-    }, [])
+    }, [$id, element, dragHandle])
     return (
       <InnerLeafComponent
         ref={useForkedRefs(ref, element, dragPreview, dropRef)}

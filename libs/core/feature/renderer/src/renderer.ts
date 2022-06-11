@@ -17,7 +17,6 @@
 
 export * from './lib/components/leaf.component'
 export * from './lib/components/branch.component'
-export * from './lib/components/tree-root.component'
 
 export * from './lib/contexts/aglyn-app-context'
 export * from './lib/contexts/aglyn-components-context'

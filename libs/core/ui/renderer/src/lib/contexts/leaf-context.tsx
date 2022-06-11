@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import {render} from '@testing-library/react'
+import {createContext, useContext} from 'react'
+import type {LeafComponentType, LeafType} from '../components/leaf.component'
+import LeafComponent from '../components/leaf.component'
 
-import TreeRootComponent from './tree-root.component'
+
+export const LeafComponentContext = createContext<LeafComponentType>(LeafComponent)
+export const useLeafComponentContext = () => useContext(LeafComponentContext)
 
 
-describe('TreeRootComponent', () => {
-  it('should render successfully', () => {
-    const {baseElement} = render(<TreeRootComponent />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export const LeafDataContext = createContext<LeafType | null>(null)
+export const useLeafDataContext = () => useContext(LeafDataContext)

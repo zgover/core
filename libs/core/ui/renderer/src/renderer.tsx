@@ -15,5 +15,6 @@
  * limitations under the License.
  */
 
-export * from './lib/leaf.component'
-export * from './lib/tree.component'
+export * from './lib/components/leaf.component'
+export * from './lib/components/tree.component'
+export * from './lib/contexts/leaf-context'

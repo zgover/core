@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-import type {AglynElement} from '@aglyn/core-data-framework'
 import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
-import {type ComponentType, createContext, forwardRef} from 'react'
+import {forwardRef, type ForwardRefExoticComponent} from 'react'
 
 
-export const LeafContext = createContext<AglynElement>({} as any)
+export interface LeafType {
+  id: string | number
+}
 
-export type LeafComponentType<P extends LeafProps = any> = ComponentType<P>
+export type LeafComponentType<P extends LeafProps = any> = ForwardRefExoticComponent<P>
 
 export interface LeafProps extends OverrideableComponentProps {
-  element: AglynElement
+  data: LeafType
 }
 
 const LeafComponent = forwardRef<any, LeafProps>(
@@ -33,12 +34,12 @@ const LeafComponent = forwardRef<any, LeafProps>(
     const {
       component: Component,
       children,
-      element,
+      data,
       ...rest
     } = props
 
     return (
-      <LeafContext.Provider value={element}>
+      <LeafContext.Provider value={data}>
         <Component ref={ref} {...rest}>
           {children}
         </Component>
@@ -48,7 +49,6 @@ const LeafComponent = forwardRef<any, LeafProps>(
 )
 
 LeafComponent.displayName = 'LeafComponent'
-LeafComponent.aglyn = true
 LeafComponent.defaultProps = {
   component: 'div',
   children: null,

@@ -15,38 +15,30 @@
  * limitations under the License.
  */
 
-import type {AglynElement} from '@aglyn/core-data-framework'
 import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
-import {forwardRef, Fragment, useMemo} from 'react'
-import LeafComponent, {LeafComponentType} from './leaf.component'
+import {forwardRef, Fragment} from 'react'
+import {LeafComponentContext} from '../contexts/leaf-context'
+import type {LeafType} from './leaf.component'
 
 
-export interface TreeProps extends OverrideableComponentProps {
-  LeafComponent?: LeafComponentType
-  elements?: AglynElement[]
+export interface TreeProps<T extends LeafType = any> extends OverrideableComponentProps {
+  items?: LeafType[]
 }
 
 const TreeComponent = forwardRef<any, TreeProps>(
   function RefRenderFn(props, ref) {
     const {
       component: Component,
-      LeafComponent: LeafOverride,
-      elements,
+      items,
       ...rest
     } = props
 
-    const Leaf = useMemo(() => (
-      LeafOverride || 'div'
-    ), [LeafOverride])
-
     return (
       <Component ref={ref} {...rest}>
-        {Array.isArray(elements) && elements.map((element) => (
-          <LeafComponent
-            key={element?.$id}
-            element={element}
-            component={Leaf}
-          />
+        {Array.isArray(items) && items.map((item) => (
+          <LeafComponentContext.Consumer>
+            {(Leaf) => <Leaf key={item.id} data={item} />}
+          </LeafComponentContext.Consumer>
         ))}
       </Component>
     )
@@ -54,10 +46,10 @@ const TreeComponent = forwardRef<any, TreeProps>(
 )
 
 TreeComponent.displayName = 'TreeComponent'
-TreeComponent.aglyn = true
 TreeComponent.defaultProps = {
   component: Fragment,
   children: null,
+  items: [],
 }
 
 export {TreeComponent}
