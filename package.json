@@ -39,18 +39,18 @@
   "dependencies": {
     "@data-driven-forms/mui-component-mapper": "^3.18.1",
     "@data-driven-forms/react-form-renderer": "^3.18.1",
-    "@emotion/cache": "^11.7.1",
+    "@emotion/cache": "^11.9.3",
     "@emotion/react": "11.9.3",
     "@emotion/server": "11.4.0",
     "@emotion/styled": "11.9.3",
     "@msgpack/msgpack": "^2.7.2",
-    "@mui/icons-material": "^5.8.3",
-    "@mui/lab": "^5.0.0-alpha.85",
-    "@mui/material": "^5.8.3",
-    "@mui/styles": "^5.8.3",
-    "@mui/system": "^5.8.3",
-    "@mui/types": "^7.1.3",
-    "@mui/utils": "^5.8.0",
+    "@mui/icons-material": "^5.8.4",
+    "@mui/lab": "^5.0.0-alpha.86",
+    "@mui/material": "^5.8.4",
+    "@mui/styles": "^5.8.4",
+    "@mui/system": "^5.8.4",
+    "@mui/types": "^7.1.4",
+    "@mui/utils": "^5.8.4",
     "@mui/x-data-grid": "^5.12.1",
     "@swc/helpers": "~0.3.17",
     "@tippyjs/react": "^4.2.6",
@@ -82,7 +82,7 @@
     "mout": "^1.2.3",
     "nanoid": "^3.3.4",
     "nanoid-dictionary": "^4.3.0",
-    "next": "12.1.7-canary.10",
+    "next": "12.1.7-canary.40",
     "next-api-middleware": "^1.0.1",
     "notistack": "^2.0.5",
     "php-serialize": "^4.0.2",
@@ -114,8 +114,8 @@
     "use-debounce": "^7.0.1"
   },
   "devDependencies": {
-    "@angular-devkit/core": "^14.0.1n",
-    "@angular-devkit/schematics": "^14.0.1",
+    "@angular-devkit/core": "^14.0.2",
+    "@angular-devkit/schematics": "^14.0.2",
     "@babel/core": "7.18.0",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.17.12",
     "@babel/plugin-proposal-optional-chaining": "^7.17.12",
@@ -203,4 +203,3 @@
     ]
   }
 }
-
