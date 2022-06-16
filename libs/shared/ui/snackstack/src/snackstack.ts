@@ -15,4 +15,8 @@
  * limitations under the License.
  */
 
-export * from './snackstack'
+export * from './lib/types'
+export * from './lib/SnackbarProvider'
+export * from './lib/SnackbarContent'
+export * from './lib/withSnackbar'
+export * from './lib/useSnackbar'

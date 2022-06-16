@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
-import { _isEqualitySameType } from '@aglyn/shared-util-guards'
-import Box, { type BoxProps as MuiBoxProps } from '@mui/material/Box'
-import MuiDrawer, { type DrawerProps as MuiDrawerProps } from '@mui/material/Drawer'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-ui-theme'
+import {_isEqualitySameType} from '@aglyn/shared-util-guards'
+import Box, {type BoxProps as MuiBoxProps} from '@mui/material/Box'
+import MuiDrawer, {type DrawerProps as MuiDrawerProps} from '@mui/material/Drawer'
 import clsx from 'clsx'
-import { forwardRef } from 'react'
-import { DEFAULT_LEFT_DRAWER_WIDTH } from '../constants'
+import {forwardRef} from 'react'
+import {DEFAULT_LEFT_DRAWER_WIDTH} from '../constants/shared'
+
 
 const classKeys = generateComponentClassKeys('AglynWorkspacePanel', [
   'drawer',

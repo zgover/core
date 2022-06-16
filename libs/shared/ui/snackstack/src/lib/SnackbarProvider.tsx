@@ -22,14 +22,14 @@ import {createPortal} from 'react-dom'
 import SnackbarContainer from './SnackbarContainer'
 import SnackbarContext from './SnackbarContext'
 import SnackbarItem from './SnackbarItem'
-import {
-  type OptionsObject,
-  type ProviderContext,
-  type RequiredBy,
-  type SnackbarId,
-  type SnackbarMessage,
-  type SnackbarProviderProps,
-  type TransitionHandlerProps,
+import type {
+  OptionsObject,
+  ProviderContext,
+  RequiredBy,
+  SnackbarId,
+  SnackbarMessage,
+  SnackbarProviderProps,
+  TransitionHandlerProps,
 } from './types'
 import {
   DEFAULTS,

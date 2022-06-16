@@ -18,17 +18,17 @@
 /**
  * Part of the following typing and documentation is from material-ui/src/Snackbar/Snackbar.d.ts
  */
-import {type ClickAwayListenerProps, type SnackbarClassKey, type StandardProps} from '@mui/material'
-import {type TransitionProps} from '@mui/material/transitions'
-import {
-  type AriaAttributes,
-  type ComponentType,
-  type HTMLAttributes,
-  type ReactNode,
-  type Ref,
-  type SyntheticEvent,
+import type {ClickAwayListenerProps, SnackbarClassKey, StandardProps} from '@mui/material'
+import {TransitionProps} from '@mui/material/transitions'
+import type {
+  AriaAttributes,
+  ComponentType,
+  HTMLAttributes,
+  ReactNode,
+  Ref,
+  SyntheticEvent,
 } from 'react'
-import SnackbarProvider from './SnackbarProvider'
+import type SnackbarProvider from './SnackbarProvider'
 
 
 export type RequiredBy<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>

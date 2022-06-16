@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {type AglynElementsNormalized, CANVAS_ROOT_ELEMENT_ID} from '@aglyn/core-data-framework'
+import type {AglynElementsNormalized} from '@aglyn/core-data-framework'
 
 
 export const samplePageData: AglynElementsNormalized = [
@@ -23,7 +23,6 @@ export const samplePageData: AglynElementsNormalized = [
     $id: 'root1',
     componentId: 'root',
     props: {},
-    parentId: CANVAS_ROOT_ELEMENT_ID,
     elements: [
       {
         $id: 'root12',
@@ -52,7 +51,6 @@ export const samplePageData: AglynElementsNormalized = [
     $id: 'root2',
     componentId: 'root4',
     props: {},
-    parentId: CANVAS_ROOT_ELEMENT_ID,
     elements: [
       {
         $id: 'root13',
@@ -82,7 +80,6 @@ export const samplePageData: AglynElementsNormalized = [
     $id: 'root3',
     componentId: 'root4',
     props: {},
-    parentId: CANVAS_ROOT_ELEMENT_ID,
     elements: [
       {
         $id: 'root14',

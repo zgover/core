@@ -16,7 +16,7 @@
  */
 
 import {createContext} from 'react'
-import {type ProviderContext} from './types'
+import type {ProviderContext} from './types'
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

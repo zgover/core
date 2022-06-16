@@ -17,7 +17,7 @@
 
 import {useContext} from 'react'
 import SnackbarContext from './SnackbarContext'
-import {type ProviderContext} from './types'
+import type {ProviderContext} from './types'
 
 
 export function useSnackbar(): ProviderContext {

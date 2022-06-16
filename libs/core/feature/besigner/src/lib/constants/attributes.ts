@@ -15,8 +15,11 @@
  * limitations under the License.
  */
 
-export * from './types'
-export * from './SnackbarProvider'
-export * from './SnackbarContent'
-export * from './withSnackbar'
-export * from './useSnackbar'
+import aglynAttributeKey from '../utils/aglynAttributeKey'
+
+
+export const ELEMENT_ID_KEY = aglynAttributeKey('element-id')
+export const ELEMENT_COMPONENT_ID_KEY = aglynAttributeKey('component-id')
+export const ELEMENT_BUNDLE_ID_KEY = aglynAttributeKey('bundle-id')
+export const ELEMENT_SELECTED_KEY = aglynAttributeKey('selected')
+export const ELEMENT_HOVERED_KEY = aglynAttributeKey('hovered')

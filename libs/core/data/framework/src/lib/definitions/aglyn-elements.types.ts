@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import type { Conditional } from '@aglyn/shared-data-types'
+import type {Conditional} from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type { BoxProps } from '@aglyn/shared-ui-theme'
+import type {BoxProps} from '@aglyn/shared-ui-theme'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type { ElementType } from 'react'
-import { ComponentClass, ComponentProps, JSXElementConstructor } from 'react'
-import type { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
-import type { BundleUId, ComponentId } from './aglyn-components.types'
+import type {ComponentClass, ComponentProps, ElementType, JSXElementConstructor} from 'react'
+import type {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
+import type {BundleUId, ComponentId} from './aglyn-components.types'
+
 
 export type ElementId = string
 export type AglynElementType<

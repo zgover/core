@@ -15,13 +15,4 @@
  * limitations under the License.
  */
 
-import aglynAttributeKey from './utils/aglynAttributeKey'
-
-
 export const DEFAULT_LEFT_DRAWER_WIDTH = 240
-
-export const ELEMENT_ID_KEY = aglynAttributeKey('element-id')
-export const ELEMENT_COMPONENT_ID_KEY = aglynAttributeKey('component-id')
-export const ELEMENT_BUNDLE_ID_KEY = aglynAttributeKey('bundle-id')
-export const ELEMENT_SELECTED_KEY = aglynAttributeKey('selected')
-export const ELEMENT_HOVERED_KEY = aglynAttributeKey('hovered')

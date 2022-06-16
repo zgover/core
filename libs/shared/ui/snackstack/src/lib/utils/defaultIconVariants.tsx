@@ -16,7 +16,7 @@
  */
 
 import {SvgIcon, type SvgIconProps} from '@mui/material'
-import {type IconVariant} from '../types'
+import type {IconVariant} from '../types'
 
 
 type Icon = (props: SvgIconProps) => JSX.Element;

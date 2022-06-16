@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-export * from './lib/constants'
+export * from './lib/constants/attributes'
+export * from './lib/constants/sample-data'
+export * from './lib/constants/shared'
 
 export * from './lib/hooks/use-add-element-callback'
 export * from './lib/hooks/use-aglyn-besigner-flag'
