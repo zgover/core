@@ -21,6 +21,7 @@ import {useBesignerAppContext} from '@aglyn/core-feature-besigner'
 import {useAglynCanvasElementsNormalized} from '@aglyn/core-feature-renderer'
 // import '@aglyn/core-feature-singleton'
 import {HAS_BROWSER, ICON_VARIANT_LEFT} from '@aglyn/shared-data-enums'
+import {useScreenVersion} from '@aglyn/shared-feature-fb-client'
 import {
   AppLink,
   LOADING_OVERLAY_ELEMENT,
@@ -32,11 +33,10 @@ import {NextPageTitle} from '@aglyn/shared-ui-next'
 import {useSnackbar} from '@aglyn/shared-ui-snackstack'
 import {decode, encode} from '@msgpack/msgpack'
 import {Button, Stack, Typography} from '@mui/material'
-import {Bytes, doc, setDoc} from 'firebase/firestore'
+import {Bytes, Timestamp} from 'firebase/firestore'
 import dynamic from 'next/dynamic'
 import {useRouter} from 'next/router'
 import {useCallback, useEffect} from 'react'
-import {useFirestore, useFirestoreDocDataOnce} from 'reactfire'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import ConsoleLayout from '../../../../../../components/layouts/console.layout'
 import SecondaryAppBarComponent from '../../../../../../components/secondary-app-bar.component'
@@ -51,12 +51,12 @@ const AglynBesigner = dynamic<BesignerComponentProps>(
 
 
 function InnerBesigner(props: any) {
-  const {screen, screenRef} = props
-  const elements = screen?.elements
-  const app = useBesignerAppContext()
+  const {screen, updateScreen} = props
   const {enqueueSnackbar} = useSnackbar()
   const {queueLoading} = useLoading()
+  const app = useBesignerAppContext()
   const normalized = useAglynCanvasElementsNormalized()
+  const elements = screen?.elements
 
   useIsomorphicLayoutEffect(() => {
     if (elements && elements instanceof Bytes) {
@@ -69,9 +69,12 @@ function InnerBesigner(props: any) {
   const handleClick = useCallback(async () => {
     const dequeueLoading = queueLoading()
     const encodedNormal = Bytes.fromUint8Array(encode(normalized))
-    await setDoc(
-      screenRef,
-      {elements: encodedNormal},
+    const timestamp = Timestamp.now()
+    await updateScreen(
+      {
+        elements: encodedNormal,
+        updatedAt: timestamp,
+      },
       {merge: true},
     ).catch((e) => {
       enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
@@ -80,7 +83,7 @@ function InnerBesigner(props: any) {
       })
     })
     dequeueLoading()
-  }, [enqueueSnackbar, normalized, queueLoading, screenRef])
+  }, [updateScreen, enqueueSnackbar, normalized, queueLoading])
 
   return (
     <>
@@ -97,9 +100,7 @@ function Besigner(props) {
   const screenId = `${query.screenId}`
   const versionId = `${query.versionId}`
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, {screenId, versionId})
-  const firestore = useFirestore()
-  const screenRef = doc(firestore, 'screens', screenId, 'versions', versionId)
-  const {status, data: screen, error} = useFirestoreDocDataOnce(screenRef, {idField: '$id'})
+  const [{status, data: screen, error}, updateScreen] = useScreenVersion<any>({screenId, versionId})
   const hasError = status === 'error'
   const notFound = status === 'success' && !screen
   const {enqueueSnackbar} = useSnackbar()
@@ -184,7 +185,7 @@ function Besigner(props) {
         <AglynBesigner sx={{flexGrow: 1, position: 'unset'}}>
           <InnerBesigner
             screen={screen}
-            screenRef={screenRef}
+            updateScreen={updateScreen}
           />
         </AglynBesigner>
       )}

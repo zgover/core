@@ -21,7 +21,7 @@
     "shared-data-mdi": "libs/shared/data/mdi",
     "shared-data-regex": "libs/shared/data/regex",
     "shared-data-types": "libs/shared/data/types",
-    "shared-feature-fbclient": "libs/shared/feature/fbclient",
+    "shared-feature-fb-client": "libs/shared/feature/fb-client",
     "shared-feature-fbserver": "libs/shared/feature/fbserver",
     "shared-ui-color-picker": "libs/shared/ui/color-picker",
     "shared-ui-jsx": "libs/shared/ui/jsx",

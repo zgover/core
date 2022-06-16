@@ -38,6 +38,7 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
   const {data: user} = useUser()
   const [, toggleThemeMode, themeMode] = useThemeMode()
   const themeModeDisplayName = getThemeModeDisplayName(themeMode)
+  // const tenantLabel =
 
   return (
     <MainLayout
@@ -88,6 +89,10 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
       ]}
       disableAppBarElevation
       centerNavigationItems={[
+        // {
+        //   id: 'center-nav-site-picker',
+        //   children: ,
+        // },
         {
           id: 'center-nav-dashboard',
           children: 'Home',

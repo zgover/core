@@ -23,15 +23,14 @@ import {
   ICON_VARIANT_PRIMARY_KEY,
   ICON_VARIANT_TEXT,
 } from '@aglyn/shared-data-enums'
+import {useScreen} from '@aglyn/shared-feature-fb-client'
 import {AppLink, ContainerComponent, GridItems, useLoading} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {NextPageTitle} from '@aglyn/shared-ui-next'
 import {useSnackbar} from '@aglyn/shared-ui-snackstack'
 import {List, ListItem, ListItemIcon, ListItemText} from '@mui/material'
-import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
 import {useEffect} from 'react'
-import {useFirestore, useFirestoreDoc, useFirestoreDocData} from 'reactfire'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import ConsoleLayout from '../../../../../../components/layouts/console.layout'
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
@@ -48,16 +47,9 @@ function ScreenDetails(props) {
   const screenId = `${query.screenId}`
   const versionId = `${query.versionId}`
   const besignerUrl = buildRoute(Route.SCREEN_BESIGNER, {screenId, versionId})
-  const firestore = useFirestore()
-  const screenRef = doc(firestore, 'screens', screenId)
   const {queueLoading} = useLoading()
-  const docData2 = useFirestoreDoc(screenRef, {idField: '$id'})
-  const docData = useFirestoreDocData(screenRef, {idField: '$id'})
-  const {status, data: screen} = docData
   const {enqueueSnackbar, closeSnackbar} = useSnackbar()
-
-  console.log('docData', docData)
-  console.log('docData2', docData2)
+  const [{status, data: screen}] = useScreen<any>({screenId})
 
   useEffect(() => {
     if (status === 'loading') {

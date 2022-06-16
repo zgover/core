@@ -19,13 +19,15 @@ import {
   FIREBASE_AUTH_EMULATOR_ENABLED,
   FIREBASE_DATABASE_EMULATOR_ENABLED,
   FIREBASE_FIRESTORE_EMULATOR_ENABLED,
-  IS_DEVELOPMENT,
 } from '@aglyn/shared-data-enums'
-import {DEFAULT_RECAPTCHA_API_KEY, defaultFirebaseAppOptions} from '@aglyn/shared-feature-fbclient'
+import {
+  fbClientAppOptions,
+  FIREBASE_CLIENT_APP_NAME,
+  RECAPTCHA_API_KEY,
+} from '@aglyn/shared-feature-fb-client'
 import {NextRouterEvent, SecureLoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import {NoSsr} from '@mui/material'
 import {getAnalytics, logEvent, setUserId, setUserProperties} from 'firebase/analytics'
-import type {FirebaseApp, FirebaseOptions} from 'firebase/app'
 import {initializeAppCheck, ReCaptchaV3Provider} from 'firebase/app-check'
 import {connectAuthEmulator, getAuth} from 'firebase/auth'
 import {connectDatabaseEmulator, getDatabase} from 'firebase/database'
@@ -49,7 +51,6 @@ import {
   useUser,
 } from 'reactfire'
 // import {getDatabase, connectDatabaseEmulator} from 'firebase/database'
-
 
 function AnalyticsGlobalEvents({children}) {
   const analytics = useAnalytics()
@@ -147,7 +148,7 @@ function GetInnerLayout({children}) {
   let appCheck
   try {
     appCheck = initializeAppCheck(app, {
-      provider: new ReCaptchaV3Provider(DEFAULT_RECAPTCHA_API_KEY),
+      provider: new ReCaptchaV3Provider(RECAPTCHA_API_KEY),
       isTokenAutoRefreshEnabled: true,
     })
   }
@@ -181,14 +182,6 @@ function GetInnerLayout({children}) {
   )
 }
 
-
-export type FirebaseAppProviderOptions = {
-  firebaseApp?: FirebaseApp
-  firebaseConfig?: FirebaseOptions
-  appName?: string
-  suspense?: boolean
-}
-
 export interface FirebaseAppLayoutProps {
   children?: ReactNode
 }
@@ -197,7 +190,10 @@ function FirebaseAppLayout(props: FirebaseAppLayoutProps) {
   const {children} = props
 
   return (
-    <FirebaseAppProvider firebaseConfig={defaultFirebaseAppOptions}>
+    <FirebaseAppProvider
+      firebaseConfig={fbClientAppOptions}
+      appName={FIREBASE_CLIENT_APP_NAME}
+    >
       <NoSsr>
         <GetInnerLayout>
           <AnalyticsGlobalEvents>

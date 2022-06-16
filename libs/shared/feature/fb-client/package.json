@@ -1,5 +1,5 @@
 {
-  "name": "@aglyn/shared-feature-fbclient",
+  "name": "@aglyn/shared-feature-fb-client",
   "version": "0.0.1",
   "type": "commonjs",
   "dependencies": {
