@@ -19,7 +19,6 @@ module.exports = {
   root: true,
   ignorePatterns: ['**/*'],
   plugins: ['@nrwl/nx', 'eslint-plugin-tsdoc'],
-  extends: './node_modules/gts',
   overrides: [
     {
       files: ['*.ts', '*.tsx', '*.js', '*.jsx'],
