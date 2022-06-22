@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import { bundle as muiBundle } from '@aglyn/plugins-ui-mui'
-import { doesBesignerAppExist, initializeBesignerApp } from '@aglyn/besigner-data'
-import { registerBundle, registerComponent } from '@aglyn/foundation-data-core'
-import { samplePageData } from '@aglyn/foundation-feature-besigner'
-import { createAglynComponent } from '@aglyn/foundation-feature-renderer'
-import { IS_PRODUCTION } from '@aglyn/shared-data-enums'
+import {bundle as muiBundle} from '@aglyn/plugins-ui-mui'
+import {doesBesignerAppExist, initializeBesignerApp} from '@aglyn/foundation-data-besigner'
+import {registerBundle, registerComponent} from '@aglyn/foundation-data-core'
+import {samplePageData} from '@aglyn/foundation-feature-besigner'
+import {createAglynComponent} from '@aglyn/foundation-feature-renderer'
+import {IS_PRODUCTION} from '@aglyn/shared-data-enums'
 
 const c1 = createAglynComponent(
   {
@@ -28,7 +28,7 @@ const c1 = createAglynComponent(
     displayName: 'Sample Element',
     title: 'Sample Element',
   },
-  'div'
+  'div',
 )
 
 const c2 = createAglynComponent(
@@ -37,7 +37,7 @@ const c2 = createAglynComponent(
     displayName: 'Sample Element 1',
     title: 'Sample Element 1',
   },
-  'div'
+  'div',
 )
 
 const c3 = createAglynComponent(
@@ -46,7 +46,7 @@ const c3 = createAglynComponent(
     displayName: 'Sample Element 2',
     title: 'Sample Element 2',
   },
-  'div'
+  'div',
 )
 
 const c4 = createAglynComponent(
@@ -55,7 +55,7 @@ const c4 = createAglynComponent(
     displayName: 'Sample Element 3',
     title: 'Sample Element 3',
   },
-  'span'
+  'span',
 )
 
 const c5 = createAglynComponent(
@@ -76,7 +76,7 @@ const c5 = createAglynComponent(
       },
     ],
   },
-  'span'
+  'span',
 )
 const components = [c1, c2, c3, c4, c5]
 

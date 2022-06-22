@@ -20,17 +20,17 @@ import {
   type BesignerPanelKey,
   type BesignerPanelsState,
   setBesignerPanel,
-} from '@aglyn/besigner-data'
-import { useSubscribable } from '@aglyn/shared-ui-jsx'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { useCallback } from 'react'
+} from '@aglyn/foundation-data-besigner'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback} from 'react'
 import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 export function useAglynBesignerSetPanel(): (
   name: BesignerPanelKey,
   panel:
     | BesignerPanelItem
-    | ((prev: BesignerPanelItem, panels: BesignerPanelsState) => BesignerPanelItem)
+    | ((prev: BesignerPanelItem, panels: BesignerPanelsState) => BesignerPanelItem),
 ) => void {
   const app = useBesignerAppContext()
   return useCallback(
@@ -38,33 +38,33 @@ export function useAglynBesignerSetPanel(): (
       name: BesignerPanelKey,
       panel:
         | BesignerPanelItem
-        | ((prev: BesignerPanelItem, panels: BesignerPanelsState) => BesignerPanelItem)
+        | ((prev: BesignerPanelItem, panels: BesignerPanelsState) => BesignerPanelItem),
     ) => {
       setBesignerPanel(app, {
         panel: name,
         value: (prev, panels) => (_isFnT(panel) ? panel(prev, panels) : panel),
       })
     },
-    [app]
+    [app],
   )
 }
 
 export function useAglynBesignerPanel(
-  name: BesignerPanelKey
+  name: BesignerPanelKey,
 ): [
   value: BesignerPanelItem | undefined,
   setValue: (
     panel:
       | BesignerPanelItem
-      | ((prev: BesignerPanelItem, panels: BesignerPanelsState) => BesignerPanelItem)
-  ) => void
+      | ((prev: BesignerPanelItem, panels: BesignerPanelsState) => BesignerPanelItem),
+  ) => void,
 ] {
   const app = useBesignerAppContext()
   const value = useSubscribable<BesignerPanelItem | undefined>(
     app?.besigner?.panels,
     undefined,
     (panels) => panels?.[name],
-    [name, app]
+    [name, app],
   )
   const setPanel = useAglynBesignerSetPanel().bind(null, name)
 

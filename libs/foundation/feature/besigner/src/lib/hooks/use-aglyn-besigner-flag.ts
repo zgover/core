@@ -20,21 +20,21 @@ import {
   type BesignerFlagsState,
   type BesignerFlagValue,
   setBesignerFlag,
-} from '@aglyn/besigner-data'
-import { useSubscribable } from '@aglyn/shared-ui-jsx'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { useCallback } from 'react'
+} from '@aglyn/foundation-data-besigner'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback} from 'react'
 import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 export function useAglynBesignerFlag<K extends BesignerFlagKey>(
-  flag: K
+  flag: K,
 ): [
   value: BesignerFlagValue<K>,
   setValue: (
     value:
       | BesignerFlagValue<K>
-      | ((prev: BesignerFlagValue<K>, flags: BesignerFlagsState) => BesignerFlagValue<K>)
-  ) => void
+      | ((prev: BesignerFlagValue<K>, flags: BesignerFlagsState) => BesignerFlagValue<K>),
+  ) => void,
 ] {
   const app = useBesignerAppContext()
   const setFlag = useAglynBesignerSetFlag().bind(null, flag)
@@ -42,7 +42,7 @@ export function useAglynBesignerFlag<K extends BesignerFlagKey>(
     app.besigner?.flags,
     undefined,
     (flags) => flags?.[flag],
-    [flag, app]
+    [flag, app],
   )
 
   return [value, setFlag]
@@ -54,7 +54,7 @@ export function useAglynBesignerSetFlag<K extends BesignerFlagKey>(): (
   flag: K,
   value:
     | BesignerFlagValue<K>
-    | ((prev: BesignerFlagValue<K>, flags: BesignerFlagsState) => BesignerFlagValue<K>)
+    | ((prev: BesignerFlagValue<K>, flags: BesignerFlagsState) => BesignerFlagValue<K>),
 ) => void {
   const app = useBesignerAppContext()
   return useCallback(
@@ -62,13 +62,13 @@ export function useAglynBesignerSetFlag<K extends BesignerFlagKey>(): (
       flag: K,
       value:
         | BesignerFlagValue<K>
-        | ((prev: BesignerFlagValue<K>, flags: BesignerFlagsState) => BesignerFlagValue<K>)
+        | ((prev: BesignerFlagValue<K>, flags: BesignerFlagsState) => BesignerFlagValue<K>),
     ) => {
       setBesignerFlag(app, {
         flag: flag,
         value: (prev, flags) => (_isFnT(value) ? value(prev, flags) : value),
       })
     },
-    [app]
+    [app],
   )
 }

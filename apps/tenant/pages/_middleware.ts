@@ -15,26 +15,40 @@
  * limitations under the License.
  */
 
+import {IS_PRODUCTION} from '@aglyn/shared-data-enums'
 import {type NextRequest, NextResponse} from 'next/server'
 import {IMPLICIT_DIRS} from '../constants/site-paths'
-
+import buildRewriteSiteHostPath from '../utils/build-rewrite-site-host-path'
 
 export default function middleware(req: NextRequest) {
-  const {nextUrl: {pathname}, headers} = req
+  const {
+    nextUrl: {pathname},
+    headers,
+  } = req
   // Get hostname (e.g. vercel.com, test.vercel.app, etc.)
-  const reqHost = headers.get('host')
+  const requestHost = headers.get('host') || ''
+
   const {HOST, AGLYN_HOST, AGLYN_TENANT_HOST_CNAME} = process.env
 
   // If localhost, assign the host value manually
   // If prod, get the custom domain/subdomain value by removing the root URL
   // (in the case of "test.vercel.app", "vercel.app" is the root URL)
-  const host =
-    process.env.NODE_ENV === 'production'
-      ? reqHost.endsWith(`.${AGLYN_TENANT_HOST_CNAME}`) || reqHost === AGLYN_TENANT_HOST_CNAME
-        ? AGLYN_TENANT_HOST_CNAME
-        : reqHost.replace(`.${AGLYN_HOST}`, '')
-      // Development and testing (localhost:4500 / vercel.app)
-      : reqHost.replace(`.${HOST}`, '')
+  let siteHost: string
+
+  if (IS_PRODUCTION) {
+    switch (true) {
+      case requestHost === AGLYN_TENANT_HOST_CNAME:
+      case requestHost.endsWith(`.${AGLYN_TENANT_HOST_CNAME}`):
+        siteHost = AGLYN_TENANT_HOST_CNAME
+        break
+      default:
+        requestHost.replace(`.${AGLYN_HOST}`, '')
+        break
+    }
+  } else {
+    // Development and testing (localhost:4500 / vercel.app)
+    siteHost = requestHost.replace(`.${HOST}`, '')
+  }
 
   // Prevent security issues – users should not be able to canonically access
   // the pages/_sites folder and its respective contents. This can also be
@@ -46,6 +60,6 @@ export default function middleware(req: NextRequest) {
   if (!IMPLICIT_DIRS.some((path) => pathname.startsWith(path))) {
     // rewrite to the current hostname under the pages/_sites folder
     // the main logic component will happen in pages/_sites/[host]/[...path].tsx
-    return NextResponse.rewrite(`/_sites/${host}${pathname}`)
+    return NextResponse.rewrite(buildRewriteSiteHostPath({host: siteHost, pathname}))
   }
 }

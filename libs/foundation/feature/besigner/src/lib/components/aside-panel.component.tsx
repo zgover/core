@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { type BesignerPanelKey, BesignerPanelTabFlag } from '@aglyn/besigner-data'
-import type { ElementId } from '@aglyn/foundation-data-core'
+import {type BesignerPanelKey, BesignerPanelTabFlag} from '@aglyn/foundation-data-besigner'
+import type {ElementId} from '@aglyn/foundation-data-core'
 import {
   AglynComponentsContext,
   useAglynComponentSchema,
@@ -30,14 +30,10 @@ import {
   ICON_VARIANT_ELEMENT_STYLES,
   ICON_VARIANT_ELEMENT_TREE_VIEW,
 } from '@aglyn/shared-data-enums'
-import { MdiIcon, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'
-import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
-import { numberFromHexadecimal, numberToHexadecimal } from '@aglyn/shared-util-tools'
-import {
-  TabContext as MuiTabContext,
-  TabList as MuiTabList,
-  TabPanel as MuiTabPanel,
-} from '@mui/lab'
+import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
+import {alpha, mergeSxProps, styled} from '@aglyn/shared-ui-theme'
+import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-tools'
+import {TabContext as MuiTabContext, TabList as MuiTabList, TabPanel as MuiTabPanel} from '@mui/lab'
 import {
   Accordion as MuiAccordion,
   AccordionDetails as MuiAccordionDetails,
@@ -50,7 +46,7 @@ import {
   Tab as MuiTab,
   Typography,
 } from '@mui/material'
-import { forwardRef, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import {forwardRef, SyntheticEvent, useCallback, useMemo, useState} from 'react'
 import useAddElementCallback from '../hooks/use-add-element-callback'
 import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
@@ -68,7 +64,7 @@ import WorkspacePanelComponent, {
 
 const TabPanelInner = styled('div', {
   name: 'AglynTabPanelInner',
-})(({ theme }) => ({
+})(({theme}) => ({
   width: '100%',
 }))
 const TabPanel = styled(MuiTabPanel, {
@@ -80,13 +76,13 @@ const TabPanel = styled(MuiTabPanel, {
 })
 const DividerSpacer = styled(Divider, {
   name: 'AglynDividerSpacer',
-})(({ theme }) => ({
+})(({theme}) => ({
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(2),
 }))
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
-))(({ theme }) => ({
+))(({theme}) => ({
   border: `1px solid ${theme.palette.divider}`,
   borderLeft: 0,
   borderRight: 0,
@@ -99,10 +95,10 @@ const Accordion = styled((props: AccordionProps) => (
 }))
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
-    expandIcon={<MdiIcon path={ICON_VARIANT_COLLAPSABLE_OPEN.path} sx={{ fontSize: '0.9rem' }} />}
+    expandIcon={<MdiIcon path={ICON_VARIANT_COLLAPSABLE_OPEN.path} sx={{fontSize: '0.9rem'}} />}
     {...props}
   />
-))(({ theme }) => ({
+))(({theme}) => ({
   backgroundColor: 'transparent',
   flexDirection: 'row-reverse',
   '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
@@ -113,12 +109,12 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
   },
 }))
 
-const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+const AccordionDetails = styled(MuiAccordionDetails)(({theme}) => ({
   padding: theme.spacing(2),
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }))
 
-const ElementInfo = function ElementInfo({ $id }: { $id: ElementId }) {
+const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
   const componentId = useAglynElementData($id, 'componentId')
   const bundleId = useAglynElementData($id, 'bundleId')
   const parentId = useAglynElementData($id, 'parentId')
@@ -149,7 +145,7 @@ const ElementInfo = function ElementInfo({ $id }: { $id: ElementId }) {
             key: 'component-description',
             label: 'Description',
             value: schema?.description,
-            TypographyProps: { gutterBottom: true },
+            TypographyProps: {gutterBottom: true},
           },
         ],
       },
@@ -181,7 +177,7 @@ const ElementInfo = function ElementInfo({ $id }: { $id: ElementId }) {
         ],
       },
     ],
-    [schema, $id, parentId, componentId, bundleId]
+    [schema, $id, parentId, componentId, bundleId],
   )
   const [expanded, setExpanded] = useState<string | false>(details[0].key)
   const handleChange = (panel: string) => (event: SyntheticEvent, newExpanded: boolean) => {
@@ -190,7 +186,7 @@ const ElementInfo = function ElementInfo({ $id }: { $id: ElementId }) {
 
   return (
     <TabPanelInner>
-      {details.map(({ label, items, ...item }) => (
+      {details.map(({label, items, ...item}) => (
         <Accordion
           key={item.key}
           expanded={expanded === item.key}
@@ -200,9 +196,9 @@ const ElementInfo = function ElementInfo({ $id }: { $id: ElementId }) {
             <Typography>{label}</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            {items.map(({ label, value, TypographyProps, ValueTypographyProps, ...item }: any) => (
+            {items.map(({label, value, TypographyProps, ValueTypographyProps, ...item}: any) => (
               <Typography key={item.key} component="div" {...TypographyProps}>
-                <Typography variant="caption" display="inline" sx={{ textTransform: 'uppercase' }}>
+                <Typography variant="caption" display="inline" sx={{textTransform: 'uppercase'}}>
                   <b>{label}:</b>
                 </Typography>{' '}
                 <Typography
@@ -219,7 +215,7 @@ const ElementInfo = function ElementInfo({ $id }: { $id: ElementId }) {
                       wordBreak: 'break-word',
                       fontSize: '0.8rem',
                     }),
-                    ValueTypographyProps?.sx
+                    ValueTypographyProps?.sx,
                   )}
                 >
                   {value || <i>{failoverText}</i>}
@@ -243,7 +239,7 @@ const withSelectedElement = (Component) => () => {
   const [selected] = useAglynCanvasSelected()
   const $id = selected?.$id
   return !$id ? (
-    <TabPanelInner sx={{ p: 2 }}>{defaultTabContent}</TabPanelInner>
+    <TabPanelInner sx={{p: 2}}>{defaultTabContent}</TabPanelInner>
   ) : (
     <Component $id={$id} />
   )
@@ -251,7 +247,7 @@ const withSelectedElement = (Component) => () => {
 
 const withTabPanelInner = (Component) => (props: any) => {
   return (
-    <TabPanelInner sx={{ p: 2 }}>
+    <TabPanelInner sx={{p: 2}}>
       <Component {...props} />
     </TabPanelInner>
   )
@@ -259,13 +255,13 @@ const withTabPanelInner = (Component) => (props: any) => {
 
 const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
   const handleAddElementClick = useAddElementCallback()
   return (
-    <TabPanelInner sx={{ pl: 0.5 }}>
+    <TabPanelInner sx={{pl: 0.5}}>
       <ElementsTreeViewComponent ref={ref} {...props}>
-        <Box sx={{ px: 0.5, pb: 1, pt: 1 }}>
+        <Box sx={{px: 0.5, pb: 1, pt: 1}}>
           <Button
             color="secondary"
             startIcon={<MdiIcon fontSize="inherit" path={mdiPlus.path} />}
@@ -280,10 +276,10 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(function Re
 })
 
 const ComponentsList = forwardRef<any, ComponentsGridListProps>(function RefRenderFn(props, ref) {
-  const { ...rest } = props
+  const {...rest} = props
   return (
     <AglynComponentsContext.Consumer>
-      {({ templateBlocks }) => (
+      {({templateBlocks}) => (
         <ComponentsGridListComponent items={templateBlocks} ref={ref} maxColumns={2} {...rest} />
       )}
     </AglynComponentsContext.Consumer>
@@ -302,7 +298,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
       {
         value: BesignerPanelTabFlag.ELEMENTS_TREE,
         tab: {
-          icon: { path: ICON_VARIANT_ELEMENT_TREE_VIEW.path },
+          icon: {path: ICON_VARIANT_ELEMENT_TREE_VIEW.path},
           label: 'Hierarchy',
         },
         panel: {
@@ -312,7 +308,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
       {
         value: BesignerPanelTabFlag.ELEMENT_BROWSE,
         tab: {
-          icon: { path: ICON_VARIANT_ELEMENT_BROWSE.path },
+          icon: {path: ICON_VARIANT_ELEMENT_BROWSE.path},
           label: 'Elements',
         },
         panel: {
@@ -332,7 +328,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
       {
         value: BesignerPanelTabFlag.ELEMENT_INFO,
         tab: {
-          icon: { path: ICON_VARIANT_ELEMENT_DETAILS.path },
+          icon: {path: ICON_VARIANT_ELEMENT_DETAILS.path},
           label: 'Info',
         },
         panel: {
@@ -342,7 +338,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
       {
         value: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
         tab: {
-          icon: { path: ICON_VARIANT_ELEMENT_PROPERTIES.path },
+          icon: {path: ICON_VARIANT_ELEMENT_PROPERTIES.path},
           label: 'Attributes',
         },
         panel: {
@@ -352,7 +348,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
       {
         value: BesignerPanelTabFlag.ELEMENT_STYLES,
         tab: {
-          icon: { path: ICON_VARIANT_ELEMENT_STYLES.path },
+          icon: {path: ICON_VARIANT_ELEMENT_STYLES.path},
           label: 'Styles',
         },
         panel: {
@@ -369,24 +365,24 @@ export interface AsidePanelComponentProps extends WorkspacePanelComponentProps {
 
 const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { children, panel: panelKey, ...rest } = props
+  const {children, panel: panelKey, ...rest} = props
 
   const [panel, setPanel] = useAglynBesignerPanel(panelKey)
   const {
-    panel: { id, ...panelProps },
+    panel: {id, ...panelProps},
     defaultTab,
     tabs,
   } = panelTabs[panelKey]
-  const { toggled, tab, size } = panel || {}
+  const {toggled, tab, size} = panel || {}
   const value = tab || defaultTab
 
   const handleTabChange = useCallback(
     (e, val) => {
-      setPanel((panel) => ({ ...panel, tab: numberFromHexadecimal(val) }))
+      setPanel((panel) => ({...panel, tab: numberFromHexadecimal(val)}))
     },
-    [setPanel]
+    [setPanel],
   )
 
   return (
@@ -401,14 +397,14 @@ const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(function R
       {...rest}
     >
       <MuiTabContext value={numberToHexadecimal(value)}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
           <MuiTabList
             onChange={handleTabChange}
             variant="fullWidth"
             indicatorColor="secondary"
             textColor="secondary"
           >
-            {tabs.map(({ value, tab: { icon, ...tab } }) => (
+            {tabs.map(({value, tab: {icon, ...tab}}) => (
               <MuiTab
                 key={value}
                 value={numberToHexadecimal(value)}
@@ -426,7 +422,7 @@ const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(function R
           </MuiTabList>
         </Box>
 
-        {tabs.map(({ value, panel: { Component, ...panel } }) => (
+        {tabs.map(({value, panel: {Component, ...panel}}) => (
           <TabPanel key={value} value={numberToHexadecimal(value)} {...panel}>
             <Component />
           </TabPanel>
@@ -442,5 +438,5 @@ AsidePanelComponent.displayName = 'AsidePanelComponent'
 AsidePanelComponent.aglyn = true
 AsidePanelComponent.defaultProps = {}
 
-export { AsidePanelComponent }
+export {AsidePanelComponent}
 export default AsidePanelComponent

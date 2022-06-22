@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { DndDragSourceTypeFlag } from '@aglyn/besigner-data'
-import { CANVAS_ROOT_ELEMENT_ID, type ElementId } from '@aglyn/foundation-data-core'
+import {DndDragSourceTypeFlag} from '@aglyn/foundation-data-besigner'
+import {CANVAS_ROOT_ELEMENT_ID, type ElementId} from '@aglyn/foundation-data-core'
 import {
   useAglynCanvasElementHierarchy,
   useAglynComponentSchema,
@@ -29,10 +29,10 @@ import {
   ICON_VARIANT_ENTITY_BLOCK,
   ICON_VARIANT_MODIFY_DRAG,
 } from '@aglyn/shared-data-enums'
-import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
-import { isReactElement, useForkedRefs } from '@aglyn/shared-ui-jsx'
-import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
-import { _isObjT } from '@aglyn/shared-util-guards'
+import {alpha, mergeSxProps, styled} from '@aglyn/shared-ui-theme'
+import {isReactElement, useForkedRefs} from '@aglyn/shared-ui-jsx'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {_isObjT} from '@aglyn/shared-util-guards'
 import {
   type SingleSelectTreeViewProps,
   TreeItem as MuiTreeItem,
@@ -40,16 +40,14 @@ import {
   type TreeItemProps,
   TreeView as MuiTreeView,
 } from '@mui/lab'
-import { Box, Button, Stack, Typography } from '@mui/material'
-import { ChangeEvent, forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getEmptyImage } from 'react-dnd-html5-backend'
-import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
-import useAglynCanvasSelected, {
-  useAglynCanvasSetSelected,
-} from '../hooks/use-aglyn-canvas-selected'
+import {Box, Button, Stack, Typography} from '@mui/material'
+import {ChangeEvent, forwardRef, useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {getEmptyImage} from 'react-dnd-html5-backend'
+import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
+import useAglynCanvasSelected, {useAglynCanvasSetSelected} from '../hooks/use-aglyn-canvas-selected'
 import useLeafDnd from '../hooks/use-leaf-dnd'
 
-const TreeItem = styled(MuiTreeItem, { name: 'AglynTreeItem' })(({ theme }) => ({
+const TreeItem = styled(MuiTreeItem, {name: 'AglynTreeItem'})(({theme}) => ({
   [`& .${treeItemClasses.content}`]: {
     borderTopLeftRadius: `50px`,
     borderBottomLeftRadius: `50px`,
@@ -64,7 +62,7 @@ const TreeItem = styled(MuiTreeItem, { name: 'AglynTreeItem' })(({ theme }) => (
     },
   },
 }))
-const TreeView = styled(MuiTreeView, { name: 'AglynTreeView' })({
+const TreeView = styled(MuiTreeView, {name: 'AglynTreeView'})({
   overflow: 'auto',
   flexGrow: 1,
 })
@@ -75,9 +73,9 @@ interface ElementsTreeItemComponentProps extends Partial<TreeItemProps> {
 
 const ElementsTreeItemComponent = forwardRef<
   any,
-  ElementsTreeItemComponentProps & { dragHandleRef?: any; dragPreviewRef?: any }
+  ElementsTreeItemComponentProps & {dragHandleRef?: any; dragPreviewRef?: any}
 >(function RefRenderFn(props, ref) {
-  const { $id, dragHandleRef, dragPreviewRef, ...rest } = props,
+  const {$id, dragHandleRef, dragPreviewRef, ...rest} = props,
     elements = useAglynElementData($id, 'elements') || [],
     componentId = useAglynElementData($id, 'componentId'),
     bundleId = useAglynElementData($id, 'bundleId'),
@@ -89,18 +87,18 @@ const ElementsTreeItemComponent = forwardRef<
   const handleOnMouseOver = useCallback(
     (e) => {
       e.stopPropagation()
-      setHovered({ $id })
+      setHovered({$id})
     },
-    [$id, setHovered]
+    [$id, setHovered],
   )
 
   const handleOnMouseDown = useCallback(
     (e: ChangeEvent<any>) => {
       e.preventDefault()
       e.stopPropagation()
-      setSelected((prev) => ({ $id: $id && prev?.$id === $id ? undefined : $id }))
+      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
     },
-    [$id, setSelected]
+    [$id, setSelected],
   )
 
   const itemIcon = useMemo(() => {
@@ -127,7 +125,7 @@ const ElementsTreeItemComponent = forwardRef<
             alignItems: 'center',
             flexDirection: 'column',
           },
-          icon?.sx
+          icon?.sx,
         )}
       >
         <MdiIcon
@@ -150,7 +148,7 @@ const ElementsTreeItemComponent = forwardRef<
       label={
         <Stack direction="row" alignItems="center">
           {itemIcon}
-          <Typography component="div" sx={{ flexGrow: 1 }}>
+          <Typography component="div" sx={{flexGrow: 1}}>
             {label}
           </Typography>
 
@@ -186,14 +184,14 @@ const ElementsTreeItemComponent = forwardRef<
 
 const DraggableTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps>(
   function RefRenderFn(props, ref) {
-    const { $id, ...rest } = props
+    const {$id, ...rest} = props
     const elemRef = useRef<Element>(null)
     const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id, {
       dragType: DndDragSourceTypeFlag.TREE_ELEMENT,
     })
 
     useEffect(() => {
-      dragPreviewRef(getEmptyImage(), { captureDraggingState: true })
+      dragPreviewRef(getEmptyImage(), {captureDraggingState: true})
     }, [dragPreviewRef])
     return (
       <ElementsTreeItemComponent
@@ -204,7 +202,7 @@ const DraggableTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProp
         {...rest}
       />
     )
-  }
+  },
 )
 DraggableTreeItemComponent.displayName = 'DraggableTreeItemComponent'
 
@@ -212,31 +210,31 @@ export interface ElementsTreeViewComponentProps extends Partial<SingleSelectTree
 
 export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewComponentProps>(
   function RefRenderFn(props, ref) {
-    const { children, ...rest } = props
+    const {children, ...rest} = props
     const [selected, setSelected] = useAglynCanvasSelected()
     const setHovered = useAglynCanvasSetHovered()
     const selectedHierarchy = useAglynCanvasElementHierarchy(selected?.$id)
     const [expanded, setExpanded] = useState<ElementId[]>([])
     const allExpanded = useMemo(
       () => [...selectedHierarchy, ...expanded],
-      [selectedHierarchy, expanded]
+      [selectedHierarchy, expanded],
     )
 
     const handleTreeItemSelect = useCallback(
       (e, $id) => {
         e.stopPropagation()
         e.preventDefault()
-        setSelected((prev) => ({ $id: $id && prev?.$id === $id ? undefined : $id }))
+        setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
       },
-      [setSelected]
+      [setSelected],
     )
 
     const handleTreeItemFocus = useCallback(
       (e, $id) => {
         e.stopPropagation()
-        setHovered({ $id })
+        setHovered({$id})
       },
-      [setHovered]
+      [setHovered],
     )
 
     const handleTreeItemToggle = useCallback((e, ids: ElementId[]) => {
@@ -261,7 +259,7 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
         <DraggableTreeItemComponent key={CANVAS_ROOT_ELEMENT_ID} $id={CANVAS_ROOT_ELEMENT_ID} />
       </TreeView>
     )
-  }
+  },
 )
 
 ElementsTreeViewComponent.displayName = 'ElementsTreeViewComponent'

@@ -20,23 +20,23 @@ import {
   type BesignerCanvasState,
   BesignerPanelTabFlag,
   setBesignerPanels,
-} from '@aglyn/besigner-data'
-import { duplicateCanvasElement } from '@aglyn/foundation-data-core'
+} from '@aglyn/foundation-data-besigner'
+import {duplicateCanvasElement} from '@aglyn/foundation-data-core'
 import {
   useAglynElementComponentSchema,
   useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/foundation-feature-renderer'
-import { ICON_VARIANT_ENTITY_BLOCK } from '@aglyn/shared-data-enums'
-import { type KeyOf } from '@aglyn/shared-data-types'
-import { useSubscribable } from '@aglyn/shared-ui-jsx'
-import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
-import { Box } from '@mui/material'
-import MuiPopper, { type PopperProps as MuiPopperProps } from '@mui/material/Popper'
-import { type ChangeEvent, forwardRef, useCallback } from 'react'
-import { RenderedCanvasElementsContext } from '../contexts/rendered-canvas-elements'
-import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
-import { useAglynCanvasSetSelected } from '../hooks/use-aglyn-canvas-selected'
+import {ICON_VARIANT_ENTITY_BLOCK} from '@aglyn/shared-data-enums'
+import {type KeyOf} from '@aglyn/shared-data-types'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {Box} from '@mui/material'
+import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Popper'
+import {type ChangeEvent, forwardRef, useCallback} from 'react'
+import {RenderedCanvasElementsContext} from '../contexts/rendered-canvas-elements'
+import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
+import {useAglynCanvasSetSelected} from '../hooks/use-aglyn-canvas-selected'
 import useBesignerAppContext from '../utils/use-besigner-app-context'
 import ElementOverlayBadgeComponent from './element-overlay-badge.component'
 import ElementOverlayOutlineComponent from './element-overlay-outline.component'
@@ -76,7 +76,7 @@ const virtualElement = {
   ...defaultClientRect,
   getBoundingClientRect: (): DOMRect => ({
     ...defaultClientRect,
-    toJSON: () => ({ ...defaultClientRect }),
+    toJSON: () => ({...defaultClientRect}),
   }),
 }
 
@@ -93,14 +93,14 @@ export interface ElementOverlayPopperComponentProps extends Partial<MuiPopperPro
 
 const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperComponentProps>(
   function RefRenderFn(props, ref) {
-    const { variant, id, ...rest } = props || {}
+    const {variant, id, ...rest} = props || {}
 
     const app = useBesignerAppContext()
     const state = useSubscribable<BesignerCanvasItemValue>(
       app.besigner?.canvas,
       undefined,
       (canvas) => canvas?.[variantToStoreName[variant]],
-      [variant, app]
+      [variant, app],
     )
 
     const $id = state?.$id
@@ -112,9 +112,9 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
 
     const handleDuplicateClick = useCallback(
       (e: ChangeEvent<unknown>) => {
-        duplicateCanvasElement(app, { $id })
+        duplicateCanvasElement(app, {$id})
       },
-      [$id, app]
+      [$id, app],
     )
 
     const handleModifyClick = useCallback(
@@ -130,28 +130,28 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
           }),
         })
       },
-      [app]
+      [app],
     )
 
     const handleSelectParentClick = useCallback(
       (e: ChangeEvent<unknown>) => {
-        setSelected({ $id: parentId })
+        setSelected({$id: parentId})
       },
-      [parentId, setSelected]
+      [parentId, setSelected],
     )
 
     const handleHoverParent = useCallback(
       (e: ChangeEvent<unknown>) => {
-        setHovered({ $id: parentId })
+        setHovered({$id: parentId})
       },
-      [parentId, setHovered]
+      [parentId, setHovered],
     )
 
     const handleHoverParentLeave = useCallback(
       (e: ChangeEvent<unknown>) => {
         setHovered(undefined)
       },
-      [setHovered]
+      [setHovered],
     )
 
     return (
@@ -287,7 +287,7 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
         }}
       </RenderedCanvasElementsContext.Consumer>
     )
-  }
+  },
 )
 ElementOverlayPopperComponent.displayName = 'ElementOverlayPopperComponent'
 ElementOverlayPopperComponent.aglyn = true
@@ -295,5 +295,5 @@ ElementOverlayPopperComponent.defaultProps = {
   variant: 'hoveredOverlay',
 }
 
-export { ElementOverlayPopperComponent }
+export {ElementOverlayPopperComponent}
 export default ElementOverlayPopperComponent

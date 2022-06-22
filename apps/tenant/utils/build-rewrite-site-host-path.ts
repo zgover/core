@@ -15,21 +15,14 @@
  * limitations under the License.
  */
 
-import {BesignerCanvasHoveredElement} from '@aglyn/foundation-data-besigner'
-import type {ElementId} from '@aglyn/foundation-data-core'
-import {useSubscribable} from '@aglyn/shared-ui-jsx'
-import useBesignerAppContext from '../utils/use-besigner-app-context'
-
-export function useAglynCanvasElementIsHovered($id: ElementId): boolean {
-  const app = useBesignerAppContext()
-  const value = useSubscribable<BesignerCanvasHoveredElement>(
-    app.besigner?.canvas,
-    false,
-    (canvas) => $id && canvas?.hovered?.$id === $id,
-    [$id, app],
-  )
-
-  return value
+type BuildSiteHostPathOptions = {
+  host: string
+  pathname: string
 }
 
-export default useAglynCanvasElementIsHovered
+export const buildRewriteSiteHostPath = (options: BuildSiteHostPathOptions) => {
+  const {host, pathname} = options
+  return `/_sites/${host}${pathname}`
+}
+
+export default buildRewriteSiteHostPath

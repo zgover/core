@@ -19,18 +19,18 @@ import {
   type BesignerPanelKey,
   type BesignerPanelsState,
   setBesignerPanel,
-} from '@aglyn/besigner-data'
-import { useSubscribable } from '@aglyn/shared-ui-jsx'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { useCallback } from 'react'
+} from '@aglyn/foundation-data-besigner'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback} from 'react'
 import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 export function useAglynBesignerPanelValue<
   P extends BesignerPanelKey,
-  K extends keyof BesignerPanelsState[P]
+  K extends keyof BesignerPanelsState[P],
 >(
   panelName: P,
-  key: K
+  key: K,
 ): [
   value: BesignerPanelsState[P][K] | undefined,
   setValue: (
@@ -39,9 +39,9 @@ export function useAglynBesignerPanelValue<
       | ((
           prev: BesignerPanelsState[P][K],
           panel: BesignerPanelsState[P],
-          panels: BesignerPanelsState
-        ) => BesignerPanelsState[P][K])
-  ) => void
+          panels: BesignerPanelsState,
+        ) => BesignerPanelsState[P][K]),
+  ) => void,
 ] {
   const app = useBesignerAppContext()
   const setPanelValue = useAglynBesignerPanelSetValue<P, K>().bind(null, panelName, key)
@@ -49,7 +49,7 @@ export function useAglynBesignerPanelValue<
     app.besigner?.panels,
     undefined,
     (panels) => panels?.[panelName]?.[key],
-    [key, panelName, app]
+    [key, panelName, app],
   )
 
   return [value, setPanelValue]
@@ -59,7 +59,7 @@ export default useAglynBesignerPanelValue
 
 export function useAglynBesignerPanelSetValue<
   P extends BesignerPanelKey,
-  K extends keyof BesignerPanelsState[P]
+  K extends keyof BesignerPanelsState[P],
 >(): (
   panelName: P,
   key: K,
@@ -68,8 +68,8 @@ export function useAglynBesignerPanelSetValue<
     | ((
         prev: BesignerPanelsState[P][K],
         panel: BesignerPanelsState[P],
-        panels: BesignerPanelsState
-      ) => BesignerPanelsState[P][K])
+        panels: BesignerPanelsState,
+      ) => BesignerPanelsState[P][K]),
 ) => void {
   const app = useBesignerAppContext()
   return useCallback(
@@ -81,8 +81,8 @@ export function useAglynBesignerPanelSetValue<
         | ((
             prev: BesignerPanelsState[P][K],
             panel: BesignerPanelsState[P],
-            panels: BesignerPanelsState
-          ) => BesignerPanelsState[P][K])
+            panels: BesignerPanelsState,
+          ) => BesignerPanelsState[P][K]),
     ) => {
       setBesignerPanel(app, {
         panel: panelName,
@@ -92,6 +92,6 @@ export function useAglynBesignerPanelSetValue<
         }),
       })
     },
-    [app]
+    [app],
   )
 }

@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-import { BesignerDeviceFlag } from '@aglyn/besigner-data'
-import { LOADING_OVERLAY_ELEMENT } from '@aglyn/shared-ui-jsx'
-import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import {BesignerDeviceFlag} from '@aglyn/foundation-data-besigner'
+import {LOADING_OVERLAY_ELEMENT} from '@aglyn/shared-ui-jsx'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-ui-theme'
 import clsx from 'clsx'
 import dynamic from 'next/dynamic'
 // import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
-import { ComponentProps, forwardRef, type Ref } from 'react'
+import {ComponentProps, forwardRef, type Ref} from 'react'
 import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
-import type { ViewportFrameComponentProps } from './viewport-frame.component'
+import type {ViewportFrameComponentProps} from './viewport-frame.component'
 
 const canvasArtboardClassKeys = generateComponentClassKeys('AglynCanvasArtboard', [
   'responsive',
@@ -47,7 +47,7 @@ const ViewportCanvas = styled('div', {
 
 const ViewportArtboard = styled('div', {
   name: 'AglynViewportArtboard',
-})(({ theme }) => ({
+})(({theme}) => ({
   overflow: 'hidden',
   minHeight: '100%',
   padding: theme.spacing(3),
@@ -60,17 +60,17 @@ const ViewportArtboard = styled('div', {
     duration: theme.transitions.duration.leavingScreen,
   }),
   width: '100%',
-  [`&, &.${canvasArtboardClassKeys.responsive}`]: { width: '100%' },
-  [`&.${canvasArtboardClassKeys.deviceXs}`]: { width: 390 },
-  [`&.${canvasArtboardClassKeys.deviceSm}`]: { width: theme.breakpoints.values.sm },
-  [`&.${canvasArtboardClassKeys.deviceMd}`]: { width: theme.breakpoints.values.md },
-  [`&.${canvasArtboardClassKeys.deviceLg}`]: { width: theme.breakpoints.values.lg },
-  [`&.${canvasArtboardClassKeys.deviceXl}`]: { width: theme.breakpoints.values.xl },
+  [`&, &.${canvasArtboardClassKeys.responsive}`]: {width: '100%'},
+  [`&.${canvasArtboardClassKeys.deviceXs}`]: {width: 390},
+  [`&.${canvasArtboardClassKeys.deviceSm}`]: {width: theme.breakpoints.values.sm},
+  [`&.${canvasArtboardClassKeys.deviceMd}`]: {width: theme.breakpoints.values.md},
+  [`&.${canvasArtboardClassKeys.deviceLg}`]: {width: theme.breakpoints.values.lg},
+  [`&.${canvasArtboardClassKeys.deviceXl}`]: {width: theme.breakpoints.values.xl},
 }))
 
 const ViewportFrameComponent = dynamic<ViewportFrameComponentProps>(
   () => import('./viewport-frame.component').then((mod) => mod.ViewportFrameComponent),
-  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT }
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
 export interface ViewportCanvasComponentProps extends ComponentProps<typeof ViewportCanvas> {
@@ -79,9 +79,9 @@ export interface ViewportCanvasComponentProps extends ComponentProps<typeof View
 
 const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { ...rest } = props
+  const {...rest} = props
 
   const [devicePreview] = useAglynBesignerFlag('devicePreview')
   const artboardClass = clsx({
@@ -106,5 +106,5 @@ ViewportCanvasComponent.displayName = 'ViewportCanvasComponent'
 ViewportCanvasComponent.aglyn = true
 ViewportCanvasComponent.defaultProps = {}
 
-export { ViewportCanvasComponent }
+export {ViewportCanvasComponent}
 export default ViewportCanvasComponent
