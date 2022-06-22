@@ -15,16 +15,14 @@
  * limitations under the License.
  */
 
-import { getTenantPageStaticPaths } from '@aglyn/foundation-data-tenants'
-import { getTenantPageStaticProps } from '@aglyn/foundation-data-tenants'
-import CatchAllPage from './[...path]'
-
-export const getStaticPaths = async (context) => {
-  return getTenantPageStaticPaths(context)
+type BuildSiteHostPathOptions = {
+  host: string
+  pathname: string
 }
 
-export const getStaticProps = async (context) => {
-  return getTenantPageStaticProps(context)
+export const buildRewriteSiteHostPath = (options: BuildSiteHostPathOptions) => {
+  const { host, pathname } = options
+  return `/_sites/${host}${pathname}`
 }
 
-export default CatchAllPage
+export default buildRewriteSiteHostPath

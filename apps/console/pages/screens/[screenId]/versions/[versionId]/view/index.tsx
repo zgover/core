@@ -23,8 +23,13 @@ import {
   ICON_VARIANT_PRIMARY_KEY,
   ICON_VARIANT_TEXT,
 } from '@aglyn/shared-data-enums'
-import { useScreen } from '@aglyn/foundation-data-fire'
-import { AppLink, ContainerComponent, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
+import { useScreen } from '@aglyn/foundation-data-tenants'
+import {
+  AppLink,
+  ContainerComponent,
+  GridItems,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -138,7 +143,9 @@ function ScreenDetails(props) {
             href={besignerUrl}
             title={'Open with besigner'}
             disabled={status !== 'success' || !screen}
-            startIcon={<MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} />}
+            startIcon={
+              <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} />
+            }
           >
             Open Besigner
           </AppLink>
@@ -160,32 +167,34 @@ function ScreenDetails(props) {
                     contentBordered
                   >
                     <List dense disablePadding>
-                      {details.map(({ primary, secondary, icon, ...item }, key) => (
-                        <ListItem
-                          key={item['key'] ?? item['id'] ?? key}
-                          alignItems="flex-start"
-                          dense
-                        >
-                          <ListItemIcon
-                            sx={{
-                              border: `1px solid`,
-                              borderColor: 'divider',
-                              padding: 1,
-                              borderRadius: 1,
-                              minWidth: 'unset',
-                              marginRight: 2,
-                              color: 'tertiary.main',
-                            }}
+                      {details.map(
+                        ({ primary, secondary, icon, ...item }, key) => (
+                          <ListItem
+                            key={item['key'] ?? item['id'] ?? key}
+                            alignItems="flex-start"
+                            dense
                           >
-                            <MdiIcon {...icon} />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={primary || whiteSpace}
-                            secondary={secondary || whiteSpace}
-                            {...item}
-                          />
-                        </ListItem>
-                      ))}
+                            <ListItemIcon
+                              sx={{
+                                border: `1px solid`,
+                                borderColor: 'divider',
+                                padding: 1,
+                                borderRadius: 1,
+                                minWidth: 'unset',
+                                marginRight: 2,
+                                color: 'tertiary.main',
+                              }}
+                            >
+                              <MdiIcon {...icon} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={primary || whiteSpace}
+                              secondary={secondary || whiteSpace}
+                              {...item}
+                            />
+                          </ListItem>
+                        ),
+                      )}
                     </List>
                   </WidgetCardComponent>
                 ),

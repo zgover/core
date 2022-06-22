@@ -35,7 +35,10 @@ import type {
 import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { BoxProps, StyledOptions } from '@aglyn/shared-ui-theme'
-import type { ComponentsLinealDirectiveFlag, FieldComponentType } from '../constants/components'
+import type {
+  ComponentsLinealDirectiveFlag,
+  FieldComponentType,
+} from '../constants/components'
 import type {
   ComponentGetPayload,
   ComponentRegisterPayload,
@@ -62,20 +65,26 @@ export type ComponentIdOrBundleTuple = ComponentId | [ComponentId, BundleUId]
 
 export type ComponentsRegistryKeys = ComponentIdOrBundleTuple[]
 export type ComponentsRegistryValues = IAglynComponent[]
-export type ComponentsRegistryEntry = [id: ComponentIdOrBundleTuple, component: IAglynComponent]
+export type ComponentsRegistryEntry = [
+  id: ComponentIdOrBundleTuple,
+  component: IAglynComponent,
+]
 export type InstanceBundles = Map<BundleUId, AglynComponentsBundle>
 export type InstanceComponents = Map<ComponentIdOrBundleTuple, IAglynComponent>
-export type InstanceSchemas = Map<ComponentIdOrBundleTuple, AglynComponentSchema>
+export type InstanceSchemas = Map<
+  ComponentIdOrBundleTuple,
+  AglynComponentSchema
+>
 export type InstanceTemplates = Map<TemplateId, AglynComponentElementTemplate>
 
 export type ComponentsLinealOrder<
-  T extends ComponentsLinealDirectiveFlag = ComponentsLinealDirectiveFlag
+  T extends ComponentsLinealDirectiveFlag = ComponentsLinealDirectiveFlag,
 > = [
   directiveType: T,
   directiveDefinition:
     | ComponentId[]
     | { bundles?: BundleUId[]; components: ComponentId[] }
-    | { bundles: BundleUId[]; components?: ComponentId[] }
+    | { bundles: BundleUId[]; components?: ComponentId[] },
 ]
 
 export type AglynComponentElementTemplate = {
@@ -86,11 +95,17 @@ export type AglynComponentElementTemplate = {
   data: AglynComponentTemplateData<any>
 }
 
-export type AglynComponentPropsFormSchema<P = any> = AglynComponentSchema<P>['formSchema']
-export type AglynComponentHierarchy<P = any> = AglynComponentSchema<P>['hierarchy']
-export type AglynComponentHierarchyFlags<P = any> = AglynComponentSchema<P>['hierarchy']
+export type AglynComponentPropsFormSchema<P = any> =
+  AglynComponentSchema<P>['formSchema']
+export type AglynComponentHierarchy<P = any> =
+  AglynComponentSchema<P>['hierarchy']
+export type AglynComponentHierarchyFlags<P = any> =
+  AglynComponentSchema<P>['hierarchy']
 export type AglynComponentsBundleMetadata = AglynComponentsBundle
-export type AglynComponentsBundleSchema = Omit<AglynComponentsBundle, 'componentIds'>
+export type AglynComponentsBundleSchema = Omit<
+  AglynComponentsBundle,
+  'componentIds'
+>
 
 export type ComponentsRegistryContext = {
   bundles: InstanceBundles
@@ -100,7 +115,9 @@ export type ComponentsRegistryContext = {
 }
 
 export interface IAglynComponent<P = any, T = any>
-  extends JSXForwardRefExoticComponent<JSXPropsWithoutRef<P> & JSXRefAttributes<T>> {
+  extends JSXForwardRefExoticComponent<
+    JSXPropsWithoutRef<P> & JSXRefAttributes<T>
+  > {
   [OF_TYPE]?: SYMBOL_TYPE
   [OF_KIND]?: SYMBOL_TYPE
   aglyn?: boolean
@@ -181,7 +198,7 @@ export interface AglynComponentSchema<P = any> {
   /**
    * Feature flags
    */
-  features: {
+  features?: {
     /**
      * Disable the use of emotion styled
      */
@@ -225,7 +242,8 @@ export interface AglynComponentSchema<P = any> {
   }
 }
 
-export interface AglynComponentsControllerOptions extends AglynModuleModelOptions {}
+export interface AglynComponentsControllerOptions
+  extends AglynModuleModelOptions {}
 
 export interface IAglynComponentsController
   extends IAglynModuleModel<AglynComponentsControllerOptions> {
@@ -239,8 +257,12 @@ export interface IAglynComponentsController
   getAllComponentsValues(): ComponentsRegistryValues
   getAllComponentsTemplateValues(): AglynComponentElementTemplate[]
 
-  getComponent<P, T>(payload: ComponentGetPayload): OrUndef<IAglynComponent<P, T>>
-  getComponentSchema(payload: ComponentSchemaGetPayload): OrUndef<AglynComponentSchema>
+  getComponent<P, T>(
+    payload: ComponentGetPayload,
+  ): OrUndef<IAglynComponent<P, T>>
+  getComponentSchema(
+    payload: ComponentSchemaGetPayload,
+  ): OrUndef<AglynComponentSchema>
   getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynComponentsBundle>
   buildMapKey(data: { componentId: ComponentId; bundleId: BundleUId }): string
 
@@ -255,6 +277,6 @@ export interface AglynComponentsControllerT
   extends AglynModuleModelT<AglynComponentsControllerOptions> {
   new (
     app: IAglynAppController,
-    options: AglynComponentsControllerOptions
+    options: AglynComponentsControllerOptions,
   ): IAglynComponentsController
 }

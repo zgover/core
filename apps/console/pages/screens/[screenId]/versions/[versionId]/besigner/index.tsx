@@ -28,7 +28,7 @@ import {
 import { useAglynCanvasElementsNormalized } from '@aglyn/foundation-feature-renderer'
 // import '@aglyn/foundation-feature-singleton'
 import { HAS_BROWSER, ICON_VARIANT_LEFT } from '@aglyn/shared-data-enums'
-import { useScreenVersion } from '@aglyn/foundation-data-fire'
+import { useScreenVersion } from '@aglyn/foundation-data-tenants'
 import {
   AppLink,
   LOADING_OVERLAY_ELEMENT,

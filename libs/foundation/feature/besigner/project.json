@@ -26,7 +26,9 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/foundation/feature/besigner/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "libs/foundation/feature/besigner/**/*.{ts,tsx,js,jsx}"
+        ]
       },
       "outputs": ["{options.outputFile}"]
     },

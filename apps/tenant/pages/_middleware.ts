@@ -15,20 +15,22 @@
  * limitations under the License.
  */
 
-import {IS_PRODUCTION} from '@aglyn/shared-data-enums'
-import {type NextRequest, NextResponse} from 'next/server'
-import {IMPLICIT_DIRS} from '../constants/site-paths'
-import buildRewriteSiteHostPath from '../utils/build-rewrite-site-host-path'
+import {
+  buildRewriteSiteHostPath,
+  IMPLICIT_DIRS,
+} from '@aglyn/foundation-data-tenants'
+import { IS_PRODUCTION } from '@aglyn/shared-data-enums'
+import { type NextRequest, NextResponse } from 'next/server'
 
 export default function middleware(req: NextRequest) {
   const {
-    nextUrl: {pathname},
+    nextUrl: { pathname },
     headers,
   } = req
   // Get hostname (e.g. vercel.com, test.vercel.app, etc.)
   const requestHost = headers.get('host') || ''
 
-  const {HOST, AGLYN_HOST, AGLYN_TENANT_HOST_CNAME} = process.env
+  const { HOST, AGLYN_HOST, AGLYN_TENANT_HOST_CNAME } = process.env
 
   // If localhost, assign the host value manually
   // If prod, get the custom domain/subdomain value by removing the root URL
@@ -54,12 +56,14 @@ export default function middleware(req: NextRequest) {
   // the pages/_sites folder and its respective contents. This can also be
   // done via rewrites to a custom 404 page
   if (pathname.startsWith(`/_tenants`)) {
-    return new Response(null, {status: 404})
+    return new Response(null, { status: 404 })
   }
 
   if (!IMPLICIT_DIRS.some((path) => pathname.startsWith(path))) {
     // rewrite to the current hostname under the pages/_sites folder
     // the main logic component will happen in pages/_sites/[host]/[...path].tsx
-    return NextResponse.rewrite(buildRewriteSiteHostPath({host: siteHost, pathname}))
+    return NextResponse.rewrite(
+      buildRewriteSiteHostPath({ host: siteHost, pathname }),
+    )
   }
 }

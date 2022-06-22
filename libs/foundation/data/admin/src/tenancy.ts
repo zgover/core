@@ -15,16 +15,8 @@
  * limitations under the License.
  */
 
-import { getTenantPageStaticPaths } from '@aglyn/foundation-data-tenants'
-import { getTenantPageStaticProps } from '@aglyn/foundation-data-tenants'
-import CatchAllPage from './[...path]'
+export * from './lib/client/firebase-app'
+export * from './lib/client/tenant.utils'
 
-export const getStaticPaths = async (context) => {
-  return getTenantPageStaticPaths(context)
-}
-
-export const getStaticProps = async (context) => {
-  return getTenantPageStaticProps(context)
-}
-
-export default CatchAllPage
+export * from './lib/server/firebase-admin'
+export * from './lib/server/tenant.utils'

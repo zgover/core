@@ -15,16 +15,14 @@
  * limitations under the License.
  */
 
-import { getTenantPageStaticPaths } from '@aglyn/foundation-data-tenants'
-import { getTenantPageStaticProps } from '@aglyn/foundation-data-tenants'
-import CatchAllPage from './[...path]'
+export * from './lib/constants/mock-data'
+export * from './lib/constants/site-paths'
 
-export const getStaticPaths = async (context) => {
-  return getTenantPageStaticPaths(context)
-}
+export * from './lib/hooks/use-screen'
+export * from './lib/hooks/use-screen-version'
 
-export const getStaticProps = async (context) => {
-  return getTenantPageStaticProps(context)
-}
+export * from './lib/utils/build-rewrite-site-host-path'
+export * from './lib/utils/get-tenant-page-static-paths'
+export * from './lib/utils/get-tenant-page-static-props'
 
-export default CatchAllPage
+export * from './lib/fb-client-app'

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { firebaseAdmin } from '@aglyn/foundation-data-tenancy'
+import { firebaseAdmin } from '@aglyn/foundation-data-admin'
 import {
   createHttpRefCode,
   HttpRefCodeSimple,
@@ -25,7 +25,10 @@ import {
   HttpStatusCode,
 } from '@aglyn/shared-data-enums'
 import { csrfApiMiddleware } from '@aglyn/shared-util-next'
-import { httpRequestMethodMiddleware, nextHandleJsonResponse } from '@aglyn/shared-util-rest-api'
+import {
+  httpRequestMethodMiddleware,
+  nextHandleJsonResponse,
+} from '@aglyn/shared-util-rest-api'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { use } from 'next-api-middleware'
 
@@ -62,7 +65,9 @@ async function users(request: NextApiRequest, response: NextApiResponse) {
 
   // Start listing users from the beginning, 1000 at a time.
   try {
-    data = await getAllUsers(Array.isArray(nextPageToken) ? nextPageToken[0] : nextPageToken)
+    data = await getAllUsers(
+      Array.isArray(nextPageToken) ? nextPageToken[0] : nextPageToken,
+    )
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err)
@@ -73,18 +78,22 @@ async function users(request: NextApiRequest, response: NextApiResponse) {
     const err = error || data.error
     return nextHandleJsonResponse(
       response,
-      err?.['code'] || err?.['statusCode'] || HttpStatusCode.INTERNAL_SERVER_ERROR,
+      err?.['code'] ||
+        err?.['statusCode'] ||
+        HttpStatusCode.INTERNAL_SERVER_ERROR,
       {
         status: HttpResponseStatus.ERROR,
         statusMessage:
-          err?.['message'] || err?.['statusMessage'] || HttpRefCodeSimple.INVALID_REQUEST,
+          err?.['message'] ||
+          err?.['statusMessage'] ||
+          HttpRefCodeSimple.INVALID_REQUEST,
         error: err,
         errorCode: createHttpRefCode(
           HttpRefCodeSimple.INVALID_REQUEST,
           HttpRefCodeSubject.INVALID_REQUEST,
-          HttpRefCodeTopic.FAIL_CSRF_TOKEN_CHECK
+          HttpRefCodeTopic.FAIL_CSRF_TOKEN_CHECK,
         ),
-      }
+      },
     )
   }
 
@@ -94,4 +103,7 @@ async function users(request: NextApiRequest, response: NextApiResponse) {
   })
 }
 
-export default use(csrfApiMiddleware, httpRequestMethodMiddleware(HttpRequestMethod.GET))(users)
+export default use(
+  csrfApiMiddleware,
+  httpRequestMethodMiddleware(HttpRequestMethod.GET),
+)(users)

@@ -24,10 +24,18 @@ import {
   fbClientAppOptions,
   FIREBASE_CLIENT_APP_NAME,
   RECAPTCHA_API_KEY,
-} from '@aglyn/foundation-data-fire'
-import { NextRouterEvent, SecureLoadingOverlayComponent } from '@aglyn/shared-ui-jsx'
+} from '@aglyn/foundation-data-tenants'
+import {
+  NextRouterEvent,
+  SecureLoadingOverlayComponent,
+} from '@aglyn/shared-ui-jsx'
 import { NoSsr } from '@mui/material'
-import { getAnalytics, logEvent, setUserId, setUserProperties } from 'firebase/analytics'
+import {
+  getAnalytics,
+  logEvent,
+  setUserId,
+  setUserProperties,
+} from 'firebase/analytics'
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
 import { connectDatabaseEmulator, getDatabase } from 'firebase/database'
@@ -73,7 +81,9 @@ function AnalyticsGlobalEvents({ children }) {
     const logRouteError = (error, asPath) => {
       logEvent(analytics, 'exception', {
         page_location: asPath,
-        description: `code(${error.code || 'none'}): ${error.message || 'none'}`,
+        description: `code(${error.code || 'none'}): ${
+          error.message || 'none'
+        }`,
         fatal: !error.cancelled,
       })
     }
@@ -191,7 +201,10 @@ function FirebaseAppLayout(props: FirebaseAppLayoutProps) {
   const { children } = props
 
   return (
-    <FirebaseAppProvider firebaseConfig={fbClientAppOptions} appName={FIREBASE_CLIENT_APP_NAME}>
+    <FirebaseAppProvider
+      firebaseConfig={fbClientAppOptions}
+      appName={FIREBASE_CLIENT_APP_NAME}
+    >
       <NoSsr>
         <GetInnerLayout>
           <AnalyticsGlobalEvents>{children}</AnalyticsGlobalEvents>

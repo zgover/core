@@ -27,7 +27,9 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/foundation/feature/canvas-designer/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "libs/foundation/feature/canvas-designer/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     }
   },

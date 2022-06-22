@@ -15,16 +15,24 @@
  * limitations under the License.
  */
 
-import { getTenantPageStaticPaths } from '@aglyn/foundation-data-tenants'
-import { getTenantPageStaticProps } from '@aglyn/foundation-data-tenants'
-import CatchAllPage from './[...path]'
+import { type AglynTenant, type TenantUid } from '@aglyn/foundation-data-core'
+import {
+  child,
+  type DataSnapshot,
+  get,
+  getDatabase,
+  ref,
+  set,
+} from 'firebase/database'
+import firebaseApp from './firebase-app'
 
-export const getStaticPaths = async (context) => {
-  return getTenantPageStaticPaths(context)
+export function setTenant(tenant: AglynTenant): Promise<void> {
+  const { $id, ...rest } = tenant
+  const db = getDatabase(firebaseApp)
+  return set(ref(db, 'tenants/' + $id), rest)
 }
 
-export const getStaticProps = async (context) => {
-  return getTenantPageStaticProps(context)
+export function getTenant(tenantId: TenantUid): Promise<DataSnapshot> {
+  const db = getDatabase(firebaseApp)
+  return get(child(ref(db), `tenants/${tenantId}`))
 }
-
-export default CatchAllPage

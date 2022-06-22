@@ -1,0 +1,33 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/foundation/data/admin/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/foundation/data/admin",
+        "main": "libs/foundation/data/admin/src/index.ts",
+        "tsConfig": "libs/foundation/data/admin/tsconfig.lib.json",
+        "assets": ["libs/foundation/data/admin/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/foundation/data/admin/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/foundation/data/admin"],
+      "options": {
+        "jestConfig": "libs/foundation/data/admin/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:tenancy"]
+}
