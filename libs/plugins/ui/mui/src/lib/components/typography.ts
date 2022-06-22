@@ -19,7 +19,7 @@ import {
   type AglynComponentSchema,
   type ComponentId,
   FieldComponentType,
-} from '@aglyn/foundation-data-core'
+} from '@aglyn/core-data-foundation'
 import {
   mdiAlphabetical,
   mdiFormatHeader1,
@@ -43,13 +43,25 @@ const typographyVariants = [
   { value: 'h4', label: 'Heading 4', icon: { path: mdiFormatHeader4.path } },
   { value: 'h5', label: 'Heading 5', icon: { path: mdiFormatHeader5.path } },
   { value: 'h6', label: 'Heading 6', icon: { path: mdiFormatHeader6.path } },
-  { value: 'subtitle1', label: 'Subtitle 1', icon: { path: mdiFormatText.path } },
-  { value: 'subtitle2', label: 'Subtitle 2', icon: { path: mdiFormatText.path } },
+  {
+    value: 'subtitle1',
+    label: 'Subtitle 1',
+    icon: { path: mdiFormatText.path },
+  },
+  {
+    value: 'subtitle2',
+    label: 'Subtitle 2',
+    icon: { path: mdiFormatText.path },
+  },
   { value: 'body1', label: 'Body 1', icon: { path: mdiFormatText.path } },
   { value: 'body2', label: 'Body 2', icon: { path: mdiFormatText.path } },
   { value: 'overline', label: 'Overline', icon: { path: mdiFormatText.path } },
   { value: 'caption', label: 'Caption', icon: { path: mdiFormatText.path } },
-  { value: 'paragraph', label: 'Paragraph', icon: { path: mdiFormatParagraph.path } },
+  {
+    value: 'paragraph',
+    label: 'Paragraph',
+    icon: { path: mdiFormatParagraph.path },
+  },
 ]
 
 export const schema: AglynComponentSchema<TypographyProps> = {

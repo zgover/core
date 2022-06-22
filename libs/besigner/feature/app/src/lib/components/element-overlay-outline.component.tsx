@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { type ElementId } from '@aglyn/foundation-data-core'
+import type { ElementId } from '@aglyn/core-data-foundation'
 import {
   alpha,
   generateComponentClassKeys,

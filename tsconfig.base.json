@@ -38,22 +38,17 @@
       "@aglyn/besigner-feature-canvas-designer": [
         "libs/besigner/feature/canvas-designer/src/index.ts"
       ],
-      "@aglyn/foundation-data-admin": [
-        "libs/foundation/data/admin/src/index.ts"
+      "@aglyn/core-data-admin": ["libs/core/data/admin/src/index.ts"],
+      "@aglyn/core-data-app": ["libs/core/data/app/src/index.ts"],
+      "@aglyn/core-data-foundation": ["libs/core/data/foundation/src/index.ts"],
+      "@aglyn/core-feature-renderer": [
+        "libs/core/feature/renderer/src/index.ts"
       ],
-      "@aglyn/foundation-data-core": ["libs/foundation/data/core/src/index.ts"],
-      "@aglyn/foundation-data-tenants": [
-        "libs/foundation/data/tenants/src/index.ts"
+      "@aglyn/core-feature-singleton": [
+        "libs/core/feature/singleton/src/index.ts"
       ],
-      "@aglyn/foundation-feature-renderer": [
-        "libs/foundation/feature/renderer/src/index.ts"
-      ],
-      "@aglyn/foundation-feature-singleton": [
-        "libs/foundation/feature/singleton/src/index.ts"
-      ],
-      "@aglyn/foundation-ui-renderer": [
-        "libs/foundation/ui/renderer/src/index.ts"
-      ],
+      "@aglyn/core-ui-renderer": ["libs/core/ui/renderer/src/index.ts"],
+      "@aglyn/db-data-tenants": ["libs/db/data/tenants/src/index.ts"],
       "@aglyn/plugins-ui-mui": ["libs/plugins/ui/mui/src/index.ts"],
       "@aglyn/shared-data-brand": ["libs/shared/data/brand/src/index.ts"],
       "@aglyn/shared-data-enums": ["libs/shared/data/enums/src/index.ts"],

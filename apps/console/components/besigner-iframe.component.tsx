@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { ScreenUid, VersionUid } from '@aglyn/foundation-data-core'
+import type { ScreenUid, VersionUid } from '@aglyn/core-data-foundation'
 import { AGLYN_SILOED_HOST } from '@aglyn/shared-data-enums'
 import { mergeSxProps, styled, type SxProps } from '@aglyn/shared-ui-theme'
 import { type IframeHTMLAttributes, useMemo } from 'react'
@@ -38,7 +38,10 @@ function BesignerIframeComponent(props: BesignerProps) {
   const { sx, screenId, versionId, ...rest } = props
 
   const host = useMemo(() => {
-    if (AGLYN_SILOED_HOST.startsWith('//') || AGLYN_SILOED_HOST.startsWith('http')) {
+    if (
+      AGLYN_SILOED_HOST.startsWith('//') ||
+      AGLYN_SILOED_HOST.startsWith('http')
+    ) {
       return AGLYN_SILOED_HOST
     }
     return `//${AGLYN_SILOED_HOST}`

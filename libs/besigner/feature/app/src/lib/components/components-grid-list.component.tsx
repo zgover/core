@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { AglynComponentElementTemplate } from '@aglyn/foundation-data-core'
+import type { AglynComponentElementTemplate } from '@aglyn/core-data-foundation'
 import {
   ICON_VARIANT_ENTITY_BLOCK,
   ICON_VARIANT_MENU_DOWN,

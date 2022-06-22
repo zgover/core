@@ -15,12 +15,9 @@
  * limitations under the License.
  */
 
-import {
-  type ElementId,
-  isRootElementId,
-  moveCanvasElement,
-} from '@aglyn/foundation-data-core'
-import { useAglynElementParentPosition } from '@aglyn/foundation-feature-renderer'
+import { isRootElementId, moveCanvasElement } from '@aglyn/core-data-app'
+import type { ElementId } from '@aglyn/core-data-foundation'
+import { useAglynElementParentPosition } from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_MODIFY_DRAG,
   ICON_VARIANT_MODIFY_DUPLICATE,

@@ -18,7 +18,7 @@
 import {
   getTenantPageStaticPaths,
   getTenantPageStaticProps,
-} from '@aglyn/foundation-data-tenants'
+} from '@aglyn/db-data-tenants'
 import CatchAllPage from './[...path]'
 
 export const getStaticPaths = async (context) => {

@@ -19,22 +19,22 @@ import { DndDragSourceTypeFlag } from '@aglyn/besigner-data-app'
 import {
   CANVAS_ROOT_ELEMENT_ID,
   type ElementId,
-} from '@aglyn/foundation-data-core'
+} from '@aglyn/core-data-foundation'
 import {
   useAglynCanvasElementHierarchy,
   useAglynComponentSchema,
   useAglynElementData,
   useAglynElementLabel,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_COLLAPSABLE_CLOSE,
   ICON_VARIANT_COLLAPSABLE_OPEN,
   ICON_VARIANT_ENTITY_BLOCK,
   ICON_VARIANT_MODIFY_DRAG,
 } from '@aglyn/shared-data-enums'
-import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import { isReactElement, useForkedRefs } from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import { _isObjT } from '@aglyn/shared-util-guards'
 import {
   type SingleSelectTreeViewProps,

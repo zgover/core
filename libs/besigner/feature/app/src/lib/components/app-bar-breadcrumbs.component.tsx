@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { ElementId } from '@aglyn/foundation-data-core'
+import { ElementId } from '@aglyn/core-data-foundation'
 import {
   useAglynCanvasElementHierarchy,
   useAglynElementLabel,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   AppBar as MuiAppBar,

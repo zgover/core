@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-import { type AglynComponentSchema, type ComponentId } from '@aglyn/foundation-data-core'
+import type {
+  AglynComponentSchema,
+  ComponentId,
+} from '@aglyn/core-data-foundation'
 import { mdiPageLayoutHeader } from '@aglyn/shared-ui-mdi-jsx'
 import AppBar, { type AppBarProps } from '@mui/material/AppBar'
 import { BUNDLE_ID } from '../constants/bundle-common'

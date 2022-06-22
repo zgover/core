@@ -18,12 +18,12 @@
 import type {
   AppUUN,
   CanvasSetElementsPayload,
-} from '@aglyn/foundation-data-core'
+} from '@aglyn/core-data-foundation'
 import {
   AglynAppProvider,
   ElementComponentsContextProvider,
   ElementsContextProvider,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { NoSsr } from '@mui/material'

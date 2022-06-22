@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AglynComponentsContext } from '@aglyn/foundation-feature-renderer'
+import { AglynComponentsContext } from '@aglyn/core-feature-renderer'
 import {
   type ElementType,
   Fragment,

@@ -16,11 +16,11 @@
  */
 
 import { setBesignerCanvasHovered } from '@aglyn/besigner-data-app'
-import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/foundation-data-core'
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import {
   useAglynAppContext,
   useAglynSiteTheme,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import { styled, ThemeProvider } from '@aglyn/shared-ui-theme'
 import { Box, BoxProps } from '@mui/material'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'

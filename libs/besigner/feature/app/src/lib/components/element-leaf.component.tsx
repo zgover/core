@@ -19,7 +19,7 @@ import {
   LeafComponent,
   type LeafComponentProps,
   useAglynElementData,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import { useForkedRefs, useIsomorphicLayoutEffect } from '@aglyn/shared-ui-jsx'
 import {
   type ChangeEvent,

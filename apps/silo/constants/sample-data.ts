@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-import { type AglynElementsNormalized, CANVAS_ROOT_ELEMENT_ID } from '@aglyn/foundation-data-core'
+import {
+  type AglynElementsNormalized,
+  CANVAS_ROOT_ELEMENT_ID,
+} from '@aglyn/core-data-app'
 
 export const samplePageData: AglynElementsNormalized = [
   {

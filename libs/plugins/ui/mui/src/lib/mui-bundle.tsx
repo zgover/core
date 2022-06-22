@@ -15,15 +15,18 @@
  * limitations under the License.
  */
 
-import { type ComponentRegisterPayload, createComponentsBundle } from '@aglyn/foundation-data-core'
-import { createAglynComponent } from '@aglyn/foundation-feature-renderer'
+import { createComponentsBundle } from '@aglyn/core-data-app'
+import type { ComponentRegisterPayload } from '@aglyn/core-data-foundation'
+import { createAglynComponent } from '@aglyn/core-feature-renderer'
 import { mdiViewArray } from '@aglyn/shared-ui-mdi-jsx'
 
 import appBar, { schema as appBarSchema } from './components/app-bar'
 import button, { schema as buttonSchema } from './components/button'
 import list, { schema as listSchema } from './components/list'
 import listItem, { schema as listItemSchema } from './components/list-item'
-import listItemText, { schema as listItemTextSchema } from './components/list-item-text'
+import listItemText, {
+  schema as listItemTextSchema,
+} from './components/list-item-text'
 import toolbar, { schema as toolbarSchema } from './components/toolbar'
 import typography, { schema as typographySchema } from './components/typography'
 

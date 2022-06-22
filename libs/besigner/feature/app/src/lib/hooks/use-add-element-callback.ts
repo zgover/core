@@ -17,10 +17,10 @@
 
 import {
   addCanvasElement,
-  CANVAS_ROOT_ELEMENT_ID,
   createComponentElementData,
-} from '@aglyn/foundation-data-core'
-import { useAglynAppContext } from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-data-app'
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
+import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { type SyntheticEvent, useCallback } from 'react'
 import {
   type ElementDrawerOptions,

@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { CANVAS_ROOT_ELEMENT_ID, createResourceUid } from '@aglyn/foundation-data-core'
+import { createResourceUid } from '@aglyn/core-data-app'
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import {
   ICON_VARIANT_CLOSE,
   ICON_VARIANT_MODIFY_DELETE,
@@ -36,7 +37,15 @@ import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Button, IconButton, Typography } from '@mui/material'
 import { GridActionsCellItem, type GridColumns } from '@mui/x-data-grid'
-import { collection, doc, limit, query, setDoc, Timestamp, updateDoc } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  limit,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+} from 'firebase/firestore'
 import { useCallback, useEffect, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
@@ -63,7 +72,9 @@ function Screens(props) {
   const firestore = useFirestore()
   const screensCollection = collection(firestore, 'screens')
   const screensQuery = query(screensCollection, limit(pageSize))
-  const { status, data } = useFirestoreCollectionData(screensQuery, { idField: '$id' })
+  const { status, data } = useFirestoreCollectionData(screensQuery, {
+    idField: '$id',
+  })
   const screens = data || []
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 
@@ -100,7 +111,10 @@ function Screens(props) {
       }
       await Promise.all([
         setDoc(doc(firestore, 'screens', newId), newValues),
-        setDoc(doc(firestore, 'screens', newId, 'versions', newVersionId), newVersionValue),
+        setDoc(
+          doc(firestore, 'screens', newId, 'versions', newVersionId),
+          newVersionValue,
+        ),
       ])
         .catch((error) => {
           console.error(error)
@@ -115,7 +129,7 @@ function Screens(props) {
           dequeueLoading()
         })
     },
-    [loading, error, queueLoading, firestore, handleFormClose, enqueueSnackbar]
+    [loading, error, queueLoading, firestore, handleFormClose, enqueueSnackbar],
   )
 
   const handleDeleteScreen = useCallback(
@@ -131,13 +145,17 @@ function Screens(props) {
         .then(() => {
           dequeueLoading = queueLoading()
         })
-        .then(() => updateDoc(doc(firestore, 'screens', id), { deletedAt: Timestamp.now() }))
+        .then(() =>
+          updateDoc(doc(firestore, 'screens', id), {
+            deletedAt: Timestamp.now(),
+          }),
+        )
         .catch(() => {})
         .finally(() => {
           dequeueLoading && dequeueLoading()
         })
     },
-    [confirm, firestore, queueLoading]
+    [confirm, firestore, queueLoading],
   )
 
   const columns: GridColumns = [
@@ -168,15 +186,27 @@ function Screens(props) {
       },
     },
     { field: '$id', headerName: 'ID', type: 'string', minWidth: 150 },
-    { field: 'displayName', headerName: 'Display name', minWidth: 220, type: 'string' },
-    { field: 'description', headerName: 'Description', flex: 1, minWidth: 275, type: 'string' },
+    {
+      field: 'displayName',
+      headerName: 'Display name',
+      minWidth: 220,
+      type: 'string',
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      flex: 1,
+      minWidth: 275,
+      type: 'string',
+    },
     {
       field: 'updatedAt',
       headerName: 'Updated',
       flex: 1,
       minWidth: 150,
       type: 'date',
-      valueFormatter: ({ value }: any) => value?.toDate?.().toLocaleTimeString() || '--',
+      valueFormatter: ({ value }: any) =>
+        value?.toDate?.().toLocaleTimeString() || '--',
     },
     {
       field: 'createdAt',
@@ -184,7 +214,8 @@ function Screens(props) {
       flex: 1,
       minWidth: 150,
       type: 'date',
-      valueFormatter: ({ value }: any) => value?.toDate?.().toLocaleTimeString() || '--',
+      valueFormatter: ({ value }: any) =>
+        value?.toDate?.().toLocaleTimeString() || '--',
     },
   ]
 
@@ -218,7 +249,12 @@ function Screens(props) {
             onClose={handleFormClose}
             appBarLeft={
               <>
-                <IconButton color="inherit" edge="start" onClick={handleFormClose} sx={{ mr: 2 }}>
+                <IconButton
+                  color="inherit"
+                  edge="start"
+                  onClick={handleFormClose}
+                  sx={{ mr: 2 }}
+                >
                   <MdiIcon path={ICON_VARIANT_CLOSE.path} />
                   <SrOnlyComponent>close drawer</SrOnlyComponent>
                 </IconButton>
@@ -228,7 +264,11 @@ function Screens(props) {
               </>
             }
             appBarRight={
-              <Button variant="outlined" color="inherit" onClick={handleFormClose}>
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={handleFormClose}
+              >
                 {'Cancel'}
               </Button>
             }
@@ -242,7 +282,10 @@ function Screens(props) {
                 subscription={{ values: true }}
                 clearOnUnmount
               />
-              <AuthErrorAlertComponent error={error as any} sx={{ mt: 2, mb: 1 }} />
+              <AuthErrorAlertComponent
+                error={error as any}
+                sx={{ mt: 2, mb: 1 }}
+              />
             </ContainerComponent>
           </NavigationDrawerComponent>
         }
@@ -278,7 +321,11 @@ const formSchema = {
       isRequired: true,
       validate: [
         { type: 'required', message: 'Provide a display name' },
-        { type: 'max-length', threshold: 25, message: 'Must not exceed 25 characters' },
+        {
+          type: 'max-length',
+          threshold: 25,
+          message: 'Must not exceed 25 characters',
+        },
       ],
     },
     {
@@ -286,7 +333,13 @@ const formSchema = {
       name: 'description',
       label: 'Description',
       helperText: 'Brief description for internal reference',
-      validate: [{ type: 'max-length', threshold: 80, message: 'Must not exceed 80 characters' }],
+      validate: [
+        {
+          type: 'max-length',
+          threshold: 80,
+          message: 'Must not exceed 80 characters',
+        },
+      ],
     },
   ],
 }

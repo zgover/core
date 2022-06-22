@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { PayloadData } from '@aglyn/foundation-data-core'
+import type { PayloadData } from '@aglyn/core-data-foundation'
 import type {
   BesignerCanvasHoveredElement,
   BesignerCanvasSelectedElement,
@@ -110,7 +110,7 @@ export type BesignerSetCanvasHoveredPayload = PayloadData<{
   ) => BesignerCanvasHoveredElement
 }>
 
-declare module '@aglyn/foundation-data-core' {
+declare module '@aglyn/core-data-foundation' {
   interface AglynModuleEffectPayload {
     [BesignerAppEffectFlag.BESIGNER_GET_STORE]: BesignerGetStorePayload
     [BesignerAppEffectFlag.BESIGNER_SET_FLAG]: BesignerSetFlagPayload

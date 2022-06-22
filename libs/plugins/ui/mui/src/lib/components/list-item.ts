@@ -19,7 +19,7 @@ import {
   type AglynComponentSchema,
   type ComponentId,
   ComponentsLinealDirectiveFlag,
-} from '@aglyn/foundation-data-core'
+} from '@aglyn/core-data-foundation'
 import { mdiFormatListText } from '@aglyn/shared-ui-mdi-jsx'
 
 import ListItem, { type ListItemProps } from '@mui/material/ListItem'

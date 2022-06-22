@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { AglynElementsNormalized } from '@aglyn/foundation-data-core'
+import type { AglynElementsNormalized } from '@aglyn/core-data-foundation'
 
 export const samplePageData: AglynElementsNormalized = [
   {

@@ -19,12 +19,12 @@ import {
   type BesignerPanelKey,
   BesignerPanelTabFlag,
 } from '@aglyn/besigner-data-app'
-import type { ElementId } from '@aglyn/foundation-data-core'
+import type { ElementId } from '@aglyn/core-data-foundation'
 import {
   AglynComponentsContext,
   useAglynComponentSchema,
   useAglynElementData,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_COLLAPSABLE_OPEN,
   ICON_VARIANT_ELEMENT_BROWSE,

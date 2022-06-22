@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-import { AglynComponentField, FieldComponentType } from '@aglyn/foundation-data-core'
+import {
+  AglynComponentField,
+  FieldComponentType,
+} from '@aglyn/core-data-foundation'
 
 export const FIELD_COLOR: AglynComponentField = {
   name: 'color',
@@ -52,7 +55,8 @@ export const FIELD_DISABLED: AglynComponentField = {
 }
 export const FIELD_FULL_WIDTH: AglynComponentField = {
   name: 'fullWidth',
-  description: 'If true, the button will take up the full width of its container.',
+  description:
+    'If true, the button will take up the full width of its container.',
   component: FieldComponentType.SWITCH,
   label: 'Full width?',
 }
@@ -64,7 +68,8 @@ export const FIELD_DISABLE_GUTTERS: AglynComponentField = {
 }
 export const FIELD_SIZE: AglynComponentField = {
   name: 'size',
-  description: 'The size of the component. small is equivalent to the dense button styling.',
+  description:
+    'The size of the component. small is equivalent to the dense button styling.',
   component: FieldComponentType.SELECT,
   label: 'Size',
   options: [

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {
-  type AglynModuleEffectListener,
-  AglynModuleModel,
-  type IAglynAppController,
-} from '@aglyn/foundation-data-core'
+import { AglynModuleModel } from '@aglyn/core-data-app'
+import type {
+  AglynModuleEffectListener,
+  IAglynAppController,
+} from '@aglyn/core-data-foundation'
 import { copy } from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
 import isEqual from 'lodash-es/isEqual'

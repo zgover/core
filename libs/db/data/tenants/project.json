@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/db/data/tenants/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/db/data/tenants",
+        "main": "libs/db/data/tenants/src/index.ts",
+        "tsConfig": "libs/db/data/tenants/tsconfig.lib.json",
+        "assets": ["libs/db/data/tenants/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/db/data/tenants/**/*.ts"]
+      }
+    }
+  },
+  "tags": ["scope:lib", "scope:shared", "scope:feature"]
+}

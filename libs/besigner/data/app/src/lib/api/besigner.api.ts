@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { IAglynAppController } from '@aglyn/foundation-data-core'
+import type { IAglynAppController } from '@aglyn/core-data-foundation'
 import { BehaviorSubject } from 'rxjs'
 import { _INTERNAL_BESIGNERS_ } from '../constants/_internal'
 import type {

@@ -19,11 +19,9 @@ import {
   setBesignerCanvasHovered,
   setBesignerCanvasSelected,
 } from '@aglyn/besigner-data-app'
-import {
-  deleteCanvasElement,
-  type ElementId,
-} from '@aglyn/foundation-data-core'
-import { useAglynAppContext } from '@aglyn/foundation-feature-renderer'
+import { deleteCanvasElement } from '@aglyn/core-data-app'
+import type { ElementId } from '@aglyn/core-data-foundation'
+import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { type ChangeEvent, useCallback } from 'react'
 

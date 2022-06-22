@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
-import type { AglynComponentSchema, ComponentId } from '@aglyn/foundation-data-core'
+import type {
+  AglynComponentSchema,
+  ComponentId,
+} from '@aglyn/core-data-foundation'
 import { mdiFormatListChecks } from '@aglyn/shared-ui-mdi-jsx'
-import ListItemText, { type ListItemTextProps } from '@mui/material/ListItemText'
+import ListItemText, {
+  type ListItemTextProps,
+} from '@mui/material/ListItemText'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generateTemplateId } from '../utils/generate-template-id'
 

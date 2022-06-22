@@ -21,12 +21,12 @@ import {
   BesignerPanelTabFlag,
   setBesignerPanels,
 } from '@aglyn/besigner-data-app'
-import { duplicateCanvasElement } from '@aglyn/foundation-data-core'
+import { duplicateCanvasElement } from '@aglyn/core-data-app'
 import {
   useAglynElementComponentSchema,
   useAglynElementData,
   useAglynElementLabel,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import { ICON_VARIANT_ENTITY_BLOCK } from '@aglyn/shared-data-enums'
 import { type KeyOf } from '@aglyn/shared-data-types'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'

@@ -15,14 +15,12 @@
  * limitations under the License.
  */
 
-import {
-  type ElementId,
-  updateCanvasElement,
-} from '@aglyn/foundation-data-core'
+import { updateCanvasElement } from '@aglyn/core-data-app'
+import type { ElementId } from '@aglyn/core-data-foundation'
 import {
   useAglynAppContext,
   useAglynElementData,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import {
   FormRenderer,
   type FormRendererProps,

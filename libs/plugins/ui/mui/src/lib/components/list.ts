@@ -19,7 +19,7 @@ import {
   type AglynComponentSchema,
   type ComponentId,
   ComponentsLinealDirectiveFlag,
-} from '@aglyn/foundation-data-core'
+} from '@aglyn/core-data-foundation'
 import { mdiFormatListBulletedSquare } from '@aglyn/shared-ui-mdi-jsx'
 import List, { type ListProps } from '@mui/material/List'
 import { BUNDLE_ID } from '../constants/bundle-common'
@@ -49,7 +49,10 @@ export const schema: AglynComponentSchema<ListProps> = {
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,
-        elements: [listItemSchema.templates![0]!.data, listItemSchema.templates![0]!.data],
+        elements: [
+          listItemSchema.templates![0]!.data,
+          listItemSchema.templates![0]!.data,
+        ],
       },
     },
   ],

@@ -16,10 +16,10 @@
  */
 
 import {
-  type ElementId,
   getCanvasDenormalizedElementsStore,
   getComponentElementHierarchy,
-} from '@aglyn/foundation-data-core'
+} from '@aglyn/core-data-app'
+import type { ElementId } from '@aglyn/core-data-foundation'
 import type { Conditional } from '@aglyn/shared-data-types'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import useBesignerAppContext from '../utils/use-besigner-app-context'

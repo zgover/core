@@ -22,17 +22,14 @@ import {
   DndDropLinealTypeFlag,
   setBesignerDnd,
 } from '@aglyn/besigner-data-app'
-import {
-  type ElementId,
-  isRootElementId,
-  moveCanvasElement,
-} from '@aglyn/foundation-data-core'
+import { isRootElementId, moveCanvasElement } from '@aglyn/core-data-app'
+import type { ElementId } from '@aglyn/core-data-foundation'
 import {
   useAglynAppContext,
   useAglynCanvasElementHierarchy,
   useAglynComponentSchema,
   useAglynElementData,
-} from '@aglyn/foundation-feature-renderer'
+} from '@aglyn/core-feature-renderer'
 import { useCallback, useEffect } from 'react'
 import {
   type DragElementWrapper,

@@ -20,9 +20,9 @@ import {
   doesBesignerAppExist,
   initializeBesignerApp,
 } from '@aglyn/besigner-data-app'
-import { registerBundle, registerComponent } from '@aglyn/foundation-data-core'
+import { registerBundle, registerComponent } from '@aglyn/core-data-app'
 import { samplePageData } from '@aglyn/besigner-feature-app'
-import { createAglynComponent } from '@aglyn/foundation-feature-renderer'
+import { createAglynComponent } from '@aglyn/core-feature-renderer'
 import { IS_PRODUCTION } from '@aglyn/shared-data-enums'
 
 const c1 = createAglynComponent(

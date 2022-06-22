@@ -19,7 +19,7 @@ import type {
   AglynAppControllerT,
   AglynAppOptions,
   IAglynAppController,
-} from '@aglyn/foundation-data-core'
+} from '@aglyn/core-data-foundation'
 import type {
   AglynBesignerControllerOptions,
   IAglynBesignerController,

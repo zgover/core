@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  buildRewriteSiteHostPath,
-  IMPLICIT_DIRS,
-} from '@aglyn/foundation-data-tenants'
+import { buildRewriteSiteHostPath, IMPLICIT_DIRS } from '@aglyn/db-data-tenants'
 import { IS_PRODUCTION } from '@aglyn/shared-data-enums'
 import { type NextRequest, NextResponse } from 'next/server'
 

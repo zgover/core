@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/foundation-data-admin'
+import { firebaseAdmin } from '@aglyn/core-data-admin'
 import {
   createHttpRefCode,
   HttpRefCodeSimple,

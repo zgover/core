@@ -16,9 +16,12 @@
  */
 
 import { bundle as muiBundle } from '@aglyn/plugins-ui-mui'
-import { doesBesignerAppExist, initializeBesignerApp } from '@aglyn/besigner-data'
-import { registerBundle, registerComponent } from '@aglyn/foundation-data-core'
-import { createAglynComponent } from '@aglyn/foundation-feature-renderer'
+import {
+  doesBesignerAppExist,
+  initializeBesignerApp,
+} from '@aglyn/besigner-data'
+import { registerBundle, registerComponent } from '@aglyn/core-data-app'
+import { createAglynComponent } from '@aglyn/core-feature-renderer'
 import { IS_PRODUCTION } from '@aglyn/shared-data-enums'
 import { samplePageData } from './sample-data'
 
@@ -28,7 +31,7 @@ const c1 = createAglynComponent(
     displayName: 'Root Element',
     title: 'Root element',
   },
-  'div'
+  'div',
 )
 
 const c2 = createAglynComponent(
@@ -37,7 +40,7 @@ const c2 = createAglynComponent(
     displayName: 'Root Element',
     title: 'Root element',
   },
-  'div'
+  'div',
 )
 
 const c3 = createAglynComponent(
@@ -46,7 +49,7 @@ const c3 = createAglynComponent(
     displayName: 'Root Element',
     title: 'Root element',
   },
-  'div'
+  'div',
 )
 
 const c4 = createAglynComponent(
@@ -55,7 +58,7 @@ const c4 = createAglynComponent(
     displayName: 'Root Element',
     title: 'Root element',
   },
-  'span'
+  'span',
 )
 
 const c5 = createAglynComponent(
@@ -76,7 +79,7 @@ const c5 = createAglynComponent(
       },
     ],
   },
-  'span'
+  'span',
 )
 const components = [c1, c2, c3, c4, c5]
 
