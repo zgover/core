@@ -303,7 +303,7 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
             <Button
               color="secondary"
               startIcon={<MdiIcon fontSize="inherit" path={mdiPlus.path} />}
-              onClick={async () => await handleAddElementClick()}
+              onClick={handleAddElementClick}
             >
               Add Element
             </Button>

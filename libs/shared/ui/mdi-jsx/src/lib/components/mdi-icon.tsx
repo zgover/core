@@ -15,28 +15,53 @@
  * limitations under the License.
  */
 
-import { DEFAULT_ICON } from '@aglyn/shared-data-mdi'
-import MuiSvgIcon, {
+import { DEFAULT_ICON } from '@aglyn/shared-data-mdi/constants/default-icon'
+import {
+  SvgIcon as MuiSvgIcon,
   type SvgIconProps as MuiSvgIconProps,
-} from '@mui/material/SvgIcon'
-import { forwardRef, type SVGAttributes, useMemo } from 'react'
+} from '@mui/material'
+import { motion } from 'framer-motion'
+import { forwardRef, useMemo } from 'react'
 
-export interface MdiIconProps extends Omit<MuiSvgIconProps, 'children'> {
+export type MdiIconBaseProps = Omit<MuiSvgIconProps, 'children'>
+export type MdiIconFeatureProps = {
   path?: string
-  PathProps?: SVGAttributes<SVGPathElement>
-  children?: (element: JSX.Children) => JSX.Children
+  PathProps?: JSX.InferElementTypeProps<typeof motion.path>
+} & { children?: (d: string) => JSX.Children }
+
+const variants = {
+  hidden: {
+    opacity: 0,
+    fill: 'none',
+  },
+  visible: {
+    opacity: 1,
+    fill: 'inherit',
+  },
 }
+
+export type MdiIconProps = MdiIconBaseProps & MdiIconFeatureProps
 
 const MdiIcon = forwardRef<any, MdiIconProps>((props, ref) => {
   const { path, children, PathProps, ...rest } = props
 
-  const pathElement = useMemo(() => {
-    return <path d={path || DEFAULT_ICON.path} {...PathProps} />
-  }, [path, PathProps])
+  const d = useMemo<string>(() => {
+    return (typeof path === 'string' && path) || DEFAULT_ICON.path
+  }, [path])
 
   return (
     <MuiSvgIcon ref={ref} {...rest}>
-      {typeof children === 'function' ? children(pathElement) : pathElement}
+      {typeof children === 'function' ? (
+        children(d)
+      ) : (
+        <motion.path
+          d={d}
+          variants={variants}
+          initial="hidden"
+          animate="visible"
+          {...PathProps}
+        />
+      )}
     </MuiSvgIcon>
   )
 })

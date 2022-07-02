@@ -23,7 +23,6 @@ import {
   styled,
 } from '@aglyn/shared-ui-theme'
 import { getElementClientRectBounding } from '@aglyn/shared-util-dom'
-import { Box, type BoxProps } from '@mui/material'
 import clsx from 'clsx'
 import { forwardRef, useMemo } from 'react'
 import useAglynCanvasElementStatus from '../hooks/use-aglyn-canvas-element-status'
@@ -36,8 +35,8 @@ const classKeys = generateComponentClassKeys('AglynElementOverlayOutline', [
   'draggingOver',
 ])
 
-const ElementOverlayOutline = styled(Box, {
-  name: 'AglynElementOverlayOutline',
+const ElementOutlineWrapper = styled('div', {
+  name: 'ElementOutlineWrapper',
 })(({ theme }) => {
   return {
     pointerEvents: 'none',
@@ -50,6 +49,7 @@ const ElementOverlayOutline = styled(Box, {
     outlineOffset: 1,
     outlineWidth: 1,
     outlineStyle: 'dashed',
+    content: '""',
     // transition: theme.transitions.create([
     //   'outline-width',
     //   'outline-offset',
@@ -61,7 +61,6 @@ const ElementOverlayOutline = styled(Box, {
     //   easing: theme.transitions.easing.easeInOut,
     // }),
 
-    cursor: 'copy',
     [`&.${classKeys.selectedSelf}`]: {
       outlineWidth: 2,
       outlineStyle: 'solid',
@@ -86,7 +85,8 @@ const ElementOverlayOutline = styled(Box, {
   }
 })
 
-export interface ElementOverlayOutlineProps extends BoxProps {
+export interface ElementOverlayOutlineProps
+  extends JSX.InferElementTypeProps<typeof ElementOutlineWrapper> {
   $id: ElementId
 }
 
@@ -108,8 +108,8 @@ const ElementOverlayOutlineComponent = forwardRef<
   )
 
   return (
-    <ElementOverlayOutline
-      ref={ref}
+    <ElementOutlineWrapper
+      ref={ref as any}
       id="aglyn:element-overlay-outline"
       data-aglyn-overlay-id={$id}
       data-aglyn-overlay-type="outline"

@@ -22,12 +22,14 @@ import { Divider, Stack, type StackProps, Typography } from '@mui/material'
 import { forwardRef } from 'react'
 import ElementIconComponent from './element-icon.component'
 
-const ElementLabelWrapper = styled(Stack)<StackProps>(({ theme }) => ({
+const ElementLabelWrapper = styled(Stack, {
+  name: 'AglynElementLabelWrapper',
+})<StackProps>(({ theme }) => ({
   pointerEvents: 'none',
   marginLeft: '-2px',
   marginBottom: '1px',
-  backgroundColor: theme.palette.secondary.main,
-  color: theme.palette.secondary.contrastText,
+  backgroundColor: theme.palette.primary.light,
+  color: theme.palette.primary.contrastText,
   paddingLeft: theme.spacing(0.5),
   paddingRight: theme.spacing(0.5),
   paddingTop: theme.spacing(0.35),

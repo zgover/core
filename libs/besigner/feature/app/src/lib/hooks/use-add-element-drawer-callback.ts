@@ -19,7 +19,10 @@ import {
   addCanvasElement,
   createComponentElementData,
 } from '@aglyn/core-data-app'
-import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
+import {
+  CANVAS_ROOT_ELEMENT_ID,
+  type ElementId,
+} from '@aglyn/core-data-foundation'
 import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { useCallback } from 'react'
 import {
@@ -32,10 +35,11 @@ export interface UseAddElementCallbackOptions {
   onComplete?: (data: unknown) => void
   onError?: (error: unknown) => void
   drawerOptions?: ElementDrawerOptions
+  $id?: ElementId
 }
 
 export type AddElementCallback = {
-  bivarianceHack(options?: UseAddElementCallbackOptions): Promise<void>
+  bivarianceHack(e, options?: UseAddElementCallbackOptions): Promise<void>
 }['bivarianceHack']
 
 export function useAddElementDrawerCallback(
@@ -47,7 +51,7 @@ export function useAddElementDrawerCallback(
   const app = useAglynAppContext()
 
   return useCallback(
-    async (callback) => {
+    async (e, callback) => {
       await elementDrawer({
         title: 'Add New Element',
         ...options?.drawerOptions,
@@ -55,13 +59,13 @@ export function useAddElementDrawerCallback(
       })
         .then((res: any) => {
           const data = res?.option?.data
-          if (data) throw new TypeError('invalid response')
+          if (!data) throw new TypeError('invalid response')
           return data
         })
         .then((data: any) => {
           const newElement = {
             index: NaN,
-            parentId: $id || CANVAS_ROOT_ELEMENT_ID,
+            parentId: callback?.$id || $id || CANVAS_ROOT_ELEMENT_ID,
             element: createComponentElementData(data),
           }
           addCanvasElement(app, newElement)

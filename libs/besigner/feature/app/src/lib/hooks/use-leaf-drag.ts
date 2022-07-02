@@ -72,7 +72,7 @@ export const useLeafDrag = (
     [$id, type, componentId, bundleId, hierarchy],
   )
 
-  console.log('dragItem item canDrag', dragItem, $id, type, canDrag, flags)
+  // console.log('dragItem item canDrag', dragItem, $id, type, canDrag, flags)
 
   return useDrag<BesignerDraggableItem, BesignerDroppableItem, DragCollected>(
     () => ({

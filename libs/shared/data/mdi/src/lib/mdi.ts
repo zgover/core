@@ -16,7 +16,8 @@
  */
 
 export * from './types'
-export * from './constants'
+export * from './constants/mdi-icons'
+export * from './constants/default-icon'
 export * from '../../generated/6.5.95/mdi-icons'
 
 export * from './utils/convert-id-to-module-name'

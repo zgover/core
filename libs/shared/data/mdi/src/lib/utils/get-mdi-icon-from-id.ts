@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-import {MdiIcons} from '../constants'
-import type {Icon, IconResponse, IdParam} from '../types'
-import {handleIconNotFound} from './handle-icon-not-found'
+import { MdiIcons } from '@aglyn/shared-data-mdi/constants/mdi-icons'
+import type { Icon, IconResponse, IdParam } from '../types'
+import { handleIconNotFound } from './handle-icon-not-found'
 
-
-export function getMdiIconFromId<T extends IdParam>(iconId: T): IconResponse<T> {
+export function getMdiIconFromId<T extends IdParam>(
+  iconId: T,
+): IconResponse<T> {
   if (Array.isArray(iconId)) {
     const result: Icon[] = []
     for (const id of iconId) {

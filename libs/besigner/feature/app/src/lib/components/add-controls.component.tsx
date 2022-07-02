@@ -37,7 +37,7 @@ const AddControlsComponent = forwardRef<any, AddControlsProps>((props, ref) => {
         <MuiIconButton
           aria-haspopup="menu"
           aria-label="add-element"
-          onClick={async () => await handleAddElementClick()}
+          onClick={handleAddElementClick}
         >
           <MdiIcon fontSize="small" path={ICON_VARIANT_MODIFY_ADD.path} />
         </MuiIconButton>

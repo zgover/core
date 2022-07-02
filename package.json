@@ -72,6 +72,7 @@
     "firebase": "^9.8.1",
     "firebase-admin": "^10.2.0",
     "flat": "^5.0.2",
+    "framer-motion": "^6.3.16",
     "fuse.js": "^6.6.2",
     "hoist-non-react-statics": "^3.3.2",
     "jss": "^10.9.0",

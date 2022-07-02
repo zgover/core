@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-import {_hasOwnProperty, _isArr, _isObj} from '@aglyn/shared-util-guards'
-import type {Icon, IconId} from './types'
-
+import { Icon } from '@aglyn/shared-data-mdi/types'
 
 export const DEFAULT_ICON: Icon = {
   id: 'undefined',
@@ -26,23 +24,3 @@ export const DEFAULT_ICON: Icon = {
   as: [],
   tags: [],
 }
-
-export const MdiIcons = new Map<IconId, Icon>()
-
-;(async function() {
-  if (typeof window !== 'undefined') {
-    await /*import('../../generated/6.5.95/mdi-icons.min.json')*/ Promise.reject<any>('Temporarily disabled')
-      .then(({data}) => {
-        if (_isArr) {
-          data.forEach((value) => {
-            if (_isObj(value) && _hasOwnProperty('path', value) && _hasOwnProperty('id', value)) {
-              MdiIcons.set(value.id as IconId, value as Icon)
-            }
-          })
-        }
-      })
-      .catch((error) => {
-        console.warn('Error loading icons', error)
-      })
-  }
-})()
