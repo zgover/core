@@ -25,6 +25,9 @@ import type {
   IconButtonProps as MuiIconButtonProps,
   LinkProps as MuiLinkProps,
 } from '@mui/material'
+import MuiButton from '@mui/material/Button'
+import MuiButtonBase from '@mui/material/ButtonBase'
+import MuiLink from '@mui/material/Link'
 import clsx from 'clsx'
 import dynamic, { type DynamicOptionsLoadingProps } from 'next/dynamic'
 import { useRouter } from 'next/router'
@@ -38,28 +41,14 @@ const Placeholder = (props: DynamicOptionsLoadingProps) => {
   return <a href={'#'}>{error ? 'error!' : 'loading'}</a>
 }
 
-const MuiButton = dynamic<MuiButtonProps>(
-  () => import('@mui/material/Button'),
-  { loading: Placeholder, ssr: true, suspense: true },
-)
-const MuiButtonBase = dynamic<MuiButtonBaseProps>(
-  () => import('@mui/material/ButtonBase'),
-  { loading: Placeholder, ssr: true, suspense: true },
-)
 const MuiFab = dynamic<MuiFabProps>(() => import('@mui/material/Fab'), {
   loading: Placeholder,
   ssr: true,
-  suspense: true,
 })
 const MuiIconButton = dynamic<MuiIconButtonProps>(
   () => import('@mui/material/IconButton'),
-  { loading: Placeholder, ssr: true, suspense: true },
+  { loading: Placeholder, ssr: true },
 )
-const MuiLink = dynamic<MuiLinkProps>(() => import('@mui/material/Link'), {
-  loading: Placeholder,
-  ssr: true,
-  suspense: true,
-})
 
 export type AppLinkVariant =
   | 'naked'
