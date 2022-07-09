@@ -22,6 +22,7 @@ import { mdiViewArray } from '@aglyn/shared-ui-mdi-jsx'
 
 import appBar, { schema as appBarSchema } from './components/app-bar'
 import button, { schema as buttonSchema } from './components/button'
+import container, { schema as containerSchema } from './components/container'
 import list, { schema as listSchema } from './components/list'
 import listItem, { schema as listItemSchema } from './components/list-item'
 import listItemText, {
@@ -35,6 +36,7 @@ import { BUNDLE_ID } from './constants/bundle-common'
 export const components: ComponentRegisterPayload[] = [
   createAglynComponent(appBarSchema, appBar),
   createAglynComponent(buttonSchema, button),
+  createAglynComponent(containerSchema, container),
   createAglynComponent(listSchema, list),
   createAglynComponent(listItemSchema, listItem),
   createAglynComponent(listItemTextSchema, listItemText),
