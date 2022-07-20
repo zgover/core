@@ -24,46 +24,64 @@ import {
   type IAglynDependencyManager,
 } from '@aglyn/core-data-foundation'
 import { ImmutableSlightlyDeep } from '@aglyn/shared-data-types'
-import { _hasOwnProperty } from '@aglyn/shared-util-guards'
 
-type Mixin<S, T, C extends new (...args: any[]) => T> = {
-  [_originalMixin]?: Mixin<S, T, C>
-  new (...any: ConstructorParameters<C>): S &
-    T & { [_mixinRef]?: Mixin<S, T, C> }
+const originalMixinSymbol = Symbol('originalMixinSymbol')
+const appliedMixinSymbol = Symbol('appliedMixinSymbol')
+const cachedApplicationSymbol = Symbol('cachedApplicationSymbol')
+
+interface MixableClass<Instance, Args = any> {
+  new (...args: Args[]): Instance
 }
-type MixinWrapper<S, T, C extends new (...args: any[]) => T> = (
-  mixin: C,
-) => Mixin<S, T, C>
+interface MixinFn<Super, New, Ctor extends MixableClass<Super>> {
+  (Mixin: Ctor): MixableClass<Super & New, ConstructorParameters<Ctor>>
+}
+interface AppliedMixinClassMembers<
+  Super,
+  New,
+  Ctor extends MixableClass<Super>,
+> {
+  [originalMixinSymbol]?: MixinFn<Super, New, Ctor>
+}
+interface AppliedMixinClassCtor<Super, New, Ctor extends MixableClass<Super>> {
+  new (...args: ConstructorParameters<Ctor>): Super &
+    New &
+    AppliedMixinClassMembers<Super, New, Ctor>
+}
+interface AppliedMixinClass<Super, New, Ctor extends MixableClass<Super>>
+  extends AppliedMixinClassMembers<Super, New, Ctor>,
+    AppliedMixinClassCtor<Super, New, Ctor> {
+  readonly prototype: MixinFn<Super, New, Ctor>
+}
 
-const _originalMixin = Symbol('_originalMixin')
-const _mixinRef = Symbol('_mixinRef')
-const _cachedApplicationRef = Symbol('_cachedApplicationRef')
-
-const wrap = <S, T, C extends new (...args: any[]) => T>(
-  mixin: MixinWrapper<S, T, C>,
-  wrapper, //: MixinWrapper<S, T, C>,
-) => {
-  Object.setPrototypeOf(wrapper, mixin)
-  if (!mixin[_originalMixin]) {
-    mixin[_originalMixin] = mixin
+function wrapMixin<S, T, C extends MixableClass<S>>(
+  Mixin: MixinFn<S, T, C>,
+  MixinWrapper: MixinFn<S, T, C>,
+): MixinFn<S, T, C> {
+  Object.setPrototypeOf(MixinWrapper, Mixin)
+  if (!Object.hasOwn(Mixin, originalMixinSymbol)) {
+    Mixin[originalMixinSymbol] = Mixin
   }
-  return wrapper
+  return MixinWrapper as unknown as MixinFn<S, T, C>
 }
-const createMixin = (mixin) =>
-  wrap(mixin, (superclass) => {
-    const application = mixin(superclass)
-    application.prototype[_mixinRef] = mixin[_originalMixin]
+function createMixin<S, T, C extends MixableClass<S>>(Mixin: MixinFn<S, T, C>) {
+  return wrapMixin(Mixin, (BaseClass) => {
+    const application = Mixin(BaseClass)
+    application.prototype[appliedMixinSymbol] = Mixin[originalMixinSymbol]
     return application
   })
-const mixinHasInstance = (mixin) => {
-  if (!Symbol.hasInstance) {
-    return mixin
-  }
-  Object.defineProperty(mixin, Symbol.hasInstance, {
-    value: function (o) {
-      const originalMixin = this[_originalMixin]
+}
+function checkMixinHasInstance<S, T, C extends MixableClass<S>>(
+  Mixin: MixinFn<S, T, C>,
+) {
+  if (!Symbol.hasInstance) return Mixin
+  Object.defineProperty(Mixin, Symbol.hasInstance, {
+    value: function (o: { [x: string]: any }) {
+      const originalMixin = this[originalMixinSymbol]
       while (o != null) {
-        if (_hasOwnProperty(_mixinRef, o) && o[_mixinRef] === originalMixin) {
+        if (
+          Object.hasOwn(o, appliedMixinSymbol) &&
+          o[appliedMixinSymbol as unknown as string] === originalMixin
+        ) {
           return true
         }
         o = Object.getPrototypeOf(o)
@@ -71,338 +89,368 @@ const mixinHasInstance = (mixin) => {
       return false
     },
   })
-  return mixin
+  return Mixin
 }
 
 /**
  * @see https://justinfagnani.com/2016/01/07/enhancing-mixins-with-decorator-functions/
  */
-const cacheMixin = (mixin) =>
-  wrap(mixin, (superclass) => {
+function cacheMixin<S, T, C extends MixableClass<S>>(
+  Mixin: MixinFn<S, T, C>,
+): MixinFn<S, T, C> {
+  return wrapMixin(Mixin, (BaseClass) => {
     // Create a symbol used to reference a cached application from a superclass
-    let applicationRef = mixin[_cachedApplicationRef]
-    if (!applicationRef) {
-      applicationRef = mixin[_cachedApplicationRef] = Symbol(mixin.name)
+    let CachedApp = Mixin[cachedApplicationSymbol]
+    if (!CachedApp) {
+      CachedApp = Mixin[cachedApplicationSymbol] = Symbol(Mixin.name)
     }
 
     // Look up an cached application of `mixin` to `superclass`
-    if (_hasOwnProperty(applicationRef, superclass)) {
-      return superclass[applicationRef]
+    if (Object.hasOwn(BaseClass, CachedApp)) {
+      return BaseClass[CachedApp]
     }
 
     // Apply the mixin
-    const application = mixin(superclass)
+    const App = Mixin(BaseClass)
 
-    // Cache the mixin application on the superclass
-    superclass[applicationRef] = application
+    // Cache the mixin application on the BaseClass
+    BaseClass[CachedApp] = App
 
-    return application
+    return App
   })
+}
 
-const createCachedMixin = (mixin) =>
-  cacheMixin(mixinHasInstance(createMixin(mixin)))
+function createCachedMixin<S, T, C extends MixableClass<S>>(
+  Mixin: MixinFn<S, T, C>,
+): MixinFn<S, T, C> {
+  return cacheMixin(checkMixinHasInstance(createMixin(Mixin)))
+}
 
-const AglynDependencyManager = createCachedMixin(
-  (superclass) =>
-    class extends superclass implements IAglynDependencyManager {
-      readonly #dependencies: AglynDependencyMap = {
-        statusByDependencyId: {},
-        dependentsByDependencyId: {},
-        __: {},
+function applyMixins<T extends MixableClass<any>, Ts extends MixableClass<any>>(
+  Constructor: T,
+  ...constructors: Ts[]
+): Ts & T {
+  constructors.forEach((ctor) => {
+    Object.getOwnPropertyNames(ctor.prototype).forEach((name) => {
+      const attributes =
+        Object.getOwnPropertyDescriptor(ctor.prototype, name) ||
+        Object.create(null)
+      Object.defineProperty(Constructor.prototype, name, attributes)
+    })
+  })
+  return Constructor as unknown as T & Ts
+}
+
+const dependencyManager = (BaseClass) =>
+  class extends BaseClass implements IAglynDependencyManager {
+    readonly #dependencies: AglynDependencyMap = {
+      statusByDependencyId: {},
+      dependentsByDependencyId: {},
+      __: {},
+    }
+
+    public get dependencies(): ImmutableSlightlyDeep<AglynDependencyMap> {
+      const { statusByDependencyId, dependentsByDependencyId, __ } =
+        this.#dependencies
+      return {
+        statusByDependencyId: { ...statusByDependencyId },
+        dependentsByDependencyId: { ...dependentsByDependencyId },
+        __: { ...__ },
       }
+    }
 
-      public get dependencies(): ImmutableSlightlyDeep<AglynDependencyMap> {
-        const { statusByDependencyId, dependentsByDependencyId, __ } =
-          this.#dependencies
-        return {
-          statusByDependencyId: { ...statusByDependencyId },
-          dependentsByDependencyId: { ...dependentsByDependencyId },
-          __: { ...__ },
+    #dependency(dependencyId: AglynDependencyUid): AglynDependency | undefined {
+      return this.dependencies.__[dependencyId]
+    }
+    #dependents(dependencyId: AglynDependencyUid): AglynDependents | undefined {
+      return this.dependencies.dependentsByDependencyId[dependencyId]
+    }
+    #dependencyStatus(
+      dependencyId: AglynDependencyUid,
+    ): AglynDependencyStatus | undefined {
+      return this.dependencies.statusByDependencyId[dependencyId]
+    }
+    #hasDependency(dependencyId: AglynDependencyUid): boolean {
+      return Boolean(dependencyId && this.#dependency(dependencyId))
+    }
+    #dependencyWaiting(dependencyId: AglynDependencyUid): boolean {
+      return (
+        this.#dependencyStatus(dependencyId) === AglynDependencyStatus.WAITING
+      )
+    }
+    #dependencyLoading(dependencyId: AglynDependencyUid): boolean {
+      return (
+        this.#dependencyStatus(dependencyId) === AglynDependencyStatus.LOADING
+      )
+    }
+    #dependencyLoaded(dependencyId: AglynDependencyUid): boolean {
+      return (
+        this.#dependencyStatus(dependencyId) === AglynDependencyStatus.LOADED
+      )
+    }
+    #dependencyUnloading(dependencyId: AglynDependencyUid): boolean {
+      return (
+        this.#dependencyStatus(dependencyId) === AglynDependencyStatus.UNLOADING
+      )
+    }
+    #allDependenciesLoaded(dependentId: AglynDependencyUid): boolean {
+      for (const dependencyId of Object.keys(
+        this.#dependency(dependentId)?.dependencies || {},
+      )) {
+        if (!this.#dependencyLoaded(dependencyId)) {
+          return false
         }
       }
-
-      #dependency(
-        dependencyId: AglynDependencyUid,
-      ): AglynDependency | undefined {
-        return this.dependencies.__[dependencyId]
+      return true
+    }
+    #setSelfDependencyProperties(
+      dependencyId: AglynDependencyUid,
+      dependency: AglynDependency,
+    ): this {
+      this.#dependencies.statusByDependencyId[dependencyId] =
+        AglynDependencyStatus.WAITING
+      this.#dependencies.dependentsByDependencyId[dependencyId] ||= {}
+      this.#dependencies.__[dependencyId] = dependency
+      return this
+    }
+    #setSelfDependencyDependents(dependencyId: AglynDependencyUid): this {
+      for (const dependentId of Object.keys(
+        this.#dependency(dependencyId)?.dependencies || {},
+      )) {
+        const dependents = (this.#dependencies.dependentsByDependencyId[
+          dependentId
+        ] ||= {})
+        dependents[dependencyId] = true
       }
-      #dependents(
-        dependencyId: AglynDependencyUid,
-      ): AglynDependents | undefined {
-        return this.dependencies.dependentsByDependencyId[dependencyId]
+      return this
+    }
+    #loadDependencyDependents(dependencyId: AglynDependencyUid): this {
+      for (const dependentId of Object.keys(
+        this.#dependents(dependencyId) || {},
+      )) {
+        if (!this.#dependencyLoaded(dependentId)) {
+          this.#handleLoadingDependencyAndDependents(dependentId)
+        }
       }
-      #dependencyStatus(
-        dependencyId: AglynDependencyUid,
-      ): AglynDependencyStatus | undefined {
-        return this.dependencies.statusByDependencyId[dependencyId]
+      return this
+    }
+    #loadDependency(dependencyId: AglynDependencyUid): this {
+      if (this.#dependencyWaiting(dependencyId)) {
+        this.#dependencies.statusByDependencyId[dependencyId] =
+          AglynDependencyStatus.LOADING
+        this.#dependency(dependencyId)?.load?.()
+        this.#dependencies.statusByDependencyId[dependencyId] =
+          AglynDependencyStatus.LOADED
       }
-      #hasDependency(dependencyId: AglynDependencyUid): boolean {
-        return Boolean(dependencyId && this.#dependency(dependencyId))
+      return this
+    }
+    #unloadDependencyDependents(dependencyId: AglynDependencyUid): this {
+      for (const dependentId of Object.keys(
+        this.#dependents(dependencyId) || {},
+      )) {
+        this.#handleUnloadingDependencyAndDependents(dependentId)
       }
-      #dependencyWaiting(dependencyId: AglynDependencyUid): boolean {
-        return (
-          this.#dependencyStatus(dependencyId) === AglynDependencyStatus.WAITING
-        )
-      }
-      #dependencyLoading(dependencyId: AglynDependencyUid): boolean {
-        return (
-          this.#dependencyStatus(dependencyId) === AglynDependencyStatus.LOADING
-        )
-      }
-      #dependencyLoaded(dependencyId: AglynDependencyUid): boolean {
-        return (
-          this.#dependencyStatus(dependencyId) === AglynDependencyStatus.LOADED
-        )
-      }
-      #dependencyUnloading(dependencyId: AglynDependencyUid): boolean {
-        return (
-          this.#dependencyStatus(dependencyId) ===
+      return this
+    }
+    #unloadDependency(dependencyId: AglynDependencyUid): this {
+      if (this.#dependencyLoaded(dependencyId)) {
+        this.#dependencies.statusByDependencyId[dependencyId] =
           AglynDependencyStatus.UNLOADING
-        )
-      }
-      #allDependenciesLoaded(dependentId: AglynDependencyUid): boolean {
-        for (const dependencyId of Object.keys(
-          this.#dependency(dependentId)?.dependencies || {},
-        )) {
-          if (!this.#dependencyLoaded(dependencyId)) {
-            return false
-          }
-        }
-        return true
-      }
-      #setSelfDependencyProperties(
-        dependencyId: AglynDependencyUid,
-        dependency: AglynDependency,
-      ): this {
+        this.#dependency(dependencyId)?.destroy?.()
         this.#dependencies.statusByDependencyId[dependencyId] =
           AglynDependencyStatus.WAITING
-        this.#dependencies.dependentsByDependencyId[dependencyId] ||= {}
-        this.#dependencies.__[dependencyId] = dependency
-        return this
       }
-      #setSelfDependencyDependents(dependencyId: AglynDependencyUid): this {
-        for (const dependentId of Object.keys(
-          this.#dependency(dependencyId)?.dependencies || {},
-        )) {
-          const dependents = (this.#dependencies.dependentsByDependencyId[
-            dependentId
-          ] ||= {})
-          dependents[dependencyId] = true
-        }
-        return this
+      return this
+    }
+    #removeSelfDependencyProperties(dependencyId: AglynDependencyUid): this {
+      delete this.#dependencies.dependentsByDependencyId[dependencyId]
+      delete this.#dependencies.statusByDependencyId[dependencyId]
+      delete this.#dependencies.__[dependencyId]
+      return this
+    }
+    #removeSelfDependencyDependents(dependencyId: AglynDependencyUid): this {
+      for (const dependentId of Object.keys(
+        this.#dependency(dependencyId)?.dependencies || {},
+      )) {
+        delete this.#dependencies.dependentsByDependencyId[dependentId]?.[
+          dependencyId
+        ]
       }
-      #loadDependencyDependents(dependencyId: AglynDependencyUid): this {
-        for (const dependentId of Object.keys(
-          this.#dependents(dependencyId) || {},
-        )) {
-          if (!this.#dependencyLoaded(dependentId)) {
-            this.#handleLoadingDependencyAndDependents(dependentId)
-          }
-        }
-        return this
-      }
-      #loadDependency(dependencyId: AglynDependencyUid): this {
-        if (this.#dependencyWaiting(dependencyId)) {
-          this.#dependencies.statusByDependencyId[dependencyId] =
-            AglynDependencyStatus.LOADING
-          this.#dependency(dependencyId)?.load?.()
-          this.#dependencies.statusByDependencyId[dependencyId] =
-            AglynDependencyStatus.LOADED
-        }
-        return this
-      }
-      #unloadDependencyDependents(dependencyId: AglynDependencyUid): this {
-        for (const dependentId of Object.keys(
-          this.#dependents(dependencyId) || {},
-        )) {
-          this.#handleUnloadingDependencyAndDependents(dependentId)
-        }
-        return this
-      }
-      #unloadDependency(dependencyId: AglynDependencyUid): this {
-        if (this.#dependencyLoaded(dependencyId)) {
-          this.#dependencies.statusByDependencyId[dependencyId] =
-            AglynDependencyStatus.UNLOADING
-          this.#dependency(dependencyId)?.destroy?.()
-          this.#dependencies.statusByDependencyId[dependencyId] =
-            AglynDependencyStatus.WAITING
-        }
-        return this
-      }
-      #removeSelfDependencyProperties(dependencyId: AglynDependencyUid): this {
-        delete this.#dependencies.dependentsByDependencyId[dependencyId]
-        delete this.#dependencies.statusByDependencyId[dependencyId]
-        delete this.#dependencies.__[dependencyId]
-        return this
-      }
-      #removeSelfDependencyDependents(dependencyId: AglynDependencyUid): this {
-        for (const dependentId of Object.keys(
-          this.#dependency(dependencyId)?.dependencies || {},
-        )) {
-          delete this.#dependencies.dependentsByDependencyId[dependentId]?.[
-            dependencyId
-          ]
-        }
-        return this
-      }
+      return this
+    }
 
-      #handleAddingDependencyAndDependents(
-        dependencyId: AglynDependencyUid,
-        dependency: AglynDependency,
-      ): this {
-        if (!dependency) throw new Error('Invalid dependency')
-        if (!dependencyId) throw new Error('Invalid dependencyId')
-        /**
-         * Set properties on local dependencies object
-         */
-        this.#setSelfDependencyProperties(dependencyId, dependency)
-        /**
-         * Set dependencies' dependent relationships
-         */
-        this.#setSelfDependencyDependents(dependencyId)
-        /**
-         * Load applicable dependencies
-         */
-        this.#handleLoadingDependencyAndDependents(dependencyId)
+    #handleAddingDependencyAndDependents(
+      dependencyId: AglynDependencyUid,
+      dependency: AglynDependency,
+    ): this {
+      if (!dependency) throw new Error('Invalid dependency')
+      if (!dependencyId) throw new Error('Invalid dependencyId')
+      /**
+       * Set properties on local dependencies object
+       */
+      this.#setSelfDependencyProperties(dependencyId, dependency)
+      /**
+       * Set dependencies' dependent relationships
+       */
+      this.#setSelfDependencyDependents(dependencyId)
+      /**
+       * Load applicable dependencies
+       */
+      this.#handleLoadingDependencyAndDependents(dependencyId)
+      return this
+    }
+    #handleLoadingDependencyAndDependents(
+      dependencyId: AglynDependencyUid,
+    ): this {
+      if (!this.#hasDependency(dependencyId)) return this
+      /**
+       * Verify all dependencies are loaded
+       */
+      if (!this.#allDependenciesLoaded(dependencyId)) {
         return this
       }
-      #handleLoadingDependencyAndDependents(
-        dependencyId: AglynDependencyUid,
-      ): this {
-        if (!this.#hasDependency(dependencyId)) return this
-        /**
-         * Verify all dependencies are loaded
-         */
-        if (!this.#allDependenciesLoaded(dependencyId)) {
-          return this
-        }
-        /**
-         * Load the self dependency
-         */
-        this.#loadDependency(dependencyId)
-        /**
-         * Load waiting dependents
-         */
-        this.#loadDependencyDependents(dependencyId)
-        return this
-      }
-      #handleUnloadingDependencyAndDependents(
-        dependencyId: AglynDependencyUid,
-      ): this {
-        if (!this.#hasDependency(dependencyId)) return this
-        /**
-         * Unload all dependents of the dependency
-         */
-        this.#unloadDependencyDependents(dependencyId)
-        /**
-         * Unload self dependency
-         */
-        this.#unloadDependency(dependencyId)
-        return this
-      }
-      #handleRemovingDependencyAndDependents(
-        dependencyId: AglynDependencyUid,
-      ): this {
-        if (!this.#hasDependency(dependencyId)) return this
-        /**
-         * Unload dependency and its dependents
-         */
-        this.#handleUnloadingDependencyAndDependents(dependencyId)
-
-        /**
-         * Remove dependencies dependent relationships
-         */
-        this.#removeSelfDependencyDependents(dependencyId)
-
-        /**
-         * Remove self from local dependencies property
-         */
-        this.#removeSelfDependencyProperties(dependencyId)
-        return this
-      }
+      /**
+       * Load the self dependency
+       */
+      this.#loadDependency(dependencyId)
+      /**
+       * Load waiting dependents
+       */
+      this.#loadDependencyDependents(dependencyId)
+      return this
+    }
+    #handleUnloadingDependencyAndDependents(
+      dependencyId: AglynDependencyUid,
+    ): this {
+      if (!this.#hasDependency(dependencyId)) return this
+      /**
+       * Unload all dependents of the dependency
+       */
+      this.#unloadDependencyDependents(dependencyId)
+      /**
+       * Unload self dependency
+       */
+      this.#unloadDependency(dependencyId)
+      return this
+    }
+    #handleRemovingDependencyAndDependents(
+      dependencyId: AglynDependencyUid,
+    ): this {
+      if (!this.#hasDependency(dependencyId)) return this
+      /**
+       * Unload dependency and its dependents
+       */
+      this.#handleUnloadingDependencyAndDependents(dependencyId)
 
       /**
-       * Check if the dependency has 'waiting' status
+       * Remove dependencies dependent relationships
        */
-      public dependencyWaiting(dependencyId: AglynDependencyUid): boolean {
-        return this.#dependencyWaiting(dependencyId)
-      }
-      /**
-       * Check if the dependency has 'loading' status
-       */
-      public dependencyLoading(dependencyId: AglynDependencyUid): boolean {
-        return this.#dependencyLoading(dependencyId)
-      }
-      /**
-       * Check if the dependency has 'loaded' status
-       */
-      public dependencyLoaded(dependencyId: AglynDependencyUid): boolean {
-        return this.#dependencyLoaded(dependencyId)
-      }
-      /**
-       * Check if the dependency has 'unloaded' status
-       */
-      public dependencyUnloading(dependencyId: AglynDependencyUid): boolean {
-        return this.#dependencyUnloading(dependencyId)
-      }
-      /**
-       * Get a copy of the local dependency object
-       */
-      public dependency(
-        dependencyId: AglynDependencyUid,
-      ): Readonly<AglynDependency> | undefined {
-        const dependency = this.#dependency(dependencyId)
-        return dependency ? { ...dependency } : undefined
-      }
+      this.#removeSelfDependencyDependents(dependencyId)
 
       /**
-       * Adds a new dependency and if dependencies are loaded it loads, then
-       * loads checks all waiting dependencies if they can now load as well.
-       * Step 1: Set properties on local dependencies object Step 2: Set
-       * dependencies' dependent relationships Step 3: Load dependencies
-       * waiting with all requirements met
+       * Remove self from local dependencies property
        */
-      public addDependency(dependency: AglynDependency): this {
-        return this.#handleAddingDependencyAndDependents(
-          dependency?.namespace,
-          dependency,
-        )
-      }
+      this.#removeSelfDependencyProperties(dependencyId)
+      return this
+    }
 
-      /**
-       * Loads a dependency and its dependents. Do not call unless necessary.
-       * Process flow automatically handles loading/unloading dependency when
-       * all required dependencies have been loaded for itself. However, if
-       * called should be ok as it checks if dependencies are loaded first.
-       * Step 1: Verify all dependencies are loaded Step 2: Load the self
-       * dependency Step 3: Load waiting dependents
-       */
-      public loadDependency(id: AglynDependencyUid): this {
-        return this.#handleLoadingDependencyAndDependents(id)
-      }
+    /**
+     * Check if the dependency has 'waiting' status
+     */
+    public dependencyWaiting(dependencyId: AglynDependencyUid): boolean {
+      return this.#dependencyWaiting(dependencyId)
+    }
+    /**
+     * Check if the dependency has 'loading' status
+     */
+    public dependencyLoading(dependencyId: AglynDependencyUid): boolean {
+      return this.#dependencyLoading(dependencyId)
+    }
+    /**
+     * Check if the dependency has 'loaded' status
+     */
+    public dependencyLoaded(dependencyId: AglynDependencyUid): boolean {
+      return this.#dependencyLoaded(dependencyId)
+    }
+    /**
+     * Check if the dependency has 'unloaded' status
+     */
+    public dependencyUnloading(dependencyId: AglynDependencyUid): boolean {
+      return this.#dependencyUnloading(dependencyId)
+    }
+    /**
+     * Get a copy of the local dependency object
+     */
+    public dependency(
+      dependencyId: AglynDependencyUid,
+    ): Readonly<AglynDependency> | undefined {
+      const dependency = this.#dependency(dependencyId)
+      return dependency ? { ...dependency } : undefined
+    }
 
-      /**
-       * Unloads a dependency and its dependents. Do not call unless necessary.
-       * Process flow automatically handles loading/unloading dependency when
-       * all required dependencies have been unloaded for itself. However, if
-       * called should be ok as it checks if dependencies are unloaded first.
-       * Step 1: Unload all dependents of the dependency Step 2: Unload self
-       * dependency
-       */
-      public unloadDependency(id: AglynDependencyUid): this {
-        return this.#handleUnloadingDependencyAndDependents(id)
-      }
+    /**
+     * Adds a new dependency and if dependencies are loaded it loads, then
+     * loads checks all waiting dependencies if they can now load as well.
+     * Step 1: Set properties on local dependencies object Step 2: Set
+     * dependencies' dependent relationships Step 3: Load dependencies
+     * waiting with all requirements met
+     */
+    public addDependency(dependency: AglynDependency): this {
+      return this.#handleAddingDependencyAndDependents(
+        dependency?.namespace,
+        dependency,
+      )
+    }
 
-      /**
-       * Unloads all dependency dependents and then removes the dependency.
-       * Step 1: Unload dependency and its dependents
-       * Step 2: Remove dependencies dependent relationships
-       * Step 3: Remove self from local dependencies property
-       */
-      public removeDependency(id: AglynDependencyUid): this {
-        return this.#handleRemovingDependencyAndDependents(id)
-      }
-    },
-)
+    /**
+     * Loads a dependency and its dependents. Do not call unless necessary.
+     * Process flow automatically handles loading/unloading dependency when
+     * all required dependencies have been loaded for itself. However, if
+     * called should be ok as it checks if dependencies are loaded first.
+     * Step 1: Verify all dependencies are loaded Step 2: Load the self
+     * dependency Step 3: Load waiting dependents
+     */
+    public loadDependency(id: AglynDependencyUid): this {
+      return this.#handleLoadingDependencyAndDependents(id)
+    }
+
+    /**
+     * Unloads a dependency and its dependents. Do not call unless necessary.
+     * Process flow automatically handles loading/unloading dependency when
+     * all required dependencies have been unloaded for itself. However, if
+     * called should be ok as it checks if dependencies are unloaded first.
+     * Step 1: Unload all dependents of the dependency Step 2: Unload self
+     * dependency
+     */
+    public unloadDependency(id: AglynDependencyUid): this {
+      return this.#handleUnloadingDependencyAndDependents(id)
+    }
+
+    /**
+     * Unloads all dependency dependents and then removes the dependency.
+     * Step 1: Unload dependency and its dependents
+     * Step 2: Remove dependencies dependent relationships
+     * Step 3: Remove self from local dependencies property
+     */
+    public removeDependency(id: AglynDependencyUid): this {
+      return this.#handleRemovingDependencyAndDependents(id)
+    }
+  }
+
+function AglynDependencyManager<Instance>(
+  Constructor: MixableClass<Instance>,
+): AppliedMixinClass<
+  Instance,
+  ReturnType<typeof dependencyManager>,
+  MixableClass<Instance>
+> {
+  return createCachedMixin<
+    Instance,
+    ReturnType<typeof dependencyManager>,
+    MixableClass<Instance>
+  >((Super) => {
+    return dependencyManager(Super) as any
+  })(Constructor)
+}
 
 export default AglynDependencyManager

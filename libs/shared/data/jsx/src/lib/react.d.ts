@@ -16,18 +16,26 @@
  */
 
 declare module 'react' {
-  interface Context {aglyn?: boolean}
-  interface ExoticComponent {aglyn?: boolean}
-  interface FunctionComponent {aglyn?: boolean}
-  interface VoidFunctionComponent {aglyn?: boolean}
-  interface ForwardRefRenderFunction {aglyn?: boolean}
-  interface ComponentClass {aglyn?: boolean}
-  interface Mixin {aglyn?: boolean}
-}
-
-declare global {
-  namespace JSX {
-
+  interface Context {
+    aglyn?: boolean
+  }
+  interface ExoticComponent {
+    aglyn?: boolean
+  }
+  interface FunctionComponent {
+    aglyn?: boolean
+  }
+  interface VoidFunctionComponent {
+    aglyn?: boolean
+  }
+  interface ForwardRefRenderFunction {
+    aglyn?: boolean
+  }
+  interface ComponentClass {
+    aglyn?: boolean
+  }
+  interface Mixin {
+    aglyn?: boolean
   }
 }
 

@@ -44,11 +44,20 @@ module.exports = {
               },
               {
                 sourceTag: 'scope:feature',
-                onlyDependOnLibsWithTags: ['scope:data', 'scope:feature', 'scope:ui', 'scope:util'],
+                onlyDependOnLibsWithTags: [
+                  'scope:data',
+                  'scope:feature',
+                  'scope:ui',
+                  'scope:util',
+                ],
               },
               {
                 sourceTag: 'scope:ui',
-                onlyDependOnLibsWithTags: ['scope:data', 'scope:ui', 'scope:util'],
+                onlyDependOnLibsWithTags: [
+                  'scope:data',
+                  'scope:ui',
+                  'scope:util',
+                ],
               },
               {
                 sourceTag: 'scope:util',
@@ -56,7 +65,11 @@ module.exports = {
               },
               {
                 sourceTag: 'scope:addons',
-                onlyDependOnLibsWithTags: ['scope:addons', 'scope:aglyn', 'scope:shared'],
+                onlyDependOnLibsWithTags: [
+                  'scope:addons',
+                  'scope:aglyn',
+                  'scope:shared',
+                ],
               },
               {
                 sourceTag: 'scope:aglyn',
@@ -85,8 +98,12 @@ module.exports = {
     },
     {
       files: ['*.ts'],
-      extends: ['plugin:@nrwl/nx/typescript', 'plugin:@next/next/core-web-vitals'],
+      extends: [
+        'plugin:@nrwl/nx/typescript',
+        'plugin:@next/next/core-web-vitals',
+      ],
       rules: {
+        '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
@@ -115,6 +132,7 @@ module.exports = {
         'plugin:@next/next/core-web-vitals',
       ],
       rules: {
+        '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
         '@typescript-eslint/no-explicit-any': 'off',

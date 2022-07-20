@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-export * from './lib/main'
-export * from './lib/mui'
-export * from './lib/overridable'
-export * from './lib/sx'
+export * from './lib/main.d'
+export * from './lib/mui.d'
+export * from './lib/overridable.d'
+export * from './lib/react.d'
+export * from './lib/sx.d'

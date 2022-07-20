@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import type { InferElementTypeProps } from '@aglyn/shared-data-types'
+import '@aglyn/shared-data-jsx'
+import { useTheme } from '@aglyn/shared-ui-theme'
 
 import { create, type Jss, type JssOptions } from 'jss'
 import rtl from 'jss-rtl'
@@ -35,7 +36,7 @@ import ReactFrameComponent from 'react-frame-component'
 
 import { useForkedRefs } from '../hooks/use-ref-forked'
 
-export type FrameComponentProps = InferElementTypeProps<
+export type FrameComponentProps = JSX.InferElementTypeProps<
   typeof ReactFrameComponent
 >
 export type SandboxFrameDocument = HTMLIFrameElement['contentDocument']

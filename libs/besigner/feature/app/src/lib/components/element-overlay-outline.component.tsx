@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { useRenderedCanvasElementRef } from '@aglyn/besigner-feature-app/contexts/rendered-canvas-elements'
 import type { ElementId } from '@aglyn/core-data-foundation'
+import '@aglyn/shared-data-jsx'
 import {
   alpha,
   generateComponentClassKeys,
@@ -25,6 +25,7 @@ import {
 import { getElementClientRectBounding } from '@aglyn/shared-util-dom'
 import clsx from 'clsx'
 import { forwardRef, useMemo } from 'react'
+import { useRenderedCanvasElementRef } from '../contexts/rendered-canvas-elements'
 import useAglynCanvasElementStatus from '../hooks/use-aglyn-canvas-element-status'
 import useAglynDndElementStatus from '../hooks/use-aglyn-dnd-element-status'
 

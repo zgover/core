@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Icon } from '@aglyn/shared-data-mdi/types'
+import type { Icon } from '../types'
 
 export const DEFAULT_ICON: Icon = {
   id: 'undefined',
@@ -24,3 +24,4 @@ export const DEFAULT_ICON: Icon = {
   as: [],
   tags: [],
 }
+export default DEFAULT_ICON
