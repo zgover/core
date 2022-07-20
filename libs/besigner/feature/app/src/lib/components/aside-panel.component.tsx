@@ -251,17 +251,16 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
     const handleAddElementClick = useAddElementDrawerCallback()
     return (
       <TabPanelInner sx={{ pl: 0.5 }}>
-        <ElementsTreeViewComponent ref={ref} {...props}>
-          <Box sx={{ px: 0.5, pb: 1, pt: 1 }}>
-            <Button
-              color="secondary"
-              startIcon={<MdiIcon fontSize="inherit" path={mdiPlus.path} />}
-              onClick={handleAddElementClick}
-            >
-              Add Element
-            </Button>
-          </Box>
-        </ElementsTreeViewComponent>
+        <Box sx={{ px: 0.5, pb: 1, pt: 1 }}>
+          <Button
+            color="secondary"
+            startIcon={<MdiIcon fontSize="inherit" path={mdiPlus.path} />}
+            onClick={handleAddElementClick}
+          >
+            {'Add Element'}
+          </Button>
+        </Box>
+        <ElementsTreeViewComponent ref={ref} {...props} />
       </TabPanelInner>
     )
   },
@@ -385,10 +384,9 @@ const ComponentsList = forwardRef<any, ListProps>((props, ref) => {
     <>
       <CollapsibleListsComponent
         items={items}
-        RenderSummaryComponent={({ id, isOpen, item }) => {
-          console.log('isOpen', isOpen, id, item)
-          return <Typography>{item?.labelPrimary}</Typography>
-        }}
+        RenderSummaryComponent={({ id, isOpen, item }) => (
+          <Typography>{item?.labelPrimary}</Typography>
+        )}
         RenderDetailsComponent={ComponentGroupDetails}
       />
     </>

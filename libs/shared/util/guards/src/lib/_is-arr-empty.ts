@@ -15,14 +15,11 @@
  * limitations under the License.
  */
 
-
 /**
- * Is an empty array
- *
- * @export
- * @param {*} val
- * @returns {val is []}
+ * Guard utility to chec
+ * @param val - the value or array to check
+ * @param invalid - the result if {@link val} is not an array
  */
-export function _isArrEmpty(val: unknown): val is [] {
+export function _isArrEmpty(val: unknown, invalid: any = true): val is [] {
   return Array.isArray(val) ? !val.length : true
 }

@@ -19,6 +19,7 @@ import { ICON_VARIANT_COLLAPSIBLE_OPEN } from '@aglyn/shared-data-enums'
 import type { AnyObj } from '@aglyn/shared-data-types'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
+import { _isArrEmpty, _isUndOrNull } from '@aglyn/shared-util-guards'
 import {
   Accordion as MuiAccordion,
   AccordionDetails as MuiAccordionDetails,
@@ -98,11 +99,13 @@ const CollapsibleListsComponent = <T extends CollapsibleItem>(
     RenderDetailsComponent,
     unique,
   } = props
-  const { id: firstId, key: firstKey } = items[0] || {}
-  const firstUnique = firstId ?? firstKey
-  const [open, setOpen] = useState<JSX.Key[]>([
-    ...(Array.isArray(initial) ? initial : firstUnique ? [firstUnique] : []),
-  ])
+  const [open, setOpen] = useState<JSX.Key[]>(() => {
+    if (!_isArrEmpty(initial)) return [...initial]
+    const first = items[0]
+    if (!_isUndOrNull(first?.id)) return [first?.id]
+    if (!_isUndOrNull(first?.key)) return [first?.key]
+    return []
+  })
   const handleToggle = useCallback(
     (id: JSX.Key) => (event: any, expand: boolean) => {
       setOpen((prev) => {
