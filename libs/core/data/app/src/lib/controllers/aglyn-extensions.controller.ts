@@ -44,7 +44,7 @@ import { AglynExtension } from '../models/aglyn-extension.model'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
 const TAG = 'AglynExtensions'
-const NS = 'com.aglyn.core.data.framework.controller.extensions'
+const NS = 'com.aglyn.core.data.controller.extensions'
 
 export class AglynExtensionsController
   extends AglynModuleModel<AglynExtensionsControllerOptions>

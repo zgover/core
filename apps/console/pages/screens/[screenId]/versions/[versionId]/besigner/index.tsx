@@ -18,6 +18,7 @@
 import {
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
+  useAglynCanvasHistoryControls,
   useBesignerAppContext,
   withBesignerContext,
   type WorkspaceEditorComponentProps,
@@ -28,6 +29,7 @@ import { useAglynCanvasElementsNormalized } from '@aglyn/core-feature-renderer'
 import {
   HAS_BROWSER,
   ICON_VARIANT_APP_SETTINGS,
+  ICON_VARIANT_CLOSE,
   ICON_VARIANT_LEFT,
   ICON_VARIANT_MODIFY_ADD,
   ICON_VARIANT_MODIFY_SAVE,
@@ -85,6 +87,7 @@ function Besigner(props) {
   const saveAvailable = true
   const [screenDialog, setScreenDialog] = useState(false)
   const handleAddElementClick = useAddElementDrawerCallback()
+  const [undo, redo, canUndo, canRedo] = useAglynCanvasHistoryControls()
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, { screenId, versionId })
   const normalized = useAglynCanvasElementsNormalized()
   const [{ status, data: screen, error }, updateScreen] = useScreenVersion<any>(
@@ -184,11 +187,22 @@ function Besigner(props) {
                 icon: {
                   path: ICON_VARIANT_MODIFY_ADD.path,
                 },
-                children: 'Add new element',
+                children: 'New element',
                 onClick: handleAddElementClick,
               },
               {
-                id: 'center-nav-file-screens',
+                type: 'divider',
+              },
+              {
+                id: 'center-nav-file-close',
+                icon: {
+                  path: ICON_VARIANT_CLOSE.path,
+                },
+                children: 'Close screen',
+                href: detailUrl,
+              },
+              {
+                id: 'center-nav-file-save',
                 icon: {
                   path: saveAvailable
                     ? ICON_VARIANT_MODIFY_SAVE.path
@@ -204,6 +218,24 @@ function Besigner(props) {
             children: 'Edit',
             // href: '/besigner',
             items: [
+              {
+                id: 'center-nav-edit-undo',
+                children: 'Undo',
+                onClick: () => undo(),
+                disabled: !canUndo,
+                ListItemTextProps: { inset: true },
+              },
+              {
+                id: 'center-nav-edit-redo',
+                children: 'Redo',
+                inset: true,
+                onClick: () => redo(),
+                disabled: !canRedo,
+                ListItemTextProps: { inset: true },
+              },
+              {
+                type: 'divider',
+              },
               {
                 id: 'center-nav-edit-properties',
                 icon: {

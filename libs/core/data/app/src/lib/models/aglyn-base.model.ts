@@ -34,7 +34,7 @@ import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { getStaticField } from '@aglyn/shared-util-tools'
 
 const TAG = 'AglynBaseModel'
-const NS = 'com.aglyn.core.data.framework.model.base'
+const NS = 'com.aglyn.besigner.data.model.base'
 
 export class AglynBaseModel<
   O extends AglynBaseModelOptions = AglynBaseModelOptions,

@@ -53,7 +53,7 @@ import { _isArr } from '@aglyn/shared-util-guards'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
 const TAG = 'AglynComponents'
-const NS = 'com.aglyn.core.data.framework.controller.components'
+const NS = 'com.aglyn.core.data.controller.components'
 
 export class AglynComponentsController
   extends AglynModuleModel<AglynComponentsControllerOptions>

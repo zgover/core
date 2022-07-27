@@ -53,7 +53,7 @@ import type {
 } from './aglyn-besigner.types'
 
 const TAG = 'AglynBesigner'
-const NS = 'com.aglyn.core.data.besigner.controller.besigner'
+const NS = 'com.aglyn.besigner.data.controller.besigner'
 
 export class AglynBesignerController
   extends AglynModuleModel<AglynBesignerControllerOptions>

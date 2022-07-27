@@ -27,7 +27,7 @@ import { getStaticField } from '@aglyn/shared-util-tools'
 import { AglynBaseModel } from './aglyn-base.model'
 
 const TAG = 'AglynModule'
-const NS = 'com.aglyn.core.data.framework.model.module'
+const NS = 'com.aglyn.core.data.model.module'
 
 export abstract class AglynModuleModel<
     O extends AglynModuleModelOptions = AglynModuleModelOptions,

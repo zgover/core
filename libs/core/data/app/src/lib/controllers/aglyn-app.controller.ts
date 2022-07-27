@@ -62,7 +62,7 @@ const BaseApp = AglynDependencyManager(
 ) as unknown as ReturnType<BaseAppT>
 
 const TAG = 'AglynApp'
-const NS = 'com.aglyn.core.data.framework.controller.app'
+const NS = 'com.aglyn.core.data.controller.app'
 
 export class AglynAppController<
     Options extends AglynAppOptions = AglynAppOptions,

@@ -24,7 +24,9 @@ import {
   Divider,
   type DividerProps,
   ListItemIcon,
+  type ListItemIconProps as MuiListItemIconProps,
   ListItemText,
+  type ListItemTextProps as MuiListItemTextProps,
   ListSubheader as MuiListSubheader,
   type ListSubheaderProps as MuiListSubheaderProps,
   Menu as MuiMenu,
@@ -32,6 +34,7 @@ import {
   type MenuItemProps as MuiMenuItemProps,
   type MenuProps as MuiMenuProps,
   Typography,
+  type TypographyProps as MuiTypographyProps,
 } from '@mui/material'
 import {
   Children,
@@ -56,9 +59,13 @@ type ItemTypeProps = MuiMenuItemProps & {
   type?: 'item'
   icon?: MdiIconProps
   endIcon?: MdiIconProps
+  ListItemTextProps?: Partial<MuiListItemTextProps>
+  ListItemIconProps?: Partial<MuiListItemIconProps>
+  EndIconTypographyProps?: Partial<MuiTypographyProps>
 }
 type DividerTypeProps = DividerProps & { type: 'divider' }
 type SubheaderTypeProps = MuiListSubheaderProps & { type: 'subheader' }
+
 export type MenuItemProps<T extends ItemTypes = ItemTypes> =
   JSX.OverrideableComponentProps &
     Conditional<
@@ -203,7 +210,20 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
         {...menuProps}
       >
         {items.map(
-          ({ onClick, icon, children, type, endIcon, ...item }: any, i) => {
+          (
+            {
+              onClick,
+              children,
+              type,
+              icon,
+              endIcon,
+              ListItemTextProps,
+              ListItemIconProps,
+              EndIconTypographyProps,
+              ...item
+            }: any,
+            i,
+          ) => {
             const key = item.key ?? item.id ?? i
 
             switch (type) {
@@ -236,7 +256,7 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                     {...item}
                   >
                     {!icon?.path || !icon ? null : (
-                      <ListItemIcon>
+                      <ListItemIcon {...ListItemIconProps}>
                         {!icon?.path ? (
                           icon
                         ) : (
@@ -244,10 +264,17 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                         )}
                       </ListItemIcon>
                     )}
-                    <ListItemText>{children}</ListItemText>
+
+                    <ListItemText {...ListItemTextProps}>
+                      {children}
+                    </ListItemText>
 
                     {!endIcon?.path || !endIcon ? null : (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        {...EndIconTypographyProps}
+                      >
                         {!endIcon?.path ? (
                           endIcon
                         ) : (

@@ -63,7 +63,7 @@ import { map } from 'rxjs/operators'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
 const TAG = 'AglynCanvas'
-const NS = 'com.aglyn.core.data.framework.controller.canvas'
+const NS = 'com.aglyn.core.data.controller.canvas'
 
 export class AglynCanvasController
   extends AglynModuleModel<AglynCanvasControllerOptions>

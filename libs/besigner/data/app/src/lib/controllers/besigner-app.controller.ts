@@ -26,7 +26,7 @@ import type {
 } from './besigner-app.types'
 
 const TAG = 'BesignerApp'
-const NS = 'com.aglyn.core.data.besigner.controller.app'
+const NS = 'com.aglyn.besigner.data.controller.app'
 
 export class BesignerAppController
   extends AglynAppController<BesignerAppOptions>

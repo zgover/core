@@ -81,11 +81,11 @@ const ComponentsGridListComponent = forwardRef<any, ComponentsGridListProps>(
     }, [handleColumnChange, columns, maxColumns])
 
     const renderItemContent = useCallback(
-      (props: AglynNodeTemplateSchema) => (
+      ({ data, ...props }: AglynNodeTemplateSchema) => (
         <ElementCardComponent
           onActionClick={handleItemClick}
           {...(props as any)}
-          item={props.item as any}
+          item={data as any}
         />
       ),
       [handleItemClick],

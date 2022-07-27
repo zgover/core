@@ -42,7 +42,7 @@ import { createDomain as createEffectorDomain } from 'effector'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
 const TAG = 'AglynContexts'
-const NS = 'com.aglyn.core.data.framework.controller.contexts'
+const NS = 'com.aglyn.core.data.controller.contexts'
 
 export class AglynContextsController
   extends AglynModuleModel<AglynContextsControllerOptions>

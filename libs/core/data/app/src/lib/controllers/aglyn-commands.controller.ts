@@ -38,7 +38,7 @@ import { _isFnT } from '@aglyn/shared-util-guards'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
 const TAG = 'AglynCommands'
-const NS = 'com.aglyn.core.data.framework.controller.commands'
+const NS = 'com.aglyn.core.data.controller.commands'
 
 export class AglynCommandsController
   extends AglynModuleModel<AglynCommandsControllerOptions>

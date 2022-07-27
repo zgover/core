@@ -30,7 +30,7 @@ import { getStaticField } from '@aglyn/shared-util-tools'
 import { AglynModuleModel } from './aglyn-module.model'
 
 const TAG = 'AglynExtension'
-const NS = 'com.aglyn.core.data.framework.model.extension'
+const NS = 'com.aglyn.core.data.model.extension'
 
 export abstract class AglynExtension<
     T = any,
