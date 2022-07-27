@@ -36,11 +36,10 @@ import type {
   CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import type { IAglynAppController } from './app.types'
-import {
+import type {
   AglynNodesDenormalized,
   AglynNodesNormalized,
 } from './components.types'
-import type { ContextEvent } from './contexts.types'
 import type {
   AglynModuleModelOptions,
   AglynModuleModelT,
@@ -52,18 +51,6 @@ export type CanvasContext = {
   past: AglynNodesDenormalized[]
   present: AglynNodesDenormalized
   readonly normalized?: AglynNodesNormalized
-}
-
-export interface ElementsDataStoreApi {
-  redo: ContextEvent<any>
-  undo: ContextEvent<any>
-  addElement: ContextEvent<CanvasAddElementPayload>
-  deleteElement: ContextEvent<CanvasDeleteElementPayload>
-  duplicateElement: ContextEvent<CanvasDuplicateElementPayload>
-  moveElement: ContextEvent<CanvasMoveElementPayload>
-  setElement: ContextEvent<CanvasSetElementPayload>
-  setElements: ContextEvent<CanvasSetElementsPayload>
-  updateElement: ContextEvent<CanvasUpdateElementPayload>
 }
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {

@@ -16,15 +16,31 @@
  */
 
 import type {
+  CanvasAddElementPayload,
   CanvasContext,
-  ElementsDataStoreApi,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
+  CanvasMoveElementPayload,
+  CanvasSetElementPayload,
+  CanvasSetElementsPayload,
+  CanvasUpdateElementPayload,
+  ContextEvent,
 } from '@aglyn/core-data-foundation'
 import { createContext, useContext } from 'react'
 
 export type UseElementsContextType = () => ElementsContextType
 
-export interface ElementsContextType extends ElementsDataStoreApi {
+export interface ElementsContextType {
   elements: CanvasContext['present']
+  redo: ContextEvent<any>
+  undo: ContextEvent<any>
+  addElement: ContextEvent<CanvasAddElementPayload>
+  deleteElement: ContextEvent<CanvasDeleteElementPayload>
+  duplicateElement: ContextEvent<CanvasDuplicateElementPayload>
+  moveElement: ContextEvent<CanvasMoveElementPayload>
+  setElement: ContextEvent<CanvasSetElementPayload>
+  setElements: ContextEvent<CanvasSetElementsPayload>
+  updateElement: ContextEvent<CanvasUpdateElementPayload>
 }
 
 export const ElementsContext = createContext<ElementsContextType>({

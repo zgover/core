@@ -35,8 +35,8 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
+import useComponentAttributes from 'libs/besigner/feature/app/src/lib/hooks/use-component-attributes'
 import { type ChangeEvent, forwardRef, useCallback } from 'react'
-import useComponentFormSchema from '../hooks/use-component-form-schema'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 /**
@@ -108,7 +108,7 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const elemProps = useAglynElementData($id, 'props')
-    const formSchema = useComponentFormSchema({ componentId, bundleId })
+    const attributes = useComponentAttributes({ componentId, bundleId })
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback(
@@ -129,6 +129,8 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
       [deleteElementCallback],
     )
 
+    console.log('attributes', attributes)
+
     return (
       <>
         <NoSsr>
@@ -138,7 +140,7 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
             onCancel={handleFormCancel}
             onSubmit={handleElementSave}
             initialValues={elemProps}
-            schema={formSchema}
+            schema={{ fields: attributes }}
             {...rest}
           >
             {({ formFields, schema, ...rest }) => (

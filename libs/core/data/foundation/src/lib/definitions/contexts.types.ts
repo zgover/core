@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 
-import { type KeyValueMap } from '@aglyn/shared-data-types'
-import {
-  type Domain as EffectorDomain,
-  type Effect as EffectorEffect,
-  type Event as EffectorEvent,
-  type Store as EffectorStore,
+import type { KeyValueMap } from '@aglyn/shared-data-types'
+import type {
+  Domain as EffectorDomain,
+  Effect as EffectorEffect,
+  Event as EffectorEvent,
+  Store as EffectorStore,
 } from 'effector'
-import {
-  type ContextsCreateEffectPayload,
-  type ContextsCreateEventPayload,
-  type ContextsCreateStorePayload,
-  type ContextsDeleteStorePayload,
-  type ContextsGetStoreApiPayload,
-  type ContextsGetStorePayload,
-  type ContextsSetStorePayload,
+import type {
+  ContextsCreateEffectPayload,
+  ContextsCreateEventPayload,
+  ContextsCreateStorePayload,
+  ContextsDeleteStorePayload,
+  ContextsGetStoreApiPayload,
+  ContextsGetStorePayload,
+  ContextsSetStorePayload,
 } from '../constants/emitter'
-import { type IAglynAppController } from './app.types'
-import {
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type IAglynModuleModel,
+import type { IAglynAppController } from './app.types'
+import type {
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  IAglynModuleModel,
 } from './module.types'
 
 export type ContextStoreUid = string

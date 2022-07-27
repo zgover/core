@@ -42,25 +42,23 @@ export const _INTERNAL_COMPONENTS_: Map<AppUUN, IAglynComponentsController> =
   new Map()
 export const ELEMENT_ID_LENGTH = 10
 
-export const DEFAULT_PROPS_FORM_SCHEMA: AglynComponentPropsFormSchema = {
-  fields: [
-    // {
-    //   name: 'iconId',
-    //   component: FieldComponentType.ICON_SELECT,
-    //   label: 'Icon',
-    // },
-    // {
-    //   name: 'displayName',
-    //   component: FieldComponentType.TEXT_FIELD,
-    //   label: 'Display name',
-    //   // variant: 'outlined',
-    // },
-    {
-      name: 'children',
-      description: 'The content of the component.',
-      component: FieldComponentType.TEXT_FIELD,
-      label: 'Content',
-      size: 'small',
-    },
-  ],
-}
+export const DEFAULT_ATTRIBUTES_SCHEMA: AglynComponentPropsFormSchema = [
+  // {
+  //   name: 'iconId',
+  //   component: FieldComponentType.ICON_SELECT,
+  //   label: 'Icon',
+  // },
+  // {
+  //   name: 'displayName',
+  //   component: FieldComponentType.TEXT_FIELD,
+  //   label: 'Display name',
+  //   // variant: 'outlined',
+  // },
+  {
+    name: 'children',
+    description: 'The content of the component.',
+    component: FieldComponentType.TEXT_FIELD,
+    label: 'Content',
+    size: 'small',
+  },
+]

@@ -16,11 +16,11 @@
  */
 
 import {
-  AglynFieldSchema,
+  AglynAttributeSchema,
   FieldComponentType,
 } from '@aglyn/core-data-foundation'
 
-export const FIELD_COLOR: AglynFieldSchema = {
+export const FIELD_COLOR: AglynAttributeSchema = {
   name: 'color',
   description:
     'The color of the component. It supports those theme colors that make sense for this component.',
@@ -37,7 +37,7 @@ export const FIELD_COLOR: AglynFieldSchema = {
     { value: 'warning', label: 'Warning' },
   ],
 }
-export const FIELD_COLOR_ALT1: AglynFieldSchema = {
+export const FIELD_COLOR_ALT1: AglynAttributeSchema = {
   ...FIELD_COLOR,
   options: [
     { value: '', label: 'Default' },
@@ -48,26 +48,26 @@ export const FIELD_COLOR_ALT1: AglynFieldSchema = {
     { value: 'secondary', label: 'Secondary' },
   ],
 }
-export const FIELD_DISABLED: AglynFieldSchema = {
+export const FIELD_DISABLED: AglynAttributeSchema = {
   name: 'disabled',
   description: 'If true, the component is disabled.',
   component: FieldComponentType.SWITCH,
   label: 'Disabled?',
 }
-export const FIELD_FULL_WIDTH: AglynFieldSchema = {
+export const FIELD_FULL_WIDTH: AglynAttributeSchema = {
   name: 'fullWidth',
   description:
     'If true, the button will take up the full width of its container.',
   component: FieldComponentType.SWITCH,
   label: 'Full width?',
 }
-export const FIELD_DISABLE_GUTTERS: AglynFieldSchema = {
+export const FIELD_DISABLE_GUTTERS: AglynAttributeSchema = {
   name: 'disableGutters',
   description: 'If true, disables gutter padding.',
   component: FieldComponentType.SWITCH,
   label: 'Disable gutters?',
 }
-export const FIELD_SIZE: AglynFieldSchema = {
+export const FIELD_SIZE: AglynAttributeSchema = {
   name: 'size',
   description:
     'The size of the component. small is equivalent to the dense button styling.',
@@ -81,7 +81,7 @@ export const FIELD_SIZE: AglynFieldSchema = {
     { value: 'large', label: 'Large' },
   ],
 }
-export const FIELD_POSITION: AglynFieldSchema = {
+export const FIELD_POSITION: AglynAttributeSchema = {
   name: 'position',
   description:
     'The positioning type. The behavior of the different options is described in the MDN web docs. Note: sticky is not universally supported and will fall back to static when unavailable.',

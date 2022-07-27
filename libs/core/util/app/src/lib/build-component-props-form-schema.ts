@@ -16,19 +16,17 @@
  */
 
 import type { AglynComponentPropsFormSchema } from '@aglyn/core-data-foundation'
-import { DEFAULT_PROPS_FORM_SCHEMA } from '@aglyn/core-data-foundation'
-import { _isArr } from '@aglyn/shared-util-guards'
-import { copy } from '@aglyn/shared-util-tools'
-import mergeWith from 'lodash-es/mergeWith'
+import { DEFAULT_ATTRIBUTES_SCHEMA } from '@aglyn/core-data-foundation'
 
 export const buildComponentPropsFormSchema = (
   schema?: AglynComponentPropsFormSchema,
-  defaults: AglynComponentPropsFormSchema = DEFAULT_PROPS_FORM_SCHEMA,
+  defaults: AglynComponentPropsFormSchema = DEFAULT_ATTRIBUTES_SCHEMA,
 ): AglynComponentPropsFormSchema => {
   // const _defaults =
-  return mergeWith(copy(schema), copy(defaults), (target, source) => {
-    if (_isArr(target)) return target.concat(source)
-  })
+  return [
+    ...(Array.isArray(schema) ? schema : []),
+    ...(Array.isArray(defaults) ? defaults : []),
+  ]
 }
 
 export default buildComponentPropsFormSchema

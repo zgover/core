@@ -85,7 +85,7 @@ export type ComponentsLinealOrder<
 ]
 
 export type AglynComponentPropsFormSchema<P = any> =
-  AglynComponentSchema<P>['formSchema']
+  AglynComponentSchema<P>['attributes']
 export type AglynComponentHierarchy<P = any> =
   AglynComponentSchema<P>['hierarchy']
 export type AglynComponentHierarchyFlags<P = any> =
@@ -193,10 +193,9 @@ export interface AglynComponentSchema<P = any> {
 
   /**
    * Attribute fields to modify the contextual properties
+   * New version
    */
-  formSchema?: {
-    fields: AglynFieldSchema[]
-  }
+  attributes?: AglynAttributeSchema[]
 
   /**
    * Feature flags
@@ -238,21 +237,6 @@ export interface AglynComponentSchema<P = any> {
   templates?: AglynNodeTemplateSchema[]
 }
 
-export interface AglynFieldSchema extends Dictionary<any> {
-  name: string
-  component: string | FieldComponentType
-  validate?: Validator[]
-  condition?: ConditionDefinition | ConditionDefinition[]
-  initializeOnMount?: boolean
-  dataType?: DataType
-  initialValue?: any
-  clearedValue?: any
-  clearOnUnmount?: boolean
-  actions?: FieldActions
-  resolveProps?: ResolvePropsFunction
-  description?: string
-}
-
 type NodeTemplateData = AglynNodeSchema & {
   $id?: NodeId
   elements?: NodeTemplateData
@@ -289,6 +273,21 @@ export interface AglynNodeSchema2 {
   props?: AnyObj
   sx?: JSX.SxProps
   children?: AglynNodeSchema2[]
+}
+
+export interface AglynAttributeSchema extends Dictionary<any> {
+  name: string
+  dataType?: DataType
+  component: string | FieldComponentType
+  validate?: Validator[]
+  condition?: ConditionDefinition | ConditionDefinition[]
+  initializeOnMount?: boolean
+  initialValue?: any
+  clearedValue?: any
+  clearOnUnmount?: boolean
+  actions?: FieldActions
+  resolveProps?: ResolvePropsFunction
+  description?: string
 }
 
 export interface AglynComponentBundle {

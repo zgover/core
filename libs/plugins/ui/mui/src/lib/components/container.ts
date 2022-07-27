@@ -36,39 +36,37 @@ export const schema: AglynComponentSchema<ContainerProps> = {
     path: mdiViewArrayOutline.path,
     sx: { color: '#2196f3' },
   },
-  formSchema: {
-    fields: [
-      {
-        name: 'fixed',
-        description:
-          "If true, set the max-width to match the min-width of the current breakpoint. This is useful if you'd prefer to design for a fixed set of sizes instead of trying to accommodate a fully fluid viewport. It's fluid by default.",
-        component: FieldComponentType.SWITCH,
-        label: 'Fixed Breakpoints',
-      },
-      {
-        name: 'disableGutters',
-        description: 'If true, the left and right padding is removed.',
-        component: FieldComponentType.SWITCH,
-        label: 'Disable Gutters?',
-      },
-      {
-        name: 'maxWidth',
-        description:
-          'Determine the max-width of the container. The container width grows with the size of the screen. Set to `false` to disable `maxWidth`',
-        component: FieldComponentType.SELECT,
-        label: 'Max Width',
-        options: [
-          { value: '', label: 'Default' },
-          { value: 'xs', label: 'XS - Mobile' },
-          { value: 'sm', label: 'SM - Tablet' },
-          { value: 'md', label: 'MD - Laptop' },
-          { value: 'lg', label: 'LG - Desktop' },
-          { value: 'xl', label: 'XL - Widescreen' },
-          { value: false, label: 'Fluid Responsive' },
-        ],
-      },
-    ],
-  },
+  attributes: [
+    {
+      name: 'fixed',
+      description:
+        "If true, set the max-width to match the min-width of the current breakpoint. This is useful if you'd prefer to design for a fixed set of sizes instead of trying to accommodate a fully fluid viewport. It's fluid by default.",
+      component: FieldComponentType.SWITCH,
+      label: 'Fixed Breakpoints',
+    },
+    {
+      name: 'disableGutters',
+      description: 'If true, the left and right padding is removed.',
+      component: FieldComponentType.SWITCH,
+      label: 'Disable Gutters?',
+    },
+    {
+      name: 'maxWidth',
+      description:
+        'Determine the max-width of the container. The container width grows with the size of the screen. Set to `false` to disable `maxWidth`',
+      component: FieldComponentType.SELECT,
+      label: 'Max Width',
+      options: [
+        { value: '', label: 'Default' },
+        { value: 'xs', label: 'XS - Mobile' },
+        { value: 'sm', label: 'SM - Tablet' },
+        { value: 'md', label: 'MD - Laptop' },
+        { value: 'lg', label: 'LG - Desktop' },
+        { value: 'xl', label: 'XL - Widescreen' },
+        { value: false, label: 'Fluid Responsive' },
+      ],
+    },
+  ],
   templates: [
     {
       id: generateTemplateId(ID),

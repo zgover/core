@@ -37,22 +37,20 @@ export const schema: AglynComponentSchema<ToolbarProps> = {
     path: mdiBorderInside.path,
     sx: { color: '#2196f3' },
   },
-  formSchema: {
-    fields: [
-      FIELD_DISABLE_GUTTERS,
-      {
-        name: 'variant',
-        description: 'The variant to use.',
-        component: FieldComponentType.SELECT,
-        label: 'Variant',
-        options: [
-          { value: '', label: 'Default' },
-          { value: 'dense', label: 'Dense' },
-          { value: 'regular', label: 'Regular' },
-        ],
-      },
-    ],
-  },
+  attributes: [
+    FIELD_DISABLE_GUTTERS,
+    {
+      name: 'variant',
+      description: 'The variant to use.',
+      component: FieldComponentType.SELECT,
+      label: 'Variant',
+      options: [
+        { value: '', label: 'Default' },
+        { value: 'dense', label: 'Dense' },
+        { value: 'regular', label: 'Regular' },
+      ],
+    },
+  ],
   templates: [
     {
       id: generateTemplateId(ID),

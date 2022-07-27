@@ -31,13 +31,15 @@ export type UseAglynElementData<
   AglynNodeDenormalized<P>
 >
 
-export function useAglynElementData<P>($id: NodeId): AglynNodeDenormalized<P>
+export function useAglynElementData<P = JSX.AnyProps>(
+  $id: NodeId,
+): AglynNodeDenormalized<P>
 export function useAglynElementData<
-  P,
+  P = JSX.AnyProps,
   K extends keyof AglynNodeDenormalized<P> = null,
 >($id: NodeId, property: K, defaultValue?: any): AglynNodeDenormalized<P>[K]
 export function useAglynElementData<
-  P,
+  P = JSX.AnyProps,
   K extends keyof AglynNodeDenormalized<P> = null,
 >($id: NodeId, property?: K, defaultValue?: any): UseAglynElementData<P, K> {
   const app = useAglynAppContext()

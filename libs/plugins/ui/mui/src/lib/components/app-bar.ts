@@ -37,9 +37,7 @@ export const schema: AglynComponentSchema<AppBarProps> = {
     path: mdiPageLayoutHeader.path,
     sx: { color: '#2196f3' },
   },
-  formSchema: {
-    fields: [FIELD_COLOR_ALT1, FIELD_POSITION],
-  },
+  attributes: [FIELD_COLOR_ALT1, FIELD_POSITION],
   templates: [
     {
       id: generateTemplateId(ID),

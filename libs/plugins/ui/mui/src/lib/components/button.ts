@@ -42,26 +42,24 @@ export const schema: AglynComponentSchema<ButtonProps> = {
     path: mdiGestureTapButton.path,
     sx: { color: '#2196f3' },
   },
-  formSchema: {
-    fields: [
-      FIELD_COLOR,
-      FIELD_DISABLED,
-      FIELD_FULL_WIDTH,
-      FIELD_SIZE,
-      {
-        name: 'variant',
-        description: 'The variant to use.',
-        component: FieldComponentType.SELECT,
-        label: 'Variant',
-        options: [
-          { value: '', label: 'Default' },
-          { value: 'text', label: 'Text' },
-          { value: 'outlined', label: 'Outlined' },
-          { value: 'contained', label: 'Contained' },
-        ],
-      },
-    ],
-  },
+  attributes: [
+    FIELD_COLOR,
+    FIELD_DISABLED,
+    FIELD_FULL_WIDTH,
+    FIELD_SIZE,
+    {
+      name: 'variant',
+      description: 'The variant to use.',
+      component: FieldComponentType.SELECT,
+      label: 'Variant',
+      options: [
+        { value: '', label: 'Default' },
+        { value: 'text', label: 'Text' },
+        { value: 'outlined', label: 'Outlined' },
+        { value: 'contained', label: 'Contained' },
+      ],
+    },
+  ],
   templates: [
     {
       id: generateTemplateId(ID),

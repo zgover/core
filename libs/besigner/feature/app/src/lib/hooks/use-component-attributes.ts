@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
+import { getComponentSchema } from '@aglyn/core-data-app'
 import type {
   AglynComponentPropsFormSchema,
   BundleId,
   ComponentId,
 } from '@aglyn/core-data-foundation'
-import { useAglynComponentSchema } from '@aglyn/core-feature-renderer'
+import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { buildComponentPropsFormSchema } from '@aglyn/core-util-app'
 
 import { useMemo } from 'react'
@@ -32,16 +33,16 @@ export interface UseComponentFormSchemaOptions {
   bundleId?: BundleId
 }
 
-export const useComponentFormSchema = (
+export const useComponentAttributes = (
   opts: UseComponentFormSchemaOptions,
 ): UseComponentFormSchema => {
-  const { componentId, bundleId } = opts
-  const componentSchema = useAglynComponentSchema(componentId, bundleId)
-  const formSchema = componentSchema?.formSchema
+  const app = useAglynAppContext()
 
   return useMemo(() => {
-    return buildComponentPropsFormSchema(formSchema)
-  }, [formSchema])
+    const { componentId, bundleId } = opts
+    const componentSchema = getComponentSchema(app, { componentId, bundleId })
+    return buildComponentPropsFormSchema(componentSchema?.attributes)
+  }, [app, opts])
 }
 
-export default useComponentFormSchema
+export default useComponentAttributes

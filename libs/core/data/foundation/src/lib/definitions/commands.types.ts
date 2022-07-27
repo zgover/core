@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
-import { type Dictionary } from '@aglyn/shared-data-types'
-import { type EmitterFn } from '@aglyn/shared-util-emitter'
-import {
-  type CommandsRegisterListenerPayload,
-  type CommandsRemoveResolverPayload,
-  type CommandsSetResolverPayload,
-  type CommandsTriggerPayload,
-  type CommandsUnregisterListenerPayload,
+import type { Dictionary } from '@aglyn/shared-data-types'
+import type { EmitterFn } from '@aglyn/shared-util-emitter'
+import type {
+  CommandsRegisterListenerPayload,
+  CommandsRemoveResolverPayload,
+  CommandsSetResolverPayload,
+  CommandsTriggerPayload,
+  CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
-import { type OF_KIND, type OF_TYPE } from '../constants/symbol'
-import { type IAglynAppController } from './app.types'
-import {
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type IAglynModuleModel,
+import type { OF_KIND, OF_TYPE } from '../constants/symbol'
+import type { IAglynAppController } from './app.types'
+import type {
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  IAglynModuleModel,
 } from './module.types'
 
 export type CommandUId = string
