@@ -22,8 +22,8 @@ import {
   mdiArrowExpandHorizontal,
   mdiArrowLeft,
   mdiArrowRight,
-  mdiArrowUp,
   mdiArrowULeftTop,
+  mdiArrowUp,
   mdiBookVariant,
   mdiBookVariantMultiple,
   mdiCalendar,
@@ -84,7 +84,7 @@ export const ICON_VARIANT_COLLECTION = mdiBookVariantMultiple
 export const ICON_VARIANT_DATE = mdiCalendar
 export const ICON_VARIANT_DATE_TIME = mdiCalendarClock
 export const ICON_VARIANT_DOCUMENT = mdiBookVariant
-export const ICON_VARIANT_ENTITY_BLOCK = mdiCubeOutline
+export const ICON_VARIANT_COMPONENT = mdiCubeOutline
 export const ICON_VARIANT_IDENTIFIER = mdiIdentifier
 export const ICON_VARIANT_OBJECT = mdiCodeBracesBox
 export const ICON_VARIANT_PRIMARY_KEY = mdiKeyVariant

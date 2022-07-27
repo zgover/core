@@ -88,8 +88,7 @@ export type AglynComponentPropsFormSchema<P = any> =
   AglynComponentSchema<P>['attributes']
 export type AglynComponentHierarchy<P = any> =
   AglynComponentSchema<P>['hierarchy']
-export type AglynComponentHierarchyFlags<P = any> =
-  AglynComponentSchema<P>['hierarchy']
+export type AglynComponentFlags<P = any> = AglynComponentSchema<P>['flags']
 export type AglynComponentsBundleMetadata = AglynComponentBundle
 export type AglynComponentsBundleSchema = Omit<
   AglynComponentBundle,
@@ -237,14 +236,16 @@ export interface AglynComponentSchema<P = any> {
   templates?: AglynNodeTemplateSchema[]
 }
 
-export type NodeTemplateData = AglynNodeSchema & {
+export type NodeTemplateData = Omit<AglynNodeSchema, '$id' | 'elements'> & {
   $id?: NodeId
-  elements?: NodeTemplateData
+  elements?: NodeTemplateData[]
 }
 
 export type AglynNodeTemplateSchema = {
   id: TemplateId
   label: string
+  componentId?: ComponentId
+  bundleId?: BundleId
   description?: string
   icon?: MdiIconProps
   category?: string | ComponentCategory

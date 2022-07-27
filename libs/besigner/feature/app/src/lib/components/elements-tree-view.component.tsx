@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-import { DndDragType, DndDropType } from '@aglyn/besigner-data-app'
+import { DndDragType } from '@aglyn/besigner-data-app'
+import { getComponentSchema } from '@aglyn/core-data-app'
 import {
   CANVAS_ROOT_ELEMENT_ID,
   type NodeId,
 } from '@aglyn/core-data-foundation'
 import {
+  useAglynAppContext,
   useAglynCanvasElementHierarchy,
   useAglynElementData,
   useAglynElementLabel,
@@ -95,8 +97,23 @@ const DraggableTreeItemComponent = forwardRef<
   ElementsTreeItemComponentProps
 >((props, ref) => {
   const { $id, ...rest } = props
-  const [, dragHandle, dragPreview] = useLeafDrag($id, DndDragType.TREE)
-  const [, dropRef] = useLeafDrop($id, DndDropType.INSIDE)
+  const app = useAglynAppContext()
+  const componentId = useAglynElementData($id, 'componentId')
+  const bundleId = useAglynElementData($id, 'bundleId')
+  const trail = useAglynCanvasElementHierarchy($id)
+  const dndData = useMemo(() => {
+    const componentSchema = getComponentSchema(app, { componentId, bundleId })
+    const hierarchy = componentSchema?.hierarchy
+    return {
+      $id,
+      componentId,
+      bundleId,
+      hierarchy,
+      trail,
+    }
+  }, [app, componentId, bundleId, $id, trail])
+  const [, dragHandle, dragPreview] = useLeafDrag(dndData, DndDragType.TREE)
+  const [, dropRef] = useLeafDrop(dndData)
   const elements = useAglynElementData($id, 'elements')
   const label = useAglynElementLabel($id)
   const setHovered = useAglynCanvasSetHovered()

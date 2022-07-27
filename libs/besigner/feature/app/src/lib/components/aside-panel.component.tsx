@@ -20,23 +20,24 @@ import {
   BesignerPanelTabFlag,
   DndDragType,
 } from '@aglyn/besigner-data-app'
-import { getBundle } from '@aglyn/core-data-app'
+import { getBundle, getComponentSchema } from '@aglyn/core-data-app'
 import type {
   AglynNodeTemplateSchema,
   NodeId,
 } from '@aglyn/core-data-foundation'
 import {
+  useAglynAppContext,
   useAglynComponentSchema,
   useAglynComponentsContext,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {
+  ICON_VARIANT_COMPONENT,
   ICON_VARIANT_ELEMENT_BROWSE,
   ICON_VARIANT_ELEMENT_DETAILS,
   ICON_VARIANT_ELEMENT_PROPERTIES,
   ICON_VARIANT_ELEMENT_STYLES,
   ICON_VARIANT_ELEMENT_TREE_VIEW,
-  ICON_VARIANT_ENTITY_BLOCK,
 } from '@aglyn/shared-data-enums'
 import {
   CardIconListItem,
@@ -63,6 +64,7 @@ import {
   Button,
   Grid,
   type ListProps,
+  Stack,
   Tab as MuiTab,
   Typography,
 } from '@mui/material'
@@ -230,16 +232,35 @@ const ElementInfo = function ElementInfo({ $id }: { $id: NodeId }) {
 }
 
 const defaultTabContent = (
-  <Typography variant="subtitle1" component="div" align="center">
-    No element selected...
-  </Typography>
+  <>
+    <Typography
+      color="textSecondary"
+      variant="overline"
+      component="div"
+      align="center"
+    >
+      <MdiIcon
+        sx={{ opacity: 0.3, fontSize: 80 }}
+        path={ICON_VARIANT_COMPONENT.path}
+      />
+      <div>{'Select an element'}</div>
+    </Typography>
+  </>
 )
 
 const withSelectedElement = (Component) => () => {
   const [selected] = useAglynCanvasSelected()
   const $id = selected?.$id
   return !$id ? (
-    <TabPanelInner sx={{ p: 2 }}>{defaultTabContent}</TabPanelInner>
+    <Stack
+      direction="column"
+      justifyContent="center"
+      height={1}
+      component={TabPanelInner}
+      sx={{ p: 2 }}
+    >
+      {defaultTabContent}
+    </Stack>
   ) : (
     <Component $id={$id} />
   )
@@ -278,38 +299,58 @@ type ComponentGridItemProps = CardIconListItemProps & {
 }
 const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
   (props, forwardRef) => {
-    const {
-      item: { icon, ...item },
-      ...rest
-    } = props
-    const [, dragHandle, dragPreview] = useLeafDrag(
-      item?.$id,
+    const { item, ...rest } = props
+    const icon = item?.icon
+    const app = useAglynAppContext()
+    const dndData = useMemo(() => {
+      const { $id, data, componentId, bundleId } = item
+      const componentSchema = getComponentSchema(app, { componentId, bundleId })
+      const hierarchy = componentSchema?.hierarchy
+      return {
+        $id,
+        data,
+        componentId,
+        bundleId,
+        hierarchy,
+      }
+    }, [item])
+    const [{ isDragging }, dragHandle, dragPreview] = useLeafDrag(
+      dndData,
       DndDragType.TEMPLATE,
-      item?.data,
     )
-    const ref = useForkedRefs(forwardRef, dragPreview, dragHandle)
+    const ref = useForkedRefs(forwardRef, dragPreview)
 
     return (
-      <CardIconListItem ref={ref} item={item} label={item.label} {...rest}>
-        {!icon?.path && icon ? (
-          (icon as any)
-        ) : (
-          <MdiIcon
-            color="quaternary"
-            {...icon}
-            path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
-            sx={mergeSxProps(
-              {
-                fontSize: { xs: `5ch`, sm: `4ch` },
-                padding: `0.15ch`,
-                color: 'quaternary.main',
-                overflow: 'visible',
-              },
-              icon?.sx,
-            )}
-          />
-        )}
-      </CardIconListItem>
+      <>
+        <CardIconListItem
+          ref={ref}
+          CardActionProps={{
+            ref: dragHandle,
+          }}
+          item={item}
+          label={item.label}
+          {...rest}
+        >
+          {!icon?.path && icon ? (
+            (icon as any)
+          ) : (
+            <MdiIcon
+              color="quaternary"
+              {...icon}
+              path={icon?.path || ICON_VARIANT_COMPONENT.path}
+              sx={mergeSxProps(
+                {
+                  fontSize: { xs: `5ch`, sm: `4ch` },
+                  padding: `0.15ch`,
+                  color: 'quaternary.main',
+                  overflow: 'visible',
+                },
+                icon?.sx,
+              )}
+            />
+          )}
+        </CardIconListItem>
+      </>
     )
   },
 )

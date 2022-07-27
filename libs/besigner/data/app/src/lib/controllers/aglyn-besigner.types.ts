@@ -19,12 +19,12 @@ import type {
   AglynComponentHierarchy,
   AglynModuleModelOptions,
   AglynModuleModelT,
+  AglynNodeHierarchy,
   BundleId,
   ComponentId,
   IAglynAppController,
   IAglynModuleModel,
   NodeId,
-  NodeTemplateData,
 } from '@aglyn/core-data-foundation'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { LogLevelString } from '@aglyn/shared-util-logger'
@@ -110,14 +110,14 @@ export type BesignerPanelItem = {
   toggled?: boolean
   tab?: BesignerPanelTabFlag
 }
-export type BesignerDndElementBaseData<T extends DndDragType | DndDropType> = {
-  $id: NodeId
-  type?: T
-  componentId?: ComponentId
-  bundleId?: BundleId
-  hierarchy?: AglynComponentHierarchy
-  data?: NodeTemplateData
-}
+export type BesignerDndElementBaseData<T extends DndDragType | DndDropType> =
+  JSX.AnyProps & {
+    $id: NodeId
+    componentId?: ComponentId
+    bundleId?: BundleId
+    trail?: AglynNodeHierarchy
+    hierarchy?: AglynComponentHierarchy
+  }
 
 export interface AglynBesignerControllerOptions
   extends AglynModuleModelOptions {

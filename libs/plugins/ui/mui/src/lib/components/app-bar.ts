@@ -53,7 +53,11 @@ export const schema: AglynComponentSchema<AppBarProps> = {
         props: {
           position: 'sticky',
         },
-        elements: [toolbarSchema.templates![0]!.data],
+        elements: [
+          {
+            ...toolbarSchema.templates![0]!.data,
+          },
+        ],
       },
     },
   ],

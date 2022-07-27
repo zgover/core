@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-import { DndDragType, DndDropType } from '@aglyn/besigner-data-app'
+import { DndDragType } from '@aglyn/besigner-data-app'
 import {
   LeafComponent,
   type LeafComponentProps,
+  useAglynCanvasElementHierarchy,
+  useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import { useForkedRefs } from '@aglyn/shared-ui-jsx'
@@ -27,6 +29,7 @@ import {
   forwardRef,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react'
 import { useRenderedCanvasElements } from '../contexts/rendered-canvas-elements'
@@ -41,8 +44,24 @@ export interface ElementLeafComponentProps extends LeafComponentProps {}
 const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
   (props, forwardRef) => {
     const { $id, leafComponent, ...rest } = props
-    const [, dragHandle, dragPreview] = useLeafDrag($id, DndDragType.CANVAS)
-    const [, dropRef] = useLeafDrop($id, DndDropType.INSIDE)
+    const componentId = useAglynElementData($id, 'componentId')
+    const bundleId = useAglynElementData($id, 'bundleId')
+    const componentSchema = useAglynComponentSchema(componentId, bundleId)
+    const hierarchy = componentSchema?.hierarchy
+    const trail = useAglynCanvasElementHierarchy($id)
+    const dndData = useMemo(
+      () => ({
+        $id,
+        componentId,
+        bundleId,
+        componentSchema,
+        hierarchy,
+        trail,
+      }),
+      [$id, componentId, bundleId, componentSchema, hierarchy, trail],
+    )
+    const [, dragHandle, dragPreview] = useLeafDrag(dndData, DndDragType.CANVAS)
+    const [, dropRef] = useLeafDrop(dndData)
     const [node, setNode] = useState<HTMLElement>()
     const { setElementRef, deleteElementRef } = useRenderedCanvasElements()
     const ref = useForkedRefs<HTMLElement>(
@@ -51,8 +70,6 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
       dropRef,
       setNode,
     )
-    const componentId = useAglynElementData($id, 'componentId')
-    const bundleId = useAglynElementData($id, 'bundleId')
     const isSelected = useAglynCanvasElementIsSelected($id)
     const setHovered = useAglynCanvasSetHovered()
     const setSelected = useAglynCanvasSetSelected()

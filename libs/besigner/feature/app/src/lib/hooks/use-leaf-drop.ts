@@ -16,20 +16,12 @@
  */
 
 import {
-  BesignerDraggableItem,
-  BesignerDroppableItem,
+  type BesignerDraggableItem,
+  type BesignerDroppableItem,
   DndDragType,
-  DndDropType,
 } from '@aglyn/besigner-data-app'
-import type { NodeId } from '@aglyn/core-data-foundation'
-import {
-  useAglynCanvasElementHierarchy,
-  useAglynComponentSchema,
-  useAglynElementData,
-} from '@aglyn/core-feature-renderer'
 import { confirmValidLinealRelationship } from '@aglyn/core-util-app'
 import isEqual from 'lodash-es/isEqual'
-import { useMemo } from 'react'
 import { type ConnectDropTarget, useDrop } from 'react-dnd'
 import { useAglynCanvasSetHovered } from './use-aglyn-canvas-hovered'
 import { useAglynDndSetOver } from './use-aglyn-dnd-over'
@@ -44,33 +36,17 @@ export type DropCollected = {
   isDragging?: boolean
 }
 
-export const useLeafDrop = (
-  $id: NodeId,
-  dropType?: DndDropType,
-  acceptType?: DndDragType,
-): [DropCollected, ConnectDropTarget] => {
-  const type = dropType ?? DndDropType.INSIDE
-  const accept = acceptType ?? Object.values(DndDragType)
-  const componentId = useAglynElementData($id, 'componentId')
-  const bundleId = useAglynElementData($id, 'bundleId')
-  const componentSchema = useAglynComponentSchema(componentId, bundleId)
-  const hierarchy = componentSchema?.hierarchy
+const defaultAccept = Object.values(DndDragType)
+
+export function useLeafDrop<T extends BesignerDroppableItem>(
+  data: T,
+  accept: DndDragType[] = defaultAccept,
+): [DropCollected, ConnectDropTarget] {
   const setHovered = useAglynCanvasSetHovered()
   const setDndOver = useAglynDndSetOver()
+  const dropItem: T = data
 
-  const trail = useAglynCanvasElementHierarchy($id)
-  const dropItem: BesignerDroppableItem = useMemo(
-    () => ({
-      $id,
-      type,
-      componentId,
-      bundleId,
-      hierarchy,
-    }),
-    [$id, type, componentId, bundleId, hierarchy],
-  )
-
-  return useDrop<BesignerDraggableItem, BesignerDroppableItem, DropCollected>(
+  return useDrop<BesignerDraggableItem, T, DropCollected>(
     () => ({
       options: {
         arePropsEqual: (props, otherProps) => {
@@ -80,6 +56,7 @@ export const useLeafDrop = (
       },
       accept: accept,
       canDrop: (dragItem, monitor) => {
+        const trail = Array.isArray(dragItem?.trail) ? dragItem?.trail : []
         const isOverDragItem = trail.indexOf(dragItem?.$id) >= 0
         const isOverSelf = monitor.isOver({ shallow: true })
         const [validRelationship] = confirmValidLinealRelationship({
@@ -106,6 +83,7 @@ export const useLeafDrop = (
         const dragItem = monitor.getItem()
         const isOver = monitor.isOver({ shallow: false })
         const isOverSelf = monitor.isOver({ shallow: true })
+        const trail = Array.isArray(dragItem?.trail) ? dragItem?.trail : []
         const isOverChildren = isOver && !isOverSelf
         const isOverDragItem = trail.indexOf(dragItem?.$id) >= 0
 
@@ -118,7 +96,7 @@ export const useLeafDrop = (
         }
       },
     }),
-    [dropItem, trail, setDndOver],
+    [dropItem, accept, setDndOver],
   )
 }
 export default useLeafDrop

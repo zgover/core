@@ -16,7 +16,7 @@
  */
 
 import {
-  type AglynComponentHierarchyFlags,
+  type AglynComponentHierarchy,
   type BundleId,
   type ComponentId,
   ComponentsLinealDirectiveFlag,
@@ -100,12 +100,12 @@ export interface ConfirmValidLinealRelationshipOptions {
   item: {
     componentId?: ComponentId
     bundleId?: ComponentId
-    hierarchy?: AglynComponentHierarchyFlags
+    hierarchy?: AglynComponentHierarchy
   }
   parent: {
     componentId?: ComponentId
     bundleId?: ComponentId
-    hierarchy?: AglynComponentHierarchyFlags
+    hierarchy?: AglynComponentHierarchy
   }
 }
 

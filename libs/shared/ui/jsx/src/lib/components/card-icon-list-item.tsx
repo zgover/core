@@ -23,6 +23,7 @@ import {
   Box,
   Card,
   CardActionArea,
+  CardActionAreaProps as MuiCardActionAreaProps,
   type CardProps as MuiCardProps,
   Typography,
 } from '@mui/material'
@@ -48,6 +49,7 @@ export interface CardIconListItemProps
   onActionClick?: {
     bivarianceHack<T>(event: MouseEvent<T>, selection: unknown): void
   }['bivarianceHack']
+  CardActionProps?: Partial<MuiCardActionAreaProps>
 }
 
 export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
@@ -60,6 +62,7 @@ export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
       label,
       onActionClick,
       sx,
+      CardActionProps,
       ...rest
     } = props
     const isSelected = Boolean(selected)
@@ -93,6 +96,7 @@ export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
             position: 'relative',
             paddingTop: `${(3 / 4) * 100}%`, // 16:9
           }}
+          {...CardActionProps}
         >
           <Box
             className={cardClasses.wrapper}
