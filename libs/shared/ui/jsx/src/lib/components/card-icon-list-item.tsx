@@ -21,6 +21,7 @@ import {
 } from '@aglyn/shared-ui-theme'
 import {
   Box,
+  BoxProps as MuiBoxProps,
   Card,
   CardActionArea,
   CardActionAreaProps as MuiCardActionAreaProps,
@@ -50,6 +51,8 @@ export interface CardIconListItemProps
     bivarianceHack<T>(event: MouseEvent<T>, selection: unknown): void
   }['bivarianceHack']
   CardActionProps?: Partial<MuiCardActionAreaProps>
+  WrapperBoxProps?: Partial<MuiBoxProps>
+  ContentBoxProps?: Partial<MuiBoxProps>
 }
 
 export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
@@ -63,6 +66,8 @@ export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
       onActionClick,
       sx,
       CardActionProps,
+      WrapperBoxProps,
+      ContentBoxProps,
       ...rest
     } = props
     const isSelected = Boolean(selected)
@@ -107,6 +112,7 @@ export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
               width: '100%',
               height: '100%',
             }}
+            {...WrapperBoxProps}
           >
             <Box
               className={cardClasses.content}
@@ -120,6 +126,7 @@ export const CardIconListItem = forwardRef<any, CardIconListItemProps>(
                 justifyContent: 'space-evenly',
                 padding: 0.5,
               }}
+              {...ContentBoxProps}
             >
               {typeof children === 'function'
                 ? children({ item, selected: isSelected })

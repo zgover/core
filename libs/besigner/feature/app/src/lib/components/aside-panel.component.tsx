@@ -318,14 +318,14 @@ const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
       dndData,
       DndDragType.TEMPLATE,
     )
-    const ref = useForkedRefs(forwardRef, dragPreview)
+    const ref = useForkedRefs(forwardRef, dragHandle)
 
     return (
       <>
         <CardIconListItem
           ref={ref}
-          CardActionProps={{
-            ref: dragHandle,
+          ContentBoxProps={{
+            ref: dragPreview,
           }}
           item={item}
           label={item.label}
