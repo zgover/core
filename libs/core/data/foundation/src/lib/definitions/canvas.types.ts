@@ -36,10 +36,7 @@ import type {
   CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import type { IAglynAppController } from './app.types'
-import type {
-  AglynNodesDenormalized,
-  AglynNodesNormalized,
-} from './components.types'
+import type { AglynNodesById, AglynNodesList } from './components.types'
 import type {
   AglynModuleModelOptions,
   AglynModuleModelT,
@@ -47,30 +44,30 @@ import type {
 } from './module.types'
 
 export type CanvasContext = {
-  future: AglynNodesDenormalized[]
-  past: AglynNodesDenormalized[]
-  present: AglynNodesDenormalized
-  readonly normalized?: AglynNodesNormalized
+  future: AglynNodesById[]
+  past: AglynNodesById[]
+  present: AglynNodesById
+  readonly denormalized?: AglynNodesList
 }
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
   defaults?: {
-    present?: AglynNodesNormalized
+    present?: AglynNodesList
   }
 }
 
 export interface IAglynCanvasController
   extends IAglynModuleModel<AglynCanvasControllerOptions> {
   readonly __store__: {
-    [K in keyof CanvasContext]: K extends 'normalized'
+    [K in keyof CanvasContext]: K extends 'denormalized'
       ? Observable<CanvasContext[K]>
       : BehaviorSubject<CanvasContext[K]>
   }
   readonly pastElements: this['__store__']['past']
   readonly futureElements: this['__store__']['future']
   readonly presentElements: this['__store__']['present']
-  readonly denormalizedElements: this['__store__']['present']
-  readonly normalizedElements: this['__store__']['normalized']
+  readonly normalized: this['__store__']['present']
+  readonly denormalized: this['__store__']['denormalized']
 
   getStore<K extends keyof CanvasContext>(
     payload: CanvasGetStorePayload<K>,
@@ -87,12 +84,12 @@ export interface IAglynCanvasController
   getPresentElements(
     payload?: CanvasGetElementsPresentPayload,
   ): this['__store__']['present']
-  getDenormalizedElements(
-    payload?: CanvasGetElementsDenormalizedPayload,
-  ): this['__store__']['present']
   getNormalizedElements(
     payload?: CanvasGetElementsNormalizedPayload,
-  ): this['__store__']['normalized']
+  ): this['__store__']['present']
+  getDenormalizedElements(
+    payload?: CanvasGetElementsDenormalizedPayload,
+  ): this['__store__']['denormalized']
   getApi(
     payload?: CanvasGetElementsNormalizedPayload,
   ): Pick<

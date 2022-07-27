@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-import type { AglynNodeDenormalized, NodeId } from '@aglyn/core-data-foundation'
+import type {
+  AglynNodeItemDenormalized,
+  NodeId,
+} from '@aglyn/core-data-foundation'
 import { _isFnT } from '@aglyn/shared-util-guards'
 import { useMemo } from 'react'
 import useAglynComponentSchema from './use-aglyn-component-schema'
@@ -32,7 +35,7 @@ export function useAglynElementResolvedProps<P>($id: NodeId): P {
   return useMemo(() => {
     const data = ((_isFnT(resolveProps)
       ? resolveProps.call(undefined, elementData)
-      : elementData) || {}) as AglynNodeDenormalized<P>
+      : elementData) || {}) as AglynNodeItemDenormalized<P>
 
     return { ...data?.props, sx: data?.sx } as P
   }, [elementData, resolveProps])

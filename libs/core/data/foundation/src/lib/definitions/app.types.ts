@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import type { Bytes } from '@aglyn/shared-data-operators'
 import type { AglynEventTriggerFlag } from '../constants/emitter'
 import type { AglynPlatform } from '../constants/platform'
 import type { AglynVersion } from '../constants/version'
@@ -83,6 +84,9 @@ export interface IAglynAppController<
   getCommandsController(): IAglynCommandsController
   getComponentsController(): IAglynComponentsController
   effect(data: AglynEffectOptions<AglynEventTriggerFlag>): this
+
+  compress<T>(value: T): Bytes
+  decompress<T>(value: Bytes): T
 }
 
 export interface AglynAppControllerT<
@@ -92,4 +96,7 @@ export interface AglynAppControllerT<
   readonly version: AglynVersion
 
   new (options: Options): IAglynAppController<Options>
+
+  compress<T>(value: T): Bytes
+  decompress<T>(value: Bytes): T
 }

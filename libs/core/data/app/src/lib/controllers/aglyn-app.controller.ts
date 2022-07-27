@@ -43,6 +43,7 @@ import {
   DEFAULT_APP_UUN,
   SDK_VERSION,
 } from '@aglyn/core-data-foundation'
+import { Bytes, compress, decompress } from '@aglyn/core-util-app'
 import { getStaticField, truthy } from '@aglyn/shared-util-tools'
 import { AglynBaseModel } from '../models/aglyn-base.model'
 import AglynDependencyManager from '../models/aglyn-depends.model'
@@ -70,12 +71,6 @@ export class AglynAppController<
   extends BaseApp<Options>
   implements IAglynAppController<Options>
 {
-  public static get [Symbol.toStringTag](): string {
-    return TAG
-  }
-  public static get namespace(): string {
-    return NS
-  }
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly version: AglynVersion = SDK_VERSION
 
@@ -87,6 +82,12 @@ export class AglynAppController<
   #componentsController: IAglynComponentsController = null
   #canvasController: IAglynCanvasController = null
 
+  public static get [Symbol.toStringTag](): string {
+    return TAG
+  }
+  public static get namespace(): string {
+    return NS
+  }
   public get platform(): AglynPlatform {
     return getStaticField('platform', this)
   }
@@ -242,6 +243,18 @@ export class AglynAppController<
     const { type, payload } = data
     this.emitter.emit(type, payload as any)
     return this
+  }
+  public static compress<T>(value: T): Bytes {
+    return compress(value)
+  }
+  public static decompress<T>(value: Bytes): T {
+    return decompress(value)
+  }
+  public compress<T>(value: T): Bytes {
+    return AglynAppController.compress(value)
+  }
+  public decompress<T>(value: Bytes): T {
+    return AglynAppController.decompress(value)
   }
 }
 

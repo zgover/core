@@ -16,7 +16,7 @@
  */
 
 import type {
-  AglynNodeNormalized,
+  AglynNodeItemDenormalized,
   AglynNodeTemplateSchema,
 } from '@aglyn/core-data-foundation'
 import { copy } from '@aglyn/shared-util-tools'
@@ -25,8 +25,8 @@ import createComponentElementId from './create-component-element-id'
 
 function traverseComponentTemplate(
   data: AglynNodeTemplateSchema['data'],
-): AglynNodeNormalized {
-  const response: AglynNodeNormalized = {
+): AglynNodeItemDenormalized {
+  const response: AglynNodeItemDenormalized = {
     ...data,
     $id: createComponentElementId(),
     elements: [],
@@ -43,14 +43,14 @@ export type CreateComponentElementDataOptions =
   | AglynNodeTemplateSchema
   | { data: AglynNodeTemplateSchema['data'] }
 
-export const ELEMENT_DEFAULTS: Partial<AglynNodeNormalized> = {
+export const ELEMENT_DEFAULTS: Partial<AglynNodeItemDenormalized> = {
   props: {},
   elements: [],
 }
 
 export function createComponentElementData(
   options?: CreateComponentElementDataOptions,
-): AglynNodeNormalized {
+): AglynNodeItemDenormalized {
   return defaultsDeep(
     traverseComponentTemplate(copy(options?.data)),
     copy(ELEMENT_DEFAULTS),

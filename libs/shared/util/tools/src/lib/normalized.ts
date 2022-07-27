@@ -137,7 +137,7 @@ export class Normalized<T = any, K extends ID = ID>
   }
 
   /**
-   * Sets an item in an existing normalized key value object.
+   * Sets an item in an existing denormalized key value object.
    *
    * @static
    * @template T

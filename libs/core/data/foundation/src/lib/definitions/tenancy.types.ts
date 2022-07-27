@@ -16,8 +16,8 @@
  */
 
 import type { HttpStatusCode } from '@aglyn/shared-data-enums'
-import type { TimestampSeconds } from '@aglyn/shared-data-operators'
 import type { Conditional } from '@aglyn/shared-data-types'
+import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type {
   ActivityAccess,
   HostEntityType,
@@ -26,11 +26,7 @@ import type {
   HostScreenVisibility,
   HostViewFormat,
 } from '../constants/tenancy'
-import type {
-  AglynNodesDenormalized,
-  AglynNodesList,
-  AglynNodesNormalized,
-} from './components.types'
+import type { AglynNodesById, AglynNodesList } from './components.types'
 
 export type UserUid = string
 export type RoleUid = string
@@ -58,7 +54,7 @@ export interface AglynUser extends AglynDocument {
   tenants?: Record<TenantUid, true>
 }
 
-export interface AglynUserRole extends AglynDocument {
+export interface AglynAuthRole extends AglynDocument {
   $id: RoleUid
   displayName?: string
   description?: string
@@ -101,7 +97,7 @@ export interface AglynTenantHost extends AglynDocument {
 }
 
 /** Hosted in tenants' host project */
-export interface AglynTenantHostEntry extends AglynDocument {
+export interface AglynHost extends AglynDocument {
   $id: HostUid
   screens?: Record<ScreenUid, true>
   redirects?: Record<RedirectUid, true>
@@ -119,7 +115,7 @@ export interface AglynTenantHostEntry extends AglynDocument {
 }
 
 /** Hosted in tenants' host project */
-export interface AglynTenantHostRedirect extends AglynDocument {
+export interface AglynHostRedirect extends AglynDocument {
   $id: RedirectUid
   hostId?: HostUid
   sourcePath?: HostPath
@@ -134,12 +130,12 @@ export interface AglynTenantHostRedirect extends AglynDocument {
     ignoreCase?: true
   }
   hits?: number
-  lastAccess?: TimestampSeconds
+  lastAccess?: ITimestamp
   description?: string
 }
 
 /** Hosted in tenants' host project */
-export interface AglynTenantHostScreen extends AglynDocument {
+export interface AglynScreen extends AglynDocument {
   $id: ScreenUid
   parentId?: ScreenUid
   hostId?: HostUid
@@ -152,12 +148,12 @@ export interface AglynTenantHostScreen extends AglynDocument {
   visibility?: HostScreenVisibility
   access?: AglynAccessRule
   contributors?: Array<UserUid>
-  createdAt?: TimestampSeconds
-  updatedAt?: TimestampSeconds
-  deletedAt?: TimestampSeconds
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
+  deletedAt?: ITimestamp
   schedule?: {
-    startAt?: TimestampSeconds
-    endAt?: TimestampSeconds
+    startAt?: ITimestamp
+    endAt?: ITimestamp
     next?: VersionUid
     previous?: VersionUid
   }
@@ -166,29 +162,15 @@ export interface AglynTenantHostScreen extends AglynDocument {
 }
 
 /** Hosted in tenants' host project */
-export interface AglynTenantHostLayout {
-  $id: LayoutUid
-  hostId?: HostUid
-  layoutId?: LayoutUid
-  versionId?: VersionUid
-  versions?: Array<VersionUid>
-  displayName?: string
-  description?: string
-  contributors?: Array<UserUid>
-  createdAt?: TimestampSeconds
-  updatedAt?: TimestampSeconds
-}
-
-/** Hosted in tenants' host project */
-export interface AglynTenantHostScreenVersion<
+export interface AglynScreenVersion<
   T extends HostViewFormat = HostViewFormat.NORMALIZED,
 > extends AglynDocument {
   $id: VersionUid
   hostId?: HostUid
   screenId?: ScreenUid
   contributors?: Array<UserUid>
-  createdAt?: TimestampSeconds
-  updatedAt?: TimestampSeconds
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
   title?: string
   description?: string
   breadcrumb?: string
@@ -198,24 +180,38 @@ export interface AglynTenantHostScreenVersion<
     T,
     HostViewFormat.NORMALIZED,
     AglynNodesList,
-    AglynNodesDenormalized
+    AglynNodesById
   >
 }
 
 /** Hosted in tenants' host project */
-export interface AglynTenantHostLayoutVersion<
+export interface AglynHostLayout {
+  $id: LayoutUid
+  hostId?: HostUid
+  layoutId?: LayoutUid
+  versionId?: VersionUid
+  versions?: Array<VersionUid>
+  displayName?: string
+  description?: string
+  contributors?: Array<UserUid>
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
+}
+
+/** Hosted in tenants' host project */
+export interface AglynLayoutVersion<
   T extends HostViewFormat = HostViewFormat.NORMALIZED,
 > extends AglynDocument {
   $id: VersionUid
   hostId?: HostUid
   contributors?: Array<UserUid>
-  createdAt?: TimestampSeconds
-  updatedAt?: TimestampSeconds
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
   format?: T
   elements?: Conditional<
     T,
     HostViewFormat.NORMALIZED,
-    AglynNodesNormalized,
-    AglynNodesDenormalized
+    AglynNodesList,
+    AglynNodesById
   >
 }

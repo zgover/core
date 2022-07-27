@@ -22,8 +22,6 @@ export * from './lib/hooks/use-screen'
 export * from './lib/hooks/use-screen-version'
 
 export * from './lib/utils/build-rewrite-site-host-path'
-export * from './lib/utils/compress'
-export * from './lib/utils/decompress'
 export * from './lib/utils/get-tenant-page-static-paths'
 export * from './lib/utils/get-tenant-page-static-props'
 

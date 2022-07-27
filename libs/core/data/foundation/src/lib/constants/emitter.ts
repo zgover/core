@@ -32,8 +32,10 @@ import type {
 import type {
   AglynComponentBundle,
   AglynComponentSchema,
-  AglynNodeDenormalized,
-  AglynNodeNormalized,
+  AglynNodeItemDenormalized,
+  AglynNodeItemNormalized,
+  AglynNodesById,
+  AglynNodesList,
   BundleId,
   ComponentId,
   IAglynComponent,
@@ -237,7 +239,7 @@ export type CanvasGetStatePayload = PayloadData<any>
 export type CanvasNextStatePayload = PayloadData<CanvasContext>
 export type CanvasSetElementsPayload = PayloadData<{
   type: 'normal' | 'denormal'
-  elements: AglynNodeDenormalized | AglynNodeNormalized
+  elements: AglynNodesById | AglynNodesList
 }>
 export type CanvasGetElementsPastPayload = PayloadData<any>
 export type CanvasGetElementsFuturePayload = PayloadData<any>
@@ -248,15 +250,15 @@ export type CanvasGetApiEventsPayload = PayloadData<any>
 export type CanvasAddElementPayload = PayloadData<{
   parentId: NodeId
   index: number
-  element: AglynNodeNormalized
+  element: AglynNodeItemDenormalized
 }>
 export type CanvasGetElementPayload = PayloadData<{ $id: NodeId }>
 export type CanvasUpdateElementPayload = PayloadData<{
   $id: NodeId
-  update: (element: AglynNodeDenormalized) => AglynNodeDenormalized
+  update: (element: AglynNodeItemNormalized) => AglynNodeItemNormalized
 }>
 export type CanvasSetElementPayload = PayloadData<{
-  element: AglynNodeDenormalized
+  element: AglynNodeItemNormalized
 }>
 export type CanvasDeleteElementPayload = PayloadData<{ $id: NodeId }>
 export type CanvasMoveElementPayload = PayloadData<{

@@ -50,20 +50,20 @@ export function getCanvasStore(
   return canvasController.getStore(payload)
 }
 
-export function getCanvasDenormalizedElementsStore(
-  app: IAglynAppController,
-  payload?: CanvasGetElementsDenormalizedPayload,
-) {
-  const canvasController = _getCanvasController(app)
-  return canvasController.getDenormalizedElements(payload)
-}
-
-export function getCanvasNormalizedElementsStore(
+export function getCanvasNormalizedNodesStore(
   app: IAglynAppController,
   payload?: CanvasGetElementsNormalizedPayload,
 ) {
   const canvasController = _getCanvasController(app)
   return canvasController.getNormalizedElements(payload)
+}
+
+export function getCanvasDenormalizedNodesStore(
+  app: IAglynAppController,
+  payload?: CanvasGetElementsDenormalizedPayload,
+) {
+  const canvasController = _getCanvasController(app)
+  return canvasController.getDenormalizedElements(payload)
 }
 
 export function getCanvasApiEvents(

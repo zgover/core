@@ -18,6 +18,8 @@
 import { encode } from '@msgpack/msgpack'
 import { Bytes } from 'firebase/firestore'
 
+export { Bytes }
+
 export function compress<T>(value: T): Bytes {
   return Bytes.fromUint8Array(encode(value))
 }

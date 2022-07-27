@@ -188,7 +188,7 @@ export interface AglynComponentSchema<P = any> {
   /**
    * Filter props
    */
-  resolveProps?: JSX.ResolveProps<AglynNodeDenormalized<P>>
+  resolveProps?: JSX.ResolveProps<AglynNodeItemDenormalized<P>>
 
   /**
    * Attribute fields to modify the contextual properties
@@ -309,17 +309,15 @@ export type ComponentsRegistryContext = {
   templates: InstanceTemplates
 }
 
-export type AglynNodeNormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
-  elements?: AglynNodeNormalized[]
-}
-export type AglynNodeDenormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
+export type AglynNodeItemNormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
   elements?: NodeId[]
 }
+export type AglynNodeItemDenormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
+  elements?: AglynNodeItemDenormalized[]
+}
 
-export type AglynNodesById = Record<NodeId, AglynNodeDenormalized>
-export type AglynNodesList = Array<AglynNodeNormalized>
-export type AglynNodesDenormalized = AglynNodesById
-export type AglynNodesNormalized = AglynNodesList
+export type AglynNodesById = Record<NodeId, AglynNodeItemNormalized>
+export type AglynNodesList = Array<AglynNodeItemDenormalized>
 
 export type AglynNodeHierarchy<$ID extends NodeId = NodeId> = [
   root: CANVAS_ROOT_ELEMENT_ID,

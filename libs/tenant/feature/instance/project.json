@@ -21,5 +21,5 @@
       }
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:feature"]
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "scope:tenant"]
 }

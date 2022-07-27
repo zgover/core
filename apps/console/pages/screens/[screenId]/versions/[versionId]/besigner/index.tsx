@@ -39,13 +39,8 @@ import { LOADING_OVERLAY_ELEMENT, useLoading } from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import {
-  compress,
-  decompress,
-  useScreenVersion,
-} from '@aglyn/tenant-feature-instance'
+import { useScreenVersion } from '@aglyn/tenant-feature-instance'
 import { Stack, Typography } from '@mui/material'
-import { Bytes, Timestamp } from 'firebase/firestore'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
@@ -90,15 +85,11 @@ function Besigner(props) {
   const [undo, redo, canUndo, canRedo] = useAglynCanvasHistoryControls()
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, { screenId, versionId })
   const normalized = useAglynCanvasElementsNormalized()
-  const [{ status, data: screen, error }, updateScreen] = useScreenVersion<any>(
-    {
-      screenId,
-      versionId,
-    },
-  )
-  const elements = screen?.elements
+  const [result, updateScreen] = useScreenVersion({ screenId, versionId })
+  const { data, status, error } = result
+  const elements = data?.elements
   const hasError = status === 'error'
-  const notFound = status === 'success' && !screen
+  const notFound = status === 'success' && !data
 
   useEffect(() => {
     if (HAS_BROWSER()) {
@@ -109,9 +100,9 @@ function Besigner(props) {
   useEffect(() => {
     if (HAS_BROWSER()) {
       console.log('Besigner props.tenant,', props.tenant, props)
-      console.log('Besigner status screen,', status, screen)
+      console.log('Besigner status screen,', status, data)
     }
-  }, [props, screen, status])
+  }, [props, data, status])
 
   useEffect(() => {
     if (hasError) {
@@ -128,24 +119,15 @@ function Besigner(props) {
   }, [enqueueSnackbar, hasError, error, notFound])
 
   useEffect(() => {
-    if (elements && elements instanceof Bytes) {
-      const decoded: any = decompress(elements)
-      console.log('decoded update', decoded)
-      setCanvasElements(app, { elements: decoded, type: 'normal' })
+    if (elements) {
+      console.log('decoded update', elements)
+      setCanvasElements(app, { elements, type: 'denormal' })
     }
   }, [app, elements])
 
   const handleSave = useCallback(async () => {
     const dequeueLoading = queueLoading()
-    const compressed = compress(normalized)
-    const timestamp = Timestamp.now()
-    await updateScreen(
-      {
-        elements: compressed,
-        updatedAt: timestamp,
-      },
-      { merge: true },
-    ).catch((e) => {
+    await updateScreen({ elements: normalized }, { merge: true }).catch((e) => {
       enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
         variant: 'error',
         allowDuplicate: true,

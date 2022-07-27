@@ -21,7 +21,7 @@ import type {
   StringLike,
 } from '@aglyn/shared-data-types'
 import type { LogLevelString } from '@aglyn/shared-util-logger'
-import type { Timestamp } from '@aglyn/shared-util-timestamp'
+import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type { AglynEmitter } from '../constants/emitter'
 import type { AglynErrorFactory } from '../constants/error'
 import type { AglynLogger } from '../constants/logger'
@@ -99,13 +99,13 @@ export interface IAglynBaseModel<
     Partial<AglynEmitter> {
   readonly [Symbol.toStringTag]: string
   readonly namespace: string
-  readonly createdAt: Timestamp
+  readonly createdAt: ITimestamp
   readonly options: O
   readonly errorFactory: AglynErrorFactory
   readonly logger: AglynLogger
   readonly emitter: AglynEmitter
 
-  getCreatedAt(): Timestamp
+  getCreatedAt(): ITimestamp
   getOptions(): O
   getErrorFactory(): AglynErrorFactory
   setErrorFactory(value: AglynErrorFactory): this

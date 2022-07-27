@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
+import type { AglynScreenVersion } from '@aglyn/core-data-foundation'
+import { Bytes, compress, decompress } from '@aglyn/core-util-app'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
+import { copy } from '@aglyn/shared-util-tools'
 import { doc, setDoc, type SetOptions } from 'firebase/firestore'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   type ObservableStatus,
   type ReactFireOptions,
   useFirestore,
-  useFirestoreDocDataOnce,
+  useFirestoreDocData,
 } from 'reactfire'
 
 export type UseScreenVersionOptions = {
@@ -30,26 +34,42 @@ export type UseScreenVersionOptions = {
   useFirestoreDocDataOptions?: ReactFireOptions
 }
 
-export const useScreenVersion = <T,>(
+export type UpdateScreenVersion = {
+  (value: Partial<AglynScreenVersion>, options: SetOptions): Promise<void>
+}
+export type UpdateScreenResult = ObservableStatus<AglynScreenVersion>
+
+export function useScreenVersion(
   options: UseScreenVersionOptions,
-): [ObservableStatus<T>, (value: T, options: SetOptions) => Promise<void>] => {
+): [UpdateScreenResult, UpdateScreenVersion] {
   const { screenId, versionId, useFirestoreDocDataOptions } = options
   const firestore = useFirestore()
   const reference = doc(firestore, 'screens', screenId, 'versions', versionId)
 
-  const value = useFirestoreDocDataOnce(reference, {
+  const value = useFirestoreDocData(reference, {
     idField: '$id',
     ...useFirestoreDocDataOptions,
-  }) as ObservableStatus<T>
+  }) as ObservableStatus<AglynScreenVersion>
+
+  const response = useMemo(() => {
+    const copied = copy(value)
+    const elements = copied?.data?.elements
+    if (elements && elements instanceof Bytes) {
+      copied.data.elements = decompress(elements)
+    }
+    return copied
+  }, [value])
 
   const update = useCallback(
     async (value, options: SetOptions) => {
+      if (value.elements) value.elements = compress(value.elements)
+      value.updatedAt = Timestamp.now()
       return await setDoc(reference, value, options)
     },
     [reference],
   )
 
-  return [value, update]
+  return [response, update]
 }
 
 export default useScreenVersion

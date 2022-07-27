@@ -30,7 +30,7 @@ import {
   type AglynLogger,
 } from '@aglyn/core-data-foundation'
 import { _isArr } from '@aglyn/shared-util-guards'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
+import { ITimestamp, Timestamp } from '@aglyn/shared-util-timestamp'
 import { getStaticField } from '@aglyn/shared-util-tools'
 
 const TAG = 'AglynBaseModel'
@@ -40,21 +40,20 @@ export class AglynBaseModel<
   O extends AglynBaseModelOptions = AglynBaseModelOptions,
 > implements IAglynBaseModel<O>
 {
-  public static get [Symbol.toStringTag](): string {
-    return TAG
-  }
-  public static get namespace(): string {
-    return NS
-  }
-
   readonly #options: O = null
-  readonly #createdAt: Timestamp
+  readonly #createdAt: ITimestamp
   #errorFactory: AglynErrorFactory
   #emitter: AglynEmitter
   #logger: AglynLogger
 
+  public static get [Symbol.toStringTag](): string {
+    return TAG
+  }
   public get [Symbol.toStringTag](): string {
     return getStaticField(Symbol.toStringTag, this)
+  }
+  public static get namespace(): string {
+    return NS
   }
   public get namespace(): string {
     return getStaticField('namespace', this)
@@ -62,7 +61,7 @@ export class AglynBaseModel<
   public get options(): O {
     return this.#options
   }
-  public get createdAt(): Timestamp {
+  public get createdAt(): ITimestamp {
     return this.#createdAt
   }
   public get errorFactory(): AglynErrorFactory {
@@ -225,7 +224,7 @@ export class AglynBaseModel<
     return this.#options
   }
 
-  public getCreatedAt(): Timestamp {
+  public getCreatedAt(): ITimestamp {
     return this.#createdAt
   }
 

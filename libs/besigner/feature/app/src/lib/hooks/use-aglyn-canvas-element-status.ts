@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getCanvasDenormalizedElementsStore } from '@aglyn/core-data-app'
+import { getCanvasNormalizedNodesStore } from '@aglyn/core-data-app'
 import type { NodeId } from '@aglyn/core-data-foundation'
 import { getComponentElementHierarchy } from '@aglyn/core-util-app'
 import type { Conditional } from '@aglyn/shared-data-types'
@@ -64,7 +64,7 @@ export function useAglynCanvasElementStatus<T extends boolean = false>(
         isSelfSelected: Boolean($id && canvas?.selected?.$id === $id),
       }
       if (includeChildStatus) {
-        const elements = getCanvasDenormalizedElementsStore(app).getValue()
+        const elements = getCanvasNormalizedNodesStore(app).getValue()
         const selectedHierarchy = getComponentElementHierarchy(
           canvas?.selected?.$id,
           elements,

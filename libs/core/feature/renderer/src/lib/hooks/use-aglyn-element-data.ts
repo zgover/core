@@ -15,36 +15,39 @@
  * limitations under the License.
  */
 
-import { getCanvasDenormalizedElementsStore } from '@aglyn/core-data-app'
-import type { AglynNodeDenormalized, NodeId } from '@aglyn/core-data-foundation'
+import { getCanvasNormalizedNodesStore } from '@aglyn/core-data-app'
+import type {
+  AglynNodeItemNormalized,
+  NodeId,
+} from '@aglyn/core-data-foundation'
 import type { AnyProps, Conditional } from '@aglyn/shared-data-types'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 export type UseAglynElementData<
   P = AnyProps,
-  K extends keyof AglynNodeDenormalized<P> = null,
+  K extends keyof AglynNodeItemNormalized<P> = null,
 > = Conditional<
   K,
-  keyof AglynNodeDenormalized<P>,
-  AglynNodeDenormalized<P>[K],
-  AglynNodeDenormalized<P>
+  keyof AglynNodeItemNormalized<P>,
+  AglynNodeItemNormalized<P>[K],
+  AglynNodeItemNormalized<P>
 >
 
 export function useAglynElementData<P = JSX.AnyProps>(
   $id: NodeId,
-): AglynNodeDenormalized<P>
+): AglynNodeItemNormalized<P>
 export function useAglynElementData<
   P = JSX.AnyProps,
-  K extends keyof AglynNodeDenormalized<P> = null,
->($id: NodeId, property: K, defaultValue?: any): AglynNodeDenormalized<P>[K]
+  K extends keyof AglynNodeItemNormalized<P> = null,
+>($id: NodeId, property: K, defaultValue?: any): AglynNodeItemNormalized<P>[K]
 export function useAglynElementData<
   P = JSX.AnyProps,
-  K extends keyof AglynNodeDenormalized<P> = null,
+  K extends keyof AglynNodeItemNormalized<P> = null,
 >($id: NodeId, property?: K, defaultValue?: any): UseAglynElementData<P, K> {
   const app = useAglynAppContext()
   return useSubscribable(
-    getCanvasDenormalizedElementsStore(app),
+    getCanvasNormalizedNodesStore(app),
     defaultValue,
     (store) => {
       const element = store?.[$id]

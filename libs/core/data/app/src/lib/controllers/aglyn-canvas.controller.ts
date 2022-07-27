@@ -18,7 +18,7 @@
 import type {
   AglynCanvasControllerOptions,
   AglynModuleEffectListener,
-  AglynNodesDenormalized,
+  AglynNodesById,
   CanvasAddElementPayload,
   CanvasContext,
   CanvasDeleteElementPayload,
@@ -42,7 +42,6 @@ import type {
 } from '@aglyn/core-data-foundation'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import {
-  denormalizeComponentElementData,
   handleCanvasAddElement,
   handleCanvasDeleteElement,
   handleCanvasDuplicateElement,
@@ -53,7 +52,8 @@ import {
   handleStateModificationHistoryChange,
   handleStateModificationHistoryRedo,
   handleStateModificationHistoryUndo,
-  normalizeComponentElementData,
+  nodeDataDenormalize,
+  nodeDataNormalize,
 } from '@aglyn/core-util-app'
 import { copy } from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
@@ -77,7 +77,7 @@ export class AglynCanvasController
   }
 
   public readonly __store__: {
-    [K in keyof CanvasContext]: K extends 'normalized'
+    [K in keyof CanvasContext]: K extends 'denormalized'
       ? Observable<CanvasContext[K]>
       : BehaviorSubject<CanvasContext[K]>
   }
@@ -91,11 +91,11 @@ export class AglynCanvasController
   public get presentElements(): this['__store__']['present'] {
     return this.__store__?.present
   }
-  public get denormalizedElements(): this['__store__']['present'] {
+  public get normalized(): this['__store__']['present'] {
     return this.__store__?.present
   }
-  public get normalizedElements(): this['__store__']['normalized'] {
-    return this.__store__?.normalized
+  public get denormalized(): this['__store__']['denormalized'] {
+    return this.__store__?.denormalized
   }
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
@@ -111,21 +111,19 @@ export class AglynCanvasController
     })
 
     const present = new BehaviorSubject(
-      denormalizeComponentElementData(
-        state.present || [],
-        CANVAS_ROOT_ELEMENT_ID,
-      ),
+      nodeDataNormalize(state.present || [], CANVAS_ROOT_ELEMENT_ID),
     )
 
     this.__store__ = {
       past: new BehaviorSubject(state.past),
       future: new BehaviorSubject(state.future),
       present: present,
-      normalized: present.pipe(
+      denormalized: present.pipe(
         // throttleTime(20, undefined, {leading: false, trailing: true}),
-        map((present) =>
-          normalizeComponentElementData(present || {}, CANVAS_ROOT_ELEMENT_ID),
-        ),
+        map((present) => {
+          const normalized = present || {}
+          return nodeDataDenormalize(normalized, CANVAS_ROOT_ELEMENT_ID)
+        }),
       ),
     }
 
@@ -160,10 +158,7 @@ export class AglynCanvasController
     return this
   }
   private handleStateModification<P>(
-    callback: (
-      present: AglynNodesDenormalized,
-      payload?: P,
-    ) => AglynNodesDenormalized,
+    callback: (present: AglynNodesById, payload?: P) => AglynNodesById,
     payload?: P,
     clear = false,
   ) {
@@ -197,15 +192,15 @@ export class AglynCanvasController
   ): this['__store__']['present'] {
     return this.__store__?.['present']
   }
-  public getDenormalizedElements(
-    payload?: CanvasGetElementsDenormalizedPayload,
+  public getNormalizedElements(
+    payload?: CanvasGetElementsNormalizedPayload,
   ): this['__store__']['present'] {
     return this.__store__?.['present']
   }
-  public getNormalizedElements(
-    payload?: CanvasGetElementsNormalizedPayload,
-  ): this['__store__']['normalized'] {
-    return this.__store__?.['normalized']
+  public getDenormalizedElements(
+    payload?: CanvasGetElementsDenormalizedPayload,
+  ): this['__store__']['denormalized'] {
+    return this.__store__?.['denormalized']
   }
   public getApi(
     payload?: CanvasGetElementsNormalizedPayload,

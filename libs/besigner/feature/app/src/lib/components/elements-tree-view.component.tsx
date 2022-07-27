@@ -114,6 +114,7 @@ const DraggableTreeItemComponent = forwardRef<
   }, [app, componentId, bundleId, $id, trail])
   const [, dragHandle, dragPreview] = useLeafDrag(dndData, DndDragType.TREE)
   const [, dropRef] = useLeafDrop(dndData)
+  const data = useAglynElementData($id)
   const elements = useAglynElementData($id, 'elements')
   const label = useAglynElementLabel($id)
   const setHovered = useAglynCanvasSetHovered()

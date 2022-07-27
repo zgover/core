@@ -16,8 +16,8 @@
  */
 
 import type {
-  AglynNodesDenormalized,
-  AglynNodesNormalized,
+  AglynNodesById,
+  AglynNodesList,
   CanvasAddElementPayload,
   CanvasContext,
   CanvasDeleteElementPayload,
@@ -40,9 +40,9 @@ import {
   copyShallow,
 } from '@aglyn/shared-util-tools'
 import { createComponentElementDataCopy } from './create-component-element-data-copy'
-import { denormalizeComponentElementData } from './denormalize-component-element-data'
 import { getComponentElementHierarchy } from './get-component-element-hierarchy'
 import { handleStateModificationHistoryChange } from './handle-state-modification-history-change'
+import { nodeDataNormalize } from './node-data-normalize'
 
 type CanvasApiEventHandler<S extends CanvasContext, P> = (
   state: CanvasContext['present'],
@@ -59,14 +59,14 @@ export const handleCanvasApiChangeEvent =
   }
 
 export const handleCanvasSetElements = (
-  state: AglynNodesDenormalized,
+  state: AglynNodesById,
   payload: CanvasSetElementsPayload,
-): AglynNodesDenormalized => {
+): AglynNodesById => {
   const { elements, type } = payload || {}
 
-  if (type === 'normal' && Array.isArray(elements)) {
-    const newState = denormalizeComponentElementData(
-      elements as unknown as AglynNodesNormalized,
+  if (type === 'denormal' && Array.isArray(elements)) {
+    const newState = nodeDataNormalize(
+      elements as unknown as AglynNodesList,
       CANVAS_ROOT_ELEMENT_ID,
     )
     console.log('newState normal', payload, newState)
@@ -76,12 +76,12 @@ export const handleCanvasSetElements = (
 
   return (elements || {
     [DEFAULT_ROOT_ELEMENT.$id]: { ...DEFAULT_ROOT_ELEMENT },
-  }) as AglynNodesDenormalized
+  }) as AglynNodesById
 }
 export const handleCanvasAddElement = (
-  state: AglynNodesDenormalized,
+  state: AglynNodesById,
   payload: CanvasAddElementPayload,
-): AglynNodesDenormalized => {
+): AglynNodesById => {
   const { index, element } = payload
   let parentId: NodeId = null
   if (_hasOwnProperty(payload.parentId, state)) {
@@ -92,7 +92,7 @@ export const handleCanvasAddElement = (
   }
   console.log('handleCanvasAddElement', payload, state)
 
-  const { [parentId]: _, ...newElements } = denormalizeComponentElementData(
+  const { [parentId]: _, ...newElements } = nodeDataNormalize(
     element,
     parentId,
     {
@@ -114,25 +114,25 @@ export const handleCanvasAddElement = (
 }
 
 export const handleCanvasUpdateElement = (
-  state: AglynNodesDenormalized,
+  state: AglynNodesById,
   payload: CanvasUpdateElementPayload,
-): AglynNodesDenormalized => {
+): AglynNodesById => {
   state[payload.$id] = payload.update(state[payload.$id])
   return state
 }
 
 export const handleCanvasSetElement = (
-  state: AglynNodesDenormalized,
+  state: AglynNodesById,
   payload: CanvasSetElementPayload,
-): AglynNodesDenormalized => {
+): AglynNodesById => {
   state[payload.element?.$id] = payload.element
   return state
 }
 
 export const handleCanvasMoveElement = (
-  state: AglynNodesDenormalized,
+  state: AglynNodesById,
   payload: CanvasMoveElementPayload,
-): AglynNodesDenormalized => {
+): AglynNodesById => {
   const element = state[payload.$id]
   if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
     console.error('Failed duplicating. Non-existent or forbidden move.')
@@ -179,9 +179,9 @@ export const handleCanvasMoveElement = (
 }
 
 export const handleCanvasDuplicateElement = (
-  state: AglynNodesDenormalized,
+  state: AglynNodesById,
   payload: CanvasDuplicateElementPayload,
-): AglynNodesDenormalized => {
+): AglynNodesById => {
   const element = state[payload.$id]
   if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
     throw new Error(
@@ -197,9 +197,9 @@ export const handleCanvasDuplicateElement = (
 }
 
 export const handleCanvasDeleteElement = (
-  state: AglynNodesDenormalized,
+  state: AglynNodesById,
   payload: CanvasDeleteElementPayload,
-): AglynNodesDenormalized => {
+): AglynNodesById => {
   const element = state[payload.$id]
   if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
     throw new Error('Failed deleting. Non-existent or forbidden deletion.')

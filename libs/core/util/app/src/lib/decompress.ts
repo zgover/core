@@ -16,7 +16,7 @@
  */
 
 import { decode } from '@msgpack/msgpack'
-import { Bytes } from 'firebase/firestore'
+import type { Bytes } from './compress'
 
 export function decompress<T>(value: Bytes): T {
   return decode(value.toUint8Array()) as T

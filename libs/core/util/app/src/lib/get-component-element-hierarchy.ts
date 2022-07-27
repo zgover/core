@@ -17,7 +17,7 @@
 
 import {
   type AglynNodeHierarchy,
-  type AglynNodesDenormalized,
+  type AglynNodesById,
   CANVAS_ROOT_ELEMENT_ID,
   type NodeId,
 } from '@aglyn/core-data-foundation'
@@ -25,7 +25,7 @@ import isRootElementId from './is-root-element-id'
 
 export function getComponentElementHierarchy<T extends NodeId>(
   $id: T,
-  elements: AglynNodesDenormalized,
+  elements: AglynNodesById,
 ): AglynNodeHierarchy<T> {
   const hierarchy = [CANVAS_ROOT_ELEMENT_ID]
 

@@ -16,21 +16,20 @@
  */
 
 import type {
-  AglynNodeNormalized,
-  AglynNodesDenormalized,
+  AglynNodeItemDenormalized,
+  AglynNodesById,
   NodeId,
 } from '@aglyn/core-data-foundation'
 import createComponentElementData from './create-component-element-data'
-import normalizeComponentElementData from './normalize-component-element-data'
+import nodeDataDenormalize from './node-data-denormalize'
 
 export const createComponentElementDataCopy = (
   $id: NodeId,
-  state: AglynNodesDenormalized,
-): AglynNodeNormalized => {
-  const element = normalizeComponentElementData(
-    state,
-    state[$id].parentId,
-  ).find((i) => i.$id === $id)
+  state: AglynNodesById,
+): AglynNodeItemDenormalized => {
+  const element = nodeDataDenormalize(state, state[$id].parentId).find(
+    (i) => i.$id === $id,
+  )
   return createComponentElementData({ data: element })
 }
 export default createComponentElementDataCopy
