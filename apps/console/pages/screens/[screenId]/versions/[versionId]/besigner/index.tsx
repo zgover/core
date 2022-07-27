@@ -228,7 +228,6 @@ function Besigner(props) {
               {
                 id: 'center-nav-edit-redo',
                 children: 'Redo',
-                inset: true,
                 onClick: () => redo(),
                 disabled: !canRedo,
                 ListItemTextProps: { inset: true },

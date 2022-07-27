@@ -68,6 +68,14 @@ export function useLeafDrag<T extends BesignerDraggableItem>(
         offsetY: -50,
       },
       type,
+      item: () => {
+        console.log('draggable item', dragItem)
+        if (type !== DndDragType.TEMPLATE) {
+          setSelected({ $id: dragItem.$id })
+          setDndActive(dragItem)
+        }
+        return dragItem
+      },
       canDrag: (monitor) => {
         const dragItem = monitor.getItem()
         const { $id, componentId, bundleId } = dragItem || {}
@@ -77,19 +85,13 @@ export function useLeafDrag<T extends BesignerDraggableItem>(
         if (flags?.dragging === FEATURE_FLAG.DISABLED) return false
         return true
       },
-      item: () => {
-        console.log('draggable item', dragItem)
-        setSelected({ $id: dragItem.$id })
-        setDndActive(dragItem)
-        return dragItem
-      },
       end: (dragItem, monitor) => {
         setDndActive(undefined)
         setDndOver(undefined)
-        if (!monitor.didDrop()) return
         const dropItem = monitor.getDropResult()
-        if (!dropItem) return
         console.log('end drag ', dragItem, dropItem)
+        if (!monitor.didDrop()) return
+        if (!dropItem) return
         if (type === DndDragType.TEMPLATE) {
           const newElement = createComponentElementData(dragItem as any)
           addCanvasElement(app, {

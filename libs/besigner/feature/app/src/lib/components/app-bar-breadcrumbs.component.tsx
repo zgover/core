@@ -15,68 +15,142 @@
  * limitations under the License.
  */
 
+import { getComponentSchema } from '@aglyn/core-data-app'
 import { NodeId } from '@aglyn/core-data-foundation'
 import {
+  useAglynAppContext,
   useAglynCanvasElementHierarchy,
+  useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/core-feature-renderer'
-import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { useForkedRefs } from '@aglyn/shared-ui-jsx'
+import {
+  generateComponentClassKeys,
+  mergeSxProps,
+  styled,
+} from '@aglyn/shared-ui-theme'
 import {
   AppBar as MuiAppBar,
   type AppBarProps as MuiAppBarProps,
-  Breadcrumbs,
+  Breadcrumbs as MuiBreadcrumbs,
+  BreadcrumbsProps as MuiBreadcrumbsProps,
   Link,
-  LinkProps,
+  type LinkProps,
   Stack,
   Toolbar as MuiToolbar,
 } from '@mui/material'
-import { forwardRef, useCallback } from 'react'
+import clsx from 'clsx'
+import { forwardRef, useCallback, useMemo } from 'react'
 import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasSelected, {
   useAglynCanvasSetSelected,
 } from '../hooks/use-aglyn-canvas-selected'
+import useLeafDrop from '../hooks/use-leaf-drop'
 
-interface BreadcrumbItemProps extends LinkProps<'button'> {
-  $id: NodeId
-  isLast?: boolean
+const breadcrumbItemClassKey = generateComponentClassKeys('BreadcrumbItem', [
+  'root',
+  'lastItem',
+])
+
+const BreadcrumbLink = styled(Link)<LinkProps>(() => ({
+  [`&.${breadcrumbItemClassKey.lastItem}`]: {
+    cursor: 'initial',
+  },
+}))
+
+export interface BreadcrumbItemProps extends Partial<LinkProps<'button'>> {
+  item: {
+    $id: NodeId
+  }
+  lastItem?: boolean
 }
 
-const BreadcrumbItem = forwardRef<any, BreadcrumbItemProps>((props, ref) => {
-  const { children, $id, isLast, ...rest } = props
-  const setSelected = useAglynCanvasSetSelected()
-  const setHovered = useAglynCanvasSetHovered()
-  const label = useAglynElementLabel($id)
+const BreadcrumbItem = forwardRef<any, BreadcrumbItemProps>(
+  (props, forwardRef) => {
+    const { children, item, lastItem, ...rest } = props
+    const { $id } = item
+    const app = useAglynAppContext()
+    const setSelected = useAglynCanvasSetSelected()
+    const setHovered = useAglynCanvasSetHovered()
+    const label = useAglynElementLabel($id)
+    const componentId = useAglynElementData($id, 'componentId')
+    const bundleId = useAglynElementData($id, 'bundleId')
+    const trail = useAglynCanvasElementHierarchy($id)
+    const dndData = useMemo(() => {
+      const componentSchema = getComponentSchema(app, { componentId, bundleId })
+      const hierarchy = componentSchema?.hierarchy
+      return {
+        $id,
+        componentId,
+        bundleId,
+        hierarchy,
+        trail,
+      }
+    }, [app, componentId, bundleId, $id, trail])
+    const [, dropRef] = useLeafDrop(dndData)
+    const ref = useForkedRefs<any>(forwardRef, dropRef)
 
-  const handleClick = useCallback(() => {
-    if (isLast) return
-    setSelected({ $id })
-  }, [$id, isLast, setSelected])
+    const handleClick = useCallback(
+      (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (!lastItem) {
+          setSelected({ $id })
+        }
+      },
+      [$id, lastItem, setSelected],
+    )
 
-  const handleMouseEnter = useCallback(() => {
-    setHovered({ $id })
-  }, [$id, setHovered])
+    const handleMouseEnter = useCallback(() => {
+      setHovered({ $id })
+    }, [$id, setHovered])
+
+    return (
+      <BreadcrumbLink
+        ref={ref as any}
+        color="textSecondary"
+        {...({ component: 'button' } as any)}
+        fontSize="inherit"
+        underline={lastItem ? 'none' : undefined}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        className={clsx(breadcrumbItemClassKey.root, {
+          [breadcrumbItemClassKey.lastItem]: Boolean(lastItem),
+        })}
+        {...rest}
+      >
+        <>
+          {label}
+          {children}
+        </>
+      </BreadcrumbLink>
+    )
+  },
+)
+
+interface BreadcrumbsProps extends Partial<MuiBreadcrumbsProps> {}
+
+const Breadcrumbs = forwardRef<any, BreadcrumbsProps>((props, ref) => {
+  const { children, sx, ...rest } = props
+  const [selected] = useAglynCanvasSelected()
+  const ids = useAglynCanvasElementHierarchy(selected?.$id)
 
   return (
-    <Link
+    <MuiBreadcrumbs
       ref={ref}
-      color="textSecondary"
-      component="button"
-      underline={isLast ? 'none' : undefined}
-      onClick={handleClick}
-      fontSize="inherit"
-      onMouseEnter={handleMouseEnter}
-      sx={
-        !isLast
-          ? undefined
-          : {
-              cursor: 'initial',
-            }
-      }
+      separator="›"
+      aria-label="breadcrumb"
+      sx={mergeSxProps({ lineHeight: 1, fontSize: 11 }, sx)}
       {...rest}
     >
-      {label}
-      {children}
-    </Link>
+      {ids.map(($id, index, arr) => (
+        <BreadcrumbItem
+          key={$id ?? index}
+          item={{ $id }}
+          lastItem={index === arr.length - 1}
+        />
+      ))}
+    </MuiBreadcrumbs>
   )
 })
 
@@ -88,9 +162,6 @@ const AppBarBreadcrumbsComponent = forwardRef<
   AppBarBreadcrumbsComponentProps
 >((props, ref) => {
   const { children, sx, ...rest } = props
-
-  const [selected] = useAglynCanvasSelected()
-  const breadcrumbs = useAglynCanvasElementHierarchy(selected?.$id)
 
   return (
     <MuiAppBar
@@ -121,19 +192,7 @@ const AppBarBreadcrumbsComponent = forwardRef<
           width={1}
           spacing={1}
         >
-          <Breadcrumbs
-            separator="›"
-            aria-label="breadcrumb"
-            sx={{ lineHeight: 1, fontSize: 11 }}
-          >
-            {breadcrumbs.map(($id, index, arr) => (
-              <BreadcrumbItem
-                key={$id}
-                $id={$id}
-                isLast={index + 1 === arr.length}
-              />
-            ))}
-          </Breadcrumbs>
+          <Breadcrumbs />
           {children}
         </Stack>
       </MuiToolbar>

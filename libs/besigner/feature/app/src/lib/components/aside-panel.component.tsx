@@ -365,10 +365,6 @@ type ComponentGroupDetailsProps = BoxProps &
 const ComponentGroupDetails = forwardRef<any, ComponentGroupDetailsProps>(
   (props, ref) => {
     const { id, isOpen, item, ...rest } = props
-    console.log('CollapsibleLists open', item)
-
-    // return <GridList items={item.items} renderItemContent={renderItemContent} />
-
     return (
       <Box ref={ref} {...rest}>
         <Grid container spacing={2}>

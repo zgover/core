@@ -36,11 +36,9 @@ export type DropCollected = {
   isDragging?: boolean
 }
 
-const defaultAccept = Object.values(DndDragType)
-
 export function useLeafDrop<T extends BesignerDroppableItem>(
   data: T,
-  accept: DndDragType[] = defaultAccept,
+  accept: DndDragType[] = Object.values(DndDragType),
 ): [DropCollected, ConnectDropTarget] {
   const setHovered = useAglynCanvasSetHovered()
   const setDndOver = useAglynDndSetOver()
@@ -56,7 +54,7 @@ export function useLeafDrop<T extends BesignerDroppableItem>(
       },
       accept: accept,
       canDrop: (dragItem, monitor) => {
-        const trail = Array.isArray(dragItem?.trail) ? dragItem?.trail : []
+        const trail = Array.isArray(dropItem?.trail) ? dropItem?.trail : []
         const isOverDragItem = trail.indexOf(dragItem?.$id) >= 0
         const isOverSelf = monitor.isOver({ shallow: true })
         const [validRelationship] = confirmValidLinealRelationship({
@@ -66,6 +64,7 @@ export function useLeafDrop<T extends BesignerDroppableItem>(
         return Boolean(isOverSelf && !isOverDragItem && validRelationship)
       },
       drop: (dragItem, monitor) => {
+        console.log('on drop ', dragItem, monitor.didDrop())
         /**
          * If already handled return
          */
