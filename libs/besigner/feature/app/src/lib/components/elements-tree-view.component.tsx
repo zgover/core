@@ -173,7 +173,7 @@ const DraggableTreeItemComponent = forwardRef<
           </Box>
 
           <Typography component="div" noWrap>
-            {label}
+            {label as string}
           </Typography>
         </Stack>
       }

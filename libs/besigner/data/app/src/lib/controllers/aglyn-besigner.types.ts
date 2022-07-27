@@ -24,6 +24,7 @@ import type {
   IAglynAppController,
   IAglynModuleModel,
   NodeId,
+  NodeTemplateData,
 } from '@aglyn/core-data-foundation'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { LogLevelString } from '@aglyn/shared-util-logger'
@@ -115,6 +116,7 @@ export type BesignerDndElementBaseData<T extends DndDragType | DndDropType> = {
   componentId?: ComponentId
   bundleId?: BundleId
   hierarchy?: AglynComponentHierarchy
+  data?: NodeTemplateData
 }
 
 export interface AglynBesignerControllerOptions

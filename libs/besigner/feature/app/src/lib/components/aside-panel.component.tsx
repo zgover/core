@@ -18,6 +18,7 @@
 import {
   type BesignerPanelKey,
   BesignerPanelTabFlag,
+  DndDragType,
 } from '@aglyn/besigner-data-app'
 import { getBundle } from '@aglyn/core-data-app'
 import type {
@@ -37,7 +38,11 @@ import {
   ICON_VARIANT_ELEMENT_TREE_VIEW,
   ICON_VARIANT_ENTITY_BLOCK,
 } from '@aglyn/shared-data-enums'
-import { CardIconListItem } from '@aglyn/shared-ui-jsx'
+import {
+  CardIconListItem,
+  type CardIconListItemProps,
+  useForkedRefs,
+} from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'
 import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import {
@@ -54,6 +59,7 @@ import {
 import {
   AppBar as MuiAppBar,
   Box,
+  BoxProps,
   Button,
   Grid,
   type ListProps,
@@ -71,6 +77,7 @@ import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callbac
 import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 import useBesignerAppContext from '../hooks/use-besigner-app-context'
+import useLeafDrag from '../hooks/use-leaf-drag'
 import AccordionListComponent from './accordion-list.component'
 import ElementPropsForm from './element-props-form.component'
 import ElementStylesForm from './element-styles-form.component'
@@ -266,10 +273,24 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
   },
 )
 
-const ComponentGroupDetails = ({ id, isOpen, item }) => {
-  const ItemContent = useCallback(
-    ({ icon, ...item }: AglynNodeTemplateSchema) => (
-      <CardIconListItem item={item} label={item.label}>
+type ComponentGridItemProps = CardIconListItemProps & {
+  item: AglynNodeTemplateSchema
+}
+const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
+  (props, forwardRef) => {
+    const {
+      item: { icon, ...item },
+      ...rest
+    } = props
+    const [, dragHandle, dragPreview] = useLeafDrag(
+      item?.$id,
+      DndDragType.TEMPLATE,
+      item?.data,
+    )
+    const ref = useForkedRefs(forwardRef, dragPreview, dragHandle)
+
+    return (
+      <CardIconListItem ref={ref} item={item} label={item.label} {...rest}>
         {!icon?.path && icon ? (
           (icon as any)
         ) : (
@@ -289,27 +310,37 @@ const ComponentGroupDetails = ({ id, isOpen, item }) => {
           />
         )}
       </CardIconListItem>
-    ),
-    [],
-  )
+    )
+  },
+)
+type ComponentGroupDetailsProps = BoxProps &
+  JSX.AnyProps & {
+    item?: {
+      items?: AglynNodeTemplateSchema[]
+    }
+    id?: string
+    isOpen?: boolean
+  }
+const ComponentGroupDetails = forwardRef<any, ComponentGroupDetailsProps>(
+  (props, ref) => {
+    const { id, isOpen, item, ...rest } = props
+    console.log('CollapsibleLists open', item)
 
-  console.log('CollapsibleLists open', item)
+    // return <GridList items={item.items} renderItemContent={renderItemContent} />
 
-  // return <GridList items={item.items} renderItemContent={renderItemContent} />
-
-  return (
-    <Box>
-      <Grid container spacing={2}>
-        {item?.items?.map((i, index) => (
-          <Grid key={i?.id ?? index} xs={6} item>
-            <ItemContent {...i} />
-          </Grid>
-        ))}
-      </Grid>
-      {/*<ComponentsGridListComponent items={item.items} maxColumns={2} />*/}
-    </Box>
-  )
-}
+    return (
+      <Box ref={ref} {...rest}>
+        <Grid container spacing={2}>
+          {item?.items?.map((i, index) => (
+            <Grid key={i?.id ?? index} xs={6} item>
+              <ComponentGridItem item={i} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    )
+  },
+)
 
 const ComponentsList = forwardRef<any, ListProps>((props, ref) => {
   const { ...rest } = props

@@ -237,7 +237,7 @@ export interface AglynComponentSchema<P = any> {
   templates?: AglynNodeTemplateSchema[]
 }
 
-type NodeTemplateData = AglynNodeSchema & {
+export type NodeTemplateData = AglynNodeSchema & {
   $id?: NodeId
   elements?: NodeTemplateData
 }

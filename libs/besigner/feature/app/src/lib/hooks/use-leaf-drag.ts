@@ -20,15 +20,21 @@ import {
   type BesignerDroppableItem,
   DndDragType,
 } from '@aglyn/besigner-data-app'
-import { moveCanvasElement } from '@aglyn/core-data-app'
+import { addCanvasElement, moveCanvasElement } from '@aglyn/core-data-app'
 import type { NodeId } from '@aglyn/core-data-foundation'
-import { FEATURE_FLAG } from '@aglyn/core-data-foundation'
+import {
+  CANVAS_ROOT_ELEMENT_ID,
+  FEATURE_FLAG,
+} from '@aglyn/core-data-foundation'
 import {
   useAglynAppContext,
   useAglynElementComponentSchema,
 } from '@aglyn/core-feature-renderer'
-import { isRootElementId } from '@aglyn/core-util-app'
-import { useMemo } from 'react'
+import {
+  createComponentElementData,
+  isRootElementId,
+} from '@aglyn/core-util-app'
+import { useId, useMemo } from 'react'
 import {
   type ConnectDragPreview,
   type ConnectDragSource,
@@ -43,9 +49,12 @@ export type DragCollected = {
 }
 
 export const useLeafDrag = (
-  $id: NodeId,
+  id: NodeId,
   dragType?: DndDragType,
+  data?: any,
 ): [DragCollected, ConnectDragSource, ConnectDragPreview] => {
+  const anyId = useId()
+  const $id = id || anyId
   const type = dragType ?? DndDragType.CANVAS
   const app = useAglynAppContext()
   const setSelected = useAglynCanvasSetSelected()
@@ -69,8 +78,9 @@ export const useLeafDrag = (
       componentId,
       bundleId,
       hierarchy,
+      data,
     }),
-    [$id, type, componentId, bundleId, hierarchy],
+    [$id, type, componentId, bundleId, hierarchy, data],
   )
 
   // console.log('dragItem item canDrag', dragItem, $id, type, canDrag, flags)
@@ -88,15 +98,6 @@ export const useLeafDrag = (
         setDndActive(dragItem)
         return dragItem
       },
-      isDragging: (monitor) => {
-        console.log(
-          'monitor?.getItem()?.$id',
-          monitor?.getItem()?.$id,
-          dragItem?.$id,
-          canDrag,
-        )
-        return monitor?.getItem()?.$id === dragItem?.$id
-      },
       end: (dragItem, monitor) => {
         setDndActive(undefined)
         setDndOver(undefined)
@@ -104,11 +105,21 @@ export const useLeafDrag = (
         const dropItem = monitor.getDropResult()
         if (!dropItem) return
         console.log('end drag ', dragItem, dropItem)
-        moveCanvasElement(app, {
-          $id: dragItem.$id,
-          parentId: dropItem?.$id,
-          index: NaN,
-        })
+        if (dragType === DndDragType.TEMPLATE) {
+          const newElement = createComponentElementData(dragItem as any)
+          addCanvasElement(app, {
+            index: NaN,
+            parentId: dropItem?.$id || CANVAS_ROOT_ELEMENT_ID,
+            element: newElement,
+          })
+          setSelected({ $id: newElement.$id })
+        } else {
+          moveCanvasElement(app, {
+            $id: dragItem.$id,
+            parentId: dropItem?.$id,
+            index: NaN,
+          })
+        }
       },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
