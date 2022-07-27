@@ -57,23 +57,27 @@ import type {
 import type { PayloadData } from '../definitions/shared'
 
 export enum AglynEventStateFlag {
-  APP_CREATING = 'event:app:creating', // 1
-  APP_CREATED = 'event:app:created', // 2
-  APP_INITIALIZING = 'event:app:initializing', // 3
-  APP_INITIALIZED = 'event:app:initialized', // 4
-  APP_DESTROYING = 'event:app:destroying', // 5
-  APP_DESTROYED = 'event:app:destroyed', // 6
-  APP_DELETING = 'event:app:deleting', // 7
-  APP_DELETED = 'event:app:deleted', // 8
+  APP_CREATING = 'event:app:creating',
+  APP_CREATED = 'event:app:created',
+  APP_INITIALIZING = 'event:app:initializing',
+  APP_INITIALIZED = 'event:app:initialized',
+  APP_ACTIVATING = 'event:app:activating',
+  APP_ACTIVATED = 'event:app:activated',
+  APP_DEACTIVATING = 'event:app:deactivating',
+  APP_DEACTIVATED = 'event:app:deactivated',
+  APP_DESTROYING = 'event:app:destroying',
+  APP_DESTROYED = 'event:app:destroyed',
+  APP_DELETING = 'event:app:deleting',
+  APP_DELETED = 'event:app:deleted',
 
-  MODULE_INITIALIZING = 'event:module:initializing', // 1
-  MODULE_INITIALIZED = 'event:module:initialized', // 2
-  MODULE_ACTIVATING = 'event:module:activating', // 3
-  MODULE_ACTIVATED = 'event:module:activated', // 4
-  MODULE_DEACTIVATING = 'event:module:deactivating', // 5
-  MODULE_DEACTIVATED = 'event:module:deactivated', // 6
-  MODULE_DESTROYING = 'event:module:destroying', // 7
-  MODULE_DESTROYED = 'event:module:destroyed', // 8
+  MODULE_INITIALIZING = 'event:module:initializing',
+  MODULE_INITIALIZED = 'event:module:initialized',
+  MODULE_ACTIVATING = 'event:module:activating',
+  MODULE_ACTIVATED = 'event:module:activated',
+  MODULE_DEACTIVATING = 'event:module:deactivating',
+  MODULE_DEACTIVATED = 'event:module:deactivated',
+  MODULE_DESTROYING = 'event:module:destroying',
+  MODULE_DESTROYED = 'event:module:destroyed',
 
   EXTENSION_REGISTERING = 'event:extensions:registering-extension',
   EXTENSION_REGISTERED = 'event:extensions:registered-extension',

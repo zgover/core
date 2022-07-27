@@ -203,6 +203,29 @@ export class AglynAppController<
     )
     return this
   }
+  public onActivate(): this {
+    this.handleEvent(
+      [AglynEventStateFlag.APP_ACTIVATING, AglynEventStateFlag.APP_ACTIVATED],
+      { appName: this.#appName },
+      () => {
+        console.log('app onActivate')
+      },
+    )
+    return this
+  }
+  public onDeactivate(): this {
+    this.handleEvent(
+      [
+        AglynEventStateFlag.APP_DEACTIVATING,
+        AglynEventStateFlag.APP_DEACTIVATED,
+      ],
+      { appName: this.#appName },
+      () => {
+        console.log('app onDeactivate')
+      },
+    )
+    return this
+  }
   public onDestroy(): this {
     this.handleEvent(
       [AglynEventStateFlag.APP_DESTROYING, AglynEventStateFlag.APP_DESTROYED],
