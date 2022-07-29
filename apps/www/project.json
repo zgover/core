@@ -5,16 +5,16 @@
   "targets": {
     "build": {
       "executor": "@nrwl/next:build",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "root": "apps/www",
         "outputPath": "dist/apps/www"
       },
       "configurations": {
         "production": {},
-        "development": {}
+        "development": {
+          "outputPath": "tmp/apps/www"
+        }
       },
       "defaultConfiguration": "production"
     },
@@ -45,9 +45,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/apps/www"
-      ],
+      "outputs": ["coverage/apps/www"],
       "options": {
         "jestConfig": "apps/www/jest.config.ts",
         "passWithNoTests": true
@@ -56,13 +54,9 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": [
-          "apps/www/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/www/**/*.{ts,tsx,js,jsx}"]
       },
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "outputs": ["{options.outputFile}"]
     },
     "version": {
       "executor": "@jscutlery/semver:version",
@@ -71,8 +65,5 @@
       }
     }
   },
-  "tags": [
-    "scope:app",
-    "scope:public"
-  ]
+  "tags": ["scope:app", "scope:public"]
 }

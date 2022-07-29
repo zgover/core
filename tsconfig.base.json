@@ -11,12 +11,13 @@
     "explainFiles": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
+    "listFiles": true,
     "jsx": "preserve",
     "jsxImportSource": "@emotion/react",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "listFiles": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "target": "es2016",
     "noEmit": true,
     "noFallthroughCasesInSwitch": false,
     "noImplicitOverride": false,
@@ -29,7 +30,6 @@
     "strictBindCallApply": true,
     "stripInternal": true,
     "strictNullChecks": false,
-    "target": "es2015",
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
@@ -120,6 +120,8 @@
   },
   "exclude": ["node_modules", "tmp", "**/generated"],
   "references": [
-    {"path": "libs/shared/data/types/src"}
+    {
+      "path": "libs/shared/data/types/src"
+    }
   ]
 }

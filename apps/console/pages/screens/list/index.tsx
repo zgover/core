@@ -30,6 +30,7 @@ import {
 } from '@aglyn/shared-data-enums'
 import {
   AppLink,
+  AppLinkNakedLinkProps,
   Container,
   NavigationDrawerComponent,
   SrOnly,
@@ -84,23 +85,24 @@ const SummaryContentComponent = forwardRef<any, AccordionRenderProps>(
   },
 )
 // eslint-disable-next-line react/display-name
-const Accordion = forwardRef<any, AccordionListProps>((props, ref) => {
+const Accordion = (props: AccordionListProps) => {
   const { items } = props
   return (
     <AccordionListComponent
-      ref={ref}
       unique
       items={items}
       AccordionSummaryProps={{ dense: true }}
-      DetailsContentComponent={DetailsContentComponent}
-      SummaryContentComponent={SummaryContentComponent}
+      DetailsContentComponent={DetailsContentComponent as any}
+      SummaryContentComponent={SummaryContentComponent as any}
     />
   )
-})
-
-const CellItemLinkComponent = (props) => {
-  return <AppLink {...props} componentVariant={'naked'} />
 }
+
+const CellItemLinkComponent = forwardRef<any, AppLinkNakedLinkProps>(
+  (props, ref) => {
+    return <AppLink ref={ref} {...props} componentVariant={'naked'} />
+  },
+)
 
 function Screens(props) {
   const { queueLoading, loading } = useLoading()
@@ -338,7 +340,7 @@ function Screens(props) {
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <WidgetCardComponent>
-            <Accordion items={screens} />
+            <Accordion items={screens as any} />
             <DataTableComponent
               rowHeight={TABLE_ROW_HEIGHT}
               getRowId={(row) => row.$id}

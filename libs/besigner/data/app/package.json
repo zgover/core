@@ -2,6 +2,11 @@
   "name": "@aglyn/besigner-data-app",
   "version": "0.0.1",
   "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aglyn/core.git",
+    "directory": "libs/besigner/data/app"
+  },
   "dependencies": {
     "@swc/helpers": "~0.3.3"
   },

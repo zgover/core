@@ -5,9 +5,7 @@
   "targets": {
     "build": {
       "executor": "@nrwl/next:build",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "root": "apps/tenant",
@@ -15,7 +13,9 @@
       },
       "configurations": {
         "production": {},
-        "development": {}
+        "development": {
+          "outputPath": "tmp/apps/tenant"
+        }
       }
     },
     "serve": {
@@ -45,9 +45,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/apps/tenant"
-      ],
+      "outputs": ["coverage/apps/tenant"],
       "options": {
         "jestConfig": "apps/tenant/jest.config.ts",
         "passWithNoTests": true
@@ -55,18 +53,11 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/tenant/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/tenant/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },
-  "tags": [
-    "scope:app",
-    "scope:public"
-  ]
+  "tags": ["scope:app", "scope:public"]
 }

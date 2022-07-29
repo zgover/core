@@ -1,12 +1,24 @@
 {
   "name": "aglyn",
+  "description": "",
   "version": "1.0.0-alpha.0",
   "license": "Apache-2.0",
+  "homepage": "https://aglyn.com",
+  "repository": "github:aglyn/core",
+  "bugs": "https://github.com/aglyn/core/issues",
   "private": true,
-  "homepage": "https://aglyn.com/",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/aglyn/core.git"
+  "engines": {
+    "node": ">=14"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   },
   "scripts": {
     "nx": "nx",
@@ -118,8 +130,6 @@
     "use-debounce": "^7.0.1"
   },
   "devDependencies": {
-    "@angular-devkit/core": "^14.0.5",
-    "@angular-devkit/schematics": "^14.0.5",
     "@babel/core": "7.18.0",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.17.12",
     "@babel/plugin-proposal-optional-chaining": "^7.17.12",
@@ -133,20 +143,21 @@
     "@jscutlery/semver": "^2.22.0",
     "@mdi/svg": "6.5.95",
     "@mdi/util": "0.3.2",
-    "@nrwl/cli": "14.4.2",
-    "@nrwl/cypress": "14.4.2",
-    "@nrwl/devkit": "14.4.2",
-    "@nrwl/eslint-plugin-nx": "14.4.2",
-    "@nrwl/jest": "14.4.2",
-    "@nrwl/js": "14.4.2",
-    "@nrwl/linter": "14.4.2",
-    "@nrwl/next": "14.4.2",
-    "@nrwl/node": "14.4.2",
+    "@nrwl/cli": "14.4.3",
+    "@nrwl/cypress": "14.4.3",
+    "@nrwl/devkit": "14.4.3",
+    "@nrwl/eslint-plugin-nx": "14.4.3",
+    "@nrwl/jest": "14.4.3",
+    "@nrwl/js": "14.4.3",
+    "@nrwl/linter": "14.4.3",
+    "@nrwl/next": "14.4.3",
+    "@nrwl/node": "14.4.3",
     "@nrwl/nx-cloud": "14.2.0",
-    "@nrwl/react": "14.4.2",
-    "@nrwl/storybook": "^14.4.2",
-    "@nrwl/web": "14.4.2",
-    "@nrwl/workspace": "14.4.2",
+    "@nrwl/nx-plugin": "14.4.3",
+    "@nrwl/react": "14.4.3",
+    "@nrwl/storybook": "14.4.3",
+    "@nrwl/web": "14.4.3",
+    "@nrwl/workspace": "14.4.3",
     "@storybook/addon-essentials": "~6.5.9",
     "@storybook/builder-webpack5": "~6.5.9",
     "@storybook/core-server": "~6.5.9",
@@ -197,7 +208,7 @@
     "jest": "28.1.3",
     "markdown-toc": "^1.2.0",
     "next-compose-plugins": "^2.2.1",
-    "nx": "14.4.2",
+    "nx": "14.4.3",
     "nx-electron": "13.1.2",
     "prettier": "2.6.2",
     "react-test-renderer": "18.2.0",
@@ -215,15 +226,5 @@
       "@types/react": "$@types/react",
       "react": "$react"
     }
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
   }
 }
