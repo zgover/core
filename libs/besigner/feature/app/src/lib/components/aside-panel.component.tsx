@@ -32,19 +32,20 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {
-  ICON_VARIANT_COMPONENT,
+  ICON_VARIANT_ELEMENT,
   ICON_VARIANT_ELEMENT_BROWSE,
   ICON_VARIANT_ELEMENT_DETAILS,
   ICON_VARIANT_ELEMENT_PROPERTIES,
   ICON_VARIANT_ELEMENT_STYLES,
   ICON_VARIANT_ELEMENT_TREE_VIEW,
+  ICON_VARIANT_MODIFY_ADD,
 } from '@aglyn/shared-data-enums'
 import {
   CardIconListItem,
   type CardIconListItemProps,
   useForkedRefs,
 } from '@aglyn/shared-ui-jsx'
-import { MdiIcon, type MdiIconProps, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import {
   arraySortBy,
@@ -241,7 +242,7 @@ const defaultTabContent = (
     >
       <MdiIcon
         sx={{ opacity: 0.3, fontSize: 80 }}
-        path={ICON_VARIANT_COMPONENT.path}
+        path={ICON_VARIANT_ELEMENT.path}
       />
       <div>{'Select an element'}</div>
     </Typography>
@@ -282,7 +283,9 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
         <Box sx={{ px: 0.5, pb: 1, pt: 1 }}>
           <Button
             color="secondary"
-            startIcon={<MdiIcon fontSize="inherit" path={mdiPlus.path} />}
+            startIcon={
+              <MdiIcon fontSize="inherit" path={ICON_VARIANT_MODIFY_ADD.path} />
+            }
             onClick={handleAddElementClick}
           >
             {'Add Element'}
@@ -337,7 +340,7 @@ const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
             <MdiIcon
               color="tertiary"
               {...icon}
-              path={icon?.path || ICON_VARIANT_COMPONENT.path}
+              path={icon?.path || ICON_VARIANT_ELEMENT.path}
               sx={mergeSxProps(
                 {
                   fontSize: { xs: `5ch`, sm: `4ch` },

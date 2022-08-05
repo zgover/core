@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ICON_VARIANT_COMPONENT } from '@aglyn/shared-data-enums'
+import { ICON_VARIANT_ELEMENT } from '@aglyn/shared-data-enums'
 import {
   CardIconListItem,
   type CardIconListItemProps,
@@ -50,7 +50,7 @@ const ElementCardComponent = forwardRef<any, ElementCardProps>((props, ref) => {
           ) : (
             <MdiIcon
               {...icon}
-              path={icon?.path || ICON_VARIANT_COMPONENT.path}
+              path={icon?.path || ICON_VARIANT_ELEMENT.path}
               sx={_iconSx}
             />
           )}

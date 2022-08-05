@@ -17,7 +17,7 @@
 
 import type { NodeId } from '@aglyn/core-data-foundation'
 import { useAglynElementComponentSchema } from '@aglyn/core-feature-renderer'
-import { ICON_VARIANT_COMPONENT } from '@aglyn/shared-data-enums'
+import { ICON_VARIANT_ELEMENT } from '@aglyn/shared-data-enums'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { forwardRef, useMemo } from 'react'
@@ -32,7 +32,7 @@ const ElementIconComponent = forwardRef<any, ElementIconProps>((props, ref) => {
   const iconProps = useMemo(
     () => ({
       ...icon,
-      path: icon?.path || ICON_VARIANT_COMPONENT.path,
+      path: icon?.path || ICON_VARIANT_ELEMENT.path,
       sx: mergeSxProps(icon?.sx, sx),
     }),
     [icon, sx],

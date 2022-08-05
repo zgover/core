@@ -65,14 +65,15 @@ import {
   mdiPageNextOutline,
   mdiPaletteOutline,
   mdiPencil,
+  mdiPlus,
   mdiRedo,
-  mdiShapeSquareRoundedPlus,
   mdiShieldLock,
   mdiTablet,
   mdiThemeLightDark,
   mdiTune,
   mdiUndo,
   mdiVariable,
+  mdiVectorSquare,
   mdiWeatherNight,
   mdiWeb,
   mdiWhiteBalanceSunny,
@@ -85,6 +86,7 @@ export const ICON_VARIANT_DATE = mdiCalendar
 export const ICON_VARIANT_DATE_TIME = mdiCalendarClock
 export const ICON_VARIANT_DOCUMENT = mdiBookVariant
 export const ICON_VARIANT_COMPONENT = mdiCubeOutline
+export const ICON_VARIANT_ELEMENT = mdiVectorSquare
 export const ICON_VARIANT_IDENTIFIER = mdiIdentifier
 export const ICON_VARIANT_OBJECT = mdiCodeBracesBox
 export const ICON_VARIANT_PRIMARY_KEY = mdiKeyVariant
@@ -102,7 +104,7 @@ export const ICON_VARIANT_DOCK_BOTTOM_TOGGLE = mdiDockBottom
 export const ICON_VARIANT_DOCK_LEFT_TOGGLE = mdiDockLeft
 export const ICON_VARIANT_DOCK_RIGHT_TOGGLE = mdiDockRight
 export const ICON_VARIANT_MENU_DOWN = mdiMenuDown
-export const ICON_VARIANT_MODIFY_ADD = mdiShapeSquareRoundedPlus
+export const ICON_VARIANT_MODIFY_ADD = mdiPlus
 export const ICON_VARIANT_MODIFY_DELETE = mdiDeleteOutline
 export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
 export const ICON_VARIANT_MODIFY_DUPLICATE = mdiContentDuplicate
