@@ -45,7 +45,7 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
       title={
         title ? [...(_isArr(title) ? title : [title]), 'Secure'] : 'Secure'
       }
-      appBarSuffix="Console"
+      // appBarSuffix="Console"
       quickActions={[
         ...(quickActions || []),
         {

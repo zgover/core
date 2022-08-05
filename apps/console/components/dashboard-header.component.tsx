@@ -115,8 +115,8 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
                         borderWidth: `1px`,
                         borderStyle: 'solid',
                         borderColor: 'tertiary.dark',
-                        color: 'quaternary.contrastText',
-                        bgcolor: 'quaternary.main',
+                        color: 'tertiary.contrastText',
+                        bgcolor: 'tertiary.main',
                         borderRadius: (theme) =>
                           `${theme.shape.appIconBorderRadius}`,
                       },

@@ -70,20 +70,38 @@ const TreeItem = styled(MuiTreeItem)<MuiTreeItemProps>(({ theme }) => ({
     [`&.${treeItemClasses.focused}`]: {
       backgroundColor: alpha(
         theme.palette.secondary.dark,
-        theme.palette.action.focusOpacity,
+        theme.palette.action.focusOpacity + 0.1,
       ),
+      [`&:hover`]: {
+        backgroundColor: alpha(
+          theme.palette.secondary.dark,
+          theme.palette.action.focusOpacity + 0.2,
+        ),
+      },
     },
     [`&.${treeItemClasses.selected}`]: {
       backgroundColor: alpha(
-        theme.palette.quaternary.main,
+        theme.palette.tertiary.main,
         theme.palette.action.selectedOpacity,
       ),
+      [`&:hover`]: {
+        backgroundColor: alpha(
+          theme.palette.tertiary.main,
+          theme.palette.action.selectedOpacity + 0.2,
+        ),
+      },
     },
     [`&.${treeItemClasses.selected}.${treeItemClasses.focused}`]: {
       backgroundColor: alpha(
-        theme.palette.quaternary.main,
+        theme.palette.tertiary.main,
         theme.palette.action.activatedOpacity,
       ),
+      [`&:hover`]: {
+        backgroundColor: alpha(
+          theme.palette.tertiary.main,
+          theme.palette.action.selectedOpacity + 0.2,
+        ),
+      },
     },
   },
 }))
@@ -180,7 +198,7 @@ const DraggableTreeItemComponent = forwardRef<
               border: 1,
               borderColor: 'divider',
               boxShadow: 1,
-              color: 'quaternary',
+              color: 'tertiary',
               display: 'flex',
               alignItems: 'center',
               flexDirection: 'column',

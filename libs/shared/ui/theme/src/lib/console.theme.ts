@@ -158,26 +158,26 @@ export const ordinalSecondaryDark: SecondaryRecord = {
 }
 
 export const ordinalTertiaryLight: TertiaryRecord = {
-  main: deepPurple['500'],
+  main: '#E040FB',
   contrastText: '#FFFFFF',
   // light: '#AF52BF',
   // dark: '#6D1B7B',
 }
 export const ordinalTertiaryDark: TertiaryRecord = {
-  main: '#AB47BC',
+  main: '#E040FB',
   contrastText: '#FFFFFF',
   // light: '#BA68C8',
   // dark: '#9C27B0',
 }
 
 export const ordinalQuaternaryLight: QuaternaryRecord = {
-  main: '#E040FB',
+  main: '#673ab7',
   // light: '#E666FB',
   // dark: '#9C2CAF',
   // contrastText: '#FFFFFF',
 }
 export const ordinalQuaternaryDark: QuaternaryRecord = {
-  main: '#E040FB',
+  main: '#673ab7',
   // light: '#E666FB',
   // dark: '#9C2CAF',
   // contrastText: '#FFFFFF',

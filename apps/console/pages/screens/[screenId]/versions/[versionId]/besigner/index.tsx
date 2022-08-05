@@ -32,7 +32,9 @@ import {
   ICON_VARIANT_CLOSE,
   ICON_VARIANT_LEFT,
   ICON_VARIANT_MODIFY_ADD,
+  ICON_VARIANT_MODIFY_REDO,
   ICON_VARIANT_MODIFY_SAVE,
+  ICON_VARIANT_MODIFY_UNDO,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
 import { LOADING_OVERLAY_ELEMENT, useLoading } from '@aglyn/shared-ui-jsx'
@@ -143,7 +145,7 @@ function Besigner(props) {
     <>
       <ConsoleLayout
         title={'Besigner'}
-        appBarSuffix={'Besigner'}
+        // appBarSuffix={'Besigner'}
         centerNavigationItems={[
           // {
           //   id: 'center-nav-site-picker',
@@ -172,7 +174,7 @@ function Besigner(props) {
                 icon: {
                   path: ICON_VARIANT_MODIFY_ADD.path,
                 },
-                children: 'New element',
+                children: 'New Element',
                 onClick: handleAddElementClick,
               },
               {
@@ -183,7 +185,7 @@ function Besigner(props) {
                 icon: {
                   path: ICON_VARIANT_CLOSE.path,
                 },
-                children: 'Close screen',
+                children: 'Close Screen',
                 href: detailUrl,
               },
               {
@@ -193,7 +195,7 @@ function Besigner(props) {
                     ? ICON_VARIANT_MODIFY_SAVE.path
                     : ICON_VARIANT_SYMBOL_CONFIRMED.path,
                 },
-                children: saveAvailable ? 'Save screen' : 'Up to date',
+                children: saveAvailable ? 'Save Screen' : 'Up to Date',
                 onClick: handleSave,
               },
             ],
@@ -205,17 +207,21 @@ function Besigner(props) {
             items: [
               {
                 id: 'center-nav-edit-undo',
-                children: 'Undo',
+                icon: {
+                  path: ICON_VARIANT_MODIFY_UNDO.path,
+                },
+                children: 'Undo Change',
                 onClick: () => undo(),
                 disabled: !canUndo,
-                ListItemTextProps: { inset: true },
               },
               {
                 id: 'center-nav-edit-redo',
+                icon: {
+                  path: ICON_VARIANT_MODIFY_REDO.path,
+                },
                 children: 'Redo',
                 onClick: () => redo(),
                 disabled: !canRedo,
-                ListItemTextProps: { inset: true },
               },
               {
                 type: 'divider',
@@ -225,7 +231,7 @@ function Besigner(props) {
                 icon: {
                   path: ICON_VARIANT_APP_SETTINGS.path,
                 },
-                children: 'Screen properties',
+                children: 'Screen Properties',
                 onClick: () => setScreenDialog(true),
               },
             ],

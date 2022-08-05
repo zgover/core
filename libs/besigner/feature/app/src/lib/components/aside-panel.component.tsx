@@ -335,14 +335,14 @@ const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
             (icon as any)
           ) : (
             <MdiIcon
-              color="quaternary"
+              color="tertiary"
               {...icon}
               path={icon?.path || ICON_VARIANT_COMPONENT.path}
               sx={mergeSxProps(
                 {
                   fontSize: { xs: `5ch`, sm: `4ch` },
                   padding: `0.15ch`,
-                  color: 'quaternary.main',
+                  color: 'tertiary.main',
                   overflow: 'visible',
                 },
                 icon?.sx,

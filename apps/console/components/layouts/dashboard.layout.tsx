@@ -50,7 +50,7 @@ const defaultTabBarTitle = (
     alignItems="center"
     typography={'subtitle2'}
     lineHeight={'normal'}
-    sx={{ color: 'tertiary.light' }}
+    sx={{ color: 'tertiary.main' }}
   >
     <span>{'Secure'}</span>
     <MdiIcon path={ICON_VARIANT_SYMBOL_SECURE.path} fontSize={'small'} />

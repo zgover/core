@@ -35,7 +35,7 @@ const ElementCardComponent = forwardRef<any, ElementCardProps>((props, ref) => {
     {
       fontSize: { xs: `5ch`, sm: `4ch` },
       padding: `0.15ch`,
-      color: 'quaternary.main',
+      color: 'tertiary.main',
       overflow: 'visible',
     },
     icon?.sx,

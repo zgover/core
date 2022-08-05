@@ -65,7 +65,7 @@ const ElementOutlineWrapper = styled('div', {
     [`&.${classKeys.selectedSelf}`]: {
       outlineWidth: 2,
       outlineStyle: 'solid',
-      outlineColor: theme.palette.quaternary.main,
+      outlineColor: theme.palette.tertiary.main,
     },
     [`&.${classKeys.hoveringSelf}`]: {
       outlineColor: theme.palette.secondary.main,
@@ -76,8 +76,8 @@ const ElementOutlineWrapper = styled('div', {
       backgroundColor: alpha(theme.palette.secondary.light, 0.76),
     },
     [`&.${classKeys.draggingOver}`]: {
-      outlineColor: theme.palette.quaternary.main,
-      backgroundColor: alpha(theme.palette.quaternary.dark, 0.76),
+      outlineColor: theme.palette.tertiary.main,
+      backgroundColor: alpha(theme.palette.tertiary.dark, 0.76),
     },
     [`&.${classKeys.draggingOver}.${classKeys.draggingSelf}`]: {
       outlineColor: theme.palette.grey['500'],

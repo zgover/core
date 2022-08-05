@@ -17,7 +17,6 @@
 
 import { APP_CONSOLE, ICON_VARIANT_MENU_DOWN } from '@aglyn/shared-data-enums'
 import {
-  AglynSvgLogo,
   AppLink,
   type AppLinkProps,
   ElevateOnScroll,
@@ -27,7 +26,7 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { Image, NextPageTitle } from '@aglyn/shared-ui-next'
-import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { mergeSxProps, useThemeModeState } from '@aglyn/shared-ui-theme'
 import { _isArrEmpty } from '@aglyn/shared-util-guards'
 import {
   AppBar,
@@ -41,9 +40,10 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { Fragment } from 'react'
+import { Fragment, useMemo } from 'react'
 import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
-import besignerIcon from '../../public/_static/images/icons/aglyn-logo-mark-rev3.svg'
+import aglynConsoleLogoDark from '../../public/_static/images/icons/aglyn-console-logo-full-rev3-dark.svg'
+import aglynConsoleLogoLight from '../../public/_static/images/icons/aglyn-console-logo-full-rev3.svg'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {
@@ -124,6 +124,10 @@ const TopAppBar = (props: TopAppBarProps) => {
     disableAppBarElevation,
     quickActions,
   } = props
+  const [[, themeMode]] = useThemeModeState()
+  const aglynLogoUrl = useMemo(() => {
+    return themeMode === 'dark' ? aglynConsoleLogoLight : aglynConsoleLogoDark
+  }, [themeMode])
 
   return (
     <ElevateOnScroll>
@@ -173,7 +177,7 @@ const TopAppBar = (props: TopAppBarProps) => {
                   alignItems="center"
                   direction="row"
                   justifyContent="flex-start"
-                  spacing={0.75}
+                  spacing={0.25}
                   sx={{
                     fontWeight: 'fontWeightRegular',
                     fontFamily: 'h6.fontFamily',
@@ -184,22 +188,14 @@ const TopAppBar = (props: TopAppBarProps) => {
                   }}
                 >
                   <Image
-                    src={besignerIcon}
+                    src={aglynLogoUrl}
                     sx={{
                       ml: -0.15,
                       height: '32px',
-                      width: '32px',
+                      width: '193px',
                     }}
                     height={32}
-                    width={32}
-                  />
-                  <AglynSvgLogo
-                    color="secondary"
-                    sx={{
-                      transform: 'translateY(0.0265em)',
-                      height: 'auto',
-                      fontSize: '2.765em',
-                    }}
+                    width={193}
                   />
                   {appBarSuffix && (
                     <Typography
