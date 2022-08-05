@@ -29,12 +29,8 @@ import { useAglynCanvasElementsNormalized } from '@aglyn/core-feature-renderer'
 import {
   HAS_BROWSER,
   ICON_VARIANT_APP_SETTINGS,
-  ICON_VARIANT_CLOSE,
   ICON_VARIANT_LEFT,
   ICON_VARIANT_MODIFY_ADD,
-  ICON_VARIANT_MODIFY_REDO,
-  ICON_VARIANT_MODIFY_SAVE,
-  ICON_VARIANT_MODIFY_UNDO,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
 import { LOADING_OVERLAY_ELEMENT, useLoading } from '@aglyn/shared-ui-jsx'
@@ -145,6 +141,7 @@ function Besigner(props) {
     <>
       <ConsoleLayout
         title={'Besigner'}
+        // besigner={true}
         // appBarSuffix={'Besigner'}
         centerNavigationItems={[
           // {
@@ -170,58 +167,38 @@ function Besigner(props) {
             // href: '/besigner',
             items: [
               {
-                id: 'center-nav-file-new-element',
-                icon: {
-                  path: ICON_VARIANT_MODIFY_ADD.path,
-                },
-                children: 'New Element',
-                onClick: handleAddElementClick,
+                id: 'center-nav-file-save',
+                icon: saveAvailable
+                  ? undefined
+                  : {
+                      path: ICON_VARIANT_SYMBOL_CONFIRMED.path,
+                    },
+                children: saveAvailable ? 'Save' : 'Up to Date',
+                onClick: handleSave,
+                ListItemTextProps: { inset: Boolean(saveAvailable) },
+              },
+              {
+                id: 'center-nav-file-close',
+                children: 'Close',
+                href: detailUrl,
+                ListItemTextProps: { inset: true },
               },
               {
                 type: 'divider',
               },
               {
-                id: 'center-nav-file-close',
-                icon: {
-                  path: ICON_VARIANT_CLOSE.path,
-                },
-                children: 'Close Screen',
-                href: detailUrl,
-              },
-              {
-                id: 'center-nav-file-save',
-                icon: {
-                  path: saveAvailable
-                    ? ICON_VARIANT_MODIFY_SAVE.path
-                    : ICON_VARIANT_SYMBOL_CONFIRMED.path,
-                },
-                children: saveAvailable ? 'Save Screen' : 'Up to Date',
-                onClick: handleSave,
-              },
-            ],
-          },
-          {
-            id: 'center-nav-edit',
-            children: 'Edit',
-            // href: '/besigner',
-            items: [
-              {
-                id: 'center-nav-edit-undo',
-                icon: {
-                  path: ICON_VARIANT_MODIFY_UNDO.path,
-                },
-                children: 'Undo Change',
-                onClick: () => undo(),
-                disabled: !canUndo,
-              },
-              {
-                id: 'center-nav-edit-redo',
-                icon: {
-                  path: ICON_VARIANT_MODIFY_REDO.path,
-                },
-                children: 'Redo',
-                onClick: () => redo(),
-                disabled: !canRedo,
+                id: 'center-nav-file-new-version',
+                children: (
+                  <Typography component="div">
+                    {'New Version'}{' '}
+                    <Typography variant="caption" component="sup">
+                      {'Coming Soon'}
+                    </Typography>
+                  </Typography>
+                ),
+                onClick: handleAddElementClick,
+                disabled: true,
+                ListItemTextProps: { inset: true },
               },
               {
                 type: 'divider',
@@ -233,6 +210,42 @@ function Besigner(props) {
                 },
                 children: 'Screen Properties',
                 onClick: () => setScreenDialog(true),
+              },
+            ],
+          },
+          {
+            id: 'center-nav-edit',
+            children: 'Edit',
+            // href: '/besigner',
+            items: [
+              {
+                id: 'center-nav-edit-undo',
+                children: 'Undo',
+                onClick: () => undo(),
+                disabled: !canUndo,
+                ListItemTextProps: { inset: true },
+              },
+              {
+                id: 'center-nav-edit-redo',
+                children: 'Redo',
+                onClick: () => redo(),
+                disabled: !canRedo,
+                ListItemTextProps: { inset: true },
+              },
+            ],
+          },
+          {
+            id: 'center-nav-insert',
+            children: 'Insert',
+            // href: '/besigner',
+            items: [
+              {
+                id: 'center-nav-insert-element',
+                icon: {
+                  path: ICON_VARIANT_MODIFY_ADD.path,
+                },
+                children: 'New Element',
+                onClick: handleAddElementClick,
               },
             ],
           },

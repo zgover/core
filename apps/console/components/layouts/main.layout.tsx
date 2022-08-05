@@ -42,6 +42,8 @@ import {
 } from '@mui/material'
 import { Fragment, useMemo } from 'react'
 import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
+import aglynBesignerLogoDark from '../../public/_static/images/icons/aglyn-besigner-logo-full-rev3-dark.svg'
+import aglynBesignerLogoLight from '../../public/_static/images/icons/aglyn-besigner-logo-full-rev3.svg'
 import aglynConsoleLogoDark from '../../public/_static/images/icons/aglyn-console-logo-full-rev3-dark.svg'
 import aglynConsoleLogoLight from '../../public/_static/images/icons/aglyn-console-logo-full-rev3.svg'
 
@@ -114,6 +116,7 @@ export interface TopAppBarProps {
   customCenter?: JSX.Node
   disableAppBarElevation?: boolean
   quickActions?: QuickActionsMenuItem[]
+  besigner?: boolean
 }
 
 const TopAppBar = (props: TopAppBarProps) => {
@@ -123,11 +126,15 @@ const TopAppBar = (props: TopAppBarProps) => {
     customCenter,
     disableAppBarElevation,
     quickActions,
+    besigner,
   } = props
   const [[, themeMode]] = useThemeModeState()
   const aglynLogoUrl = useMemo(() => {
-    return themeMode === 'dark' ? aglynConsoleLogoLight : aglynConsoleLogoDark
-  }, [themeMode])
+    if (themeMode === 'dark') {
+      return besigner ? aglynBesignerLogoLight : aglynConsoleLogoLight
+    }
+    return besigner ? aglynBesignerLogoDark : aglynConsoleLogoDark
+  }, [themeMode, besigner])
 
   return (
     <ElevateOnScroll>
@@ -287,6 +294,7 @@ function MainLayout(props: MainLayoutProps) {
     customCenter,
     disableAppBarElevation,
     quickActions,
+    besigner,
     ...rest
   } = props
 
@@ -309,6 +317,7 @@ function MainLayout(props: MainLayoutProps) {
           appBarSuffix={appBarSuffix}
           quickActions={quickActions}
           disableAppBarElevation={disableAppBarElevation}
+          besigner={besigner}
         />
         {children}
       </Stack>
