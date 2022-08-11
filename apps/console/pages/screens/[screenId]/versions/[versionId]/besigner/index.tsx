@@ -29,7 +29,6 @@ import { useAglynCanvasElementsNormalized } from '@aglyn/core-feature-renderer'
 import {
   HAS_BROWSER,
   ICON_VARIANT_APP_SETTINGS,
-  ICON_VARIANT_LEFT,
   ICON_VARIANT_MODIFY_ADD,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
@@ -38,7 +37,6 @@ import {
   LOADING_OVERLAY_ELEMENT,
   useLoading,
 } from '@aglyn/shared-ui-jsx'
-import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { useScreenVersion } from '@aglyn/tenant-feature-instance'
@@ -148,24 +146,18 @@ function Besigner(props) {
         disableAppBarElevation
         // besigner={true}
         // appBarSuffix={'Besigner'}
+        backButton={
+          {
+            component: AppLink,
+            componentVariant: 'naked',
+            href: detailUrl,
+          } as any
+        }
         centerNavigationItems={[
           // {
           //   id: 'center-nav-site-picker',
           //   children: ,
           // },
-          {
-            id: 'center-nav-back',
-            startIcon: (
-              <MdiIcon path={ICON_VARIANT_LEFT.path} fontSize={'small'} />
-            ),
-            color: 'tertiary',
-            children: (
-              <>
-                <span>{'Back'}</span>
-              </>
-            ),
-            href: detailUrl,
-          },
           {
             id: 'center-nav-file',
             children: 'File',

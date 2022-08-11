@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AglynLogoFull } from '@aglyn/shared-ui-jsx/const/svg-icons'
+import { AglynLogoFull } from '@aglyn/shared-ui-jsx'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {

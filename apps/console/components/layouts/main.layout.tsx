@@ -17,6 +17,7 @@
 
 import {
   APP_CONSOLE,
+  ICON_VARIANT_LEFT,
   ICON_VARIANT_MENU_DOWN,
   ICON_VARIANT_SIGN_OUT,
   ICON_VARIANT_THEME_DARK,
@@ -25,20 +26,21 @@ import {
   ICON_VARIANT_USER_SETTINGS,
 } from '@aglyn/shared-data-enums'
 import {
+  AglynConsoleLogoFull,
   AppLink,
   type AppLinkProps,
   ElevateOnScroll,
   Menu,
   type MenuItemProps,
   type MenuProps,
+  SrOnly,
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { Image, NextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next'
 import {
   getThemeModeDisplayName,
   mergeSxProps,
   useThemeMode,
-  useThemeModeState,
 } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
 import { useUserPhotoUrl } from '@aglyn/tenant-feature-instance'
@@ -46,6 +48,7 @@ import {
   AppBar,
   Avatar,
   Button,
+  type ButtonProps,
   Divider,
   IconButton,
   type IconButtonProps,
@@ -58,10 +61,6 @@ import { Fragment, useMemo } from 'react'
 import { useUser } from 'reactfire'
 import { Route } from '../../constants/route-links'
 import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
-import aglynBesignerLogoDark from '../../public/_static/images/brand/aglyn-besigner-logo-full-dark.svg'
-import aglynBesignerLogoLight from '../../public/_static/images/brand/aglyn-besigner-logo-full-light.svg'
-import aglynConsoleLogoDark from '../../public/_static/images/brand/aglyn-console-logo-full-dark.svg'
-import aglynConsoleLogoLight from '../../public/_static/images/brand/aglyn-console-logo-full-light.svg'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {
@@ -133,6 +132,7 @@ export interface TopAppBarProps {
   disableAppBarElevation?: boolean
   quickActions?: QuickActionsMenuItem[]
   besigner?: boolean
+  backButton?: Partial<ButtonProps>
 }
 
 const TopAppBar = (props: TopAppBarProps) => {
@@ -143,14 +143,8 @@ const TopAppBar = (props: TopAppBarProps) => {
     disableAppBarElevation,
     quickActions,
     besigner,
+    backButton,
   } = props
-  const [[, themeMode]] = useThemeModeState()
-  const aglynLogoUrl = useMemo(() => {
-    if (themeMode === 'dark') {
-      return besigner ? aglynBesignerLogoLight : aglynConsoleLogoLight
-    }
-    return besigner ? aglynBesignerLogoDark : aglynConsoleLogoDark
-  }, [themeMode, besigner])
 
   return (
     <ElevateOnScroll>
@@ -187,8 +181,30 @@ const TopAppBar = (props: TopAppBarProps) => {
               color="inherit"
               width={DRAWER_WIDTH}
               maxWidth={{ xs: '100%' }}
-              sx={{ paddingLeft: { xs: 2, md: 3 } }}
+              sx={{ paddingLeft: { xs: 3.5, md: 3.5 } }}
             >
+              {backButton && (
+                <Button
+                  {...backButton}
+                  sx={{
+                    minWidth: 'unset',
+                    padding: '0 1px 0 1px',
+                    position: 'absolute',
+                    left: 0,
+                    height: 1,
+                    borderRadius: 0,
+                    borderRight: ({ palette }) =>
+                      `1px solid ${palette.divider}`,
+                  }}
+                >
+                  <MdiIcon
+                    sx={{ fontSize: '1.2em' }}
+                    path={ICON_VARIANT_LEFT.path}
+                  />
+                  <SrOnly>{'back'}</SrOnly>
+                </Button>
+              )}
+
               <AppLink
                 href="/"
                 componentVariant="button-base"
@@ -210,16 +226,7 @@ const TopAppBar = (props: TopAppBarProps) => {
                     }),
                   }}
                 >
-                  <Image
-                    src={aglynLogoUrl}
-                    sx={{
-                      ml: -0.15,
-                      height: '32px',
-                      width: '193px',
-                    }}
-                    height={32}
-                    width={193}
-                  />
+                  <AglynConsoleLogoFull sx={{ fontSize: 156 }} />
                   {appBarSuffix && (
                     <Typography
                       component="span"
@@ -311,6 +318,7 @@ function MainLayout(props: MainLayoutProps) {
     disableAppBarElevation,
     quickActions,
     besigner,
+    backButton,
     ...rest
   } = props
 
@@ -337,6 +345,7 @@ function MainLayout(props: MainLayoutProps) {
       >
         <TopAppBar
           disableAppBarElevation={disableAppBarElevation}
+          backButton={backButton}
           centerNavigationItems={
             centerNavigationItems || [
               // {
