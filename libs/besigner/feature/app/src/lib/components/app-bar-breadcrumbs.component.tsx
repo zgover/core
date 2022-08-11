@@ -52,9 +52,18 @@ const breadcrumbItemClassKey = generateComponentClassKeys('BreadcrumbItem', [
   'lastItem',
 ])
 
-const BreadcrumbLink = styled(Link)<LinkProps>(() => ({
+const BreadcrumbLink = styled(Link)<LinkProps>(({ theme }) => ({
+  transition: theme.transitions.create('color', {
+    duration: theme.transitions.duration.short,
+  }),
+  [`:hover`]: {
+    color: theme.palette.secondary.light,
+  },
   [`&.${breadcrumbItemClassKey.lastItem}`]: {
     cursor: 'initial',
+    [`:hover`]: {
+      color: theme.palette.tertiary.light,
+    },
   },
 }))
 

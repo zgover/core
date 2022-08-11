@@ -60,7 +60,7 @@ import {
 import { Fragment, useMemo } from 'react'
 import { useUser } from 'reactfire'
 import { Route } from '../../constants/route-links'
-import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
+import { TOP_BAR_HEIGHT } from '../../constants/shared'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {
@@ -169,42 +169,49 @@ const TopAppBar = (props: TopAppBarProps) => {
             alignItems="center"
             justifyContent="flex-start"
             direction="row"
-            sx={{ paddingLeft: { xs: 0, md: 0 } }}
+            sx={{
+              paddingLeft: { sx: 1, sm: 2 },
+            }}
             divider={
               <Divider orientation="vertical" variant="middle" flexItem light />
             }
           >
+            {backButton && (
+              <Button
+                {...backButton}
+                sx={{
+                  minWidth: 'unset',
+                  // position: 'absolute',
+                  marginLeft: { xs: -2, sm: -2 },
+                  paddingRight: { xs: 1, sm: 0.75 },
+                  paddingLeft: { xs: 0.5, sm: 0.25 },
+                  py: { xs: 0, sm: 0 },
+                  left: 0,
+                  height: 1,
+                  borderRadius: 0,
+                  // borderRight: ({ palette }) => `1px solid ${palette.divider}`,
+                }}
+              >
+                <MdiIcon
+                  sx={{ fontSize: '1.2em' }}
+                  path={ICON_VARIANT_LEFT.path}
+                />
+                <SrOnly>{'back'}</SrOnly>
+              </Button>
+            )}
+
             <Stack
               alignItems="center"
               direction="row"
               justifyContent="flex-start"
               color="inherit"
-              width={DRAWER_WIDTH}
               maxWidth={{ xs: '100%' }}
-              sx={{ paddingLeft: { xs: 3.5, md: 3.5 } }}
+              sx={{
+                paddingLeft: backButton ? 0.5 : undefined,
+                paddingRight: 3,
+                // width: DRAWER_WIDTH - 26,
+              }}
             >
-              {backButton && (
-                <Button
-                  {...backButton}
-                  sx={{
-                    minWidth: 'unset',
-                    padding: '0 1px 0 1px',
-                    position: 'absolute',
-                    left: 0,
-                    height: 1,
-                    borderRadius: 0,
-                    borderRight: ({ palette }) =>
-                      `1px solid ${palette.divider}`,
-                  }}
-                >
-                  <MdiIcon
-                    sx={{ fontSize: '1.2em' }}
-                    path={ICON_VARIANT_LEFT.path}
-                  />
-                  <SrOnly>{'back'}</SrOnly>
-                </Button>
-              )}
-
               <AppLink
                 href="/"
                 componentVariant="button-base"

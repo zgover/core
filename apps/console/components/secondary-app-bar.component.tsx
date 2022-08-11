@@ -60,6 +60,7 @@ function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
               borderBottomWidth: `1px`,
               borderBottomStyle: 'solid',
               borderBottomColor: 'divider',
+              paddingLeft: { sx: 1, sm: 2 },
             }}
           >
             {tabBarTitle && (
