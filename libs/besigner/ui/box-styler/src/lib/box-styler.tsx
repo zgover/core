@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { CssUnit } from '@aglyn/shared-data-enums'
+import { CssUnit, isGlobalUnit, Measurement } from '@aglyn/shared-data-enums'
 import '@aglyn/shared-data-jsx'
 import {
   alpha,
@@ -106,72 +106,93 @@ const Box = styled('div')(({ theme }) => {
   }
 })
 
-const Property = styled('span')(({ theme }) => {
-  return {}
-})
-const DimensionControl = ({ dimension }: { dimension: BoxDimension }) => {
-  const [{ value, unit }, setDimension] = useState<BoxDimension>({
-    value: dimension?.value ?? '',
-    unit: dimension?.unit ?? CssUnit.PIXELS,
+interface DimensionControlProps {
+  dimension: Measurement
+  onUpdate?: (dimension: Measurement) => void
+}
+
+const DimensionControl = (props: DimensionControlProps) => {
+  const { dimension: initialDimension, onUpdate } = props
+  const [dimension, setDimension] = useState<Measurement>({
+    quantity: initialDimension?.quantity,
+    unit: initialDimension?.unit ?? CssUnit.INITIAL,
   })
+  const { quantity, unit } = dimension
   const [menuOpen, setMenuOpen] = useState(false)
   const [iconRef, setIconRef] = useState<any>()
   const toggleMenu = () => setMenuOpen((prev) => !prev)
-  const handleChange = (type: 'value' | 'unit') => (value: any) => {
+  const handleChange = (type: 'quantity' | 'unit') => (value: any) => {
     setDimension((prev) => ({ ...prev, [type]: value }))
     setMenuOpen(false)
+    onUpdate && onUpdate(dimension)
   }
 
   return (
-    <Property>
+    <div>
       <FormControl sx={{ m: 0, width: '7ch' }} variant="standard">
-        <Input
-          value={value}
-          placeholder={'--'}
-          onChange={(e) => handleChange('value')(e.target.value)}
-          endAdornment={
-            <InputAdornment
-              ref={setIconRef}
-              position="end"
-              sx={{
-                margin: 0,
-              }}
-            >
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={toggleMenu}
-                onMouseDown={(e) => e.preventDefault()}
+        {isGlobalUnit(unit) ? (
+          <IconButton
+            ref={setIconRef}
+            onClick={toggleMenu}
+            onMouseDown={(e) => e.preventDefault()}
+            sx={{
+              fontSize: `0.65rem`,
+              padding: 0,
+            }}
+          >
+            {(unit || 'Unit') ?? 'px'}
+          </IconButton>
+        ) : (
+          <Input
+            value={quantity || ''}
+            placeholder={'--'}
+            onChange={(e) => handleChange('quantity')(e.target.value)}
+            endAdornment={
+              <InputAdornment
+                position="end"
                 sx={{
-                  fontSize: `0.65rem`,
-                  padding: 0,
+                  margin: 0,
                 }}
               >
-                {unit ?? 'px'}
-              </IconButton>
-            </InputAdornment>
-          }
-          sx={{
-            padding: 0,
-            fontSize: `0.65rem`,
-            maxWidth: 50,
-            paddingRight: 0,
-            ':before': {
-              border: 'none',
-            },
-            [`.MuiInput-input`]: {
-              paddingRight: `2px !important`,
-              textAlign: 'right',
-            },
-          }}
-        />
+                <IconButton
+                  ref={setIconRef}
+                  onClick={toggleMenu}
+                  onMouseDown={(e) => e.preventDefault()}
+                  sx={{
+                    fontSize: `0.65rem`,
+                    padding: 0,
+                  }}
+                >
+                  {(unit || 'Unit') ?? 'px'}
+                </IconButton>
+              </InputAdornment>
+            }
+            sx={{
+              padding: 0,
+              fontSize: `0.65rem`,
+              maxWidth: 50,
+              paddingRight: 0,
+              ':before': {
+                border: 'none',
+              },
+              [`.MuiInput-input`]: {
+                paddingRight: `2px !important`,
+                textAlign: 'right',
+              },
+            }}
+          />
+        )}
         <Menu
           onClose={toggleMenu}
           open={menuOpen}
           anchorEl={iconRef}
           variant={'selectedMenu'}
         >
-          <MenuItem disabled>
-            <em>{'Unit'}</em>
+          <MenuItem
+            onClick={(event) => handleChange('unit')('')}
+            selected={!unit}
+          >
+            <em>{'default'}</em>
           </MenuItem>
           {Object.entries(CssUnit).map(([key, value]) => (
             <MenuItem
@@ -184,7 +205,7 @@ const DimensionControl = ({ dimension }: { dimension: BoxDimension }) => {
           ))}
         </Menu>
       </FormControl>
-    </Property>
+    </div>
   )
 }
 
@@ -213,22 +234,17 @@ const Legend = styled(Stack)(({ theme }) => {
 
 type BoxStylerWrapperProps = JSX.ComponentProps<typeof Box>
 
-export type BoxDimension = {
-  value: 'inherit' | 'initial' | 'unset' | '' | number
-  unit: CssUnit
-}
-
 export interface BoxStylerProps extends BoxStylerWrapperProps {
-  marginTop?: BoxDimension
-  marginLeft?: BoxDimension
-  marginRight?: BoxDimension
-  marginBottom?: BoxDimension
-  paddingTop?: BoxDimension
-  paddingLeft?: BoxDimension
-  paddingRight?: BoxDimension
-  paddingBottom?: BoxDimension
-  width?: BoxDimension
-  height?: BoxDimension
+  marginTop?: Measurement
+  marginLeft?: Measurement
+  marginRight?: Measurement
+  marginBottom?: Measurement
+  paddingTop?: Measurement
+  paddingLeft?: Measurement
+  paddingRight?: Measurement
+  paddingBottom?: Measurement
+  width?: Measurement
+  height?: Measurement
 }
 
 const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
@@ -246,9 +262,7 @@ const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
     ...rest
   } = props
 
-  const dimension = (dimension: any) => (
-    <Property>{dimension?.value ?? '--'}</Property>
-  )
+  const size = (dimension: any) => <span>{dimension?.quantity ?? '--'}</span>
 
   return (
     <Box ref={ref} {...rest}>
@@ -262,9 +276,9 @@ const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
               <DimensionControl dimension={paddingLeft} />
               <Box className={classKeys.node}>
                 <Box className={classKeys.row}>
-                  {dimension(width)}
+                  {size(width)}
                   {' x '}
-                  {dimension(height)}
+                  {size(height)}
                 </Box>
               </Box>
               <DimensionControl dimension={paddingRight} />
