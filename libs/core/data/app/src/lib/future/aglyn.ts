@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 
-import {
-  AGLYN_ERROR,
-  AGLYN_LOGGER,
-  IAglynCanvasController,
-  IAglynCommandsController,
-  IAglynComponentsController,
-  IAglynContextsController,
-  IAglynExtensionsController,
-} from '@aglyn/core-data-foundation'
+import { IAglynCanvasController } from '@aglyn/core-data-foundation'
 import { LogLevelString } from '@aglyn/shared-util-logger'
 import { ITimestamp, Timestamp } from '@aglyn/shared-util-timestamp'
 import { type DecodeOptions, type EncodeOptions } from '@msgpack/msgpack'
 import type { SplitUndefined } from '@msgpack/msgpack/src/context'
-import { EventEmitter2 } from 'eventemitter2'
 import UAParser from 'ua-parser-js'
 import ComponentManager from './components-manager'
+import {
+  AglynEvent,
+  emitter,
+  errorFactory,
+  lifecycleEvent,
+  logger,
+  setLogLevel,
+} from './constants'
 import DependencyManager, {
   type Dependency,
   type DependencyId,
@@ -38,67 +37,6 @@ import DependencyManager, {
 import { name, version } from './package'
 
 const TAG = 'Aglyn'
-
-export enum AglynEvent {
-  APP_CREATING = 'event:app:creating',
-  APP_CREATED = 'event:app:created',
-  APP_INITIALIZING = 'event:app:initializing',
-  APP_INITIALIZED = 'event:app:initialized',
-  APP_ACTIVATING = 'event:app:activating',
-  APP_ACTIVATED = 'event:app:activated',
-  APP_DEACTIVATING = 'event:app:deactivating',
-  APP_DEACTIVATED = 'event:app:deactivated',
-  APP_DESTROYING = 'event:app:destroying',
-  APP_DESTROYED = 'event:app:destroyed',
-  APP_DELETING = 'event:app:deleting',
-  APP_DELETED = 'event:app:deleted',
-
-  MODULE_INITIALIZING = 'event:module:initializing',
-  MODULE_INITIALIZED = 'event:module:initialized',
-  MODULE_ACTIVATING = 'event:module:activating',
-  MODULE_ACTIVATED = 'event:module:activated',
-  MODULE_DEACTIVATING = 'event:module:deactivating',
-  MODULE_DEACTIVATED = 'event:module:deactivated',
-  MODULE_DESTROYING = 'event:module:destroying',
-  MODULE_DESTROYED = 'event:module:destroyed',
-
-  EXTENSION_REGISTERING = 'event:extensions:registering-extension',
-  EXTENSION_REGISTERED = 'event:extensions:registered-extension',
-  EXTENSION_INITIALIZING = 'event:extensions:initializing-extension',
-  EXTENSION_INITIALIZED = 'event:extensions:initialized-extension',
-  EXTENSION_ACTIVATING = 'event:extensions:activating-extension',
-  EXTENSION_ACTIVATED = 'event:extensions:activated-extension',
-  EXTENSION_DEACTIVATING = 'event:extensions:deactivating-extension',
-  EXTENSION_DEACTIVATED = 'event:extensions:deactivated-extension',
-  EXTENSION_DESTROYING = 'event:extensions:destroying-extension',
-  EXTENSION_DESTROYED = 'event:extensions:destroyed-extension',
-
-  COMMAND_RESOLVER_SETTING = 'event:commands:setting-resolver',
-  COMMAND_RESOLVER_SET = 'event:commands:set-resolver',
-  COMMAND_LISTENER_REGISTERING = 'event:commands:registering-listener',
-  COMMAND_LISTENER_REGISTERED = 'event:commands:registered-listener',
-  COMMAND_RESOLVER_REMOVING = 'event:commands:unregistering-resolver',
-  COMMAND_RESOLVER_REMOVED = 'event:commands:unregistered-resolver',
-  COMMAND_LISTENER_UNREGISTERING = 'event:commands:unregistering-listener',
-  COMMAND_LISTENER_UNREGISTERED = 'event:commands:unregistered-listener',
-  COMMAND_RESOLVER_TRIGGERING = 'event:commands:triggering-resolver',
-  COMMAND_RESOLVER_TRIGGERED = 'event:commands:triggered-resolver',
-  COMMAND_LISTENERS_TRIGGERING = 'event:commands:triggering-listeners',
-  COMMAND_LISTENERS_TRIGGERED = 'event:commands:triggered-listeners',
-
-  COMPONENT_REGISTERING = 'event:components:registering-component',
-  COMPONENT_REGISTERED = 'event:components:registered-component',
-  COMPONENT_UNREGISTERING = 'event:components:unregistering-component',
-  COMPONENT_UNREGISTERED = 'event:components:unregistered-component',
-  COMPONENT_BUNDLE_REGISTERING = 'event:components:registering-bundle',
-  COMPONENT_BUNDLE_REGISTERED = 'event:components:registered-bundle',
-  COMPONENT_BUNDLE_UNREGISTERING = 'event:components:unregistering-bundle',
-  COMPONENT_BUNDLE_UNREGISTERED = 'event:components:unregistered-bundle',
-  COMPONENT_PRESET_REGISTERING = 'event:components:registering-preset',
-  COMPONENT_PRESET_REGISTERED = 'event:components:registered-preset',
-  COMPONENT_PRESET_UNREGISTERING = 'event:components:unregistering-preset',
-  COMPONENT_PRESET_UNREGISTERED = 'event:components:unregistered-preset',
-}
 
 export interface AglynConfig {
   logLevel?: LogLevelString
@@ -108,10 +46,16 @@ export class Aglyn {
   public static readonly namespace = name
   public static readonly version = version
   public static readonly platform = new UAParser()
-  public static readonly errorFactory = AGLYN_ERROR
-  public static readonly logger = AGLYN_LOGGER
-  public static readonly emitter = new EventEmitter2()
+  public static readonly errorFactory = errorFactory
+  public static readonly logger = logger
+  public static readonly emitter = emitter
   public static readonly components = ComponentManager
+
+  private static singleton: Aglyn
+  public static getInstance(appName?: string, config?: AglynConfig) {
+    if (!Aglyn.singleton) Aglyn.singleton = new Aglyn(appName, config)
+    return Aglyn.singleton
+  }
 
   //region Properties
   readonly #createdAt: ITimestamp
@@ -128,33 +72,7 @@ export class Aglyn {
   public get canvas(): IAglynCanvasController {
     return this.#canvas
   }
-
-  #contexts: IAglynContextsController = null
-  public get contexts(): IAglynContextsController {
-    return this.#contexts
-  }
-
-  #commands: IAglynCommandsController = null
-  public get commands(): IAglynCommandsController {
-    return this.#commands
-  }
-
-  #components: IAglynComponentsController = null
-  public get components(): IAglynComponentsController {
-    return this.#components
-  }
-
-  #extensions: IAglynExtensionsController = null
-  public get extensions(): IAglynExtensionsController {
-    return this.#extensions
-  }
   //endregion
-
-  protected static singleton: Aglyn
-  public static getSingleton(appName?: string, config?: AglynConfig) {
-    if (!this.singleton) this.singleton = new this(appName, config)
-    return this.singleton
-  }
 
   protected constructor(
     public readonly appName?: string,
@@ -167,38 +85,14 @@ export class Aglyn {
 
   //region Setup/Breakdown
   private setupLogger() {
-    Aglyn.logger.setLogLevel(this.#config.logLevel)
+    setLogLevel(this.#config.logLevel)
   }
   //endregion
 
   //region Lifecycle Methods
-  public static lifecycleEvent(
-    callbackFn: () => void,
-    options: {
-      startEvent: AglynEvent
-      startPayload: any[]
-      endEvent: AglynEvent
-      endPayload: any[]
-      onCatch?: (e: unknown) => void
-    },
-  ): void {
-    const { startEvent, startPayload, endEvent, endPayload, onCatch } = options
-    Aglyn.logger.debug(Timestamp.now().toJSON(), startEvent, startPayload)
-    Aglyn.emitter.emit(startEvent, Timestamp.now().toJSON(), ...startPayload)
-    try {
-      callbackFn()
-    } catch (e) {
-      Aglyn.logger.error(Timestamp.now().toJSON(), startEvent, startPayload, e)
-      onCatch && onCatch(e)
-    } finally {
-      Aglyn.logger.debug(Timestamp.now().toJSON(), startEvent, startPayload)
-      Aglyn.emitter.emit(endEvent, Timestamp.now().toJSON(), ...endPayload)
-    }
-  }
-
   /** @ignore */
   public __initialize__(props?: never): this {
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
         this.onInitialize()
       },
@@ -213,7 +107,7 @@ export class Aglyn {
   }
   /** @ignore */
   public __activate__(props?: never): this {
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
         this.onActivate()
       },
@@ -228,7 +122,7 @@ export class Aglyn {
   }
   /** @ignore */
   public __deactivate__(props?: never): this {
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
         this.onDeactivate()
       },
@@ -243,7 +137,7 @@ export class Aglyn {
   }
   /** @ignore */
   public __destroy__(props?: never): this {
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
         this.onDestroy()
       },
@@ -327,4 +221,4 @@ export namespace Aglyn {
 
 export default Aglyn
 
-console.log('aglyn', Aglyn, Aglyn.getSingleton(), Aglyn.depends)
+console.log('aglyn', Aglyn, Aglyn.getInstance(), Aglyn.depends)

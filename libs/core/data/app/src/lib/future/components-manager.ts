@@ -24,17 +24,17 @@ import {
   ComponentId,
   PresetId,
 } from '@aglyn/core-data-foundation'
-import Aglyn, { AglynEvent } from './aglyn'
+import { AglynEvent, lifecycleEvent } from './constants'
 
 export class ComponentManager {
   static #bundles: Record<BundleId, AglynBundleSchema> = {}
   public static get bundles(): Record<BundleId, AglynBundleSchema> {
-    return this.#bundles
+    return ComponentManager.#bundles
   }
 
   static #components: Record<ComponentId, AglynComponentType> = {}
   public static get components(): Record<ComponentId, AglynComponentType> {
-    return this.#components
+    return ComponentManager.#components
   }
 
   static #componentSchemas: Record<ComponentId, AglynComponentSchema> = {}
@@ -42,15 +42,15 @@ export class ComponentManager {
     ComponentId,
     AglynComponentSchema
   > {
-    return this.#componentSchemas
+    return ComponentManager.#componentSchemas
   }
 
   static #presets: Record<PresetId, AglynNodePresetSchema> = {}
   public static get presets(): Record<PresetId, AglynNodePresetSchema> {
-    return this.#presets
+    return ComponentManager.#presets
   }
 
-  constructor() {}
+  protected constructor() {}
 
   public toJSON() {
     return {
@@ -66,21 +66,21 @@ export class ComponentManager {
   }
 
   public static getBundle(bundleId: BundleId) {
-    return this.bundles[bundleId]
+    return ComponentManager.bundles[bundleId]
   }
   public static getComponent(componentId: ComponentId, bundleId?: BundleId) {
-    const key = this.buildId(componentId, bundleId)
-    return this.#components[key]
+    const key = ComponentManager.buildId(componentId, bundleId)
+    return ComponentManager.#components[key]
   }
   public static getComponentSchema(
     componentId: ComponentId,
     bundleId?: BundleId,
   ) {
-    const key = this.buildId(componentId, bundleId)
-    return this.#componentSchemas[key]
+    const key = ComponentManager.buildId(componentId, bundleId)
+    return ComponentManager.#componentSchemas[key]
   }
   public static getPreset(presetId: PresetId) {
-    return this.#presets[presetId]
+    return ComponentManager.#presets[presetId]
   }
 
   public static registerBundle(
@@ -91,11 +91,11 @@ export class ComponentManager {
     }[],
   ) {
     const { bundleId } = schema
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
-        this.#bundles[bundleId] = schema
+        ComponentManager.#bundles[bundleId] = schema
         for (const { component, schema } of components) {
-          this.registerComponent(component, { ...schema, bundleId })
+          ComponentManager.registerComponent(component, { ...schema, bundleId })
         }
       },
       {
@@ -105,7 +105,7 @@ export class ComponentManager {
         endPayload: [{ bundleId }],
       },
     )
-    return this
+    return ComponentManager
   }
 
   public static registerComponent(
@@ -113,20 +113,20 @@ export class ComponentManager {
     schema: AglynComponentSchema,
   ) {
     const { componentId, bundleId } = schema
-    const key = this.buildId(schema.componentId, schema.bundleId)
+    const key = ComponentManager.buildId(schema.componentId, schema.bundleId)
 
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
         // TODO: throw errorFactory error
-        if (bundleId && !this.#bundles[bundleId]) {
+        if (bundleId && !ComponentManager.#bundles[bundleId]) {
           throw new Error(`No bundle exists with ID ${bundleId}.`)
         } else if (bundleId) {
-          this.#bundles[bundleId].componentIds.push(key)
+          ComponentManager.#bundles[bundleId].componentIds.push(key)
         }
-        this.#components[key] = component
-        this.#componentSchemas[key] = schema
+        ComponentManager.#components[key] = component
+        ComponentManager.#componentSchemas[key] = schema
         for (const preset of schema.presets || []) {
-          this.registerPreset(preset)
+          ComponentManager.registerPreset(preset)
         }
       },
       {
@@ -136,14 +136,14 @@ export class ComponentManager {
         endPayload: [{ componentId, bundleId }],
       },
     )
-    return this
+    return ComponentManager
   }
 
   public static registerPreset(preset: AglynNodePresetSchema) {
     const { presetId, bundleId, componentId } = preset
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
-        this.#presets[presetId] = preset
+        ComponentManager.#presets[presetId] = preset
       },
       {
         startEvent: AglynEvent.COMPONENT_PRESET_REGISTERING,
@@ -152,13 +152,13 @@ export class ComponentManager {
         endPayload: [{ bundleId, componentId, presetId }],
       },
     )
-    return this
+    return ComponentManager
   }
 
   public static unregisterPreset(presetId: PresetId) {
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
-        delete this.#presets[presetId]
+        delete ComponentManager.#presets[presetId]
       },
       {
         startEvent: AglynEvent.COMPONENT_PRESET_UNREGISTERING,
@@ -167,35 +167,36 @@ export class ComponentManager {
         endPayload: [{ presetId }],
       },
     )
-    return this
+    return ComponentManager
   }
 
   public static unregisterComponentPresets(componentId: ComponentId) {
-    const schema = this.#componentSchemas[componentId]
+    const schema = ComponentManager.#componentSchemas[componentId]
     for (const preset of schema?.presets || []) {
-      this.unregisterPreset(preset?.presetId)
+      ComponentManager.unregisterPreset(preset?.presetId)
     }
-    return this
+    return ComponentManager
   }
 
   public static unregisterComponent(
     componentId: ComponentId,
     bundleId?: BundleId,
   ) {
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
         // TODO: throw errorFactory error
-        if (bundleId && !this.#bundles[bundleId]) {
+        if (bundleId && !ComponentManager.#bundles[bundleId]) {
           throw new Error(`No bundle exists with ID ${bundleId}.`)
         } else if (bundleId) {
-          this.#bundles[bundleId].componentIds = this.#bundles[
-            bundleId
-          ].componentIds.filter((i) => i !== componentId)
+          ComponentManager.#bundles[bundleId].componentIds =
+            ComponentManager.#bundles[bundleId].componentIds.filter(
+              (i) => i !== componentId,
+            )
         }
-        const key = this.buildId(componentId, bundleId)
-        this.unregisterComponentPresets(key)
-        delete this.#componentSchemas[key]
-        delete this.#components[key]
+        const key = ComponentManager.buildId(componentId, bundleId)
+        ComponentManager.unregisterComponentPresets(key)
+        delete ComponentManager.#componentSchemas[key]
+        delete ComponentManager.#components[key]
       },
       {
         startEvent: AglynEvent.COMPONENT_UNREGISTERING,
@@ -205,19 +206,19 @@ export class ComponentManager {
       },
     )
 
-    return this
+    return ComponentManager
   }
 
   public static unregisterBundle(bundleId: BundleId) {
-    const bundle = this.bundles[bundleId]
+    const bundle = ComponentManager.bundles[bundleId]
     // TODO: throw errorFactory error
     if (!bundle) throw new Error(`No bundle exists with ID ${bundleId}.`)
-    Aglyn.lifecycleEvent(
+    lifecycleEvent(
       () => {
         for (const componentId of bundle.componentIds) {
-          this.unregisterComponent(componentId, bundleId)
+          ComponentManager.unregisterComponent(componentId, bundleId)
         }
-        delete this.bundles[bundleId]
+        delete ComponentManager.bundles[bundleId]
       },
       {
         startEvent: AglynEvent.COMPONENT_BUNDLE_UNREGISTERING,
@@ -227,7 +228,7 @@ export class ComponentManager {
       },
     )
 
-    return this
+    return ComponentManager
   }
 }
 
