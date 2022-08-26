@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { CssUnit, isGlobalUnit, Measurement } from '@aglyn/shared-data-enums'
+import {
+  buildCssMeasurement,
+  CssUnit,
+  isGlobalUnit,
+  Measurement,
+  parseCssMeasurement,
+} from '@aglyn/shared-data-enums'
 import '@aglyn/shared-data-jsx'
 import {
   alpha,
@@ -33,7 +39,7 @@ import {
   Stack,
 } from '@mui/material'
 import clsx from 'clsx'
-import { forwardRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 
 export const classKeys = generateComponentClassKeys('BoxStyler', [
   'box',
@@ -107,33 +113,68 @@ const Box = styled('div')(({ theme }) => {
 })
 
 interface DimensionControlProps {
-  dimension: Measurement
+  dimension: string
   onChange?: (dimension: Measurement) => void
 }
 
+const buildLocalValue = (dimension: string) => ({
+  raw: dimension,
+  ...parseCssMeasurement(dimension),
+})
+
 const DimensionControl = (props: DimensionControlProps) => {
-  const { dimension: initialDimension, onChange } = props
-  const [dimension, setDimension] = useState<Measurement>({
-    quantity: initialDimension?.quantity,
-    unit: initialDimension?.unit ?? ('' as any),
-  })
-  const { quantity, unit } = dimension
+  const { dimension, onChange } = props
+  const [parsed, setParsed] = useState(buildLocalValue(dimension))
+  useEffect(() => setParsed(buildLocalValue(dimension)), [dimension])
   const [menuOpen, setMenuOpen] = useState(false)
   const [iconRef, setIconRef] = useState<any>()
   const toggleMenu = () => setMenuOpen((prev) => !prev)
-  const handleChange = (type: 'quantity' | 'unit') => (value: any) => {
-    setDimension((prev) => {
-      if (type === 'unit' && isGlobalUnit(value)) return { [type]: value }
-      return { ...prev, [type]: value }
-    })
-    setMenuOpen(false)
-    onChange && onChange(dimension)
-  }
+  const handleChange = useCallback(
+    (type: 'quantity' | 'unit') => (newValue: any) => {
+      const res: any = {
+        raw: undefined,
+        quantity: undefined,
+        unit: undefined,
+      }
+      switch (true) {
+        case type === 'unit' && isGlobalUnit(newValue):
+          res.raw = `${newValue}`
+          res.quantity = undefined
+          res.unit = newValue
+          break
+        case type === 'unit' && !newValue:
+          res.raw = undefined
+          res.quantity = undefined
+          res.unit = undefined
+          break
+        case type === 'unit':
+          res.raw = buildCssMeasurement({
+            quantity: parsed.quantity,
+            unit: newValue,
+          })
+          res.quantity = parsed.quantity
+          res.unit = newValue
+          break
+        default:
+          res.raw = buildCssMeasurement({
+            quantity: newValue,
+            unit: parsed.unit,
+          })
+          res.quantity = newValue
+          res.unit = parsed.unit
+          break
+      }
+      setParsed(res)
+      onChange && onChange(res.raw)
+      setMenuOpen(false)
+    },
+    [onChange, parsed],
+  )
 
   return (
     <div>
       <FormControl sx={{ m: 0, width: '7ch' }} variant="standard">
-        {!unit || isGlobalUnit(unit) ? (
+        {!parsed.unit || isGlobalUnit(parsed.unit) ? (
           <IconButton
             ref={setIconRef}
             onClick={toggleMenu}
@@ -141,13 +182,15 @@ const DimensionControl = (props: DimensionControlProps) => {
             sx={{
               fontSize: `0.65rem`,
               padding: 0,
+              borderRadius: `2px`,
             }}
           >
-            {unit || 'default'}
+            {parsed.unit || 'default'}
           </IconButton>
         ) : (
           <Input
-            value={quantity || ''}
+            value={parsed.quantity || ''}
+            type={'number'}
             placeholder={'--'}
             onChange={(e) => handleChange('quantity')(e.target.value)}
             endAdornment={
@@ -164,9 +207,10 @@ const DimensionControl = (props: DimensionControlProps) => {
                   sx={{
                     fontSize: `0.65rem`,
                     padding: 0,
+                    borderRadius: `2px`,
                   }}
                 >
-                  {unit || 'default'}
+                  {parsed.unit || 'default'}
                 </IconButton>
               </InputAdornment>
             }
@@ -193,7 +237,7 @@ const DimensionControl = (props: DimensionControlProps) => {
         >
           <MenuItem
             onClick={(event) => handleChange('unit')('')}
-            selected={!unit}
+            selected={!parsed.unit}
           >
             <em>{'default'}</em>
           </MenuItem>
@@ -201,7 +245,7 @@ const DimensionControl = (props: DimensionControlProps) => {
             <MenuItem
               onClick={(event) => handleChange('unit')(value)}
               key={key}
-              selected={value === unit}
+              selected={value === parsed.unit}
             >
               {key}
             </MenuItem>
@@ -236,15 +280,15 @@ const Legend = styled(Stack)(({ theme }) => {
 })
 
 type BoxStylerWrapperProps = JSX.ComponentProps<typeof Box>
-type Measurements = {
-  marginTop?: Measurement
-  marginLeft?: Measurement
-  marginRight?: Measurement
-  marginBottom?: Measurement
-  paddingTop?: Measurement
-  paddingLeft?: Measurement
-  paddingRight?: Measurement
-  paddingBottom?: Measurement
+export type Measurements = {
+  marginTop?: string
+  marginLeft?: string
+  marginRight?: string
+  marginBottom?: string
+  paddingTop?: string
+  paddingLeft?: string
+  paddingRight?: string
+  paddingBottom?: string
 }
 
 export interface BoxStylerProps
@@ -264,26 +308,18 @@ const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
     ...rest
   } = props
 
-  const [measurements, setMeasurements] = useState<Measurements>({
-    ...measurementsProp,
-  })
+  const measurements = useMemo<Measurements>(
+    () => ({
+      ...measurementsProp,
+    }),
+    [measurementsProp],
+  )
 
   const handleChange =
     (key: keyof Measurements) => (dimension: Measurement) => {
-      setMeasurements((prev) => ({ ...prev, [key]: dimension }))
-      onChange && onChange(measurements)
+      const res = { ...measurements, [key]: dimension }
+      onChange && onChange(res)
     }
-
-  const {
-    marginTop,
-    marginLeft,
-    marginRight,
-    marginBottom,
-    paddingTop,
-    paddingLeft,
-    paddingRight,
-    paddingBottom,
-  } = measurements
 
   const size = (dimension: any) => <span>{dimension?.quantity ?? '--'}</span>
 
@@ -291,22 +327,22 @@ const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
     <Box ref={ref} {...rest}>
       <Box className={classKeys.margin}>
         <DimensionControl
-          dimension={marginTop}
+          dimension={measurements?.marginTop}
           onChange={handleChange('marginTop')}
         />
         <Box className={classKeys.row}>
           <DimensionControl
-            dimension={marginLeft}
+            dimension={measurements?.marginLeft}
             onChange={handleChange('marginLeft')}
           />
           <Box className={classKeys.padding}>
             <DimensionControl
-              dimension={paddingTop}
+              dimension={measurements?.paddingTop}
               onChange={handleChange('paddingTop')}
             />
             <Box className={classKeys.row}>
               <DimensionControl
-                dimension={paddingLeft}
+                dimension={measurements?.paddingLeft}
                 onChange={handleChange('paddingLeft')}
               />
               <Box className={classKeys.node}>
@@ -318,22 +354,22 @@ const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
                 </Box>
               </Box>
               <DimensionControl
-                dimension={paddingRight}
+                dimension={measurements?.paddingRight}
                 onChange={handleChange('paddingRight')}
               />
             </Box>
             <DimensionControl
-              dimension={paddingBottom}
+              dimension={measurements?.paddingBottom}
               onChange={handleChange('paddingBottom')}
             />
           </Box>
           <DimensionControl
-            dimension={marginRight}
+            dimension={measurements?.marginRight}
             onChange={handleChange('marginRight')}
           />
         </Box>
         <DimensionControl
-          dimension={marginBottom}
+          dimension={measurements?.marginBottom}
           onChange={handleChange('marginBottom')}
         />
       </Box>

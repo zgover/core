@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { BoxStyler } from '@aglyn/besigner-ui-box-styler'
+import { BoxStyler, Measurements } from '@aglyn/besigner-ui-box-styler'
 import { updateCanvasElement } from '@aglyn/core-data-app'
 import { FieldComponentType, type NodeId } from '@aglyn/core-data-foundation'
 import {
@@ -157,34 +157,6 @@ const stylesSchema = (presetColors) => ({
           description: 'The element floats to the right of its container',
         },
       ],
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'paddingTop',
-      label: 'Top',
-      title: 'Padding top',
-      FormFieldGridProps: { xs: 3 },
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'paddingRight',
-      label: 'Right',
-      title: 'Padding right',
-      FormFieldGridProps: { xs: 3 },
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'paddingBottom',
-      label: 'Bottom',
-      title: 'Padding bottom',
-      FormFieldGridProps: { xs: 3 },
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'paddingLeft',
-      label: 'Left',
-      title: 'Padding left',
-      FormFieldGridProps: { xs: 3 },
     },
     {
       component: FieldComponentType.SELECT,
@@ -424,9 +396,36 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
       [deleteElementCallback],
     )
 
+    const handleBoxStylerChange = useCallback(
+      (dimensions: Measurements) => {
+        handleElementSave({
+          ...elemStyles,
+          ...dimensions,
+        })
+      },
+      [elemStyles, handleElementSave],
+    )
+
+    const boxMeasurements = useMemo(
+      () => ({
+        marginTop: elemStyles?.['marginTop'],
+        marginLeft: elemStyles?.['marginLeft'],
+        marginRight: elemStyles?.['marginRight'],
+        marginBottom: elemStyles?.['marginBottom'],
+        paddingTop: elemStyles?.['paddingTop'],
+        paddingLeft: elemStyles?.['paddingLeft'],
+        paddingRight: elemStyles?.['paddingRight'],
+        paddingBottom: elemStyles?.['paddingBottom'],
+      }),
+      [elemStyles],
+    )
+
     return (
       <>
-        <BoxStyler />
+        <BoxStyler
+          measurements={boxMeasurements}
+          onChange={handleBoxStylerChange}
+        />
 
         <FormRenderer
           ref={ref}
