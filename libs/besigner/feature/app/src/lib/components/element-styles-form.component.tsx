@@ -28,14 +28,6 @@ import {
   FormRenderer,
   type FormRendererProps,
 } from '@aglyn/shared-ui-jsx-forms'
-import {
-  mdiAlignHorizontalDistribute,
-  mdiAlignVerticalCenter,
-  mdiFormatHorizontalAlignCenter,
-  mdiFormatHorizontalAlignLeft,
-  mdiFormatHorizontalAlignRight,
-  MdiIcon,
-} from '@aglyn/shared-ui-mdi-jsx'
 import { objectFlatten } from '@aglyn/shared-util-vendor'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
@@ -77,39 +69,39 @@ const stylesSchema = (presetColors) => ({
         { value: 'unset', label: 'Unset' },
       ],
     },
-    {
-      component: FieldComponentType.TOGGLE_BUTTON,
-      condition: {
-        when: 'Foo', // name of controlled field
-        is: 'Bar', // condition
-      },
-      name: 'alignItems',
-      label: 'Align Items',
-      description: 'The flex box align items',
-      exclusive: true,
-      options: [
-        {
-          value: 'start',
-          label: <MdiIcon path={mdiFormatHorizontalAlignRight.path} />,
-        },
-        {
-          value: 'space-evenly',
-          label: <MdiIcon path={mdiAlignHorizontalDistribute.path} />,
-        },
-        {
-          value: 'space-between',
-          label: <MdiIcon path={mdiAlignVerticalCenter.path} />,
-        },
-        {
-          value: 'center',
-          label: <MdiIcon path={mdiFormatHorizontalAlignCenter.path} />,
-        },
-        {
-          value: 'end',
-          label: <MdiIcon path={mdiFormatHorizontalAlignLeft.path} />,
-        },
-      ],
-    },
+    // {
+    //   component: FieldComponentType.TOGGLE_BUTTON,
+    //   condition: {
+    //     when: 'Foo', // name of controlled field
+    //     is: 'Bar', // condition
+    //   },
+    //   name: 'alignItems',
+    //   label: 'Align Items',
+    //   description: 'The flex box align items',
+    //   exclusive: true,
+    //   options: [
+    //     {
+    //       value: 'start',
+    //       label: <MdiIcon path={mdiFormatHorizontalAlignRight.path} />,
+    //     },
+    //     {
+    //       value: 'space-evenly',
+    //       label: <MdiIcon path={mdiAlignHorizontalDistribute.path} />,
+    //     },
+    //     {
+    //       value: 'space-between',
+    //       label: <MdiIcon path={mdiAlignVerticalCenter.path} />,
+    //     },
+    //     {
+    //       value: 'center',
+    //       label: <MdiIcon path={mdiFormatHorizontalAlignCenter.path} />,
+    //     },
+    //     {
+    //       value: 'end',
+    //       label: <MdiIcon path={mdiFormatHorizontalAlignLeft.path} />,
+    //     },
+    //   ],
+    // },
     {
       component: FieldComponentType.COLOR_PICKER,
       name: 'color',

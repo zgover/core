@@ -108,29 +108,32 @@ const Box = styled('div')(({ theme }) => {
 
 interface DimensionControlProps {
   dimension: Measurement
-  onUpdate?: (dimension: Measurement) => void
+  onChange?: (dimension: Measurement) => void
 }
 
 const DimensionControl = (props: DimensionControlProps) => {
-  const { dimension: initialDimension, onUpdate } = props
+  const { dimension: initialDimension, onChange } = props
   const [dimension, setDimension] = useState<Measurement>({
     quantity: initialDimension?.quantity,
-    unit: initialDimension?.unit ?? CssUnit.INITIAL,
+    unit: initialDimension?.unit ?? ('' as any),
   })
   const { quantity, unit } = dimension
   const [menuOpen, setMenuOpen] = useState(false)
   const [iconRef, setIconRef] = useState<any>()
   const toggleMenu = () => setMenuOpen((prev) => !prev)
   const handleChange = (type: 'quantity' | 'unit') => (value: any) => {
-    setDimension((prev) => ({ ...prev, [type]: value }))
+    setDimension((prev) => {
+      if (type === 'unit' && isGlobalUnit(value)) return { [type]: value }
+      return { ...prev, [type]: value }
+    })
     setMenuOpen(false)
-    onUpdate && onUpdate(dimension)
+    onChange && onChange(dimension)
   }
 
   return (
     <div>
       <FormControl sx={{ m: 0, width: '7ch' }} variant="standard">
-        {isGlobalUnit(unit) ? (
+        {!unit || isGlobalUnit(unit) ? (
           <IconButton
             ref={setIconRef}
             onClick={toggleMenu}
@@ -140,7 +143,7 @@ const DimensionControl = (props: DimensionControlProps) => {
               padding: 0,
             }}
           >
-            {(unit || 'Unit') ?? 'px'}
+            {unit || 'default'}
           </IconButton>
         ) : (
           <Input
@@ -163,7 +166,7 @@ const DimensionControl = (props: DimensionControlProps) => {
                     padding: 0,
                   }}
                 >
-                  {(unit || 'Unit') ?? 'px'}
+                  {unit || 'default'}
                 </IconButton>
               </InputAdornment>
             }
@@ -233,8 +236,7 @@ const Legend = styled(Stack)(({ theme }) => {
 })
 
 type BoxStylerWrapperProps = JSX.ComponentProps<typeof Box>
-
-export interface BoxStylerProps extends BoxStylerWrapperProps {
+type Measurements = {
   marginTop?: Measurement
   marginLeft?: Measurement
   marginRight?: Measurement
@@ -243,11 +245,35 @@ export interface BoxStylerProps extends BoxStylerWrapperProps {
   paddingLeft?: Measurement
   paddingRight?: Measurement
   paddingBottom?: Measurement
+}
+
+export interface BoxStylerProps
+  extends Omit<BoxStylerWrapperProps, 'onChange'> {
+  measurements?: Measurements
   width?: Measurement
   height?: Measurement
+  onChange?: (measurements?: Measurements) => void
 }
 
 const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
+  const {
+    measurements: measurementsProp,
+    width,
+    height,
+    onChange,
+    ...rest
+  } = props
+
+  const [measurements, setMeasurements] = useState<Measurements>({
+    ...measurementsProp,
+  })
+
+  const handleChange =
+    (key: keyof Measurements) => (dimension: Measurement) => {
+      setMeasurements((prev) => ({ ...prev, [key]: dimension }))
+      onChange && onChange(measurements)
+    }
+
   const {
     marginTop,
     marginLeft,
@@ -257,37 +283,59 @@ const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
     paddingLeft,
     paddingRight,
     paddingBottom,
-    width,
-    height,
-    ...rest
-  } = props
+  } = measurements
 
   const size = (dimension: any) => <span>{dimension?.quantity ?? '--'}</span>
 
   return (
     <Box ref={ref} {...rest}>
       <Box className={classKeys.margin}>
-        <DimensionControl dimension={marginTop} />
+        <DimensionControl
+          dimension={marginTop}
+          onChange={handleChange('marginTop')}
+        />
         <Box className={classKeys.row}>
-          <DimensionControl dimension={marginLeft} />
+          <DimensionControl
+            dimension={marginLeft}
+            onChange={handleChange('marginLeft')}
+          />
           <Box className={classKeys.padding}>
-            <DimensionControl dimension={paddingTop} />
+            <DimensionControl
+              dimension={paddingTop}
+              onChange={handleChange('paddingTop')}
+            />
             <Box className={classKeys.row}>
-              <DimensionControl dimension={paddingLeft} />
+              <DimensionControl
+                dimension={paddingLeft}
+                onChange={handleChange('paddingLeft')}
+              />
               <Box className={classKeys.node}>
                 <Box className={classKeys.row}>
-                  {size(width)}
-                  {' x '}
-                  {size(height)}
+                  <span>Node</span>
+                  {/*{size(width)}*/}
+                  {/*{' x '}*/}
+                  {/*{size(height)}*/}
                 </Box>
               </Box>
-              <DimensionControl dimension={paddingRight} />
+              <DimensionControl
+                dimension={paddingRight}
+                onChange={handleChange('paddingRight')}
+              />
             </Box>
-            <DimensionControl dimension={paddingBottom} />
+            <DimensionControl
+              dimension={paddingBottom}
+              onChange={handleChange('paddingBottom')}
+            />
           </Box>
-          <DimensionControl dimension={marginRight} />
+          <DimensionControl
+            dimension={marginRight}
+            onChange={handleChange('marginRight')}
+          />
         </Box>
-        <DimensionControl dimension={marginBottom} />
+        <DimensionControl
+          dimension={marginBottom}
+          onChange={handleChange('marginBottom')}
+        />
       </Box>
 
       <Legend
