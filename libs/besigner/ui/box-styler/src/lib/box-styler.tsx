@@ -34,6 +34,7 @@ import {
   IconButton,
   Input,
   InputAdornment,
+  ListSubheader,
   Menu,
   MenuItem,
   Stack,
@@ -171,22 +172,28 @@ const DimensionControl = (props: DimensionControlProps) => {
     [onChange, parsed],
   )
 
+  const unitModifier = (
+    <IconButton
+      ref={setIconRef}
+      onClick={toggleMenu}
+      onMouseDown={(e) => e.preventDefault()}
+      sx={{
+        fontSize: `0.65rem`,
+        padding: 0,
+        borderRadius: `2px`,
+      }}
+    >
+      {parsed.unit || 'default'}
+    </IconButton>
+  )
+
+  console.log('parsed', parsed)
+
   return (
     <div>
       <FormControl sx={{ m: 0, width: '7ch' }} variant="standard">
         {!parsed.unit || isGlobalUnit(parsed.unit) ? (
-          <IconButton
-            ref={setIconRef}
-            onClick={toggleMenu}
-            onMouseDown={(e) => e.preventDefault()}
-            sx={{
-              fontSize: `0.65rem`,
-              padding: 0,
-              borderRadius: `2px`,
-            }}
-          >
-            {parsed.unit || 'default'}
-          </IconButton>
+          unitModifier
         ) : (
           <Input
             value={parsed.quantity || ''}
@@ -194,24 +201,8 @@ const DimensionControl = (props: DimensionControlProps) => {
             placeholder={'--'}
             onChange={(e) => handleChange('quantity')(e.target.value)}
             endAdornment={
-              <InputAdornment
-                position="end"
-                sx={{
-                  margin: 0,
-                }}
-              >
-                <IconButton
-                  ref={setIconRef}
-                  onClick={toggleMenu}
-                  onMouseDown={(e) => e.preventDefault()}
-                  sx={{
-                    fontSize: `0.65rem`,
-                    padding: 0,
-                    borderRadius: `2px`,
-                  }}
-                >
-                  {parsed.unit || 'default'}
-                </IconButton>
+              <InputAdornment position="end" sx={{ margin: 0 }}>
+                {unitModifier}
               </InputAdornment>
             }
             sx={{
@@ -235,6 +226,7 @@ const DimensionControl = (props: DimensionControlProps) => {
           anchorEl={iconRef}
           variant={'selectedMenu'}
         >
+          <ListSubheader>{'Dimension Unit'}</ListSubheader>
           <MenuItem
             onClick={(event) => handleChange('unit')('')}
             selected={!parsed.unit}

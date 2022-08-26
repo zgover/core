@@ -55,8 +55,8 @@ export function parseCssMeasurement(value: string | undefined): Measurement {
   if (isGlobalUnit(value as any)) {
     result.unit = `${value}` as any
   } else {
-    result.quantity = `${value}`.replace(/\D+/, '') as any
-    result.unit = `${value}`.replace(/\d+/, '') as any
+    result.quantity = `${value}`.replace(/\D+$/, '') as any
+    result.unit = `${value}`.replace(/^-?\d+/, '') as any
   }
   return result
 }
