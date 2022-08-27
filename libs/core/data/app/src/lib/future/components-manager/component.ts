@@ -30,7 +30,7 @@ import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
 import type { ComponentClass, ComponentProps } from 'react'
 import type { BundleId } from '../bundle-manager'
-import type { NodeId, NodeSchema } from '../nodes-manager'
+import type { NodeId, NodeSchema } from '../screen-manager'
 
 export type ComponentId = string
 

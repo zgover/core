@@ -37,31 +37,37 @@ export enum AglynEvent {
   APP_DESTROYING = 'lifecycle.app.destroying',
   APP_DESTROYED = 'lifecycle.app.destroyed',
 
-  COMPONENT_REGISTER = 'action.component.register',
-  COMPONENT_REGISTERING = 'lifecycle.component.registering',
-  COMPONENT_REGISTERED = 'lifecycle.component.registered',
+  COMPONENT_REGISTER = 'action.components.register',
+  COMPONENT_REGISTERING = 'lifecycle.components.registering',
+  COMPONENT_REGISTERED = 'lifecycle.components.registered',
 
   COMPONENT_UNREGISTER = 'action.components.unregister',
-  COMPONENT_UNREGISTERING = 'lifecycle.component.unregistering',
-  COMPONENT_UNREGISTERED = 'lifecycle.component.unregistered',
+  COMPONENT_UNREGISTERING = 'lifecycle.components.unregistering',
+  COMPONENT_UNREGISTERED = 'lifecycle.components.unregistered',
 
-  PRESET_REGISTER = 'action.preset.register',
-  PRESET_REGISTERING = 'lifecycle.preset.registering',
-  PRESET_REGISTERED = 'lifecycle.preset.registered',
+  PRESET_REGISTER = 'action.presets.register',
+  PRESET_REGISTERING = 'lifecycle.presets.registering',
+  PRESET_REGISTERED = 'lifecycle.presets.registered',
 
-  PRESET_UNREGISTER = 'action.preset.unregister',
-  PRESET_UNREGISTERING = 'lifecycle.preset.unregistering',
-  PRESET_UNREGISTERED = 'lifecycle.preset.unregistered',
+  PRESET_UNREGISTER = 'action.presets.unregister',
+  PRESET_UNREGISTERING = 'lifecycle.presets.unregistering',
+  PRESET_UNREGISTERED = 'lifecycle.presets.unregistered',
 
-  BUNDLE_REGISTER = 'action.bundle.register',
-  BUNDLE_UNREGISTERING = 'lifecycle.bundle.unregistering',
-  BUNDLE_UNREGISTERED = 'lifecycle.bundle.unregistered',
+  BUNDLE_REGISTER = 'action.bundles.register',
+  BUNDLE_UNREGISTERING = 'lifecycle.bundles.unregistering',
+  BUNDLE_UNREGISTERED = 'lifecycle.bundles.unregistered',
 
   BUNDLE_UNREGISTER = 'action.bundles.unregister',
-  BUNDLE_REGISTERING = 'lifecycle.bundle.registering',
-  BUNDLE_REGISTERED = 'lifecycle.bundle.registered',
+  BUNDLE_REGISTERING = 'lifecycle.bundles.registering',
+  BUNDLE_REGISTERED = 'lifecycle.bundles.registered',
 
-  BUNDLE_NONE = 'error.bundle.none',
+  NODE_CLEAR_ITEMS = 'action.nodes.clearItems',
+  NODE_SET_ITEMS = 'action.nodes.setItems',
+  NODE_SET = 'action.nodes.set',
+  NODE_DELETE = 'action.nodes.delete',
+  NODE_DUPLICATE = 'action.nodes.duplicate',
+  NODE_REPARENT = 'action.nodes.reparent',
+
   ERROR_GENERAL = 'error.general',
 }
 

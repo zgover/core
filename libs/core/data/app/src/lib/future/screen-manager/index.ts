@@ -16,4 +16,4 @@
  */
 
 export * from './node'
-export * as canvas from './nodes-manager'
+export * as screen from './screen-manager'

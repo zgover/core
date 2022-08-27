@@ -22,7 +22,7 @@ export * from './user-agent-manager'
 export * from './bundle-manager'
 export * from './preset-manager'
 export * from './components-manager'
-export * from './nodes-manager'
+export * from './screen-manager'
 export * from './dependency-manager'
 
 // const TAG = 'Aglyn'

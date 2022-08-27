@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
+import { makeAutoObservable } from 'mobx'
 import { nanoid } from 'nanoid'
-import type { BundleId, ComponentId } from '../components-manager'
+import type { BundleId } from '../bundle-manager'
 
 export type NodeId = string
 
@@ -47,51 +48,13 @@ export function nodeFactory<P>(schema: NodeSchema<P>) {
     nodes: Array.isArray(schema.nodes) ? [...schema.nodes] : [],
   }
 
-  return {
-    get node() {
-      return node
-    },
-    get $id(): NodeId {
-      return node.$id
-    },
-    set $id(value: NodeId) {
-      node.$id = value
-    },
-    get componentId(): ComponentId {
-      return node.componentId
-    },
-    set componentId(value: ComponentId) {
-      node.componentId = value
-    },
-    get bundleId(): BundleId {
-      return node.bundleId
-    },
-    set bundleId(value: BundleId) {
-      node.bundleId = value
-    },
-    get parentId(): NodeId {
-      return node.parentId
-    },
-    set parentId(value: NodeId) {
-      node.parentId = value
-    },
-    get sx(): JSX.SxProps {
-      return node.sx
-    },
-    set sx(value: JSX.SxProps) {
-      node.sx = value
-    },
-    get props(): P {
-      return node.props
-    },
-    set props(value: P) {
-      node.props = value
-    },
-    get nodes(): NodeId[] {
-      return node.nodes
-    },
-    set nodes(value: NodeId[]) {
-      node.nodes = value
-    },
-  }
+  return makeAutoObservable({
+    $id: node.$id,
+    componentId: node.componentId,
+    bundleId: node.bundleId,
+    parentId: node.parentId,
+    sx: node.sx,
+    props: node.props,
+    nodes: node.nodes,
+  })
 }
