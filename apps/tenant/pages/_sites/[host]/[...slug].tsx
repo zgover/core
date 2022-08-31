@@ -19,14 +19,18 @@ import {
   getTenantPageStaticPaths,
   getTenantPageStaticProps,
 } from '@aglyn/tenant-feature-instance'
-import CatchAllPage from './[...slug]'
+
+export default function CatchAllPage(props) {
+  console.log('!!!!!CatchAllPage')
+  return <>{JSON.stringify(props, null, 2)}</>
+}
 
 export const getStaticPaths = async (context) => {
+  console.log('!!!!!getStaticPaths props', context)
   return getTenantPageStaticPaths(context)
 }
 
 export const getStaticProps = async (context) => {
+  console.log('!!!!!getStaticProps')
   return getTenantPageStaticProps(context)
 }
-
-export default CatchAllPage

@@ -39,7 +39,7 @@ export const getTenantPageStaticPaths: GetStaticPaths = async (
     ) {
       return paths.map((pg: string) => ({
         params: {
-          path: pg.split('/').filter((i) => Boolean(i)),
+          slug: pg.split('/').filter((i) => Boolean(i)),
           host: host,
         },
       }))

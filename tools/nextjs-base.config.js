@@ -33,32 +33,41 @@ const IS_TEST = NODE_ENV === 'test'
 const ANALYZE_BUNDLE = process.env.NEXT_ANALYZE_BUNDLE === 'true'
 
 let REMOTE_DOMAINS = [
+  // TLD: .io
+  'aglyn.io',
+  'www.aglyn.io',
+  'console.aglyn.io',
+  'admin.aglyn.io',
+  'cdn.aglyn.io',
+  'cname.aglyn.io',
+  'tenant.aglyn.io',
+  // TLD: .com
   'aglyn.com',
-  'app.aglyn.com',
-  'bucket.aglyn.com',
-  'cdn.aglyn.com',
-  'cloud.aglyn.com',
-  'cname.aglyn.com',
-  'console.aglyn.com',
-  'proxy.aglyn.com',
-  'space.aglyn.com',
-  'static.aglyn.com',
-  'storage.aglyn.com',
-  'tenant.aglyn.com',
-  'host.aglyn.com',
-  'hostname.aglyn.com',
-  'www.aglyn.com',
+  // TLD: .app
   'aglyn.app',
+  'localhost:4500',
+  'myhost-1.localhost:4500',
+
+  // // Ideas
+  // 'app.aglyn.com',
+  // 'bucket.aglyn.com',
+  // 'cloud.aglyn.com',
+  // 'proxy.aglyn.com',
+  // 'space.aglyn.com',
+  // 'static.aglyn.com',
+  // 'storage.aglyn.com',
+  // 'host.aglyn.com',
+  // 'hostname.aglyn.com',
 ]
 let LOCAL_DOMAINS = [
   'localhost',
   'localhost:4000',
   'localhost:4100',
-  'localhost:4200',
+  'localhost:4200', // console
   'localhost:4210',
   'localhost:4300',
   'localhost:4400',
-  'localhost:4500',
+  'localhost:4500', // tenant
 ]
 const REMOTE_URLS = REMOTE_DOMAINS.map((i) => `https://${i}`)
 const LOCAL_URLS = REMOTE_DOMAINS.map((i) => `http://${i}`)

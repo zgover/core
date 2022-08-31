@@ -14,24 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type {HttpResponseStatus, HttpStatusCode} from '@aglyn/shared-data-enums'
-import {JsonResponse} from '../types'
-
+import type {
+  HttpResponseStatus,
+  HttpStatusCode,
+} from '@aglyn/shared-data-enums'
+import { JsonResponse } from '../types'
 
 export type JsonCreateResponseOptions = {
-  status?: HttpResponseStatus | true,
-  statusCode?: HttpStatusCode,
-  statusMessage?: string,
-  data?: any,
+  status?: HttpResponseStatus | true
+  statusCode?: HttpStatusCode
+  statusMessage?: string
+  data?: any
   error?: any
-  init?: ResponseInit,
+  init?: ResponseInit
 }
 
 /**
  * Speed up creating a new {@link Response} object specifying the JSON header
  * `'Content-Type': 'application/json'` and {@link JSON.stringify|serializing}
  * JSON response data
- * @example - pages/_middleware.ts
+ * @example - pages/middleware.ts
  * export function middleware(req: NextRequest) {
  *   return createNewJsonResponse(
  *     HttpStatusCode.OK,
@@ -43,8 +45,8 @@ export function createNewJsonResponse(
   statusCode: HttpStatusCode,
   options: JsonCreateResponseOptions = {},
 ) {
-  const {statusMessage, data, error, init} = options
-  const json: JsonResponse = {statusCode, data}
+  const { statusMessage, data, error, init } = options
+  const json: JsonResponse = { statusCode, data }
   if (error) json.error = error
   if (statusMessage) json.statusMessage = statusMessage
 

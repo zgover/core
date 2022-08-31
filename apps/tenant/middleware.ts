@@ -1,0 +1,107 @@
+/**
+ * @license
+ * Copyright 2022 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { type NextRequest, NextResponse } from 'next/server'
+
+export function middleware(req: NextRequest) {
+  const reqHost = req.headers.get('host') || 'console.aglyn.io'
+  const PORT = process.env.PORT
+  const AGLYN_TENANT_HOST_CNAME = process.env.AGLYN_TENANT_HOST_CNAME
+  const VERCEL_ENV = process.env.VERCEL === '1'
+  const PRODUCTION = process.env.NODE_ENV === 'production'
+  const isProdVercel = PRODUCTION && VERCEL_ENV
+
+  // If localhost, assign the host value manually
+  // If prod, get the custom domain/subdomain value by removing the root URL
+  // (in the case of "test.vercel.app", "vercel.app" is the root URL)
+  let tenant: string
+
+  switch (true) {
+    case isProdVercel && reqHost === AGLYN_TENANT_HOST_CNAME:
+    case isProdVercel && reqHost.endsWith(`.${AGLYN_TENANT_HOST_CNAME}`):
+      tenant = AGLYN_TENANT_HOST_CNAME
+      break
+    case isProdVercel && reqHost.endsWith(`.aglyn.app`):
+      tenant = reqHost.replace(`.aglyn.app`, '')
+      break
+    case reqHost.endsWith(`.localhost:4500`):
+      // Development and testing (localhost:4500)
+      tenant = reqHost.replace(`.localhost:4500`, '')
+      break
+    default:
+      const redirect = 'https://console.aglyn.io'
+      console.log('REDIRECTING!!!!!', req.nextUrl.pathname, '', redirect)
+      return NextResponse.redirect(new URL(redirect, req.url))
+  }
+
+  if (
+    req.nextUrl.pathname === '/login' &&
+    (req.cookies.get('next-auth.session-token') ||
+      req.cookies.get('__Secure-next-auth.session-token'))
+  ) {
+    const redirect = '/'
+    console.log('REDIRECTING!!!!!', req.nextUrl.pathname, '', redirect)
+    return NextResponse.redirect(new URL(redirect, req.url))
+  }
+  // url.hostname = 'my.localhost'
+  // rewrite root application to `/home` folder
+  if (reqHost === 'localhost:4500' || reqHost === 'platformize.vercel.app') {
+    const rewrite = `/home${req.nextUrl.pathname}`
+    return NextResponse.rewrite(new URL(rewrite, req.url))
+    return NextResponse.rewrite(req.nextUrl)
+  }
+
+  // rewrite to the current hostname under the pages/_sites folder
+  // the main logic component will happen in pages/_sites/[host]/[...path].tsx
+  const rewrite = `/_sites/${tenant}${req.nextUrl.pathname}`
+  console.log('REDIRECTING!!!!!', req.nextUrl.pathname, '', rewrite)
+  return NextResponse.rewrite(new URL(rewrite, req.url))
+}
+
+/**
+ * The way you configure your matcher items depend on your route structure.
+ * E.g. if you decide to put all your posts under `/posts/[postSlug]`,
+ * you'll need to add an extra matcher item "/posts/:path*".
+ *
+ * The reason we do this is to prevent the middleware from matching absolute
+ * paths like "demo.vercel.pub/_sites/steven" and have the content from
+ * `steven` be served.
+ *
+ * Here's a breakdown of each matcher item:
+ * @example
+ * "/" - Matches the root path of the site.
+ * @example
+ * "/" - Matches the root path of the site.
+ * @example
+ * "/([^/.]*)" - Matches all first-level paths (e.g.
+ *   demo.vercel.pub/platforms-starter-kit) but exclude `/public` files by
+ *   excluding paths containing `.` (e.g. /logo.png)
+ * @example
+ * "/_sites/:path*" – for all custom hostnames under the `/_sites/[host]*`
+ *   dynamic route (demo.vercel.pub, platformize.co) we do this to make sure
+ *   "demo.vercel.pub/_sites/steven" is not matched and throws a 404.
+ */
+export const config = {
+  // prettier-ignore
+  matcher: [
+    '/',
+    '/([^/.]*)',
+    // '/(\\?\\!favicon.ico|robots.txt)',
+    // '/(\\?\\!_next|_static|api)/:path*',
+    '/_sites/:path*',
+  ],
+}

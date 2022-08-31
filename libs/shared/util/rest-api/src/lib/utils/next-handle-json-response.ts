@@ -14,16 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {HttpStatusCode} from '@aglyn/shared-data-enums'
-import type {NextApiResponse} from 'next'
-import type {JsonResponse} from '../types'
-
+import { HttpStatusCode } from '@aglyn/shared-data-enums'
+import type { NextApiResponse } from 'next'
+import type { JsonResponse } from '../types'
 
 /**
  * Speed up creating a new {@link Response} object specifying the JSON header
  * `'Content-Type': 'application/json'` and {@link JSON.stringify | serializing}
  * JSON response data
- * @example - pages/_middleware.ts
+ * @example - pages/middleware.ts
  * export function handler(req: NextApiRequest, res: NextApiResponse) {
  *   return createNewJsonResponse(
  *     res,
@@ -38,13 +37,7 @@ export function nextHandleJsonResponse(
   statusCode: HttpStatusCode,
   options?: JsonResponse,
 ) {
-  const {
-    error,
-    errorCode,
-    status,
-    statusMessage,
-    data,
-  } = options || {}
+  const { error, errorCode, status, statusMessage, data } = options || {}
   const json: JsonResponse = {
     errorCode,
     error,
@@ -54,9 +47,7 @@ export function nextHandleJsonResponse(
     data: data ?? null,
   }
 
-  response
-    .status(json.statusCode)
-    .json(json)
+  response.status(json.statusCode).json(json)
 }
 
 export default nextHandleJsonResponse
