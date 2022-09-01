@@ -16,7 +16,7 @@
  */
 import { HttpStatusCode } from '@aglyn/shared-data-enums'
 import type { NextApiResponse } from 'next'
-import type { JsonResponse } from '../types'
+import type { JsonResponse } from './types'
 
 /**
  * Speed up creating a new {@link Response} object specifying the JSON header

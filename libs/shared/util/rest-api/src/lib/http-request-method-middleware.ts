@@ -24,10 +24,9 @@ import {
   HttpResponseStatus,
   HttpStatusCode,
 } from '@aglyn/shared-data-enums'
-import {HttpResponseError} from '@aglyn/shared-util-errors'
-import type {NextMiddleware} from 'next-api-middleware'
-import nextHandleJsonResponse from '../utils/next-handle-json-response'
-
+import { HttpResponseError } from '@aglyn/shared-util-errors'
+import type { NextMiddleware } from 'next-api-middleware'
+import nextHandleJsonResponse from './next-handle-json-response'
 
 /**
  * @example
@@ -43,7 +42,7 @@ import nextHandleJsonResponse from '../utils/next-handle-json-response'
 export function httpRequestMethodMiddleware(
   allowed: HttpRequestMethod[] | HttpRequestMethod,
 ): NextMiddleware {
-  return async function(req, res, next) {
+  return async function (req, res, next) {
     const method = req.method.toUpperCase() as HttpRequestMethod
     const valid = Array.isArray(allowed)
       ? allowed.includes(method)
@@ -51,8 +50,7 @@ export function httpRequestMethodMiddleware(
 
     if (valid || method === HttpRequestMethod.OPTIONS) {
       await next()
-    }
-    else {
+    } else {
       const err = new HttpResponseError(
         HttpStatusCode.METHOD_NOT_ALLOWED,
         HttpRefCodeSimple.METHOD_NOT_ALLOWED,

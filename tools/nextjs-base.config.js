@@ -232,6 +232,7 @@ const AGLYN_CONFIG = {
      */
     esmExternals: false,
   },
+  pageExtensions: ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'],
   generateEtags: true,
   headers: async () => {
     return [

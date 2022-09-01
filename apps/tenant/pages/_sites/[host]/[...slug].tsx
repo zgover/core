@@ -25,23 +25,21 @@ export default function CatchAllPage(props) {
   return <>{JSON.stringify(props, null, 2)}</>
 }
 
-export const getStaticPaths = async (context) => {
-  console.log('!!!!!getStaticPaths props', context)
-  return {
-    paths: [
-      { params: { host: 'aa', slug: ['bb', 'cc'] } },
-      { params: { host: 'hh', slug: ['bb', 'cc'] } },
-    ],
-    fallback: false, // can also be true or 'blocking'
-  }
-  // return getTenantPageStaticPaths(context)
-}
-
 export const getStaticProps = async (context) => {
-  console.log('!!!!!getStaticProps')
+  console.log('!!!!!getStaticProps', context)
+
   return {
-    props: { context },
+    props: { params: context.params },
     revalidate: 30, // never=false, always=1, since=SECONDS
   }
   // return getTenantPageStaticProps(context)
+}
+
+export const getStaticPaths = async (context) => {
+  console.log('!!!!!getStaticPaths props', context)
+  return {
+    paths: [],
+    fallback: 'blocking', // can also be true or 'blocking'
+  }
+  // return getTenantPageStaticPaths(context)
 }

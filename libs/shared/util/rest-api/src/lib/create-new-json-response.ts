@@ -18,7 +18,7 @@ import type {
   HttpResponseStatus,
   HttpStatusCode,
 } from '@aglyn/shared-data-enums'
-import { JsonResponse } from '../types'
+import { JsonResponse } from './types'
 
 export type JsonCreateResponseOptions = {
   status?: HttpResponseStatus | true

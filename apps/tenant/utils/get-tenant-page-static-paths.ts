@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import type {
-  GetStaticPaths,
-  GetStaticPathsContext,
-  GetStaticPathsResult,
-} from 'next/types'
+import {
+  mockDB,
+  type TenantSite,
+} from '@aglyn/tenant-feature-instance/constants/mock-data'
+import type { GetStaticPathsContext, GetStaticPathsResult } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
-import { mockDB, type TenantSite } from '../constants/mock-data'
 
 export interface StaticPaths extends ParsedUrlQuery, TenantSite {}
 
@@ -29,9 +28,9 @@ export interface StaticPaths extends ParsedUrlQuery, TenantSite {}
  * @see {@link https://vercel.com/docs/concepts/next.js/incremental-static-regeneration#generating-paths|Generating paths for ISR}
  * @param context
  */
-export const getTenantPageStaticPaths: GetStaticPaths = async (
+export async function getTenantPageStaticPaths(
   context: GetStaticPathsContext,
-): Promise<GetStaticPathsResult<StaticPaths>> => {
+): Promise<GetStaticPathsResult<StaticPaths>> {
   function mapTenants(sites: TenantSite[]) {
     function mapPaths(
       paths: TenantSite['paths'],

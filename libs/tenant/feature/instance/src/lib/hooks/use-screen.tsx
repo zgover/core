@@ -29,9 +29,9 @@ export type UseScreenOptions = {
   useFirestoreDocDataOptions?: ReactFireOptions
 }
 
-export const useScreen = <T,>(
+export function useScreen<T>(
   options: UseScreenOptions,
-): [ObservableStatus<T>, (value: T, options: SetOptions) => Promise<void>] => {
+): [ObservableStatus<T>, (value: T, options: SetOptions) => Promise<void>] {
   const { screenId, useFirestoreDocDataOptions } = options
   const firestore = useFirestore()
   const reference = doc(firestore, 'screens', screenId)
