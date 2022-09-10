@@ -17,7 +17,7 @@
 
 // MARK – IMPORTS
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withAglyn = require('../../build/nextjs-base.config')
+const withAglyn = require('../../with-aglyn.nextjs.config')
 
 // MARK – GLOBALS
 const isProduction = process.env.NODE_ENV === 'production'

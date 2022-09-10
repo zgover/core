@@ -17,7 +17,7 @@
 
 import type { PartialKeys } from '@aglyn/shared-data-types'
 import { _isArr } from '@aglyn/shared-util-guards'
-import { copy } from '@aglyn/shared-util-tools'
+import cloneDeep from 'lodash-es/cloneDeep'
 import { observable, toJS } from 'mobx'
 import { AglynEvent, emitter } from '../emit-manager'
 import {
@@ -129,7 +129,7 @@ function duplicateNodeAndChildren<P>(
   node: NodeSchema<P>,
   parentId: NodeId,
 ): NodeSchema<P> {
-  const copied = copy(node)
+  const copied = cloneDeep(node)
   const newNode = createNode({
     ...copied,
     $id: createNodeId(),
@@ -150,8 +150,14 @@ function duplicateNodeAndChildren<P>(
 export function denormalizeNodes(
   nodes: Record<NodeId, NodeSchema<any>>,
   rootNode: NodeSchema<any>,
-) {
-  const parent = copy(rootNode) as unknown as NodeSchemaDenormalized<any>
+): NodeSchemaDenormalized<any> {
+  const parent = cloneDeep(rootNode) as unknown as NodeSchemaDenormalized<any>
+
+  // TODO: Remove after migration to nodes property
+  if (parent['elements']) {
+    parent.nodes = parent['elements']
+    delete parent['elements']
+  }
 
   parent.nodes = (parent.nodes ||= []).map((id) => {
     const child = nodes[id as unknown as string]
@@ -165,9 +171,16 @@ export function denormalizeNodes(
 export function normalizeNodes(
   nodes: NodeSchemaDenormalized<any>[],
   accumulator: Record<NodeId, NodeSchema<any>> = {},
-) {
+): Record<NodeId, NodeSchema<any>> {
   for (const rootNode of nodes) {
-    const parent = copy(rootNode) as unknown as NodeSchema<any>
+    // TODO: Remove after migration to nodes property
+    if (rootNode['elements']) {
+      rootNode.nodes = rootNode['elements']
+      delete rootNode['elements']
+    }
+
+    const parent = cloneDeep(rootNode) as unknown as NodeSchema<any>
+
     parent.nodes = (parent as unknown as NodeSchemaDenormalized<any>).nodes.map(
       (child) => child.$id,
     )

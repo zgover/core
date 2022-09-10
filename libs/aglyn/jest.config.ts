@@ -21,10 +21,7 @@ export default {
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]sx?$': [
-      '@swc/jest',
-      { jsc: { transform: { react: { runtime: 'automatic' } } } },
-    ],
+    '^.+\\.[tj]sx?$': ['babel-jest', { presets: ['@nrwl/react/babel'] }],
   },
   transformIgnorePatterns: ['<rootDor>/node_modules/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],

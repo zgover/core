@@ -17,7 +17,7 @@
 
 const nextComposePlugins = require('next-compose-plugins')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
-const pkg = require('../package.json')
+const pkg = require('./package.json')
 const withNx = require('@nrwl/next/plugins/with-nx')
 const deepFillIn = require('mout/object/deepFillIn')
 
@@ -150,7 +150,7 @@ const BRAND_HEADERS = [
 
 /**
  * Base configuration for NextJS Apps next.config.js
- * @type {import('./nextjs-base.config').WithAglynOptions}
+ * @type {import('./with-aglyn.nextjs.config').WithAglynOptions}
  **/
 const AGLYN_CONFIG = {
   aglyn: {
@@ -331,7 +331,7 @@ const AGLYN_CONFIG = {
 
 /**
  * Base configuration for NextJS Apps next.config.js
- * @param nextConfig {import('./nextjs-base.config').WithAglynOptions}
+ * @param nextConfig {import('./with-aglyn.nextjs.config').WithAglynOptions}
  **/
 function withAglyn(nextConfig = {}) {
   console.log(
@@ -343,7 +343,7 @@ function withAglyn(nextConfig = {}) {
 
   /**
    * Base configuration for NextJS Apps next.config.js
-   * @param userConfig {import('./nextjs-base.config').WithAglynOptions}
+   * @param userConfig {import('./with-aglyn.nextjs.config').WithAglynOptions}
    * @returns WithAglynOptions
    **/
   const useAglyn = (userConfig = {}) => {
