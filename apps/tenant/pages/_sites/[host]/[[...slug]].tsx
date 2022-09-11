@@ -16,12 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import {
-  AglynEvent,
-  NodeId,
-  NodeSchema,
-  NodeSchemaDenormalized,
-} from '@aglyn/aglyn'
+import { AglynEvent } from '@aglyn/aglyn'
 import type {
   AglynHost,
   AglynScreen,
@@ -31,11 +26,10 @@ import {
   LeafComponent,
   LeafComponentContext,
   TreeComponent,
-  TreeComponentContext,
 } from '@aglyn/core-ui-renderer'
 import type { PreviewData } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
-import { useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 // import getHost from '../../../utils/get-host'
 // import getScreen from '../../../utils/get-screen'
 // import getScreenVersion from '../../../utils/get-screen-version'
@@ -126,22 +120,93 @@ interface Props {
 //   }
 // }
 
+function Leaf(props: {
+  component: any
+  children?: any
+  nodeSchema: Aglyn.NodeSchema
+}) {
+  const { component: Component, children, nodeSchema } = props
+  return (
+    <Component
+      key={nodeSchema.$id}
+      // data-aglyn={`leaf:${nodeSchema.$id}`}
+      {...nodeSchema.props}
+    >
+      {children || nodeSchema.props?.children}
+    </Component>
+  )
+}
+
+function Stem(props: { nodeId: Aglyn.NodeId }) {
+  const { nodeId } = props
+
+  if (!Aglyn.screen.hasNode(nodeId)) {
+    console.error(`Error rendering ${nodeId}`)
+    return <div></div>
+  }
+
+  const nodeSchema = Aglyn.screen.getNode(nodeId)
+  let cmpFactory: Aglyn.ComponentType = 'div'
+  let cmpSchema: Aglyn.ComponentSchema = null
+
+  if (Aglyn.components.hasComponent(nodeSchema.componentId)) {
+    cmpFactory = Aglyn.components.getFactory(nodeSchema.componentId)
+    cmpSchema = Aglyn.components.getSchema(nodeSchema.componentId)
+  }
+
+  return (
+    <Leaf key={nodeSchema.$id} component={cmpFactory} nodeSchema={nodeSchema}>
+      {!nodeSchema.nodes?.length ? null : (
+        <Branch
+          key={nodeSchema.$id}
+          parentId={nodeSchema.$id}
+          nodeIds={nodeSchema.nodes}
+        />
+      )}
+    </Leaf>
+  )
+}
+
+function Branch(props: { nodeIds: Aglyn.NodeId[]; parentId: Aglyn.NodeId }) {
+  const { nodeIds, parentId } = props
+  return (
+    <Fragment key={parentId}>
+      {nodeIds.map((nodeId) => (
+        <Stem key={nodeId} nodeId={nodeId} />
+      ))}
+    </Fragment>
+  )
+}
+
+function Trunk(props: { nodeId: Aglyn.NodeId }) {
+  const { nodeId } = props
+  return <Stem key={nodeId} nodeId={nodeId} />
+}
+
+function TreeRoot(props: { nodeId: Aglyn.NodeId }) {
+  const { nodeId } = props
+  return <Trunk nodeId={nodeId} />
+}
+
 export default function CatchAllPage(/*props: Props*/) {
   const props = { data: exampleData }
   const nodes = props.data.screen.version.nodes
-  const isDenormal = Array.isArray(nodes)
-  const denormalized = isDenormal
-    ? (nodes as unknown as NodeSchemaDenormalized)
-    : Aglyn.screen.denormalizeNodes(nodes, nodes[Aglyn.CANVAS_ROOT_ELEMENT_ID])
-  const normalized = !isDenormal
-    ? (nodes as unknown as Record<NodeId, NodeSchema>)
-    : Aglyn.screen.normalizeNodes([
-        {
-          $id: Aglyn.CANVAS_ROOT_ELEMENT_ID,
-          componentId: 'div',
-          nodes: [...nodes],
-        },
-      ])
+  const isNested = Array.isArray(nodes)
+  const nested = isNested
+    ? (nodes as unknown as Aglyn.NodeSchemaNested)
+    : Aglyn.screen.nestNodes(nodes, nodes[Aglyn.NODE_ROOT_ID])
+  const denormalized = !isNested
+    ? (nodes as unknown as Record<Aglyn.NodeId, Aglyn.NodeSchema>)
+    : Aglyn.screen.denormalizeNodes(
+        [
+          {
+            $id: Aglyn.NODE_ROOT_ID,
+            componentId: 'div',
+            nodes: [...nodes],
+          },
+        ],
+        null,
+      )
 
   console.log('!!!!!CatchAllPage')
 
@@ -153,21 +218,17 @@ export default function CatchAllPage(/*props: Props*/) {
     //     elements: props.screen.version,
     //   })
     // }
-    Aglyn.emitter.emit(AglynEvent.NODE_SET_ITEMS, { nodes: normalized })
-  }, [normalized])
+    Aglyn.emitter.emit(AglynEvent.NODE_SET_ITEMS, { nodes: denormalized })
+  }, [denormalized])
 
   return (
     <>
-      <TreeComponentContext.Provider value={'div'}>
-        <LeafComponentContext.Provider value={'div'}>
-          <RenderNodes nodes={[denormalized]} />
-        </LeafComponentContext.Provider>
-      </TreeComponentContext.Provider>
+      <TreeRoot nodeId={Aglyn.NODE_ROOT_ID} />
       <br />
       <br />
-      normalized
+      nested
       <br />
-      <pre>{JSON.stringify(normalized, null, 2)}</pre>
+      <pre>{JSON.stringify(nested, null, 2)}</pre>
       <br />
       <br />
       denormalized
@@ -179,7 +240,7 @@ export default function CatchAllPage(/*props: Props*/) {
     </>
   )
 
-  function RenderNodes(props: { nodes: NodeSchemaDenormalized[] }) {
+  function RenderNodes(props: { nodes: Aglyn.NodeSchemaNested[] }) {
     const { nodes } = props
     return (
       nodes?.length && (

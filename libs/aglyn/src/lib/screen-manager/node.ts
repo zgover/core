@@ -31,8 +31,10 @@ export interface NodeSchema<P = JSX.AnyProps> {
   nodes?: NodeId[]
 }
 
-export type NodeSchemaDenormalized<P = JSX.AnyProps> = Omit<NodeSchema<P>, 'nodes'>
-  & {nodes?: NodeSchemaDenormalized<any>[]}
+export type NodeSchemaNested<P = JSX.AnyProps> = Omit<
+  NodeSchema<P>,
+  'nodes'
+> & { nodes?: NodeSchemaNested<any>[] }
 
 export const NODE_ID_LENGTH = 10
 
@@ -40,14 +42,14 @@ export function createNodeId(): NodeId {
   return nanoid(NODE_ID_LENGTH)
 }
 
-export function nodeFactory<P>(schema: NodeSchema<P>) {
+export function nodeFactory<P = JSX.AnyProps>(schema: NodeSchema<P>) {
   const node: NodeSchema<P> = {
     $id: schema.$id,
     componentId: schema.componentId,
     bundleId: schema.bundleId,
     parentId: schema.parentId,
-    sx: Array.isArray(schema.sx) ? [...schema.sx] : {...schema.sx},
-    props: {...schema.props},
+    sx: Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx },
+    props: { ...schema.props },
     nodes: Array.isArray(schema.nodes) ? [...schema.nodes] : [],
   }
 

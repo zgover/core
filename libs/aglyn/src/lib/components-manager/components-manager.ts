@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { _hasOwnProperty } from '@aglyn/shared-util-guards'
 import { AglynEvent, emitter, lifecycleEvent } from '../emit-manager'
 import { bundles } from '../plugin-manager'
 import { ComponentId, ComponentSchema, ComponentType } from './component'
@@ -39,7 +38,7 @@ export function getSchema(componentId: ComponentId) {
 }
 
 export function hasComponent(componentId: ComponentId) {
-  return componentId && _hasOwnProperty(componentId, schemas)
+  return Object.hasOwn(factories, componentId)
 }
 
 export function registerComponent(

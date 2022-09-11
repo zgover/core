@@ -1,4 +1,11 @@
 {
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultProject": "console",
+  "npmScope": "aglyn",
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "libs"
+  },
   "implicitDependencies": {
     "workspace.json": "*",
     "package.json": {
@@ -13,7 +20,6 @@
   "affected": {
     "defaultBase": "main"
   },
-  "npmScope": "aglyn",
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/nx-cloud",
@@ -26,18 +32,64 @@
     }
   },
   "generators": {
+    "@nrwl/js": {
+      "library": {
+        "buildable": true,
+        "publishable": true,
+        "includeBabelRc": true,
+        "standaloneConfig": true,
+        "compiler": "swc",
+        "config": "project",
+        "testEnvironment": "node",
+        "unitTestRunner": "jest",
+        "linter": "eslint"
+      }
+    },
+    "@nrwl/node": {
+      "library": {
+        "buildable": true,
+        "publishable": true,
+        "includeBabelRc": true,
+        "standaloneConfig": true,
+        "compiler": "swc",
+        "config": "project",
+        "testEnvironment": "node",
+        "unitTestRunner": "jest",
+        "linter": "eslint"
+      }
+    },
     "@nrwl/react": {
-      "application": {
-        "babel": true
+      "library": {
+        "buildable": true,
+        "publishable": true,
+        "includeBabelRc": true,
+        "standaloneConfig": true,
+        "compiler": "swc",
+        "config": "project",
+        "testEnvironment": "node",
+        "unitTestRunner": "jest",
+        "linter": "eslint"
       }
     },
     "@nrwl/next": {
       "application": {
-        "style": "@emotion/styled",
+        "swc": true,
+        "standaloneConfig": true,
+        "linter": "eslint",
+        "unitTestRunner": "jest",
+        "e2eTestRunner": "cypress"
+      },
+      "library": {
+        "buildable": true,
+        "publishable": true,
+        "includeBabelRc": true,
+        "standaloneConfig": true,
+        "compiler": "swc",
+        "config": "project",
+        "testEnvironment": "node",
+        "unitTestRunner": "jest",
         "linter": "eslint"
       }
     }
-  },
-  "defaultProject": "console",
-  "$schema": "./node_modules/nx/schemas/nx-schema.json"
+  }
 }

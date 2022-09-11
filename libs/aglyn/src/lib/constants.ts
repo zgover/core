@@ -19,4 +19,4 @@ const pkg = require('../../package.json')
 
 export const version = pkg.version
 export const namespace = pkg.name
-export const CANVAS_ROOT_ELEMENT_ID = '_@_'
+export const NODE_ROOT_ID = '_@_'

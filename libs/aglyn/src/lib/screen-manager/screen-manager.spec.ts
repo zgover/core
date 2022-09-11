@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-import { CANVAS_ROOT_ELEMENT_ID } from '../constants'
+import { NODE_ROOT_ID } from '../constants'
 import {
   denormalizeNodes,
+  nestNodes,
   NodeId,
   NodeSchema,
-  NodeSchemaDenormalized,
-  normalizeNodes,
+  NodeSchemaNested,
 } from './screen-manager'
 
 describe('Aglyn: Screen Manager', () => {
   const nodes: Record<NodeId, NodeSchema> = {
-    [CANVAS_ROOT_ELEMENT_ID]: {
-      $id: CANVAS_ROOT_ELEMENT_ID,
+    [NODE_ROOT_ID]: {
+      $id: NODE_ROOT_ID,
       parentId: null,
       componentId: 'div',
       props: {},
@@ -36,7 +36,7 @@ describe('Aglyn: Screen Manager', () => {
     },
     child1: {
       $id: 'child1',
-      parentId: CANVAS_ROOT_ELEMENT_ID,
+      parentId: NODE_ROOT_ID,
       componentId: 'div',
       props: {},
       sx: {},
@@ -44,7 +44,7 @@ describe('Aglyn: Screen Manager', () => {
     },
     child2: {
       $id: 'child2',
-      parentId: CANVAS_ROOT_ELEMENT_ID,
+      parentId: NODE_ROOT_ID,
       componentId: 'div',
       props: {},
       sx: {},
@@ -68,9 +68,9 @@ describe('Aglyn: Screen Manager', () => {
     },
   }
 
-  const denormalized: NodeSchemaDenormalized[] = [
+  const denormalized: NodeSchemaNested[] = [
     {
-      $id: CANVAS_ROOT_ELEMENT_ID,
+      $id: NODE_ROOT_ID,
       parentId: null,
       componentId: 'div',
       props: {},
@@ -78,7 +78,7 @@ describe('Aglyn: Screen Manager', () => {
       nodes: [
         {
           $id: 'child1',
-          parentId: CANVAS_ROOT_ELEMENT_ID,
+          parentId: NODE_ROOT_ID,
           componentId: 'div',
           props: {},
           sx: {},
@@ -103,7 +103,7 @@ describe('Aglyn: Screen Manager', () => {
         },
         {
           $id: 'child2',
-          parentId: CANVAS_ROOT_ELEMENT_ID,
+          parentId: NODE_ROOT_ID,
           componentId: 'div',
           props: {},
           sx: {},
@@ -114,38 +114,38 @@ describe('Aglyn: Screen Manager', () => {
   ]
 
   it('Denormalize Nodes', () => {
-    const denormal = denormalizeNodes(nodes, nodes[CANVAS_ROOT_ELEMENT_ID])
+    const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
     expect(denormal).toEqual(denormalized[0])
   })
 
   it('Normalize Nodes', () => {
-    const normal = normalizeNodes(denormalized)
+    const normal = denormalizeNodes(denormalized)
     expect(normal).toEqual(nodes)
   })
 
   it('Normalize Nodes then Denormalize', () => {
-    const normal = normalizeNodes(denormalized)
-    const denormal = denormalizeNodes(normal, normal[CANVAS_ROOT_ELEMENT_ID])
+    const normal = denormalizeNodes(denormalized)
+    const denormal = nestNodes(normal, normal[NODE_ROOT_ID])
     expect(denormal).toEqual(denormalized[0])
   })
 
   it('Denormalize Nodes then Normalize', () => {
-    const denormal = denormalizeNodes(nodes, nodes[CANVAS_ROOT_ELEMENT_ID])
-    const normal = normalizeNodes([denormal])
+    const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
+    const normal = denormalizeNodes([denormal])
     expect(normal).toEqual(nodes)
   })
 
   it('Denormalize Nodes then Normalize then Denormalize again', () => {
-    const denormal = denormalizeNodes(nodes, nodes[CANVAS_ROOT_ELEMENT_ID])
-    const normal = normalizeNodes([denormal])
-    const denormal2 = denormalizeNodes(normal, normal[CANVAS_ROOT_ELEMENT_ID])
+    const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
+    const normal = denormalizeNodes([denormal])
+    const denormal2 = nestNodes(normal, normal[NODE_ROOT_ID])
     expect(denormal2).toEqual(denormalized[0])
   })
 
   it('Normalize Nodes then Denormalize then Normalize again', () => {
-    const normal = normalizeNodes(denormalized)
-    const denormal = denormalizeNodes(normal, normal[CANVAS_ROOT_ELEMENT_ID])
-    const normal2 = normalizeNodes([denormal])
+    const normal = denormalizeNodes(denormalized)
+    const denormal = nestNodes(normal, normal[NODE_ROOT_ID])
+    const normal2 = denormalizeNodes([denormal])
     expect(normal2).toEqual(nodes)
   })
 })

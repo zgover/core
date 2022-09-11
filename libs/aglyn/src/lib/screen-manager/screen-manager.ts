@@ -25,7 +25,7 @@ import {
   nodeFactory,
   type NodeId,
   type NodeSchema,
-  NodeSchemaDenormalized,
+  type NodeSchemaNested,
 } from './node'
 
 export * from './node'
@@ -60,7 +60,7 @@ export function toJSON() {
   }
 }
 
-export function createNode<P>(
+export function createNode<P = JSX.AnyProps>(
   schema: PartialKeys<NodeSchema<P>, '$id'>,
 ): NodeSchema<P> {
   return nodeFactory({ ...schema, $id: schema?.$id ?? createNodeId() })
@@ -70,26 +70,36 @@ export function clearNodes() {
   for (const key in nodes) delete nodes[key]
 }
 
-export function setNodes<P>(values: Record<NodeId, NodeSchema<P>>) {
+export function setNodes<P = JSX.AnyProps>(
+  values: Record<NodeId, NodeSchema<P>>,
+) {
   Object.entries(values).forEach(([id, node]) => {
     nodes[id] = createNode(node)
   })
 }
 
-export function getNode<P>($id: NodeId): NodeSchema<P> | undefined {
+export function hasNode($id: NodeId): boolean {
+  return Object.hasOwn(nodes, $id)
+}
+
+export function getNode<P = JSX.AnyProps>(
+  $id: NodeId,
+): NodeSchema<P> | undefined {
   return nodes[$id]
 }
 
-export function setNodeItem<P>(node: NodeSchema<P>) {
+export function setNodeItem<P = JSX.AnyProps>(node: NodeSchema<P>) {
   nodes[node.$id] = createNode(node)
 }
 
-export function deleteNode<P>(node: NodeSchema<P>) {
+export function deleteNode<P = JSX.AnyProps>(node: NodeSchema<P>) {
   deleteChildNodes(node)
   delete nodes[node.$id]
 }
 
-export function duplicateNode<P>(node: NodeSchema<P>): NodeSchema<P> {
+export function duplicateNode<P = JSX.AnyProps>(
+  node: NodeSchema<P>,
+): NodeSchema<P> {
   const parentId = node.parentId
   const parent = nodes[parentId]
   const oldIndex = parent.nodes.indexOf(node.$id)
@@ -114,7 +124,7 @@ export function reparentNode(
   nodes[node.$id] = node
 }
 
-function deleteChildNodes<P>(node: NodeSchema<P>) {
+function deleteChildNodes<P = JSX.AnyProps>(node: NodeSchema<P>) {
   const children = Array.isArray(node.nodes) ? node.nodes : []
   for (const childId of children) {
     const child = getNode(childId)
@@ -125,7 +135,7 @@ function deleteChildNodes<P>(node: NodeSchema<P>) {
   }
 }
 
-function duplicateNodeAndChildren<P>(
+function duplicateNodeAndChildren<P = JSX.AnyProps>(
   node: NodeSchema<P>,
   parentId: NodeId,
 ): NodeSchema<P> {
@@ -147,11 +157,11 @@ function duplicateNodeAndChildren<P>(
   return newNode as NodeSchema<P>
 }
 
-export function denormalizeNodes(
+export function nestNodes(
   nodes: Record<NodeId, NodeSchema<any>>,
   rootNode: NodeSchema<any>,
-): NodeSchemaDenormalized<any> {
-  const parent = cloneDeep(rootNode) as unknown as NodeSchemaDenormalized<any>
+): NodeSchemaNested<any> {
+  const parent = cloneDeep(rootNode) as unknown as NodeSchemaNested<any>
 
   // TODO: Remove after migration to nodes property
   if (parent['elements']) {
@@ -161,34 +171,32 @@ export function denormalizeNodes(
 
   parent.nodes = (parent.nodes ||= []).map((id) => {
     const child = nodes[id as unknown as string]
-    child.parentId = parent.$id
-    return denormalizeNodes(nodes, child)
+    return nestNodes(nodes, child)
   })
 
   return parent
 }
 
-export function normalizeNodes(
-  nodes: NodeSchemaDenormalized<any>[],
+export function denormalizeNodes(
+  nodes: NodeSchemaNested<any>[],
+  parentId: NodeId,
   accumulator: Record<NodeId, NodeSchema<any>> = {},
 ): Record<NodeId, NodeSchema<any>> {
-  for (const rootNode of nodes) {
+  for (const nestedNode of nodes) {
     // TODO: Remove after migration to nodes property
-    if (rootNode['elements']) {
-      rootNode.nodes = rootNode['elements']
-      delete rootNode['elements']
+    if (nestedNode['elements']) {
+      nestedNode.nodes = nestedNode['elements']
+      delete nestedNode['elements']
     }
 
-    const parent = cloneDeep(rootNode) as unknown as NodeSchema<any>
+    const node = cloneDeep(nestedNode) as unknown as NodeSchema<any>
 
-    parent.nodes = (parent as unknown as NodeSchemaDenormalized<any>).nodes.map(
+    node.parentId = parentId
+    node.nodes = (node as unknown as NodeSchemaNested<any>).nodes.map(
       (child) => child.$id,
     )
-    accumulator = {
-      ...accumulator,
-      ...normalizeNodes(rootNode.nodes, accumulator),
-    }
-    accumulator[parent.$id] = parent
+    denormalizeNodes(nestedNode.nodes, node.$id, accumulator)
+    accumulator[node.$id] = node
   }
   return accumulator
 }

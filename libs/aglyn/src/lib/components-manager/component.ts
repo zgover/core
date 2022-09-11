@@ -82,10 +82,8 @@ export enum ComponentsLinealDirectiveFlag {
 export type ComponentType<
   P extends ComponentProps<C> | any = any,
   C extends keyof JSX.IntrinsicElements | JSX.ElementConstructor<any> = any,
-> =
-  | ComponentClass<P>
-  | JSX.ElementConstructor<P>
-  | keyof JSX.IntrinsicElements[keyof JSX.IntrinsicElements]
+> = ComponentClass<P> | JSX.ElementConstructor<P> | keyof JSX.IntrinsicElements
+// | keyof JSX.IntrinsicElements[keyof JSX.IntrinsicElements]
 
 export type ComponentsLinealOrder = [
   directiveType: ComponentsLinealDirectiveFlag,
