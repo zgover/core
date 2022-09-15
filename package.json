@@ -50,8 +50,8 @@
     "readme:table-of-contents": "markdown-toc -i ./README.md"
   },
   "dependencies": {
-    "@data-driven-forms/mui-component-mapper": "^3.18.8",
-    "@data-driven-forms/react-form-renderer": "^3.18.8",
+    "@data-driven-forms/mui-component-mapper": "^3.18.11",
+    "@data-driven-forms/react-form-renderer": "^3.18.11",
     "@emotion/cache": "^11.9.3",
     "@emotion/css": "^11.9.0",
     "@emotion/react": "11.10.0",
@@ -99,7 +99,7 @@
     "mout": "^1.2.3",
     "nanoid": "^3.3.4",
     "nanoid-dictionary": "^4.3.0",
-    "next": "12.2.5",
+    "next": "^12.3.0",
     "next-api-middleware": "^1.0.1",
     "notistack": "^2.0.5",
     "php-serialize": "^4.0.2",
@@ -232,4 +232,3 @@
     }
   }
 }
-

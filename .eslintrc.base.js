@@ -31,10 +31,6 @@ module.exports = {
             enforceBuildableLibDependency: true,
             depConstraints: [
               {
-                sourceTag: 'scope:app',
-                onlyDependOnLibsWithTags: ['scope:lib'],
-              },
-              {
                 sourceTag: 'scope:lib',
                 onlyDependOnLibsWithTags: ['scope:lib'],
               },

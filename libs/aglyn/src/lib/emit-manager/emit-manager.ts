@@ -53,13 +53,13 @@ export enum AglynEvent {
   PRESET_UNREGISTERING = 'lifecycle.presets.unregistering',
   PRESET_UNREGISTERED = 'lifecycle.presets.unregistered',
 
-  BUNDLE_REGISTER = 'action.bundles.register',
-  BUNDLE_UNREGISTERING = 'lifecycle.bundles.unregistering',
-  BUNDLE_UNREGISTERED = 'lifecycle.bundles.unregistered',
+  PLUGIN_REGISTER = 'action.plugins.register',
+  PLUGIN_UNREGISTERING = 'lifecycle.plugins.unregistering',
+  PLUGIN_UNREGISTERED = 'lifecycle.plugins.unregistered',
 
-  BUNDLE_UNREGISTER = 'action.bundles.unregister',
-  BUNDLE_REGISTERING = 'lifecycle.bundles.registering',
-  BUNDLE_REGISTERED = 'lifecycle.bundles.registered',
+  PLUGIN_UNREGISTER = 'action.plugins.unregister',
+  PLUGIN_REGISTERING = 'lifecycle.plugins.registering',
+  PLUGIN_REGISTERED = 'lifecycle.plugins.registered',
 
   NODE_CLEAR_ITEMS = 'action.nodes.clearItems',
   NODE_SET_ITEMS = 'action.nodes.setItems',

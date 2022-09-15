@@ -16,8 +16,10 @@
  */
 
 import { AglynEvent, emitter, lifecycleEvent } from '../emit-manager'
-import { bundles } from '../plugin-manager'
-import { ComponentId, ComponentSchema, ComponentType } from './component'
+import { hasDependency } from '../plugin-manager'
+import type { ComponentId, ComponentSchema, ComponentType } from './component'
+
+export * from './component'
 
 export const factories: Record<ComponentId, ComponentType> = {}
 export const schemas: Record<ComponentId, ComponentSchema> = {}
@@ -45,25 +47,25 @@ export function registerComponent(
   component: ComponentType,
   schema: ComponentSchema,
 ) {
-  const { componentId, bundleId } = schema
+  const { componentId, pluginId } = schema
 
   lifecycleEvent(
     () => {
       // TODO: throw errorFactory error
-      if (bundleId && !bundles.hasBundle(bundleId)) {
-        throw new Error(`No bundle exists with ID ${bundleId}.`)
-      } else if (bundleId) {
-        const ids = (bundles[bundleId].componentIds ??= [])
+      if (pluginId && !hasDependency(pluginId)) {
+        throw new Error(`No plugin exists with ID ${pluginId}.`)
+      } /* else if (pluginId) {
+        const ids = (bundles[pluginId].componentIds ??= [])
         ids.push(componentId)
-      }
+      }*/
       factories[componentId] = component
       schemas[componentId] = schema
     },
     {
       beforeEvent: AglynEvent.COMPONENT_REGISTERING,
-      beforePayload: [{ componentId, bundleId }],
+      beforePayload: [{ componentId, pluginId: pluginId }],
       afterEvent: AglynEvent.COMPONENT_REGISTERED,
-      afterPayload: [{ componentId, bundleId }],
+      afterPayload: [{ componentId, pluginId: pluginId }],
     },
   )
 }
@@ -74,15 +76,15 @@ export function unregisterComponent(componentId: ComponentId) {
       if (!componentId || !hasComponent(componentId)) {
         throw new Error(`No component exists with ID ${componentId}.`)
       }
-      const { bundleId } = getSchema(componentId)
+      const { pluginId } = getSchema(componentId)
 
-      if (bundleId && !bundles.hasBundle(bundleId)) {
-        throw new Error(`No bundle exists with ID ${bundleId}.`)
-      } else if (bundleId) {
-        bundles[bundleId].componentIds = bundles[bundleId].componentIds.filter(
+      if (pluginId && !hasDependency(pluginId)) {
+        throw new Error(`No plugin exists with ID ${pluginId}.`)
+      } /*else if (pluginId) {
+        bundles[pluginId].componentIds = bundles[pluginId].componentIds.filter(
           (i) => i !== componentId,
         )
-      }
+      }*/
       delete schemas[componentId]
       delete factories[componentId]
     },

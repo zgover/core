@@ -15,4 +15,4 @@
  * limitations under the License.
  */
 
-export * as depends from './dependency-manager'
+export const PLUGIN_ID = 'mui'

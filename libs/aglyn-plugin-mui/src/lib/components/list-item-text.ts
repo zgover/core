@@ -15,11 +15,18 @@
  * limitations under the License.
  */
 
-export * from './utils'
-export * from './constants'
-export * from './emit-manager'
-export * from './user-agent-manager'
-export * from './plugin-manager'
-export * from './preset-manager'
-export * from './components-manager'
-export * from './screen-manager'
+import * as Aglyn from '@aglyn/aglyn'
+import { mdiFormatListChecks } from '@aglyn/shared-ui-mdi-jsx'
+import ListItemText from '@mui/material/ListItemText'
+import { PLUGIN_ID } from '../constants/common'
+
+const ID: Aglyn.ComponentId = 'list-item-text'
+
+export const schema: Aglyn.ComponentSchema = {
+  componentId: ID,
+  pluginId: PLUGIN_ID,
+  displayName: 'List Item Text',
+  icon: { path: mdiFormatListChecks.path },
+}
+
+export default ListItemText

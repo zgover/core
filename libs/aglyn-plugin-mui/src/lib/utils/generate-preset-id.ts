@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-export * from './utils'
-export * from './constants'
-export * from './emit-manager'
-export * from './user-agent-manager'
-export * from './plugin-manager'
-export * from './preset-manager'
-export * from './components-manager'
-export * from './screen-manager'
+import type { ComponentId } from '@aglyn/core-data-foundation'
+import { PLUGIN_ID } from '../constants/common'
+
+export const generatePresetId = (
+  componentId: ComponentId,
+  ...other: string[]
+): ComponentId => {
+  return `${PLUGIN_ID}:${[componentId, ...other].join('.')}`
+}
+
+export default generatePresetId

@@ -17,7 +17,6 @@
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { _hasOwnProperty } from '@aglyn/shared-util-guards'
 import { AglynEvent, emitter, lifecycleEvent } from '../emit-manager'
 
 export enum PluginStatus {
@@ -48,60 +47,60 @@ export interface Plugin {
   destroy?(...args: any[]): void
 }
 
-export const bundles: Record<PluginId, Plugin> = {}
-
-emitter.on(AglynEvent.BUNDLE_REGISTER, ({ bundle }) => {
-  registerBundle(bundle)
+emitter.on(AglynEvent.PLUGIN_REGISTER, ({ plugin }) => {
+  addDependency(plugin)
 })
-emitter.on(AglynEvent.BUNDLE_UNREGISTER, ({ bundleId }) => {
-  unregisterBundle(bundleId)
+emitter.on(AglynEvent.PLUGIN_UNREGISTER, ({ pluginId }) => {
+  removeDependency(pluginId)
 })
-
-export function getBundle(bundleId: PluginId) {
-  return bundles[bundleId]
-}
-
-export function hasBundle(bundleId: PluginId) {
-  return bundleId && _hasOwnProperty(bundleId, bundles)
-}
-
-export function registerBundle(schema: Plugin) {
-  const { id: pluginId } = schema
-  lifecycleEvent(
-    () => {
-      bundles[pluginId] = schema
-      // for (const preset of schema.presets || []) {
-      //   emitter.emit(AglynEvent.PRESET_REGISTER, { preset })
-      // }
-    },
-    {
-      beforeEvent: AglynEvent.BUNDLE_REGISTERING,
-      beforePayload: [{ schema }],
-      afterEvent: AglynEvent.BUNDLE_REGISTERED,
-      afterPayload: [{ schema }],
-    },
-  )
-}
-
-export function unregisterBundle(bundleId: PluginId) {
-  const bundle = bundles[bundleId]
-  lifecycleEvent(
-    () => {
-      if (!bundle) throw new Error(`No bundle exists with ID ${bundleId}`)
-
-      // for (const componentId of bundle.componentIds || []) {
-      //   emitter.emit(AglynEvent.COMPONENT_UNREGISTER, { componentId, bundleId })
-      // }
-      delete bundles[bundleId]
-    },
-    {
-      beforeEvent: AglynEvent.BUNDLE_UNREGISTERING,
-      beforePayload: [{ bundleId }],
-      afterEvent: AglynEvent.BUNDLE_UNREGISTERED,
-      afterPayload: [{ bundleId }],
-    },
-  )
-}
+// export const bundles: Record<PluginId, Plugin> = {}
+//
+// export function getBundle(bundleId: PluginId) {
+//   return bundles[bundleId]
+// }
+//
+// export function hasBundle(bundleId: PluginId) {
+//   return bundleId && _hasOwnProperty(bundleId, bundles)
+// }
+//
+// export function registerBundle(schema: Plugin) {
+//   const { id: pluginId } = schema
+//   lifecycleEvent(
+//     () => {
+//       addDependency(schema)
+//       bundles[pluginId] = schema
+//       // for (const preset of schema.presets || []) {
+//       //   emitter.emit(AglynEvent.PRESET_REGISTER, { preset })
+//       // }
+//     },
+//     {
+//       beforeEvent: AglynEvent.PLUGIN_REGISTERING,
+//       beforePayload: [{ schema }],
+//       afterEvent: AglynEvent.PLUGIN_REGISTERED,
+//       afterPayload: [{ schema }],
+//     },
+//   )
+// }
+//
+// export function unregisterBundle(bundleId: PluginId) {
+//   const bundle = bundles[bundleId]
+//   lifecycleEvent(
+//     () => {
+//       if (!bundle) throw new Error(`No bundle exists with ID ${bundleId}`)
+//
+//       // for (const componentId of bundle.componentIds || []) {
+//       //   emitter.emit(AglynEvent.COMPONENT_UNREGISTER, { componentId, bundleId })
+//       // }
+//       delete bundles[bundleId]
+//     },
+//     {
+//       beforeEvent: AglynEvent.PLUGIN_UNREGISTERING,
+//       beforePayload: [{ bundleId }],
+//       afterEvent: AglynEvent.PLUGIN_UNREGISTERED,
+//       afterPayload: [{ bundleId }],
+//     },
+//   )
+// }
 
 //     ____  __________  _______   _______________________
 //    / __ \/ ____/ __ \/ ____/ | / / ____/  _/ ____/ ___/
@@ -162,7 +161,18 @@ export function areAllDependenciesLoaded(dependentId: PluginId): boolean {
 }
 
 export function addDependency(dependency: Plugin) {
-  return handleAddingDependencyAndDependents(dependency)
+  lifecycleEvent(
+    () => {
+      handleAddingDependencyAndDependents(dependency)
+    },
+    {
+      beforeEvent: AglynEvent.PLUGIN_REGISTERING,
+      beforePayload: [{ schema: dependency }],
+      afterEvent: AglynEvent.PLUGIN_REGISTERED,
+      afterPayload: [{ schema: dependency }],
+    },
+  )
+  return
 }
 
 export function addDependencies(dependencies?: Array<Plugin>) {
@@ -180,7 +190,18 @@ export function destroyDependencies() {
 }
 
 export function removeDependency(id: PluginId) {
-  return handleRemovingDependencyAndDependents(id)
+  lifecycleEvent(
+    () => {
+      handleRemovingDependencyAndDependents(id)
+    },
+    {
+      beforeEvent: AglynEvent.PLUGIN_UNREGISTERING,
+      beforePayload: [{ id }],
+      afterEvent: AglynEvent.PLUGIN_UNREGISTERED,
+      afterPayload: [{ id }],
+    },
+  )
+  return
 }
 
 export function loadDependency(id: PluginId) {

@@ -16,23 +16,22 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { AglynEvent } from '@aglyn/aglyn'
+import '@aglyn/aglyn-plugin-mui'
 import type {
   AglynHost,
   AglynScreen,
   AglynScreenVersion,
 } from '@aglyn/core-data-foundation'
-import {
-  LeafComponent,
-  LeafComponentContext,
-  TreeComponent,
-} from '@aglyn/core-ui-renderer'
-import type { PreviewData } from 'next/types'
+import { styled } from '@aglyn/shared-ui-theme'
+import cloneDeep from 'lodash-es/cloneDeep'
+import type { GetStaticPaths, GetStaticProps, PreviewData } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
-import { Fragment, useEffect } from 'react'
-// import getHost from '../../../utils/get-host'
-// import getScreen from '../../../utils/get-screen'
-// import getScreenVersion from '../../../utils/get-screen-version'
+import { Fragment, useEffect, useMemo } from 'react'
+import getHost from '../../../utils/get-host'
+import getScreen from '../../../utils/get-screen'
+import getScreenVersion from '../../../utils/get-screen-version'
+
+const DefaultComponent = styled('div')({})
 
 type StaticPreviewData = PreviewData
 
@@ -48,89 +47,109 @@ interface Props {
   }
 }
 
-// export const getStaticPathskk: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
-//   console.log('!!!!!getStaticPaths ctx', ctx)
-//   return {
-//     paths: [],
-//     fallback: 'blocking', // ISR server-render if static cache is not available
-//   }
-// }
-//
-// export const getStaticPropskk: GetStaticProps = async (context) => {
-//   console.debug('!!!!!getStaticProps', context)
-//
-//   const { params } = context
-//
-//   try {
-//     const hostRes = await getHost(params.host as string)
-//     console.debug('hostRes', hostRes)
-//
-//     if (hostRes.error || !hostRes.host) {
-//       return {
-//         notFound: true,
-//         revalidate: false, // never=false, always=1, since=SECONDS
-//       }
-//     }
-//
-//     const screenEntry = Object.entries(hostRes.host.screens || {}).find(
-//       ([screenId, slug]) => {
-//         return slug === (params.slug as string[]).join('/')
-//       },
-//     )
-//     console.debug('screenEntry', screenEntry)
-//
-//     if (!Array.isArray(screenEntry)) {
-//       return {
-//         notFound: true,
-//         revalidate: false, // never=false, always=1, since=SECONDS
-//       }
-//     }
-//
-//     const screenId = screenEntry[0]
-//     const screenRes = await getScreen(screenId)
-//     console.debug('screenRes', screenRes)
-//
-//     if (screenRes.error || !screenRes.screen) {
-//       return {
-//         notFound: true,
-//         revalidate: false, // never=false, always=1, since=SECONDS
-//       }
-//     }
-//
-//     const versionRes = await getScreenVersion(
-//       screenId,
-//       screenRes.screen.versionId,
-//     )
-//     console.debug('versionRes', versionRes)
-//
-//     return {
-//       props: JSON.parse(
-//         JSON.stringify({
-//           host: hostRes.host,
-//           screen: {
-//             data: screenRes.screen,
-//             version: versionRes.version,
-//           },
-//         }),
-//       ),
-//       revalidate: false, // never=false, always=1, since=SECONDS
-//     }
-//   } catch (e) {
-//     console.error(e)
-//   }
-// }
+export const getStaticPaths: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
+  console.log('!!!!!getStaticPaths ctx', ctx)
+  return {
+    paths: [],
+    fallback: 'blocking', // ISR server-render if static cache is not available
+  }
+}
+
+export const getStaticProps: GetStaticProps<Props> = async (context) => {
+  console.debug('!!!!!getStaticProps', context)
+
+  const { params } = context
+
+  try {
+    const hostRes = await getHost(params.host as string)
+    console.debug('hostRes', hostRes)
+
+    if (hostRes.error || !hostRes.host) {
+      return {
+        notFound: true,
+        revalidate: false, // never=false, always=1, since=SECONDS
+      }
+    }
+
+    const screenEntry = Object.entries(hostRes.host.screens || {}).find(
+      ([screenId, slug]) => {
+        return slug === (params.slug as string[]).join('/')
+      },
+    )
+    console.debug('screenEntry', screenEntry)
+
+    if (!Array.isArray(screenEntry)) {
+      return {
+        notFound: true,
+        revalidate: false, // never=false, always=1, since=SECONDS
+      }
+    }
+
+    const screenId = screenEntry[0]
+    const screenRes = await getScreen(screenId)
+    console.debug('screenRes', screenRes)
+
+    if (screenRes.error || !screenRes.screen) {
+      return {
+        notFound: true,
+        revalidate: false, // never=false, always=1, since=SECONDS
+      }
+    }
+
+    const versionRes = await getScreenVersion(
+      screenId,
+      screenRes.screen.versionId,
+    )
+    console.debug('versionRes', versionRes)
+
+    return {
+      props: {
+        data: JSON.parse(
+          JSON.stringify({
+            host: hostRes.host,
+            screen: {
+              data: screenRes.screen,
+              version: versionRes.version,
+            },
+          }),
+        ),
+      },
+      revalidate: false, // never=false, always=1, since=SECONDS
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 function Leaf(props: {
   component: any
   children?: any
   nodeSchema: Aglyn.NodeSchema
+  cmpSchema?: Aglyn.ComponentSchema
 }) {
-  const { component: Component, children, nodeSchema } = props
+  const {
+    component: Component = 'div',
+    children,
+    nodeSchema,
+    cmpSchema,
+  } = props
+
+  const resolved = useMemo(() => {
+    const data = cmpSchema?.resolveProps && cmpSchema?.resolveProps(nodeSchema)
+    return data || nodeSchema.props
+  }, [cmpSchema, nodeSchema])
+  const merged = useMemo(() => {
+    const { sx } = { ...nodeSchema }
+    return { ...resolved, sx: sx }
+  }, [resolved])
+
+  console.log('node shcema', nodeSchema.componentId, props)
+
   return (
     <Component
       key={nodeSchema.$id}
-      // data-aglyn={`leaf:${nodeSchema.$id}`}
-      {...nodeSchema.props}
+      data-aglyn={`leaf:${nodeSchema.$id}`}
+      {...merged}
     >
       {children || nodeSchema.props?.children}
     </Component>
@@ -146,7 +165,7 @@ function Stem(props: { nodeId: Aglyn.NodeId }) {
   }
 
   const nodeSchema = Aglyn.screen.getNode(nodeId)
-  let cmpFactory: Aglyn.ComponentType = 'div'
+  let cmpFactory: Aglyn.ComponentType = cloneDeep(DefaultComponent)
   let cmpSchema: Aglyn.ComponentSchema = null
 
   if (Aglyn.components.hasComponent(nodeSchema.componentId)) {
@@ -155,7 +174,12 @@ function Stem(props: { nodeId: Aglyn.NodeId }) {
   }
 
   return (
-    <Leaf key={nodeSchema.$id} component={cmpFactory} nodeSchema={nodeSchema}>
+    <Leaf
+      key={nodeSchema.$id}
+      component={cmpFactory}
+      nodeSchema={nodeSchema}
+      cmpSchema={cmpSchema}
+    >
       {!nodeSchema.nodes?.length ? null : (
         <Branch
           key={nodeSchema.$id}
@@ -188,8 +212,8 @@ function TreeRoot(props: { nodeId: Aglyn.NodeId }) {
   return <Trunk nodeId={nodeId} />
 }
 
-export default function CatchAllPage(/*props: Props*/) {
-  const props = { data: exampleData }
+export default function CatchAllPage(props: Props) {
+  // const props = { data: exampleData }
   const nodes = props.data.screen.version.nodes
   const isNested = Array.isArray(nodes)
   const nested = isNested
@@ -218,48 +242,15 @@ export default function CatchAllPage(/*props: Props*/) {
     //     elements: props.screen.version,
     //   })
     // }
-    Aglyn.emitter.emit(AglynEvent.NODE_SET_ITEMS, { nodes: denormalized })
+    // Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: denormalized })
+    Aglyn.screen.setNodes(denormalized)
   }, [denormalized])
 
   return (
     <>
       <TreeRoot nodeId={Aglyn.NODE_ROOT_ID} />
-      <br />
-      <br />
-      nested
-      <br />
-      <pre>{JSON.stringify(nested, null, 2)}</pre>
-      <br />
-      <br />
-      denormalized
-      <br />
-      <pre>{JSON.stringify(denormalized, null, 2)}</pre>
-      <br />
-      <br />
-      <pre>{JSON.stringify(props, null, 2)}</pre>
     </>
   )
-
-  function RenderNodes(props: { nodes: Aglyn.NodeSchemaNested[] }) {
-    const { nodes } = props
-    return (
-      nodes?.length && (
-        <TreeComponent
-          leafs={nodes as any}
-          renderLeaf={(leaf) => (
-            <LeafComponentContext.Provider
-              key={leaf['$id']}
-              value={leaf['component'] || 'div'}
-            >
-              <LeafComponent data={leaf}>
-                <RenderNodes nodes={leaf['nodes']} />
-              </LeafComponent>
-            </LeafComponentContext.Provider>
-          )}
-        />
-      )
-    )
-  }
 }
 
 const exampleData = {

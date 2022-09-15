@@ -109,7 +109,7 @@ export interface AttributeSchema extends Dictionary<any> {
 }
 export interface ComponentSchema<P = any> {
   componentId: ComponentId
-  bundleId?: PluginId
+  pluginId?: PluginId
   kind?: 'element' | 'plaintext' | 'markdown'
 
   displayName: string

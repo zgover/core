@@ -62,4 +62,4 @@ export const schema: AglynBundleSchema = {
 
 export const bundle = createComponentsBundle(schema, components)
 export default bundle
-export function activate(unknown, context) {}
+// export function activate(unknown, context) {}
