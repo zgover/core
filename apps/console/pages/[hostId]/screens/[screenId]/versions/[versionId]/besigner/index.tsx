@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import '@aglyn/aglyn-plugin-mui'
 import {
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
@@ -78,9 +79,9 @@ function Besigner(props) {
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const app = useBesignerAppContext()
-  const hostId = `${query.hostId}`
-  const screenId = `${query.screenId}`
-  const versionId = `${query.versionId}`
+  const hostId = query.hostId as string
+  const screenId = query.screenId as string
+  const versionId = query.versionId as string
   const saveAvailable = true
   const [screenDialog, setScreenDialog] = useState(false)
   const handleAddElementClick = useAddElementDrawerCallback()
@@ -93,8 +94,8 @@ function Besigner(props) {
     versionId,
   })
   const { data, status, error } = result
-  const elements = data?.nodes
-  const hasError = status === 'error'
+  const nodes = data?.nodes
+  const hasError = Boolean(error) || status === 'error'
   const notFound = status === 'success' && !data
 
   console.log('result', result)
@@ -127,11 +128,12 @@ function Besigner(props) {
   }, [enqueueSnackbar, hasError, error, notFound])
 
   useEffect(() => {
-    if (elements) {
-      console.log('decoded update', elements)
-      setCanvasElements(app, { elements, type: 'normal' })
+    if (nodes) {
+      console.log('decoded update', nodes)
+      Aglyn.screen.setNodes(nodes)
+      setCanvasElements(app, { elements: nodes, type: 'normal' })
     }
-  }, [app, elements])
+  }, [app, nodes])
 
   const handleSave = useCallback(async () => {
     const dequeueLoading = queueLoading()

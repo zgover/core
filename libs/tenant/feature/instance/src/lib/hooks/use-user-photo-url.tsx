@@ -14,16 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { gravatarUrlFromEmail } from '@aglyn/shared-util-tools'
+import {
+  gravatarUrlFromEmail,
+  GravatarUrlOptions,
+} from '@aglyn/shared-util-tools'
 import { useMemo } from 'react'
 import { useUser } from 'reactfire'
 
-export function useUserPhotoUrl() {
+export function useUserPhotoUrl(options?: {
+  gravatarOptions?: GravatarUrlOptions
+}) {
+  const { gravatarOptions } = options || {}
   const { data: user } = useUser()
+  const photoURL = user?.photoURL
+  const email = user?.email
 
   return useMemo(() => {
-    return user?.photoURL || gravatarUrlFromEmail(user?.email)
-  }, [user])
+    if (photoURL) return photoURL
+    if (email) return gravatarUrlFromEmail(email, gravatarOptions)
+  }, [photoURL, email, gravatarOptions])
 }
 
 export default useUserPhotoUrl

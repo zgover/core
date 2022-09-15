@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import md5 from 'md5'
+import {
+  Options as GravatarUrlOptions,
+  profile_url as gravatarProfileUrlFromEmail,
+  Protocol as GravatarUrlProtocol,
+  url as gravatarUrlFromEmail,
+} from 'gravatar'
 
-export function gravatarUrlFromEmail(email: string) {
-  const emailHash = md5(
-    String(email ?? '')
-      .toLowerCase()
-      .trim(),
-  )
-  return `https://secure.gravatar.com/avatar/${emailHash}`
-}
+export type { GravatarUrlOptions, GravatarUrlProtocol }
+export { gravatarUrlFromEmail, gravatarProfileUrlFromEmail }
+export default gravatarUrlFromEmail

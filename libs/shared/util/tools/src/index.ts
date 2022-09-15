@@ -81,8 +81,8 @@ export * from './lib/object/object-update'
 
 // SERIALIZE
 
-export * from '@aglyn/shared-util-tools/serialize/base64-isomorphic-decode'
-export * from '@aglyn/shared-util-tools/serialize/base64-isomorphic-encode'
+export * from './lib/serialize/base64-isomorphic-decode'
+export * from './lib/serialize/base64-isomorphic-encode'
 export * from './lib/serialize/php-serial-deserialize-from-byte-stream'
 export * from './lib/serialize/php-serial-is-serialized-byte-stream'
 export * from './lib/serialize/php-serial-serialize-to-byte-stream'

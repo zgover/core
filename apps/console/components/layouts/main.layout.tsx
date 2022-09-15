@@ -47,6 +47,7 @@ import { useUserPhotoUrl } from '@aglyn/tenant-feature-instance'
 import {
   AppBar,
   Avatar,
+  type AvatarProps,
   Button,
   type ButtonProps,
   Divider,
@@ -67,6 +68,7 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
   const { avatar, icon, children, id, key, items, MenuProps, ...rest } = item
   const isMenu = !_isArrEmpty(items)
   const itemKey = key || id || i
+
   const rendered =
     type === 'text' ? (
       <Button
@@ -291,7 +293,7 @@ TopAppBar.displayName = 'TopAppBar'
 
 export interface QuickActionsMenuItem extends IconButtonProps {
   icon?: MdiIconProps
-  avatar?: any
+  avatar?: AvatarProps
   dense?: boolean
   href?: any
   items?: MenuItemProps[]
@@ -330,7 +332,9 @@ function MainLayout(props: MainLayoutProps) {
   } = props
 
   const { data: user } = useUser()
-  const userPhotoUrl = useUserPhotoUrl()
+  const userPhotoUrl = useUserPhotoUrl({
+    gravatarOptions: { size: '64' },
+  })
   const [, toggleThemeMode, themeMode] = useThemeMode()
   const themeModeDisplayName = getThemeModeDisplayName(themeMode)
   const layoutTitle = useMemo(() => {
@@ -389,6 +393,10 @@ function MainLayout(props: MainLayoutProps) {
               edge: 'end',
               avatar: {
                 src: userPhotoUrl,
+                imgProps: {
+                  // user.photoURL https://stackoverflow.com/a/61042200/16134372
+                  referrerPolicy: 'no-referrer',
+                },
               },
               items: [
                 {
