@@ -15,20 +15,19 @@
  * limitations under the License.
  */
 
-import type {GetServerSidePropsContext} from 'next/types'
-import {buildRoute, Route} from '../../../../../constants/route-links'
-
+import type { GetServerSidePropsContext } from 'next/types'
+import { buildRoute, Route } from '../../../../../../constants/route-links'
 
 export default () => null
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => {
-  const {query} = context
+  const { query } = context
   const screenId = `${query.screenId}`
   const versionId = `${query.versionId}`
   return {
     redirect: {
       permanent: true,
-      destination: buildRoute(Route.SCREEN_DETAILS, {screenId, versionId}),
+      destination: buildRoute(Route.SCREEN_DETAILS, { screenId, versionId }),
     },
   }
 }

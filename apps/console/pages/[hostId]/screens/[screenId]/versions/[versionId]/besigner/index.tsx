@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import {
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
@@ -44,11 +45,11 @@ import { Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
-import BesignerAppBarComponent from '../../../../../../components/besigner-app-bar.component'
-import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
-import MainLayout from '../../../../../../components/layouts/main.layout'
-import '../../../../../../constants/app-setup'
-import { buildRoute, Route } from '../../../../../../constants/route-links'
+import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
+import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
+import MainLayout from '../../../../../../../components/layouts/main.layout'
+import '../../../../../../../constants/app-setup'
+import { buildRoute, Route } from '../../../../../../../constants/route-links'
 
 const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
   () =>
@@ -77,6 +78,7 @@ function Besigner(props) {
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const app = useBesignerAppContext()
+  const hostId = `${query.hostId}`
   const screenId = `${query.screenId}`
   const versionId = `${query.versionId}`
   const saveAvailable = true
@@ -85,11 +87,17 @@ function Besigner(props) {
   const [undo, redo, canUndo, canRedo] = useAglynCanvasHistoryControls()
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, { screenId, versionId })
   const normalized = useAglynCanvasElementsNormalized()
-  const [result, updateScreen] = useScreenVersion({ screenId, versionId })
+  const [result, updateScreen] = useScreenVersion({
+    hostId,
+    screenId,
+    versionId,
+  })
   const { data, status, error } = result
-  const elements = data?.elements
+  const elements = data?.nodes
   const hasError = status === 'error'
   const notFound = status === 'success' && !data
+
+  console.log('result', result)
 
   useEffect(() => {
     if (HAS_BROWSER()) {
@@ -127,7 +135,41 @@ function Besigner(props) {
 
   const handleSave = useCallback(async () => {
     const dequeueLoading = queueLoading()
-    await updateScreen({ elements: normalized }, { merge: true })
+    const nodes = normalized
+    const isNested = Array.isArray(nodes)
+    const denormalized = !isNested
+      ? Aglyn.screen.denormalizeNodes(
+          [
+            {
+              $id: Aglyn.NODE_ROOT_ID,
+              componentId: 'div',
+              nodes: [
+                { ...Aglyn.screen.nestNodes(nodes, nodes[Aglyn.NODE_ROOT_ID]) },
+              ],
+            },
+          ],
+          null,
+        )
+      : Aglyn.screen.denormalizeNodes(
+          [
+            {
+              $id: Aglyn.NODE_ROOT_ID,
+              componentId: 'div',
+              nodes: [...nodes],
+            },
+          ],
+          null,
+        )
+
+    console.log('denormalized', isNested, denormalized)
+    console.log(
+      'nested',
+      Aglyn.screen.nestNodes(denormalized, denormalized[Aglyn.NODE_ROOT_ID]),
+    )
+    // dequeueLoading()
+
+    // return
+    await updateScreen({ nodes: denormalized }, { merge: true })
       .catch((e) => {
         enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
           variant: 'error',

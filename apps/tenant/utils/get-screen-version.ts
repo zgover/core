@@ -18,11 +18,17 @@
 import { firebaseAdmin, screenVersionConverter } from '@aglyn/core-data-admin'
 import type {
   AglynScreen,
+  HostUid,
   ScreenUid,
   VersionUid,
 } from '@aglyn/core-data-foundation'
 
-export async function getScreenVersion(screen: ScreenUid, version: VersionUid) {
+export async function getScreenVersion(options: {
+  hostId: HostUid
+  screenId: ScreenUid
+  versionId: VersionUid
+}) {
+  const { hostId, screenId, versionId } = options
   const data = {
     version: undefined as AglynScreen,
     nextPageToken: '',
@@ -32,11 +38,13 @@ export async function getScreenVersion(screen: ScreenUid, version: VersionUid) {
 
   // List batch of users, 1000 at a time.
   await firestore
+    .collection('hosts')
+    .doc(hostId)
     .collection('screens')
-    .doc(screen)
+    .doc(screenId)
     .collection('versions')
     .withConverter(screenVersionConverter)
-    .doc(version)
+    .doc(versionId)
     .get()
     .then((res) => {
       if (!res.exists) return

@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/core-data-admin'
+import { firebaseAdmin, hostConverter } from '@aglyn/core-data-admin'
 import type { AglynHost, HostUid } from '@aglyn/core-data-foundation'
 
-export async function getHost(host: HostUid) {
+export async function getHost(options: { host: HostUid }) {
+  const { host } = options
   const data = { host: undefined as AglynHost, nextPageToken: '', error: null }
   const firestore = firebaseAdmin.app().firestore()
 
@@ -26,6 +27,7 @@ export async function getHost(host: HostUid) {
   await firestore
     .collection('hosts')
     .where('subdomain', '==', host)
+    .withConverter(hostConverter)
     .limit(1)
     .get()
     .then((res) => {

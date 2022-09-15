@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-import type {GetServerSidePropsContext} from 'next/types'
-import {buildRoute, Route} from '../../constants/route-links'
-
+import type { GetServerSidePropsContext } from 'next/types'
+import { buildRoute, Route } from '../../../constants/route-links'
 
 export default () => null
 

@@ -46,11 +46,6 @@ const converter: FirestoreDataConverter<AglynScreen> = {
   },
 }
 
-export type UseScreenOptions = {
-  screenId: string
-  useFirestoreDocDataOptions?: ReactFireOptions
-}
-
 type Response = [
   $screen: ObservableStatus<OrUndef<AglynScreen>>,
   setScreen: (
@@ -59,10 +54,20 @@ type Response = [
   ) => Promise<void>,
 ]
 
-export function useScreen(options: UseScreenOptions): Response {
-  const { screenId, useFirestoreDocDataOptions } = options
+export function useScreen(options: {
+  hostId: string
+  screenId: string
+  useFirestoreDocDataOptions?: ReactFireOptions
+}): Response {
+  const { hostId, screenId, useFirestoreDocDataOptions } = options
   const firestore = useFirestore()
-  const reference = doc(firestore, 'screens', screenId).withConverter(converter)
+  const reference = doc(
+    firestore,
+    'hosts',
+    hostId,
+    'screens',
+    screenId,
+  ).withConverter(converter)
 
   const $screen = useFirestoreDocDataOnce(reference, {
     idField: '$id',
@@ -70,9 +75,17 @@ export function useScreen(options: UseScreenOptions): Response {
   }) as ObservableStatus<OrUndef<AglynScreen>>
 
   const setScreen = useCallback(
-    async function setScreen(value: Partial<AglynScreen>, options: SetOptions) {
-      const { $id, ...fields } = value
-      return await setDoc(reference, fields, options)
+    async (
+      value: Partial<AglynScreen>,
+      options: SetOptions,
+      onReject?: (e?: any) => void,
+    ) => {
+      await setDoc(reference, value, options)
+        .then(async () => {})
+        .catch((e) => {
+          console.error(e)
+          onReject && onReject(e)
+        })
     },
     [reference],
   )

@@ -15,8 +15,11 @@
  * limitations under the License.
  */
 
-import type { AglynScreen } from '@aglyn/core-data-foundation'
-import { AglynScreenVersion } from '@aglyn/core-data-foundation'
+import type {
+  AglynHost,
+  AglynScreen,
+  AglynScreenVersion,
+} from '@aglyn/core-data-foundation'
 import { decode, encode } from '@msgpack/msgpack'
 import * as firebaseAdmin from 'firebase-admin'
 
@@ -26,6 +29,21 @@ function compress(value) {
 function decompress(value) {
   return decode(value)
 }
+
+export const hostConverter: firebaseAdmin.firestore.FirestoreDataConverter<AglynHost> =
+  {
+    toFirestore(data) {
+      if (data.$id) delete data.$id
+      // data.updatedAt = firebaseAdmin.firestore.Timestamp.now()
+      return data
+    },
+    fromFirestore(snapshot) {
+      if (!snapshot.exists) return undefined
+      const data = snapshot.data()
+      data.$id = snapshot.id
+      return data as AglynScreen
+    },
+  }
 
 export const screenConverter: firebaseAdmin.firestore.FirestoreDataConverter<AglynScreen> =
   {
@@ -45,8 +63,11 @@ export const screenConverter: firebaseAdmin.firestore.FirestoreDataConverter<Agl
 export const screenVersionConverter: firebaseAdmin.firestore.FirestoreDataConverter<AglynScreenVersion> =
   {
     toFirestore(data) {
+      if (data.elements) {
+        data.nodes = data.elements
+        delete data.elements
+      }
       if (data.nodes) data.nodes = compress(data.nodes) as any
-      if (data.elements) data.elements = compress(data.elements) as any
       if (data.$id) delete data.$id
       data.updatedAt = firebaseAdmin.firestore.Timestamp.now()
       return data
@@ -54,11 +75,12 @@ export const screenVersionConverter: firebaseAdmin.firestore.FirestoreDataConver
     fromFirestore(snapshot) {
       if (!snapshot.exists) return undefined
       const data = snapshot.data()
+      if (data?.elements) {
+        data.nodes = data.elements
+        delete data.elements
+      }
       if (data?.nodes) {
         data.nodes = decompress(data.nodes)
-      }
-      if (data?.elements) {
-        data.elements = decompress(data.elements)
       }
       data.$id = snapshot.id
       return data as AglynScreenVersion

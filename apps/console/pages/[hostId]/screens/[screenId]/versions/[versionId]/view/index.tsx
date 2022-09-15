@@ -30,12 +30,12 @@ import { useScreen } from '@aglyn/tenant-feature-instance'
 import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
-import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
-import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
-import MainLayout from '../../../../../../components/layouts/main.layout'
-import WidgetCardComponent from '../../../../../../components/widget-card.component'
-import { buildRoute, Route } from '../../../../../../constants/route-links'
-import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
+import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
+import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
+import MainLayout from '../../../../../../../components/layouts/main.layout'
+import WidgetCardComponent from '../../../../../../../components/widget-card.component'
+import { buildRoute, Route } from '../../../../../../../constants/route-links'
+import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 
 const whiteSpace = '--'
 
@@ -46,7 +46,7 @@ function ScreenDetails(props) {
   const besignerUrl = buildRoute(Route.SCREEN_BESIGNER, { screenId, versionId })
   const { queueLoading } = useLoading()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
-  const [{ status, data: screen }] = useScreen<any>({ screenId })
+  const [{ status, data: screen }] = useScreen({ screenId })
 
   useEffect(() => {
     if (status === 'loading') {

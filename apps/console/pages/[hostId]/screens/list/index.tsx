@@ -54,15 +54,18 @@ import {
 } from 'firebase/firestore'
 import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
-import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
-import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
-import DataTableComponent from '../../../components/data-table.component'
-import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
-import DashboardLayout from '../../../components/layouts/dashboard.layout'
-import MainLayout from '../../../components/layouts/main.layout'
-import WidgetCardComponent from '../../../components/widget-card.component'
-import { buildRoute, Route } from '../../../constants/route-links'
-import { CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT } from '../../../constants/shared'
+import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
+import AuthFormTemplateComponent from '../../../../components/auth-form-template.component'
+import DataTableComponent from '../../../../components/data-table.component'
+import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
+import DashboardLayout from '../../../../components/layouts/dashboard.layout'
+import MainLayout from '../../../../components/layouts/main.layout'
+import WidgetCardComponent from '../../../../components/widget-card.component'
+import { buildRoute, Route } from '../../../../constants/route-links'
+import {
+  CONTENT_MAX_WIDTH,
+  TABLE_ROW_HEIGHT,
+} from '../../../../constants/shared'
 
 // eslint-disable-next-line react/display-name
 const DetailsContentComponent = forwardRef<any, AccordionRenderProps>(

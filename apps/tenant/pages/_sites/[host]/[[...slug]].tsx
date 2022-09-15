@@ -57,7 +57,10 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
   const { params } = context
 
   try {
-    const hostRes = await getHost(params.host as string)
+    const host = params.host as string
+    const hostRes = await getHost({
+      host: host,
+    })
     console.debug('hostRes', hostRes)
 
     if (hostRes.error || !hostRes.host) {
@@ -67,6 +70,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       }
     }
 
+    const hostId = hostRes.host.$id
     const screenEntry = Object.entries(hostRes.host.screens || {}).find(
       ([screenId, slug]) => {
         return slug === (params.slug as string[]).join('/')
@@ -82,7 +86,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     }
 
     const screenId = screenEntry[0]
-    const screenRes = await getScreen(screenId)
+    const screenRes = await getScreen({ hostId, screenId })
     console.debug('screenRes', screenRes)
 
     if (screenRes.error || !screenRes.screen) {
@@ -92,10 +96,11 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       }
     }
 
-    const versionRes = await getScreenVersion(
-      screenId,
-      screenRes.screen.versionId,
-    )
+    const versionRes = await getScreenVersion({
+      hostId,
+      screenId: screenId,
+      versionId: screenRes.screen.versionId,
+    })
     console.debug('versionRes', versionRes)
     const nodes = versionRes.version.nodes
     const isNested = Array.isArray(nodes)

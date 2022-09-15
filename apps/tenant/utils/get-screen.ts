@@ -16,9 +16,17 @@
  */
 
 import { firebaseAdmin, screenConverter } from '@aglyn/core-data-admin'
-import type { AglynScreen, ScreenUid } from '@aglyn/core-data-foundation'
+import type {
+  AglynScreen,
+  HostUid,
+  ScreenUid,
+} from '@aglyn/core-data-foundation'
 
-export async function getScreen(screen: ScreenUid) {
+export async function getScreen(options: {
+  screenId: ScreenUid
+  hostId: HostUid
+}) {
+  const { screenId, hostId } = options
   const data = {
     screen: undefined as AglynScreen,
     nextPageToken: '',
@@ -28,9 +36,11 @@ export async function getScreen(screen: ScreenUid) {
 
   // List batch of users, 1000 at a time.
   await firestore
+    .collection('hosts')
+    .doc(hostId)
     .collection('screens')
     .withConverter(screenConverter)
-    .doc(screen)
+    .doc(screenId)
     .get()
     .then((res) => {
       if (!res.exists) return

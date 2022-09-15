@@ -35,8 +35,11 @@ import {
 
 const converter: FirestoreDataConverter<AglynScreenVersion> = {
   toFirestore(data) {
+    if (data.elements) {
+      data.nodes = data.elements
+      delete data.elements
+    }
     if (data.nodes) data.nodes = compress(data.nodes) as any
-    if (data.elements) data.elements = compress(data.elements) as any
     if (data.$id) delete data.$id
     data.updatedAt = Timestamp.now()
     return data
@@ -44,21 +47,16 @@ const converter: FirestoreDataConverter<AglynScreenVersion> = {
   fromFirestore(snapshot, options) {
     if (!snapshot.exists()) return undefined
     const data = snapshot.data(options)
+    if (data?.elements instanceof Bytes) {
+      data.nodes = data.elements
+      delete data.elements
+    }
     if (data?.nodes instanceof Bytes) {
       data.nodes = decompress(data.nodes)
-    }
-    if (data?.elements instanceof Bytes) {
-      data.elements = decompress(data.elements)
     }
     data.$id = snapshot.id
     return data as AglynScreenVersion
   },
-}
-
-export type UseScreenVersionOptions = {
-  screenId: string
-  versionId: string
-  useFirestoreDocDataOptions?: ReactFireOptions
 }
 
 type Response = [
@@ -69,11 +67,18 @@ type Response = [
   ) => Promise<void>,
 ]
 
-export function useScreenVersion(options: UseScreenVersionOptions): Response {
-  const { screenId, versionId, useFirestoreDocDataOptions } = options
+export function useScreenVersion(options: {
+  screenId: string
+  versionId: string
+  hostId: string
+  useFirestoreDocDataOptions?: ReactFireOptions
+}): Response {
+  const { hostId, screenId, versionId, useFirestoreDocDataOptions } = options
   const firestore = useFirestore()
   const versionRef = doc(
     firestore,
+    'hosts',
+    hostId,
     'screens',
     screenId,
     'versions',
@@ -85,32 +90,23 @@ export function useScreenVersion(options: UseScreenVersionOptions): Response {
     ...useFirestoreDocDataOptions,
   }) as ObservableStatus<AglynScreenVersion>
 
-  // const response = useMemo(() => {
-  //   const copied = copy(value)
-  //   const elements = copied?.data?.elements
-  //   if (elements && elements instanceof Bytes) {
-  //     copied.data.elements = decompress(elements)
-  //   }
-  //   return copied
-  // }, [value])
-
   const setVersion = useCallback(
     async (
       value: Partial<AglynScreenVersion>,
-      options: SetOptions,
+      options?: SetOptions,
       onReject?: (e?: any) => void,
     ) => {
       await setDoc(versionRef, value, options)
         .then(async () => {
-          const screenRef = doc(firestore, 'screens', screenId, 'updatedAt')
-          return await setDoc(screenRef, Timestamp.now())
+          // const screenRef = doc(firestore, 'screens', screenId, 'updatedAt')
+          // return await setDoc(screenRef, Timestamp.now())
         })
         .catch((e) => {
           console.error(e)
           onReject && onReject(e)
         })
     },
-    [firestore, screenId, versionRef],
+    [$version, firestore, hostId, screenId, versionRef],
   )
 
   return [$version, setVersion]
