@@ -32,12 +32,12 @@ const denormalizeData = (
 ): AglynNodesList => {
   if (element?.$id) {
     const _element = element as unknown as AglynNodeItemDenormalized
-    const childIds: NodeId[] = [...arraySafe(element.elements)]
-    _element.elements = []
+    const childIds: NodeId[] = [...arraySafe(element.nodes)]
+    _element.nodes = []
     for (const $id of childIds) {
       if (!$id || !denormalized[$id]) continue
       const child = denormalized[$id]
-      denormalizeData(child, denormalized, _element.elements)
+      denormalizeData(child, denormalized, _element.nodes)
     }
     accumulator.push(_element)
   }
@@ -68,12 +68,12 @@ export function nodeDataDenormalize(
       return denormalizeData(_element, normalized, denormalized)
     }
 
-    // If received a denormalized map of elements by id
+    // If received a denormalized map of nodes by id
     normalized = state as AglynNodesById
     const parent = (normalized[parentId] ||= {
       $id: parentId,
     } as AglynNodeItemNormalized)
-    for (const $id of (parent.elements ||= [])) {
+    for (const $id of (parent.nodes ||= [])) {
       denormalizeData(normalized[$id], normalized, denormalized)
     }
   } catch (error) {

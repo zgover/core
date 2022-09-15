@@ -98,10 +98,10 @@ export type AglynComponentsBundleSchema = Omit<
 >
 
 export type AglynNodeItemNormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
-  elements?: NodeId[]
+  nodes?: NodeId[]
 }
 export type AglynNodeItemDenormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
-  elements?: AglynNodeItemDenormalized[]
+  nodes?: AglynNodeItemDenormalized[]
 }
 
 export type AglynNodesById = {
@@ -190,11 +190,11 @@ export interface AglynComponentSchema<P = any> {
   styledOptions?: MuiStyledOptions
 
   /**
-   * Define a limitation for elements allowed as direct descendents
+   * Define a limitation for nodes allowed as direct descendents
    */
   restrictChildren?: ComponentsLinealOrder
   /**
-   * Define a limitation for elements allowed to be direct ancestors
+   * Define a limitation for nodes allowed to be direct ancestors
    */
   restrictParent?: ComponentsLinealOrder
 
@@ -218,15 +218,15 @@ export interface AglynComponentSchema<P = any> {
      */
     emotion?: FEATURE_FLAG
     /**
-     * Can the elements of this component type be cloned?
+     * Can the nodes of this component type be cloned?
      */
     cloning?: FEATURE_FLAG
     /**
-     * Allow dragging elements of this component type
+     * Allow dragging nodes of this component type
      */
     dragging?: FEATURE_FLAG
     /**
-     * Allow dropping elements inside elements of this component type
+     * Allow dropping nodes inside nodes of this component type
      */
     dropping?: FEATURE_FLAG
     /**
@@ -234,11 +234,11 @@ export interface AglynComponentSchema<P = any> {
      */
     editing?: FEATURE_FLAG
     /**
-     * Allow removing elements of this component type
+     * Allow removing nodes of this component type
      */
     removing?: FEATURE_FLAG
     /**
-     * Describe elements of this component type to be self-closing
+     * Describe nodes of this component type to be self-closing
      */
     selfClosing?: FEATURE_FLAG
   }
@@ -249,9 +249,9 @@ export interface AglynComponentSchema<P = any> {
   presets?: AglynNodePresetSchema[]
 }
 
-export type NodePresetData = Omit<AglynNodeSchema, '$id' | 'elements'> & {
+export type NodePresetData = Omit<AglynNodeSchema, '$id' | 'nodes'> & {
   $id?: NodeId
-  elements?: NodePresetData[]
+  nodes?: NodePresetData[]
 }
 
 export type AglynNodePresetSchema = {
@@ -350,5 +350,5 @@ export interface AglynNodeSchema<P = JSX.AnyProps> {
   parentId?: NodeId
   sx?: JSX.SxProps
   props?: P
-  elements?: NodeId[] | AglynNodeSchema[]
+  nodes?: NodeId[] | AglynNodeSchema[]
 }

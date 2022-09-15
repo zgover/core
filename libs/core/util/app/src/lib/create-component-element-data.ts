@@ -29,12 +29,12 @@ export function traverseNodePreset(
   const response: AglynNodeItemDenormalized = {
     ...data,
     $id: createComponentElementId(),
-    elements: [],
+    nodes: [],
     props: { ...data?.props },
   }
-  const current = Array.isArray(data?.elements) ? data.elements : []
+  const current = Array.isArray(data?.nodes) ? data.nodes : []
   for (const child of current) {
-    response.elements.push(traverseNodePreset(child))
+    response.nodes.push(traverseNodePreset(child))
   }
   return response
 }
@@ -45,7 +45,7 @@ export type CreateComponentElementDataOptions =
 
 export const ELEMENT_DEFAULTS: Partial<AglynNodeItemDenormalized> = {
   props: {},
-  elements: [],
+  nodes: [],
 }
 
 export function createComponentElementData(

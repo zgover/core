@@ -129,7 +129,7 @@ function Besigner(props) {
   useEffect(() => {
     if (elements) {
       console.log('decoded update', elements)
-      setCanvasElements(app, { elements, type: 'denormal' })
+      setCanvasElements(app, { elements, type: 'normal' })
     }
   }, [app, elements])
 

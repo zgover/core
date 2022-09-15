@@ -156,7 +156,7 @@ function Screens(props) {
         screenId: newId,
         createdAt: timestamp,
         updatedAt: timestamp,
-        elements: { [CANVAS_ROOT_ELEMENT_ID]: { elements: [] } },
+        nodes: { [CANVAS_ROOT_ELEMENT_ID]: { nodes: [] } },
       }
       await Promise.all([
         setDoc(doc(firestore, 'screens', newId), newValues),

@@ -50,7 +50,7 @@ export const schema: AglynComponentSchema<ListItemProps> = {
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,
-        elements: [
+        nodes: [
           {
             ...listItemTextSchema.presets![0]!.data,
           },

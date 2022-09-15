@@ -22,7 +22,7 @@ export const samplePageData: AglynNodesList = [
     $id: 'sample-element-1',
     componentId: 'sample-element',
     props: {},
-    elements: [
+    nodes: [
       {
         $id: 'sample-element-11',
         componentId: 'sample-element-1',
@@ -50,7 +50,7 @@ export const samplePageData: AglynNodesList = [
     $id: 'sample-element-2',
     componentId: 'sample-element-4',
     props: {},
-    elements: [
+    nodes: [
       {
         $id: 'sample-element-13',
         componentId: 'sample-element-1',
@@ -79,7 +79,7 @@ export const samplePageData: AglynNodesList = [
     $id: 'sample-element-3',
     componentId: 'sample-element-4',
     props: {},
-    elements: [
+    nodes: [
       {
         $id: 'sample-element-14',
         componentId: 'sample-element-1',

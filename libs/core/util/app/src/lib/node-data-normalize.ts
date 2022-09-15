@@ -35,11 +35,11 @@ const normalizeData = (
 ): AglynNodesById => {
   if (element?.$id && parentId && accumulator[parentId]) {
     const _element = element as unknown as AglynNodeItemNormalized
-    const childElements: AglynNodesList = [...arraySafe(element.elements)]
+    const childElements: AglynNodesList = [...arraySafe(element.nodes)]
     _element.parentId = parentId
-    _element.elements = []
+    _element.nodes = []
     accumulator[_element.$id] = _element
-    ;(accumulator[parentId].elements ||= []).push(_element.$id)
+    ;(accumulator[parentId].nodes ||= []).push(_element.$id)
     for (const child of childElements) {
       if (!child?.$id) continue
       normalizeData(child, _element.$id, accumulator)
@@ -75,7 +75,7 @@ export function nodeDataNormalize(
     normalized = {
       [parentId]: {
         $id: parentId,
-        elements: [],
+        nodes: [],
         parentId: null,
         componentId: undefined,
       },
