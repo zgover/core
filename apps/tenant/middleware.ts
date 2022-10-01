@@ -64,6 +64,8 @@ export const middleware: NextMiddleware = (req, event) => {
   const isProdVercel = PROD_NODE_ENV && PROD_VERCEL_ENV
 
   console.log('process.env.VERCEL_ENV', PREV_VERCEL_ENV)
+  console.log('reqHost', reqHost)
+  console.log("req?.headers?.get('host')", req?.headers?.get('host'))
 
   // If localhost, assign the host value manually
   // If prod, get the custom domain/subdomain value by removing the root URL
@@ -79,6 +81,7 @@ export const middleware: NextMiddleware = (req, event) => {
       tenant = reqHost.replace(`.aglyn.app`, '')
       break
     case /*PREV_VERCEL_ENV && */ reqHost.endsWith(`.vercel.app`):
+    case reqHost === 'console.aglyn.io':
     case reqHost === 'localhost:4500':
       tenant = 'tenant'
       break
