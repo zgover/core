@@ -261,7 +261,7 @@ const baseOptions: ThemeOptions = {
         },
       },
     },
-    MuiMenu: {},
+    // MuiMenu: {},
     MuiToolbar: {
       styleOverrides: {
         root: ({ theme }) => ({
@@ -278,7 +278,7 @@ const baseOptions: ThemeOptions = {
       },
     },
   },
-  mixins: {},
+  // mixins: {},
   shadowsInset: [
     'none',
     createShadowInset(0, 2, 1, -1, 0, 1, 1, -0, 0, 1, 3, -0),
