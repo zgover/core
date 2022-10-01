@@ -51,12 +51,17 @@ export const config = {
   ],
 }
 
+type EnvVercelEnv = 'production' | 'development' | 'preview' | undefined
+
 export const middleware: NextMiddleware = (req, event) => {
   const reqHost = req?.headers?.get('host') || 'console.aglyn.io'
   const AGLYN_TENANT_HOST_CNAME = process.env.AGLYN_TENANT_HOST_CNAME
-  const VERCEL_ENV = process.env.VERCEL === '1'
-  const PRODUCTION = process.env.NODE_ENV === 'production'
-  const isProdVercel = PRODUCTION && VERCEL_ENV
+  const VERCEL_ENV: EnvVercelEnv = process.env.VERCEL_ENV as EnvVercelEnv
+  const NODE_ENV = process.env.NODE_ENV
+  const PROD_NODE_ENV = NODE_ENV === 'production'
+  const PROD_VERCEL_ENV = VERCEL_ENV === 'production'
+  const PREV_VERCEL_ENV = VERCEL_ENV === 'preview'
+  const isProdVercel = PROD_NODE_ENV && PROD_VERCEL_ENV
 
   // If localhost, assign the host value manually
   // If prod, get the custom domain/subdomain value by removing the root URL
@@ -71,11 +76,14 @@ export const middleware: NextMiddleware = (req, event) => {
     case isProdVercel && reqHost.endsWith(`.aglyn.app`):
       tenant = reqHost.replace(`.aglyn.app`, '')
       break
+    case PREV_VERCEL_ENV && reqHost.endsWith(`.vercel.app`):
+    case reqHost === 'localhost:4500':
+      tenant = 'tenant'
+      break
     case reqHost.endsWith(`.localhost:4500`):
       // Development and testing (localhost:4500)
-      tenant = reqHost.replace(`.localhost:4500`, '')
+      tenant = reqHost.replace(`.localhost:4500`, '') || 'tenant'
       break
-    case reqHost === 'localhost:4500':
     default:
       console.log('REDIR!!', req.nextUrl.pathname, 'https://console.aglyn.io')
       return NextResponse.redirect('https://console.aglyn.io')
