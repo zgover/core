@@ -184,7 +184,6 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 export default function CatchAllPage(props: Props) {
   // const props = { data: exampleData }
   const nodes = props.nodes
-  //
 
   console.log('!!!!!CatchAllPage', props)
 

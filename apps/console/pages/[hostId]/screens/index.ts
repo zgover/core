@@ -21,10 +21,12 @@ import { buildRoute, Route } from '../../../constants/route-links'
 export default () => null
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => {
+  const { query } = context
+  const hostId = query.hostId as string
   return {
     redirect: {
       permanent: true,
-      destination: buildRoute(Route.SCREEN_LIST),
+      destination: buildRoute(Route.SCREEN_LIST, { hostId }),
     },
   }
 }

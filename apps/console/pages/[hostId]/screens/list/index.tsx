@@ -52,6 +52,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
+import { useRouter } from 'next/router'
 import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
@@ -106,8 +107,11 @@ const CellItemLinkComponent = forwardRef<any, AppLinkNakedLinkProps>(
     return <AppLink ref={ref} {...props} componentVariant={'naked'} />
   },
 )
+CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 
 function Screens(props) {
+  const { query: routerQuery } = useRouter()
+  const hostId = routerQuery.hostId as string
   const { queueLoading, loading } = useLoading()
   const { confirm } = useConfirmationContext()
   const [quickDrawerOpen, setQuickDrawerOpen] = useState<boolean>(false)
@@ -222,7 +226,11 @@ function Screens(props) {
             label="detail"
             LinkComponent={CellItemLinkComponent}
             {...({
-              href: buildRoute(Route.SCREEN_DETAILS, { screenId, versionId }),
+              href: buildRoute(Route.SCREEN_DETAILS, {
+                hostId,
+                screenId,
+                versionId,
+              }),
             } as any)}
           />,
           <GridActionsCellItem
@@ -275,11 +283,11 @@ function Screens(props) {
     <>
       <NextPageTitle screen={'Screens'} />
       <DashboardLayout
-        activeTab={buildRoute(Route.SCREEN_LIST)}
+        activeTab={buildRoute(Route.SCREEN_LIST, { hostId })}
         breadcrumbItems={[
           {
             children: 'Screens',
-            href: buildRoute(Route.SCREEN_LIST),
+            href: buildRoute(Route.SCREEN_LIST, { hostId }),
           },
         ]}
         header={{

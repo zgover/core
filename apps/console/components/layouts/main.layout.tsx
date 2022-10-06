@@ -58,9 +58,10 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
+import { useRouter } from 'next/router'
 import { Fragment, useMemo } from 'react'
 import { useUser } from 'reactfire'
-import { Route } from '../../constants/route-links'
+import { buildRoute, Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
 
 // eslint-disable-next-line react/display-name
@@ -330,6 +331,8 @@ function MainLayout(props: MainLayoutProps) {
     backButton,
     ...rest
   } = props
+  const { query: routerQuery } = useRouter()
+  const hostId = routerQuery.hostId as string
 
   const { data: user } = useUser()
   const userPhotoUrl = useUserPhotoUrl({
@@ -366,7 +369,9 @@ function MainLayout(props: MainLayoutProps) {
               {
                 id: 'center-nav-dashboard',
                 children: 'Home',
-                href: Route.SCREEN_DASHBOARD,
+                href: buildRoute(Route.SCREEN_DASHBOARD, {
+                  hostId,
+                }),
               },
               // {
               //   id: 'center-nav-app',

@@ -41,12 +41,17 @@ const whiteSpace = '--'
 
 function ScreenDetails(props) {
   const { query } = useRouter()
-  const screenId = `${query.screenId}`
-  const versionId = `${query.versionId}`
-  const besignerUrl = buildRoute(Route.SCREEN_BESIGNER, { screenId, versionId })
+  const hostId = query.hostId as string
+  const screenId = query.screenId as string
+  const versionId = query.versionId as string
+  const besignerUrl = buildRoute(Route.SCREEN_BESIGNER, {
+    hostId,
+    screenId,
+    versionId,
+  })
   const { queueLoading } = useLoading()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
-  const [{ status, data: screen }] = useScreen({ screenId })
+  const [{ status, data: screen }] = useScreen({ hostId, screenId })
 
   useEffect(() => {
     if (status === 'loading') {
@@ -118,11 +123,11 @@ function ScreenDetails(props) {
   return (
     <MainLayout title={[displayName, 'Screen']} disableAppBarElevation>
       <DashboardLayout
-        activeTab={buildRoute(Route.SCREEN_LIST)}
+        activeTab={buildRoute(Route.SCREEN_LIST, { hostId })}
         breadcrumbItems={[
           {
             children: 'Screens',
-            href: buildRoute(Route.SCREEN_LIST),
+            href: buildRoute(Route.SCREEN_LIST, { hostId }),
           },
           {
             children: displayName,

@@ -21,7 +21,9 @@ import {
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { Box, Stack } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import { buildRoute, Route } from '../../constants/route-links'
 import DashboardHeaderComponent, {
   type DashboardHeaderProps,
 } from '../dashboard-header.component'
@@ -92,6 +94,8 @@ function DashboardLayout(props: DashboardLayoutProps) {
     aside,
     activeTab,
   } = props
+  const { query: routerQuery } = useRouter()
+  const hostId = routerQuery.hostId as string
 
   const breadcrumbs = useMemo(() => {
     return [
@@ -104,7 +108,24 @@ function DashboardLayout(props: DashboardLayoutProps) {
     <>
       <SecondaryAppBarComponent
         tabBarTitle={tabBarTitle ?? defaultTabBarTitle}
-        navTabItems={navTabItems ?? defaultNavTabItems}
+        navTabItems={
+          navTabItems ?? [
+            {
+              id: 'nav-tab-dashboard',
+              label: 'Dashboard',
+              href: buildRoute(Route.SCREEN_DASHBOARD, {
+                hostId,
+              }),
+            },
+            {
+              id: 'nav-tab-screens',
+              label: 'Screens',
+              href: buildRoute(Route.SCREEN_LIST, {
+                hostId,
+              }),
+            },
+          ]
+        }
         activeTab={activeTab}
       />
 

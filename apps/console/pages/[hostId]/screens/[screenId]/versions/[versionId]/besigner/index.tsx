@@ -86,7 +86,11 @@ function Besigner(props) {
   const [screenDialog, setScreenDialog] = useState(false)
   const handleAddElementClick = useAddElementDrawerCallback()
   const [undo, redo, canUndo, canRedo] = useAglynCanvasHistoryControls()
-  const detailUrl = buildRoute(Route.SCREEN_DETAILS, { screenId, versionId })
+  const detailUrl = buildRoute(Route.SCREEN_DETAILS, {
+    hostId,
+    screenId,
+    versionId,
+  })
   const normalized = useAglynCanvasElementsNormalized()
   const [result, updateScreen] = useScreenVersion({
     hostId,

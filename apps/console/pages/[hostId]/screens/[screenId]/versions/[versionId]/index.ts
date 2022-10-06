@@ -22,12 +22,17 @@ export default () => null
 
 export const getServerSideProps = (context: GetServerSidePropsContext) => {
   const { query } = context
-  const screenId = `${query.screenId}`
-  const versionId = `${query.versionId}`
+  const hostId = query.hostId as string
+  const screenId = query.screenId as string
+  const versionId = query.versionId as string
   return {
     redirect: {
       permanent: true,
-      destination: buildRoute(Route.SCREEN_DETAILS, { screenId, versionId }),
+      destination: buildRoute(Route.SCREEN_DETAILS, {
+        hostId,
+        screenId,
+        versionId,
+      }),
     },
   }
 }
