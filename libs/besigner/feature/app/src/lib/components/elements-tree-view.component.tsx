@@ -15,15 +15,10 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import { DndDragType } from '@aglyn/besigner-data-app'
-import { getComponentSchema } from '@aglyn/core-data-app'
+import { type NodeId } from '@aglyn/core-data-foundation'
 import {
-  CANVAS_ROOT_ELEMENT_ID,
-  type NodeId,
-} from '@aglyn/core-data-foundation'
-import {
-  useAglynAppContext,
-  useAglynCanvasElementHierarchy,
   useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/core-feature-renderer'
@@ -115,21 +110,19 @@ const DraggableTreeItemComponent = forwardRef<
   ElementsTreeItemComponentProps
 >((props, ref) => {
   const { $id, ...rest } = props
-  const app = useAglynAppContext()
-  const componentId = useAglynElementData($id, 'componentId')
-  const pluginId = useAglynElementData($id, 'pluginId')
-  const trail = useAglynCanvasElementHierarchy($id)
+  const node = Aglyn.screen.getNode($id)
+  const schema = Aglyn.components.getSchema($id)
+  const hierarchy = Aglyn.screen.getNodeNavigationHierarchy($id)
   const dndData = useMemo(() => {
-    const componentSchema = getComponentSchema(app, { componentId, pluginId })
     return {
       $id,
-      componentId,
-      pluginId,
-      trail,
-      restrictParent: componentSchema?.restrictParent,
-      restrictChildren: componentSchema?.restrictChildren,
+      componentId: node?.componentId,
+      pluginId: schema?.pluginId,
+      trail: hierarchy,
+      restrictParent: schema?.restrictParent,
+      restrictChildren: schema?.restrictChildren,
     }
-  }, [app, componentId, pluginId, $id, trail])
+  }, [node, schema, $id, hierarchy])
   const [, dragHandle, dragPreview] = useLeafDrag(dndData, DndDragType.TREE)
   const [, dropRef] = useLeafDrop(dndData)
   const nodes = useAglynElementData($id, 'nodes')
@@ -232,7 +225,9 @@ export const ElementsTreeViewComponent = forwardRef<
   const { children, ...rest } = props
   const [selected, setSelected] = useAglynCanvasSelected()
   const setHovered = useAglynCanvasSetHovered()
-  const selectedHierarchy = useAglynCanvasElementHierarchy(selected?.$id)
+  const selectedHierarchy = Aglyn.screen.getNodeNavigationHierarchy(
+    selected?.$id,
+  )
   const [manuallyExpanded, setManuallyExpanded] = useState<NodeId[]>([])
 
   const allExpanded = useMemo(
@@ -284,8 +279,8 @@ export const ElementsTreeViewComponent = forwardRef<
         {...rest}
       >
         <DraggableTreeItemComponent
-          key={CANVAS_ROOT_ELEMENT_ID}
-          $id={CANVAS_ROOT_ELEMENT_ID}
+          key={Aglyn.NODE_ROOT_ID}
+          $id={Aglyn.NODE_ROOT_ID}
         />
       </TreeView>
     </>
