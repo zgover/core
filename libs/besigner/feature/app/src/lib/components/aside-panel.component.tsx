@@ -77,9 +77,9 @@ import useLeafDrag from '../hooks/use-leaf-drag'
 import AccordionListComponent from './accordion-list.component'
 import ElementPropsForm from './element-props-form.component'
 import ElementStylesForm from './element-styles-form.component'
-import ElementsTreeViewComponent, {
-  type ElementsTreeViewComponentProps,
-} from './elements-tree-view.component'
+import NodeTreeViewComponent, {
+  type NodeTreeViewProps,
+} from './node-tree-view.component'
 import WorkspacePanelComponent, {
   type WorkspacePanelComponentProps,
 } from './workspace-panel.component'
@@ -266,7 +266,7 @@ const withTabPanelInner = (Component) => (props: any) => {
   )
 }
 
-const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
+const ElementsTree = forwardRef<any, NodeTreeViewProps>(
   (props, ref) => {
     const handleAddElementClick = useAddElementDrawerCallback()
     return (
@@ -282,7 +282,7 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
             {'Add Element'}
           </Button>
         </Box>
-        <ElementsTreeViewComponent ref={ref} {...props} />
+        <NodeTreeViewComponent ref={ref} {...props} />
       </TabPanelInner>
     )
   },

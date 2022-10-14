@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 export interface NoopFn {
   <T = any>(..._: T[]): any
 }
@@ -23,7 +22,7 @@ export interface NoopFn {
 /**
  * Create a no operation function with no return
  */
-export function createNoop(): NoopFn {
+export function noopFactory(): NoopFn {
   return function noop<T = any>(..._: T[]): any {
     // Do nothing.
   }

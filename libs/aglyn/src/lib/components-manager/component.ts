@@ -35,9 +35,37 @@ import type { NodeId, NodeSchema } from '../screen-manager'
 export type ComponentId = string
 
 export enum FEATURE_FLAG {
-  DEFAULT,
+  UNKNOWN,
+  DEFAULT = 1,
   ENABLED = 1 << 1,
   DISABLED = 1 << 2,
+  ENABLED_DEFAULT = DEFAULT | ENABLED,
+  DISABLED_DEFAULT = DEFAULT | DISABLED,
+}
+
+export function _isFeatureExplicitlyDisabled(val: FEATURE_FLAG) {
+  return Boolean(val === FEATURE_FLAG.DISABLED)
+}
+export function _isFeatureExplicitlyEnabled(val: FEATURE_FLAG) {
+  return Boolean(val === FEATURE_FLAG.ENABLED)
+}
+export function _isFeatureDisabledDefault(val: FEATURE_FLAG) {
+  return val === (val | FEATURE_FLAG.DISABLED_DEFAULT)
+}
+export function _isFeatureEnabledDefault(val: FEATURE_FLAG) {
+  return val === (val | FEATURE_FLAG.ENABLED_DEFAULT)
+}
+export function _isFeatureUnknown(val: FEATURE_FLAG) {
+  return val === FEATURE_FLAG.UNKNOWN || val === undefined || val === null
+}
+export function isFeatureDefaulted(val: FEATURE_FLAG) {
+  return Boolean(val & FEATURE_FLAG.DEFAULT) || _isFeatureUnknown(val)
+}
+export function isFeatureDisabled(val: FEATURE_FLAG) {
+  return Boolean(val & FEATURE_FLAG.DISABLED_DEFAULT)
+}
+export function isFeatureEnabled(val: FEATURE_FLAG) {
+  return Boolean(val & FEATURE_FLAG.ENABLED_DEFAULT) || _isFeatureUnknown(val)
 }
 
 export enum ComponentCategory {

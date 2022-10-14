@@ -15,25 +15,16 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import {
   type BesignerDraggableItem,
   type BesignerDroppableItem,
   DndDragType,
 } from '@aglyn/besigner-data-app'
-import {
-  addCanvasElement,
-  getComponentSchema,
-  moveCanvasElement,
-} from '@aglyn/core-data-app'
-import {
-  CANVAS_ROOT_ELEMENT_ID,
-  FEATURE_FLAG,
-} from '@aglyn/core-data-foundation'
+import { addCanvasElement, moveCanvasElement } from '@aglyn/core-data-app'
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import { useAglynAppContext } from '@aglyn/core-feature-renderer'
-import {
-  createComponentElementData,
-  isRootElementId,
-} from '@aglyn/core-util-app'
+import { createComponentElementData } from '@aglyn/core-util-app'
 import {
   type ConnectDragPreview,
   type ConnectDragSource,
@@ -48,10 +39,9 @@ export type DragCollected = {
 }
 
 export function useLeafDrag<T extends BesignerDraggableItem>(
-  data?: T,
+  dragObject?: T,
   type: DndDragType = DndDragType.CANVAS,
 ): [DragCollected, ConnectDragSource, ConnectDragPreview] {
-  const dragItem: T = data
   const app = useAglynAppContext()
   const setSelected = useAglynCanvasSetSelected()
   const setDndActive = useAglynDndSetActive()
@@ -68,22 +58,22 @@ export function useLeafDrag<T extends BesignerDraggableItem>(
         offsetY: -50,
       },
       type,
+      isDragging: (monitor) => {
+        return dragObject?.$id && dragObject?.$id === monitor.getItem()?.$id
+      },
       item: () => {
-        console.log('draggable item', dragItem)
+        console.log('draggable item', dragObject)
         if (type !== DndDragType.TEMPLATE) {
-          setSelected({ $id: dragItem.$id })
-          setDndActive(dragItem)
+          setSelected({ $id: dragObject.$id })
+          setDndActive(dragObject)
         }
-        return dragItem
+        return dragObject
       },
       canDrag: (monitor) => {
-        const dragItem = monitor.getItem()
-        const { $id, componentId, pluginId } = dragItem || {}
-        if (isRootElementId($id)) return false
-        const schema = getComponentSchema(app, { componentId, pluginId })
-        const flags = schema?.flags
-        if (flags?.dragging === FEATURE_FLAG.DISABLED) return false
-        return true
+        const item = monitor.getItem()
+        if (Aglyn.screen.isRootNodeId(item?.$id)) return false
+        const schema = Aglyn.components.getSchema(item?.componentId)
+        return Aglyn.isFeatureEnabled(schema?.flags?.dragging)
       },
       end: (dragItem, monitor) => {
         setDndActive(undefined)
@@ -112,7 +102,7 @@ export function useLeafDrag<T extends BesignerDraggableItem>(
         isDragging: monitor.isDragging(),
       }),
     }),
-    [dragItem, app, type, setSelected, setDndActive],
+    [dragObject, app, type, setSelected, setDndActive],
   )
 }
 export default useLeafDrag

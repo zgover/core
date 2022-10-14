@@ -84,7 +84,7 @@ export type NodeSchemaNested<P = JSX.AnyProps> = Omit<
 > & { nodes?: NodeSchemaNested<any>[] }
 
 export type NodeNavigationHierarchy = [
-  root: typeof NODE_ROOT_ID,
+  root: string & typeof NODE_ROOT_ID,
   ...nodes: [...ancestors: NodeId[], node: NodeId],
 ]
 

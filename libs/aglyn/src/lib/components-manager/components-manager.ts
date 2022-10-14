@@ -101,3 +101,8 @@ export function unregisterComponent(componentId: ComponentId) {
     },
   )
 }
+
+export function getComponentLabel(componentId?: ComponentId) {
+  const schema = getSchema(componentId)
+  return schema?.displayName || schema?.title
+}

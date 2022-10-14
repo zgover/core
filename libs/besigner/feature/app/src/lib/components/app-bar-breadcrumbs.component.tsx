@@ -16,11 +16,6 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { NodeId } from '@aglyn/core-data-foundation'
-import {
-  useAglynElementData,
-  useAglynElementLabel,
-} from '@aglyn/core-feature-renderer'
 import { useForkedRefs } from '@aglyn/shared-ui-jsx'
 import {
   generateComponentClassKeys,
@@ -66,32 +61,29 @@ const BreadcrumbLink = styled(Link)<LinkProps>(({ theme }) => ({
 }))
 
 export interface BreadcrumbItemProps extends Partial<LinkProps<'button'>> {
-  item: {
-    $id: NodeId
-  }
+  nodeId: Aglyn.NodeId
   lastItem?: boolean
 }
 
 const BreadcrumbItem = forwardRef<any, BreadcrumbItemProps>(
   (props, forwardRef) => {
-    const { children, item, lastItem, ...rest } = props
-    const { $id } = item
+    const { children, nodeId, lastItem, ...rest } = props
+    const node = Aglyn.screen.getNode(nodeId)
+    const nodeLabel = Aglyn.screen.getNodeLabelShort(node)
+    const hierarchy = Aglyn.screen.getNodeNavigationHierarchy(node)
+    const schema = Aglyn.components.getSchema(node?.componentId)
     const setSelected = useAglynCanvasSetSelected()
     const setHovered = useAglynCanvasSetHovered()
-    const label = useAglynElementLabel($id)
-    const componentId = useAglynElementData($id, 'componentId')
-    const hierarchy = Aglyn.screen.getNodeNavigationHierarchy($id)
     const dndData = useMemo(() => {
-      const schema = Aglyn.components.getSchema(componentId)
       return {
-        $id,
-        componentId,
+        $id: nodeId,
+        componentId: node?.componentId,
         pluginId: schema?.pluginId,
         trail: hierarchy,
         restrictParent: schema?.restrictParent,
         restrictChildren: schema?.restrictChildren,
       }
-    }, [componentId, $id, hierarchy])
+    }, [nodeId, node, hierarchy, schema])
     const [, dropRef] = useLeafDrop(dndData)
     const ref = useForkedRefs<any>(forwardRef, dropRef)
 
@@ -100,15 +92,15 @@ const BreadcrumbItem = forwardRef<any, BreadcrumbItemProps>(
         e.preventDefault()
         e.stopPropagation()
         if (!lastItem) {
-          setSelected({ $id })
+          setSelected({ $id: nodeId })
         }
       },
-      [$id, lastItem, setSelected],
+      [nodeId, lastItem, setSelected],
     )
 
     const handleMouseEnter = useCallback(() => {
-      setHovered({ $id })
-    }, [$id, setHovered])
+      setHovered({ $id: nodeId })
+    }, [nodeId, setHovered])
 
     return (
       <BreadcrumbLink
@@ -125,7 +117,7 @@ const BreadcrumbItem = forwardRef<any, BreadcrumbItemProps>(
         {...rest}
       >
         <>
-          {label}
+          {nodeLabel}
           {children}
         </>
       </BreadcrumbLink>
@@ -151,7 +143,7 @@ const Breadcrumbs = forwardRef<any, BreadcrumbsProps>((props, ref) => {
       {hierarchy.map(($id, index, arr) => (
         <BreadcrumbItem
           key={$id ?? index}
-          item={{ $id }}
+          nodeId={$id}
           lastItem={index === arr.length - 1}
         />
       ))}

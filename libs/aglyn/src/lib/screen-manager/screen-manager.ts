@@ -21,6 +21,7 @@ import _isObj from '@aglyn/shared-util-guards/_is-obj'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { observable, toJS } from 'mobx'
 import { NODE_ROOT_ID, NodeNavigationHierarchy } from '../../index'
+import { getComponentLabel } from '../components-manager/components-manager'
 import { AglynEvent, emitter } from '../emit-manager'
 import {
   createNodeId,
@@ -264,20 +265,36 @@ export function processNodesToDenormalized(
   return response
 }
 
-export function isNodeRootNodeId(id: NodeId): id is typeof NODE_ROOT_ID {
+export function isRootNodeId(id: NodeId): id is typeof NODE_ROOT_ID {
   return id === NODE_ROOT_ID
 }
 
+export function isRootNode(node: NodeSchema): boolean {
+  return node?.$id === NODE_ROOT_ID
+}
+
 export function getNodeNavigationHierarchy(
-  id: NodeId,
+  nodeId: NodeId,
+): NodeNavigationHierarchy
+export function getNodeNavigationHierarchy(
+  node: NodeSchema,
+): NodeNavigationHierarchy
+export function getNodeNavigationHierarchy(
+  nodeOrId: NodeId | NodeSchema,
 ): NodeNavigationHierarchy {
   const hierarchy = [NODE_ROOT_ID]
 
-  let currentId: NodeId = id
-  while (currentId && !isNodeRootNodeId(currentId)) {
+  let currentId = typeof nodeOrId !== 'string' ? nodeOrId?.$id : nodeOrId
+  while (currentId && !isRootNodeId(currentId)) {
     hierarchy.splice(1, 0, currentId)
     currentId = getNode(currentId)?.parentId
   }
 
   return hierarchy as NodeNavigationHierarchy
+}
+
+export function getNodeLabelShort(node: NodeSchema) {
+  if (isRootNode(node)) return 'Document'
+  const componentLabel = getComponentLabel(node?.componentId)
+  return node?.displayName || componentLabel || node?.$id
 }
