@@ -23,9 +23,11 @@ import {
   styled,
 } from '@aglyn/shared-ui-theme'
 import {
+  alpha,
   AppBar as MuiAppBar,
   type AppBarProps as MuiAppBarProps,
   Breadcrumbs as MuiBreadcrumbs,
+  breadcrumbsClasses,
   BreadcrumbsProps as MuiBreadcrumbsProps,
   Link,
   type LinkProps,
@@ -45,20 +47,55 @@ const breadcrumbItemClassKey = generateComponentClassKeys('BreadcrumbItem', [
   'lastItem',
 ])
 
-const BreadcrumbLink = styled(Link)<LinkProps>(({ theme }) => ({
-  transition: theme.transitions.create('color', {
-    duration: theme.transitions.duration.short,
-  }),
-  [`:hover`]: {
-    color: theme.palette.secondary.light,
+const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
+  lineHeight: 1,
+  fontSize: 11,
+  overflowX: 'auto',
+
+  [`& .${breadcrumbsClasses.ol}`]: {
+    flexWrap: 'nowrap',
+    whiteSpace: 'nowrap',
   },
-  [`&.${breadcrumbItemClassKey.lastItem}`]: {
-    cursor: 'initial',
-    [`:hover`]: {
-      color: theme.palette.tertiary.light,
+  [`& .${breadcrumbsClasses.separator}`]: {
+    margin: 0,
+    padding: theme.spacing(0.25),
+    // width: '0px',
+    // height: '100%',
+    // background: 'transparent',
+    // borderLeft: `0.45em solid ${theme.palette.divider}`,
+    // borderBottom: '1em solid transparent',
+    // borderTop: '1em solid transparent',
+  },
+  [`& .${breadcrumbsClasses.li}`]: {
+    [`& .${breadcrumbItemClassKey.root}`]: {
+      padding: theme.spacing(0.75),
+      background: 'transparent',
+      paddingLeft: '1em',
+      paddingRight: '1em',
+
+      [`&:hover`]: {
+        color: theme.palette.secondary.contrastText,
+        background: alpha(
+          theme.palette.secondary.main,
+          theme.palette.action.hoverOpacity + 0.4,
+        ),
+      },
+
+      [`&.${breadcrumbItemClassKey.lastItem}`]: {
+        cursor: 'initial',
+        [`:hover`]: {
+          color: theme.palette.tertiary.contrastText,
+          background: alpha(
+            theme.palette.tertiary.light,
+            theme.palette.action.hoverOpacity + 0.4,
+          ),
+        },
+      },
     },
   },
 }))
+
+const BreadcrumbLink = styled(Link)<LinkProps>(({ theme }) => ({}))
 
 export interface BreadcrumbItemProps extends Partial<LinkProps<'button'>> {
   nodeId: Aglyn.NodeId
@@ -133,11 +170,11 @@ const Breadcrumbs = forwardRef<any, BreadcrumbsProps>((props, ref) => {
   const hierarchy = Aglyn.screen.getNodeNavigationHierarchy(selected?.$id)
 
   return (
-    <MuiBreadcrumbs
+    <StyledBreadcrumbs
       ref={ref}
       separator="›"
       aria-label="breadcrumb"
-      sx={mergeSxProps({ lineHeight: 1, fontSize: 11 }, sx)}
+      sx={sx}
       {...rest}
     >
       {hierarchy.map(($id, index, arr) => (
@@ -147,7 +184,7 @@ const Breadcrumbs = forwardRef<any, BreadcrumbsProps>((props, ref) => {
           lastItem={index === arr.length - 1}
         />
       ))}
-    </MuiBreadcrumbs>
+    </StyledBreadcrumbs>
   )
 })
 
@@ -181,7 +218,7 @@ const AppBarBreadcrumbsComponent = forwardRef<
       )}
       {...rest}
     >
-      <MuiToolbar variant="dense" sx={{ px: { xs: 2, sm: 2 } }}>
+      <MuiToolbar variant="dense" sx={{ px: { xs: 0, sm: 0 } }}>
         <Stack
           direction="row"
           alignItems="center"
