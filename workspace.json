@@ -4,6 +4,7 @@
     "admin": "apps/admin",
     "admin-e2e": "apps/admin-e2e",
     "aglyn": "libs/aglyn",
+    "aglyn-besigner": "libs/aglyn-besigner",
     "aglyn-node-renderer": "libs/aglyn-node-renderer",
     "aglyn-plugin-mui": "libs/aglyn-plugin-mui",
     "api": "apps/api",

@@ -1,4 +1,5 @@
 {
+  "name": "aglyn",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/aglyn/src",
   "projectType": "library",

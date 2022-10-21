@@ -18,6 +18,7 @@
 import type { PartialKeys } from '@aglyn/shared-data-types'
 import _isArr from '@aglyn/shared-util-guards/_is-arr'
 import _isObj from '@aglyn/shared-util-guards/_is-obj'
+import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { observable, toJS } from 'mobx'
 import { NODE_ROOT_ID, NodeNavigationHierarchy } from '../../index'
@@ -212,48 +213,86 @@ export function denormalizeNodes(
   parentId: NodeId,
   accumulator: Record<NodeId, NodeSchema<any>> = {},
 ): Record<NodeId, NodeSchema<any>> {
-  for (const nestedNode of nodes || []) {
+  for (const childNode of Array.isArray(nodes) ? nodes : []) {
+    const child =
+      _isStrT(childNode) && accumulator[childNode]
+        ? accumulator[childNode]
+        : childNode
+    if (!_isObj(child)) continue
+
+    const node = cloneDeep(child) as unknown as NodeSchema<any>
+
     // TODO: Remove after migration to nodes property
-    if (nestedNode['elements']) {
-      nestedNode.nodes = nestedNode['elements']
-      delete nestedNode['elements']
+    if (node['elements']) {
+      node.nodes = node['elements']
+      delete node['elements']
     }
-    if (nestedNode['bundleId']) {
-      nestedNode.pluginId = nestedNode['bundleId']
-      delete nestedNode['bundleId']
+    // TODO: Remove after migration to pluginId property
+    if (node['bundleId']) {
+      node.pluginId = node['bundleId']
+      delete node['bundleId']
     }
 
-    const node = cloneDeep(nestedNode) as unknown as NodeSchema<any>
-
-    node.parentId = parentId
-    node.nodes = ((node as unknown as NodeSchemaNested<any>)?.nodes || []).map(
-      (child) => child?.$id,
-    )
-    denormalizeNodes(nestedNode.nodes, node.$id, accumulator)
-    accumulator[node.$id] = node
+    const nodes = (node as unknown as NodeSchemaNested<any>)?.nodes
+    const nodesArray = [...(Array.isArray(nodes) ? nodes : [])].filter(Boolean)
+    accumulator[node.$id] = {
+      ...node,
+      parentId,
+      nodes: [...nodesArray]
+        .map((i) => {
+          if (_isStrT(i)) return i
+          if (_isObj(i)) return i.$id
+          return null
+        })
+        .filter(Boolean),
+    }
+    denormalizeNodes(nodesArray, node.$id, accumulator)
   }
+
   return accumulator
 }
 
-type ProcessableNodes =
-  | NodeSchemaNested<any>[]
-  | NodeSchemaNested<any>
-  | Record<NodeId, NodeSchema>
 export function processNodesToDenormalized(
-  value: ProcessableNodes,
+  value:
+    | NodeSchemaNested<any>[]
+    | NodeSchemaNested<any>
+    | Record<NodeId, NodeSchema>,
 ): Record<NodeId, NodeSchema<any>> {
-  let response: Record<NodeId, NodeSchema<any>> = null
+  let response: Record<NodeId, NodeSchema<any>> = {}
+  const isArray = Array.isArray(value)
 
-  if (Array.isArray(value)) {
+  if (isArray && value.length === 1) {
+    const item = value[0]
+    if (item?.$id === NODE_ROOT_ID) {
+      response = denormalizeNodes(
+        [{ ...item, parentId: null }],
+        NODE_ROOT_ID,
+        response,
+      )
+    } else if (item?.parentId === NODE_ROOT_ID || !item?.parentId) {
+      response = denormalizeNodes(
+        [{ $id: NODE_ROOT_ID, componentId: 'div', nodes: [item] }],
+        NODE_ROOT_ID,
+        response,
+      )
+    } else if (item?.parentId) {
+      response = denormalizeNodes(
+        [{ $id: item?.parentId, componentId: 'div', nodes: [item] }],
+        item?.parentId,
+        response,
+      )
+    } else {
+      response = denormalizeNodes(
+        [{ $id: NODE_ROOT_ID, componentId: 'div', nodes: [] }],
+        NODE_ROOT_ID,
+        response,
+      )
+    }
+  } else if (isArray) {
     response = denormalizeNodes(
-      [
-        {
-          $id: NODE_ROOT_ID,
-          componentId: 'div',
-          nodes: [...value],
-        },
-      ],
-      null,
+      [{ $id: NODE_ROOT_ID, componentId: 'div', nodes: [...value] }],
+      NODE_ROOT_ID,
+      response,
     )
   } else if (
     _isObj(value) &&
@@ -261,7 +300,11 @@ export function processNodesToDenormalized(
     typeof value.nodes[0] !== 'string'
   ) {
     const _value = { ...(value as NodeSchemaNested<any>) }
-    response = denormalizeNodes([_value], _value.parentId || NODE_ROOT_ID)
+    response = denormalizeNodes(
+      [_value],
+      _value?.parentId || NODE_ROOT_ID,
+      response,
+    )
   } else {
     response = value as unknown as Record<NodeId, NodeSchema>
   }
@@ -300,5 +343,5 @@ export function getNodeNavigationHierarchy(
 export function getNodeLabelShort(node: NodeSchema) {
   if (isRootNode(node)) return 'Document'
   const componentLabel = getComponentLabel(node?.componentId)
-  return node?.displayName || componentLabel || node?.$id
+  return node?.name || componentLabel || node?.$id
 }

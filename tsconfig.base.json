@@ -43,6 +43,7 @@
       "@aglyn/aglyn": ["libs/aglyn/src/index.ts"],
       "@aglyn/aglyn-node-renderer": ["libs/aglyn-node-renderer/src/index.ts"],
       "@aglyn/aglyn-plugin-mui": ["libs/aglyn-plugin-mui/src/index.ts"],
+      "@aglyn/besigner": ["libs/aglyn-besigner/src/index.ts"],
       "@aglyn/besigner-data-app": ["libs/besigner/data/app/src/index.ts"],
       "@aglyn/besigner-data-app/*": ["libs/besigner/data/app/src/lib/*"],
       "@aglyn/besigner-feature-app": ["libs/besigner/feature/app/src/index.ts"],

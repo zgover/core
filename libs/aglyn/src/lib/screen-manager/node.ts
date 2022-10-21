@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import type { JSONSchema7 } from 'json-schema'
 import { makeAutoObservable } from 'mobx'
 import { nanoid } from 'nanoid'
 import { NODE_ROOT_ID } from '../constants'
@@ -23,59 +22,57 @@ import type { PluginId } from '../plugin-manager'
 
 export type NodeId = string
 
-export interface NodeSchema<P = JSX.AnyProps> {
-  $id: NodeId
-  componentId: string
-  pluginId?: PluginId
-  parentId?: NodeId
-  nodes?: NodeId[]
-  className?: string
-  props?: P
-  sx?: JSX.SxProps
-  displayName?: string
+export enum NType {
+  NODE = 'node',
+  TEXT = 'text',
+  SCREEN = 'screen',
+  REF = 'ref',
 }
 
-export const NodeSchemaJsonSchema: JSONSchema7 = {
-  $schema: 'https://json-schema.org/draft/2020-12/schema',
-  $id: 'https://aglyn.io/schema/node.schema.json',
-  title: 'Aglyn Node Item',
-  description: 'Aglyn screen node for hydrating view component',
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    $id: {
-      description: 'The unique identifier for a node',
-      type: 'string',
-    },
-    componentId: {
-      description: 'The unique identifier of the node component',
-      type: 'string',
-    },
-    pluginId: {
-      description: 'The unique identifier of the node component bundle',
-      type: 'string',
-    },
-    parentId: {
-      description: 'The unique identifier of the node parent',
-      type: 'string',
-    },
-    sx: {
-      description: 'The node style properties for emotion',
-      type: 'object',
-    },
-    props: {
-      description: 'The node props/attributes passed to the component',
-      type: 'object',
-    },
-    nodes: {
-      description: 'List of the children unique identifiers for the node',
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-    },
-  },
-  required: ['$id', 'componentId'],
+export interface NodeModel<TYPE extends NType = null> {
+  /**
+   * The unique identifier for a node
+   */
+  $id: NodeId
+  /**
+   * Display name of node to override inherited label. Only used in editor
+   */
+  name?: string
+  /**
+   * The node type to describe the IST
+   */
+  type?: TYPE
+}
+
+export interface NodeSchema<P = JSX.AnyProps> extends NodeModel<NType.NODE> {
+  /**
+   * The unique identifier of the node component
+   */
+  componentId: string
+  /**
+   * The unique identifier of the node component plugin bundle
+   */
+  pluginId?: PluginId
+  /**
+   * The unique identifier of the node parent
+   */
+  parentId?: NodeId
+  /**
+   * List of the children unique identifiers for the node
+   */
+  nodes?: NodeId[]
+  /**
+   * Class name to pass the DOM node, can also be defined in props
+   */
+  className?: string
+  /**
+   * The node props/attributes passed to the component
+   */
+  props?: P
+  /**
+   * The node style properties for emotion
+   */
+  sx?: JSX.SxProps
 }
 
 export type NodeSchemaNested<P = JSX.AnyProps> = Omit<
@@ -88,19 +85,6 @@ export type NodeNavigationHierarchy = [
   ...nodes: [...ancestors: NodeId[], node: NodeId],
 ]
 
-export const NodeSchemaNestedJsonSchema: JSONSchema7 = {
-  ...NodeSchemaJsonSchema,
-  properties: {
-    ...NodeSchemaJsonSchema.properties,
-    nodes: {
-      ...(NodeSchemaJsonSchema.properties['nodes'] as JSONSchema7),
-      items: {
-        $ref: '#',
-      },
-    },
-  },
-}
-
 export const NODE_ID_LENGTH = 10
 
 export function createNodeId(): NodeId {
@@ -108,7 +92,7 @@ export function createNodeId(): NodeId {
 }
 
 export function nodeFactory<P = JSX.AnyProps>(schema: NodeSchema<P>) {
-  const node: NodeSchema<P> = {
+  return makeAutoObservable({
     $id: schema.$id,
     componentId: schema.componentId,
     pluginId: schema.pluginId,
@@ -116,15 +100,60 @@ export function nodeFactory<P = JSX.AnyProps>(schema: NodeSchema<P>) {
     sx: Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx },
     props: { ...schema.props },
     nodes: Array.isArray(schema.nodes) ? [...schema.nodes] : [],
-  }
-
-  return makeAutoObservable({
-    $id: node.$id,
-    componentId: node.componentId,
-    pluginId: node.pluginId,
-    parentId: node.parentId,
-    sx: node.sx,
-    props: node.props,
-    nodes: node.nodes,
   })
 }
+
+// export const NodeSchemaJsonSchema: JSONSchema7 = {
+//   $schema: 'https://json-schema.org/draft/2020-12/schema',
+//   $id: 'https://aglyn.io/schema/node.schema.json',
+//   title: 'Aglyn Node Item',
+//   description: 'Aglyn screen node for hydrating view component',
+//   type: 'object',
+//   additionalProperties: false,
+//   properties: {
+//     $id: {
+//       description: 'The unique identifier for a node',
+//       type: 'string',
+//     },
+//     componentId: {
+//       description: 'The unique identifier of the node component',
+//       type: 'string',
+//     },
+//     pluginId: {
+//       description: 'The unique identifier of the node component bundle',
+//       type: 'string',
+//     },
+//     parentId: {
+//       description: 'The unique identifier of the node parent',
+//       type: 'string',
+//     },
+//     sx: {
+//       description: 'The node style properties for emotion',
+//       type: 'object',
+//     },
+//     props: {
+//       description: 'The node props/attributes passed to the component',
+//       type: 'object',
+//     },
+//     nodes: {
+//       description: 'List of the children unique identifiers for the node',
+//       type: 'array',
+//       items: {
+//         type: 'string',
+//       },
+//     },
+//   },
+//   required: ['$id', 'componentId'],
+// }
+// export const NodeSchemaNestedJsonSchema: JSONSchema7 = {
+//   ...NodeSchemaJsonSchema,
+//   properties: {
+//     ...NodeSchemaJsonSchema.properties,
+//     nodes: {
+//       ...(NodeSchemaJsonSchema.properties['nodes'] as JSONSchema7),
+//       items: {
+//         $ref: '#',
+//       },
+//     },
+//   },
+// }

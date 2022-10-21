@@ -15,11 +15,8 @@
  * limitations under the License.
  */
 
-import * as Aglyn from '@aglyn/aglyn'
+export * from './dnd-manager'
 
-export function useAglynElementLabel($id: Aglyn.NodeId) {
-  const node = Aglyn.screen.getNode($id)
-  const schema = Aglyn.components.getSchema(node?.componentId)
-  return node?.name || schema?.displayName || schema?.title || $id
+export function aglynBesigner(): string {
+  return 'aglyn-besigner'
 }
-export default useAglynElementLabel
