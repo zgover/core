@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import {
   BesignerPanelTabFlag,
   setBesignerPanels,
@@ -104,12 +105,20 @@ export const MoveButtons = forwardRef<any, { $id: NodeId }>((props, ref) => {
   const { index, isFirst, isLast, parentId } = useAglynElementIndexInParent($id)
   const handleMoveUp = useCallback(
     (e: ChangeEvent<unknown>) => {
+      const node = Aglyn.screen.getNode($id)
+      const parent = Aglyn.screen.getNode(node?.parentId)
+      const oldIndex = parent?.nodes?.indexOf(node.$id) || 0
+      Aglyn.screen.reparentNode(node, parent, parent, oldIndex - 1)
       moveCanvasElement(app, { $id, parentId, index: index - 1 })
     },
     [app, $id, index, parentId],
   )
   const handleMoveDown = useCallback(
     (e: ChangeEvent<unknown>) => {
+      const node = Aglyn.screen.getNode($id)
+      const parent = Aglyn.screen.getNode(node?.parentId)
+      const oldIndex = parent?.nodes?.indexOf(node.$id) || 0
+      Aglyn.screen.reparentNode(node, parent, parent, oldIndex + 1)
       moveCanvasElement(app, { $id, parentId, index: index + 1 })
     },
     [app, $id, index, parentId],
