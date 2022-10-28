@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { NODE_ROOT_ID } from '../constants'
 import {
   denormalizeNodes,
   nestNodes,
+  NODE_ROOT_ID,
   NodeId,
   NodeSchema,
   NodeSchemaNested,

@@ -21,13 +21,14 @@ import _isObj from '@aglyn/shared-util-guards/_is-obj'
 import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { observable, toJS } from 'mobx'
-import { NODE_ROOT_ID, NodeNavigationHierarchy } from '../../index'
 import { getComponentLabel } from '../components-manager/components-manager'
 import { AglynEvent, emitter } from '../emit-manager'
 import {
   createNodeId,
+  NODE_ROOT_ID,
   nodeFactory,
   type NodeId,
+  type NodeNavigationHierarchy,
   type NodeSchema,
   type NodeSchemaNested,
 } from './node'

@@ -16,11 +16,11 @@
  */
 
 import { makeAutoObservable } from 'mobx'
-import { nanoid } from 'nanoid'
-import { NODE_ROOT_ID } from '../constants'
+import { createIdUrlSafe } from '../constants'
 import type { PluginId } from '../plugin-manager'
 
-export type NodeId = string
+export const NODE_ROOT_ID = '_@_'
+export const NODE_ID_LENGTH = 10
 
 export enum NType {
   NODE = 'node',
@@ -28,6 +28,8 @@ export enum NType {
   SCREEN = 'screen',
   REF = 'ref',
 }
+
+export type NodeId = string
 
 export interface NodeModel<TYPE extends NType = null> {
   /**
@@ -85,10 +87,8 @@ export type NodeNavigationHierarchy = [
   ...nodes: [...ancestors: NodeId[], node: NodeId],
 ]
 
-export const NODE_ID_LENGTH = 10
-
 export function createNodeId(): NodeId {
-  return nanoid(NODE_ID_LENGTH)
+  return createIdUrlSafe(NODE_ID_LENGTH)
 }
 
 export function nodeFactory<P = JSX.AnyProps>(schema: NodeSchema<P>) {

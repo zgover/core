@@ -15,8 +15,12 @@
  * limitations under the License.
  */
 
+import { customAlphabet, urlAlphabet } from 'nanoid'
+
 const pkg = require('../../package.json')
 
 export const version = pkg.version
 export const namespace = pkg.name
-export const NODE_ROOT_ID = '_@_'
+
+export const ID_CHAR_LENGTH = 10
+export const createIdUrlSafe = customAlphabet(urlAlphabet, ID_CHAR_LENGTH)

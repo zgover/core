@@ -273,7 +273,6 @@ function NodeTreeItem(props: NodeTreeItemProps) {
               // e.preventDefault()
               onItemHover(e, nodeId)
             }}
-            autoFocus
             dense
           >
             <MuiListItemIcon sx={{ minWidth: 20, mr: '1px' }}>

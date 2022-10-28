@@ -127,7 +127,7 @@ class _EmotionDocumentComponent<
       function WithEmotionCache(props: P) {
         return <Component emotionCache={cache} {...props} />
       }
-      WithEmotionCache.name = `WithEmotionCache(${displayName})`
+      WithEmotionCache.displayName = `WithEmotionCache(${displayName})`
       hoistNonReactStatics(WithEmotionCache, Component)
       return WithEmotionCache
     }

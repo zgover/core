@@ -35,6 +35,7 @@ import {
   ICON_VARIANT_MODIFY_MOVE_DOWN,
   ICON_VARIANT_MODIFY_MOVE_UP,
   ICON_VARIANT_SELECT_PARENT,
+  ICON_VARIANT_SHOW_MORE,
 } from '@aglyn/shared-data-enums'
 import { SrOnly, type SrOnlyProps } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
@@ -44,10 +45,18 @@ import {
   ButtonGroup as MuiButtonGroup,
   type ButtonGroupProps,
   type ButtonProps,
+  ClickAwayListener,
+  Grow,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
   Tooltip as MuiTooltip,
   type TooltipProps,
 } from '@mui/material'
-import { type ChangeEvent, forwardRef, useCallback } from 'react'
+import { type ChangeEvent, forwardRef, useCallback, useState } from 'react'
 import { useRenderedCanvasElementRef } from '../contexts/rendered-canvas-elements'
 import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
 import { useAglynCanvasSetSelected } from '../hooks/use-aglyn-canvas-selected'
@@ -64,7 +73,7 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>((props, ref) => {
   const { children, ButtonProps, icon, SrOnlyProps, ...rest } = props
 
   return (
-    <MuiTooltip ref={ref} {...rest}>
+    <MuiTooltip ref={ref} disableInteractive {...rest}>
       <MuiButton
         {...ButtonProps}
         sx={mergeSxProps(
@@ -145,6 +154,11 @@ const ElementOverlayActionsComponent = forwardRef<
   const setSelected = useAglynCanvasSetSelected()
   const parentId = useAglynElementData($id, 'parentId')
   const elementRef = useRenderedCanvasElementRef({ $id })
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [moreButton, moreButtonRef] = useState(null)
+
+  const closeMore = useCallback(() => setMoreOpen(false), [])
+  const openMore = useCallback(() => setMoreOpen(true), [])
 
   const handleParentOnMouseLeave = useCallback(
     (e: ChangeEvent<unknown>) => {
@@ -196,74 +210,118 @@ const ElementOverlayActionsComponent = forwardRef<
   }, [])
 
   return (
-    <MuiButtonGroup
-      ref={ref}
-      id="aglyn:element-overlay-badge"
-      data-aglyn-node={$id}
-      data-aglyn-kind="overlay-actions"
-      variant="contained"
-      color="secondary"
-      aria-label="element controls"
-      sx={{
-        boxShadow: 4,
-        pointerEvents: 'auto',
-      }}
-      {...rest}
-    >
-      {!isRootElementId($id) && (
+    <>
+      <MuiButtonGroup
+        ref={ref}
+        id="aglyn:element-overlay-badge"
+        data-aglyn-node={$id}
+        data-aglyn-kind="overlay-actions"
+        variant="contained"
+        color="secondary"
+        aria-label="element controls"
+        sx={{
+          boxShadow: 4,
+          pointerEvents: 'auto',
+        }}
+        {...rest}
+      >
+        {!isRootElementId($id) && (
+          <BadgeButton
+            title="Drag"
+            children="drag"
+            sx={{ '&, &:hover, &:focus': { cursor: 'move' } }}
+            // ref={dragHandleRef}
+            ButtonProps={{
+              ref: elementRef?.dragHandle,
+              sx: { '&, &:hover, &:focus': { cursor: 'move' } },
+            }}
+            icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}
+          />
+        )}
+
+        {!isRootElementId($id) && (
+          <BadgeButton
+            title="Duplicate"
+            children="duplicate"
+            ButtonProps={{ onClick: handleDuplicateClick }}
+            icon={{ path: ICON_VARIANT_MODIFY_DUPLICATE.path }}
+          />
+        )}
+
+        {!isRootElementId($id) && (
+          <BadgeButton
+            title="Select parent"
+            children={'select parent'}
+            ButtonProps={{
+              onClick: handleParentOnClick,
+              onMouseEnter: handleParentOnMouseEnter,
+              onMouseLeave: handleParentOnMouseLeave,
+            }}
+            icon={{ path: ICON_VARIANT_SELECT_PARENT.path }}
+          />
+        )}
+
+        {!isRootElementId($id) && <MoveButtons $id={$id} />}
+
         <BadgeButton
-          title="Drag"
-          children="drag"
-          sx={{ '&, &:hover, &:focus': { cursor: 'move' } }}
-          // ref={dragHandleRef}
+          ref={moreButtonRef}
+          title="More options"
+          children={'more options'}
           ButtonProps={{
-            ref: elementRef?.dragHandle,
-            sx: { '&, &:hover, &:focus': { cursor: 'move' } },
+            onClick: openMore,
+            // onMouseEnter: handleParentOnMouseEnter,
+            // onMouseLeave: handleParentOnMouseLeave,
           }}
-          icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}
+          icon={{ path: ICON_VARIANT_SHOW_MORE.path }}
         />
-      )}
+      </MuiButtonGroup>
+      <Popper
+        sx={{ zIndex: 1 }}
+        open={moreButton && moreOpen}
+        anchorEl={moreButton}
+        role={undefined}
+        transition
+        disablePortal
+      >
+        {({ TransitionProps, placement }) => (
+          <Grow
+            {...TransitionProps}
+            style={{
+              transformOrigin:
+                placement === 'bottom' ? 'center top' : 'center bottom',
+            }}
+          >
+            <Paper sx={{ bgcolor: 'secondary.main' }}>
+              <ClickAwayListener onClickAway={closeMore}>
+                <MenuList
+                  color="secondary"
+                  id="split-button-menu"
+                  autoFocusItem
+                >
+                  {!isRootElementId($id) && (
+                    <MenuItem dense onClick={handleModifyClick}>
+                      <ListItemIcon>
+                        <MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />
+                      </ListItemIcon>
+                      <ListItemText>{'Modify'}</ListItemText>
+                    </MenuItem>
+                  )}
 
-      {!isRootElementId($id) && (
-        <BadgeButton
-          title="Duplicate"
-          children="duplicate"
-          ButtonProps={{ onClick: handleDuplicateClick }}
-          icon={{ path: ICON_VARIANT_MODIFY_DUPLICATE.path }}
-        />
-      )}
-
-      {!isRootElementId($id) && (
-        <BadgeButton
-          title="Delete"
-          children="delete"
-          ButtonProps={{ onClick: handleDeleteClick }}
-          icon={{ path: ICON_VARIANT_MODIFY_DELETE.path }}
-        />
-      )}
-
-      <BadgeButton
-        title="Modify"
-        children="modify"
-        onClick={handleModifyClick}
-        icon={{ path: ICON_VARIANT_MODIFY_EDIT.path }}
-      />
-
-      {!isRootElementId($id) && (
-        <BadgeButton
-          title="Select parent"
-          children={'select parent'}
-          ButtonProps={{
-            onClick: handleParentOnClick,
-            onMouseEnter: handleParentOnMouseEnter,
-            onMouseLeave: handleParentOnMouseLeave,
-          }}
-          icon={{ path: ICON_VARIANT_SELECT_PARENT.path }}
-        />
-      )}
-
-      {!isRootElementId($id) && <MoveButtons $id={$id} />}
-    </MuiButtonGroup>
+                  {!isRootElementId($id) && (
+                    <MenuItem dense onClick={handleDeleteClick}>
+                      <ListItemIcon>
+                        <MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />
+                      </ListItemIcon>
+                      <ListItemText>{'Delete'}</ListItemText>
+                    </MenuItem>
+                  )}
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
+    </>
   )
 })
 ElementOverlayActionsComponent.displayName = 'ElementOverlayActionsComponent'
