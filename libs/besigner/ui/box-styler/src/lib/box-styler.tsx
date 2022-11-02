@@ -38,18 +38,21 @@ import {
   Menu,
   MenuItem,
   Stack,
+  StackProps,
 } from '@mui/material'
 import clsx from 'clsx'
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 
 export const classKeys = generateComponentClassKeys('BoxStyler', [
   'box',
+  'row',
+  'label',
   'margin',
   'padding',
-  'row',
-  'node',
+  'contents',
   'legendItem',
   'legendSwatch',
+  'legendLabel',
 ])
 
 const Box = styled('div')(({ theme }) => {
@@ -63,8 +66,16 @@ const Box = styled('div')(({ theme }) => {
     [`&.${classKeys.margin}, &.${classKeys.padding}`]: {
       flexShrink: 0.36,
     },
-    [`&.${classKeys.node}`]: {
-      flexShrink: 0.52,
+    [`&.${classKeys.contents}`]: {
+      // flexShrink: 0.52,
+      minHeight: 24,
+      minWidth: 78,
+      maxWidth: 168,
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: theme.palette.info.dark,
+      color: theme.palette.surface.contrastText,
+      backgroundColor: alpha(darken(theme.palette.surface.main, 0.24), 0.12),
     },
     [`> *`]: {
       width: '100%',
@@ -79,14 +90,20 @@ const Box = styled('div')(({ theme }) => {
       alignItems: 'center',
     },
     [`&.${classKeys.margin}`]: {
+      position: 'relative',
       height: 184,
       minWidth: 258,
       borderStyle: 'dashed',
       borderWidth: 1,
       borderColor: theme.palette.warning.dark,
       backgroundColor: alpha(theme.palette.surface.main, 0.96),
+
+      [`> .${classKeys.label}`]: {
+        borderColor: theme.palette.warning.dark,
+      },
     },
     [`&.${classKeys.padding}`]: {
+      position: 'relative',
       height: 104,
       minWidth: 168,
       padding: 2,
@@ -102,16 +119,26 @@ const Box = styled('div')(({ theme }) => {
         `${alpha(theme.palette.secondary.main, 0.12)}`,
         ') content-box',
       ].join(''),
+
+      [`> .${classKeys.label}`]: {
+        borderColor: theme.palette.success.dark,
+      },
     },
-    [`&.${classKeys.node}`]: {
-      minHeight: 24,
-      minWidth: 78,
-      maxWidth: 168,
-      borderStyle: 'solid',
-      borderWidth: 1,
-      borderColor: theme.palette.info.dark,
-      color: theme.palette.surface.contrastText,
-      backgroundColor: alpha(darken(theme.palette.surface.main, 0.24), 0.12),
+    [`.${classKeys.label}`]: {
+      width: 'auto',
+      position: 'absolute',
+      textAlign: 'left',
+      left: 0,
+      top: 0,
+      fontWeight: theme.typography.fontWeightMedium,
+      paddingLeft: theme.spacing(0.5),
+      paddingRight: theme.spacing(0.5),
+      paddingTop: theme.spacing(0.25),
+      paddingBottom: theme.spacing(0.25),
+      borderBottom: `1px solid ${theme.palette.text.secondary}`,
+      borderRight: `1px solid ${theme.palette.text.secondary}`,
+      color: darken(theme.palette.surface.contrastText, 0.12),
+      backgroundColor: alpha(darken(theme.palette.surface.dark, 0.12), 0.76),
     },
   }
 })
@@ -215,6 +242,7 @@ const DimensionControl = (props: DimensionControlProps) => {
                 border: 'none',
               },
               [`.MuiInput-input`]: {
+                padding: 0,
                 paddingRight: `2px !important`,
                 textAlign: 'right',
               },
@@ -249,6 +277,107 @@ const DimensionControl = (props: DimensionControlProps) => {
   )
 }
 
+interface MarginStylerProps extends MarginMeasurements {
+  onChange: (key: keyof Measurements) => (dimension: Measurement) => void
+  children?: JSX.Children
+}
+
+const MarginStyler = (props: MarginStylerProps) => {
+  const {
+    marginTop,
+    marginRight,
+    marginBottom,
+    marginLeft,
+    onChange,
+    children,
+  } = props
+
+  return (
+    <Box className={classKeys.margin}>
+      <div className={classKeys.label}>{'Margin'}</div>
+      <DimensionControl
+        dimension={marginTop}
+        onChange={onChange('marginTop')}
+      />
+      <Box className={classKeys.row}>
+        <DimensionControl
+          dimension={marginLeft}
+          onChange={onChange('marginLeft')}
+        />
+
+        {children}
+
+        <DimensionControl
+          dimension={marginRight}
+          onChange={onChange('marginRight')}
+        />
+      </Box>
+      <DimensionControl
+        dimension={marginBottom}
+        onChange={onChange('marginBottom')}
+      />
+    </Box>
+  )
+}
+
+interface PaddingStylerProps extends PaddingMeasurements {
+  onChange: (key: keyof Measurements) => (dimension: Measurement) => void
+  children?: JSX.Children
+}
+
+const PaddingStyler = (props: PaddingStylerProps) => {
+  const {
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+    onChange,
+    children,
+  } = props
+
+  return (
+    <Box className={classKeys.padding}>
+      <div className={classKeys.label}>{'Padding'}</div>
+      <DimensionControl
+        dimension={paddingTop}
+        onChange={onChange('paddingTop')}
+      />
+      <Box className={classKeys.row}>
+        <DimensionControl
+          dimension={paddingLeft}
+          onChange={onChange('paddingLeft')}
+        />
+
+        {children}
+
+        <DimensionControl
+          dimension={paddingRight}
+          onChange={onChange('paddingRight')}
+        />
+      </Box>
+      <DimensionControl
+        dimension={paddingBottom}
+        onChange={onChange('paddingBottom')}
+      />
+    </Box>
+  )
+}
+
+const Contents = () => {
+  // const size = (dimension: any) => <span>{dimension?.quantity ?? '--'}</span>
+
+  return (
+    <Box className={classKeys.contents}>
+      <Box className={classKeys.row}>
+        <span>Contents</span>
+        {/*{size(width)}*/}
+        {/*{' x '}*/}
+        {/*{size(height)}*/}
+      </Box>
+    </Box>
+  )
+}
+
 const Legend = styled(Stack)(({ theme }) => {
   return {
     [`.${classKeys.legendSwatch}`]: {
@@ -257,32 +386,73 @@ const Legend = styled(Stack)(({ theme }) => {
       content: '" "',
       width: 10,
       height: 10,
-      [`&.${classKeys.margin}`]: {
+    },
+    [`.${classKeys.margin}`]: {
+      [`.${classKeys.legendSwatch}`]: {
         borderStyle: 'dashed',
         borderColor: theme.palette.warning.dark,
       },
-      [`&.${classKeys.padding}`]: {
+    },
+    [`.${classKeys.padding}`]: {
+      [`.${classKeys.legendSwatch}`]: {
         borderStyle: 'dashed',
         borderColor: theme.palette.success.dark,
       },
-      [`&.${classKeys.node}`]: {
+    },
+    [`.${classKeys.contents}`]: {
+      [`.${classKeys.legendSwatch}`]: {
+        borderStyle: 'solid',
         borderColor: theme.palette.info.dark,
       },
+    },
+    [`.${classKeys.legendLabel}`]: {
+      color: theme.palette.text.secondary,
+      textTransform: 'capitalize',
     },
   }
 })
 
-type BoxStylerWrapperProps = JSX.ComponentProps<typeof Box>
-export type Measurements = {
-  marginTop?: string
-  marginLeft?: string
-  marginRight?: string
-  marginBottom?: string
-  paddingTop?: string
-  paddingLeft?: string
-  paddingRight?: string
-  paddingBottom?: string
+interface LegendItemProps extends Partial<StackProps> {
+  item: 'margin' | 'padding' | 'contents'
 }
+const LegendItem = (props: LegendItemProps) => {
+  const { item, className, ...rest } = props
+
+  return (
+    <Stack
+      direction="row"
+      alignItems="center"
+      justifyContent="start"
+      className={clsx(
+        classKeys.legendItem,
+        { [classKeys[item]]: Boolean(classKeys[item]) },
+        className,
+      )}
+      spacing={1}
+      {...rest}
+    >
+      <div className={classKeys.legendSwatch} />
+      <div className={classKeys.legendLabel}>{item}</div>
+    </Stack>
+  )
+}
+
+type BoxStylerWrapperProps = JSX.ComponentProps<typeof Box>
+
+export type PaddingMeasurements = Partial<
+  Pick<
+    CSSStyleDeclaration,
+    'paddingTop' | 'paddingRight' | 'paddingBottom' | 'paddingLeft'
+  >
+>
+export type MarginMeasurements = Partial<
+  Pick<
+    CSSStyleDeclaration,
+    'marginTop' | 'marginRight' | 'marginBottom' | 'marginLeft'
+  >
+>
+
+export type Measurements = PaddingMeasurements & MarginMeasurements
 
 export interface BoxStylerProps
   extends Omit<BoxStylerWrapperProps, 'onChange'> {
@@ -314,97 +484,37 @@ const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
       onChange && onChange(res)
     }
 
-  const size = (dimension: any) => <span>{dimension?.quantity ?? '--'}</span>
-
   return (
     <Box ref={ref} {...rest}>
-      <Box className={classKeys.margin}>
-        <DimensionControl
-          dimension={measurements?.marginTop}
-          onChange={handleChange('marginTop')}
-        />
-        <Box className={classKeys.row}>
-          <DimensionControl
-            dimension={measurements?.marginLeft}
-            onChange={handleChange('marginLeft')}
-          />
-          <Box className={classKeys.padding}>
-            <DimensionControl
-              dimension={measurements?.paddingTop}
-              onChange={handleChange('paddingTop')}
-            />
-            <Box className={classKeys.row}>
-              <DimensionControl
-                dimension={measurements?.paddingLeft}
-                onChange={handleChange('paddingLeft')}
-              />
-              <Box className={classKeys.node}>
-                <Box className={classKeys.row}>
-                  <span>Node</span>
-                  {/*{size(width)}*/}
-                  {/*{' x '}*/}
-                  {/*{size(height)}*/}
-                </Box>
-              </Box>
-              <DimensionControl
-                dimension={measurements?.paddingRight}
-                onChange={handleChange('paddingRight')}
-              />
-            </Box>
-            <DimensionControl
-              dimension={measurements?.paddingBottom}
-              onChange={handleChange('paddingBottom')}
-            />
-          </Box>
-          <DimensionControl
-            dimension={measurements?.marginRight}
-            onChange={handleChange('marginRight')}
-          />
-        </Box>
-        <DimensionControl
-          dimension={measurements?.marginBottom}
-          onChange={handleChange('marginBottom')}
-        />
-      </Box>
+      <MarginStyler
+        onChange={handleChange}
+        marginTop={measurements?.marginTop}
+        marginRight={measurements?.marginRight}
+        marginBottom={measurements?.marginBottom}
+        marginLeft={measurements?.marginLeft}
+      >
+        <PaddingStyler
+          onChange={handleChange}
+          paddingTop={measurements?.paddingTop}
+          paddingRight={measurements?.paddingRight}
+          paddingBottom={measurements?.paddingBottom}
+          paddingLeft={measurements?.paddingLeft}
+        >
+          <Contents />
+        </PaddingStyler>
+      </MarginStyler>
 
       <Legend
         direction="row"
         alignItems="center"
         justifyContent="space-around"
         spacing={1}
-        marginTop={0.5}
-        marginBottom={1}
+        marginTop={1}
+        marginBottom={2}
       >
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="start"
-          className={classKeys.legendItem}
-          spacing={1}
-        >
-          <div className={clsx(classKeys.legendSwatch, classKeys.margin)} />
-          <div>{'Margin'}</div>
-        </Stack>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="start"
-          className={classKeys.legendItem}
-          spacing={1}
-        >
-          <div className={clsx(classKeys.legendSwatch, classKeys.padding)} />
-          <div>{'Padding'}</div>
-        </Stack>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="start"
-          className={classKeys.legendItem}
-          spacing={1}
-        >
-          <div className={clsx(classKeys.legendSwatch, classKeys.node)} />
-          <div>{'Node'}</div>
-        </Stack>
+        <LegendItem item={'margin'} />
+        <LegendItem item={'padding'} />
+        <LegendItem item={'contents'} />
       </Legend>
     </Box>
   )
