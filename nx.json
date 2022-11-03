@@ -14,7 +14,7 @@
     },
     "tsconfig.base.json": "*",
     "tslint.json": "*",
-    ".eslintrc.json": "*",
+    ".eslintrc.js": "*",
     "nx.json": "*"
   },
   "affected": {
