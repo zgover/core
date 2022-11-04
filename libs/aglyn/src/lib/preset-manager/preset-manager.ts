@@ -49,14 +49,20 @@ emitter.on(AglynEvent.PRESET_UNREGISTER, ({ presetId }) => {
   unregisterPreset(presetId)
 })
 
-export const presets = observable<Record<PresetId, PresetSchema>>({})
+export interface PresetState {
+  presets?: Record<PresetId, PresetSchema>
+}
+
+export const state = observable<PresetState>({
+  presets: {},
+})
 
 export function getPreset($id: PresetId) {
-  return presets[$id]
+  return (state.presets ||= {})[$id]
 }
 
 export function hasPreset($id: PresetId) {
-  return Boolean($id) && Object.hasOwn(presets, $id)
+  return Boolean($id) && Object.hasOwn(state, $id)
 }
 
 export function registerPreset(preset: PresetSchema) {
@@ -65,7 +71,7 @@ export function registerPreset(preset: PresetSchema) {
   lifecycleEvent(
     () => {
       runInAction(() => {
-        presets[$id] = preset
+        ;(state.presets ||= {})[$id] = preset
       })
     },
     {
@@ -81,7 +87,7 @@ export function unregisterPreset($id: PresetId) {
   lifecycleEvent(
     () => {
       runInAction(() => {
-        delete presets[$id]
+        delete (state.presets ||= {})[$id]
       })
     },
     {

@@ -21,7 +21,6 @@ import {
   type BesignerPanelKey,
   BesignerPanelTabFlag,
 } from '@aglyn/besigner-data-app'
-import { getBundle } from '@aglyn/core-data-app'
 import { useAglynComponentsContext } from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_ELEMENT,
@@ -61,6 +60,7 @@ import {
   Tab as MuiTab,
   Typography,
 } from '@mui/material'
+import groupBy from 'lodash-es/groupBy'
 import {
   forwardRef,
   type SyntheticEvent,
@@ -286,13 +286,31 @@ const ElementsTree = forwardRef<any, NodeTreeViewProps>((props, ref) => {
   )
 })
 
-type ComponentGridItemProps = CardListItemProps & {
-  item: Aglyn.PresetSchema<any>
+type ComponentGridItemData = Aglyn.PresetSchema<any> | Aglyn.NodeSchema<any>
+type ComponentGridGroupItemData = {
+  id: string
+  order: number
+  labelPrimary: JSX.Node
+  labelSecondary: JSX.Node
+  icon: MdiIconProps
+  items: ComponentGridItemData[]
+}
+type ComponentGridItemProps = Partial<CardListItemProps> & {
+  item: ComponentGridGroupItemData
 }
 const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
   (props, forwardRef) => {
     const { item, ...rest } = props
-    const icon = item?.icon
+    const isPreset = item?.type === Aglyn.NodeType.PRESET
+    const icon = isPreset ? item?.schema?.icon : item?.icon
+
+    const label =
+      item?.label ||
+      item?.displayName ||
+      item?.title ||
+      (isPreset
+        ? item?.schema?.label
+        : Aglyn.components.getComponentLabel(item?.componentId))
     // const schema = Aglyn.components.getSchema(item?.componentId)
     // const dndData = useMemo(() => {
     //   const { $id, data, componentId, pluginId } = item
@@ -310,47 +328,45 @@ const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
       Besigner.dnd.DragType.TEMPLATE,
     )
 
+    !label && console.log('ComponentGridItem', label, item?.$id, item)
+
     const ref = useForkedRefs(forwardRef, dragHandle)
 
     return (
-      <>
-        <CardListItem
-          ref={ref}
-          ContentBoxProps={{
-            ref: dragPreview,
-          }}
-          item={item}
-          label={item.label}
-          {...rest}
-        >
-          {!icon?.path && icon ? (
-            (icon as any)
-          ) : (
-            <MdiIcon
-              color="tertiary"
-              {...icon}
-              path={icon?.path || ICON_VARIANT_ELEMENT.path}
-              sx={mergeSxProps(
-                {
-                  fontSize: { xs: `5ch`, sm: `4ch` },
-                  padding: `0.15ch`,
-                  color: 'tertiary.main',
-                  overflow: 'visible',
-                },
-                icon?.sx,
-              )}
-            />
-          )}
-        </CardListItem>
-      </>
+      <CardListItem
+        ref={ref}
+        ContentBoxProps={{
+          ref: dragPreview,
+        }}
+        item={{ ...item, id: item?.$id }}
+        label={label}
+        {...rest}
+      >
+        {!icon?.path && icon ? (
+          (icon as any)
+        ) : (
+          <MdiIcon
+            color="tertiary"
+            {...icon}
+            path={icon?.path || ICON_VARIANT_ELEMENT.path}
+            sx={mergeSxProps(
+              {
+                fontSize: { xs: `5ch`, sm: `4ch` },
+                padding: `0.15ch`,
+                color: 'tertiary.main',
+                overflow: 'visible',
+              },
+              icon?.sx,
+            )}
+          />
+        )}
+      </CardListItem>
     )
   },
 )
 type ComponentGroupDetailsProps = BoxProps &
   JSX.AnyProps & {
-    item?: {
-      items?: Aglyn.PresetSchema<any>[]
-    }
+    item?: ComponentGridGroupItemData
     id?: string
     isOpen?: boolean
   }
@@ -391,55 +407,73 @@ const ComponentsList = forwardRef<any, ListProps>((props, ref) => {
     [sortedItems],
   )
 
-  const items = useMemo<
-    {
-      id: string
-      order: number
-      labelPrimary: JSX.Node
-      labelSecondary: JSX.Node
-      icon: MdiIconProps
-      items: Aglyn.PresetSchema<any>[]
-    }[]
-  >(() => {
+  const items = useMemo<ComponentGridGroupItemData[]>(() => {
     const bundles = []
     const cats = []
-
-    sortedItems.forEach((item) => {
-      const { category, data } = item || {}
-      const { pluginId } = data || {}
-      const bundled = pluginId && bundles.find((i) => i.$id === pluginId)
-      const categorized = category && cats.find((i) => i.$id === category)
-
-      if (bundled) bundled?.items?.push(item)
-      if (categorized) categorized?.items?.push(item)
-      if (!bundled && pluginId) {
-        const bundle = getBundle(app, { pluginId })
-        bundles.push({
-          id: pluginId,
-          order: 49,
-          labelPrimary: bundle?.displayName ?? pluginId,
-          labelSecondary: bundle?.subtitle || 'Category',
-          icon: {
-            path: ICON_VARIANT_ELEMENT_BROWSE.path,
-            ...bundle?.icon,
-          },
-          items: [item],
-        })
+    const presets = Object.values(Aglyn.presets.state)
+    const schemas = Object.values(Aglyn.components.schemas)
+    const allItems = [...presets, ...schemas]
+    const grouped = groupBy(allItems, (i) => {
+      if (i?.type === Aglyn.NodeType.PRESET) {
+        return i?.meta?.category
       }
-      if (!categorized && category) {
-        cats.push({
-          id: category,
-          order: 5,
-          labelPrimary: category,
-          labelSecondary: 'Bundle',
-          icon: { path: ICON_VARIANT_ELEMENT_BROWSE.path },
-          items: [item],
-        })
-      }
+      return 'Uncategorized'
     })
+    const mapped = Object.entries({ ...grouped, All: allItems }).map(
+      ([groupId, group]) => {
+        return {
+          id: groupId,
+          labelPrimary: groupId,
+          labelSecondary: 'Category',
+          icon: {
+            path: ICON_VARIANT_ELEMENT.path,
+          },
+          items: group,
+          order: 0,
+        }
+      },
+    )
 
-    return arraySortBy([...cats, ...bundles, allItem], (i) => i.order ?? 0)
-  }, [sortedItems, allItem, app])
+    console.log('aside panel group components', mapped)
+
+    return mapped
+
+    // sortedItems.forEach((item) => {
+    //   const { category, data } = item || {}
+    //   const { pluginId } = data || {}
+    //   const bundled = pluginId && bundles.find((i) => i.$id === pluginId)
+    //   const categorized = category && cats.find((i) => i.$id === category)
+    //
+    //   if (bundled) bundled?.items?.push(item)
+    //   if (categorized) categorized?.items?.push(item)
+    //   if (!bundled && pluginId) {
+    //     const bundle = getBundle(app, { pluginId })
+    //     bundles.push({
+    //       id: pluginId,
+    //       order: 49,
+    //       labelPrimary: bundle?.displayName ?? pluginId,
+    //       labelSecondary: bundle?.subtitle || 'Category',
+    //       icon: {
+    //         path: ICON_VARIANT_ELEMENT.path,
+    //         ...bundle?.icon,
+    //       },
+    //       items: [item],
+    //     })
+    //   }
+    //   if (!categorized && category) {
+    //     cats.push({
+    //       id: category,
+    //       order: 5,
+    //       labelPrimary: category,
+    //       labelSecondary: 'Bundle',
+    //       icon: { path: ICON_VARIANT_ELEMENT.path },
+    //       items: [item],
+    //     })
+    //   }
+    // })
+    //
+    // return arraySortBy([...cats, ...bundles, allItems], (i) => i.order ?? 0)
+  }, [])
 
   return (
     <>

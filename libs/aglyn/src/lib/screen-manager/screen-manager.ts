@@ -22,6 +22,7 @@ import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { makeAutoObservable, observable, runInAction, toJS } from 'mobx'
 import {
+  type ComponentId,
   type ComponentSchema,
   getComponentLabel,
   getSchema,
@@ -60,7 +61,7 @@ export interface NodeSchema<P = JSX.AnyProps>
   /**
    * The unique identifier of the node component
    */
-  componentId?: string
+  componentId?: ComponentId
   /**
    * The unique identifier of the node component plugin bundle
    */
