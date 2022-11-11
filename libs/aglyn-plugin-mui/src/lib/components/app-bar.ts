@@ -16,17 +16,20 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import { ComponentCategory } from '@aglyn/core-data-foundation'
 import { mdiPageLayoutHeader } from '@aglyn/shared-ui-mdi-jsx'
 import Toolbar from '@mui/material/AppBar'
 import { PLUGIN_ID } from '../constants/common'
 import { FIELD_COLOR_ALT1, FIELD_POSITION } from '../constants/field-presets'
+import GeneratePresetId from '../utils/generate-preset-id'
+import { ID as toolbarId } from './toolbar'
 
 export const ID: Aglyn.ComponentId = 'muiAppBar'
 
 export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
   pluginId: PLUGIN_ID,
-  displayName: 'Toolbar',
+  displayName: 'App Bar',
   category: Aglyn.ComponentCategory.SURFACE,
   icon: {
     path: mdiPageLayoutHeader.path,
@@ -34,5 +37,31 @@ export const schema: Aglyn.ComponentSchema = {
   },
   attributes: [FIELD_COLOR_ALT1, FIELD_POSITION],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: GeneratePresetId(ID),
+    displayName: 'Toolbar (Complete)',
+    pluginId: PLUGIN_ID,
+    description: 'A toolbar preset with the app bar and toolbar content nodes',
+    category: ComponentCategory.DATA_DISPLAY,
+    icon: schema.icon,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: PLUGIN_ID,
+      nodes: [
+        {
+          $id: null,
+          componentId: toolbarId,
+          pluginId: PLUGIN_ID,
+          props: {
+            dense: true,
+          },
+        },
+      ],
+    },
+  },
+]
 
 export default Toolbar

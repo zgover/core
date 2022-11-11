@@ -35,13 +35,11 @@ export type PluginDependents = Record<PluginId, Dependents>
 
 export interface Plugin {
   id?: PluginId
-  info?: {
-    displayName?: string
-    title?: string
-    subtitle?: string
-    description?: string
-    icon?: MdiIconProps
-  }
+  displayName?: string
+  title?: string
+  subtitle?: string
+  description?: string
+  icon?: MdiIconProps
   dependencies?: PluginDependencies
   load?(...args: any[]): void
   destroy?(...args: any[]): void

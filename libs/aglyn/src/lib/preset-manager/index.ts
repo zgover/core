@@ -16,4 +16,8 @@
  */
 
 export * as presets from './preset-manager'
-export { type PresetId, type PresetSchema } from './preset-manager'
+export {
+  type PresetId,
+  type PresetSchema,
+  type PresetState,
+} from './preset-manager'

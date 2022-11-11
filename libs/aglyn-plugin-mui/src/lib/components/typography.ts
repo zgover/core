@@ -29,8 +29,36 @@ import {
 } from '@aglyn/shared-ui-mdi-jsx'
 import Typography from '@mui/material/Typography'
 import { PLUGIN_ID } from '../constants/common'
+import GeneratePresetId from '../utils/generate-preset-id'
 
 export const ID: Aglyn.ComponentId = 'muiTypography'
+const typographyVariants = [
+  { value: 'h1', label: 'Heading 1', icon: { path: mdiFormatHeader1.path } },
+  { value: 'h2', label: 'Heading 2', icon: { path: mdiFormatHeader2.path } },
+  { value: 'h3', label: 'Heading 3', icon: { path: mdiFormatHeader3.path } },
+  { value: 'h4', label: 'Heading 4', icon: { path: mdiFormatHeader4.path } },
+  { value: 'h5', label: 'Heading 5', icon: { path: mdiFormatHeader5.path } },
+  { value: 'h6', label: 'Heading 6', icon: { path: mdiFormatHeader6.path } },
+  {
+    value: 'subtitle1',
+    label: 'Subtitle 1',
+    icon: { path: mdiFormatText.path },
+  },
+  {
+    value: 'subtitle2',
+    label: 'Subtitle 2',
+    icon: { path: mdiFormatText.path },
+  },
+  { value: 'body1', label: 'Body 1', icon: { path: mdiFormatText.path } },
+  { value: 'body2', label: 'Body 2', icon: { path: mdiFormatText.path } },
+  { value: 'overline', label: 'Overline', icon: { path: mdiFormatText.path } },
+  { value: 'caption', label: 'Caption', icon: { path: mdiFormatText.path } },
+  {
+    value: 'paragraph',
+    label: 'Paragraph',
+    icon: { path: mdiFormatParagraph.path },
+  },
+]
 
 export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
@@ -48,66 +76,7 @@ export const schema: Aglyn.ComponentSchema = {
       description: 'The variant to use.',
       component: Aglyn.FieldComponentType.SELECT,
       label: 'Variant',
-      options: [
-        { value: '', label: 'Default' },
-        {
-          value: 'h1',
-          label: 'Heading 1',
-          icon: { path: mdiFormatHeader1.path },
-        },
-        {
-          value: 'h2',
-          label: 'Heading 2',
-          icon: { path: mdiFormatHeader2.path },
-        },
-        {
-          value: 'h3',
-          label: 'Heading 3',
-          icon: { path: mdiFormatHeader3.path },
-        },
-        {
-          value: 'h4',
-          label: 'Heading 4',
-          icon: { path: mdiFormatHeader4.path },
-        },
-        {
-          value: 'h5',
-          label: 'Heading 5',
-          icon: { path: mdiFormatHeader5.path },
-        },
-        {
-          value: 'h6',
-          label: 'Heading 6',
-          icon: { path: mdiFormatHeader6.path },
-        },
-        {
-          value: 'subtitle1',
-          label: 'Subtitle 1',
-          icon: { path: mdiFormatText.path },
-        },
-        {
-          value: 'subtitle2',
-          label: 'Subtitle 2',
-          icon: { path: mdiFormatText.path },
-        },
-        { value: 'body1', label: 'Body 1', icon: { path: mdiFormatText.path } },
-        { value: 'body2', label: 'Body 2', icon: { path: mdiFormatText.path } },
-        {
-          value: 'overline',
-          label: 'Overline',
-          icon: { path: mdiFormatText.path },
-        },
-        {
-          value: 'caption',
-          label: 'Caption',
-          icon: { path: mdiFormatText.path },
-        },
-        {
-          value: 'paragraph',
-          label: 'Paragraph',
-          icon: { path: mdiFormatParagraph.path },
-        },
-      ],
+      options: [{ value: '', label: 'Default' }, ...typographyVariants],
     },
     {
       name: 'component',
@@ -122,7 +91,7 @@ export const schema: Aglyn.ComponentSchema = {
         { value: 'h4', label: 'Heading 4' },
         { value: 'h5', label: 'Heading 5' },
         { value: 'h6', label: 'Heading 6' },
-        { value: 'paragraph', label: 'Paragraph' },
+        { value: 'p', label: 'Paragraph' },
         { value: 'div', label: 'Div' },
         { value: 'span', label: 'Span' },
       ],
@@ -155,5 +124,28 @@ export const schema: Aglyn.ComponentSchema = {
     },
   ],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  ...typographyVariants.map((item) => ({
+    $id: GeneratePresetId(ID, item.value),
+    displayName: item.label,
+    pluginId: PLUGIN_ID,
+    description: `Element with ${item.label} styles`,
+    category: Aglyn.ComponentCategory.TEXT,
+    icon: {
+      sx: { color: '#057822' },
+      ...item.icon,
+    },
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: PLUGIN_ID,
+      props: {
+        variant: item.value,
+        children: item.label,
+      },
+    },
+  })),
+]
 
 export default Typography

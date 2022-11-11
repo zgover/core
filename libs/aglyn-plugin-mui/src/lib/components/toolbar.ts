@@ -20,7 +20,6 @@ import { mdiBorderInside } from '@aglyn/shared-ui-mdi-jsx'
 import ToolbarInner from '@mui/material/Toolbar'
 import { PLUGIN_ID } from '../constants/common'
 import { FIELD_DISABLE_GUTTERS } from '../constants/field-presets'
-import { ID as toolbarId } from './app-bar'
 
 export const ID: Aglyn.ComponentId = 'muiToolbar'
 
@@ -35,7 +34,7 @@ export const schema: Aglyn.ComponentSchema = {
   },
   restrictParent: [
     Aglyn.LinealDirectiveFlag.LIMIT_TO,
-    { components: [toolbarId], plugins: [PLUGIN_ID] },
+    { components: ['muiAppBar'], plugins: [PLUGIN_ID] },
   ],
   attributes: [
     FIELD_DISABLE_GUTTERS,

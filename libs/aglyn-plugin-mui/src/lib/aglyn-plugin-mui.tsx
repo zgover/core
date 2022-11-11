@@ -29,11 +29,9 @@ import { PLUGIN_ID } from './constants/common'
 
 Aglyn.plugins.addDependency({
   id: PLUGIN_ID,
-  info: {
-    displayName: 'Material UI',
-    description: 'Material UI elements',
-    title: 'Mui',
-  },
+  displayName: 'Material UI',
+  description: 'Material UI elements',
+  title: 'Material UI',
   dependencies: {},
   load(...args): void {
     console.log('mui load', ...args)
@@ -49,9 +47,15 @@ Aglyn.plugins.addDependency({
     )
     Aglyn.components.registerComponent(Stack.default, Stack.schema)
     Aglyn.components.registerComponent(Typography.default, Typography.schema)
+
+    Aglyn.presets.registerPreset(AppBar.presets)
+    Aglyn.presets.registerPreset(Typography.presets)
   },
   destroy(...args): void {
     console.log('mui destroy', ...args)
+    Aglyn.presets.unregisterPreset(AppBar.presets.map((i) => i.$id))
+    Aglyn.presets.unregisterPreset(Typography.presets.map((i) => i.$id))
+
     Aglyn.components.unregisterComponent(AppBar.ID)
     Aglyn.components.unregisterComponent(Toolbar.ID)
     Aglyn.components.unregisterComponent(Button.ID)

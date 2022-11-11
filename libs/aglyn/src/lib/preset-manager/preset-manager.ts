@@ -16,14 +16,14 @@
  */
 
 import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { observable, runInAction } from 'mobx'
+import { observable, runInAction, toJS } from 'mobx'
 import type { ComponentCategory } from '../components-manager'
 import { createIdUrlSafe } from '../constants'
 import { AglynEvent, emitter, lifecycleEvent } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'
 import {
   type AbstractNodeSchema,
-  NodeSchemaNested,
+  type NodeSchemaNested,
   NodeType,
 } from '../screen-manager'
 
@@ -32,15 +32,20 @@ export type PresetId = string
 export interface PresetSchema<P = JSX.AnyProps>
   extends AbstractNodeSchema<NodeType.PRESET> {
   $id: PresetId
-  meta?: {
-    label?: string
-    pluginId?: PluginId
-    description?: string
-    icon?: MdiIconProps
-    category?: string | ComponentCategory
-  }
+  pluginId?: PluginId
+  displayName?: string
+  description?: string
+  category?: string | ComponentCategory
+  icon?: MdiIconProps
   data: NodeSchemaNested<P>
 }
+export interface PresetState {
+  byId?: Record<PresetId, PresetSchema<any>>
+}
+
+export const state = observable<PresetState>({
+  byId: {},
+})
 
 emitter.on(AglynEvent.PRESET_REGISTER, ({ preset }) => {
   registerPreset(preset)
@@ -49,52 +54,54 @@ emitter.on(AglynEvent.PRESET_UNREGISTER, ({ presetId }) => {
   unregisterPreset(presetId)
 })
 
-export interface PresetState {
-  presets?: Record<PresetId, PresetSchema>
-}
-
-export const state = observable<PresetState>({
-  presets: {},
-})
-
 export function getPreset($id: PresetId) {
-  return (state.presets ||= {})[$id]
+  return (state.byId ||= {})[$id]
 }
 
 export function hasPreset($id: PresetId) {
   return Boolean($id) && Object.hasOwn(state, $id)
 }
 
-export function registerPreset(preset: PresetSchema) {
-  if (!preset) return
-  const $id = (preset.$id ||= createIdUrlSafe())
-  lifecycleEvent(
-    () => {
-      runInAction(() => {
-        ;(state.presets ||= {})[$id] = preset
-      })
-    },
-    {
-      beforeEvent: AglynEvent.PRESET_REGISTERING,
-      beforePayload: [{ $id, meta: preset.meta }],
-      afterEvent: AglynEvent.PRESET_REGISTERED,
-      afterPayload: [{ $id, meta: preset.meta }],
-    },
-  )
+export function registerPreset(presets: PresetSchema[] | PresetSchema) {
+  if (!presets) return
+  const arr = Array.isArray(presets) ? presets : [presets]
+
+  for (const preset of arr) {
+    const $id = (preset.$id ||= createIdUrlSafe())
+    lifecycleEvent(
+      () => {
+        runInAction(() => {
+          preset.type = NodeType.PRESET
+          state.byId[$id] = preset
+        })
+      },
+      {
+        beforeEvent: AglynEvent.PRESET_REGISTERING,
+        beforePayload: [{ preset: toJS(preset) }],
+        afterEvent: AglynEvent.PRESET_REGISTERED,
+        afterPayload: [{ preset: toJS(preset) }],
+      },
+    )
+  }
 }
 
-export function unregisterPreset($id: PresetId) {
-  lifecycleEvent(
-    () => {
-      runInAction(() => {
-        delete (state.presets ||= {})[$id]
-      })
-    },
-    {
-      beforeEvent: AglynEvent.PRESET_UNREGISTERING,
-      beforePayload: [{ $id }],
-      afterEvent: AglynEvent.PRESET_UNREGISTERED,
-      afterPayload: [{ $id }],
-    },
-  )
+export function unregisterPreset($ids: PresetId[] | PresetId) {
+  if (!$ids) return
+  const arr = Array.isArray($ids) ? $ids : [$ids]
+
+  for (const $id of arr) {
+    lifecycleEvent(
+      () => {
+        runInAction(() => {
+          delete state.byId[$id]
+        })
+      },
+      {
+        beforeEvent: AglynEvent.PRESET_UNREGISTERING,
+        beforePayload: [{ $id }],
+        afterEvent: AglynEvent.PRESET_UNREGISTERED,
+        afterPayload: [{ $id }],
+      },
+    )
+  }
 }

@@ -33,10 +33,13 @@ import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { Box, Grid } from '@mui/material'
 import groupBy from 'lodash-es/groupBy'
 import { observer } from 'mobx-react-lite'
-import { forwardRef, useMemo } from 'react'
+import { useMemo } from 'react'
 
-type ComponentGridItemData = Aglyn.PresetSchema<any> | Aglyn.NodeSchema<any>
-type ComponentGridGroupItemData = {
+export type ComponentGridItemData =
+  | Aglyn.PresetSchema<any>
+  | Aglyn.NodeSchema<any>
+  | Aglyn.ComponentSchema
+export type ComponentGridGroupItemData = {
   id: string
   order: number
   labelPrimary: JSX.Node
@@ -44,21 +47,21 @@ type ComponentGridGroupItemData = {
   icon: MdiIconProps
   items: ComponentGridItemData[]
 }
-type ComponentGridItemProps = Partial<CardListItemProps> & {
+export type ComponentGridItemProps = Partial<CardListItemProps> & {
   item: ComponentGridGroupItemData
 }
-const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
+const ComponentGridItem = observer<ComponentGridItemProps, any>(
   (props, forwardRef) => {
     const { item, ...rest } = props
     const isPreset = item?.type === Aglyn.NodeType.PRESET
-    const icon = isPreset ? item?.schema?.icon : item?.icon
+    const icon = isPreset ? item?.icon : item?.icon
 
     const label =
       item?.label ||
       item?.displayName ||
       item?.title ||
       (isPreset
-        ? item?.schema?.label
+        ? item?.label
         : Aglyn.components.getComponentLabel(item?.componentId))
 
     const [, dragHandle, dragPreview] = useLeafDrag(
@@ -101,13 +104,15 @@ const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
       </CardListItem>
     )
   },
+  { forwardRef: true },
 )
+
 export const ComponentAccordionList = observer(
   <T extends AccordionListItem = AccordionListItem>(
     props: AccordionListProps<T>,
   ) => {
     const { ...rest } = props
-    const presets = Aglyn.presets.state
+    const presets = Aglyn.presets.state.byId
     const schemas = Aglyn.components.schemas
 
     const items = useMemo<ComponentGridGroupItemData[]>(() => {
@@ -117,10 +122,11 @@ export const ComponentAccordionList = observer(
       ]
 
       const grouped = groupBy(allItems, (i) => {
-        return i?.category || i?.meta?.category || 'Uncategorized'
+        return i?.category || 'Uncategorized'
       })
+      grouped.All = allItems
 
-      const mapped = Object.entries({ ...grouped, All: allItems })
+      return Object.entries(grouped)
         .sort(([aId], [bId]) => {
           switch (true) {
             case aId === 'All' && bId === 'Uncategorized':
@@ -137,8 +143,8 @@ export const ComponentAccordionList = observer(
               return aId.localeCompare(bId)
           }
         })
-        .map(([groupId, group]) => {
-          return {
+        .map(
+          ([groupId, group]): ComponentGridGroupItemData => ({
             id: groupId,
             labelPrimary: groupId,
             labelSecondary: 'Category',
@@ -147,12 +153,8 @@ export const ComponentAccordionList = observer(
             },
             items: group,
             order: 0,
-          }
-        })
-
-      console.log('aside panel group components', mapped)
-
-      return mapped
+          }),
+        )
     }, [presets, schemas])
 
     return (
@@ -160,9 +162,7 @@ export const ComponentAccordionList = observer(
         unique
         items={items}
         AccordionSummaryProps={{ dense: true }}
-        SummaryContentComponent={({ id, isOpen, item }) => (
-          <>{item?.labelPrimary}</>
-        )}
+        SummaryContentComponent={({ item }) => <>{item?.labelPrimary}</>}
         DetailsContentComponent={(props) => {
           const { id, isOpen, item, openItems, ...rest } = props
           return (
