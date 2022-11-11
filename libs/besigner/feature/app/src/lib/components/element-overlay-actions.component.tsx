@@ -22,7 +22,6 @@ import {
   setBesignerPanels,
 } from '@aglyn/besigner-data-app'
 import useDeleteElementCallback from '@aglyn/besigner-feature-app/hooks/use-delete-element-callback'
-import { moveCanvasElement } from '@aglyn/core-data-app'
 import { isRootElementId } from '@aglyn/core-util-app'
 import {
   ICON_VARIANT_MODIFY_DELETE,
@@ -93,25 +92,12 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>((props, ref) => {
 })
 BadgeButton.displayName = 'AglynBadgeButton'
 
-const MoveUpButton = observer(({ $id }: { $id: Aglyn.NodeId }) => {
-  const app = useBesignerAppContext()
-  const node = Aglyn.screen.getNode($id)
-
+const MoveUpButton = observer(({ node }: { node: Aglyn.NodeSchema }) => {
   const handleMoveUp = useCallback(
     (e: ChangeEvent<unknown>) => {
-      Aglyn.screen.reparentNode(
-        node,
-        node?.parent,
-        node?.parent,
-        node?.index - 1,
-      )
-      moveCanvasElement(app, {
-        $id: node?.$id,
-        parentId: node?.parentId,
-        index: node?.index - 1,
-      })
+      Aglyn.screen.reorderNode(node, node?.index - 1)
     },
-    [app, node],
+    [node],
   )
 
   return node?.index > 0 ? (
@@ -124,25 +110,12 @@ const MoveUpButton = observer(({ $id }: { $id: Aglyn.NodeId }) => {
     />
   ) : null
 })
-const MoveDownButton = observer(({ $id }: { $id: Aglyn.NodeId }) => {
-  const app = useBesignerAppContext()
-  const node = Aglyn.screen.getNode($id)
-
+const MoveDownButton = observer(({ node }: { node: Aglyn.NodeSchema }) => {
   const handleMoveDown = useCallback(
     (e: ChangeEvent<unknown>) => {
-      Aglyn.screen.reparentNode(
-        node,
-        node?.parent,
-        node?.parent,
-        node?.index + 1,
-      )
-      moveCanvasElement(app, {
-        $id: node?.$id,
-        parentId: node?.parentId,
-        index: node?.index + 1,
-      })
+      Aglyn.screen.reorderNode(node, node?.index + 1)
     },
-    [app, node],
+    [node],
   )
 
   return node?.index < node?.parent?.nodes?.length - 1 ? (
@@ -160,187 +133,182 @@ export interface ElementOverlayActionsProps extends ButtonGroupProps {
   $id: Aglyn.NodeId
 }
 
-const ElementOverlayActionsComponent = forwardRef<
-  any,
-  ElementOverlayActionsProps
->((props, ref) => {
-  const { $id, ...rest } = props
+const ElementOverlayActionsComponent = observer(
+  (props: ElementOverlayActionsProps) => {
+    const { $id, ...rest } = props
 
-  const app = useBesignerAppContext()
-  const node = Aglyn.screen.getNode($id)
-  const parent = node?.parent
-  const elementRef = useRenderedCanvasElementRef({ $id })
-  const [moreOpen, setMoreOpen] = useState(false)
-  const [moreButton, moreButtonRef] = useState(null)
+    const app = useBesignerAppContext()
+    const node = Aglyn.screen.getNode($id)
+    const parent = node?.parent
+    const elementRef = useRenderedCanvasElementRef({ $id })
+    const [moreOpen, setMoreOpen] = useState(false)
+    const [moreButton, moreButtonRef] = useState(null)
 
-  const closeMore = useCallback(() => setMoreOpen(false), [])
-  const openMore = useCallback(() => setMoreOpen(true), [])
+    const closeMore = useCallback(() => setMoreOpen(false), [])
+    const openMore = useCallback(() => setMoreOpen(true), [])
 
-  const handleDuplicateClick = useCallback(
-    (e: ChangeEvent<unknown>) => {
-      Aglyn.screen.duplicateNode(node)
-    },
-    [node],
-  )
+    const handleDuplicateClick = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        Aglyn.screen.duplicateNode(node)
+      },
+      [node],
+    )
 
-  const handleModifyClick = useCallback(
-    (e: ChangeEvent<unknown>) => {
-      setBesignerPanels(app, {
-        panels: (panels) => ({
-          ...panels,
-          panelRight: {
-            ...panels.panelRight,
-            toggled: true,
-            tab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
-          },
-        }),
-      })
-    },
-    [app],
-  )
+    const handleModifyClick = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        setBesignerPanels(app, {
+          panels: (panels) => ({
+            ...panels,
+            panelRight: {
+              ...panels.panelRight,
+              toggled: true,
+              tab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
+            },
+          }),
+        })
+      },
+      [app],
+    )
 
-  const handleParentOnClick = useCallback(
-    (e: ChangeEvent<unknown>) => {
-      Besigner.focus.setSelectedNode(parent)
-    },
-    [parent],
-  )
+    const handleParentOnClick = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        Besigner.focus.setSelectedNode(parent)
+      },
+      [parent],
+    )
 
-  const handleParentOnMouseEnter = useCallback(
-    (e: ChangeEvent<unknown>) => {
-      Besigner.focus.setHoveredNode(parent)
-    },
-    [parent],
-  )
-  const handleParentOnMouseLeave = useCallback((e: ChangeEvent<unknown>) => {
-    Besigner.focus.clearHover()
-  }, [])
+    const handleParentOnMouseEnter = useCallback(
+      (e: ChangeEvent<unknown>) => {
+        Besigner.focus.setHoveredNode(parent)
+      },
+      [parent],
+    )
+    const handleParentOnMouseLeave = useCallback((e: ChangeEvent<unknown>) => {
+      Besigner.focus.clearHover()
+    }, [])
 
-  const deleteElementCallback = useDeleteElementCallback({ $id })
-  const handleDeleteClick = useCallback((e: ChangeEvent<unknown>) => {
-    deleteElementCallback(e)
-  }, [])
+    const deleteElementCallback = useDeleteElementCallback({ $id })
 
-  return (
-    <>
-      <MuiButtonGroup
-        ref={ref}
-        id="aglyn:element-overlay-badge"
-        data-aglyn-node={$id}
-        data-aglyn-kind="overlay-actions"
-        variant="contained"
-        color="secondary"
-        aria-label="element controls"
-        sx={{
-          boxShadow: 4,
-          pointerEvents: 'auto',
-        }}
-        {...rest}
-      >
-        {!isRootElementId($id) && (
-          <BadgeButton
-            title="Drag"
-            children="drag"
-            sx={{ '&, &:hover, &:focus': { cursor: 'move' } }}
-            // ref={dragHandleRef}
-            ButtonProps={{
-              ref: elementRef?.dragHandle,
-              sx: { '&, &:hover, &:focus': { cursor: 'move' } },
-            }}
-            icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}
-            disableInteractive
-          />
-        )}
-
-        {!isRootElementId($id) && (
-          <BadgeButton
-            title="Duplicate"
-            children="duplicate"
-            ButtonProps={{ onClick: handleDuplicateClick }}
-            icon={{ path: ICON_VARIANT_MODIFY_DUPLICATE.path }}
-            disableInteractive
-          />
-        )}
-
-        {!isRootElementId($id) && (
-          <BadgeButton
-            title="Select parent"
-            children={'select parent'}
-            ButtonProps={{
-              onClick: handleParentOnClick,
-              onMouseEnter: handleParentOnMouseEnter,
-              onMouseLeave: handleParentOnMouseLeave,
-            }}
-            icon={{ path: ICON_VARIANT_SELECT_PARENT.path }}
-            disableInteractive
-          />
-        )}
-
-        {!isRootElementId($id) && <MoveUpButton $id={$id} />}
-        {!isRootElementId($id) && <MoveDownButton $id={$id} />}
-
-        <BadgeButton
-          ref={moreButtonRef}
-          title="More options"
-          children={'more options'}
-          ButtonProps={{
-            onClick: openMore,
-            // onMouseEnter: handleParentOnMouseEnter,
-            // onMouseLeave: handleParentOnMouseLeave,
+    return (
+      <>
+        <MuiButtonGroup
+          id="aglyn:element-overlay-badge"
+          data-aglyn-node={$id}
+          data-aglyn-kind="overlay-actions"
+          variant="contained"
+          color="secondary"
+          aria-label="element controls"
+          sx={{
+            boxShadow: 4,
+            pointerEvents: 'auto',
           }}
-          icon={{ path: ICON_VARIANT_SHOW_MORE.path }}
-          disableInteractive
-        />
-      </MuiButtonGroup>
-      <Popper
-        sx={{ zIndex: 1 }}
-        open={Boolean(moreButton) && moreOpen}
-        anchorEl={moreButton}
-        role={undefined}
-        transition
-        disablePortal
-      >
-        {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin:
-                placement === 'bottom' ? 'center top' : 'center bottom',
-            }}
-          >
-            <Paper sx={{ bgcolor: 'secondary.main' }}>
-              <ClickAwayListener onClickAway={closeMore}>
-                <MenuList
-                  color="secondary"
-                  id="split-button-menu"
-                  autoFocusItem
-                >
-                  {!isRootElementId($id) && (
-                    <MenuItem dense onClick={handleModifyClick}>
-                      <ListItemIcon>
-                        <MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />
-                      </ListItemIcon>
-                      <ListItemText>{'Modify'}</ListItemText>
-                    </MenuItem>
-                  )}
+          {...rest}
+        >
+          {!isRootElementId($id) && (
+            <BadgeButton
+              title="Drag"
+              children="drag"
+              sx={{ '&, &:hover, &:focus': { cursor: 'move' } }}
+              // ref={dragHandleRef}
+              ButtonProps={{
+                ref: elementRef?.dragHandle,
+                sx: { '&, &:hover, &:focus': { cursor: 'move' } },
+              }}
+              icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}
+              disableInteractive
+            />
+          )}
 
-                  {!isRootElementId($id) && (
-                    <MenuItem dense onClick={handleDeleteClick}>
-                      <ListItemIcon>
-                        <MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />
-                      </ListItemIcon>
-                      <ListItemText>{'Delete'}</ListItemText>
-                    </MenuItem>
-                  )}
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
-    </>
-  )
-})
+          {!isRootElementId($id) && (
+            <BadgeButton
+              title="Duplicate"
+              children="duplicate"
+              ButtonProps={{ onClick: handleDuplicateClick }}
+              icon={{ path: ICON_VARIANT_MODIFY_DUPLICATE.path }}
+              disableInteractive
+            />
+          )}
+
+          {!isRootElementId($id) && (
+            <BadgeButton
+              title="Select parent"
+              children={'select parent'}
+              ButtonProps={{
+                onClick: handleParentOnClick,
+                onMouseEnter: handleParentOnMouseEnter,
+                onMouseLeave: handleParentOnMouseLeave,
+              }}
+              icon={{ path: ICON_VARIANT_SELECT_PARENT.path }}
+              disableInteractive
+            />
+          )}
+
+          {!isRootElementId($id) && <MoveUpButton node={node} />}
+          {!isRootElementId($id) && <MoveDownButton node={node} />}
+
+          <BadgeButton
+            ref={moreButtonRef}
+            title="More options"
+            children={'more options'}
+            ButtonProps={{
+              onClick: openMore,
+              // onMouseEnter: handleParentOnMouseEnter,
+              // onMouseLeave: handleParentOnMouseLeave,
+            }}
+            icon={{ path: ICON_VARIANT_SHOW_MORE.path }}
+            disableInteractive
+          />
+        </MuiButtonGroup>
+        <Popper
+          sx={{ zIndex: 1 }}
+          open={Boolean(moreButton) && moreOpen}
+          anchorEl={moreButton}
+          role={undefined}
+          transition
+          disablePortal
+        >
+          {({ TransitionProps, placement }) => (
+            <Grow
+              {...TransitionProps}
+              style={{
+                transformOrigin:
+                  placement === 'bottom' ? 'center top' : 'center bottom',
+              }}
+            >
+              <Paper sx={{ bgcolor: 'secondary.main' }}>
+                <ClickAwayListener onClickAway={closeMore}>
+                  <MenuList
+                    color="secondary"
+                    id="split-button-menu"
+                    autoFocusItem
+                  >
+                    {!isRootElementId($id) && (
+                      <MenuItem dense onClick={handleModifyClick}>
+                        <ListItemIcon>
+                          <MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />
+                        </ListItemIcon>
+                        <ListItemText>{'Modify'}</ListItemText>
+                      </MenuItem>
+                    )}
+
+                    {!isRootElementId($id) && (
+                      <MenuItem dense onClick={deleteElementCallback}>
+                        <ListItemIcon>
+                          <MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />
+                        </ListItemIcon>
+                        <ListItemText>{'Delete'}</ListItemText>
+                      </MenuItem>
+                    )}
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            </Grow>
+          )}
+        </Popper>
+      </>
+    )
+  },
+)
 ElementOverlayActionsComponent.displayName = 'ElementOverlayActionsComponent'
 ElementOverlayActionsComponent.aglyn = true
 

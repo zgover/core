@@ -315,6 +315,22 @@ export function reparentNode(
   addNodeToParent(node, newParent, index)
 }
 
+export function reorderNode(node: NodeSchema<any>, newIndex = NaN) {
+  if (!node || !node.$id || !node?.parent) {
+    console.error('Invalid node or parent', node)
+    return
+  }
+  return runInAction(() => {
+    node.parent.nodes.splice(node?.index, 1)
+    if (isNaN(newIndex)) {
+      node.parent.nodes.push(node?.$id)
+    } else {
+      node.parent.nodes.splice(newIndex, 0, node?.$id)
+    }
+    return node
+  })
+}
+
 export function removeNodeFromParent(node: NodeSchema<any>) {
   const parent = getNode(node?.parentId)
   const index = getNodeIndex(node)
