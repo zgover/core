@@ -1,11 +1,12 @@
 {
+  "name": "besigner-ui-color-picker",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/besigner/ui/color-picker/src",
   "projectType": "library",
   "tags": ["scope:lib", "scope:aglyn", "scope:besigner", "scope:ui"],
   "targets": {
     "build": {
-      "executor": "@nrwl/web:rollup",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/besigner/ui/color-picker",
@@ -35,7 +36,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/besigner/ui/color-picker"],
+      "outputs": ["{workspaceRoot}/coverage/libs/besigner/ui/color-picker"],
       "options": {
         "jestConfig": "libs/besigner/ui/color-picker/jest.config.ts",
         "passWithNoTests": true

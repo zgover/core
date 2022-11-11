@@ -1,11 +1,12 @@
 {
+  "name": "besigner-ui-box-styler",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/besigner/ui/box-styler/src",
   "projectType": "library",
   "tags": ["scope:lib", "scope:aglyn", "scope:ui", "aglyn:besigner"],
   "targets": {
     "build": {
-      "executor": "@nrwl/web:rollup",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/besigner/ui/box-styler",
@@ -33,7 +34,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/besigner/ui/box-styler"],
+      "outputs": ["{workspaceRoot}/coverage/libs/besigner/ui/box-styler"],
       "options": {
         "jestConfig": "libs/besigner/ui/box-styler/jest.config.ts",
         "passWithNoTests": true

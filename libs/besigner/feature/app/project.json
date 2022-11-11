@@ -1,10 +1,11 @@
 {
+  "name": "besigner-feature-app",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/besigner/feature/app/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/web:rollup",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/besigner/feature/app",
@@ -32,7 +33,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/besigner/feature/app"],
+      "outputs": ["{workspaceRoot}/coverage/libs/besigner/feature/app"],
       "options": {
         "jestConfig": "libs/besigner/feature/app/jest.config.ts",
         "passWithNoTests": true

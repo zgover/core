@@ -35,7 +35,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/aglyn"],
+      "outputs": ["{workspaceRoot}/coverage/libs/aglyn"],
       "options": {
         "jestConfig": "libs/aglyn/jest.config.ts",
         "passWithNoTests": true

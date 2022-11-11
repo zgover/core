@@ -1,11 +1,12 @@
 {
+  "name": "aglyn-plugin-mui",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/aglyn-plugin-mui/src",
   "projectType": "library",
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nrwl/web:rollup",
+      "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/aglyn-plugin-mui",
@@ -33,7 +34,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/aglyn-plugin-mui"],
+      "outputs": ["{workspaceRoot}/coverage/libs/aglyn-plugin-mui"],
       "options": {
         "jestConfig": "libs/aglyn-plugin-mui/jest.config.ts",
         "passWithNoTests": true
