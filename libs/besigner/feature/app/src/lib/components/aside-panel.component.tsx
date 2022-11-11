@@ -40,9 +40,11 @@ import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import {
   arraySortBy,
+  getDisplayName,
   numberFromHexadecimal,
   numberToHexadecimal,
 } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import {
   TabContext as MuiTabContext,
   TabList as MuiTabList,
@@ -61,6 +63,7 @@ import {
   Typography,
 } from '@mui/material'
 import groupBy from 'lodash-es/groupBy'
+import { observer } from 'mobx-react-lite'
 import {
   forwardRef,
   type SyntheticEvent,
@@ -241,9 +244,11 @@ const defaultTabContent = (
   </>
 )
 
-const withSelectedElement = (Component) => () => {
-  const lastSelected = Besigner.focus.state.lastSelected
-  return !lastSelected ? (
+function withLastSelectedNode<P>(
+  WrappedComponent: JSX.ComponentType<P & { node: Besigner.LastSelectedNode }>,
+) {
+  const displayName = getDisplayName(WrappedComponent)
+  const empty = (
     <Stack
       direction="column"
       justifyContent="center"
@@ -253,9 +258,26 @@ const withSelectedElement = (Component) => () => {
     >
       {defaultTabContent}
     </Stack>
-  ) : (
-    <Component node={lastSelected} />
   )
+
+  const WithLastSelectedNode = observer((props: P) => {
+    const { ...rest } = props
+    const lastSelected = Besigner.focus.state.lastSelected
+
+    return (
+      <>
+        {!lastSelected ? (
+          empty
+        ) : (
+          <WrappedComponent node={lastSelected} {...rest} />
+        )}
+      </>
+    )
+  })
+  WithLastSelectedNode.displayName = `WithLastSelectedNode(${displayName})`
+  hoistNonReactStatics(WithLastSelectedNode, WrappedComponent)
+
+  return WithLastSelectedNode
 }
 
 const withTabPanelInner = (Component) => (props: any) => {
@@ -536,7 +558,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
           label: 'Info',
         },
         panel: {
-          Component: withSelectedElement(ElementInfo),
+          Component: withLastSelectedNode(ElementInfo),
         },
       },
       {
@@ -546,7 +568,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
           label: 'Attributes',
         },
         panel: {
-          Component: withSelectedElement(withTabPanelInner(ElementPropsForm)),
+          Component: withLastSelectedNode(withTabPanelInner(ElementPropsForm)),
         },
       },
       {
@@ -556,7 +578,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
           label: 'Styles',
         },
         panel: {
-          Component: withSelectedElement(withTabPanelInner(ElementStylesForm)),
+          Component: withLastSelectedNode(withTabPanelInner(ElementStylesForm)),
         },
       },
     ],
