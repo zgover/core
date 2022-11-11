@@ -26,6 +26,7 @@ export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
   pluginId: PLUGIN_ID,
   displayName: 'Container',
+  category: Aglyn.ComponentCategory.LAYOUT,
   icon: {
     path: mdiViewArrayOutline.path,
     sx: { color: '#2196f3' },

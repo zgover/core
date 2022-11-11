@@ -26,6 +26,7 @@ export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
   pluginId: PLUGIN_ID,
   displayName: 'List Item Text',
+  category: Aglyn.ComponentCategory.LAYOUT,
   icon: { path: mdiFormatListChecks.path },
 }
 

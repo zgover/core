@@ -27,6 +27,7 @@ export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
   pluginId: PLUGIN_ID,
   displayName: 'List Item',
+  category: Aglyn.ComponentCategory.LAYOUT,
   icon: { path: mdiFormatListText.path },
   restrictChildren: [
     Aglyn.LinealDirectiveFlag.LIMIT_TO,

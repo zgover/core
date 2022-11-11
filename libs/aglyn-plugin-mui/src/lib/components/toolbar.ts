@@ -27,6 +27,7 @@ export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
   pluginId: PLUGIN_ID,
   displayName: 'Toolbar Content',
+  category: Aglyn.ComponentCategory.SURFACE,
   icon: {
     path: mdiBorderInside.path,
     sx: { color: '#2196f3' },

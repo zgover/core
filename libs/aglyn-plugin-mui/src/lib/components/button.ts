@@ -32,6 +32,7 @@ export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
   pluginId: PLUGIN_ID,
   displayName: 'Button',
+  category: Aglyn.ComponentCategory.NAVIGATION,
   icon: {
     path: mdiGestureTapButton.path,
     sx: { color: '#2196f3' },

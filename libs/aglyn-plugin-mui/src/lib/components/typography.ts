@@ -36,6 +36,7 @@ export const schema: Aglyn.ComponentSchema = {
   componentId: ID,
   pluginId: PLUGIN_ID,
   displayName: 'Typography',
+  category: Aglyn.ComponentCategory.DATA_DISPLAY,
   icon: {
     path: mdiAlphabetical.path,
     sx: { color: '#057822' },
