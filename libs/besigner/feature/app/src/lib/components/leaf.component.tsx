@@ -65,7 +65,7 @@ function RawLeafComponent(
     return () => {
       deleteElementRef(node?.$id)
     }
-  }, [setElementRef, dragHandle, node, nodeRef, deleteElementRef])
+  })
   /**
    * Remove only on unmount
    */
@@ -97,10 +97,7 @@ function RawLeafComponent(
       node={node}
       onMouseOver={handleOnMouseOver}
       onMouseDown={handleOnMouseDown}
-      data-aglyn-node={node?.$id}
-      data-aglyn-component={node?.componentId}
-      data-aglyn-bundle={node?.componentSchema?.pluginId}
-      data-aglyn-status={isSelected ? 'selected' : 'none'}
+      data-aglyn-selected={isSelected ? 'selected' : undefined}
       {...rest}
     />
   )

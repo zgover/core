@@ -53,6 +53,7 @@ const ViewportFrame = styled('div', {
   // position: 'relative',
 }))
 ViewportFrame.displayName = 'ViewportFrame'
+
 type SiteShadowDomProps = HTMLAttributes<HTMLDivElement> & ShadowRootProps
 const SiteShadowDom = styled(MuiShadowDom.div, {
   name: 'AglynViewportShadowDom',
@@ -87,10 +88,11 @@ const ThemedElementContainer = ({ children }) => {
   )
 }
 
-const SiteContainer = (props: SiteShadowDomProps) => {
+const SiteContainer = forwardRef<any, SiteShadowDomProps>((props, ref) => {
   const { ...rest } = props
   return (
     <SiteShadowDom
+      ref={ref}
       key="aglyn:site-container"
       id="aglyn:site-container"
       mode="closed"
@@ -115,14 +117,15 @@ const SiteContainer = (props: SiteShadowDomProps) => {
       </>
     </SiteShadowDom>
   )
-}
+})
 
-const Overlays = (props: Partial<BoxProps>) => {
+const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
   const { ...rest } = props
   return (
     <Box
-      key="aglyn:site-overlay"
-      id="aglyn:site-overlay"
+      ref={ref}
+      key="aglyn:site-overlays"
+      id="aglyn:site-overlays"
       sx={{
         position: 'relative',
         zIndex: 'tooltip',
@@ -130,18 +133,18 @@ const Overlays = (props: Partial<BoxProps>) => {
       {...rest}
     >
       <ElementOverlayPopperComponent
-        key="aglyn:element-overlay-selected"
-        id="aglyn:element-overlay-selected"
+        key="aglyn:overlay-selected"
+        id="aglyn:overlay-selected"
         variant="selectedOverlay"
       />
       <ElementOverlayPopperComponent
-        key="aglyn:element-overlay-hovered"
-        id="aglyn:element-overlay-hovered"
+        key="aglyn:overlay-hovered"
+        id="aglyn:overlay-hovered"
         variant="hoveredOverlay"
       />
     </Box>
   )
-}
+})
 
 export interface ViewportFrameComponentProps
   extends ComponentProps<typeof ViewportFrame> {}

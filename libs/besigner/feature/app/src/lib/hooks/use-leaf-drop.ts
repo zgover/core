@@ -53,18 +53,25 @@ export function useLeafDrop(
         },
       },
       drop: (dragObject, monitor) => {
-        if (monitor.didDrop()) return
-        if (!dropObject) return
+        if (monitor.didDrop()) {
+          Besigner.dnd.clearDndStatus()
+          return
+        }
+        if (!dropObject) {
+          Besigner.dnd.clearDndStatus()
+          return
+        }
         const dragType = monitor.getItemType()
         const breadcrumbs = dropObject?.node?.breadcrumbPath
         const isOverDragItem = breadcrumbs?.indexOf(dragObject?.$id) >= 0
         const isOverSelf = monitor.isOver({ shallow: true })
 
-        Besigner.dnd.clearDndStatus()
         Besigner.focus.clearFocusStatus()
-        console.log('end drag ', dragObject, dragObject, dropObject)
 
-        if (!isOverSelf || isOverDragItem) return
+        if (!isOverSelf || isOverDragItem) {
+          Besigner.dnd.clearDndStatus()
+          return
+        }
 
         const dropSchema = Aglyn.components.getSchema(
           dropObject?.node?.componentId,
@@ -74,7 +81,10 @@ export function useLeafDrop(
         )
         const validRelationship = Besigner.dnd.state.isValidLinealRelationship
 
-        if (!dropAllowed || !validRelationship) return
+        if (!dropAllowed || !validRelationship) {
+          Besigner.dnd.clearDndStatus()
+          return
+        }
 
         if (dragType === Besigner.DragType.TEMPLATE) {
           const dragNode = dragObject?.node as Aglyn.PresetSchema<any>
