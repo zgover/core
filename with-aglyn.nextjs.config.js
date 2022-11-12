@@ -315,11 +315,19 @@ const AGLYN_CONFIG = {
   // Disable production source maps
   webpack: (config, options) => {
     const { webpack, buildId, isServer } = options
+    console.log(
+      'webpackConfig, ',
+      // webpackConfig,
+      '\n\n\n',
+      options,
+      '\n\n\n',
+      config,
+    )
     // if (!isServer) {
     //   /** @see https://github.com/vercel/next.js/issues/7755#issuecomment-812805708 */
     //   config.resolve.fallback.fs = false
     // }
-    config.bundles.push(
+    config.plugins.push(
       new webpack.DefinePlugin({
         'process.env.BUILD_ID': JSON.stringify(buildId),
       }),
@@ -388,7 +396,7 @@ function withAglyn(nextConfig = {}) {
           } = aglynConfig.analyzerOptions
           const fileExt = analyzerMode === 'json' ? 'json' : 'html'
 
-          config.bundles.push(
+          config.plugins.push(
             new BundleAnalyzerPlugin({
               analyzerMode: analyzerMode || 'static',
               reportFilename: options.isServer

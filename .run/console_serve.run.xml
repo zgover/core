@@ -5,6 +5,7 @@
     <tasks>
       <task value="console:serve" />
     </tasks>
+    <arguments value="--verbose" />
     <envs />
     <method v="2" />
   </configuration>

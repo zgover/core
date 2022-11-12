@@ -149,7 +149,6 @@
     "@commitlint/cli": "^17.0.0",
     "@commitlint/config-conventional": "^17.0.0",
     "@emotion/babel-plugin": "11.10.2",
-    "@jscutlery/semver": "^2.22.0",
     "@mdi/svg": "6.5.95",
     "@mdi/util": "0.3.2",
     "@nrwl/cli": "15.0.13",
@@ -239,4 +238,3 @@
     }
   }
 }
-
