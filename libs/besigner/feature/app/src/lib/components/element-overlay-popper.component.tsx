@@ -29,7 +29,7 @@ import {
   type PopperProps as MuiPopperProps,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { ForwardedRef, useMemo, useState } from 'react'
+import { type MutableRefObject, useMemo, useState } from 'react'
 import { useRenderedCanvasElementRef } from '../contexts/rendered-canvas-elements'
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
 import ElementOverlayActionsComponent from './element-overlay-actions.component'
@@ -136,7 +136,7 @@ const variantToStoreName: Record<
   hoveredOverlay: 'hovered',
 }
 
-export type PopperVariant = 'hoveredOverlay' | 'selectedOverlay'
+export type PopperVariant = string & ('hoveredOverlay' | 'selectedOverlay')
 
 export interface ElementOverlayPopperComponentProps
   extends Partial<MuiPopperProps> {
@@ -145,11 +145,11 @@ export interface ElementOverlayPopperComponentProps
 
 const ElementOverlayPopper = (
   props: ElementOverlayPopperComponentProps,
-  ref: ForwardedRef<any>,
+  ref: MutableRefObject<any>,
 ) => {
   const { variant, ...rest } = props || {}
 
-  const state = Besigner.focus.state[variantToStoreName[variant]]
+  const state = Besigner.focus.state[variantToStoreName[variant] || 'hovered']
   const $id = state?.$id
   const node = Aglyn.screen.getNode($id)
 
@@ -169,20 +169,6 @@ const ElementOverlayPopper = (
 
   return (
     <>
-      {/*<MuiPopper*/}
-      {/*  anchorEl={() => elementRef?.node}*/}
-      {/*  data-aglyn-node={$id}*/}
-      {/*  data-aglyn-kind={'overlay-popper-new'}*/}
-      {/*  placement={'bottom'}*/}
-      {/*  modifiers={innerModifiers}*/}
-      {/*  open={addHelperOpen}*/}
-      {/*  disablePortal*/}
-      {/*  {...rest}*/}
-      {/*>*/}
-      {/*  <div>*/}
-      {/*    <AddElementOverlay $id={$id} active={addHelperOpen} />*/}
-      {/*  </div>*/}
-      {/*</MuiPopper>*/}
       <MuiPopper
         ref={ref}
         anchorEl={() => elementRef?.node}
@@ -240,15 +226,12 @@ const ElementOverlayPopper = (
 
 ElementOverlayPopper.displayName = 'ElementOverlayPopperComponent'
 ElementOverlayPopper.aglyn = true
-ElementOverlayPopper.defaultProps = {
-  variant: 'hoveredOverlay',
-}
-const ElementOverlayPopperComponent = observer<
+
+export const ElementOverlayPopperComponent = observer<
   ElementOverlayPopperComponentProps,
   any
 >(ElementOverlayPopper, {
   forwardRef: true,
 })
 
-export { ElementOverlayPopperComponent }
 export default ElementOverlayPopperComponent

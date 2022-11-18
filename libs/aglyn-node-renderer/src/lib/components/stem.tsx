@@ -26,12 +26,12 @@ export interface StemProps {
 function RawStem(props, ref) {
   const { nodeId } = props
 
-  if (!Aglyn.screen.hasNode(nodeId)) {
+  const node = Aglyn.screen.getNode(nodeId)
+
+  if (!node) {
     console.error(`Error rendering ${nodeId}`)
     return <div></div>
   }
-
-  const node = Aglyn.screen.getNode(nodeId)
 
   return (
     <RendererComponents.Consumer>
@@ -46,7 +46,5 @@ function RawStem(props, ref) {
 RawStem.displayName = 'Stem'
 RawStem.aglyn = true
 
-const Stem = observer<StemProps, any>(RawStem, { forwardRef: true })
-
-export { Stem }
+export const Stem = observer<StemProps, any>(RawStem, { forwardRef: true })
 export default Stem

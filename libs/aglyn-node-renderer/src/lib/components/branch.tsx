@@ -26,9 +26,10 @@ export interface BranchProps {
 
 function RawBranch(props: BranchProps) {
   const { node } = props
+  const nodes = Array.isArray(node?.nodes) ? node.nodes : []
   return (
     <Fragment key={node?.$id}>
-      {node?.nodes?.map((nodeId) => (
+      {nodes.map((nodeId) => (
         <Stem key={nodeId} nodeId={nodeId} />
       ))}
     </Fragment>

@@ -169,6 +169,57 @@ export function isRootNodeId(id: NodeId): id is typeof NODE_ROOT_ID {
   return id === NODE_ROOT_ID
 }
 
+export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
+  public name: string
+  public type: NodeType.NODE = NodeType.NODE
+  public $id: NodeId
+  public pluginId?: PluginId
+  public componentId?: ComponentId
+  public parentId?: NodeId
+  public nodes?: NodeId[]
+  public props?: P
+  public sx?: JSX.SxProps
+  public className?: string
+
+  get parent(): NodeSchema<any> | null {
+    return getNode(this.parentId)
+  }
+  get index(): number | null {
+    return getNodeIndex(this)
+  }
+  get labelShort(): string {
+    return getNodeLabelShort(this)
+  }
+  get breadcrumbPath(): NodeBreadcrumbPath {
+    return getNodeBreadcrumbPath(this)
+  }
+  get componentSchema(): ComponentSchema | undefined {
+    return getNodeComponentSchema(this)
+  }
+  get hasNodes(): boolean {
+    return Array.isArray(this.nodes) && this.nodes.length > 0
+  }
+
+  constructor(schema: NodeSchema<P>) {
+    this.$id = schema.$id
+    this.name = schema.name
+    this.type = schema.type || NodeType.NODE
+    this.parentId = schema.parentId
+    this.pluginId = schema.pluginId
+    this.componentId = schema.componentId
+    this.className = schema.className
+    this.nodes = Array.isArray(schema.nodes) ? [...schema.nodes] : []
+    this.props = { ...schema.props } as P
+    this.sx = Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx }
+
+    makeAutoObservable(this)
+  }
+
+  public toJSON(): NodeSchemaJSON<P> {
+    return nodeToJSON(this)
+  }
+}
+
 export function nodeFactory<P = JSX.AnyProps>(
   schema: NodeSchema<P>,
 ): NodeSchema<P> {
@@ -230,7 +281,7 @@ export function clearNodes() {
 export function createNode<P = JSX.AnyProps>(
   schema: PartialKeys<NodeSchema<P>, '$id'>,
 ): NodeSchema<P> {
-  return nodeFactory({ ...schema, $id: schema?.$id ?? createNodeId() })
+  return new AglynNode<P>({ ...schema, $id: schema?.$id ?? createNodeId() })
 }
 
 export function setNode(node: NodeSchema<any>, create = false) {
@@ -360,7 +411,7 @@ export function addNodeToParent(
     if (isNaN(index)) {
       parent.nodes.push(node.$id)
     } else {
-      parent.nodes.splice(index, 0, node.$id)
+      parent.nodes.unshift(node.$id)
     }
 
     node.parentId = parent.$id
@@ -529,16 +580,16 @@ export function processNodesToDenormalized(
       response,
     )
   } else {
-    response = value as unknown as Record<NodeId, NodeSchema>
+    response = value as unknown as Record<NodeId, NodeSchema<any>>
   }
 
   return response
 }
 
 export function getNodeBreadcrumbPath(nodeId: NodeId): NodeBreadcrumbPath
-export function getNodeBreadcrumbPath(node: NodeSchema): NodeBreadcrumbPath
+export function getNodeBreadcrumbPath(node: NodeSchema<any>): NodeBreadcrumbPath
 export function getNodeBreadcrumbPath(
-  nodeOrId: NodeId | NodeSchema,
+  nodeOrId: NodeId | NodeSchema<any>,
 ): NodeBreadcrumbPath {
   const hierarchy = [NODE_ROOT_ID]
 
@@ -551,7 +602,7 @@ export function getNodeBreadcrumbPath(
   return hierarchy as NodeBreadcrumbPath
 }
 
-export function getNodeLabelShort(node: NodeSchema) {
+export function getNodeLabelShort(node: NodeSchema<any>) {
   if (isRootNode(node)) return NODE_ROOT_LABEL
   const componentLabel = getComponentLabel(node?.componentId)
   return node?.name || componentLabel || node?.$id

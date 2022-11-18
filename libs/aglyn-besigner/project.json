@@ -30,5 +30,5 @@
       }
     }
   },
-  "tags": []
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:besigner"]
 }

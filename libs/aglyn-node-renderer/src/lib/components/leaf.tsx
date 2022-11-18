@@ -19,7 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import { styled } from '@aglyn/shared-ui-theme'
 import mergeSxProps from '@aglyn/shared-ui-theme/util/merge-sx-props'
 import { observer } from 'mobx-react-lite'
-import { type ForwardedRef, HTMLAttributes, useMemo } from 'react'
+import { HTMLAttributes, type MutableRefObject, useMemo } from 'react'
 import { isValidElementType } from 'react-is'
 
 const DefaultComponent = styled('div')({})
@@ -30,8 +30,9 @@ export interface LeafProps extends HTMLAttributes<any> {
   sx?: JSX.SxProps
 }
 
-function RawLeaf(props: LeafProps, ref: ForwardedRef<any>) {
+function RawLeaf(props: LeafProps, ref: MutableRefObject<any>) {
   const { children, node, sx, ...rest } = props
+
   const componentSchema = node?.componentSchema
   const resolveProps = componentSchema?.resolveProps
   const Factory = Aglyn.components.getFactory(componentSchema?.componentId)

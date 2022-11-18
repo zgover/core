@@ -21,7 +21,7 @@ import { useForkedRefs } from '@aglyn/shared-ui-jsx'
 import { observer } from 'mobx-react-lite'
 import {
   type ChangeEvent,
-  type ForwardedRef,
+  type MutableRefObject,
   useCallback,
   useEffect,
   useState,
@@ -34,10 +34,9 @@ export interface ElementLeafComponentProps extends LeafProps {}
 
 function RawLeafComponent(
   props: ElementLeafComponentProps,
-  forwardRef: ForwardedRef<any>,
+  forwardRef: MutableRefObject<any>,
 ) {
   const { node, ...rest } = props
-  const isSelected = Besigner.focus.isNodeSelected(node)
 
   const [, dragHandle, dragPreview] = useLeafDrag(
     { $id: node?.$id, node },
@@ -66,10 +65,6 @@ function RawLeafComponent(
       deleteElementRef(node?.$id)
     }
   })
-  /**
-   * Remove only on unmount
-   */
-  // useEffect(() => () => deleteElementRef(node?.$id), [deleteElementRef, node])
 
   const handleOnMouseOver = useCallback(
     (e: ChangeEvent<any>) => {
@@ -87,6 +82,7 @@ function RawLeafComponent(
     },
     [node],
   )
+  const isSelected = Besigner.focus.isNodeSelected(node)
 
   // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
   // console.log('element attributes', elementAttributes)
