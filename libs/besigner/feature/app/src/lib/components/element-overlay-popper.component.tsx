@@ -162,8 +162,8 @@ const ElementOverlayPopper = (
     if (variant === 'selectedOverlay') {
       return <ElementOverlayActionsComponent $id={$id} />
     }
-    return <ElementOverlayLabelComponent $id={$id} />
-  }, [$id, variant])
+    return <ElementOverlayLabelComponent node={node} />
+  }, [$id, node, variant])
 
   const addHelperOpen = isOpen && !isSelected
 

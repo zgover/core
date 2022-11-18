@@ -17,49 +17,27 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import useAddElementDrawerCallback from '@aglyn/besigner-feature-app/hooks/use-add-element-drawer-callback'
-import { ICON_VARIANT_MODIFY_ADD } from '@aglyn/shared-data-enums'
-import { styled } from '@aglyn/shared-ui-theme'
+import {
+  ICON_VARIANT_MODIFY_ADD,
+  ICON_VARIANT_SHOW_MORE_VERTICAL,
+} from '@aglyn/shared-data-enums'
 import { Divider, Stack, type StackProps, Typography } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import ComponentIconComponent from './component-icon.component'
 import { BadgeButton } from './element-overlay-actions.component'
-
-const ElementLabelWrapper = styled(Stack, {
-  name: 'AglynElementLabelWrapper',
-})<StackProps>(({ theme }) => ({
-  pointerEvents: 'none',
-  marginLeft: '-2px',
-  marginBottom: '1px',
-  backgroundColor: theme.palette.primary.light,
-  color: theme.palette.primary.contrastText,
-  paddingLeft: theme.spacing(0.5),
-  paddingRight: theme.spacing(0.5),
-  paddingTop: theme.spacing(0.35),
-  paddingBottom: theme.spacing(0.35),
-  maxWidth: 140,
-  fontSize: 12,
-  ['& > .icon-wrapper']: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    display: 'flex',
-    fontSize: theme.typography.pxToRem(12),
-  },
-}))
+import NodeContextMenu from './node-context-menu'
 
 export interface ElementOverlayLabelProps extends StackProps {
-  $id: Aglyn.NodeId
+  node: Aglyn.NodeSchema
 }
 
 const ElementOverlayLabel = (props: ElementOverlayLabelProps) => {
-  const { $id, children, ...rest } = props
-  const node = Aglyn.screen.getNode($id)
-  const label = Aglyn.screen.getNodeLabelShort(node)
-  const handleAddElementClick = useAddElementDrawerCallback({ $id })
+  const { node, children, ...rest } = props
+  const handleAddElementClick = useAddElementDrawerCallback({ $id: node?.$id })
   return (
     <Stack
       id="aglyn:element-overlay-label"
-      data-aglyn-node={$id}
+      data-aglyn-node={node?.$id}
       data-aglyn-kind="overlay-label"
       direction="row"
       justifyContent="flex-start"
@@ -76,8 +54,9 @@ const ElementOverlayLabel = (props: ElementOverlayLabelProps) => {
         backgroundColor: 'primary.light',
         color: 'primary.contrastText',
         px: 0.5,
+        pl: 0.5,
+        pr: 0.25,
         py: 0.35,
-        maxWidth: 140,
       }}
       divider={
         <Divider orientation="vertical" variant="fullWidth" light flexItem />
@@ -104,20 +83,53 @@ const ElementOverlayLabel = (props: ElementOverlayLabelProps) => {
         whiteSpace="nowrap"
         fontSize="inherit"
         color="inherit"
-        children={label}
-      />
-      <BadgeButton
-        title="Add"
-        children={'add'}
-        disableInteractive={false}
-        ButtonProps={{
-          onClick: (e) => handleAddElementClick(e, { $id }),
-          variant: 'contained',
-          color: 'primary',
-          sx: { borderRadius: `0.2em`, ml: -0.2, pointerEvent: 'unset' },
+        sx={{
+          maxWidth: 80,
         }}
-        icon={{ path: ICON_VARIANT_MODIFY_ADD.path }}
+        children={node?.labelShort}
       />
+      <Stack
+        direction="row"
+        justifyContent="flex-start"
+        alignItems="center"
+        spacing={0.25}
+      >
+        <BadgeButton
+          title="Add"
+          children={'add'}
+          disableInteractive
+          ButtonProps={{
+            onClick: handleAddElementClick,
+            variant: 'contained',
+            color: 'primary',
+            sx: { borderRadius: `0.2em`, ml: -0.2, pointerEvent: 'unset' },
+          }}
+          icon={{ path: ICON_VARIANT_MODIFY_ADD.path }}
+        />
+        <BadgeButton
+          placement="right"
+          children={'add'}
+          ButtonProps={{
+            variant: 'contained',
+            color: 'primary',
+            sx: { borderRadius: `0.2em`, ml: -0.2, pointerEvent: 'unset' },
+          }}
+          icon={{ path: ICON_VARIANT_SHOW_MORE_VERTICAL.path }}
+          componentsProps={{
+            tooltip: {
+              sx: {
+                padding: 0,
+                m: -2,
+              },
+            },
+          }}
+          title={
+            <>
+              <NodeContextMenu node={node} />
+            </>
+          }
+        />
+      </Stack>
     </Stack>
   )
 }

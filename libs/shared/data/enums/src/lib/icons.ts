@@ -49,6 +49,7 @@ import {
   mdiDockLeft,
   mdiDockRight,
   mdiDotsHorizontal,
+  mdiDotsVertical,
   mdiDrag,
   mdiFileTree,
   mdiFormatAlignCenter,
@@ -148,6 +149,7 @@ export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
 export const ICON_VARIANT_SELECT_PARENT = mdiArrowULeftTop
 export const ICON_VARIANT_SHOW_DETAIL = mdiPageNextOutline
 export const ICON_VARIANT_SHOW_MORE = mdiDotsHorizontal
+export const ICON_VARIANT_SHOW_MORE_VERTICAL = mdiDotsVertical
 
 // Areas + Pages
 export const ICON_VARIANT_APP_PREFERENCES = mdiTune
