@@ -21,11 +21,59 @@ import {
   ICON_VARIANT_MODIFY_ADD,
   ICON_VARIANT_SHOW_MORE_VERTICAL,
 } from '@aglyn/shared-data-enums'
-import { Divider, Stack, type StackProps, Typography } from '@mui/material'
+import { SrOnly, SrOnlyProps } from '@aglyn/shared-ui-jsx'
+import { MdiIcon, MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { styled } from '@aglyn/shared-ui-theme'
+import {
+  Button as MuiButton,
+  type ButtonProps,
+  Divider,
+  Stack,
+  type StackProps,
+  Tooltip as MuiTooltip,
+  TooltipProps,
+  Typography,
+} from '@mui/material'
 import { observer } from 'mobx-react-lite'
+import { forwardRef } from 'react'
 import ComponentIconComponent from './component-icon.component'
-import { BadgeButton } from './element-overlay-actions.component'
 import NodeContextMenu from './node-context-menu'
+
+interface LabelActionProps extends Omit<TooltipProps, 'children'> {
+  children?: JSX.Children
+  icon: MdiIconProps
+  ButtonProps?: ButtonProps
+  SrOnlyProps?: SrOnlyProps
+}
+
+const ActionButton = styled(MuiButton)(({ theme }) => ({
+  borderRadius: `0.2em`,
+  marginLeft: theme.spacing(-0.2),
+  pointerEvent: 'unset',
+  paddingTop: theme.spacing(0.1),
+  paddingBottom: theme.spacing(0.1),
+  paddingRight: theme.spacing(0.15),
+  paddingLeft: theme.spacing(0.15),
+  fontSize: theme.typography.pxToRem(16),
+  minWidth: 20,
+  '&.MuiButtonGroup-grouped': { minWidth: 25 },
+}))
+
+const LabelAction = forwardRef<any, LabelActionProps>((props, ref) => {
+  const { children, ButtonProps, icon, SrOnlyProps, ...rest } = props
+
+  return (
+    <MuiTooltip ref={ref} {...rest}>
+      <ActionButton variant={'contained'} color={'primary'} {...ButtonProps}>
+        <MdiIcon fontSize="inherit" {...icon} />
+        <SrOnly component="span" {...SrOnlyProps}>
+          {children}
+        </SrOnly>
+      </ActionButton>
+    </MuiTooltip>
+  )
+})
+LabelAction.displayName = 'AglynLabelAction'
 
 export interface ElementOverlayLabelProps extends StackProps {
   node: Aglyn.NodeSchema
@@ -94,26 +142,18 @@ const ElementOverlayLabel = (props: ElementOverlayLabelProps) => {
         alignItems="center"
         spacing={0.25}
       >
-        <BadgeButton
+        <LabelAction
           title="Add"
           children={'add'}
           disableInteractive
           ButtonProps={{
             onClick: () => handleAddElementClick(node),
-            variant: 'contained',
-            color: 'primary',
-            sx: { borderRadius: `0.2em`, ml: -0.2, pointerEvent: 'unset' },
           }}
           icon={{ path: ICON_VARIANT_MODIFY_ADD.path }}
         />
-        <BadgeButton
+        <LabelAction
           placement="right"
           children={'add'}
-          ButtonProps={{
-            variant: 'contained',
-            color: 'primary',
-            sx: { borderRadius: `0.2em`, ml: -0.2, pointerEvent: 'unset' },
-          }}
           icon={{ path: ICON_VARIANT_SHOW_MORE_VERTICAL.path }}
           componentsProps={{
             tooltip: {
