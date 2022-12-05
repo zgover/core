@@ -165,6 +165,7 @@ export interface ScreenState {
   readonly isInitialSame: boolean
   readonly didSetInitial: boolean
   readonly rootNode: NodeSchema<any>
+  readonly nestedNodes: NodeSchemaNested<any>
   hasNode: ($id: NodeId) => boolean
   getNode: ($id: NodeId) => NodeSchema<any> | undefined
   nodesAreEqual: (left: NodesMap, right?: NodesMap) => boolean
@@ -176,6 +177,10 @@ export interface ScreenState {
     nodeOrId: NodeId | NodeSchema<any>,
   ) => NodeBreadcrumbPath
   getNodeLabelShort: (node: NodeSchema<any>) => any
+  nestNodes: (
+    nodes?: NodesMap,
+    rootNode?: NodeSchema<any>,
+  ) => NodeSchemaNested<any>
   redo(): void
   undo(): void
   saveHistory(): void
@@ -228,6 +233,9 @@ export const state = observable<ScreenState>({
   get rootNode() {
     return this._history[this._activeIndex][NODE_ROOT_ID]
   },
+  get nestedNodes(): NodeSchemaNested<any> {
+    return this.nestNodes(this.nodes, this.rootNode)
+  },
 
   hasNode: computedFn(($id: NodeId): boolean => {
     return Boolean(state.nodes[$id])
@@ -273,6 +281,39 @@ export const state = observable<ScreenState>({
     const componentLabel = getComponentLabel(node?.componentId)
     return node?.name || componentLabel || node?.$id
   }),
+  nestNodes: computedFn(
+    (nodes: NodesMap, rootNode: NodeSchema<any>): NodeSchemaNested<any> => {
+      console.log('nestNodes', rootNode, toJS(nodes))
+      if (!nodes) throw new Error('Invalid nodes')
+      if (!rootNode) throw new Error('Invalid root node')
+
+      function nest(
+        nodes?: NodesMap,
+        rootNode?: NodeSchema<any>,
+      ): NodeSchemaNested<any> {
+        const parent = toJS(rootNode) as unknown as NodeSchemaNested<any>
+
+        // TODO: Remove after migration to nodes property
+        if (parent['elements']) {
+          parent.nodes = parent['elements']
+          delete parent['elements']
+        }
+        if (parent['bundleId']) {
+          parent.pluginId = parent['bundleId']
+          delete parent['bundleId']
+        }
+
+        parent.nodes = (parent.nodes ||= []).map((id) => {
+          const child = nodes[id as unknown as string]
+          return nest(nodes, child)
+        })
+
+        return parent
+      }
+
+      return nest(nodes, rootNode)
+    },
+  ),
 
   redo() {
     console.log('redo', this.canRedo, this._activeIndex)
@@ -594,27 +635,7 @@ export function nestNodes(
   nodes: NodesMap,
   rootNode: NodeSchema<any>,
 ): NodeSchemaNested<any> {
-  console.log('nestNodes', rootNode, toJS(nodes))
-  if (!nodes) throw new Error('Invalid nodes')
-  if (!rootNode) throw new Error('Invalid root node')
-  const parent = toJS(rootNode) as unknown as NodeSchemaNested<any>
-
-  // TODO: Remove after migration to nodes property
-  if (parent['elements']) {
-    parent.nodes = parent['elements']
-    delete parent['elements']
-  }
-  if (parent['bundleId']) {
-    parent.pluginId = parent['bundleId']
-    delete parent['bundleId']
-  }
-
-  parent.nodes = (parent.nodes ||= []).map((id) => {
-    const child = nodes[id as unknown as string]
-    return nestNodes(nodes, child)
-  })
-
-  return parent
+  return runInAction(() => state.nestNodes(nodes, rootNode))
 }
 
 export function denormalizeNodes(
