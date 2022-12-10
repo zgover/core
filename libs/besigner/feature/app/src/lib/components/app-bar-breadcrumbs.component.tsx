@@ -28,9 +28,9 @@ import {
   type AppBarProps as MuiAppBarProps,
   Breadcrumbs as MuiBreadcrumbs,
   breadcrumbsClasses,
-  BreadcrumbsProps as MuiBreadcrumbsProps,
-  Link,
-  type LinkProps,
+  type BreadcrumbsProps as MuiBreadcrumbsProps,
+  ButtonBase as MuiButtonBase,
+  type ButtonBaseProps as ButtonBaseProps,
   Stack,
   Toolbar as MuiToolbar,
 } from '@mui/material'
@@ -42,6 +42,7 @@ import useLeafDrop from '../hooks/use-leaf-drop'
 const breadcrumbItemClassKey = generateComponentClassKeys('BreadcrumbItem', [
   'root',
   'lastItem',
+  'hovered',
 ])
 
 const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
@@ -66,8 +67,8 @@ const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
   [`.${breadcrumbsClasses.li}`]: {
     marginLeft: theme.spacing(-0.5),
     [`.${breadcrumbItemClassKey.root}`]: {
+      fontSize: 'inherit',
       padding: theme.spacing(0.75),
-      background: 'transparent',
       paddingLeft: theme.spacing(1.75),
       paddingRight: theme.spacing(1.75),
       marginLeft: theme.spacing(-0.5),
@@ -77,11 +78,27 @@ const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
         1,
       )}) 100%, 0% 100%, ${theme.spacing(1)} 50%, 0% 0%)`,
 
-      [`&:hover`]: {
-        color: theme.palette.secondary.contrastText,
+      color: theme.palette.primary.contrastText,
+      background: alpha(
+        theme.palette.primary.light,
+        theme.palette.action.hoverOpacity,
+      ),
+      [`:hover, .${breadcrumbItemClassKey.hovered}`]: {
         background: alpha(
-          theme.palette.secondary.main,
-          theme.palette.action.hoverOpacity + 0.4,
+          theme.palette.secondary.light,
+          theme.palette.action.activatedOpacity,
+        ),
+      },
+      [`:focus`]: {
+        background: alpha(
+          theme.palette.primary.light,
+          theme.palette.action.focusOpacity,
+        ),
+      },
+      [`:active`]: {
+        background: alpha(
+          theme.palette.primary.light,
+          theme.palette.action.activatedOpacity,
         ),
       },
     },
@@ -118,55 +135,88 @@ const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
       color: theme.palette.tertiary.contrastText,
       background: alpha(
         theme.palette.tertiary.light,
-        theme.palette.action.focusOpacity,
+        theme.palette.action.selectedOpacity,
       ),
-      [`:hover`]: {
-        color: theme.palette.tertiary.contrastText,
+      [`:hover, ${breadcrumbItemClassKey.hovered}`]: {
         background: alpha(
           theme.palette.tertiary.light,
-          theme.palette.action.hoverOpacity + 0.4,
+          theme.palette.action.activatedOpacity,
+        ),
+      },
+      [`:focus, .Mui-focusVisible`]: {
+        background: alpha(
+          theme.palette.tertiary.light,
+          theme.palette.action.focusOpacity,
+        ),
+      },
+      [`:active`]: {
+        background: alpha(
+          theme.palette.tertiary.light,
+          theme.palette.action.hoverOpacity,
         ),
       },
     },
   },
 }))
 
-const BreadcrumbLink = styled(Link)<LinkProps>(({ theme }) => ({}))
-
-export interface BreadcrumbItemProps extends Partial<LinkProps<'button'>> {
-  nodeId: Aglyn.NodeId
+export interface BreadcrumbItemProps
+  extends Partial<
+    Omit<
+      ButtonBaseProps<'button'>,
+      'onClick' | 'onMouseEnter' | 'onFocusVisible'
+    >
+  > {
+  $id: Aglyn.NodeId
   lastItem?: boolean
+  onClick?: (e, node: Aglyn.NodeSchema<any>) => void
+  onMouseEnter?: (e, node: Aglyn.NodeSchema<any>) => void
+  onFocusVisible?: (e, node: Aglyn.NodeSchema<any>) => void
 }
 
 const BreadcrumbItem = observer((props: BreadcrumbItemProps) => {
-  const { children, nodeId, lastItem, ...rest } = props
-  const node = Aglyn.screen.getNode(nodeId)
+  const {
+    children,
+    $id,
+    lastItem,
+    onClick,
+    onMouseEnter,
+    onFocusVisible,
+    ...rest
+  } = props
+  const node = Aglyn.screen.getNode($id)
+  const isHovered = Besigner.focus.isNodeHovered(node)
   const { setNodeRef: setDroppableNodeRef } = useLeafDrop(node)
 
   const handleClick = useCallback(
     (e) => {
-      e.preventDefault()
-      e.stopPropagation()
-      if (!lastItem) Besigner.focus.setSelectedNode(node)
+      onClick && onClick(e, node)
     },
-    [lastItem, node],
+    [onClick, node],
   )
 
-  const handleMouseEnter = useCallback(() => {
-    Besigner.focus.setHoveredNode(node)
-  }, [node])
+  const handleMouseEnter = useCallback(
+    (e) => {
+      onMouseEnter && onMouseEnter(e, node)
+    },
+    [onMouseEnter, node],
+  )
+
+  const handleFocusVisible = useCallback(
+    (e) => {
+      onFocusVisible && onFocusVisible(e, node)
+    },
+    [onFocusVisible, node],
+  )
 
   return (
-    <BreadcrumbLink
+    <MuiButtonBase
       ref={setDroppableNodeRef}
-      color="textSecondary"
-      {...({ component: 'button' } as any)}
-      fontSize="inherit"
-      underline={'none'}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
+      onFocusVisible={handleFocusVisible}
       className={clsx(breadcrumbItemClassKey.root, {
-        [breadcrumbItemClassKey.lastItem]: Boolean(lastItem),
+        [breadcrumbItemClassKey.lastItem]: lastItem,
+        [breadcrumbItemClassKey.hovered]: isHovered,
       })}
       {...rest}
     >
@@ -174,7 +224,7 @@ const BreadcrumbItem = observer((props: BreadcrumbItemProps) => {
         {node?.labelShort}
         {children}
       </>
-    </BreadcrumbLink>
+    </MuiButtonBase>
   )
 })
 
@@ -184,6 +234,18 @@ const Breadcrumbs = observer((props: BreadcrumbsProps) => {
   const { children, sx, ...rest } = props
   const lastSelected = Besigner.focus.state.lastSelected
 
+  const handleClick = useCallback((e, node: Aglyn.NodeSchema<any>) => {
+    Besigner.focus.setSelectedNode(node)
+  }, [])
+
+  const handleMouseEnter = useCallback((e, node: Aglyn.NodeSchema<any>) => {
+    Besigner.focus.setHoveredNode(node)
+  }, [])
+
+  const handleFocusVisible = useCallback((e, node: Aglyn.NodeSchema<any>) => {
+    Besigner.focus.setHoveredNode(node)
+  }, [])
+
   return (
     <StyledBreadcrumbs
       separator={null}
@@ -191,13 +253,18 @@ const Breadcrumbs = observer((props: BreadcrumbsProps) => {
       sx={sx}
       {...rest}
     >
-      {lastSelected?.breadcrumbPath.map(($id, index, arr) => (
-        <BreadcrumbItem
-          key={$id ?? index}
-          nodeId={$id}
-          lastItem={index === arr.length - 1}
-        />
-      ))}
+      {lastSelected?.breadcrumbPath.map(($id) => {
+        return (
+          <BreadcrumbItem
+            key={$id}
+            $id={$id}
+            onClick={handleClick}
+            onMouseEnter={handleMouseEnter}
+            onFocusVisible={handleFocusVisible}
+            lastItem={lastSelected?.$id === $id}
+          />
+        )
+      })}
     </StyledBreadcrumbs>
   )
 })

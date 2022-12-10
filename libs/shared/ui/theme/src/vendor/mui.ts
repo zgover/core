@@ -96,7 +96,8 @@ declare module '@mui/material/styles/createPalette' {
 }
 declare module '@mui/material/styles/zIndex' {
   interface ZIndex {
-    blocking: number
+    max: number
+    min: number
   }
 }
 declare module '@mui/material/styles/createMixins' {
