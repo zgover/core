@@ -73,6 +73,9 @@ declare module '@mui/material/AppBar' {
 declare module '@mui/material/IconButton' {
   interface AppBarPropsColorOverrides extends ColorPropOverrides {}
 }
+declare module '@mui/material/Tabs' {
+  interface TabsPropsIndicatorColorOverrides extends ColorPropOverrides {}
+}
 declare module '@mui/system/createTheme/shape' {
   interface Shape {
     appIconBorderRadius: number | string

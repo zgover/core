@@ -132,7 +132,7 @@ export interface TopAppBarProps {
   appBarSuffix?: JSX.Node
   centerNavigationItems?: CenterNavMenuItem[]
   customCenter?: JSX.Node
-  disableAppBarElevation?: boolean
+  enableAppBarElevation?: boolean
   quickActions?: QuickActionsMenuItem[]
   besigner?: boolean
   backButton?: Partial<ButtonProps>
@@ -143,7 +143,7 @@ const TopAppBar = (props: TopAppBarProps) => {
     appBarSuffix,
     centerNavigationItems,
     customCenter,
-    disableAppBarElevation,
+    enableAppBarElevation,
     quickActions,
     besigner,
     backButton,
@@ -156,8 +156,8 @@ const TopAppBar = (props: TopAppBarProps) => {
           component="header"
           color="surface"
           variant="elevation"
-          elevation={!disableAppBarElevation && activeWithoutHysteresis ? 4 : 0}
-          position={disableAppBarElevation ? 'relative' : 'sticky'}
+          elevation={enableAppBarElevation && activeWithoutHysteresis ? 4 : 0}
+          position={!enableAppBarElevation ? 'relative' : 'sticky'}
           sx={{
             height: `${TOP_BAR_HEIGHT - 1}px`,
             borderBottomWidth: `1px`,
@@ -325,7 +325,7 @@ function MainLayout(props: MainLayoutProps) {
     appBarSuffix,
     centerNavigationItems,
     customCenter,
-    disableAppBarElevation,
+    enableAppBarElevation,
     quickActions,
     besigner,
     backButton,
@@ -358,7 +358,7 @@ function MainLayout(props: MainLayoutProps) {
         {...rest}
       >
         <TopAppBar
-          disableAppBarElevation={disableAppBarElevation}
+          enableAppBarElevation={enableAppBarElevation}
           backButton={backButton}
           centerNavigationItems={
             centerNavigationItems || [
@@ -421,7 +421,7 @@ function MainLayout(props: MainLayoutProps) {
                 {
                   children: 'Settings',
                   component: AppLink,
-                  href: Route.MANAGE_ACCOUNT_SETTINGS,
+                  href: Route.MANAGE_USER_SETTINGS,
                   icon: { path: ICON_VARIANT_USER_SETTINGS.path },
                 },
                 {

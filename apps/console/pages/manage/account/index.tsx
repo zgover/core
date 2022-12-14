@@ -34,14 +34,14 @@ const Settings: NextPageWithLayout = (props) => {
       <DashboardLayout
         navTabItems={[
           {
-            id: 'nav-tab-settings-account',
-            label: 'Account',
-            href: buildRoute(Route.MANAGE_ACCOUNT_SETTINGS),
-          },
-          {
             id: 'nav-tab-settings-user',
             label: 'User',
             href: buildRoute(Route.MANAGE_USER_SETTINGS),
+          },
+          {
+            id: 'nav-tab-settings-account',
+            label: 'Account',
+            href: buildRoute(Route.MANAGE_ACCOUNT_SETTINGS),
           },
         ]}
         breadcrumbItems={[
@@ -93,6 +93,7 @@ Settings.layouts = [
     Component: MainLayout,
     props: {
       title: 'User Settings',
+      enableAppBarElevation: true,
     },
   },
 ]

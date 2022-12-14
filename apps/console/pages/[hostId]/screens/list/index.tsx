@@ -421,7 +421,6 @@ Screens.layouts = [
     Component: MainLayout,
     props: {
       title: 'Screens',
-      disableAppBarElevation: true,
     },
   },
 ]

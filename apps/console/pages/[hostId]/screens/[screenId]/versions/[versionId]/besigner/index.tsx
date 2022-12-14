@@ -182,7 +182,7 @@ function BesignerPage(props) {
     <>
       <MainLayout
         title={'Besigner'}
-        disableAppBarElevation
+        enableAppBarElevation
         // besigner={true}
         // appBarSuffix={'Besigner'}
         backButton={

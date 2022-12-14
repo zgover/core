@@ -89,8 +89,8 @@ export interface WidgetCardProps extends CardProps {
   contentGutterY?: boolean
   contentBordered?: boolean
   headerCentered?: boolean
-  header?: JSX.Node
-  actions?: CardActionsProps
+  header?: JSX.Children
+  actions?: JSX.Children
   lastchildren?: JSX.Children
   HeaderProps?: CardHeaderProps
   ContentProps?: CardContentProps
