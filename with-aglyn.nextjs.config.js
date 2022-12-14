@@ -315,14 +315,6 @@ const AGLYN_CONFIG = {
   // Disable production source maps
   webpack: (config, options) => {
     const { webpack, buildId, isServer } = options
-    console.log(
-      'webpackConfig, ',
-      // webpackConfig,
-      '\n\n\n',
-      options,
-      '\n\n\n',
-      config,
-    )
     // if (!isServer) {
     //   /** @see https://github.com/vercel/next.js/issues/7755#issuecomment-812805708 */
     //   config.resolve.fallback.fs = false

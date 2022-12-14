@@ -160,6 +160,7 @@ export const ICON_VARIANT_PAGES = mdiWeb
 export const ICON_VARIANT_SIGN_IN = mdiLoginVariant
 export const ICON_VARIANT_SIGN_OUT = mdiLogoutVariant
 export const ICON_VARIANT_USER_SETTINGS = mdiAccountSettings
+export const ICON_VARIANT_HOST = mdiWeb
 
 // Views + Panels
 export const ICON_VARIANT_ELEMENT_BROWSE = mdiGroup

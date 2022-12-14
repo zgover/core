@@ -26,6 +26,7 @@ export enum Route {
   SCREEN_DASHBOARD = '/[hostId]',
   SCREEN_DETAILS = '/[hostId]/screens/[screenId]/versions/[versionId]/view',
   SCREEN_LIST = '/[hostId]/screens/list',
+  HOST_LIST = '/hosts',
 }
 
 export interface RoutePayload extends Record<keyof any, any> {

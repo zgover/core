@@ -367,11 +367,9 @@ function MainLayout(props: MainLayoutProps) {
               //   children: ,
               // },
               {
-                id: 'center-nav-dashboard',
-                children: 'Home',
-                href: buildRoute(Route.SCREEN_DASHBOARD, {
-                  hostId,
-                }),
+                id: 'center-nav-hosts',
+                children: 'Hosts',
+                href: buildRoute(Route.HOST_LIST),
               },
               // {
               //   id: 'center-nav-app',
