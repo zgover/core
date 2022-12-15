@@ -15,4 +15,16 @@
  * limitations under the License.
  */
 
-export * from './lib/box-styler'
+export type PaddingMeasurements = Partial<
+  Pick<
+    CSSStyleDeclaration,
+    'paddingTop' | 'paddingRight' | 'paddingBottom' | 'paddingLeft'
+  >
+>
+export type MarginMeasurements = Partial<
+  Pick<
+    CSSStyleDeclaration,
+    'marginTop' | 'marginRight' | 'marginBottom' | 'marginLeft'
+  >
+>
+export type Measurements = PaddingMeasurements & MarginMeasurements
