@@ -107,8 +107,7 @@ const SiteContainer = observer(
     return (
       <SiteShadowDom
         ref={ref}
-        key="aglyn:site-container"
-        id="aglyn:site-container"
+        data-aglyn={'viewport:dom'}
         mode="closed"
         {...rest}
       >
@@ -130,11 +129,11 @@ const SiteContainer = observer(
 
 const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
   const { ...rest } = props
+
   return (
     <Box
       ref={ref}
-      key="aglyn:node-overlays"
-      id="aglyn:node-overlays"
+      data-aglyn="viewport:popover"
       sx={{
         position: 'relative',
         zIndex: 'tooltip',
@@ -142,13 +141,11 @@ const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
       {...rest}
     >
       <ElementOverlayPopperComponent
-        key="aglyn:overlay-selected"
-        id="aglyn:overlay-selected"
+        data-aglyn="popover:selected"
         variant="selectedOverlay"
       />
       <ElementOverlayPopperComponent
-        key="aglyn:overlay-hovered"
-        id="aglyn:overlay-hovered"
+        data-aglyn="popover:hovered"
         variant="hoveredOverlay"
       />
     </Box>
@@ -175,7 +172,7 @@ const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
     return (
       <ViewportFrame
         ref={ref}
-        id="aglyn:viewport-frame"
+        data-aglyn="viewport:frame"
         onMouseLeave={handleMouseLeave}
         {...rest}
       >
