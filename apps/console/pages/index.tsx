@@ -19,7 +19,7 @@ export default function Index() {
   return null
 }
 
-export async function getStaticProps(context) {
+export async function getServerSideProps(context) {
   return {
     redirect: {
       destination: '/hosts',
