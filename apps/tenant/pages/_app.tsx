@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-114/**
+114
+/**
  * @license
  * Copyright 2022 Aglyn LLC
  *
@@ -41,7 +42,6 @@ import {
 } from '@aglyn/shared-ui-theme'
 import { Fragment } from 'react'
 
-
 const withThemeProvider = createWithThemeProvider({
   theme: [consoleThemeLight, consoleThemeDark],
 })
@@ -49,7 +49,12 @@ const withThemeProvider = createWithThemeProvider({
 const MainComponent = withThemeProvider((props: any) => {
   const { children } = props
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      {/*<HostProvider>{children}</HostProvider>*/}
+    </>
+  )
 })
 
 export type _Props<Props, InitialProps> = _AppProps<Props, InitialProps>

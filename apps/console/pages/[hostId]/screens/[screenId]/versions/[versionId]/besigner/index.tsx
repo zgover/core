@@ -94,7 +94,7 @@ function BesignerPage(props) {
     screenId: screenId as string,
     versionId: versionId as string,
   })
-  const [result, updateScreen] = useScreenVersion({
+  const { doc: result, setDoc: updateScreen } = useScreenVersion({
     hostId: hostId as string,
     screenId: screenId as string,
     versionId: versionId as string,

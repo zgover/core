@@ -15,22 +15,17 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin, screenVersionConverter } from '@aglyn/core-data-admin'
-import type {
-  AglynScreen,
-  HostUid,
-  ScreenUid,
-  VersionUid,
-} from '@aglyn/core-data-foundation'
 
 export async function getScreenVersion(options: {
-  hostId: HostUid
-  screenId: ScreenUid
-  versionId: VersionUid
+  hostId: Aglyn.HostUid
+  screenId: Aglyn.ScreenUid
+  versionId: Aglyn.VersionUid
 }) {
   const { hostId, screenId, versionId } = options
   const data = {
-    version: undefined as AglynScreen,
+    version: undefined as Aglyn.AglynScreen,
     nextPageToken: '',
     error: null,
   }
@@ -48,7 +43,7 @@ export async function getScreenVersion(options: {
     .get()
     .then((res) => {
       if (!res.exists) return
-      data.version = res.data() as AglynScreen
+      data.version = res.data() as Aglyn.AglynScreen
     })
     .catch((error) => {
       console.error(error)

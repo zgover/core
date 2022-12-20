@@ -15,17 +15,20 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/core-data-admin'
-import { HostScreenStatus, type HostUid } from '@aglyn/core-data-foundation'
 
-export async function getAllScreens(host: HostUid, nextPageToken?: string) {
+export async function getAllScreens(
+  host: Aglyn.HostUid,
+  nextPageToken?: string,
+) {
   const data = { screens: [] as any, nextPageToken: '', error: null }
   const firestore = firebaseAdmin.app().firestore()
 
   // List batch of users, 1000 at a time.
   await firestore
     .collection('screens')
-    .where('status', '==', HostScreenStatus.PUBLISHED)
+    .where('status', '==', Aglyn.HostScreenStatus.PUBLISHED)
     .limit(5)
     .get()
     .then((screens) => {

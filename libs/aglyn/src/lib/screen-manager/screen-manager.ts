@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { HostUid } from '@aglyn/core-data-foundation'
 import type { PartialKeys } from '@aglyn/shared-data-types'
 import _isObj from '@aglyn/shared-util-guards/_is-obj'
 import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
@@ -25,6 +24,7 @@ import cloneDeep from 'lodash-es/cloneDeep'
 import isEqual from 'lodash-es/isEqual'
 import { makeAutoObservable, observable, runInAction, toJS } from 'mobx'
 import { computedFn } from 'mobx-utils'
+import * as Aglyn from '../../index'
 import {
   type ComponentId,
   type ComponentSchema,
@@ -146,7 +146,7 @@ export interface ScreenSchema {
   nodes: NodeSchemaNested
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
-  hostId?: HostUid
+  hostId?: Aglyn.HostUid
 }
 
 export type NodeBreadcrumbPath = [

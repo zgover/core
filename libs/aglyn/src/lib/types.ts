@@ -17,14 +17,54 @@
 
 import type { HttpStatusCode } from '@aglyn/shared-data-enums'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
-import type {
-  ActivityAccess,
-  HostEntityType,
-  HostRedirectParams,
-  HostScreenStatus,
-  HostScreenVisibility,
-} from '../constants/tenancy'
-import type { AglynNodesById } from './components.types'
+import type { NodeId, NodeSchema } from './screen-manager'
+
+export enum HostScreenStatus {
+  UNPUBLISHED = 0x1 << 0x1,
+  PUBLISHED = 0x1 << 0x2,
+  SCHEDULED_TO_PUBLISH_UNPUBLISHED = UNPUBLISHED | (0x1 << 0x3),
+  SCHEDULED_TO_UNPUBLISH_PUBLISHED = PUBLISHED | (0x1 << 0x4),
+  SCHEDULED_TO_UPDATE_PUBLISHED = PUBLISHED | (0x1 << 0x5),
+  SCHEDULED_TO_REVERT_UPDATE_PUBLISHED = PUBLISHED | (0x1 << 0x6),
+}
+
+export enum HostScreenVisibility {
+  PUBLIC = 0x1 << 0x1,
+  UNLISTED = PUBLIC | (0x1 << 0x2),
+  PRIVATE = 0x1 << 0x3,
+  PASSWORD = PRIVATE | (0x1 << 0x4),
+  AUTHENTICATED = PRIVATE | (0x1 << 0x5),
+  AUTHORIZED = AUTHENTICATED | (0x1 << 0x6),
+}
+
+export enum HostViewType {
+  SCREEN = 0x1,
+  LAYOUT = 0x2,
+}
+
+export enum HostViewFormat {
+  NORMALIZED = 0x1,
+  DENORMALIZED = 0x2,
+}
+
+export enum ActivityAccess {
+  NONE,
+  READ = 0x1 << 0x1,
+  WRITE = 0x1 << 0x2,
+  READ_WRITE = READ | WRITE,
+  SUPER = READ_WRITE | (0x1 << 0x3),
+}
+
+export enum HostEntityType {
+  ORGANIZATION = 0x1,
+  PERSON = 0x2,
+}
+
+export enum HostRedirectParams {
+  IGNORE,
+  FORWARD = 0x1,
+  MATCH = 0x2,
+}
 
 export type UserUid = string
 export type RoleUid = string
@@ -163,7 +203,7 @@ export interface AglynScreenVersion extends AglynDocument {
   screenId?: ScreenUid
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
-  elements?: AglynNodesById
+  nodes?: Record<NodeId, NodeSchema>
 }
 
 /** CONCEPT: Shared layouts. Hosted in tenants' host project */

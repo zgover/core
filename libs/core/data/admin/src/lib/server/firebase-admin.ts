@@ -15,11 +15,7 @@
  * limitations under the License.
  */
 
-import type {
-  AglynHost,
-  AglynScreen,
-  AglynScreenVersion,
-} from '@aglyn/core-data-foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import { decode, encode } from '@msgpack/msgpack'
 import * as firebaseAdmin from 'firebase-admin'
 
@@ -30,7 +26,7 @@ function decompress(value) {
   return decode(value)
 }
 
-export const hostConverter: firebaseAdmin.firestore.FirestoreDataConverter<AglynHost> =
+export const hostConverter: firebaseAdmin.firestore.FirestoreDataConverter<Aglyn.AglynHost> =
   {
     toFirestore(data) {
       if (data.$id) delete data.$id
@@ -41,11 +37,11 @@ export const hostConverter: firebaseAdmin.firestore.FirestoreDataConverter<Aglyn
       if (!snapshot.exists) return undefined
       const data = snapshot.data()
       data.$id = snapshot.id
-      return data as AglynScreen
+      return data as Aglyn.AglynScreen
     },
   }
 
-export const screenConverter: firebaseAdmin.firestore.FirestoreDataConverter<AglynScreen> =
+export const screenConverter: firebaseAdmin.firestore.FirestoreDataConverter<Aglyn.AglynScreen> =
   {
     toFirestore(data) {
       if (data.$id) delete data.$id
@@ -56,11 +52,11 @@ export const screenConverter: firebaseAdmin.firestore.FirestoreDataConverter<Agl
       if (!snapshot.exists) return undefined
       const data = snapshot.data()
       data.$id = snapshot.id
-      return data as AglynScreen
+      return data as Aglyn.AglynScreen
     },
   }
 
-export const screenVersionConverter: firebaseAdmin.firestore.FirestoreDataConverter<AglynScreenVersion> =
+export const screenVersionConverter: firebaseAdmin.firestore.FirestoreDataConverter<Aglyn.AglynScreenVersion> =
   {
     toFirestore(data) {
       if (data.elements) {
@@ -91,7 +87,7 @@ export const screenVersionConverter: firebaseAdmin.firestore.FirestoreDataConver
         data.nodes = decompress(data.nodes)
       }
       data.$id = snapshot.id
-      return data as AglynScreenVersion
+      return data as Aglyn.AglynScreenVersion
     },
   }
 

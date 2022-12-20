@@ -16,7 +16,6 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
   doc,
   type DocumentSnapshot,
@@ -25,36 +24,29 @@ import {
 import { ReactFireOptions, useFirestore } from 'reactfire'
 import useDoc from './helpers/use-doc'
 
-export const useScreenRef = ({ hostId, screenId }) => {
+export const useHostRef = ({ hostId }) => {
   const firestore = useFirestore()
-  const ref = doc(firestore, 'hosts', hostId, 'screens', screenId)
+  const ref = doc(firestore, 'hosts', hostId)
   return ref.withConverter({
-    toFirestore(data: Aglyn.AglynScreen) {
-      if (data.$id) delete data.$id
-      data.updatedAt = Timestamp.now()
-      data.nodes = data.versionRef?.get()?.nodes
+    toFirestore(data: Aglyn.AglynHost) {
       return data
     },
     fromFirestore(
-      snapshot: DocumentSnapshot<Aglyn.AglynScreen>,
+      snapshot: DocumentSnapshot<Aglyn.AglynHost>,
       options: SnapshotOptions,
     ) {
       if (!snapshot.exists()) return undefined
       const data = snapshot.data(options)
-      // data.nodes = data.versionRef?.get()
-      return data as Aglyn.AglynScreen
+      return data as Aglyn.AglynHost
     },
   })
 }
 
-export const useScreen = (
-  data: {
-    hostId: Aglyn.HostUid
-    screenId: Aglyn.ScreenUid
-  },
-  options?: ReactFireOptions<Aglyn.AglynScreen>,
+export const useHost = (
+  data: { hostId: Aglyn.HostUid },
+  options?: ReactFireOptions<Aglyn.AglynHost>,
 ) => {
-  return useDoc(useScreenRef(data), options)
+  return useDoc(useHostRef(data), options)
 }
 
-export default useScreen
+export default useHost

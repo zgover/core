@@ -43,7 +43,7 @@ import {
   useThemeMode,
 } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
-import { useUserPhotoUrl } from '@aglyn/tenant-feature-instance'
+import { useUserPhoto } from '@aglyn/tenant-feature-instance'
 import {
   AppBar,
   Avatar,
@@ -58,9 +58,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { useRouter } from 'next/router'
 import { Fragment, useMemo } from 'react'
-import { useUser } from 'reactfire'
 import { buildRoute, Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
 
@@ -331,13 +329,7 @@ function MainLayout(props: MainLayoutProps) {
     backButton,
     ...rest
   } = props
-  const { query: routerQuery } = useRouter()
-  const hostId = routerQuery.hostId as string
-
-  const { data: user } = useUser()
-  const userPhotoUrl = useUserPhotoUrl({
-    gravatarOptions: { size: '64' },
-  })
+  const userPhotoUrl = useUserPhoto({ gravatar: { size: '64' } })
   const [, toggleThemeMode, themeMode] = useThemeMode()
   const themeModeDisplayName = getThemeModeDisplayName(themeMode)
   const layoutTitle = useMemo(() => {

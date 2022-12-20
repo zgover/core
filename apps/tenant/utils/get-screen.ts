@@ -15,20 +15,16 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin, screenConverter } from '@aglyn/core-data-admin'
-import type {
-  AglynScreen,
-  HostUid,
-  ScreenUid,
-} from '@aglyn/core-data-foundation'
 
 export async function getScreen(options: {
-  screenId: ScreenUid
-  hostId: HostUid
+  screenId: Aglyn.ScreenUid
+  hostId: Aglyn.HostUid
 }) {
   const { screenId, hostId } = options
   const data = {
-    screen: undefined as AglynScreen,
+    screen: undefined as Aglyn.AglynScreen,
     nextPageToken: '',
     error: null,
   }
@@ -44,7 +40,7 @@ export async function getScreen(options: {
     .get()
     .then((res) => {
       if (!res.exists) return
-      data.screen = res.data() as AglynScreen
+      data.screen = res.data() as Aglyn.AglynScreen
     })
     .catch((error) => {
       console.error(error)

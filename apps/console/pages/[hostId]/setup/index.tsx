@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { HostEntityType, HostUid } from '@aglyn/core-data-foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
 import {
@@ -27,12 +27,13 @@ import {
 } from '@aglyn/shared-ui-jsx-forms'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import useHost from '@aglyn/tenant-feature-instance/hooks/use-host'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { InputAdornment, Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useAnalytics, useFirestore, useFirestoreDocData } from 'reactfire'
+import { useAnalytics, useFirestore } from 'reactfire'
 import CardDisplay from '../../../components/card-display'
 import CardDisplayFormTemplate from '../../../components/card-display-form-template'
 import { useHostId } from '../../../components/host-id-provider'
@@ -198,8 +199,11 @@ const seoSchema: FormSchema = {
           name: 'seo.entity.type',
           label: 'Type',
           options: [
-            { value: `${HostEntityType.ORGANIZATION}`, label: 'Organization' },
-            { value: `${HostEntityType.PERSON}`, label: 'Person' },
+            {
+              value: `${Aglyn.HostEntityType.ORGANIZATION}`,
+              label: 'Organization',
+            },
+            { value: `${Aglyn.HostEntityType.PERSON}`, label: 'Person' },
           ],
         },
         {
@@ -217,7 +221,7 @@ const seoSchema: FormSchema = {
   ],
 }
 
-const useHostRef = (id: HostUid) => {
+const useHostRef = (id: Aglyn.HostUid) => {
   const firestore = useFirestore()
   return doc(firestore, 'hosts', id)
 }
@@ -229,15 +233,15 @@ const HostSetup: NextPageWithLayout = (props) => {
   const [tab, setTab] = useState(basicSchema.id)
   const analytics = useAnalytics()
   const hostId = useHostId()
-  const hostRef = useHostRef(hostId)
-  const { data } = useFirestoreDocData(hostRef)
+  const {
+    doc: { data },
+    setDoc,
+  } = useHost({ hostId })
 
   const handleBasicSave = useCallback(
     async (fields: any) => {
-      console.log('fields', fields)
-      return
       const dequeueLoading = queueLoading()
-      await setDoc(hostRef, { ...fields }, { merge: true })
+      await setDoc(fields, { merge: true })
         .then(() => {
           enqueueSnackbar('Saved!', { variant: 'success' })
         })
@@ -248,13 +252,13 @@ const HostSetup: NextPageWithLayout = (props) => {
           dequeueLoading()
         })
     },
-    [enqueueSnackbar, queueLoading, hostRef],
+    [enqueueSnackbar, queueLoading, setDoc],
   )
 
   const forms = [
     {
       schema: basicSchema,
-      initialValues: data,
+      initialValues: doc,
       onSubmit: handleBasicSave,
     },
     {

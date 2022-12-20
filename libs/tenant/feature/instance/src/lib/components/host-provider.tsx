@@ -14,25 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  gravatarUrlFromEmail,
-  GravatarUrlOptions,
-} from '@aglyn/shared-util-tools'
-import { useMemo } from 'react'
-import { useUser } from 'reactfire'
+import { useRouter } from 'next/router'
+import { createContext, useContext } from 'react'
+import useHost from '../hooks/use-host'
 
-export function useUserPhotoUrl(options?: {
-  gravatarOptions?: GravatarUrlOptions
-}) {
-  const { gravatarOptions } = options || {}
-  const { data: user } = useUser()
-  const photoURL = user?.photoURL
-  const email = user?.email
+export const HostContext = createContext<ReturnType<typeof useHost>>(null)
 
-  return useMemo(() => {
-    if (photoURL) return photoURL
-    if (email) return gravatarUrlFromEmail(email, gravatarOptions)
-  }, [photoURL, email, gravatarOptions])
+export const useHostContext = () => {
+  return useContext(HostContext)
 }
 
-export default useUserPhotoUrl
+export function HostProvider({ children }) {
+  const router = useRouter()
+  const $doc = useHost({ hostId: router.query.hostId }, { suspense: true })
+
+  return <HostContext.Provider value={$doc}>{children}</HostContext.Provider>
+}
+HostProvider.displayName = 'HostProvider'
+
+export default HostProvider

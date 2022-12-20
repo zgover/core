@@ -30,10 +30,10 @@ import { useScreen } from '@aglyn/tenant-feature-instance'
 import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
+import CardDisplay from '../../../../../../../components/card-display'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
-import CardDisplay from '../../../../../../../components/card-display'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 
@@ -46,7 +46,9 @@ function ScreenDetails(props) {
   const versionId = query.versionId as string
   const { queueLoading } = useLoading()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
-  const [{ status, data: screen }] = useScreen({ hostId, screenId })
+  const {
+    doc: { status, data: screen },
+  } = useScreen({ hostId, screenId })
 
   useEffect(() => {
     if (status === 'loading') {

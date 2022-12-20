@@ -15,12 +15,16 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin, hostConverter } from '@aglyn/core-data-admin'
-import type { AglynHost, HostUid } from '@aglyn/core-data-foundation'
 
-export async function getHost(options: { host: HostUid }) {
+export async function getHost(options: { host: Aglyn.HostUid }) {
   const { host } = options
-  const data = { host: undefined as AglynHost, nextPageToken: '', error: null }
+  const data = {
+    host: undefined as Aglyn.AglynHost,
+    nextPageToken: '',
+    error: null,
+  }
   const firestore = firebaseAdmin.app().firestore()
 
   // List batch of users, 1000 at a time.
@@ -31,7 +35,7 @@ export async function getHost(options: { host: HostUid }) {
     .limit(1)
     .get()
     .then((res) => {
-      if (res.size) data.host = res.docs[0].data() as AglynHost
+      if (res.size) data.host = res.docs[0].data() as Aglyn.AglynHost
     })
     .catch((error) => {
       console.error(error)
