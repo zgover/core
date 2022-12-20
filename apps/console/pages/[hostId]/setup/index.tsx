@@ -15,20 +15,266 @@
  * limitations under the License.
  */
 
+import { HostEntityType, HostUid } from '@aglyn/core-data-foundation'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
-import { Container, GridItems } from '@aglyn/shared-ui-jsx'
+import { Container, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  FieldComponentType,
+  FieldValidatorType,
+  FormRenderer,
+  FormSchema,
+  simpleComponentMapper,
+} from '@aglyn/shared-ui-jsx-forms'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
-import { useRouter } from 'next/router'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { TabContext, TabList, TabPanel } from '@mui/lab'
+import { InputAdornment, Tab } from '@mui/material'
+import { logEvent } from 'firebase/analytics'
+import { doc, setDoc } from 'firebase/firestore'
+import { useCallback, useState } from 'react'
+import { useAnalytics, useFirestore, useFirestoreDocData } from 'reactfire'
+import CardDisplay from '../../../components/card-display'
+import CardDisplayFormTemplate from '../../../components/card-display-form-template'
+import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import CardDisplay from '../../../components/card-display'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
+const basicSchema: FormSchema = {
+  id: 'hostDetails',
+  title: 'Basic details',
+  fields: [
+    {
+      component: FieldComponentType.TEXT_FIELD,
+      name: 'displayName',
+      label: 'Display name',
+      type: 'text',
+      FormFieldGridProps: {
+        xs: 12,
+        sm: 6,
+      },
+      isRequired: true,
+      validate: [
+        {
+          type: FieldValidatorType.REQUIRED,
+          message: 'Please enter a display name',
+        },
+        {
+          type: FieldValidatorType.MAX_LENGTH,
+          threshold: 30,
+          message: 'Please enter shorter display name',
+        },
+      ],
+    },
+    {
+      component: FieldComponentType.TEXT_FIELD,
+      name: 'subdomain',
+      label: 'Subdomain',
+      type: 'text',
+      isRequired: true,
+      validate: [
+        {
+          type: FieldValidatorType.REQUIRED,
+          message: 'Please enter a subdomain',
+        },
+        {
+          type: FieldValidatorType.MAX_LENGTH,
+          threshold: 15,
+          message: 'Please enter shorter display name',
+        },
+      ],
+    },
+  ],
+}
+
+const seoSchema: FormSchema = {
+  id: 'hostSeo',
+  title: 'SEO',
+  fields: [
+    {
+      component: FieldComponentType.TEXT_FIELD,
+      name: 'seo.title',
+      label: 'Title',
+      type: 'text',
+      isRequired: true,
+      resolveProps: (_, { input: { value } }) => {
+        const len = value?.length || 0
+        const over = len > 60
+        return {
+          InputProps: {
+            endAdornment: (
+              <InputAdornment
+                position="end"
+                sx={{ color: over ? 'error.light' : undefined }}
+              >
+                {len}/60
+              </InputAdornment>
+            ),
+          },
+        }
+      },
+      validate: [
+        {
+          type: FieldValidatorType.REQUIRED,
+          message: 'Please enter a title',
+        },
+        {
+          type: FieldValidatorType.MAX_LENGTH,
+          threshold: 60,
+          message: 'Please enter a shorter title',
+        },
+      ],
+    },
+    {
+      component: FieldComponentType.TEXT_FIELD,
+      name: 'seo.description',
+      label: 'Description',
+      type: 'text',
+      isRequired: true,
+      multiline: true,
+      rows: 2,
+      resolveProps: (_, { input: { value } }) => {
+        const len = value?.length || 0
+        const over = len > 155
+        return {
+          InputProps: {
+            endAdornment: (
+              <InputAdornment
+                position="end"
+                sx={{ color: over ? 'error.light' : undefined }}
+              >
+                {len}/155
+              </InputAdornment>
+            ),
+          },
+        }
+      },
+      validate: [
+        {
+          type: FieldValidatorType.REQUIRED,
+          message: 'Please enter a description',
+        },
+        {
+          type: FieldValidatorType.MAX_LENGTH,
+          threshold: 155,
+          message: 'Please enter a shorter description',
+        },
+      ],
+    },
+    {
+      component: FieldComponentType.TEXT_FIELD,
+      name: 'seo.separator',
+      label: 'Separator',
+      type: 'text',
+      isRequired: true,
+      validate: [
+        {
+          type: FieldValidatorType.REQUIRED,
+          message: 'Please enter a title separator',
+        },
+        {
+          type: FieldValidatorType.MAX_LENGTH,
+          threshold: 3,
+          message: 'Please enter a shorter title separator',
+        },
+      ],
+    },
+    {
+      component: FieldComponentType.TEXT_FIELD,
+      name: 'seo.favicon',
+      label: 'Favicon',
+      type: 'text',
+    },
+    {
+      component: FieldComponentType.SUB_FORM,
+      name: 'seo.entity',
+      title: 'Entity',
+      className: false,
+      fields: [
+        {
+          component: FieldComponentType.SELECT,
+          name: 'seo.entity.type',
+          label: 'Type',
+          options: [
+            { value: `${HostEntityType.ORGANIZATION}`, label: 'Organization' },
+            { value: `${HostEntityType.PERSON}`, label: 'Person' },
+          ],
+        },
+        {
+          component: FieldComponentType.TEXT_FIELD,
+          name: 'seo.entity.name',
+          label: 'Name',
+        },
+        {
+          component: FieldComponentType.TEXT_FIELD,
+          name: 'seo.entity.logo',
+          label: 'Logo',
+        },
+      ],
+    },
+  ],
+}
+
+const useHostRef = (id: HostUid) => {
+  const firestore = useFirestore()
+  return doc(firestore, 'hosts', id)
+}
+
 const HostSetup: NextPageWithLayout = (props) => {
-  const { query } = useRouter()
-  const hostId = query.hostId as string
+  const { enqueueSnackbar } = useSnackbar()
+  const { queueLoading } = useLoading()
+
+  const [tab, setTab] = useState(basicSchema.id)
+  const analytics = useAnalytics()
+  const hostId = useHostId()
+  const hostRef = useHostRef(hostId)
+  const { data } = useFirestoreDocData(hostRef)
+
+  const handleBasicSave = useCallback(
+    async (fields: any) => {
+      console.log('fields', fields)
+      return
+      const dequeueLoading = queueLoading()
+      await setDoc(hostRef, { ...fields }, { merge: true })
+        .then(() => {
+          enqueueSnackbar('Saved!', { variant: 'success' })
+        })
+        .catch((e) => {
+          enqueueSnackbar(`Error: ${JSON.stringify(e)}`, { variant: 'error' })
+        })
+        .finally(() => {
+          dequeueLoading()
+        })
+    },
+    [enqueueSnackbar, queueLoading, hostRef],
+  )
+
+  const forms = [
+    {
+      schema: basicSchema,
+      initialValues: data,
+      onSubmit: handleBasicSave,
+    },
+    {
+      schema: seoSchema,
+      initialValues: data,
+      onSubmit: handleBasicSave,
+    },
+  ]
+
+  const onTabChange = useCallback(
+    async (e, value) => {
+      setTab(value)
+      const form = forms.find(({ schema }) => schema.id === value)
+      logEvent(analytics, 'screen_view', {
+        firebase_screen: form.schema.title as string,
+        firebase_screen_class: HostSetup.displayName,
+      })
+    },
+    [forms, analytics],
+  )
 
   return (
     <>
@@ -67,29 +313,66 @@ const HostSetup: NextPageWithLayout = (props) => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <GridItems
-            spacing={3}
-            items={[
-              {
-                xs: 12,
-                md: 6,
-                children: (
-                  <CardDisplay header={'Login'}>
-                    hello
-                  </CardDisplay>
-                ),
-              },
-              {
-                xs: 12,
-                md: 6,
-                children: (
-                  <CardDisplay header={'Profile Details'}>
-                    hello
-                  </CardDisplay>
-                ),
-              },
-            ]}
-          />
+          <TabContext value={tab}>
+            <GridItems
+              spacing={3}
+              items={[
+                {
+                  xs: 12,
+                  sm: 3,
+                  children: (
+                    <CardDisplay header="Navigation">
+                      <TabList
+                        orientation="vertical"
+                        textColor="secondary"
+                        indicatorColor="secondary"
+                        sx={{
+                          ['.MuiTab-root']: {
+                            alignItems: 'start',
+                            maxWidth: 'unset',
+                          },
+                        }}
+                        onChange={onTabChange}
+                      >
+                        {forms.map(({ schema }) => (
+                          <Tab
+                            key={schema.id}
+                            value={schema.id}
+                            label={schema.title}
+                          />
+                        ))}
+                      </TabList>
+                    </CardDisplay>
+                  ),
+                },
+                {
+                  xs: 12,
+                  sm: 9,
+                  children: (
+                    <>
+                      {forms.map(({ initialValues, onSubmit, schema }) => (
+                        <TabPanel
+                          key={schema.id}
+                          value={schema.id}
+                          sx={{ padding: 'unset' }}
+                        >
+                          <FormRenderer
+                            FormTemplate={CardDisplayFormTemplate}
+                            componentMapper={simpleComponentMapper}
+                            onSubmit={onSubmit}
+                            schema={schema}
+                            initialValues={initialValues}
+                          />
+
+                          <CardDisplay></CardDisplay>
+                        </TabPanel>
+                      ))}
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </TabContext>
         </Container>
       </DashboardLayout>
     </>

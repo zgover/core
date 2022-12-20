@@ -28,6 +28,7 @@ import {
   FieldRadio,
   FieldSelect,
   FieldSlider,
+  FieldSubForm,
   FieldSwitch,
   FieldTabs,
   FieldTextarea,
@@ -122,4 +123,8 @@ export const FIELD_MAP_TOGGLE_BUTTON: FieldComponentMap = {
   FormControlProps: {
     ...fieldSharedOptions,
   },
+}
+export const FIELD_SUB_FORM: FieldComponentMap = {
+  ...fieldSharedOptions,
+  component: FieldSubForm,
 }

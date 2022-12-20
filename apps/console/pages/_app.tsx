@@ -28,6 +28,7 @@ import {
   createWithThemeProvider,
 } from '@aglyn/shared-ui-theme'
 import { Fragment } from 'react'
+import HostIdProvider from '../components/host-id-provider'
 import FirebaseAppLayout from '../components/layouts/firebase-app.layout'
 import './styles.css'
 
@@ -42,7 +43,9 @@ const MainComponent = withThemeProvider((props: any) => {
     <FirebaseAppLayout>
       <LoadingLayoutComponent>
         <ConfirmationProviderComponent>
-          <SnackbarProvider>{children}</SnackbarProvider>
+          <SnackbarProvider>
+            <HostIdProvider>{children}</HostIdProvider>
+          </SnackbarProvider>
         </ConfirmationProviderComponent>
       </LoadingLayoutComponent>
     </FirebaseAppLayout>

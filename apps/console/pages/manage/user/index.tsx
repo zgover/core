@@ -19,27 +19,26 @@ import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import {
   FIELD_SCHEMA_FIRST_NAME,
   FIELD_SCHEMA_LAST_NAME,
+  FIELD_SCHEMA_ORGANIZATION_NAME,
   FIELD_SCHEMA_PASSWORD,
   FIELD_SCHEMA_PASSWORD_CONFIRM,
   FIELD_SCHEMA_PASSWORD_OLD,
+  FIELD_SCHEMA_PHONE_NUMBER,
 } from '@aglyn/shared-data-forms'
 import { Container, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
 import {
   FormRenderer,
   FormSchema,
-  FormSpy,
-  FormTemplateRenderProps,
   simpleComponentMapper,
-  useFormApi,
 } from '@aglyn/shared-ui-jsx-forms'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
-import { Button, FormControl, Grid, Tab } from '@mui/material'
+import { Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
 import { signInWithEmailAndPassword, updatePassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { forwardRef, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   useAnalytics,
   useAuth,
@@ -47,17 +46,23 @@ import {
   useFirestoreDocData,
   useUser,
 } from 'reactfire'
+import CardDisplay from '../../../components/card-display'
+import CardDisplayFormTemplate from '../../../components/card-display-form-template'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import CardDisplay from '../../../components/card-display'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
 const basicSchema: FormSchema = {
   id: 'basic',
   title: 'Basic info',
-  fields: [FIELD_SCHEMA_FIRST_NAME, FIELD_SCHEMA_LAST_NAME],
+  fields: [
+    FIELD_SCHEMA_FIRST_NAME,
+    FIELD_SCHEMA_LAST_NAME,
+    FIELD_SCHEMA_PHONE_NUMBER,
+    FIELD_SCHEMA_ORGANIZATION_NAME,
+  ],
 }
 const securitySchema: FormSchema = {
   id: 'security',
@@ -68,43 +73,6 @@ const securitySchema: FormSchema = {
     FIELD_SCHEMA_PASSWORD_CONFIRM,
   ],
 }
-
-const FormTemplate = forwardRef<any, FormTemplateRenderProps>((props, ref) => {
-  const { formFields, schema, ...rest } = props
-  const { handleSubmit } = useFormApi()
-  const isLoading = status === 'loading'
-  return (
-    <CardDisplay
-      contentGutterY
-      contentGutterX
-      header={schema.title}
-      actions={
-        <FormSpy>
-          {({ submitting, pristine, valid }) => (
-            <FormControl margin="normal">
-              <Button
-                color="secondary"
-                disabled={submitting || pristine || !valid || isLoading}
-                // style={{ marginRight: 8 }}
-                type="submit"
-                // variant="contained"
-              >
-                Update
-              </Button>
-            </FormControl>
-          )}
-        </FormSpy>
-      }
-    >
-      <form ref={ref} onSubmit={handleSubmit} noValidate {...rest}>
-        <Grid spacing={2} container>
-          {formFields as any}
-        </Grid>
-      </form>
-    </CardDisplay>
-  )
-})
-FormTemplate.displayName = 'FormTemplate'
 
 const ManageUser: NextPageWithLayout = (props) => {
   const [tab, setTab] = useState('basic')
@@ -249,7 +217,7 @@ const ManageUser: NextPageWithLayout = (props) => {
                           sx={{ padding: 'unset' }}
                         >
                           <FormRenderer
-                            FormTemplate={FormTemplate}
+                            FormTemplate={CardDisplayFormTemplate}
                             componentMapper={simpleComponentMapper}
                             onSubmit={onSubmit}
                             schema={schema}

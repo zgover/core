@@ -80,7 +80,7 @@ export {
 } from '@data-driven-forms/react-form-renderer'
 
 declare module '@data-driven-forms/react-form-renderer' {
-  interface Schema {
+  interface Schema extends Record<string, any> {
     id?: string
     name?: string
   }

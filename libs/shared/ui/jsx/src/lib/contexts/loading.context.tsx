@@ -125,8 +125,7 @@ const createQueueId = () => {
 }
 
 export const useLoading = () => {
-  const context = useContext(LoadingContext)
-  return context
+  return useContext(LoadingContext)
 }
 
 export interface LoadingProviderProps {
