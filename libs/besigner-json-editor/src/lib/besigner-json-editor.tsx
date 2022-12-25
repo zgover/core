@@ -61,7 +61,7 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
     const [warnOpen, setWarnOpen] = useState(true)
     const closeWarn = useCallback(() => setWarnOpen(false), [])
 
-    console.log('default value', data)
+    // console.log('default value', data)
     const value = JSON.stringify(data, null, 2)
 
     const handleChange = useCallback((value: any) => {

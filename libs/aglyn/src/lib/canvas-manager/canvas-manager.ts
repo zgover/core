@@ -22,7 +22,14 @@ import { ITimestamp } from '@aglyn/shared-util-timestamp'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
 import cloneDeep from 'lodash-es/cloneDeep'
 import isEqual from 'lodash-es/isEqual'
-import { makeAutoObservable, toJS } from 'mobx'
+import {
+  action,
+  computed,
+  makeAutoObservable,
+  makeObservable,
+  observable,
+  toJS,
+} from 'mobx'
 import { computedFn } from 'mobx-utils'
 import { type Aglyn } from '../aglyn'
 import {
@@ -59,8 +66,7 @@ export interface AbstractNodeSchema<TYPE extends NodeType = any> {
   type?: TYPE
 }
 
-export interface NodeSchema<P = JSX.AnyProps>
-  extends AbstractNodeSchema<NodeType.NODE> {
+export interface NodeSchema<P = JSX.AnyProps> extends AbstractNodeSchema {
   /**
    * The unique identifier of the node component
    */
@@ -162,39 +168,40 @@ export const NODE_ID_LENGTH = 10
 export const NODE_ROOT_LABEL = 'Document'
 
 export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
-  public $id: NodeId
-  public name: string
-  public type: NodeType.NODE = NodeType.NODE
-  public pluginId?: PluginId
-  public componentId?: ComponentId
-  public parentId?: NodeId
-  public nodes?: NodeId[]
-  public props?: P
-  public sx?: JSX.SxProps
-  public className?: string
+  public store: CanvasManager = null
+  public $id: NodeId = null
+  public name: string = null
+  public type: NodeType = null
+  public pluginId?: PluginId = null
+  public componentId?: ComponentId = null
+  public parentId?: NodeId = null
+  public nodes?: NodeId[] = null
+  public props?: P = null
+  public sx?: JSX.SxProps = null
+  public className?: string = null
 
   get parent(): NodeSchema<any> | null {
-    return this.screen.getNode(this.parentId)
+    return this.store.getNode(this.parentId)
   }
   get index(): number | null {
-    return this.screen.getNodeIndex(this)
+    return this.store.getNodeIndex(this)
   }
   get children(): NodeSchema<any>[] {
     const res: NodeSchema[] = []
     for (const $id of this.nodes) {
-      const node = this.screen.getNode($id)
+      const node = this.store.getNode($id)
       res.push(node)
     }
     return res
   }
   get labelShort(): string {
-    return this.screen.getNodeLabelShort(this)
+    return this.store.getNodeLabelShort(this)
   }
   get breadcrumbPath(): NodeBreadcrumbPath {
-    return this.screen.getNodeBreadcrumbPath(this)
+    return this.store.getNodeBreadcrumbPath(this)
   }
   get componentSchema(): ComponentSchema | undefined {
-    return this.screen.aglyn.components.getSchema(this.componentId)
+    return this.store.aglyn.components.getSchema(this.componentId)
   }
   get hasNodes(): boolean {
     return Array.isArray(this.nodes) && this.nodes.length > 0
@@ -211,7 +218,11 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     return this.toJSON()
   }
 
-  constructor(schema: NodeSchema<P>, public screen: CanvasManager) {
+  constructor(schema: NodeSchema<P>, store: CanvasManager) {
+    makeAutoObservable(this, {
+      store: false,
+    })
+
     this.$id = schema.$id
     this.name = schema.name
     this.type = schema.type || NodeType.NODE
@@ -223,36 +234,94 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     this.props = { ...schema.props } as P
     this.sx = Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx }
 
-    makeAutoObservable(this, {
-      screen: false,
-    })
+    this.store = store
+  }
+
+  public delete() {
+    this.store.deleteNode(this)
   }
 
   public toJSON = computedFn((): NodeSchemaJSON<P> => {
-    const { screen, ...node } = toJS(this)
-    return node
+    const { store, ...node } = toJS(this)
+    return node as NodeSchemaJSON<P>
   })
+}
+
+class HistoryManager<K extends string, T> {
+  public past = observable.array<Map<K, T>>([], { deep: false })
+
+  public present = observable.map<K, T>({})
+
+  public future = observable.array<Map<K, T>>([], { deep: false })
+
+  public get canUndo() {
+    return this.past.length >= 1
+  }
+
+  public get canRedo() {
+    return this.future.length >= 1
+  }
+
+  constructor() {
+    makeObservable(this, {
+      canUndo: computed,
+      canRedo: computed,
+      undo: action,
+      redo: action,
+      clearPast: action,
+      clearFuture: action,
+      clearHistory: action,
+      saveHistory: action,
+    })
+  }
+
+  public undo() {
+    if (!this.canUndo) throw new Error('No history to undo')
+    this.future.push(toJS(this.present))
+    return this.past.pop()
+  }
+
+  public redo() {
+    if (!this.canRedo) throw new Error('No history to redo')
+    this.past.push(toJS(this.present))
+    return this.future.pop()
+  }
+
+  public clearPast(): this {
+    this.past.clear()
+    return this
+  }
+
+  public clearFuture(): this {
+    this.future.clear()
+    return this
+  }
+
+  public clearHistory(): this {
+    this.clearPast()
+    this.clearFuture()
+    return this
+  }
+
+  public saveHistory(): this {
+    this.clearFuture()
+    this.past.push(toJS(this.present))
+    return this
+  }
 }
 
 export class CanvasManager {
   private _initial = null
-  private _history = [{}]
-  private _activeIndex = 0
-
+  private _history: HistoryManager<NodeId, NodeSchema<any>> = null
   public get nodes() {
-    console.log(
-      'nodes active',
-      this._activeIndex,
-      this._history.length,
-      this._history[this._activeIndex],
-    )
-    return this._history[this._activeIndex]
+    return this._history.present
   }
+
   public get canRedo() {
-    return this._activeIndex < this._history.length - 1
+    return this._history.canRedo
   }
   public get canUndo() {
-    return this._activeIndex > 0
+    return this._history.canUndo
   }
   public get isInitialSame() {
     return isEqual(toJS(this._initial), toJS(this.nodes))
@@ -261,17 +330,17 @@ export class CanvasManager {
     return Boolean(this._initial)
   }
   public get rootNode() {
-    return this._history[this._activeIndex][NODE_ROOT_ID]
+    return this.nodes.get(NODE_ROOT_ID)
   }
   public get nestedNodes(): NodeSchemaNested<any> {
     return this.makeNested(this.rootNode)
   }
 
   public hasNode = computedFn(($id: NodeId): boolean => {
-    return Boolean(this.nodes[$id])
+    return this.nodes.has($id)
   })
   public getNode = computedFn(($id: NodeId): NodeSchema<any> | undefined => {
-    return this.nodes[$id]
+    return this.nodes.get($id)
   })
   public nodesAreEqual = computedFn(
     (left: NodesMap, right?: NodesMap): boolean => {
@@ -332,7 +401,22 @@ export class CanvasManager {
   })
 
   constructor(public aglyn?: Aglyn) {
-    makeAutoObservable(this)
+    makeObservable(this, {
+      nodes: computed,
+      undo: action,
+      redo: action,
+      saveHistory: action,
+      clearHistory: action,
+      clearNodes: action,
+      updateInitialNodes: action,
+      setNode: action,
+      setNodes: action,
+      deleteNode: action,
+      reparentNode: action,
+      reorderNode: action,
+    })
+
+    this._history = new HistoryManager<NodeId, NodeSchema<any>>()
   }
 
   public toJSON() {
@@ -341,23 +425,26 @@ export class CanvasManager {
     }
   }
 
-  public redo() {
-    console.log('redo', this.canRedo, this._activeIndex)
-    if (this.canRedo) this._activeIndex = this._activeIndex + 1
+  public redo(): this {
+    const state = this._history.redo()
+    const json = Object.fromEntries(state.entries())
+    console.log('redo', json)
+    this.setNodes(json)
+    return this
   }
-  public undo() {
-    console.log('undo', this.canUndo, this._activeIndex)
-    if (this.canUndo) this._activeIndex = this._activeIndex - 1
+  public undo(): this {
+    const state = this._history.undo()
+    const json = Object.fromEntries(state.entries())
+    console.log('undo', json)
+    this.setNodes(json)
+    return this
   }
-  public saveHistory() {
-    const state = toJS(this._history[this._activeIndex])
-    this._history.splice(this._activeIndex, 0, state)
-    this._history.splice(this._activeIndex + 2, this._history.length)
-    this._activeIndex = this._history.length - 1
+  public saveHistory(): this {
+    this._history.saveHistory()
+    return this
   }
   public clearHistory() {
-    this._history = [{}]
-    this._activeIndex = 0
+    this._history.clearPast()
   }
   public createNodeId(): NodeId {
     return createIdUrlSafe(NODE_ID_LENGTH)
@@ -374,28 +461,31 @@ export class CanvasManager {
     )
   }
   public clearNodes() {
-    return (this._history[this._activeIndex] = {})
+    this.nodes.clear()
+    return this
   }
   public updateInitialNodes(nodes?: NodesMap) {
-    const value = nodes ? nodes : this._history[this._activeIndex]
-    return (this._initial = toJS(value))
+    this._initial = toJS(nodes || this.nodes)
+    return this
   }
   public setNode(node: NodeSchema<any>, create = false) {
     if (!node || (!create && !node.$id)) throw new Error('Invalid node')
     const _node = create ? this.createNode(node) : node
-    return (this.nodes[_node?.$id] = _node)
+    this.nodes.set(_node.$id, _node)
+    return this.nodes.get(_node.$id)
   }
-  public setNodes(schemas: NodesMap): NodesMap {
+  public setNodes(schemas: NodesMap): this {
     if (!schemas) throw new Error('Invalid schemas')
-    const cloned = cloneDeep(schemas)
+    const cloned = toJS(schemas)
     const nodes = {}
     for (const nodeId in cloned) {
       if (!cloned[nodeId]) continue
       nodes[nodeId] = this.createNode(cloned[nodeId])
     }
-    return (this._history[this._activeIndex] = nodes)
+    this.nodes.replace(nodes)
+    return this
   }
-  public deleteNode(node: NodeSchema<any>) {
+  public deleteNode(node: NodeSchema<any>): this {
     if (!node) throw new Error('Invalid node')
     if (this.isRootNode(node)) throw new Error('Cannot delete root node')
     this.saveHistory()
@@ -407,7 +497,8 @@ export class CanvasManager {
     }
 
     if (index > -1) parent.nodes.splice(index, 1)
-    delete this.nodes[node.$id]
+    this.nodes.delete(node.$id)
+    return this
   }
   public reparentNode(
     node: NodeSchema<any>,
@@ -618,66 +709,3 @@ export class CanvasManager {
 }
 
 export default CanvasManager
-
-// export function getNodeBreadcrumbPath(nodeId: NodeId): NodeBreadcrumbPath
-// export function getNodeBreadcrumbPath(node: NodeSchema<any>): NodeBreadcrumbPath
-// export function getNodeBreadcrumbPath(
-//   nodeOrId: NodeId | NodeSchema<any>,
-// ): NodeBreadcrumbPath {
-//   return runInAction(() => state.getNodeBreadcrumbPath(nodeOrId))
-// }
-
-// export const NodeSchemaJsonSchema: JSONSchema7 = {
-//   $schema: 'https://json-schema.org/draft/2020-12/schema',
-//   $id: 'https://aglyn.io/schema/node.schema.json',
-//   title: 'Aglyn Node Item',
-//   description: 'Aglyn screen node for hydrating view component',
-//   type: 'object',
-//   additionalProperties: false,
-//   properties: {
-//     $id: {
-//       description: 'The unique identifier for a node',
-//       type: 'string',
-//     },
-//     componentId: {
-//       description: 'The unique identifier of the node component',
-//       type: 'string',
-//     },
-//     pluginId: {
-//       description: 'The unique identifier of the node component bundle',
-//       type: 'string',
-//     },
-//     parentId: {
-//       description: 'The unique identifier of the node parent',
-//       type: 'string',
-//     },
-//     sx: {
-//       description: 'The node style properties for emotion',
-//       type: 'object',
-//     },
-//     props: {
-//       description: 'The node props/attributes passed to the component',
-//       type: 'object',
-//     },
-//     nodes: {
-//       description: 'List of the children unique identifiers for the node',
-//       type: 'array',
-//       items: {
-//         type: 'string',
-//       },
-//     },
-//   },
-//   required: ['$id', 'componentId'],
-// }
-// export const NodeSchemaNestedJsonSchema: JSONSchema7 = {
-//   ...NodeSchemaJsonSchema,
-//   properties: {
-//     ...NodeSchemaJsonSchema.properties,
-//     nodes: {
-//       ...(NodeSchemaJsonSchema.properties['nodes'] as JSONSchema7),
-//       items: {
-//         $ref: '#',
-//       },
-//     },
-//   },
-// }
