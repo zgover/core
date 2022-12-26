@@ -1,23 +1,23 @@
 {
-  "name": "besigner-feature-app",
-  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/besigner/feature/app/src",
+  "name": "aglyn-besigner-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/aglyn-besigner-ui/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nrwl/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/besigner/feature/app",
-        "tsConfig": "libs/besigner/feature/app/tsconfig.lib.json",
-        "project": "libs/besigner/feature/app/package.json",
-        "entryFile": "libs/besigner/feature/app/src/index.ts",
+        "outputPath": "dist/libs/aglyn-besigner-ui",
+        "tsConfig": "libs/aglyn-besigner-ui/tsconfig.lib.json",
+        "project": "libs/aglyn-besigner-ui/package.json",
+        "entryFile": "libs/aglyn-besigner-ui/src/index.ts",
         "external": ["react/jsx-runtime"],
         "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
         "compiler": "swc",
         "assets": [
           {
-            "glob": "libs/besigner/feature/app/README.md",
+            "glob": "libs/aglyn-besigner-ui/README.md",
             "input": ".",
             "output": "."
           }
@@ -27,15 +27,15 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/besigner/feature/app/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": ["libs/aglyn-besigner-ui/**/*.{ts,tsx,js,jsx}"]
       },
       "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/besigner/feature/app"],
+      "outputs": ["{workspaceRoot}/coverage/libs/aglyn-besigner-ui"],
       "options": {
-        "jestConfig": "libs/besigner/feature/app/jest.config.ts",
+        "jestConfig": "libs/aglyn-besigner-ui/jest.config.ts",
         "passWithNoTests": true
       }
     }

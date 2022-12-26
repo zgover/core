@@ -25,6 +25,8 @@ import MarginStyler from './components/margin-styler'
 import PaddingStyler from './components/padding-styler'
 import type { Measurements } from './types'
 
+export { Measurements }
+
 export interface BoxStylerProps extends Omit<BoxProps, 'onChange'> {
   measurements?: Measurements
   width?: Measurement
@@ -90,6 +92,5 @@ export const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
   )
 })
 BoxStyler.displayName = 'BoxStyler'
-BoxStyler.defaultProps = {}
 
 export default BoxStyler

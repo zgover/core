@@ -17,17 +17,23 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
-import AccordionListComponent, {
-  AccordionListProps,
-} from '@aglyn/besigner-feature-app/components/accordion-list.component'
-import useLeafDrag from '@aglyn/besigner-feature-app/hooks/use-leaf-drag'
-import ListItemText from '@aglyn/plugins-ui-mui/components/list-item-text'
 import { ICON_VARIANT_ELEMENT } from '@aglyn/shared-data-enums'
 import { CardListItemProps, useForkedRefs } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { Box, Card, Grid, ListItemAvatar, Stack } from '@mui/material'
+import {
+  Box,
+  Card,
+  Grid,
+  ListItemAvatar,
+  ListItemText,
+  Stack,
+} from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useMemo } from 'react'
+import useLeafDrag from '../hooks/use-leaf-drag'
+import AccordionListComponent, {
+  AccordionListProps,
+} from './accordion-list.component'
 
 export type ComponentGridItemData =
   | Aglyn.PresetSchema<any>

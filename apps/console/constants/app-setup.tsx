@@ -22,7 +22,7 @@ import {
   IBesignerAppController,
   initializeBesignerApp,
 } from '@aglyn/besigner-data-app'
-import { samplePageData } from '@aglyn/besigner-feature-app'
+import { samplePageData } from '@aglyn/besigner-ui'
 import { registerBundle, registerComponent } from '@aglyn/core-data-app'
 import { createAglynComponent } from '@aglyn/core-feature-renderer'
 import { bundle as muiBundle } from '@aglyn/plugins-ui-mui'

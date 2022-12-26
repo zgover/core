@@ -21,9 +21,6 @@ import {
   BesignerPanelTabFlag,
   setBesignerPanels,
 } from '@aglyn/besigner-data-app'
-import useAddElementDrawerCallback from '@aglyn/besigner-feature-app/hooks/use-add-element-drawer-callback'
-import useBesignerAppContext from '@aglyn/besigner-feature-app/hooks/use-besigner-app-context'
-import useDeleteElementCallback from '@aglyn/besigner-feature-app/hooks/use-delete-element-callback'
 import {
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_DUPLICATE,
@@ -42,6 +39,9 @@ import {
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import { ChangeEvent, useCallback, useState } from 'react'
+import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
+import useBesignerAppContext from '../hooks/use-besigner-app-context'
+import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 export interface NodeContextMenuProps extends PaperProps {
   node: Aglyn.NodeSchema<any>

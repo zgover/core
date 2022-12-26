@@ -21,7 +21,6 @@ import {
   type BesignerPanelKey,
   BesignerPanelTabFlag,
 } from '@aglyn/besigner-data-app'
-import { ComponentAccordionList } from '@aglyn/besigner-feature-app/components/component-accordion-list'
 import {
   ICON_VARIANT_ELEMENT,
   ICON_VARIANT_ELEMENT_BROWSE,
@@ -64,6 +63,7 @@ import {
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
 import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
 import AccordionListComponent from './accordion-list.component'
+import ComponentAccordionList from './component-accordion-list'
 import ElementPropsForm from './element-props-form.component'
 import ElementStylesForm from './element-styles-form.component'
 import NodeTreeViewComponent, {

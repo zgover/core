@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { type AccordionRenderProps } from '@aglyn/besigner-feature-app'
+import { type AccordionRenderProps } from '@aglyn/besigner-ui'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import { createResourceUid } from '@aglyn/core-util-app'
 import {

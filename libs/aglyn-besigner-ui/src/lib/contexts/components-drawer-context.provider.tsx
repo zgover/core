@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import ComponentsGridListComponent from '@aglyn/besigner-feature-app/components/components-grid-list.component'
 import { AglynComponentsContext } from '@aglyn/core-feature-renderer'
 import { type ElementType, Fragment, useCallback, useState } from 'react'
 import {
   CloseableDrawerComponent,
   type CloseableDrawerProps,
 } from '../components/closeable-drawer.component'
+import ComponentsGridListComponent from '../components/components-grid-list.component'
 import {
   buildOptions,
   DEFAULT_OPTIONS,

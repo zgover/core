@@ -23,7 +23,7 @@ import {
   useAddElementDrawerCallback,
   withBesignerContext,
   type WorkspaceEditorComponentProps,
-} from '@aglyn/besigner-feature-app'
+} from '@aglyn/besigner-ui'
 import { BesignerJsonEditor } from '@aglyn/besigner-json-editor'
 // import '@aglyn/foundation-feature-singleton'
 import {
@@ -54,23 +54,15 @@ import { buildRoute, Route } from '../../../../../../../constants/route-links'
 
 const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
   () =>
-    import('@aglyn/besigner-feature-app').then(
-      (mod) => mod.WorkspaceEditorComponent,
-    ),
+    import('@aglyn/besigner-ui').then((mod) => mod.WorkspaceEditorComponent),
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
 const ViewportRootComponent = dynamic<WorkspaceEditorComponentProps>(
-  () =>
-    import('@aglyn/besigner-feature-app').then(
-      (mod) => mod.ViewportRootComponent,
-    ),
+  () => import('@aglyn/besigner-ui').then((mod) => mod.ViewportRootComponent),
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
 const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
-  () =>
-    import('@aglyn/besigner-feature-app').then(
-      (mod) => mod.ViewportCanvasComponent,
-    ),
+  () => import('@aglyn/besigner-ui').then((mod) => mod.ViewportCanvasComponent),
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
 
