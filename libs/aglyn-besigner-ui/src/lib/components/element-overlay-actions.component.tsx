@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ const ElementOverlayActionsComponentRaw = (
   const app = useBesignerAppContext()
   const node = Aglyn.canvas.getNode($id)
   const parent = node?.parent
-  const elementRef = Besigner.refs.get($id)
+  const handleProps = Besigner.handles.get($id)
   const [moreOpen, setMoreOpen] = useState(false)
   const [moreButton, moreButtonRef] = useState(null)
 
@@ -210,7 +210,7 @@ const ElementOverlayActionsComponentRaw = (
             // ref={dragHandleRef}
             ButtonProps={{
               // ref: elementRef?.dragHandle,
-              ...elementRef?.dragHandle,
+              ...handleProps,
               sx: { '&, &:hover, &:focus': { cursor: 'move' } },
             }}
             icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}

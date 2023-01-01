@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,18 +72,22 @@ export const DraggableDroppable = <T extends { $id: string }>(
     style.outlineStyle = 'solid'
   }
 
-  const ref = useRef<HTMLElement>()
+  const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    Besigner.refs.set(node.$id, {
-      node: ref,
-      dragHandle: {
-        ...draggable.listeners,
-        style: isTransforming ? { cursor: 'grab' } : { cursor: 'move' },
-      },
-    })
+    Besigner.refs.set(node.$id, ref)
     return () => {
       Besigner.refs.delete(node.$id)
+    }
+  }, [node?.$id])
+
+  useEffect(() => {
+    Besigner.handles.set(node.$id, {
+      ...draggable.listeners,
+      style: isTransforming ? { cursor: 'grab' } : { cursor: 'move' },
+    })
+    return () => {
+      Besigner.handles.delete(node.$id)
     }
   }, [node.$id, draggable.listeners, isTransforming])
 

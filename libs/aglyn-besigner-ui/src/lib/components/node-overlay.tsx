@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import {
 } from '@mui/material'
 import { VirtualElement } from '@popperjs/core'
 import { observer } from 'mobx-react-lite'
-import { forwardRef } from 'react'
+import { forwardRef, useMemo } from 'react'
 import { Else, If, Then } from 'react-if'
 import ElementOverlayActionsComponent from './element-overlay-actions.component'
 import NodeOutline from './node-outline'
@@ -90,24 +90,23 @@ const NodeOverlayRaw = forwardRef<any, NodeOverlayProps>((props, ref) => {
   const node = Aglyn.canvas.getNode($id)
 
   const elementRef = Besigner.refs.get($id)
-  const isOpen = Boolean(elementRef?.node.current)
+  const isOpen = Boolean(elementRef?.current)
 
-  const virtualElement: VirtualElement = {
-    getBoundingClientRect: (): DOMRect => {
-      if (elementRef?.node.current) {
-        return elementRef?.node.current.getBoundingClientRect()
-      }
-      return {
-        top: 10,
-        left: 10,
-        bottom: 20,
-        right: 100,
-        width: 90,
-        height: 10,
-      } as DOMRect
-    },
-    contextElement: elementRef?.node.current,
-  }
+  const virtualElement = useMemo<VirtualElement>(() => {
+    const el = elementRef?.current
+    return {
+      getBoundingClientRect() {
+        if (el) return el.getBoundingClientRect()
+        return {
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0,
+        } as DOMRect
+      },
+      contextElement: el,
+    }
+  }, [elementRef])
 
   return (
     <MuiPopper
@@ -120,47 +119,42 @@ const NodeOverlayRaw = forwardRef<any, NodeOverlayProps>((props, ref) => {
       disablePortal
       {...rest}
     >
-      {({ placement, TransitionProps }) => {
-        return (
-          <>
-            <NodeOutline node={node} />
+      <>
+        <NodeOutline node={node} />
 
-            <MuiPopper
-              open
-              anchorEl={virtualElement}
-              placement={variant === 'hovered' ? 'top-start' : undefined}
-              modifiers={innerModifiers}
-              sx={{
-                ['&[data-popper-placement^=top] #aglyn\\:element-overlay-label']:
-                  {
-                    borderTopLeftRadius: 3,
-                    borderTopRightRadius: 3,
-                    borderBottomLeftRadius: 0,
-                    borderBottomRightRadius: 0,
-                  },
-                ['&[data-popper-placement^=bottom] #aglyn\\:element-overlay-label']:
-                  {
-                    borderTopLeftRadius: 0,
-                    borderTopRightRadius: 0,
-                    borderBottomLeftRadius: 3,
-                    borderBottomRightRadius: 3,
-                  },
-              }}
-              disablePortal
-              {...rest}
-            >
-              <If condition={variant === 'selected'}>
-                <Then>
-                  <ElementOverlayActionsComponent $id={$id} />
-                </Then>
-                <Else>
-                  <NodeQuickActions node={node} />
-                </Else>
-              </If>
-            </MuiPopper>
-          </>
-        )
-      }}
+        <MuiPopper
+          open={isOpen}
+          anchorEl={virtualElement}
+          placement={variant === 'hovered' ? 'top-start' : undefined}
+          modifiers={innerModifiers}
+          sx={{
+            ['&[data-popper-placement^=top] #aglyn\\:element-overlay-label']: {
+              borderTopLeftRadius: 3,
+              borderTopRightRadius: 3,
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+            },
+            ['&[data-popper-placement^=bottom] #aglyn\\:element-overlay-label']:
+              {
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+                borderBottomLeftRadius: 3,
+                borderBottomRightRadius: 3,
+              },
+          }}
+          disablePortal
+          {...rest}
+        >
+          <If condition={variant === 'selected'}>
+            <Then>
+              <ElementOverlayActionsComponent $id={$id} />
+            </Then>
+            <Else>
+              <NodeQuickActions node={node} />
+            </Else>
+          </If>
+        </MuiPopper>
+      </>
     </MuiPopper>
   )
 })

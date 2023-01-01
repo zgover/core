@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { observable } from 'mobx'
-import type { MutableRefObject } from 'react'
+import type { RefObject } from 'react'
 
 export enum EditorMode { //BesignerDeviceFlag
   SELECT = 0x1,
@@ -25,9 +25,11 @@ export enum EditorMode { //BesignerDeviceFlag
   PREVIEW = 0x3,
 }
 
-type RefEntry = {
-  node: MutableRefObject<HTMLElement>
-  dragHandle?: any
-}
-
-export const refs = observable.map<Aglyn.NodeId, RefEntry>({}, { deep: false })
+export const refs = observable.map<Aglyn.NodeId, RefObject<HTMLElement>>(
+  {},
+  { deep: false },
+)
+export const handles = observable.map<Aglyn.NodeId, JSX.AnyProps>(
+  {},
+  { deep: false },
+)
