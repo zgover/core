@@ -28,30 +28,42 @@ import { REGION } from '../../utils/droppable-region-utils'
 
 type Orientation = 'vertical' | 'horizontal'
 
-export interface DropIndicatorProps extends Partial<BoxProps> {
-  orientation?: Orientation
+const DEFAULT = {
+  region: REGION.CHILDREN,
+  rect: {
+    left: 0,
+    top: 0,
+    height: 0,
+    right: 0,
+    bottom: 0,
+    width: 0,
+  } as ClientRect,
 }
+
+export interface DropIndicatorProps extends Partial<BoxProps> {}
 
 export const DropIndicator = observer(function DropIndicator(
   props: DropIndicatorProps,
 ) {
-  const { orientation: orient = 'vertical', ...rest } = props
-  const [orientation, setOrientation] = useState<Orientation>(orient)
-  const [region, setRegion] = useState<REGION>(REGION.LEFT)
-  const [rect, setRect] = useState<ClientRect>({})
+  const { ...rest } = props
+  const [dragging, setDragging] = useState(false)
+  const [region, setRegion] = useState<REGION>(REGION.CHILDREN)
+  const [rect, setRect] = useState<ClientRect>({} as any)
   const before = region === REGION.LEFT || region === REGION.TOP
   const after = region === REGION.RIGHT || region === REGION.BOTTOM
   const asChild = region === REGION.CHILDREN
 
   useDndMonitor({
-    onDragStart(event: DragStartEvent): void {},
-    onDragEnd(event: DragEndEvent): void {},
+    onDragStart(event: DragStartEvent): void {
+      setDragging(true)
+    },
+    onDragEnd(event: DragEndEvent): void {
+      setDragging(false)
+    },
     onDragMove(event: DragMoveEvent): void {
       const droppable = event.over
-      if (droppable) {
-        setRect(droppable.rect)
-        setRegion(droppable.data.current.region)
-      }
+      setRect(droppable?.rect || DEFAULT.rect)
+      setRegion(droppable?.data.current.region || DEFAULT.region)
     },
   })
 
@@ -75,6 +87,7 @@ export const DropIndicator = observer(function DropIndicator(
     <Stack
       direction={asChild ? 'row' : 'column'}
       style={{
+        visibility: dragging ? 'visible' : 'hidden',
         position: 'absolute',
         ...(before ? beforeStyles : undefined),
         ...(after ? afterStyles : undefined),

@@ -110,7 +110,7 @@ const ComponentGridItem = observer(
           <div>
             <ListItemText
               primaryTypographyProps={{
-                fontWeight: 'fontWeightBold',
+                fontWeight: 'fontWeightMedium',
                 lineHeight: 'normal',
                 fontSize: 'subtitle2.fontSize',
               }}
