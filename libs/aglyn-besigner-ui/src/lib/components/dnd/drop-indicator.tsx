@@ -44,9 +44,7 @@ const DEFAULT = {
 
 export interface DropIndicatorProps extends Partial<BoxProps> {}
 
-export const DropIndicator = observer(function DropIndicator(
-  props: DropIndicatorProps,
-) {
+export const DropIndicator = observer((props: DropIndicatorProps) => {
   const { ...rest } = props
   const [dragging, setDragging] = useState(false)
   const [{ rect, region }, setRect] = useState<State>({

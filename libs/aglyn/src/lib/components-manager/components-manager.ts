@@ -216,7 +216,7 @@ export class ComponentManager {
       ;(schemas[category] ??= []).push(schema)
       ;(schemas[ComponentCategory.ALL] ??= []).push(schema)
     }
-    Object.values(this.schemas).forEach(setSchema)
+    // Object.values(this.schemas).forEach(setSchema)
     Object.values(this.presets).forEach(setSchema)
     return schemas
   }

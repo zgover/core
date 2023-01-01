@@ -32,6 +32,14 @@ export enum DropAreaType {
   AFTER = 0x3,
 }
 
+export enum DropRegion {
+  CHILDREN = 'children',
+  TOP = 'top',
+  RIGHT = 'right',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+}
+
 export type DraggableNode = Aglyn.NodeSchema<any> | Aglyn.PresetSchema<any>
 
 export interface DndState {
@@ -84,6 +92,24 @@ export interface DndState {
   readonly canDragNode: (node: Aglyn.AbstractNodeSchema) => boolean
 
   clearDndStatus(): void
+}
+
+export class DndManager {
+  drag?: DraggableNode = null
+  drop?: DraggableNode = null
+  dropRegion?: any = null
+  get intoArea(): DropAreaType {
+    switch (this.dropRegion) {
+      case DropRegion.TOP:
+      case DropRegion.LEFT:
+        return DropAreaType.BEFORE
+      case DropRegion.RIGHT:
+      case DropRegion.BOTTOM:
+        return DropAreaType.AFTER
+    }
+
+    return DropAreaType.INSIDE
+  }
 }
 
 export const state = observable<DndState>({
