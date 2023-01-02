@@ -117,6 +117,7 @@ const NodeOverlayRaw = forwardRef<any, NodeOverlayProps>((props, ref) => {
       open={isOpen}
       keepMounted
       disablePortal
+      transition
       {...rest}
     >
       <>

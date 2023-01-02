@@ -18,6 +18,7 @@
 import * as Besigner from '@aglyn/besigner'
 import { mergeRefs } from '@aglyn/shared-ui-jsx'
 import useId from '@aglyn/shared-ui-jsx/hooks/use-id'
+import useIsomorphicLayoutEffect from '@aglyn/shared-ui-jsx/hooks/use-isomorphic-layout-effect'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { mergeProps } from '@react-aria/utils'
 import * as CSS from 'csstype'
@@ -74,7 +75,7 @@ export const DraggableDroppable = <T extends { $id: string }>(
 
   const ref = useRef<HTMLElement>(null)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     Besigner.refs.set(node.$id, ref)
     return () => {
       Besigner.refs.delete(node.$id)
