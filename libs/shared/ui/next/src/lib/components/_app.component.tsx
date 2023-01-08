@@ -124,7 +124,7 @@ function _AppComponent<Props, InitialProps>(
         <Head>
           {meta &&
             meta.map((props, i) => (
-              <meta key={props.id ?? props.key ?? i} {...props} />
+              <meta {...props} key={props.id ?? props.key ?? i} />
             ))}
           {makeMetaElements(metaElementsMemoed)}
           {makeLinkElements(linkElementsMemoed)}
