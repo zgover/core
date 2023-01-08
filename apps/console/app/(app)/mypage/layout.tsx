@@ -15,20 +15,14 @@
  * limitations under the License.
  */
 
-// MARK – IMPORTS
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const withAglyn = require('../../with-aglyn.nextjs.config')
+'use client'
 
-// MARK – GLOBALS
-const isProduction = process.env.NODE_ENV === 'production'
-
-/**
- * @type {import('/tools/nextjs-base.config').WithAglynOptions}
- **/
-module.exports = withAglyn({
-  experimental: { esmExternals: true, appDir: isProduction },
-  swcMinify: true,
-  env: {
-    AGLYN_SILOED_HOST: process.env.AGLYN_SILOED_HOST,
-  },
-})
+export default function Layout({ children }) {
+  return (
+    <>
+      dashboard
+      {children}
+      layout
+    </>
+  )
+}

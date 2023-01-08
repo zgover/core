@@ -23,10 +23,10 @@ module.exports = {
     {
       files: ['*.ts', '*.tsx', '*.js', '*.jsx'],
       rules: {
-        'mobx/exhaustive-make-observable': 'warn',
-        'mobx/unconditional-make-observable': 'error',
-        'mobx/missing-make-observable': 'error',
-        'mobx/missing-observer': 'warn',
+        'mobx/exhaustive-make-observable': 'off',
+        'mobx/unconditional-make-observable': 'off',
+        'mobx/missing-make-observable': 'off',
+        'mobx/missing-observer': 'off',
 
         'node/no-extraneous-import': 'off',
         '@nrwl/nx/enforce-module-boundaries': [
