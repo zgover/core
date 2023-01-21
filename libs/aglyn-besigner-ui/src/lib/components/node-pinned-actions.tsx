@@ -191,7 +191,7 @@ export const NodePinnedActions = observer(
             boxShadow: 4,
 
             pointerEvents: 'auto',
-            // bgcolor: 'surface.main',
+            bgcolor: 'surface.main',
 
             '& .MuiButton-root': {
               px: 0.5,

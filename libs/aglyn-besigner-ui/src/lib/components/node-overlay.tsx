@@ -25,9 +25,7 @@ import {
 import { VirtualElement } from '@popperjs/core'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useMemo, useState } from 'react'
-import { Else, If, Then } from 'react-if'
 import NodeOutline from './node-outline'
-import NodePinnedActions from './node-pinned-actions'
 import NodeQuickActions from './node-quick-actions'
 
 const outerModifiers = [
@@ -159,14 +157,10 @@ const NodeOverlay = observer(
                 },
             }}
           >
-            <If condition={variant === 'selected'}>
-              <Then>
-                <NodePinnedActions $id={$id} />
-              </Then>
-              <Else>
-                <NodeQuickActions node={node} />
-              </Else>
-            </If>
+            <NodeQuickActions
+              node={node}
+              variant={variant === 'selected' ? 'actions' : 'label'}
+            />
           </MuiPopper>
         </div>
       </MuiPopper>
