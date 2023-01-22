@@ -93,7 +93,7 @@ export const NodeOutline = observer(
     const elementRef = Besigner.refs.get($id)
     const isSelected = Besigner.focus.isNodeSelected(node)
     const isHovered = Besigner.focus.isNodeHovered(node)
-    const isDragging = Besigner.dnd.state.isDraggingNode(node)
+    const isDragging = Besigner.dnd.isDraggingNode(node)
     const isDraggingOver = Besigner.dnd.isDraggingOverDropNode(node)
     const rect = getElementClientRectBounding(elementRef?.current)
 

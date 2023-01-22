@@ -31,7 +31,6 @@ import dynamic from 'next/dynamic'
 import { ChangeEvent, forwardRef, useCallback, useRef } from 'react'
 import { useMouse } from 'react-use'
 import useAglynBesignerPanelValue from '../hooks/use-aglyn-besigner-panel-value'
-import { determineDropRegion } from '../utils/droppable-region-utils'
 import AppBarBreadcrumbsComponent from './app-bar-breadcrumbs.component'
 import type { AsidePanelComponentProps } from './aside-panel.component'
 import ViewportZoomControlsComponent from './viewport-zoom-controls.component'
@@ -112,14 +111,19 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
 
     useDndMonitor({
       onDragMove(event: DragMoveEvent): void {
-        event.activatorEvent.stopPropagation()
-        let region: any = null
+        let region: Besigner.DropRegion = null
         if (event.over) {
-          region = determineDropRegion(event.over.rect, mouse.docX, mouse.docY)
+          region = Besigner.determineDropRegion(
+            event.over.rect,
+            mouse.docX,
+            mouse.docY,
+          )
           event.over.data.current.region = region
         }
         Besigner.dnd.setDropRegion(region)
         Besigner.dnd.setDropNode(event.over?.data.current.node)
+
+        event.activatorEvent.stopPropagation()
       },
       onDragStart({ active }: DragStartEvent) {
         const node = active?.data.current.node
@@ -128,7 +132,7 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
       },
       onDragEnd(e: DragEndEvent) {
         e.activatorEvent.stopPropagation()
-        return Besigner.dnd.state.onDragEnd()
+        return Besigner.dnd.onDragEnd()
       },
     })
 

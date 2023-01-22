@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
+import { DndManager } from './dnd-manager'
+
 export * from './canvas-manager'
 export * from './dnd-manager'
 export * from './focus-manager'
 export * from './panel-manager'
+
+export const dnd = new DndManager()

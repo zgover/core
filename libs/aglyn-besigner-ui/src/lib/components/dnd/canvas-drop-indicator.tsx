@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as Besigner from '@aglyn/besigner'
 import {
   type ClientRect,
   type DragCancelEvent,
@@ -25,11 +26,10 @@ import {
 } from '@dnd-kit/core'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { REGION } from '../../utils/droppable-region-utils'
 import DropIndicator from './drop-indicator'
 
-const DEFAULT: { region: REGION; rect: ClientRect } = {
-  region: REGION.CHILDREN,
+const DEFAULT: { region: Besigner.DropRegion; rect: ClientRect } = {
+  region: Besigner.DropRegion.CHILDREN,
   rect: {
     left: 0,
     top: 0,
@@ -44,7 +44,7 @@ export const CanvasDropIndicator = observer(() => {
   const [visible, setVisible] = useState(false)
   const [{ rect, region }, setRect] = useState<typeof DEFAULT>({
     rect: { ...DEFAULT.rect } as ClientRect,
-    region: REGION.CHILDREN,
+    region: Besigner.DropRegion.CHILDREN,
   })
 
   useDndMonitor({

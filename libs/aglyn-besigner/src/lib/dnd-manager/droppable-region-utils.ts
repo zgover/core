@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { DropRegion } from './dnd-manager'
 
 export function buildDroppableRects(rect: DOMRect) {
   const {
@@ -93,27 +94,19 @@ export function withinRegion(rect, x, y) {
   return xis && yis
 }
 
-export enum REGION {
-  CHILDREN = 'children',
-  TOP = 'top',
-  RIGHT = 'right',
-  BOTTOM = 'bottom',
-  LEFT = 'left',
-}
-
 export function determineDropRegion(clientRect, x, y, regions?) {
   const _regions = regions || buildDroppableRects(clientRect)
   switch (true) {
     case withinRegion(_regions.top, x, y):
-      return REGION.TOP
+      return DropRegion.TOP
     case withinRegion(_regions.right, x, y):
-      return REGION.RIGHT
+      return DropRegion.RIGHT
     case withinRegion(_regions.bottom, x, y):
-      return REGION.BOTTOM
+      return DropRegion.BOTTOM
     case withinRegion(_regions.left, x, y):
-      return REGION.LEFT
+      return DropRegion.LEFT
     case withinRegion(_regions.children, x, y):
     default:
-      return REGION.CHILDREN
+      return DropRegion.CHILDREN
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ export function useLeafDrop(
 
         const dropSchema = node?.componentSchema
         const dropBreadcrumb = node?.breadcrumbPath
-        const validRelationship = Besigner.dnd.state.isValidLinealRelationship
+        const validRelationship = Besigner.dnd.isValidLinealRelationship
 
         const isOverDragItem = dropBreadcrumb?.indexOf(drag?.node?.$id) >= 0
         const isOverSelf = monitor.isOver({ shallow: true })
