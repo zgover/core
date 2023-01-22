@@ -18,27 +18,77 @@
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
 import { alpha, generateComponentClassKeys } from '@aglyn/shared-ui-theme'
-import mergeSxProps from '@aglyn/shared-ui-theme/util/merge-sx-props'
 import { getElementClientRectBounding } from '@aglyn/shared-util-dom'
-import { Box, BoxProps } from '@mui/material'
+import { styled } from '@mui/material'
 import clsx from 'clsx'
 import { observer } from 'mobx-react-lite'
 import { forwardRef } from 'react'
 
 const classKeys = generateComponentClassKeys('NodeOutline', [
+  'root',
   'hoveringSelf',
   'selectedSelf',
   'draggingSelf',
   'draggingOver',
 ])
 
-export interface NodeOutlineProps extends BoxProps {
+const NodeOutlineRoot = styled('div', {
+  name: 'NodeOutline',
+  slot: 'Root',
+})(({ theme }) => ({
+  pointerEvents: 'none',
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  right: 0,
+  bottom: 0,
+  outlineColor: 'transparent',
+  outlineOffset: 1,
+  outlineWidth: 1,
+  outlineStyle: 'dashed',
+  content: '""',
+  // transition: theme.transitions.create([
+  //   'outline-width',
+  //   'outline-offset',
+  //   'outline-style',
+  //   'outline-color',
+  //   'background-color',
+  // ], {
+  //   duration: theme.transitions.duration.standard,
+  //   easing: theme.transitions.easing.easeInOut,
+  // }),
+
+  [`&.${classKeys.selectedSelf}`]: {
+    outlineWidth: 2,
+    outlineStyle: 'solid',
+    outlineColor: theme.palette.tertiary.main,
+  },
+  [`&.${classKeys.hoveringSelf}`]: {
+    outlineColor: theme.palette.secondary.main,
+    backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+  },
+  [`&.${classKeys.draggingSelf}`]: {
+    outlineColor: 'transparent',
+    backgroundColor: alpha(theme.palette.secondary.light, 0.12),
+  },
+  [`&.${classKeys.draggingOver}`]: {
+    outlineColor: theme.palette.tertiary.main,
+    backgroundColor: alpha(theme.palette.tertiary.dark, 0.12),
+  },
+  [`&.${classKeys.draggingOver}.${classKeys.draggingSelf}`]: {
+    outlineColor: theme.palette.grey['500'],
+    backgroundColor: alpha(theme.palette.grey['500'], 0.64),
+  },
+}))
+
+export interface NodeOutlineProps
+  extends JSX.ComponentProps<typeof NodeOutlineRoot> {
   node: Aglyn.NodeSchema<any>
 }
 
 export const NodeOutline = observer(
-  forwardRef<any, NodeOutlineProps>((props, ref) => {
-    const { className, node, sx, ...rest } = props
+  forwardRef<HTMLDivElement, NodeOutlineProps>((props, ref) => {
+    const { className, node, style, ...rest } = props
     const $id = node?.$id
     const elementRef = Besigner.refs.get($id)
     const isSelected = Besigner.focus.isNodeSelected(node)
@@ -48,10 +98,10 @@ export const NodeOutline = observer(
     const rect = getElementClientRectBounding(elementRef?.current)
 
     return (
-      <Box
+      <NodeOutlineRoot
         ref={ref}
         data-aglyn={`outline:${$id}`}
-        style={{ width: rect?.width, height: rect?.height }}
+        style={{ ...style, width: rect?.width, height: rect?.height }}
         className={clsx(
           {
             [classKeys.selectedSelf]: Boolean(isSelected),
@@ -59,59 +109,8 @@ export const NodeOutline = observer(
             [classKeys.draggingSelf]: Boolean(isDragging),
             [classKeys.draggingOver]: Boolean(isDraggingOver),
           },
+          classKeys.root,
           className,
-        )}
-        sx={mergeSxProps(
-          {
-            pointerEvents: 'none',
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            outlineColor: 'transparent',
-            outlineOffset: 1,
-            outlineWidth: 1,
-            outlineStyle: 'dashed',
-            content: '""',
-            // transition: theme.transitions.create([
-            //   'outline-width',
-            //   'outline-offset',
-            //   'outline-style',
-            //   'outline-color',
-            //   'background-color',
-            // ], {
-            //   duration: theme.transitions.duration.standard,
-            //   easing: theme.transitions.easing.easeInOut,
-            // }),
-
-            [`&.${classKeys.selectedSelf}`]: {
-              outlineWidth: 2,
-              outlineStyle: 'solid',
-              outlineColor: (theme) => theme.palette.tertiary.main,
-            },
-            [`&.${classKeys.hoveringSelf}`]: {
-              outlineColor: (theme) => theme.palette.secondary.main,
-              backgroundColor: (theme) =>
-                alpha(theme.palette.secondary.main, 0.12),
-            },
-            [`&.${classKeys.draggingSelf}`]: {
-              outlineColor: 'transparent',
-              backgroundColor: (theme) =>
-                alpha(theme.palette.secondary.light, 0.12),
-            },
-            [`&.${classKeys.draggingOver}`]: {
-              outlineColor: (theme) => theme.palette.tertiary.main,
-              backgroundColor: (theme) =>
-                alpha(theme.palette.tertiary.dark, 0.12),
-            },
-            [`&.${classKeys.draggingOver}.${classKeys.draggingSelf}`]: {
-              outlineColor: (theme) => theme.palette.grey['500'],
-              backgroundColor: (theme) =>
-                alpha(theme.palette.grey['500'], 0.64),
-            },
-          },
-          sx,
         )}
         {...rest}
       />
