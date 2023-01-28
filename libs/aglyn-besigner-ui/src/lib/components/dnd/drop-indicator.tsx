@@ -19,7 +19,7 @@ import * as Besigner from '@aglyn/besigner'
 import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
 import _isEqualitySameType from '@aglyn/shared-util-guards/_is-equality-same-type'
 import { type ClientRect } from '@dnd-kit/core'
-import { styled } from '@mui/material'
+import { Portal, styled } from '@mui/material'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import { forwardRef } from 'react'
@@ -122,21 +122,23 @@ export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
       region === Besigner.DropRegion.RIGHT
 
     return (
-      <Indicator
-        ref={ref}
-        className={clsx(classes.root, className)}
-        variant={vertical ? 'vertical' : 'horizontal'}
-        animate={{
-          ...styles[region],
-          visibility: visible ? 'visible' : 'hidden',
-        }}
-        transition={{ type: 'spring' }}
-        {...rest}
-      >
-        <div className={classes.handle} />
-        <div className={classes.line} />
-        <div className={classes.handle} />
-      </Indicator>
+      <Portal>
+        <Indicator
+          ref={ref}
+          className={clsx(classes.root, className)}
+          variant={vertical ? 'vertical' : 'horizontal'}
+          animate={{
+            ...styles[region],
+            visibility: visible ? 'visible' : 'hidden',
+          }}
+          transition={{ type: 'spring' }}
+          {...rest}
+        >
+          <div className={classes.handle} />
+          <div className={classes.line} />
+          <div className={classes.handle} />
+        </Indicator>
+      </Portal>
     )
   },
 )

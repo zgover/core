@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ export const MdiIcon = forwardRef<any, MdiIconProps>((props, ref) => {
     <MuiSvgIcon
       ref={ref}
       children={typeof children === 'function' ? children(d) : <path d={d} />}
+      color="inherit"
+      fontSize="inherit"
       {...rest}
     />
   )

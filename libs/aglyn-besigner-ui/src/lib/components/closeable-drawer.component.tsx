@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ export interface CloseableDrawerProps extends Partial<NavigationDrawerProps> {
   }['bivarianceHack']
 }
 
-const CloseableDrawerComponent = forwardRef<any, CloseableDrawerProps>(
+export const CloseableDrawerComponent = forwardRef<any, CloseableDrawerProps>(
   (props, ref) => {
     const {
       disableCloseButton,
@@ -150,7 +150,5 @@ const CloseableDrawerComponent = forwardRef<any, CloseableDrawerProps>(
 
 CloseableDrawerComponent.displayName = 'CloseableDrawerComponent'
 CloseableDrawerComponent.aglyn = true
-CloseableDrawerComponent.defaultProps = {}
 
-export { CloseableDrawerComponent }
 export default CloseableDrawerComponent

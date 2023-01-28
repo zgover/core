@@ -151,37 +151,36 @@ const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
 export interface ViewportFrameComponentProps
   extends ComponentProps<typeof ViewportFrame> {}
 
-const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
-  (props, ref) => {
-    const { onMouseLeave, ...rest } = props
+export const ViewportFrameComponent = forwardRef<
+  any,
+  ViewportFrameComponentProps
+>((props, ref) => {
+  const { onMouseLeave, ...rest } = props
 
-    const app = useAglynAppContext()
-    const handleMouseLeave = useCallback(
-      (e) => {
-        e.stopPropagation()
-        setBesignerCanvasHovered(app, { hovered: () => ({}) })
-        onMouseLeave && onMouseLeave(e)
-      },
-      [app, onMouseLeave],
-    )
+  const app = useAglynAppContext()
+  const handleMouseLeave = useCallback(
+    (e) => {
+      e.stopPropagation()
+      setBesignerCanvasHovered(app, { hovered: () => ({}) })
+      onMouseLeave && onMouseLeave(e)
+    },
+    [app, onMouseLeave],
+  )
 
-    return (
-      <ViewportFrame
-        ref={ref}
-        data-aglyn="viewport:frame"
-        onMouseLeave={handleMouseLeave}
-        {...rest}
-      >
-        <SiteContainer />
-        <Overlays />
-      </ViewportFrame>
-    )
-  },
-)
+  return (
+    <ViewportFrame
+      ref={ref}
+      data-aglyn="viewport:frame"
+      onMouseLeave={handleMouseLeave}
+      {...rest}
+    >
+      <SiteContainer />
+      <Overlays />
+    </ViewportFrame>
+  )
+})
 
 ViewportFrameComponent.displayName = 'ViewportFrameComponent'
 ViewportFrameComponent.aglyn = true
-ViewportFrameComponent.defaultProps = {}
 
-export { ViewportFrameComponent }
 export default ViewportFrameComponent

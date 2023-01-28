@@ -58,7 +58,7 @@ export interface NavigationDrawerProps extends Partial<DrawerProps> {
   AppBarRightProps?: StackProps
 }
 
-const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
+export const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
   function RefRenderFn(props, ref) {
     const {
       children,
@@ -177,7 +177,5 @@ const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
 
 NavigationDrawerComponent.displayName = 'NavigationDrawerComponent'
 NavigationDrawerComponent.aglyn = true
-NavigationDrawerComponent.defaultProps = {}
 
-export { NavigationDrawerComponent }
 export default NavigationDrawerComponent

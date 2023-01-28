@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ export interface SelectProps extends SelectBaseProps {
   defaultOption?: MuiMenuItemProps
 }
 
-const SelectComponent = forwardRef<any, SelectProps>((props, ref) => {
+export const SelectComponent = forwardRef<any, SelectProps>((props, ref) => {
   const {
     input,
     isReadOnly,
@@ -61,7 +61,7 @@ const SelectComponent = forwardRef<any, SelectProps>((props, ref) => {
     inputProps,
     options = [],
     variant,
-    FormControlProps: { sx: formControlSx, ...formControlProps },
+    FormControlProps: { sx: formControlSx, ...formControlProps } = {},
     defaultOption,
     disableDefaultOption,
     ...rest
@@ -121,8 +121,5 @@ const SelectComponent = forwardRef<any, SelectProps>((props, ref) => {
 
 SelectComponent.displayName = 'SelectComponent'
 SelectComponent.aglyn = true
-SelectComponent.defaultProps = {
-  FormControlProps: {},
-}
 
 export default SelectComponent

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ export interface SecondaryAppBarProps extends Partial<AppBarProps> {
   activeTab?: AppLinkTabsProps['activeTab']
 }
 
-function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
+export function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
   const { children, tabBarTitle, navTabItems, activeTab, ...rest } = props
 
   return (
@@ -102,9 +102,5 @@ function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
 }
 SecondaryAppBarComponent.displayName = 'SecondaryAppBarComponent'
 SecondaryAppBarComponent.aglyn = true
-SecondaryAppBarComponent.defaultProps = {
-  navTabItems: undefined,
-}
 
-export { SecondaryAppBarComponent }
 export default SecondaryAppBarComponent

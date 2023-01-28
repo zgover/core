@@ -74,7 +74,14 @@ export function withShadowRoot(
   const { render } = options
 
   const ShadowRoot = forwardRef<Element, ShadowRootProps>((props, ref) => {
-    const { mode, delegatesFocus, styleSheets, ssr, children, ...rest } = props
+    const {
+      mode = 'open',
+      delegatesFocus,
+      styleSheets = [],
+      ssr,
+      children,
+      ...rest
+    } = props
     const local = useRef<Element>()
     const [container, setContainer] = useState(null)
     const key = `node_${mode}${delegatesFocus}`
@@ -124,13 +131,6 @@ export function withShadowRoot(
     )
   })
   ShadowRoot.displayName = 'ShadowRoot'
-  ShadowRoot.defaultProps = {
-    mode: 'open',
-    delegatesFocus: false,
-    styleSheets: [],
-    ssr: false,
-    children: null,
-  }
 
   return ShadowRoot
 }
@@ -188,7 +188,10 @@ export const MuiShadowDomRenderer = (props: ShadowRendererProps) => {
   )
 }
 
-const MuiShadowDom = createShadowDomProxy({}, 'mui', MuiShadowDomRenderer)
+export const MuiShadowDom = createShadowDomProxy(
+  {},
+  'mui',
+  MuiShadowDomRenderer,
+)
 
-export { MuiShadowDom }
 export default MuiShadowDom

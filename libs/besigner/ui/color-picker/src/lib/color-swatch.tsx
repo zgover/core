@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,12 @@ const Swatch = styled('div', {
 
 export interface ColorSwatchProps extends JSX.ComponentProps<typeof Swatch> {}
 
-const ColorSwatch = forwardRef<any, ColorSwatchProps>((props, ref) => {
+export const ColorSwatch = forwardRef<any, ColorSwatchProps>((props, ref) => {
   const { children, ...rest } = props
 
   return <Swatch ref={ref} {...rest} />
 })
 ColorSwatch.displayName = 'ColorSwatch'
 ColorSwatch.aglyn = true
-ColorSwatch.defaultProps = {}
 
-export { ColorSwatch }
 export default ColorSwatch

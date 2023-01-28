@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,119 +53,115 @@ export interface ComponentsGridListProps extends Partial<GridListProps> {
   maxColumns?: number
 }
 
-const ComponentsGridListComponent = forwardRef<any, ComponentsGridListProps>(
-  (props, ref) => {
-    const { onActionClick, items, sx, maxColumns, ...rest } = props
+export const ComponentsGridListComponent = forwardRef<
+  any,
+  ComponentsGridListProps
+>((props, ref) => {
+  const { onActionClick, items = [], sx, maxColumns = 4, ...rest } = props
 
-    const [columns, setColumns] = useState(maxColumns)
-    const handleColumnChange = useCallback(
-      (columns: number) => (e) => {
-        setColumns(columns)
-      },
-      [],
-    )
-    const handleOnActionClick = useCallback(
-      (e, item) => {
-        console.log('item', item)
-        onActionClick?.call(null, e, { type: 'selection', data: item?.data })
-      },
-      [onActionClick],
-    )
+  const [columns, setColumns] = useState(maxColumns)
+  const handleColumnChange = useCallback(
+    (columns: number) => (e) => {
+      setColumns(columns)
+    },
+    [],
+  )
+  const handleOnActionClick = useCallback(
+    (e, item) => {
+      console.log('item', item)
+      onActionClick?.call(null, e, { type: 'selection', data: item?.data })
+    },
+    [onActionClick],
+  )
 
-    const columnOptions = useMemo(() => {
-      return arrayFromLength(maxColumns).map((_, index) => ({
-        value: index + 1,
-        children: `${index + 1} columns`,
-        onClick: handleColumnChange(index + 1),
-        endIcon: endIcon(index + 1, columns),
-        selected: columns === index + 1,
-      }))
-    }, [handleColumnChange, columns, maxColumns])
+  const columnOptions = useMemo(() => {
+    return arrayFromLength(maxColumns).map((_, index) => ({
+      value: index + 1,
+      children: `${index + 1} columns`,
+      onClick: handleColumnChange(index + 1),
+      endIcon: endIcon(index + 1, columns),
+      selected: columns === index + 1,
+    }))
+  }, [handleColumnChange, columns, maxColumns])
 
-    const renderItemContent = useCallback(
-      (item: Aglyn.PresetSchema<any>) => {
-        return (
-          <ElementCardComponent
-            component={ButtonBase}
-            onClick={(e) => handleOnActionClick(e, item)}
-            label={item?.label}
-            icon={item?.icon}
-            item={{ id: item?.$id, ...item } as any}
-          />
-        )
-      },
-      [handleOnActionClick],
-    )
+  const renderItemContent = useCallback(
+    (item: Aglyn.PresetSchema<any>) => {
+      return (
+        <ElementCardComponent
+          component={ButtonBase}
+          onClick={(e) => handleOnActionClick(e, item)}
+          label={item?.label}
+          icon={item?.icon}
+          item={{ id: item?.$id, ...item } as any}
+        />
+      )
+    },
+    [handleOnActionClick],
+  )
 
-    return (
-      <GridList
-        ref={ref}
-        GridContainerProps={{
-          spacing: 1,
-          children: (
-            <Box sx={{ mb: 2 }}>
-              <Menu
-                id="aglyn:component-drawer-columns-changer"
-                items={columnOptions}
-                // MenuProps={{variant: 'selectedMenu'}}
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-              >
-                <Tooltip title={'Columns'}>
-                  <Button
-                    aria-label="columns"
-                    aria-haspopup="menu"
-                    aria-controls={'aglyn:component-drawer-columns-changer'}
-                    endIcon={
-                      <MdiIcon
-                        fontSize="inherit"
-                        path={ICON_VARIANT_MENU_DOWN.path}
-                      />
-                    }
-                    sx={{
-                      borderColor: 'divider',
-                      '& .MuiButton-endIcon': { ml: 0.15 },
-                      '& .MuiButton-startIcon': { mr: 0.85 },
-                    }}
-                  >
-                    {columns} Columns
-                  </Button>
-                </Tooltip>
-              </Menu>
-            </Box>
-          ),
-        }}
-        GridItemProps={{
-          xs: 6,
-          sm: Math.floor(12 / columns),
-        }}
-        renderItemContent={renderItemContent}
-        items={items}
-        sx={mergeSxProps(
-          {
-            overflowX: 'hidden',
-            '& .AglynGridList-itemContent': {
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              textAlign: 'center',
-              flexDirection: 'column',
-              justifyContent: 'space-evenly',
-            },
+  return (
+    <GridList
+      ref={ref}
+      GridContainerProps={{
+        spacing: 1,
+        children: (
+          <Box sx={{ mb: 2 }}>
+            <Menu
+              id="aglyn:component-drawer-columns-changer"
+              items={columnOptions}
+              // MenuProps={{variant: 'selectedMenu'}}
+              sx={{ display: { xs: 'none', sm: 'block' } }}
+            >
+              <Tooltip title={'Columns'}>
+                <Button
+                  aria-label="columns"
+                  aria-haspopup="menu"
+                  aria-controls={'aglyn:component-drawer-columns-changer'}
+                  endIcon={
+                    <MdiIcon
+                      fontSize="inherit"
+                      path={ICON_VARIANT_MENU_DOWN.path}
+                    />
+                  }
+                  sx={{
+                    borderColor: 'divider',
+                    '& .MuiButton-endIcon': { ml: 0.15 },
+                    '& .MuiButton-startIcon': { mr: 0.85 },
+                  }}
+                >
+                  {columns} Columns
+                </Button>
+              </Tooltip>
+            </Menu>
+          </Box>
+        ),
+      }}
+      GridItemProps={{
+        xs: 6,
+        sm: Math.floor(12 / columns),
+      }}
+      renderItemContent={renderItemContent}
+      items={items}
+      sx={mergeSxProps(
+        {
+          overflowX: 'hidden',
+          '& .AglynGridList-itemContent': {
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            textAlign: 'center',
+            flexDirection: 'column',
+            justifyContent: 'space-evenly',
           },
-          sx,
-        )}
-        {...rest}
-      />
-    )
-  },
-)
+        },
+        sx,
+      )}
+      {...rest}
+    />
+  )
+})
 
 ComponentsGridListComponent.displayName = 'ComponentsGridListComponent'
 ComponentsGridListComponent.aglyn = true
-ComponentsGridListComponent.defaultProps = {
-  items: [],
-  maxColumns: 4,
-}
 
-export { ComponentsGridListComponent }
 export default ComponentsGridListComponent

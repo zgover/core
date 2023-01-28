@@ -23,7 +23,7 @@ import useCallbackParamRef from './use-callback-param-ref'
 
 // const observerCtx = createContext(observer)
 
-export function useIntersectionObserver(
+export function useObserverIntersection(
   ctorCallback: IntersectionObserverCallback,
   options?: IntersectionObserverInit,
 ): [
@@ -70,4 +70,4 @@ export function useIntersectionObserver(
   return [observe, unobserve, disconnect, takeRecords, getObserver]
 }
 
-export default useIntersectionObserver
+export default useObserverIntersection

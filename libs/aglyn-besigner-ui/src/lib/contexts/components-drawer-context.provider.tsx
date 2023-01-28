@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ export interface ComponentsDrawerContextProviderProps
   component?: ElementType<CloseableDrawerProps>
 }
 
-function ComponentsDrawerContextProvider(
+export function ComponentsDrawerContextProvider(
   props: ComponentsDrawerContextProviderProps,
 ) {
-  const { children, defaultOptions, component, ...rest } = props
+  const { children, defaultOptions = {}, component, ...rest } = props
   const Component = component || CloseableDrawerComponent
   const [options, setOptions] = useState(() => ({
     ...DEFAULT_OPTIONS,
@@ -101,9 +101,5 @@ function ComponentsDrawerContextProvider(
 }
 ComponentsDrawerContextProvider.displayName = 'ComponentsDrawerContextProvider'
 ComponentsDrawerContextProvider.aglyn = true
-ComponentsDrawerContextProvider.defaultProps = {
-  defaultOptions: {},
-}
 
-export { ComponentsDrawerContextProvider }
 export default ComponentsDrawerContextProvider

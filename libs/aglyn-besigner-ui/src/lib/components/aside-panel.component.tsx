@@ -182,11 +182,10 @@ const ElementInfo = function ElementInfo({
   return (
     <TabPanelInner>
       <AccordionListComponent
-        unique
         items={details}
         getItemId={(item) => item.key}
-        renderSummary={(item) => <>{item?.label}</>}
-        renderDetails={(item) => (
+        onRenderSummary={({ item }) => <>{item?.label}</>}
+        onRenderDetail={({ item }) => (
           <>
             {item?.items?.map(
               ({
@@ -368,7 +367,7 @@ export interface AsidePanelComponentProps extends WorkspacePanelComponentProps {
   panel: BesignerPanelKey
 }
 
-const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(
+export const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(
   (props, ref) => {
     const { children, panel: panelKey, ...rest } = props
 
@@ -430,7 +429,7 @@ const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(
                     // color={'tertiary'}
                     value={numberToHexadecimal(value)}
                     iconPosition="top"
-                    icon={<MdiIcon {...icon} />}
+                    icon={<MdiIcon {...icon} fontSize="small" />}
                     sx={{
                       minHeight: 'unset',
                       fontSize: (theme) => theme.typography.pxToRem(12),
@@ -459,7 +458,5 @@ const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(
 
 AsidePanelComponent.displayName = 'AsidePanelComponent'
 AsidePanelComponent.aglyn = true
-AsidePanelComponent.defaultProps = {}
 
-export { AsidePanelComponent }
 export default AsidePanelComponent

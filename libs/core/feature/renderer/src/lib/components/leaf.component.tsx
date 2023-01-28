@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,54 +31,50 @@ export interface LeafComponentProps extends BoxProps<any, any> {
   leafComponent?: LeafComponent
 }
 
-const LeafComponent = forwardRef<any, LeafComponentProps>(function RefRenderFn(
-  props,
-  ref,
-) {
-  const { $id, leafComponent, children, className, sx, ...rest } = props
-  const node = Aglyn.canvas.getNode($id)
-  const factory = Aglyn.components.getFactory(node?.componentId)
-  const Component = useMemo(() => {
-    return isValidElementType(factory) ? factory : Box
-  }, [factory])
-  const resolved = useAglynElementResolvedProps($id)
-  const _className = clsx(
-    className,
-    ...arraySafe(resolved?.className, [resolved?.className]),
-    ...arraySafe(resolved?.props?.className, [resolved?.props?.className]),
-  )
+export const LeafComponent = forwardRef<any, LeafComponentProps>(
+  function RefRenderFn(props, ref) {
+    const { $id, leafComponent, children, className, sx, ...rest } = props
+    const node = Aglyn.canvas.getNode($id)
+    const factory = Aglyn.components.getFactory(node?.componentId)
+    const Component = useMemo(() => {
+      return isValidElementType(factory) ? factory : Box
+    }, [factory])
+    const resolved = useAglynElementResolvedProps($id)
+    const _className = clsx(
+      className,
+      ...arraySafe(resolved?.className, [resolved?.className]),
+      ...arraySafe(resolved?.props?.className, [resolved?.props?.className]),
+    )
 
-  return (
-    <Component
-      ref={ref}
-      id={`element-leaf-${$id}`}
-      className={_className}
-      sx={mergeSxProps(sx, resolved?.sx, resolved?.props?.sx)}
-      {...resolved?.props}
-      {...rest}
-    >
-      {children}
-      <ReactMarkdown
-        children={resolved?.props?.children}
-        components={{
-          p: Fragment,
-        }}
-      />
-      <BranchComponent
-        key={`element-branch-${$id}`}
-        $id={$id}
-        leafComponent={leafComponent}
-      />
-    </Component>
-  )
-})
+    return (
+      <Component
+        ref={ref}
+        id={`element-leaf-${$id}`}
+        className={_className}
+        sx={mergeSxProps(sx, resolved?.sx, resolved?.props?.sx)}
+        {...resolved?.props}
+        {...rest}
+      >
+        {children}
+        <ReactMarkdown
+          children={resolved?.props?.children}
+          components={{
+            p: Fragment,
+          }}
+        />
+        <BranchComponent
+          key={`element-branch-${$id}`}
+          $id={$id}
+          leafComponent={leafComponent}
+        />
+      </Component>
+    )
+  },
+)
 
 LeafComponent.displayName = 'LeafComponent'
 LeafComponent.aglyn = true
-LeafComponent.defaultProps = {
-  children: undefined,
-}
 
 type LeafComponent = typeof LeafComponent
-export { LeafComponent }
+
 export default LeafComponent

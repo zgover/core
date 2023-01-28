@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,28 +76,27 @@ export interface ViewportRootComponentProps
   component?
 }
 
-const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
-  (props, ref) => {
-    const { children, ...rest } = props
+export const ViewportRootComponent = forwardRef<
+  any,
+  ViewportRootComponentProps
+>((props, ref) => {
+  const { children, ...rest } = props
 
-    return (
-      <AglynViewport
-        ref={ref}
-        id="aglyn:viewport-root"
-        aria-label="besigner viewport root"
-        component="main"
-        // drawerWidth={left?.drawerWidth}
-        {...rest}
-      >
-        {children}
-      </AglynViewport>
-    )
-  },
-)
+  return (
+    <AglynViewport
+      ref={ref}
+      id="aglyn:viewport-root"
+      aria-label="besigner viewport root"
+      component="main"
+      // drawerWidth={left?.drawerWidth}
+      {...rest}
+    >
+      {children}
+    </AglynViewport>
+  )
+})
 
 ViewportRootComponent.displayName = 'ViewportRootComponent'
 ViewportRootComponent.aglyn = true
-ViewportRootComponent.defaultProps = {}
 
-export { ViewportRootComponent }
 export default ViewportRootComponent

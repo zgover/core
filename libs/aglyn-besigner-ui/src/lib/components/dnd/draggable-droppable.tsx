@@ -32,22 +32,30 @@ export interface DraggableDroppableProps<T extends { $id: string }> {
   accept: Besigner.DragType[]
   disableDragging?: boolean
   disableDropping?: boolean
+  idSuffix?: string
 }
 
 export const DraggableDroppable = observer(
   <T extends { $id: string }>(props: DraggableDroppableProps<T>) => {
-    const { node, type, disableDragging, disableDropping, accept, children } =
-      props
+    const {
+      node,
+      type,
+      disableDragging,
+      disableDropping,
+      accept,
+      children,
+      idSuffix,
+    } = props
     const id = useId(node?.$id)
 
     const draggable = useDraggable({
-      id: `${id}:${type}`,
+      id: `${id}:${type}${idSuffix || ''}`,
       data: { type, node },
       disabled: disableDragging,
     })
 
     const droppable = useDroppable({
-      id: `${id}:${type}`,
+      id: `${id}:${type}${idSuffix || ''}`,
       data: { type, node, accept },
       disabled: disableDropping,
     })
@@ -65,22 +73,29 @@ export const DraggableDroppable = observer(
       // transform: css.Transform.toString(transform),
       // scale: css.Scale.toString(transform),
       translate: css.Translate.toString(transform),
-    }
-    if (isTransforming) {
-      // style.transform = `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      // style.cursor = 'grab'
-    }
-    if (droppable.isOver) {
-      style.outlineColor = 'lime'
-      style.outlineStyle = 'solid'
-      style.outlineOffset = '3'
-    }
-    if (draggable.isDragging) {
-      style.outlineColor = 'grey'
-      style.outlineStyle = 'double'
-      style.outlineOffset = -1 as any
-      style.opacity = 0.5
-      style.cursor = 'move'
+
+      ...(isTransforming
+        ? {
+            // transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+            // cursor: 'grab',
+          }
+        : {}),
+      ...(droppable.isOver
+        ? {
+            outlineColor: 'lime',
+            outlineStyle: 'solid',
+            outlineOffset: '3',
+          }
+        : {}),
+      ...(draggable.isDragging
+        ? {
+            outlineColor: 'grey',
+            outlineStyle: 'double',
+            outlineOffset: -1 as any,
+            opacity: 0.5,
+            cursor: 'move',
+          }
+        : {}),
     }
 
     const ref = useRef<HTMLElement>(null)

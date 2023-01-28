@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ export interface BesignerAppBarProps extends SecondaryAppBarProps {
   saveAvailable?: boolean
 }
 
-const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
+export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
   (props, ref) => {
     const { onPropertiesEdit, onSave, saveAvailable } = props
 
@@ -106,7 +106,5 @@ const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
   },
 )
 BesignerAppBarComponent.displayName = 'BesignerAppBarComponent'
-BesignerAppBarComponent.defaultProps = {}
 
-export { BesignerAppBarComponent }
 export default BesignerAppBarComponent

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,13 +68,13 @@ export interface DashboardLayoutProps {
   aside?: JSX.Node
 }
 
-function DashboardLayout(props: DashboardLayoutProps) {
+export function DashboardLayout(props: DashboardLayoutProps) {
   const {
     children,
     header,
     breadcrumbItems,
     disableBreadcrumbs,
-    disableDefaultBreadcrumb,
+    disableDefaultBreadcrumb = false,
     tabBarTitle,
     navTabItems,
     headerRight,
@@ -137,9 +137,5 @@ function DashboardLayout(props: DashboardLayoutProps) {
 }
 DashboardLayout.displayName = 'DashboardLayout'
 DashboardLayout.aglyn = true
-DashboardLayout.defaultProps = {
-  disableDefaultBreadcrumb: false,
-}
 
-export { DashboardLayout }
 export default DashboardLayout

@@ -72,7 +72,7 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(
       onContentDidMount,
       onContentDidUpdate,
       jssPlugins,
-      baseStyles,
+      baseStyles = 'html, body, .frame-root, .frame-content { width: 100%; height: 100%; }',
       ...rest
     } = props
     // Current frame state
@@ -155,10 +155,5 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(
 
 SandboxFrame.displayName = 'SandboxFrame'
 SandboxFrame.aglyn = true
-SandboxFrame.defaultProps = {
-  // Global styles for frame document
-  baseStyles:
-    'html, body, .frame-root, .frame-content { width: 100%; height: 100%; }',
-}
 
 export default SandboxFrame

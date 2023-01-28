@@ -16,51 +16,50 @@
  */
 
 import { useCallback, useRef } from 'react'
-import ResizeObserver from 'resize-observer-polyfill'
 import useCallbackParamRef from './use-callback-param-ref'
 
-export function useResizeObserver(
-  ctorCallback: ResizeObserverCallback,
+export function useObserverMutation(
+  ctorCallback: MutationCallback,
 ): [
-  observe: ResizeObserver['observe'],
-  unobserve: ResizeObserver['unobserve'],
-  disconnect: ResizeObserver['disconnect'],
-  getObserver: () => ResizeObserver,
+  observe: MutationObserver['observe'],
+  disconnect: MutationObserver['disconnect'],
+  takeRecords: MutationObserver['takeRecords'],
+  getObserver: () => MutationObserver,
 ] {
   const callback = useCallbackParamRef(ctorCallback)
-  const observer = useRef<ResizeObserver>(null)
+  const observer = useRef<MutationObserver>(null)
 
   // This avoids creating an expensive object until it’s truly needed for the
   // first time. If you use Flow or TypeScript, you can also give getObserver()
   // a non-nullable type for convenience.
   const getObserver = useCallback(
-    () => (observer.current ??= new ResizeObserver(callback.current)),
+    () => (observer.current ??= new MutationObserver(callback.current)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
 
   const observe = useCallback(
-    (...args: Parameters<ResizeObserver['observe']>) =>
+    (...args: Parameters<MutationObserver['observe']>) =>
       getObserver()?.observe(...args),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
 
-  const unobserve = useCallback(
-    (...args: Parameters<ResizeObserver['unobserve']>) =>
-      getObserver()?.unobserve(...args),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  )
-
   const disconnect = useCallback(
-    (...args: Parameters<ResizeObserver['disconnect']>) =>
+    (...args: Parameters<MutationObserver['disconnect']>) =>
       getObserver()?.disconnect(...args),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
 
-  return [observe, unobserve, disconnect, getObserver]
+  const takeRecords = useCallback(
+    (...args: Parameters<MutationObserver['takeRecords']>) =>
+      getObserver()?.takeRecords(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  return [observe, disconnect, takeRecords, getObserver]
 }
 
-export default useResizeObserver
+export default useObserverMutation

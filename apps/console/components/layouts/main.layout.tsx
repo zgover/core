@@ -314,7 +314,7 @@ export interface MainLayoutProps
   title?: string[] | string
 }
 
-function MainLayout(props: MainLayoutProps) {
+export function MainLayout(props: MainLayoutProps) {
   const {
     children,
     title,
@@ -443,7 +443,5 @@ function MainLayout(props: MainLayoutProps) {
 
 MainLayout.displayName = 'MainLayout'
 MainLayout.aglyn = true
-MainLayout.defaultProps = {}
 
-export { MainLayout }
 export default MainLayout

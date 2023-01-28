@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ export interface MenuProps extends MuiBoxProps {
 export const Menu = forwardRef<any, MenuProps>((props, ref) => {
   const {
     children,
-    items,
+    items = [],
     context,
     className,
     sx,
@@ -221,11 +221,12 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
               ListItemTextProps,
               ListItemIconProps,
               EndIconTypographyProps,
+              key: keyProp,
               ...item
             }: any,
             i,
           ) => {
-            const key = item.key ?? item.id ?? i
+            const key = keyProp ?? item.id ?? i
 
             switch (type) {
               case 'subheader':
@@ -294,8 +295,5 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
 
 Menu.displayName = 'Menu'
 Menu.aglyn = true
-Menu.defaultProps = {
-  items: [],
-}
 
 export default Menu

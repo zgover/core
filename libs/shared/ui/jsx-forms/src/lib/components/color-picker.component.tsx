@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,142 +113,142 @@ const getStrValue = (value: RGBColor | string) => {
   return `rgb(${r || 0}, ${g || 0}, ${b || 0})`
 }
 
-const ColorPickerComponent = forwardRef<any, ColorPickerProps>((props, ref) => {
-  const {
-    input,
-    isReadOnly,
-    isDisabled,
-    placeholder,
-    isRequired,
-    label,
-    helperText,
-    description,
-    validateOnMount,
-    meta,
-    defaultValue,
-    onChange,
-    onBlur,
-    onFocus,
-    inputProps,
-    InputProps,
-    presetColors,
-    FormFieldGridProps,
-    FormControlProps,
-    ColorPickerProps,
-    PopperProps,
-    ...rest
-  } = useFieldApi(props as any)
+export const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
+  (props, ref) => {
+    const {
+      input,
+      isReadOnly,
+      isDisabled,
+      placeholder,
+      isRequired,
+      label,
+      helperText,
+      description,
+      validateOnMount,
+      meta,
+      defaultValue,
+      onChange,
+      onBlur,
+      onFocus,
+      inputProps,
+      InputProps,
+      presetColors,
+      FormFieldGridProps,
+      FormControlProps,
+      ColorPickerProps,
+      PopperProps,
+      ...rest
+    } = useFieldApi(props as any)
 
-  const id = `color-picker-${useId()}`
-  const invalid = validationError(meta, validateOnMount)
-  const hasError = Boolean(invalid)
+    const id = `color-picker-${useId()}`
+    const invalid = validationError(meta, validateOnMount)
+    const hasError = Boolean(invalid)
 
-  const value = input?.value || defaultValue || ''
+    const value = input?.value || defaultValue || ''
 
-  const handleChange = useCallback(
-    (value: RGBColor | string, e: any) => {
-      const val = getStrValue(value || '') || ''
-      input?.onChange && input?.onChange(val)
-      inputProps?.onChange && inputProps?.onChange(e, val)
-      onChange && onChange(e, val)
-    },
-    [input, inputProps, onChange],
-  )
+    const handleChange = useCallback(
+      (value: RGBColor | string, e: any) => {
+        const val = getStrValue(value || '') || ''
+        input?.onChange && input?.onChange(val)
+        inputProps?.onChange && inputProps?.onChange(e, val)
+        onChange && onChange(e, val)
+      },
+      [input, inputProps, onChange],
+    )
 
-  const handleTextChange = useCallback(
-    (e: any) => {
-      handleChange(e.target.value, e)
-    },
-    [handleChange],
-  )
+    const handleTextChange = useCallback(
+      (e: any) => {
+        handleChange(e.target.value, e)
+      },
+      [handleChange],
+    )
 
-  const handleColorChange = useCallback(
-    (color: any, e: any) => {
-      handleChange(color.rgb, e)
-    },
-    [handleChange],
-  )
+    const handleColorChange = useCallback(
+      (color: any, e: any) => {
+        handleChange(color.rgb, e)
+      },
+      [handleChange],
+    )
 
-  const popperRef = useRef<HTMLDivElement | null>(null)
-  const [fieldRef, setFieldRef] = useState<HTMLDivElement | null>(null)
-  const [open, setOpen] = useState(false)
+    const popperRef = useRef<HTMLDivElement | null>(null)
+    const [fieldRef, setFieldRef] = useState<HTMLDivElement | null>(null)
+    const [open, setOpen] = useState(false)
 
-  const handleClickAway = useCallback((e) => setOpen(false), [])
-  const handleFocus = useCallback(
-    (e) => {
-      setOpen(true)
-      onFocus && onFocus(e)
-    },
-    [onFocus],
-  )
+    const handleClickAway = useCallback((e) => setOpen(false), [])
+    const handleFocus = useCallback(
+      (e) => {
+        setOpen(true)
+        onFocus && onFocus(e)
+      },
+      [onFocus],
+    )
 
-  const startAdornment = useMemo(
-    () => (
-      <TextFieldColorSwatch
-        color={value}
-        IconButtonProps={{
-          onClick: () => setOpen((prev) => !prev),
-        }}
-      />
-    ),
-    [value],
-  )
+    const startAdornment = useMemo(
+      () => (
+        <TextFieldColorSwatch
+          color={value}
+          IconButtonProps={{
+            onClick: () => setOpen((prev) => !prev),
+          }}
+        />
+      ),
+      [value],
+    )
 
-  return (
-    <FormFieldGrid ref={ref} {...FormFieldGridProps}>
-      <ClickAwayListener onClickAway={handleClickAway}>
-        <div>
-          <MuiTextField
-            {...input}
-            fullWidth
-            error={hasError}
-            helperText={
-              invalid ||
-              ((meta.touched || validateOnMount) && meta.warning) ||
-              helperText ||
-              description
-            }
-            disabled={isDisabled}
-            label={label}
-            placeholder={placeholder || 'default'}
-            required={isRequired}
-            onChange={handleTextChange}
-            onFocus={handleFocus}
-            value={value}
-            inputProps={{
-              ...inputProps,
-              readOnly: isReadOnly,
-            }}
-            InputProps={{
-              startAdornment,
-              ref: setFieldRef,
-              ...InputProps,
-            }}
-            {...rest}
-          />
-          <Popper
-            id={id}
-            ref={popperRef}
-            open={Boolean(fieldRef && open)}
-            anchorEl={fieldRef}
-            sx={{ zIndex: 'tooltip', maxWidth: 280 }}
-            disablePortal
-            {...PopperProps}
-          >
-            <AglynColorPicker
-              {...ColorPickerProps}
-              color={value}
-              onChange={handleColorChange}
-              presetColors={presetColors}
+    return (
+      <FormFieldGrid ref={ref} {...FormFieldGridProps}>
+        <ClickAwayListener onClickAway={handleClickAway}>
+          <div>
+            <MuiTextField
+              {...input}
+              fullWidth
+              error={hasError}
+              helperText={
+                invalid ||
+                ((meta.touched || validateOnMount) && meta.warning) ||
+                helperText ||
+                description
+              }
+              disabled={isDisabled}
+              label={label}
+              placeholder={placeholder || 'default'}
+              required={isRequired}
+              onChange={handleTextChange}
+              onFocus={handleFocus}
+              value={value}
+              inputProps={{
+                ...inputProps,
+                readOnly: isReadOnly,
+              }}
+              InputProps={{
+                startAdornment,
+                ref: setFieldRef,
+                ...InputProps,
+              }}
+              {...rest}
             />
-          </Popper>
-        </div>
-      </ClickAwayListener>
-    </FormFieldGrid>
-  )
-})
+            <Popper
+              id={id}
+              ref={popperRef}
+              open={Boolean(fieldRef && open)}
+              anchorEl={fieldRef}
+              sx={{ zIndex: 'tooltip', maxWidth: 280 }}
+              disablePortal
+              {...PopperProps}
+            >
+              <AglynColorPicker
+                {...ColorPickerProps}
+                color={value}
+                onChange={handleColorChange}
+                presetColors={presetColors}
+              />
+            </Popper>
+          </div>
+        </ClickAwayListener>
+      </FormFieldGrid>
+    )
+  },
+)
+ColorPickerComponent.displayName = 'ColorPickerComponent'
 
-ColorPickerComponent.defaultProps = {}
-
-export { ColorPickerComponent }
 export default ColorPickerComponent

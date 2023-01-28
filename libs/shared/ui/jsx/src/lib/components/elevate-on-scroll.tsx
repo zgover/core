@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import {_isFnT} from '@aglyn/shared-util-guards'
-import {useScrollTrigger} from '@mui/material'
+import { _isFnT } from '@aglyn/shared-util-guards'
+import { useScrollTrigger } from '@mui/material'
 // eslint-disable-next-line no-restricted-imports
-import type {UseScrollTriggerOptions} from '@mui/material/useScrollTrigger/useScrollTrigger'
-import {cloneElement, type ReactElement, useMemo} from 'react'
-
+import type { UseScrollTriggerOptions } from '@mui/material/useScrollTrigger/useScrollTrigger'
+import { cloneElement, type ReactElement, useMemo } from 'react'
 
 export type ElevatedRenderProps = {
   activeWithHysteresis: boolean
@@ -28,7 +27,8 @@ export type ElevatedRenderProps = {
 }
 
 /* eslint-disable-next-line */
-export interface ElevationOnScrollProps<P = any> extends Omit<UseScrollTriggerOptions, 'disableHysteresis'> {
+export interface ElevationOnScrollProps<P = any>
+  extends Omit<UseScrollTriggerOptions, 'disableHysteresis'> {
   /**
    * If children is a function uses renderProps prop and copies children
    */
@@ -39,7 +39,7 @@ export interface ElevationOnScrollProps<P = any> extends Omit<UseScrollTriggerOp
   withoutHysteresis?: Omit<UseScrollTriggerOptions, 'disableHysteresis'>
 }
 
-function ElevateOnScroll<P>(props: ElevationOnScrollProps<P>) {
+export function ElevateOnScroll<P>(props: ElevationOnScrollProps<P>) {
   const {
     children,
     renderProps,
@@ -59,7 +59,7 @@ function ElevateOnScroll<P>(props: ElevationOnScrollProps<P>) {
     target: withHysteresis?.target || target || undefined,
   })
   const state = useMemo(
-    () => ({activeWithHysteresis, activeWithoutHysteresis}),
+    () => ({ activeWithHysteresis, activeWithoutHysteresis }),
     [activeWithHysteresis, activeWithoutHysteresis],
   )
 
@@ -73,9 +73,5 @@ function ElevateOnScroll<P>(props: ElevationOnScrollProps<P>) {
 
 ElevateOnScroll.displayName = 'ElevateOnScroll'
 ElevateOnScroll.aglyn = true
-ElevateOnScroll.defaultProps = {
-  disableHysteresis: false,
-}
 
-export {ElevateOnScroll}
 export default ElevateOnScroll

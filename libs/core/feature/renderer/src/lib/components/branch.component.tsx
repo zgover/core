@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,27 +25,29 @@ export interface BranchComponentProps extends JSX.OverrideableComponentProps {
   $id?: NodeId
 }
 
-const BranchComponent = forwardRef<any, BranchComponentProps>((props, ref) => {
-  const { component: Component, leafComponent, $id, ...rest } = props
+export const BranchComponent = forwardRef<any, BranchComponentProps>(
+  (props, ref) => {
+    const {
+      component: Component = Fragment,
+      leafComponent,
+      $id,
+      ...rest
+    } = props
 
-  const node = Aglyn.canvas.getNode($id)
-  const Leaf = useMemo(() => leafComponent || LeafComponent, [leafComponent])
+    const node = Aglyn.canvas.getNode($id)
+    const Leaf = useMemo(() => leafComponent || LeafComponent, [leafComponent])
 
-  return Array.isArray(node?.nodes) && node?.nodes.length ? (
-    <Component ref={ref} {...rest}>
-      {node?.nodes.map(($id) => (
-        <Leaf key={`element-leaf-${$id}`} $id={$id} leafComponent={Leaf} />
-      ))}
-    </Component>
-  ) : null
-})
+    return Array.isArray(node?.nodes) && node?.nodes.length ? (
+      <Component ref={ref} {...rest}>
+        {node?.nodes.map(($id) => (
+          <Leaf key={`element-leaf-${$id}`} $id={$id} leafComponent={Leaf} />
+        ))}
+      </Component>
+    ) : null
+  },
+)
 
 BranchComponent.displayName = 'BranchComponent'
 BranchComponent.aglyn = true
-BranchComponent.defaultProps = {
-  component: Fragment,
-  children: null,
-}
 
-export { BranchComponent }
 export default BranchComponent

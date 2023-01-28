@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,29 +71,27 @@ export interface BreadcrumbsProps extends MuiBreadcrumbsProps {
   centered?: boolean
 }
 
-const BreadcrumbsComponent = forwardRef<any, BreadcrumbsProps>((props, ref) => {
-  const { centered, children, items, ...rest } = props
+export const BreadcrumbsComponent = forwardRef<any, BreadcrumbsProps>(
+  (props, ref) => {
+    const { centered, children, items = [], ...rest } = props
 
-  return (
-    <Breadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
-      {items.map(({ className, ...item }, key, arr) => (
-        <BreadcrumbItemComponent
-          key={item.key ?? item.id ?? key}
-          isLast={_isLength(key, arr.length - 1)}
-          centered={centered}
-          {...item}
-        />
-      ))}
-      {children}
-    </Breadcrumbs>
-  )
-})
+    return (
+      <Breadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
+        {items.map(({ className, ...item }, key, arr) => (
+          <BreadcrumbItemComponent
+            key={item.key ?? item.id ?? key}
+            isLast={_isLength(key, arr.length - 1)}
+            centered={centered}
+            {...item}
+          />
+        ))}
+        {children}
+      </Breadcrumbs>
+    )
+  },
+)
 
 BreadcrumbsComponent.displayName = 'BreadcrumbsComponent'
 BreadcrumbsComponent.aglyn = true
-BreadcrumbsComponent.defaultProps = {
-  items: [],
-}
 
-export { BreadcrumbsComponent }
 export default BreadcrumbsComponent

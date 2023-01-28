@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,25 +33,26 @@ export interface ElementCardProps extends CardListItemProps {
   icon?: MdiIconProps
 }
 
-const ElementCardComponent = forwardRef<any, ElementCardProps>((props, ref) => {
-  const { icon, ...rest } = props
+export const ElementCardComponent = forwardRef<any, ElementCardProps>(
+  (props, ref) => {
+    const { icon, ...rest } = props
 
-  return (
-    <CardListItem ref={ref} {...rest}>
-      {({ item }) => (
-        <div>
-          {!icon?.path && icon ? (
-            (icon as any)
-          ) : (
-            <Icon {...icon} path={icon?.path || ICON_VARIANT_ELEMENT.path} />
-          )}
-        </div>
-      )}
-    </CardListItem>
-  )
-})
+    return (
+      <CardListItem ref={ref} {...rest}>
+        {({ item }) => (
+          <div>
+            {!icon?.path && icon ? (
+              (icon as any)
+            ) : (
+              <Icon {...icon} path={icon?.path || ICON_VARIANT_ELEMENT.path} />
+            )}
+          </div>
+        )}
+      </CardListItem>
+    )
+  },
+)
 ElementCardComponent.displayName = 'ElementCardComponent'
 ElementCardComponent.aglyn = true
-ElementCardComponent.defaultProps = {}
-export { ElementCardComponent }
+
 export default ElementCardComponent

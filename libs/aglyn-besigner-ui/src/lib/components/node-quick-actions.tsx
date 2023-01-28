@@ -123,9 +123,7 @@ export const NodeQuickActions = observer(
         >
           <ComponentIconComponent
             component={node?.componentSchema}
-            color="inherit"
             fontSize="inherit"
-            sx={{ color: 'inherit' }}
           />
         </Stack>
         {variant === 'actions' ? null : (
@@ -136,7 +134,7 @@ export const NodeQuickActions = observer(
             whiteSpace="nowrap"
             fontSize="inherit"
             color="inherit"
-            sx={{ maxWidth: 80 }}
+            maxWidth={100}
             title={node?.labelShort}
           >
             {node?.labelShort}

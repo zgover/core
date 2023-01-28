@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ export interface ChildrenFunctionPropProps<T = any> {
   args?: T[] | T
 }
 
-const ChildrenFunctionProp = <T,>(props: ChildrenFunctionPropProps<T>) => {
-  const { childrenProp, args } = props
+export const ChildrenFunctionProp = <T,>(
+  props: ChildrenFunctionPropProps<T>,
+) => {
+  const { childrenProp, args = [] } = props
   const arg = Array.isArray(args) ? args : args ? [args] : []
 
   return (
@@ -31,9 +33,5 @@ const ChildrenFunctionProp = <T,>(props: ChildrenFunctionPropProps<T>) => {
   )
 }
 ChildrenFunctionProp.displayName = 'ChildrenFunctionProp'
-ChildrenFunctionProp.defaultProps = {
-  args: [],
-}
 
-export { ChildrenFunctionProp }
 export default ChildrenFunctionProp

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,42 +85,33 @@ export interface ViewportCanvasComponentProps
   pannerRef?: Ref<any>
 }
 
-const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
-  (props, ref) => {
-    const { ...rest } = props
+export const ViewportCanvasComponent = forwardRef<
+  any,
+  ViewportCanvasComponentProps
+>((props, ref) => {
+  const { ...rest } = props
 
-    const [devicePreview] = useAglynBesignerFlag('devicePreview')
-    const artboardClass = clsx({
-      [canvasArtboardClassKeys.responsive]:
-        BesignerDeviceFlag.RESPONSIVE === devicePreview,
-      [canvasArtboardClassKeys.deviceXs]:
-        BesignerDeviceFlag.XS === devicePreview,
-      [canvasArtboardClassKeys.deviceSm]:
-        BesignerDeviceFlag.SM === devicePreview,
-      [canvasArtboardClassKeys.deviceMd]:
-        BesignerDeviceFlag.MD === devicePreview,
-      [canvasArtboardClassKeys.deviceLg]:
-        BesignerDeviceFlag.LG === devicePreview,
-      [canvasArtboardClassKeys.deviceXl]:
-        BesignerDeviceFlag.XL === devicePreview,
-    })
+  const [devicePreview] = useAglynBesignerFlag('devicePreview')
+  const artboardClass = clsx({
+    [canvasArtboardClassKeys.responsive]:
+      BesignerDeviceFlag.RESPONSIVE === devicePreview,
+    [canvasArtboardClassKeys.deviceXs]: BesignerDeviceFlag.XS === devicePreview,
+    [canvasArtboardClassKeys.deviceSm]: BesignerDeviceFlag.SM === devicePreview,
+    [canvasArtboardClassKeys.deviceMd]: BesignerDeviceFlag.MD === devicePreview,
+    [canvasArtboardClassKeys.deviceLg]: BesignerDeviceFlag.LG === devicePreview,
+    [canvasArtboardClassKeys.deviceXl]: BesignerDeviceFlag.XL === devicePreview,
+  })
 
-    return (
-      <ViewportCanvas ref={ref} id="aglyn:viewport-canvas" {...rest}>
-        <ViewportArtboard
-          id="aglyn:viewport-artboard"
-          className={artboardClass}
-        >
-          <ViewportFrameComponent />
-        </ViewportArtboard>
-      </ViewportCanvas>
-    )
-  },
-)
+  return (
+    <ViewportCanvas ref={ref} id="aglyn:viewport-canvas" {...rest}>
+      <ViewportArtboard id="aglyn:viewport-artboard" className={artboardClass}>
+        <ViewportFrameComponent />
+      </ViewportArtboard>
+    </ViewportCanvas>
+  )
+})
 
 ViewportCanvasComponent.displayName = 'ViewportCanvasComponent'
 ViewportCanvasComponent.aglyn = true
-ViewportCanvasComponent.defaultProps = {}
 
-export { ViewportCanvasComponent }
 export default ViewportCanvasComponent

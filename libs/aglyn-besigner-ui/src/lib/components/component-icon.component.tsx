@@ -18,7 +18,6 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { ICON_VARIANT_ELEMENT } from '@aglyn/shared-data-enums'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { observer } from 'mobx-react-lite'
 import { isElement, isValidElementType } from 'react-is'
 
@@ -27,18 +26,15 @@ export interface ComponentIconProps extends MdiIconProps {
 }
 
 export const ComponentIconComponent = observer((props: ComponentIconProps) => {
-  const { component, sx, ...rest } = props
+  const { component, ...rest } = props
   const Icon = component?.icon
 
   if (isElement(Icon)) return Icon
 
   return (
     <MdiIcon
-      fontSize="inherit"
-      color="inherit"
       path={Icon?.path || ICON_VARIANT_ELEMENT.path}
-      sx={mergeSxProps(Icon?.sx, sx)}
-      {...(isValidElementType(Icon) ? { component: Icon } : { ...Icon })}
+      {...(isValidElementType(Icon) ? { component: Icon } : {})}
       {...rest}
     />
   )

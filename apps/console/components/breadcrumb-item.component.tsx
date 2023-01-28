@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
-import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
-import { AppLink, type AppLinkProps, type AppLinkVariant } from '@aglyn/shared-ui-jsx'
+import {
+  AppLink,
+  type AppLinkProps,
+  type AppLinkVariant,
+} from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
 import { truthy } from '@aglyn/shared-util-tools'
 import { Typography } from '@mui/material'
 import clsx from 'clsx'
@@ -31,18 +35,19 @@ export const classKeys = generateComponentClassKeys('AglynBreadcrumbItem', [
   'icon',
 ])
 
-export type BreadcrumbItemProps<T extends AppLinkVariant = AppLinkVariant> = AppLinkProps<T> & {
-  icon?: MdiIconProps
-  disabled?: boolean
-  isLast?: boolean
-  centered?: boolean
-}
+export type BreadcrumbItemProps<T extends AppLinkVariant = AppLinkVariant> =
+  AppLinkProps<T> & {
+    icon?: MdiIconProps
+    disabled?: boolean
+    isLast?: boolean
+    centered?: boolean
+  }
 
-const BreadcrumbItemComponent = forwardRef(function RefRenderFn<T extends AppLinkVariant>(
-  props: BreadcrumbItemProps<T>,
-  ref
-) {
-  const { icon, className, isLast, disabled, children, centered, ...rest } = props
+export const BreadcrumbItemComponent = forwardRef(function RefRenderFn<
+  T extends AppLinkVariant,
+>(props: BreadcrumbItemProps<T>, ref) {
+  const { icon, className, isLast, disabled, children, centered, ...rest } =
+    props
   const itemClass = clsx(
     classKeys.item,
     {
@@ -50,7 +55,7 @@ const BreadcrumbItemComponent = forwardRef(function RefRenderFn<T extends AppLin
       [classKeys.centered]: Boolean(centered),
       [classKeys.last]: Boolean(isLast),
     },
-    className
+    className,
   )
   const iconClass = clsx(classKeys.icon, icon?.className)
 
@@ -65,7 +70,5 @@ const BreadcrumbItemComponent = forwardRef(function RefRenderFn<T extends AppLin
 })
 BreadcrumbItemComponent.displayName = 'BreadcrumbItemComponent'
 BreadcrumbItemComponent.aglyn = true
-BreadcrumbItemComponent.defaultProps = {}
 
-export { BreadcrumbItemComponent }
 export default BreadcrumbItemComponent
