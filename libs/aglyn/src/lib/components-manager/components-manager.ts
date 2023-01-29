@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,6 +219,31 @@ export class ComponentManager {
     // Object.values(this.schemas).forEach(setSchema)
     Object.values(this.presets).forEach(setSchema)
     return schemas
+  }
+
+  public get schemasBySortedCategories() {
+    return Object.entries(this.schemasByCategory)
+      .map(([k, v]) => ({
+        $id: k,
+        label: k,
+        items: v,
+      }))
+      .sort(({ label: a }, { label: b }) => {
+        switch (true) {
+          case a === 'All' && b === 'Uncategorized':
+            return 1
+          case a === 'Uncategorized' && b === 'All':
+            return -1
+          case a === 'All':
+          case a === 'Uncategorized':
+            return 1
+          case b === 'All':
+          case b === 'Uncategorized':
+            return -1
+          default:
+            return a.localeCompare(b)
+        }
+      })
   }
 
   public getFactory = computedFn((id: ComponentId) => {

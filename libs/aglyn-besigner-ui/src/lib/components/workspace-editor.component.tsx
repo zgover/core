@@ -33,7 +33,7 @@ import { useMouse } from 'react-use'
 import useAglynBesignerPanelValue from '../hooks/use-aglyn-besigner-panel-value'
 import AppBarBreadcrumbsComponent from './app-bar-breadcrumbs.component'
 import type { AsidePanelComponentProps } from './aside-panel.component'
-import ViewportZoomControlsComponent from './viewport-zoom-controls.component'
+import ViewportZoomControls from './viewport-zoom-controls'
 
 const classKeys = generateComponentClassKeys('AglynViewport', [
   'panelLeftOpen',
@@ -165,7 +165,7 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
             sx={{ overflow: 'hidden', zIndex: 0 }}
           >
             {children}
-            <ViewportZoomControlsComponent
+            <ViewportZoomControls
               onZoomReset={handleZoomReset}
               onZoomDecrease={handleZoomDecrease}
               onZoomIncrease={handleZoomIncrease}

@@ -43,7 +43,7 @@ const DEFAULT: { region: Besigner.DropRegion; rect: ClientRect } = {
 
 export const CanvasDropIndicator = observer(() => {
   const [visible, setVisible] = useState(false)
-  const [rect, setRect] = useState<ClientRect>({ ...DEFAULT.rect })
+  const [rect, setRect] = useState<ClientRect>(() => ({ ...DEFAULT.rect }))
   const [region, setRegion] = useState<Besigner.DropRegion>(DEFAULT.region)
 
   useDndMonitor({
@@ -52,7 +52,7 @@ export const CanvasDropIndicator = observer(() => {
     onDragCancel: (event: DragCancelEvent) => setVisible(false),
     onDragOver(event: DragOverEvent) {
       setVisible(Boolean(event.over))
-      setRect(event.over?.rect || DEFAULT.rect)
+      if (event.over) setRect(event.over?.rect)
     },
     onDragMove: (event: DragMoveEvent) => {
       setRegion(event.over?.data.current.region || DEFAULT.region)

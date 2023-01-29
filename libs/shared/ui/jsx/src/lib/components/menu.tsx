@@ -148,7 +148,6 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
     >
       {cloned}
       <MuiMenu
-        dense={dense}
         anchorEl={context ? undefined : state.anchorEl}
         anchorReference={context ? 'anchorPosition' : undefined}
         anchorPosition={
@@ -249,6 +248,7 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
               default:
                 return (
                   <MuiMenuItem
+                    dense={dense}
                     key={key}
                     onClick={(e) => {
                       handleClose()

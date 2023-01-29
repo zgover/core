@@ -31,7 +31,7 @@ import {
   Stack,
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react-lite'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef } from 'react'
 import { AccordionListComponent } from './accordion-list.component'
 import Draggable from './dnd/draggable'
 
@@ -111,32 +111,7 @@ interface ComponentAccordionListProp {}
 export const ComponentAccordionList = observer(
   (props: ComponentAccordionListProp) => {
     const { ...rest } = props
-    const schemasByCategory = Aglyn.components.schemasByCategory
-
-    const items = useMemo(() => {
-      return Object.entries(schemasByCategory)
-        .map(([k, v]) => ({
-          $id: k,
-          label: k,
-          items: v,
-        }))
-        .sort(({ label: a }, { label: b }) => {
-          switch (true) {
-            case a === 'All' && b === 'Uncategorized':
-              return 1
-            case a === 'Uncategorized' && b === 'All':
-              return -1
-            case a === 'All':
-            case a === 'Uncategorized':
-              return 1
-            case b === 'All':
-            case b === 'Uncategorized':
-              return -1
-            default:
-              return a.localeCompare(b)
-          }
-        })
-    }, [schemasByCategory])
+    const items = Aglyn.components.schemasBySortedCategories
 
     return (
       <AccordionListComponent

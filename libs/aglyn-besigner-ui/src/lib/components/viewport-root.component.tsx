@@ -18,22 +18,27 @@
 import { alpha, styled } from '@aglyn/shared-ui-theme'
 import { forwardRef } from 'react'
 
-const AglynViewport = styled('div', {
+const AglynViewport = styled('main', {
   name: 'AglynViewport',
 })(({ theme }) => {
-  const o = 'transparent'
+  // const o = 'transparent'
   const bg = theme.palette.background.default
-  const base = theme.palette.divider
-  const sq = alpha(base, 0.02)
-  const outline = alpha(base, 0.0312)
-  const corner = alpha(base, 0.016)
-  const gradient = 'linear-gradient'
-  const s = {
-    sq: '4px',
-    grid: '97px',
-    line: '1px',
-    rot: '-90deg',
-  }
+  // const base = theme.palette.divider
+  // const sq = alpha(base, 0.02)
+  // const outline = alpha(base, 0.0312)
+  // const corner = alpha(base, 0.016)
+  // const gradient = 'linear-gradient'
+  // const s = {
+  //   sq: '4px',
+  //   grid: '97px',
+  //   line: '1px',
+  //   rot: '-90deg',
+  // }
+
+  const divider = alpha(theme.palette.divider, 0.0312)
+  const dot = alpha(theme.palette.divider, 0.0486)
+  const minor = theme.spacing(1)
+  const major = theme.spacing(12)
 
   return {
     flexGrow: 1,
@@ -42,39 +47,52 @@ const AglynViewport = styled('div', {
     alignItems: 'center',
     display: 'flex',
     // position: 'relative',
-    boxShadow: theme.shadowsInset[3],
     // minHeight: '100%',
+    boxShadow: theme.shadowsInset[3],
     backgroundColor: bg,
-    background: [
-      `${gradient}(${s.rot}, ${sq} ${s.line}, ${o} ${s.line})`,
-      `${gradient}(${sq} ${s.line}, ${o} ${s.line})`,
-      `${gradient}(${s.rot}, ${outline} ${s.line}, ${o} ${s.line})`,
-      `${gradient}(${outline} ${s.line}, ${o} ${s.line})`,
-      `${gradient}(${o} ${s.sq}, ${bg} ${s.sq}, ${bg} ${s.grid}, ${o} ${s.grid})`,
-      `${gradient}(${s.rot}, ${corner} ${s.line}, ${o} ${s.line})`,
-      `${gradient}(${s.rot}, ${o} ${s.sq}, ${bg} ${s.sq}, ${bg} ${s.grid}, ${o} ${s.grid})`,
-      `${gradient}(${corner} ${s.line}, ${o} ${s.line})`,
-      corner,
-    ].join(','),
+    // backgroundImage: `radial-gradient(circle, #000000 1px, rgba(0, 0, 0, 0) 1px)`,
+    backgroundImage: [
+      // `${gradient}(${s.rot}, ${sq} ${s.line}, ${o} ${s.line})`,
+      // `${gradient}(${sq} ${s.line}, ${o} ${s.line})`,
+      // `${gradient}(${s.rot}, ${outline} ${s.line}, ${o} ${s.line})`,
+      // `${gradient}(${outline} ${s.line}, ${o} ${s.line})`,
+      // `${gradient}(${o} ${s.sq}, ${bg} ${s.sq}, ${bg} ${s.grid}, ${o} ${s.grid})`,
+      // `${gradient}(${s.rot}, ${corner} ${s.line}, ${o} ${s.line})`,
+      // `${gradient}(${s.rot}, ${o} ${s.sq}, ${bg} ${s.sq}, ${bg} ${s.grid}, ${o} ${s.grid})`,
+      // `${gradient}(${corner} ${s.line}, ${o} ${s.line})`,
+      `linear-gradient(to right, ${divider} 1px, transparent 1px)`,
+      `linear-gradient(to bottom, ${divider} 1px, transparent 1px)`,
+      `linear-gradient(to right, ${divider} 1px, transparent 1px)`,
+      `linear-gradient(to bottom, ${divider} 1px, transparent 1px)`,
+      `radial-gradient(circle at 0% 0%, ${dot} 2px, transparent 2px)`,
+      `radial-gradient(circle at 100% 0%, ${dot} 2px, transparent 2px)`,
+      `radial-gradient(circle at 100% 100%, ${dot} 2px, transparent 2px)`,
+      `radial-gradient(circle at 0% 100%, ${dot} 2px, transparent 2px)`,
+    ].join(', '),
     backgroundSize: [
-      '10px 10px',
-      '10px 10px',
-      '100px 100px',
-      '100px 100px',
-      '100px 100px',
-      '100px 100px',
-      '100px 100px',
-      '100px 100px',
-    ].join(','),
-    // position: 'relative',
+      // '40px 40px',
+      // '40px 40px',
+      // '40px 40px',
+      // '10px 10px',
+      // '100px 100px',
+      // '100px 100px',
+      // '100px 100px',
+      // '100px 100px',
+      // '100px 100px',
+      `${minor} ${minor}`,
+      `${minor} ${minor}`,
+      `${major} ${major}`,
+      `${major} ${major}`,
+      `${major} ${major}`,
+      `${major} ${major}`,
+      `${major} ${major}`,
+      `${major} ${major}`,
+    ].join(', '),
   }
 })
 
 export interface ViewportRootComponentProps
-  extends JSX.ComponentProps<typeof AglynViewport> {
-  // drawerWidth?: number
-  component?
-}
+  extends JSX.ComponentProps<typeof AglynViewport> {}
 
 export const ViewportRootComponent = forwardRef<
   any,
@@ -87,8 +105,6 @@ export const ViewportRootComponent = forwardRef<
       ref={ref}
       id="aglyn:viewport-root"
       aria-label="besigner viewport root"
-      component="main"
-      // drawerWidth={left?.drawerWidth}
       {...rest}
     >
       {children}

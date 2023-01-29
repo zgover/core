@@ -131,7 +131,7 @@ export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
             ...styles[region],
             visibility: visible ? 'visible' : 'hidden',
           }}
-          transition={{ type: 'spring' }}
+          transition={{ type: 'keyframes' }}
           {...rest}
         >
           <div className={classes.handle} />

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import type { Modifier } from '@dnd-kit/core'
 import {
   DndContext,
   KeyboardSensor,
@@ -26,11 +27,33 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
+import { getEventCoordinates } from '@dnd-kit/utilities'
 import type { BackendFactory } from 'dnd-core'
 import { DndProvider } from 'react-dnd'
 // import {TouchBackend} from 'react-dnd-touch-backend'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
+export const snapDraggingToCursor: Modifier = ({
+  activatorEvent,
+  draggingNodeRect,
+  transform,
+}) => {
+  if (draggingNodeRect && activatorEvent) {
+    const activatorCoordinates = getEventCoordinates(activatorEvent)
+    if (!activatorCoordinates) return transform
+
+    const offsetX = activatorCoordinates.x - draggingNodeRect.left
+    const offsetY = activatorCoordinates.y - draggingNodeRect.top
+
+    return {
+      ...transform,
+      x: transform.x + offsetX + 2,
+      y: transform.y + offsetY + 2,
+    }
+  }
+
+  return transform
+}
 export interface BesignerDndContextProps<BackendContext, BackendOptions> {
   children?: JSX.Children
   backend?: BackendFactory
@@ -63,6 +86,7 @@ export function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
     <DndProvider backend={HTML5Backend} options={opts} {...rest} debugMode>
       <DndContext
         sensors={sensors}
+        modifiers={[snapDraggingToCursor]}
         collisionDetection={pointerWithin}
         measuring={{
           droppable: {
