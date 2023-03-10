@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ export interface NextLinkProps extends NextLinkBaseProps, NextLinkBaseProps {
   hrefAs?: LinkProps['as']
 }
 
-const NextLink = forwardRef<any, NextLinkProps>((props, ref) => {
+export const NextLink = forwardRef<any, NextLinkProps>((props, ref) => {
   const {
     as: _1,
     href: _2,
@@ -46,7 +46,7 @@ const NextLink = forwardRef<any, NextLinkProps>((props, ref) => {
     hrefTo,
     replace,
     scroll,
-    passHref,
+    passHref = true,
     shallow,
     prefetch,
     locale,
@@ -74,9 +74,5 @@ const NextLink = forwardRef<any, NextLinkProps>((props, ref) => {
 
 NextLink.displayName = 'NextLink'
 NextLink.aglyn = true
-NextLink.defaultProps = {
-  passHref: true,
-}
 
-export { NextLink }
 export default NextLink

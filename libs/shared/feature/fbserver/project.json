@@ -6,21 +6,33 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared/feature/fbserver",
         "main": "libs/shared/feature/fbserver/src/index.ts",
         "tsConfig": "libs/shared/feature/fbserver/tsconfig.lib.json",
-        "assets": ["libs/shared/feature/fbserver/*.md"]
+        "assets": [
+          "libs/shared/feature/fbserver/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/shared/feature/fbserver/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/shared/feature/fbserver/**/*.ts"
+        ]
       }
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:feature"]
+  "tags": [
+    "scope:lib",
+    "scope:shared",
+    "scope:feature"
+  ]
 }

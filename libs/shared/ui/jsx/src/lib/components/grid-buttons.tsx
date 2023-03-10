@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ export interface GridButtonsProps<P = MuiButtonProps> extends MuiGridProps {
 
 export const GridButtons = forwardRef<any, GridButtonsProps<any>>(
   (props, ref) => {
-    const { items, ItemComponent = Button, ...rest } = props
+    const { items = [], ItemComponent = Button, ...rest } = props
     return (
       <GridItems
         ref={ref}
@@ -44,9 +44,5 @@ export const GridButtons = forwardRef<any, GridButtonsProps<any>>(
 
 GridButtons.displayName = 'GridButtons'
 GridButtons.aglyn = true
-GridButtons.defaultProps = {
-  items: [],
-  ItemComponent: Button,
-}
 
 export default GridButtons

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,55 +31,54 @@ import PanelControlsComponent from './panel-controls.component'
 export interface AppBarSecondaryComponentProps
   extends Partial<MuiAppBarProps> {}
 
-const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponentProps>(
-  (props, ref) => {
-    const { children, sx, ...rest } = props
+export const AppBarSecondaryComponent = forwardRef<
+  any,
+  AppBarSecondaryComponentProps
+>((props, ref) => {
+  const { children, sx, ...rest } = props
 
-    return (
-      <MuiAppBar
-        ref={ref}
-        id="aglyn:besigner-appbar-secondary"
-        aria-label="secondary app toolbar"
-        position="static"
-        color="surface"
-        component="header"
-        elevation={0}
-        sx={mergeSxProps(
-          {
-            top: 0,
-            borderBottomWidth: '1px',
-            borderBottomStyle: 'solid',
-            borderBottomColor: 'divider',
-            [`& .MuiToolbar-root`]: { minHeight: 40 },
-          },
-          sx,
-        )}
-        {...rest}
-      >
-        <MuiToolbar variant="dense" sx={{ pr: { xs: 2, sm: 2 } }}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            width={1}
-            spacing={1}
-          >
-            <AddControlsComponent />
-            <HistoryControlsComponent sx={{ flexGrow: 1 }} />
-            <DevicePreviewControlsComponent />
-            {/*<InteractControlsComponent />*/}
-            <PanelControlsComponent />
-            {children}
-          </Stack>
-        </MuiToolbar>
-      </MuiAppBar>
-    )
-  },
-)
+  return (
+    <MuiAppBar
+      ref={ref}
+      id="aglyn:besigner-appbar-secondary"
+      aria-label="secondary app toolbar"
+      position="static"
+      color="surface"
+      component="header"
+      elevation={0}
+      sx={mergeSxProps(
+        {
+          top: 0,
+          borderBottomWidth: '1px',
+          borderBottomStyle: 'solid',
+          borderBottomColor: 'divider',
+          [`& .MuiToolbar-root`]: { minHeight: 40 },
+        },
+        sx,
+      )}
+      {...rest}
+    >
+      <MuiToolbar variant="dense" sx={{ pr: { xs: 2, sm: 2 } }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          width={1}
+          spacing={1}
+        >
+          <AddControlsComponent />
+          <HistoryControlsComponent sx={{ flexGrow: 1 }} />
+          <DevicePreviewControlsComponent />
+          {/*<InteractControlsComponent />*/}
+          <PanelControlsComponent />
+          {children}
+        </Stack>
+      </MuiToolbar>
+    </MuiAppBar>
+  )
+})
 
 AppBarSecondaryComponent.displayName = 'AppBarSecondaryComponent'
 AppBarSecondaryComponent.aglyn = true
-AppBarSecondaryComponent.defaultProps = {}
 
-export { AppBarSecondaryComponent }
 export default AppBarSecondaryComponent

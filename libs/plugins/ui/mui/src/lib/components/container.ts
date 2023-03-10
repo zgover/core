@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,15 @@
  * limitations under the License.
  */
 
-import {
-  type AglynComponentSchema,
-  ComponentCategory,
-  type ComponentId,
-  FieldComponentType,
-} from '@aglyn/core-data-foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import { mdiViewArrayOutline } from '@aglyn/shared-ui-mdi-jsx'
 import Container, { type ContainerProps } from '@mui/material/Container'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: ComponentId = 'container'
+const ID: Aglyn.ComponentId = 'container'
 
-export const schema: AglynComponentSchema<ContainerProps> = {
+export const schema: Aglyn.ComponentSchema<ContainerProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Container',
@@ -41,20 +36,20 @@ export const schema: AglynComponentSchema<ContainerProps> = {
       name: 'fixed',
       description:
         "If true, set the max-width to match the min-width of the current breakpoint. This is useful if you'd prefer to design for a fixed set of sizes instead of trying to accommodate a fully fluid viewport. It's fluid by default.",
-      component: FieldComponentType.SWITCH,
+      component: Aglyn.FieldComponentType.SWITCH,
       label: 'Fixed Breakpoints',
     },
     {
       name: 'disableGutters',
       description: 'If true, the left and right padding is removed.',
-      component: FieldComponentType.SWITCH,
+      component: Aglyn.FieldComponentType.SWITCH,
       label: 'Disable Gutters?',
     },
     {
       name: 'maxWidth',
       description:
         'Determine the max-width of the container. The container width grows with the size of the screen. Set to `false` to disable `maxWidth`',
-      component: FieldComponentType.SELECT,
+      component: Aglyn.FieldComponentType.SELECT,
       label: 'Max Width',
       options: [
         { value: '', label: 'Default' },
@@ -67,22 +62,24 @@ export const schema: AglynComponentSchema<ContainerProps> = {
       ],
     },
   ],
-  presets: [
-    {
-      $id: generatePresetId(ID),
-      label: 'Container',
-      icon: {
-        path: mdiViewArrayOutline.path,
-        sx: { color: '#2196f3' },
-      },
-      category: ComponentCategory.LAYOUT,
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        props: {},
-      },
-    },
-  ],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'Container',
+    icon: {
+      path: mdiViewArrayOutline.path,
+      sx: { color: '#2196f3' },
+    },
+    category: Aglyn.ComponentCategory.LAYOUT,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {},
+    },
+  },
+]
 
 export default Container

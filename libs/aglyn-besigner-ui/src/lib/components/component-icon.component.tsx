@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { ICON_VARIANT_ELEMENT } from '@aglyn/shared-data-enums'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { observer } from 'mobx-react-lite'
 import { isElement, isValidElementType } from 'react-is'
 
@@ -26,27 +25,20 @@ export interface ComponentIconProps extends MdiIconProps {
   component?: Aglyn.ComponentSchema
 }
 
-const ComponentIcon = (props: ComponentIconProps) => {
-  const { component, sx, ...rest } = props
+export const ComponentIconComponent = observer((props: ComponentIconProps) => {
+  const { component, ...rest } = props
   const Icon = component?.icon
 
   if (isElement(Icon)) return Icon
 
   return (
     <MdiIcon
-      fontSize="inherit"
-      color="inherit"
       path={Icon?.path || ICON_VARIANT_ELEMENT.path}
-      sx={mergeSxProps(sx, Icon?.sx)}
-      {...(isValidElementType(Icon) ? { component: Icon } : { ...Icon })}
+      {...(isValidElementType(Icon) ? { component: Icon } : {})}
       {...rest}
     />
   )
-}
-ComponentIcon.displayName = 'ComponentIconComponent'
-ComponentIcon.defaultProps = {}
+})
+ComponentIconComponent.displayName = 'ComponentIconComponent'
 
-const ComponentIconComponent = observer<ComponentIconProps>(ComponentIcon)
-
-export { ComponentIconComponent }
 export default ComponentIconComponent

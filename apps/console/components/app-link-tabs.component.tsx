@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,86 +67,84 @@ export interface AppLinkTabsProps extends Partial<MuiTabsProps> {
   activeTab?: string
 }
 
-const AppLinkTabsComponent = forwardRef<any, AppLinkTabsProps>((props, ref) => {
-  const { children, items, activeTab, sx, ...rest } = props
-  const router = useRouter()
-  const tabValue = useMemo(() => {
-    const asPath = router.asPath,
-      active = activeTab,
-      specific = typeof active !== 'undefined'
-    return (
-      items.find((i) => {
-        const href = i?.href,
-          as = i?.hrefAs,
-          id = i?.id
-        if (specific) return active === href || active === as || active === id
-        return asPath === href || asPath === as || asPath === id
-      })?.href || false
-    )
-  }, [router, items, activeTab])
+export const AppLinkTabsComponent = forwardRef<any, AppLinkTabsProps>(
+  (props, ref) => {
+    const { children, items = [], activeTab, sx, ...rest } = props
+    const router = useRouter()
+    const tabValue = useMemo(() => {
+      const asPath = router.asPath,
+        active = activeTab,
+        specific = typeof active !== 'undefined'
+      return (
+        items.find((i) => {
+          const href = i?.href,
+            as = i?.hrefAs,
+            id = i?.id
+          if (specific) return active === href || active === as || active === id
+          return asPath === href || asPath === as || asPath === id
+        })?.href || false
+      )
+    }, [router, items, activeTab])
 
-  return (
-    <MuiTabs
-      ref={ref}
-      aria-label="area navigation"
-      indicatorColor="secondary"
-      scrollButtons="auto"
-      textColor="inherit"
-      value={tabValue}
-      variant="scrollable"
-      sx={mergeSxProps(
-        {
-          minHeight: TAB_HEIGHT,
-          alignItems: 'center',
-          '& .MuiTabs-flexContainer': {
+    return (
+      <MuiTabs
+        ref={ref}
+        aria-label="area navigation"
+        indicatorColor="secondary"
+        scrollButtons="auto"
+        textColor="inherit"
+        value={tabValue}
+        variant="scrollable"
+        sx={mergeSxProps(
+          {
+            minHeight: TAB_HEIGHT,
             alignItems: 'center',
-          },
-          '& .MuiTabs-indicator': {
-            height: '3px',
-            backgroundColor: 'unset',
-            '&:after': {
-              borderRadius: '3px 3px 0 0',
-              content: '" "',
-              display: 'block',
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              right: 0,
-              mx: 'auto',
-              width: 0.8,
-              height: 1,
-              backgroundColor: 'secondary.light',
+            '& .MuiTabs-flexContainer': {
+              alignItems: 'center',
+            },
+            '& .MuiTabs-indicator': {
+              height: '3px',
+              backgroundColor: 'unset',
+              '&:after': {
+                borderRadius: '3px 3px 0 0',
+                content: '" "',
+                display: 'block',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                right: 0,
+                mx: 'auto',
+                width: 0.8,
+                height: 1,
+                backgroundColor: 'secondary.light',
+              },
             },
           },
-        },
-        sx,
-      )}
-      {...rest}
-    >
-      {children}
-      {items.map(({ icon, href, ...item }, key) => (
-        <TabItem
-          key={item.key ?? item.id ?? key}
-          href={href ?? ''}
-          value={href ?? item.key ?? item.id ?? key}
-          icon={(icon?.path ? <MdiIcon {...icon} /> : undefined) as any}
-          componentVariant="naked"
-          component={AppLink}
-          color="inherit"
-          underline="none"
-          wrapped
-          {...a11yProps(key)}
-          {...item}
-        />
-      ))}
-    </MuiTabs>
-  )
-})
+          sx,
+        )}
+        {...rest}
+      >
+        {children}
+        {items.map(({ icon, href, ...item }, key) => (
+          <TabItem
+            key={item.key ?? item.id ?? key}
+            href={href ?? ''}
+            value={href ?? item.key ?? item.id ?? key}
+            icon={(icon?.path ? <MdiIcon {...icon} /> : undefined) as any}
+            componentVariant="naked"
+            component={AppLink}
+            color="inherit"
+            underline="none"
+            wrapped
+            {...a11yProps(key)}
+            {...item}
+          />
+        ))}
+      </MuiTabs>
+    )
+  },
+)
 AppLinkTabsComponent.displayName = 'AppLinkTabsComponent'
 AppLinkTabsComponent.aglyn = true
-AppLinkTabsComponent.defaultProps = {
-  items: [],
-}
 
-export { AppLinkTabsComponent }
 export default AppLinkTabsComponent

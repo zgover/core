@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export * from './lib/hooks/use-aglyn-canvas-elements-normalized'
 export * from './lib/hooks/use-aglyn-canvas-elements-denormalized'
 export * from './lib/hooks/use-aglyn-component'
 export * from './lib/hooks/use-aglyn-component-schema'
-export * from '@aglyn/core-feature-renderer/hooks/use-aglyn-node-presets'
+export * from './lib/hooks/use-aglyn-node-presets'
 export * from './lib/hooks/use-aglyn-element-component'
 export * from './lib/hooks/use-aglyn-element-component-schema'
 export * from './lib/hooks/use-aglyn-element-data'

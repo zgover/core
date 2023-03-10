@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,14 +50,14 @@ export const ToggleButtonComponent = (props: ToggleButtonProps) => {
     description,
     validateOnMount,
     meta,
-    FormFieldGridProps,
-    FormControlProps,
-    FormGroupProps,
-    FormControlLabelProps,
-    ToggleButtonProps,
-    ToggleButtonGroupProps,
-    FormLabelProps,
-    FormHelperTextProps,
+    FormFieldGridProps = {},
+    FormControlProps = {},
+    FormGroupProps = {},
+    FormControlLabelProps = {},
+    ToggleButtonProps = {},
+    ToggleButtonGroupProps = {},
+    FormLabelProps = {},
+    FormHelperTextProps = {},
     inputProps,
     options,
     ...rest
@@ -122,16 +122,6 @@ export const ToggleButtonComponent = (props: ToggleButtonProps) => {
     </FormFieldGrid>
   )
 }
-
-ToggleButtonComponent.defaultProps = {
-  FormFieldGridProps: {},
-  FormControlProps: {},
-  FormGroupProps: {},
-  FormControlLabelProps: {},
-  ToggleButtonProps: {},
-  ToggleButtonGroupProps: {},
-  FormLabelProps: {},
-  FormHelperTextProps: {},
-}
+ToggleButtonComponent.displayName = 'ToggleButtonComponent'
 
 export default ToggleButtonComponent

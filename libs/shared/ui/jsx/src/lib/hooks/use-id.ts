@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import { useId as useReactId, useMemo } from 'react'
  */
 export function useId(id?: JSX.Key): JSX.Key {
   const serverId = useReactId()
-  return useMemo(() => id || serverId, [id, serverId])
+  return useMemo(() => id ?? serverId, [id, serverId])
 }
 
 export default useId

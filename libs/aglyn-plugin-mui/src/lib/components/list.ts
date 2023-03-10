@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,11 @@ import * as Aglyn from '@aglyn/aglyn'
 import { mdiFormatListBulletedSquare } from '@aglyn/shared-ui-mdi-jsx'
 import List from '@mui/material/List'
 import { PLUGIN_ID } from '../constants/common'
-import { schema as listItemSchema } from './list-item'
+import generatePresetId from '../utils/generate-preset-id'
+import {
+  presets as listItemPresets,
+  schema as listItemSchema,
+} from './list-item'
 
 export const ID: Aglyn.ComponentId = 'muiList'
 
@@ -36,5 +40,27 @@ export const schema: Aglyn.ComponentSchema = {
     },
   ],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'List',
+    icon: { path: mdiFormatListBulletedSquare.path },
+    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: PLUGIN_ID,
+      nodes: [
+        {
+          ...listItemPresets[0].data,
+        },
+        {
+          ...listItemPresets[0].data,
+        },
+      ],
+    },
+  },
+]
 
 export default List

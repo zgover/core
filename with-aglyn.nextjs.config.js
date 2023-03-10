@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,31 @@ const IS_TEST = NODE_ENV === 'test'
 
 const ANALYZE_BUNDLE = process.env.NEXT_ANALYZE_BUNDLE === 'true'
 
-let REMOTE_DOMAINS = [
-  // TLD: .io
+const PRODUCTION_DOMAINS = [
   'aglyn.io',
-  'www.aglyn.io',
-  'console.aglyn.io',
+  'admin.aglyn.com',
   'admin.aglyn.io',
-  'cdn.aglyn.io',
-  'cname.aglyn.io',
-  'tenant.aglyn.io',
-  // TLD: .com
   'aglyn.com',
-  // TLD: .app
-  'aglyn.app',
-  'localhost:4500',
-  'myhost-1.localhost:4500',
+  'app.aglyn.com',
+  'app.aglyn.io',
+  'cdn.aglyn.com',
+  'cdn.aglyn.io',
+  'cname.aglyn.com',
+  'cname.aglyn.io',
+  'console.aglyn.com',
+  'console.aglyn.io',
+  'demo.aglyn.com',
+  'demo.aglyn.io',
+  'host.aglyn.com',
+  'host.aglyn.io',
+  'io.aglyn.com',
+  'io.aglyn.io',
+  'proxy.aglyn.com',
+  'proxy.aglyn.io',
+  'tenant.aglyn.com',
+  'tenant.aglyn.io',
+  'www.aglyn.com',
+  'www.aglyn.io',
 
   // // Ideas
   // 'app.aglyn.com',
@@ -58,22 +68,27 @@ let REMOTE_DOMAINS = [
   // 'host.aglyn.com',
   // 'hostname.aglyn.com',
 ]
-let LOCAL_DOMAINS = [
-  'localhost',
-  'localhost:4000',
-  'localhost:4100',
-  'localhost:4200', // console
-  'localhost:4210',
-  'localhost:4300',
-  'localhost:4400',
-  'localhost:4500', // tenant
-]
-const REMOTE_URLS = REMOTE_DOMAINS.map((i) => `https://${i}`)
-const LOCAL_URLS = REMOTE_DOMAINS.map((i) => `http://${i}`)
-const SAFE_DOMAINS = !IS_PRODUCTION
-  ? REMOTE_DOMAINS.concat(LOCAL_DOMAINS)
-  : REMOTE_DOMAINS
+
+const DEVELOPMENT_DOMAINS = IS_PRODUCTION
+  ? []
+  : [
+      'localhost',
+      'localhost:4000',
+      'localhost:4100',
+      'localhost:4200', // console / app
+      'localhost:4210',
+      'localhost:4300',
+      'localhost:4400',
+      'localhost:4500', // tenant
+    ]
+
+const REMOTE_URLS = PRODUCTION_DOMAINS.map((i) => `https://${i}`)
+const LOCAL_URLS = PRODUCTION_DOMAINS.map((i) => `http://${i}`)
 const SAFE_URLS = !IS_PRODUCTION ? REMOTE_URLS.concat(LOCAL_URLS) : REMOTE_URLS
+
+const SAFE_DOMAINS = !IS_PRODUCTION
+  ? PRODUCTION_DOMAINS.concat(DEVELOPMENT_DOMAINS)
+  : PRODUCTION_DOMAINS
 
 const SECURITY_HEADERS = [
   /**
@@ -169,12 +184,13 @@ const AGLYN_CONFIG = {
      * @see {@link https://docs.rs/regex | Rust Regex Docs}
      * @inheritDoc
      */
-    reactRemoveProperties: { properties: ['^data-test'] },
+    reactRemoveProperties: { properties: ['^data-test', 'displayName'] },
 
     /**
      * ssr and displayName are configured by default
      */
     // styledComponents: true,
+    // emotion: {}
   },
 
   /**
@@ -204,33 +220,22 @@ const AGLYN_CONFIG = {
     ignoreDuringBuilds: IS_PRODUCTION,
   },
   experimental: {
-    optimizeImages: IS_PRODUCTION,
-    // optimizeCss: true,
-    /**
-     * Next.js can automatically create a standalone folder which copies only
-     * the necessary files for a production deployment including select files in
-     * node_modules
-     */
-    outputStandalone: false,
-    /**
-     * Concurrent features in React 18 include built-in support for server-side
-     * Suspense and SSR streaming support, allowing you to server-render pages
-     * using HTTP streaming
-     */
-    concurrentFeatures: false,
-    /**
-     * React Server Components allow us to render everything, including the
-     * components themselves, on the server. This is fundamentally different
-     * from server-side rendering where you're pre-generating HTML on the server
-     */
-    serverComponents: false,
     workerThreads: true,
 
     /**
      * required to stop the FATAL heap crash
      */
     esmExternals: false,
+
+    // optimizeCss: true,
   },
+  /**
+   * Next.js can automatically create a standalone folder which copies only
+   * the necessary files for a production deployment including select files in
+   * node_modules
+   */
+  // output: 'standalone',
+
   pageExtensions: ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'],
   generateEtags: true,
   headers: async () => {
@@ -247,14 +252,14 @@ const AGLYN_CONFIG = {
      * deviceSizes
      * DEFAULT [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
      */
-    deviceSizes: [600, 768, 900, 1080, 1200, 1536, 1920, 2560],
+    deviceSizes: [640, 768, 828, 1080, 1200, 1920, 2048, 3840],
     disableStaticImages: false,
     domains: SAFE_DOMAINS,
     /**
      * imageSizes
      * DEFAULT: [16, 32, 48, 64, 96, 128, 256, 384]
      */
-    imageSizes: [24, 40, 64, 96, 144, 256, 390, 512],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/avif', 'image/webp'],
     loader: 'default',
     minimumCacheTTL: 60 * 60 * 24, // 24hrs = 86400sec
@@ -267,20 +272,21 @@ const AGLYN_CONFIG = {
      */
     svgr: false,
   },
-  onDemandEntries: {
-    /**
-     * period (in ms) where the server will keep pages in the buffer
-     */
-    maxInactiveAge: 1000 * 30,
-    /**
-     * number of pages that should be kept simultaneously without being disposed
-     */
-    pagesBufferLength: 2,
-  },
+  // onDemandEntries: {
+  //   /**
+  //    * period (in ms) where the server will keep pages in the buffer
+  //    */
+  //   maxInactiveAge: 1000 * 30,
+  //   /**
+  //    * number of pages that should be kept simultaneously without being disposed
+  //    */
+  //   pagesBufferLength: 2,
+  // },
   optimizeFonts: IS_PRODUCTION,
   // outputFileTracing: true,
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
+
   /**
    * Available on both server and client
    */
@@ -346,8 +352,10 @@ function withAglyn(nextConfig = {}) {
    * @returns WithAglynOptions
    **/
   const handleUserConfig = (userConfig = {}) => {
-    const merged = deepFillIn(AGLYN_CONFIG, userConfig),
-      aglynConfig = merged.aglyn
+    const { aglyn: aglynConfig, ...merged } = deepFillIn(
+      AGLYN_CONFIG,
+      userConfig,
+    )
 
     return {
       ...merged,

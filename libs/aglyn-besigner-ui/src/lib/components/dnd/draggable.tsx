@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,44 +21,80 @@ import useId from '@aglyn/shared-ui-jsx/hooks/use-id'
 import { useDraggable } from '@dnd-kit/core'
 import { mergeProps } from '@react-aria/utils'
 import type * as CSS from 'csstype'
-import { Children, cloneElement } from 'react'
+import { observer } from 'mobx-react-lite'
+import { Children, cloneElement, forwardRef, MutableRefObject } from 'react'
 
-export interface DraggableProps<T extends { $id: string }> {
-  children: JSX.Element
+export interface DraggableChildProps<T extends { $id?: string }>
+  extends Omit<DraggableProps<T>, 'children'> {
+  draggable: ReturnType<typeof useDraggable>
+  style: CSS.Properties
+  forwardRef: MutableRefObject<any>
+}
+export type DraggableChild<T extends { $id?: string }> = (
+  props: DraggableChildProps<T>,
+) => JSX.Element
+
+export interface DraggableProps<T extends { $id?: string }> {
+  children: JSX.Element | DraggableChild<T>
   node: T
   type: Besigner.DragType
   disabled?: boolean
+  idSuffix?: string
 }
 
-const Draggable = <T extends { $id: string }>(props: DraggableProps<T>) => {
-  const { node, type, disabled, children } = props
-  const id = useId(node?.$id)
+const Draggable = observer(
+  forwardRef(<T extends { $id?: string }>(props: DraggableProps<T>, ref) => {
+    const { children, ...rest } = props
+    const { node, type, disabled, idSuffix } = rest
+    const id = useId(node?.$id)
 
-  const draggable = useDraggable({
-    id: `drag:${id}:${type}`,
-    data: { type, node },
-    disabled,
-  })
+    const draggable = useDraggable({
+      id: `${id}:${type}${idSuffix || ''}`,
+      data: { type, node },
+      disabled,
+    })
 
-  const transform = draggable.transform
-  const child = Children.only(children)
-  const style: CSS.Properties = { ...child.props.style, cursor: 'move' }
+    const transform = draggable.transform
+    const style: CSS.Properties = {
+      cursor: 'move',
+      ...(draggable.isDragging
+        ? {
+            outlineColor: 'grey',
+            outlineStyle: 'double',
+            outlineOffset: -1 as any,
+            opacity: 0.5,
+            cursor: 'move',
+          }
+        : {}),
+      ...(transform
+        ? {
+            transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+            cursor: 'grab',
+          }
+        : {}),
+    }
 
-  if (transform) {
-    style.transform = `translate3d(${transform.x}px, ${transform.y}px, 0)`
-    style.cursor = 'grab'
-  }
+    if (typeof children === 'function') {
+      return children({
+        ...rest,
+        style,
+        draggable,
+        forwardRef: ref,
+      })
+    }
 
-  return cloneElement(
-    child,
-    mergeProps(child.props, {
-      ref: mergeRefs(child.props.ref, draggable.setNodeRef),
-      style,
-      ...draggable.listeners,
-      ...draggable.attributes,
-    }),
-  )
-}
+    const child = Children.only(children)
+    return cloneElement(
+      child,
+      mergeProps(child.props, {
+        ref: mergeRefs(ref, child.props.ref, draggable.setNodeRef),
+        style,
+        ...draggable.listeners,
+        ...draggable.attributes,
+      }),
+    )
+  }),
+)
 Draggable.displayName = 'Draggable'
 
 export default Draggable

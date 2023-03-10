@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,19 +29,15 @@ import {
   AglynConsoleLogoFull,
   AppLink,
   type AppLinkProps,
-  ElevateOnScroll,
   Menu,
   type MenuItemProps,
   type MenuProps,
+  ScrollReaction,
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
-import {
-  getThemeModeDisplayName,
-  mergeSxProps,
-  useThemeMode,
-} from '@aglyn/shared-ui-theme'
+import { getThemeModeDisplayName, mergeSxProps } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
 import { useUserPhoto } from '@aglyn/tenant-feature-instance'
 import {
@@ -58,6 +54,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
+import { useColorScheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
 import { buildRoute, Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
@@ -149,7 +146,7 @@ const TopAppBar = (props: TopAppBarProps) => {
   } = props
 
   return (
-    <ElevateOnScroll>
+    <ScrollReaction>
       {({ activeWithoutHysteresis }) => (
         <AppBar
           component="header"
@@ -286,7 +283,7 @@ const TopAppBar = (props: TopAppBarProps) => {
           </Toolbar>
         </AppBar>
       )}
-    </ElevateOnScroll>
+    </ScrollReaction>
   )
 }
 TopAppBar.displayName = 'TopAppBar'
@@ -317,7 +314,7 @@ export interface MainLayoutProps
   title?: string[] | string
 }
 
-function MainLayout(props: MainLayoutProps) {
+export function MainLayout(props: MainLayoutProps) {
   const {
     children,
     title,
@@ -331,8 +328,8 @@ function MainLayout(props: MainLayoutProps) {
     ...rest
   } = props
   const userPhotoUrl = useUserPhoto({ gravatar: { size: '64' } })
-  const [, toggleThemeMode, themeMode] = useThemeMode()
-  const themeModeDisplayName = getThemeModeDisplayName(themeMode)
+  const { mode, setMode } = useColorScheme()
+  const themeModeDisplayName = getThemeModeDisplayName(mode)
   const layoutTitle = useMemo(() => {
     return title ? [...(_isArr(title) ? title : [title]), 'Secure'] : 'Secure'
   }, [title])
@@ -396,14 +393,24 @@ function MainLayout(props: MainLayoutProps) {
               },
               items: [
                 {
-                  onClick: toggleThemeMode,
+                  onClick: () => {
+                    setMode(
+                      mode === 'dark'
+                        ? 'system'
+                        : mode === 'light'
+                        ? 'dark'
+                        : mode === 'system' || mode === undefined
+                        ? 'light'
+                        : 'system',
+                    )
+                  },
                   // component: 'button',
                   children: `Theme mode: ${themeModeDisplayName}`,
                   icon: {
                     path:
-                      themeMode === 'dark'
+                      mode === 'dark'
                         ? ICON_VARIANT_THEME_DARK.path
-                        : themeMode === 'light'
+                        : mode === 'light'
                         ? ICON_VARIANT_THEME_LIGHT.path
                         : ICON_VARIANT_THEME_SYSTEM.path,
                   },
@@ -436,7 +443,5 @@ function MainLayout(props: MainLayoutProps) {
 
 MainLayout.displayName = 'MainLayout'
 MainLayout.aglyn = true
-MainLayout.defaultProps = {}
 
-export { MainLayout }
 export default MainLayout

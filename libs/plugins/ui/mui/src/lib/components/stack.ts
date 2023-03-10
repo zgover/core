@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,15 @@
  * limitations under the License.
  */
 
-import {
-  type AglynComponentSchema,
-  ComponentCategory,
-  type ComponentId,
-} from '@aglyn/core-data-foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import { mdiViewColumn, mdiViewSequential } from '@aglyn/shared-ui-mdi-jsx'
-import Stack, { type StackProps } from '@mui/material/Stack'
+import Stack from '@mui/material/Stack'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: ComponentId = 'stack'
+const ID: Aglyn.ComponentId = 'stack'
 
-export const schema: AglynComponentSchema<StackProps> = {
+export const schema: Aglyn.ComponentSchema = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Stack',
@@ -36,38 +32,41 @@ export const schema: AglynComponentSchema<StackProps> = {
     sx: { color: '#2196f3' },
   },
   attributes: [],
-  presets: [
-    {
-      $id: generatePresetId(ID),
-      label: 'Stack Horizontal',
-      icon: {
-        path: mdiViewColumn.path,
-        sx: { color: '#2196f3' },
-      },
-      category: ComponentCategory.LAYOUT,
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        props: {},
-        sx: { flexDirection: 'row' },
-      },
-    },
-    {
-      $id: generatePresetId(ID, 'vertical'),
-      label: 'Stack Vertical',
-      icon: {
-        path: mdiViewSequential.path,
-        sx: { color: '#2196f3' },
-      },
-      category: ComponentCategory.LAYOUT,
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        props: {},
-        sx: { flexDirection: 'column' },
-      },
-    },
-  ],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'Stack Horizontal',
+    icon: {
+      path: mdiViewColumn.path,
+      sx: { color: '#2196f3' },
+    },
+    category: Aglyn.ComponentCategory.LAYOUT,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {},
+      sx: { flexDirection: 'row' },
+    },
+  },
+  {
+    $id: generatePresetId(ID, 'vertical'),
+    displayName: 'Stack Vertical',
+    icon: {
+      path: mdiViewSequential.path,
+      sx: { color: '#2196f3' },
+    },
+    category: Aglyn.ComponentCategory.LAYOUT,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {},
+      sx: { flexDirection: 'column' },
+    },
+  },
+]
 
 export default Stack

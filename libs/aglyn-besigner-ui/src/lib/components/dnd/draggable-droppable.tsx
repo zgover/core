@@ -19,8 +19,9 @@ import * as Besigner from '@aglyn/besigner'
 import { mergeRefs } from '@aglyn/shared-ui-jsx'
 import useId from '@aglyn/shared-ui-jsx/hooks/use-id'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
+import { CSS as css } from '@dnd-kit/utilities'
 import { mergeProps } from '@react-aria/utils'
-import * as CSS from 'csstype'
+import type * as CSS from 'csstype'
 import { observer } from 'mobx-react-lite'
 import { Children, cloneElement, useEffect, useRef } from 'react'
 
@@ -31,22 +32,30 @@ export interface DraggableDroppableProps<T extends { $id: string }> {
   accept: Besigner.DragType[]
   disableDragging?: boolean
   disableDropping?: boolean
+  idSuffix?: string
 }
 
 export const DraggableDroppable = observer(
   <T extends { $id: string }>(props: DraggableDroppableProps<T>) => {
-    const { node, type, disableDragging, disableDropping, accept, children } =
-      props
+    const {
+      node,
+      type,
+      disableDragging,
+      disableDropping,
+      accept,
+      children,
+      idSuffix,
+    } = props
     const id = useId(node?.$id)
 
     const draggable = useDraggable({
-      id: `drag:${id}:${type}`,
+      id: `${id}:${type}${idSuffix || ''}`,
       data: { type, node },
       disabled: disableDragging,
     })
 
     const droppable = useDroppable({
-      id: `drop:${id}:${type}`,
+      id: `${id}:${type}${idSuffix || ''}`,
       data: { type, node, accept },
       disabled: disableDropping,
     })
@@ -57,19 +66,36 @@ export const DraggableDroppable = observer(
     const style: CSS.Properties = {
       ...child.props.style,
       // cursor: 'move',
-      outline: `1px dotted grey`,
-      outlineWidth: 1,
+      outlineWidth: 2,
+      outlineOffset: -1,
       outlineColor: 'grey',
       outlineStyle: 'dotted',
-      outlineOffset: 1,
-    }
-    if (isTransforming) {
-      style.transform = `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      // style.cursor = 'grab'
-    }
-    if (droppable.isOver) {
-      style.outlineColor = 'red'
-      style.outlineStyle = 'solid'
+      // transform: css.Transform.toString(transform),
+      // scale: css.Scale.toString(transform),
+      translate: css.Translate.toString(transform),
+
+      ...(isTransforming
+        ? {
+            // transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+            // cursor: 'grab',
+          }
+        : {}),
+      ...(droppable.isOver
+        ? {
+            outlineColor: 'lime',
+            outlineStyle: 'solid',
+            outlineOffset: '3',
+          }
+        : {}),
+      ...(draggable.isDragging
+        ? {
+            outlineColor: 'grey',
+            outlineStyle: 'double',
+            outlineOffset: -1 as any,
+            opacity: 0.5,
+            cursor: 'move',
+          }
+        : {}),
     }
 
     const ref = useRef<HTMLElement>(null)
@@ -120,7 +146,7 @@ export const DraggableDroppable = observer(
 
     return cloneElement(
       child,
-      mergeProps(child.props, {
+      mergeProps(child.props, draggable.attributes, {
         ref: mergeRefs(
           ref,
           child.props.ref,
@@ -128,7 +154,11 @@ export const DraggableDroppable = observer(
           droppable.setNodeRef,
         ),
         style,
-        ...draggable.attributes,
+        sx: {
+          '&, &:hover, &:focus': {
+            cursor: draggable.isDragging ? 'move' : 'initial',
+          },
+        },
       }),
     )
   },

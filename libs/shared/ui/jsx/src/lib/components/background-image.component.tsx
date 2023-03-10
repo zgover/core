@@ -29,7 +29,7 @@ interface OverrideProps {
 
 export type BackgroundImageComponentProps = MuiBoxProps<any, OverrideProps>
 
-const BackgroundImageComponent = styled(Box, {
+export const BackgroundImageComponent = styled(Box, {
   name: 'BackgroundImage',
   shouldForwardProp(propName) {
     return !_isEqualitySameType(
@@ -43,7 +43,13 @@ const BackgroundImageComponent = styled(Box, {
     )
   },
 })<BackgroundImageComponentProps>(
-  ({ url, parallax, bgRepeat, bgPosition, bgSize }) => ({
+  ({
+    url,
+    parallax,
+    bgRepeat = 'no-repeat',
+    bgPosition = 'bottom center',
+    bgSize = 'cover',
+  }) => ({
     backgroundColor: 'inherit',
     backgroundRepeat: bgRepeat,
     backgroundPosition: bgPosition,
@@ -55,11 +61,5 @@ const BackgroundImageComponent = styled(Box, {
 
 BackgroundImageComponent.displayName = 'BackgroundImageComponent'
 BackgroundImageComponent.aglyn = true
-BackgroundImageComponent.defaultProps = {
-  bgPosition: 'bottom center',
-  bgRepeat: 'no-repeat',
-  bgSize: 'cover',
-}
 
-export { BackgroundImageComponent }
 export default BackgroundImageComponent

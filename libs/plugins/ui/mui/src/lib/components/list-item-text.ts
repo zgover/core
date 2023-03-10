@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
  * limitations under the License.
  */
 
-import type {
-  AglynComponentSchema,
-  ComponentId,
-} from '@aglyn/core-data-foundation'
-import { ComponentCategory } from '@aglyn/core-data-foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import { mdiFormatListChecks } from '@aglyn/shared-ui-mdi-jsx'
 import ListItemText, {
   type ListItemTextProps,
@@ -27,29 +23,31 @@ import ListItemText, {
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: ComponentId = 'list-item-text'
+const ID: Aglyn.ComponentId = 'list-item-text'
 
-export const schema: AglynComponentSchema<ListItemTextProps> = {
+export const schema: Aglyn.ComponentSchema<ListItemTextProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'List Item Text',
   icon: { path: mdiFormatListChecks.path },
-  presets: [
-    {
-      $id: generatePresetId(ID),
-      label: 'List Item Text',
-      icon: { path: mdiFormatListChecks.path },
-      category: ComponentCategory.DATA_DISPLAY,
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        props: {
-          primary: 'Item Primary',
-          secondary: 'This is the secondary',
-        },
+}
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'List Item Text',
+    icon: { path: mdiFormatListChecks.path },
+    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {
+        primary: 'Item Primary',
+        secondary: 'This is the secondary',
       },
     },
-  ],
-}
+  },
+]
 
 export default ListItemText

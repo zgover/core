@@ -19,6 +19,7 @@ import type { Measurement } from '@aglyn/shared-data-enums'
 import '@aglyn/shared-data-jsx'
 import { forwardRef, useCallback } from 'react'
 import Box, { type BoxProps } from './components/box'
+import BoxButtonStyler from './components/box-button-styler'
 import Contents from './components/contents'
 import Legend, { LegendItem } from './components/legend'
 import MarginStyler from './components/margin-styler'
@@ -26,6 +27,9 @@ import PaddingStyler from './components/padding-styler'
 import type { Measurements } from './types'
 
 export { Measurements }
+
+const BTN_SIZE = 20
+const HEIGHT = 200
 
 export interface BoxStylerProps extends Omit<BoxProps, 'onChange'> {
   measurements?: Measurements
@@ -46,38 +50,41 @@ export const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
   )
 
   return (
-    <Box ref={ref} {...rest}>
-      <MarginStyler
-        onChange={handleChange}
-        marginTop={measurements?.marginTop}
-        marginRight={measurements?.marginRight}
-        marginBottom={measurements?.marginBottom}
-        marginLeft={measurements?.marginLeft}
-      >
-        <PaddingStyler
+    <>
+      <BoxButtonStyler />
+      <Box ref={ref} {...rest}>
+        <MarginStyler
           onChange={handleChange}
-          paddingTop={measurements?.paddingTop}
-          paddingRight={measurements?.paddingRight}
-          paddingBottom={measurements?.paddingBottom}
-          paddingLeft={measurements?.paddingLeft}
+          marginTop={measurements?.marginTop}
+          marginRight={measurements?.marginRight}
+          marginBottom={measurements?.marginBottom}
+          marginLeft={measurements?.marginLeft}
         >
-          <Contents />
-        </PaddingStyler>
-      </MarginStyler>
+          <PaddingStyler
+            onChange={handleChange}
+            paddingTop={measurements?.paddingTop}
+            paddingRight={measurements?.paddingRight}
+            paddingBottom={measurements?.paddingBottom}
+            paddingLeft={measurements?.paddingLeft}
+          >
+            <Contents />
+          </PaddingStyler>
+        </MarginStyler>
 
-      <Legend
-        direction="row"
-        alignItems="center"
-        justifyContent="space-around"
-        spacing={1}
-        marginTop={1}
-        marginBottom={2}
-      >
-        <LegendItem item={'margin'} />
-        <LegendItem item={'padding'} />
-        <LegendItem item={'contents'} />
-      </Legend>
-    </Box>
+        <Legend
+          direction="row"
+          alignItems="center"
+          justifyContent="space-around"
+          spacing={1}
+          marginTop={1}
+          marginBottom={2}
+        >
+          <LegendItem item={'margin'} />
+          <LegendItem item={'padding'} />
+          <LegendItem item={'contents'} />
+        </Legend>
+      </Box>
+    </>
   )
 })
 BoxStyler.displayName = 'BoxStyler'

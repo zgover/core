@@ -16,8 +16,10 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as Besigner from '@aglyn/besigner'
 import {
   ICON_VARIANT_MODIFY_ADD,
+  ICON_VARIANT_MODIFY_DRAG,
   ICON_VARIANT_SHOW_MORE_VERTICAL,
 } from '@aglyn/shared-data-enums'
 import { SrOnly, SrOnlyProps } from '@aglyn/shared-ui-jsx'
@@ -35,6 +37,7 @@ import {
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import { forwardRef } from 'react'
+import { Else, If, Then } from 'react-if'
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
 import ComponentIconComponent from './component-icon.component'
 import NodeContextMenu from './node-context-menu'
@@ -75,12 +78,14 @@ LabelAction.displayName = 'AglynLabelAction'
 
 export interface NodeQuickActionsProps extends StackProps {
   node: Aglyn.NodeSchema
+  variant?: 'label' | 'actions'
 }
 
 export const NodeQuickActions = observer(
   forwardRef<any, NodeQuickActionsProps>((props, ref) => {
-    const { node, children, ...rest } = props
+    const { node, children, variant, ...rest } = props
     const handleAddElementClick = useAddElementDrawerCallback()
+    const handleProps = Besigner.handles.get(node?.$id)
     return (
       <Stack
         ref={ref}
@@ -119,57 +124,100 @@ export const NodeQuickActions = observer(
         >
           <ComponentIconComponent
             component={node?.componentSchema}
-            color="inherit"
             fontSize="inherit"
-            sx={{ color: 'inherit' }}
           />
         </Stack>
-        <Typography
-          component="div"
-          textOverflow="ellipsis"
-          overflow="hidden"
-          whiteSpace="nowrap"
-          fontSize="inherit"
-          color="inherit"
-          sx={{
-            maxWidth: 80,
-          }}
-          children={node?.labelShort}
-        />
-        <Stack
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="center"
-          spacing={0.25}
-        >
-          <LabelAction
-            title="Add"
-            children={'add'}
-            disableInteractive
-            ButtonProps={{
-              onClick: () => handleAddElementClick(node),
-            }}
-            icon={{ path: ICON_VARIANT_MODIFY_ADD.path }}
-          />
-          <LabelAction
-            placement="right"
-            children={'add'}
-            icon={{ path: ICON_VARIANT_SHOW_MORE_VERTICAL.path }}
-            componentsProps={{
-              tooltip: {
-                sx: {
-                  padding: 0,
-                  m: -2,
-                },
-              },
-            }}
-            title={
-              <>
-                <NodeContextMenu node={node} />
-              </>
-            }
-          />
-        </Stack>
+        <If condition={variant !== 'actions'}>
+          <Then>
+            <Typography
+              component="div"
+              textOverflow="ellipsis"
+              overflow="hidden"
+              whiteSpace="nowrap"
+              fontSize="inherit"
+              color="inherit"
+              maxWidth={100}
+              title={node?.labelShort}
+            >
+              {node?.labelShort}
+            </Typography>
+          </Then>
+          <Else>
+            <Stack
+              direction="row"
+              justifyContent="flex-start"
+              alignItems="center"
+              spacing={0.25}
+            >
+              <LabelAction
+                title="move"
+                disableInteractive
+                ButtonProps={{
+                  ...handleProps,
+                  onClick: () => handleAddElementClick(node),
+                }}
+                icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}
+              >
+                {'move'}
+              </LabelAction>
+              <LabelAction
+                title="Add"
+                disableInteractive
+                ButtonProps={{
+                  onClick: () => handleAddElementClick(node),
+                }}
+                icon={{ path: ICON_VARIANT_MODIFY_ADD.path }}
+              >
+                {'add'}
+              </LabelAction>
+              <LabelAction
+                placement="right"
+                children={'add'}
+                icon={{ path: ICON_VARIANT_SHOW_MORE_VERTICAL.path }}
+                enterDelay={200}
+                leaveDelay={500}
+                componentsProps={{
+                  popper: {
+                    disablePortal: false,
+                    modifiers: [
+                      {
+                        name: 'flip',
+                        enabled: true,
+                        options: {
+                          altBoundary: true,
+                          rootBoundary: 'document',
+                          padding: 100,
+                        },
+                      },
+                      {
+                        name: 'preventOverflow',
+                        enabled: true,
+                        options: {
+                          altAxis: true,
+                          altBoundary: true,
+                          tether: true,
+                          rootBoundary: 'document',
+                          padding: 100,
+                        },
+                      },
+                      {
+                        name: 'arrow',
+                        enabled: true,
+                      },
+                    ],
+                  },
+                  tooltip: {
+                    sx: {
+                      padding: 0,
+                      m: -2,
+                    },
+                  },
+                }}
+                title={<NodeContextMenu node={node} />}
+              />
+            </Stack>
+          </Else>
+        </If>
       </Stack>
     )
   }),

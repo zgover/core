@@ -17,15 +17,12 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
-import { setBesignerCanvasHovered } from '@aglyn/besigner-data-app'
-import {
-  useAglynAppContext,
-  useAglynSiteTheme,
-} from '@aglyn/core-feature-renderer'
+import * as Besigner from '@aglyn/besigner'
+import { useAglynSiteTheme } from '@aglyn/core-feature-renderer'
 import {
   MuiShadowDom,
-  type ShadowRootProps,
-  useShadowDomContext,
+  type MuiShadowRootProps,
+  useMuiShadowDomContext,
 } from '@aglyn/shared-ui-jsx'
 import { styled, ThemeProvider } from '@aglyn/shared-ui-theme'
 import { Box, type BoxProps, CssBaseline, GlobalStyles } from '@mui/material'
@@ -38,7 +35,7 @@ import {
   useCallback,
 } from 'react'
 import CanvasDropIndicator from './dnd/canvas-drop-indicator'
-import LeafComponent from './leaf.component'
+import NodeLeaf from './node-leaf'
 import NodeOverlay from './node-overlay'
 
 const ViewportFrame = styled('div', {
@@ -56,7 +53,7 @@ const ViewportFrame = styled('div', {
 }))
 ViewportFrame.displayName = 'ViewportFrame'
 
-type SiteShadowDomProps = HTMLAttributes<HTMLDivElement> & ShadowRootProps
+type SiteShadowDomProps = HTMLAttributes<HTMLDivElement> & MuiShadowRootProps
 const SiteShadowDom = styled(MuiShadowDom.div, {
   name: 'AglynViewportShadowDom',
 })<SiteShadowDomProps>(({ theme }) => ({
@@ -92,7 +89,7 @@ const ViewportGlobalStyles = (
   />
 )
 const ThemedElementContainer = ({ children }) => {
-  const shadowDom = useShadowDomContext()
+  const shadowDom = useMuiShadowDomContext()
   const hostTheme = useAglynSiteTheme({ container: shadowDom })
   return (
     <ThemeProvider theme={hostTheme}>
@@ -118,7 +115,7 @@ const SiteContainer = observer(
             <FramePaper>
               <AglynNodeRenderer
                 node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)}
-                LeafComponent={LeafComponent}
+                LeafComponent={NodeLeaf}
               />
             </FramePaper>
           </ThemedElementContainer>
@@ -151,37 +148,36 @@ const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
 export interface ViewportFrameComponentProps
   extends ComponentProps<typeof ViewportFrame> {}
 
-const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
-  (props, ref) => {
-    const { onMouseLeave, ...rest } = props
+export const ViewportFrameComponent = forwardRef<
+  any,
+  ViewportFrameComponentProps
+>((props, ref) => {
+  const { onMouseLeave, ...rest } = props
 
-    const app = useAglynAppContext()
-    const handleMouseLeave = useCallback(
-      (e) => {
-        e.stopPropagation()
-        setBesignerCanvasHovered(app, { hovered: () => ({}) })
-        onMouseLeave && onMouseLeave(e)
-      },
-      [app, onMouseLeave],
-    )
+  const handlePointerLeave = useCallback(
+    (e) => {
+      // e.stopPropagation()
+      Besigner.focus.clearHover()
+      onMouseLeave && onMouseLeave(e)
+    },
+    [onMouseLeave],
+  )
 
-    return (
-      <ViewportFrame
-        ref={ref}
-        data-aglyn="viewport:frame"
-        onMouseLeave={handleMouseLeave}
-        {...rest}
-      >
-        <SiteContainer />
-        <Overlays />
-      </ViewportFrame>
-    )
-  },
-)
+  return (
+    <ViewportFrame
+      ref={ref}
+      data-aglyn="viewport:frame"
+      onMouseLeave={handlePointerLeave}
+      onPointerLeave={handlePointerLeave}
+      {...rest}
+    >
+      <SiteContainer />
+      <Overlays />
+    </ViewportFrame>
+  )
+})
 
 ViewportFrameComponent.displayName = 'ViewportFrameComponent'
 ViewportFrameComponent.aglyn = true
-ViewportFrameComponent.defaultProps = {}
 
-export { ViewportFrameComponent }
 export default ViewportFrameComponent

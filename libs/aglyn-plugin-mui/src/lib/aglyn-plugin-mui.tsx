@@ -38,6 +38,7 @@ Aglyn.plugins.addDependency({
     console.log('mui load', ...args)
     Aglyn.components.registerComponent(AppBar.default, AppBar.schema)
     Aglyn.components.registerComponent(Toolbar.default, Toolbar.schema)
+    Aglyn.components.registerComponent(Typography.default, Typography.schema)
     Aglyn.components.registerComponent(Button.default, Button.schema)
     Aglyn.components.registerComponent(Container.default, Container.schema)
     Aglyn.components.registerComponent(List.default, List.schema)
@@ -47,25 +48,38 @@ Aglyn.plugins.addDependency({
       ListItemText.schema,
     )
     Aglyn.components.registerComponent(Stack.default, Stack.schema)
-    Aglyn.components.registerComponent(Typography.default, Typography.schema)
 
     Aglyn.components.registerPreset(AppBar.presets)
+    Aglyn.components.registerPreset(Toolbar.presets)
     Aglyn.components.registerPreset(Typography.presets)
+    Aglyn.components.registerPreset(Button.presets)
+    Aglyn.components.registerPreset(Container.presets)
+    Aglyn.components.registerPreset(List.presets)
+    Aglyn.components.registerPreset(ListItem.presets)
+    Aglyn.components.registerPreset(ListItemText.presets)
+    Aglyn.components.registerPreset(Stack.presets)
   },
   destroy(...args): void {
     console.log('mui destroy', ...args)
     Aglyn.components.unregisterPreset(AppBar.presets.map((i) => i.$id))
+    Aglyn.components.unregisterPreset(Toolbar.presets.map((i) => i.$id))
     Aglyn.components.unregisterPreset(Typography.presets.map((i) => i.$id))
+    Aglyn.components.unregisterPreset(Button.presets.map((i) => i.$id))
+    Aglyn.components.unregisterPreset(Container.presets.map((i) => i.$id))
+    Aglyn.components.unregisterPreset(List.presets.map((i) => i.$id))
+    Aglyn.components.unregisterPreset(ListItem.presets.map((i) => i.$id))
+    Aglyn.components.unregisterPreset(ListItemText.presets.map((i) => i.$id))
+    Aglyn.components.unregisterPreset(Stack.presets.map((i) => i.$id))
 
     Aglyn.components.unregisterComponent(AppBar.ID)
     Aglyn.components.unregisterComponent(Toolbar.ID)
+    Aglyn.components.unregisterComponent(Typography.ID)
     Aglyn.components.unregisterComponent(Button.ID)
     Aglyn.components.unregisterComponent(Container.ID)
     Aglyn.components.unregisterComponent(List.ID)
     Aglyn.components.unregisterComponent(ListItem.ID)
     Aglyn.components.unregisterComponent(ListItemText.ID)
     Aglyn.components.unregisterComponent(Stack.ID)
-    Aglyn.components.unregisterComponent(Typography.ID)
   },
 })
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,11 +113,11 @@ export interface GridListProps extends Partial<VirtualizedGridProps> {
 export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
   function RefRenderFn(props, ref) {
     const {
-      items,
-      renderItemContent,
-      ListWrapperProps,
-      GridContainerProps,
-      GridItemProps,
+      items = [],
+      renderItemContent = (item) => item,
+      ListWrapperProps = {},
+      GridContainerProps = {},
+      GridItemProps = {},
       components,
       ...rest
     } = props
@@ -213,12 +213,5 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
 
 GridList.displayName = 'GridList'
 GridList.aglyn = true
-GridList.defaultProps = {
-  items: [],
-  GridContainerProps: {},
-  GridItemProps: {},
-  ListWrapperProps: {},
-  renderItemContent: (item) => item,
-}
 
 export default GridList

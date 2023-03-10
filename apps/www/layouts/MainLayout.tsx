@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
  */
 
 import { APP_WWW, BUILD_ID, PACKAGE_VERSION } from '@aglyn/shared-data-enums'
-import { styled } from '@aglyn/shared-ui-theme'
 import {
   AglynSvgLogo,
   AppLink,
   type AppLinkProps,
-  ContainerComponent,
+  Container,
   GridButtons,
   type GridButtonsProps,
   Menu,
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { useNextPageTitle } from '@aglyn/shared-ui-next'
+import { styled } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty, _isObj } from '@aglyn/shared-util-guards'
 import {
   AppBar,
@@ -46,7 +46,8 @@ import {
 import { cyan } from '@mui/material/colors'
 import { useRouter } from 'next/router'
 import { type ElementType, Fragment, type ReactNode } from 'react'
-// import {BreadcrumbsComponent, BreadcrumbsProps} from '../components/BreadcrumbsComponent'
+// import {BreadcrumbsComponent, BreadcrumbsProps} from
+// '../components/BreadcrumbsComponent'
 import Copyright from '../components/Copyright'
 import { tailNavigation } from '../const'
 
@@ -241,7 +242,9 @@ export interface QuickActionsMenuItem extends IconButtonProps {
   items?: QuickActionsMenuItem[]
 }
 
-export type NavTabItem = Partial<AppLinkProps<'text'> & MuiTabProps & { icon: MdiIconProps }>
+export type NavTabItem = Partial<
+  AppLinkProps<'text'> & MuiTabProps & { icon: MdiIconProps }
+>
 
 export interface MainLayoutProps {
   children?: ReactNode | undefined
@@ -257,7 +260,7 @@ export interface MainLayoutProps {
   // currentUserContext: CurrentUserContextType
 }
 
-function MainLayout(props: MainLayoutProps) {
+export function MainLayout(props: MainLayoutProps) {
   const router = useRouter()
   const {
     children,
@@ -266,15 +269,19 @@ function MainLayout(props: MainLayoutProps) {
     tabBarTitle,
     navTabItems,
     productName,
-    footerNavItems,
+    footerNavItems = tailNavigation,
     quickActionMenus: quickActions,
   } = props
   const tabValue = navTabItems
     ? navTabItems
         .filter((i) => router.asPath.includes(i.href))
         .reduce((prev, current) => {
-          const currentHref = (_isObj(current.href) ? current.href.paths : current.href) as string
-          const prevHref = (_isObj(prev.href) ? prev.href.paths : prev.href) as string
+          const currentHref = (
+            _isObj(current.href) ? current.href.paths : current.href
+          ) as string
+          const prevHref = (
+            _isObj(prev.href) ? prev.href.paths : prev.href
+          ) as string
 
           return currentHref.length > prevHref.length ? current : prev
         }).href ?? false
@@ -282,7 +289,11 @@ function MainLayout(props: MainLayoutProps) {
 
   const buildIconButton = ({ avatar, icon, children, ...rest }, i) => (
     <IconButton key={rest.id ?? rest['href'] ?? i} color="inherit" {...rest}>
-      {avatar ? <StyledAvatar {...avatar} /> : icon ? <MdiIcon {...icon} /> : null}
+      {avatar ? (
+        <StyledAvatar {...avatar} />
+      ) : icon ? (
+        <MdiIcon {...icon} />
+      ) : null}
       {children}
     </IconButton>
   )
@@ -300,7 +311,10 @@ function MainLayout(props: MainLayoutProps) {
   // eslint-disable-next-line react/display-name
   const buildNav = (id, actionBuilder) => (item, key) =>
     _isArr(item.items) ? (
-      <StyledMenu key={`${id}_${item?.key ?? item?.id ?? key}`} items={item.items}>
+      <StyledMenu
+        key={`${id}_${item?.key ?? item?.id ?? key}`}
+        items={item.items}
+      >
         {actionBuilder(item, item?.key ?? item?.id ?? key)}
       </StyledMenu>
     ) : (
@@ -317,9 +331,19 @@ function MainLayout(props: MainLayoutProps) {
 
   return (
     <Fragment>
-      <AppBar component="header" elevation={3} color="transparent" position="fixed">
-        <InnerAppBarTop component={'div'} elevation={0} color="primary" position="relative">
-          <ContainerComponent maxWidth={NAVIGATION_MAX_WIDTH} disableGutters>
+      <AppBar
+        component="header"
+        elevation={3}
+        color="transparent"
+        position="fixed"
+      >
+        <InnerAppBarTop
+          component={'div'}
+          elevation={0}
+          color="primary"
+          position="relative"
+        >
+          <Container maxWidth={NAVIGATION_MAX_WIDTH} disableGutters>
             <Toolbar>
               <StyledLeft>
                 <StyledLogoWrapper>
@@ -327,20 +351,31 @@ function MainLayout(props: MainLayoutProps) {
                     <StyledLogoInner>
                       <StyledLogo color="inherit" />
                     </StyledLogoInner>
-                    {productName && <StyledProductName>{` ${productName}`}</StyledProductName>}
+                    {productName && (
+                      <StyledProductName>{` ${productName}`}</StyledProductName>
+                    )}
                   </AppLink>
                 </StyledLogoWrapper>
               </StyledLeft>
               <StyledCenter>
-                {(centerNavigationItems ?? []).map(buildNav('cni', buildTextButton))}
+                {(centerNavigationItems ?? []).map(
+                  buildNav('cni', buildTextButton),
+                )}
               </StyledCenter>
-              <StyledRight>{(quickActions ?? []).map(buildNav('qa', buildIconButton))}</StyledRight>
+              <StyledRight>
+                {(quickActions ?? []).map(buildNav('qa', buildIconButton))}
+              </StyledRight>
             </Toolbar>
-          </ContainerComponent>
+          </Container>
         </InnerAppBarTop>
         {tabBarTitle || (_isArr(navTabItems) && !_isArrEmpty(navTabItems)) ? (
-          <AppBar component="div" color="primary" elevation={0} position="static">
-            <ContainerComponent maxWidth={NAVIGATION_MAX_WIDTH}>
+          <AppBar
+            component="div"
+            color="primary"
+            elevation={0}
+            position="static"
+          >
+            <Container maxWidth={NAVIGATION_MAX_WIDTH}>
               <Tabs
                 aria-label="area navigation"
                 indicatorColor="secondary"
@@ -368,13 +403,13 @@ function MainLayout(props: MainLayoutProps) {
                     />
                   ))}
               </Tabs>
-            </ContainerComponent>
+            </Container>
           </AppBar>
         ) : null}
       </AppBar>
       <StyledContent>{children}</StyledContent>
       <footer>
-        <ContainerComponent maxWidth={FOOTER_MAX_WIDTH}>
+        <Container maxWidth={FOOTER_MAX_WIDTH}>
           <Box
             component={'div'}
             sx={{
@@ -410,12 +445,17 @@ function MainLayout(props: MainLayoutProps) {
               flexBasis="100%"
               justifyContent="center"
             >
-              <Typography align="center" color="textSecondary" variant="overline">
-                <span>{`Version ${PACKAGE_VERSION}`}</span> <span>{`(${BUILD_ID})`}</span>
+              <Typography
+                align="center"
+                color="textSecondary"
+                variant="overline"
+              >
+                <span>{`Version ${PACKAGE_VERSION}`}</span>{' '}
+                <span>{`(${BUILD_ID})`}</span>
               </Typography>
             </Box>
           </Box>
-        </ContainerComponent>
+        </Container>
       </footer>
     </Fragment>
   )
@@ -423,11 +463,5 @@ function MainLayout(props: MainLayoutProps) {
 
 MainLayout.displayName = 'MainLayout'
 MainLayout.aglyn = true
-MainLayout.defaultProps = {
-  footerNavItems: tailNavigation as any,
-  // aggregatedPageMeta: {} as any,
-  // currentUserContext: {} as any,
-}
 
-export { MainLayout }
 export default MainLayout

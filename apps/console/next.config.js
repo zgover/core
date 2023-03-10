@@ -20,14 +20,13 @@
 const withAglyn = require('../../with-aglyn.nextjs.config')
 
 // MARK – GLOBALS
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = process.env.NODE_ENV !== 'production'
 
 /**
  * @type {import('/tools/nextjs-base.config').WithAglynOptions}
  **/
 module.exports = withAglyn({
-  experimental: { esmExternals: true, appDir: isProduction },
-  swcMinify: true,
+  experimental: { appDir: isProduction },
   env: {
     AGLYN_SILOED_HOST: process.env.AGLYN_SILOED_HOST,
   },

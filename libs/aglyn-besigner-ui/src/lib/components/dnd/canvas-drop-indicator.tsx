@@ -15,21 +15,22 @@
  * limitations under the License.
  */
 
+import * as Besigner from '@aglyn/besigner'
 import {
   type ClientRect,
   type DragCancelEvent,
   type DragEndEvent,
   type DragMoveEvent,
+  DragOverEvent,
   type DragStartEvent,
   useDndMonitor,
 } from '@dnd-kit/core'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { REGION } from '../../utils/droppable-region-utils'
 import DropIndicator from './drop-indicator'
 
-const DEFAULT: { region: REGION; rect: ClientRect } = {
-  region: REGION.CHILDREN,
+const DEFAULT: { region: Besigner.DropRegion; rect: ClientRect } = {
+  region: Besigner.DropRegion.CHILDREN,
   rect: {
     left: 0,
     top: 0,
@@ -42,20 +43,20 @@ const DEFAULT: { region: REGION; rect: ClientRect } = {
 
 export const CanvasDropIndicator = observer(() => {
   const [visible, setVisible] = useState(false)
-  const [{ rect, region }, setRect] = useState<typeof DEFAULT>({
-    rect: { ...DEFAULT.rect } as ClientRect,
-    region: REGION.CHILDREN,
-  })
+  const [rect, setRect] = useState<ClientRect>(() => ({ ...DEFAULT.rect }))
+  const [region, setRegion] = useState<Besigner.DropRegion>(DEFAULT.region)
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => setVisible(true),
     onDragEnd: (event: DragEndEvent) => setVisible(false),
     onDragCancel: (event: DragCancelEvent) => setVisible(false),
-    onDragMove: (event: DragMoveEvent) =>
-      setRect({
-        rect: event.over?.rect || DEFAULT.rect,
-        region: event.over?.data.current.region || DEFAULT.region,
-      }),
+    onDragOver(event: DragOverEvent) {
+      setVisible(Boolean(event.over))
+      if (event.over) setRect(event.over?.rect)
+    },
+    onDragMove: (event: DragMoveEvent) => {
+      setRegion(event.over?.data.current.region || DEFAULT.region)
+    },
   })
 
   return <DropIndicator rect={rect} visible={visible} region={region} />

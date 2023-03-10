@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,29 @@
  * limitations under the License.
  */
 
-import {useLoading} from '@aglyn/shared-ui-jsx'
-import {mdiFilterVariant, MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import {objectRemap, str} from '@aglyn/shared-util-tools'
-import {createUid} from '@aglyn/shared-util-vendor'
+import { useLoading } from '@aglyn/shared-ui-jsx'
+import { mdiFilterVariant, MdiIcon, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'
+import { objectRemap, str } from '@aglyn/shared-util-tools'
+import { createUid } from '@aglyn/shared-util-vendor'
 import IconButton from '@mui/material/IconButton'
-import {useRouter} from 'next/router'
-import {useSnackbar} from 'notistack'
-import {type ChangeEvent, Fragment, useCallback, useEffect, useState} from 'react'
+import { useRouter } from 'next/router'
+import { useSnackbar } from 'notistack'
+import {
+  type ChangeEvent,
+  Fragment,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
+import CardDisplay from '../../console/components/card-display'
 import DataTableComponent, {
   type DataTableProps,
 } from '../../console/components/data-table.component'
-import CardDisplay from '../../console/components/card-display'
-import {type AppContextType, withAppContext} from '../contexts/app-context'
-import {type Fields} from '../forms'
+import { type AppContextType, withAppContext } from '../contexts/app-context'
+import { type Fields } from '../forms'
 import ConsoleLayout from '../layouts/ConsoleLayout'
 import AreaManageNavigationListWidgetView from './AreaManageNavigationListWidgetView'
 import DrawerFormView from './DrawerFormView'
-
 
 const pageLen = 25
 
@@ -63,16 +68,18 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
     onSaveError,
   } = props
   const router = useRouter()
-  const {enqueueSnackbar} = useSnackbar()
-  const {queueLoading, loading} = useLoading()
+  const { enqueueSnackbar } = useSnackbar()
+  const { queueLoading, loading } = useLoading()
   const [loadingDocuments, setLoadingDocuments] = useState(false)
   const [error, setError] = useState<any>(null)
-  const [documents, setDocuments] = useState<{[id: string]: any}>(null)
+  const [documents, setDocuments] = useState<{ [id: string]: any }>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const [activeDocument, setActiveDocument] =
-    useState<{type: 'updating' | 'creating'; data: any}>(null)
+  const [activeDocument, setActiveDocument] = useState<{
+    type: 'updating' | 'creating'
+    data: any
+  }>(null)
   const query = app.getCollectionRef(collectionId)
-  const rows = Object.entries(documents ?? {}).map(([id, v]) => ({id, ...v}))
+  const rows = Object.entries(documents ?? {}).map(([id, v]) => ({ id, ...v }))
   const openForm = () => setFormOpen(true)
   const closeForm = () => setFormOpen(false)
   const clearActiveDocument = () => setActiveDocument(null)
@@ -103,15 +110,19 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
 
   // Update field on active document
   const handleFieldUpdate =
-    (fieldId: string) => (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    (fieldId: string) =>
+    (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
       const value = event.target.value
-      setActiveDocument((prev) => ({...prev, data: {...prev.data, [fieldId]: value}}))
+      setActiveDocument((prev) => ({
+        ...prev,
+        data: { ...prev.data, [fieldId]: value },
+      }))
     }
 
   // Open create form
   const handleCreateDocumentFormOpen = async () => {
     const dequeueLoader = queueLoading()
-    setActiveDocument({type: 'creating', data: {id: createUid()}})
+    setActiveDocument({ type: 'creating', data: { id: createUid() } })
     openForm()
     dequeueLoader()
   }
@@ -120,20 +131,20 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
   const setRemoteDocument = useCallback(async () => {
     console.debug('Saving active document', activeDocument)
     const dequeueLoader = queueLoading()
-    const {type, data} = activeDocument
-    const {id: dataId, ...allExceptId} = data
+    const { type, data } = activeDocument
+    const { id: dataId, ...allExceptId } = data
     const id = dataId ?? createUid()
     await query
       .doc(id)
       .set(allExceptId)
       .then((res) => {
         const actionMsg = type === 'creating' ? 'Created' : 'Updated'
-        enqueueSnackbar(`${actionMsg} successfully`, {variant: 'success'})
+        enqueueSnackbar(`${actionMsg} successfully`, { variant: 'success' })
         onSaveSuccess && onSaveSuccess(activeDocument)
       })
       .catch((error) => {
         setError(error.message)
-        enqueueSnackbar(error?.message, {variant: 'error'})
+        enqueueSnackbar(error?.message, { variant: 'error' })
         onSaveError && onSaveError(error)
       })
     handleCloseForm()
@@ -168,15 +179,14 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
       (querySnapshot) => {
         setLoadingDocuments(true)
         setDocuments((prev) => {
-          const items = {...prev}
+          const items = { ...prev }
           querySnapshot.docChanges().forEach((change) => {
             if (change.type === 'removed') {
               console.debug('Removed document update: ', change.doc.data())
               delete items[change.doc.id]
-            }
-            else {
+            } else {
               console.debug('Updated document update: ', change.doc.data())
-              items[change.doc.id] = {id: change.doc.id, ...change.doc.data()}
+              items[change.doc.id] = { id: change.doc.id, ...change.doc.data() }
             }
           })
           return items
@@ -184,7 +194,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
         setLoadingDocuments(false)
       },
       (error) => {
-        enqueueSnackbar(error?.message, {variant: 'error'})
+        enqueueSnackbar(error?.message, { variant: 'error' })
       },
     )
     return () => {
@@ -197,13 +207,12 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
     if (documentId && documents) {
       const document = documents[documentId]
       if (document) {
-        setActiveDocument({type: 'updating', data: document})
+        setActiveDocument({ type: 'updating', data: document })
         setError(null)
-      }
-      else {
+      } else {
         setError('Item does not exist!')
         setActiveDocument(null)
-        enqueueSnackbar('Error loading item', {variant: 'error'})
+        enqueueSnackbar('Error loading item', { variant: 'error' })
       }
     }
   }, [documentId, documents])
@@ -278,7 +287,6 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
 
 AreaManageViewRaw.displayName = 'AreaManageViewRaw'
 AreaManageViewRaw.aglyn = true
-AreaManageViewRaw.defaultProps = {}
 
 export const AreaManageView = withAppContext(AreaManageViewRaw)
 export default AreaManageView

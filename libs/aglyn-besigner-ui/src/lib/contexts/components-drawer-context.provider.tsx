@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import {
   CloseableDrawerComponent,
   type CloseableDrawerProps,
 } from '../components/closeable-drawer.component'
+import ComponentPicker from '../components/component-picker'
 import ComponentsGridListComponent from '../components/components-grid-list.component'
 import {
   buildOptions,
@@ -36,39 +37,55 @@ export interface ComponentsDrawerContextProviderProps
   component?: ElementType<CloseableDrawerProps>
 }
 
-function ComponentsDrawerContextProvider(
+export type ComponentPickerResolve<T> = (value: T | PromiseLike<T>) => void
+export type ComponentPickerReject = (reason?: any) => void
+
+export function ComponentsDrawerContextProvider(
   props: ComponentsDrawerContextProviderProps,
 ) {
-  const { children, defaultOptions, component, ...rest } = props
+  const { children, defaultOptions = {}, component, ...rest } = props
   const Component = component || CloseableDrawerComponent
   const [options, setOptions] = useState(() => ({
     ...DEFAULT_OPTIONS,
     ...defaultOptions,
   }))
-  const [resolveReject, setResolveReject] = useState([])
-  const [resolve, reject] = resolveReject
-  const isOpen = resolveReject.length === 2
 
-  const handleClose = useCallback(
-    (e, reason) => {
-      reject && reject({ reason })
-      setResolveReject([])
-    },
-    [reject],
-  )
-  const handleOnActionClick = useCallback(
+  const [[resolve, reject], setCallbacks] = useState<
+    [resolve?: any, reject?: any]
+  >([])
+  const open = Boolean(resolve)
+
+  const handleResolve = useCallback(
     (e, item) => {
-      resolve && resolve({ option: item })
-      setResolveReject([])
+      try {
+        resolve(item)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setCallbacks([])
+      }
     },
     [resolve],
   )
 
+  const handleReject = useCallback(
+    (e, reason: string) => {
+      try {
+        reject(reason || 'canceled')
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setCallbacks([])
+      }
+    },
+    [reject],
+  )
+
   const elementDrawer = useCallback(
-    (options: ElementDrawerOptions = {}) => {
+    (opts?: ElementDrawerOptions) => {
+      setOptions(buildOptions(defaultOptions, opts))
       return new Promise((resolve, reject) => {
-        setOptions(buildOptions(defaultOptions, options))
-        setResolveReject([resolve, reject])
+        setCallbacks([resolve, reject])
       })
     },
     [defaultOptions],
@@ -79,31 +96,34 @@ function ComponentsDrawerContextProvider(
       <ElementDrawerContext.Provider value={{ elementDrawer }}>
         {children}
       </ElementDrawerContext.Provider>
-      <AglynComponentsContext.Consumer>
-        {({ nodePresets }) => (
-          <Component
-            open={isOpen}
-            onClose={handleClose}
-            action={'Close'}
-            onActionClick={handleClose}
-            drawerTitle={options?.title}
-            {...rest}
-          >
-            <ComponentsGridListComponent
-              onActionClick={handleOnActionClick}
-              items={nodePresets}
-            />
-          </Component>
-        )}
-      </AglynComponentsContext.Consumer>
+      <ComponentPicker
+        open={open}
+        onClose={handleReject}
+        onSelectItem={handleResolve}
+      />
+      {false && (
+        <AglynComponentsContext.Consumer>
+          {({ nodePresets }) => (
+            <Component
+              open={open}
+              onClose={handleReject}
+              action={'Close'}
+              onActionClick={handleReject}
+              drawerTitle={options?.title}
+              {...rest}
+            >
+              <ComponentsGridListComponent
+                onActionClick={handleResolve}
+                items={nodePresets}
+              />
+            </Component>
+          )}
+        </AglynComponentsContext.Consumer>
+      )}
     </Fragment>
   )
 }
 ComponentsDrawerContextProvider.displayName = 'ComponentsDrawerContextProvider'
 ComponentsDrawerContextProvider.aglyn = true
-ComponentsDrawerContextProvider.defaultProps = {
-  defaultOptions: {},
-}
 
-export { ComponentsDrawerContextProvider }
 export default ComponentsDrawerContextProvider

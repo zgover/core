@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import { styled } from '@aglyn/shared-ui-theme'
 import {
   Accordion as MuiAccordion,
   AccordionDetails as MuiAccordionDetails,
-  AccordionDetailsProps,
+  type AccordionDetailsProps,
+  type AccordionProps,
   AccordionSummary as MuiAccordionSummary,
-  AccordionSummaryProps,
+  type AccordionSummaryProps,
 } from '@mui/material'
+import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 
 const Accordion = styled(MuiAccordion)(({ theme }) => ({
@@ -65,76 +67,81 @@ export interface AccordionListProps<T = any> {
   items: T[]
   unique?: boolean
   defaultExpanded?: JSX.Key[]
+  AccordionProps?: AccordionProps
   AccordionSummaryProps?: AccordionSummaryProps
   AccordionDetailsProps?: AccordionDetailsProps
-  renderSummary: (item: T) => JSX.Children
-  renderDetails: (item: T) => JSX.Children
+  onRenderSummary: (props: { item: T }) => JSX.Children
+  onRenderDetail: (props: { item: T }) => JSX.Children
   getItemId: (item: T) => string | number
 }
 
-function AccordionListComponent<T = any>(props: AccordionListProps<T>) {
-  const {
-    items,
-    defaultExpanded,
-    renderSummary,
-    renderDetails,
-    AccordionSummaryProps,
-    AccordionDetailsProps,
-    unique,
-    getItemId,
-  } = props
+export const AccordionListComponent = observer(
+  <T,>(props: AccordionListProps<T>) => {
+    const {
+      items,
+      defaultExpanded,
+      onRenderSummary,
+      onRenderDetail,
+      AccordionProps,
+      AccordionSummaryProps,
+      AccordionDetailsProps,
+      unique,
+      getItemId,
+    } = props
 
-  const [expanded, setExpanded] = useState<JSX.Key[]>(() => [
-    ...(defaultExpanded || []),
-  ])
-  const handleToggle = useCallback(
-    (id: JSX.Key) => (e, expanded: boolean) => {
-      setExpanded((prev) => {
-        if (unique && expanded) return [id]
-        if (unique && !expanded) return []
-        const data = [...prev].filter((i) => i !== id)
-        if (expanded) data.push(id)
-        return data
-      })
-    },
-    [unique],
-  )
+    const [expanded, setExpanded] = useState<JSX.Key[]>(() => [
+      ...(defaultExpanded || []),
+    ])
+    const handleToggle = useCallback(
+      (id: JSX.Key) => (e, expanded: boolean) => {
+        setExpanded((prev) => {
+          if (unique && expanded) return [id]
+          if (unique && !expanded) return []
+          const data = [...prev].filter((i) => i !== id)
+          if (expanded) data.push(id)
+          return data
+        })
+      },
+      [unique],
+    )
 
-  return (
-    <>
-      {items.map((item) => {
-        const id = getItemId(item)
-        const isExpanded = expanded.some((i) => i === id)
-        return (
-          <Accordion
-            key={id}
-            expanded={isExpanded}
-            onChange={handleToggle(id)}
-            disableGutters
-            elevation={0}
-            square
-          >
-            <MuiAccordionSummary
-              expandIcon={
-                <MdiIcon
-                  path={ICON_VARIANT_COLLAPSIBLE_OPEN.path}
-                  sx={{ fontSize: '0.9rem' }}
-                />
-              }
-              {...AccordionSummaryProps}
+    return (
+      <>
+        {items.map((item) => {
+          const id = getItemId(item)
+          const isExpanded = expanded.some((i) => i === id)
+          return (
+            <Accordion
+              key={id}
+              expanded={isExpanded}
+              onChange={handleToggle(id)}
+              elevation={0}
+              disableGutters
+              square
+              {...AccordionProps}
             >
-              {renderSummary(item)}
-            </MuiAccordionSummary>
-            <MuiAccordionDetails {...AccordionDetailsProps}>
-              {renderDetails(item)}
-            </MuiAccordionDetails>
-          </Accordion>
-        )
-      })}
-    </>
-  )
-}
+              <MuiAccordionSummary
+                sx={{ position: 'sticky', top: 0 }}
+                expandIcon={
+                  <MdiIcon
+                    path={ICON_VARIANT_COLLAPSIBLE_OPEN.path}
+                    sx={{ fontSize: '0.9rem' }}
+                  />
+                }
+                {...AccordionSummaryProps}
+              >
+                {onRenderSummary({ item })}
+              </MuiAccordionSummary>
+              <MuiAccordionDetails {...AccordionDetailsProps}>
+                {onRenderDetail({ item })}
+              </MuiAccordionDetails>
+            </Accordion>
+          )
+        })}
+      </>
+    )
+  },
+)
 AccordionListComponent.displayName = 'AccordionListComponent'
 
-export { AccordionListComponent }
 export default AccordionListComponent

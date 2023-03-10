@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,10 @@ export interface TreeProps {
   renderLeaf?: (leaf: LeafType) => JSX.Node
 }
 
-const TreeComponent = forwardRef<any, TreeProps>((props, ref) => {
-  const { leafs, renderLeaf } = props
+const defaultRenderLeaf = (leaf) => <LeafComponent key={leaf.id} data={leaf} />
+
+export const TreeComponent = forwardRef<any, TreeProps>((props, ref) => {
+  const { leafs = [], renderLeaf = defaultRenderLeaf } = props
 
   return (
     <TreeContext.Provider value={leafs}>
@@ -43,10 +45,5 @@ const TreeComponent = forwardRef<any, TreeProps>((props, ref) => {
 })
 
 TreeComponent.displayName = 'TreeComponent'
-TreeComponent.defaultProps = {
-  leafs: [],
-  renderLeaf: (leaf) => <LeafComponent key={leaf.id} data={leaf} />,
-}
 
-export { TreeComponent }
 export default TreeComponent

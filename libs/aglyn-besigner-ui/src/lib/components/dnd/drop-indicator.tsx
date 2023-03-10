@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
+import * as Besigner from '@aglyn/besigner'
 import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
 import _isEqualitySameType from '@aglyn/shared-util-guards/_is-equality-same-type'
 import { type ClientRect } from '@dnd-kit/core'
-import { styled } from '@mui/material'
+import { Portal, styled } from '@mui/material'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import { forwardRef } from 'react'
-import { REGION } from '../../utils/droppable-region-utils'
 
 const classes = generateComponentClassKeys('DropIndicator', [
   'root',
@@ -77,39 +77,39 @@ export interface DropIndicatorProps
   extends JSX.ComponentProps<typeof Indicator> {
   visible?: boolean
   rect: ClientRect
-  region: REGION
+  region: Besigner.DropRegion
 }
 
 export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
   (props, ref) => {
-    const { style, visible, region, rect, ...rest } = props
+    const { visible, region, rect, className, ...rest } = props
 
     const styles = {
-      [REGION.LEFT]: {
+      [Besigner.DropRegion.LEFT]: {
         left: rect.left - handleHalf,
         top: rect.top - handleHalf,
         height: rect.height + handleW,
         width: null,
       },
-      [REGION.TOP]: {
+      [Besigner.DropRegion.TOP]: {
         left: rect.left - handleHalf,
         top: rect.top - handleHalf,
         width: rect.width + handleW,
         height: null,
       },
-      [REGION.RIGHT]: {
+      [Besigner.DropRegion.RIGHT]: {
         left: rect.left + rect.width - handleHalf,
         top: rect.top - handleHalf,
         height: rect.height + handleW,
         width: null,
       },
-      [REGION.BOTTOM]: {
+      [Besigner.DropRegion.BOTTOM]: {
         left: rect.left - handleHalf,
         top: rect.top + rect.height - handleHalf,
         width: rect.width + handleW,
         height: null,
       },
-      [REGION.CHILDREN]: {
+      [Besigner.DropRegion.CHILDREN]: {
         left: rect.left + handleHalf,
         top: rect.top + rect.height / 2 - handleHalf,
         width: rect.width - handleW,
@@ -117,25 +117,28 @@ export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
       },
     }
 
-    const vertical = region === REGION.LEFT || region === REGION.RIGHT
+    const vertical =
+      region === Besigner.DropRegion.LEFT ||
+      region === Besigner.DropRegion.RIGHT
 
     return (
-      <Indicator
-        ref={ref}
-        className={clsx(classes.root)}
-        variant={vertical ? 'vertical' : 'horizontal'}
-        style={style}
-        animate={{
-          ...styles[region],
-          visibility: visible ? 'visible' : 'hidden',
-        }}
-        transition={{ type: 'spring' }}
-        {...rest}
-      >
-        <div className={classes.handle} />
-        <div className={classes.line} />
-        <div className={classes.handle} />
-      </Indicator>
+      <Portal>
+        <Indicator
+          ref={ref}
+          className={clsx(classes.root, className)}
+          variant={vertical ? 'vertical' : 'horizontal'}
+          animate={{
+            ...styles[region],
+            visibility: visible ? 'visible' : 'hidden',
+          }}
+          transition={{ type: 'keyframes' }}
+          {...rest}
+        >
+          <div className={classes.handle} />
+          <div className={classes.line} />
+          <div className={classes.handle} />
+        </Indicator>
+      </Portal>
     )
   },
 )

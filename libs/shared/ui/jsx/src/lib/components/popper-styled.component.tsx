@@ -55,11 +55,11 @@ export interface PopperStyledComponentProps extends MuiPopperProps {
   arrowGap?: number | string
 }
 
-const PopperStyledComponent = styled(MuiPopper, {
+export const PopperStyledComponent = styled(MuiPopper, {
   name: 'AglynPopperStyled',
   shouldForwardProp: (prop) =>
     !_isEqualitySameType(prop, null, 'disableArrow', 'arrowGap'),
-})<PopperStyledComponentProps>(({ theme, disableArrow, arrowGap }) => ({
+})<PopperStyledComponentProps>(({ theme, disableArrow, arrowGap = 2 }) => ({
   zIndex: 1,
   '& > div': {
     position: 'relative',
@@ -130,9 +130,5 @@ const PopperStyledComponent = styled(MuiPopper, {
 
 PopperStyledComponent.displayName = 'PopperStyledComponent'
 PopperStyledComponent.aglyn = true
-PopperStyledComponent.defaultProps = {
-  arrowGap: 2,
-}
 
-export { PopperStyledComponent }
 export default PopperStyledComponent

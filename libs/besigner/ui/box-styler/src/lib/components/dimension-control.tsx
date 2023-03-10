@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material'
+import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useState } from 'react'
 
 interface DimensionControlProps {
@@ -38,16 +39,19 @@ interface DimensionControlProps {
   onChange?: (dimension: Measurement) => void
 }
 
+const cssUnits = Object.entries(CssUnit)
 const buildLocalValue = (dimension: string) => ({
   raw: dimension,
   ...parseCssMeasurement(dimension),
 })
-export const DimensionControl = (props: DimensionControlProps) => {
+
+export const DimensionControl = observer((props: DimensionControlProps) => {
   const { dimension, onChange } = props
   const [parsed, setParsed] = useState(buildLocalValue(dimension))
   useEffect(() => setParsed(buildLocalValue(dimension)), [dimension])
   const [menuOpen, setMenuOpen] = useState(false)
   const [iconRef, setIconRef] = useState<any>()
+  const [btnRef, setBtnRef] = useState<any>()
   const toggleMenu = () => setMenuOpen((prev) => !prev)
   const handleChange = useCallback(
     (type: 'quantity' | 'unit') => (newValue: any) => {
@@ -69,15 +73,15 @@ export const DimensionControl = (props: DimensionControlProps) => {
           break
         case type === 'unit':
           res.raw = buildCssMeasurement({
-            quantity: parsed.quantity,
+            value: parsed.value,
             unit: newValue,
           })
-          res.quantity = parsed.quantity
+          res.quantity = parsed.value
           res.unit = newValue
           break
         default:
           res.raw = buildCssMeasurement({
-            quantity: newValue,
+            value: newValue,
             unit: parsed.unit,
           })
           res.quantity = newValue
@@ -113,7 +117,7 @@ export const DimensionControl = (props: DimensionControlProps) => {
           unitModifier
         ) : (
           <Input
-            value={parsed.quantity || ''}
+            value={parsed.value || ''}
             type={'number'}
             placeholder={'--'}
             onChange={(e) => handleChange('quantity')(e.target.value)}
@@ -151,7 +155,7 @@ export const DimensionControl = (props: DimensionControlProps) => {
           >
             <em>{'default'}</em>
           </MenuItem>
-          {Object.entries(CssUnit).map(([key, value]) => (
+          {cssUnits.map(([key, value]) => (
             <MenuItem
               onClick={(event) => handleChange('unit')(value)}
               key={key}
@@ -164,7 +168,7 @@ export const DimensionControl = (props: DimensionControlProps) => {
       </FormControl>
     </div>
   )
-}
+})
 DimensionControl.displayName = 'DimensionControl'
 
 export default DimensionControl

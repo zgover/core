@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,9 @@ export const withBesignerContext = <P,>(Component: ComponentType<P>) => {
   return WithBesignerContext
 }
 
-const BesignerRootProviderComponent = (props: BesignerComponentProps) => {
+export const BesignerRootProviderComponent = (
+  props: BesignerComponentProps,
+) => {
   /*forwardRef<any, BesignerComponentProps>(
  (props, ref) => {*/
   const { noSsr, appName, canvasElements, children } = props
@@ -81,7 +83,5 @@ const BesignerRootProviderComponent = (props: BesignerComponentProps) => {
 
 BesignerRootProviderComponent.displayName = 'BesignerRootProviderComponent'
 BesignerRootProviderComponent.aglyn = true
-BesignerRootProviderComponent.defaultProps = {}
 
-export { BesignerRootProviderComponent }
 export default BesignerRootProviderComponent

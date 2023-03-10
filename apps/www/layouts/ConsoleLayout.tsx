@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
+import { Container, GridItems, type GridItemsProps } from '@aglyn/shared-ui-jsx'
+import {
+  mdiCogOutline,
+  MdiIcon,
+  type MdiIconProps,
+} from '@aglyn/shared-ui-mdi-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
-import { ContainerComponent, GridItems, type GridItemsProps } from '@aglyn/shared-ui-jsx'
-import { mdiCogOutline, MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { str } from '@aglyn/shared-util-tools'
 import { Typography } from '@mui/material'
 import { type ReactNode } from 'react'
@@ -27,9 +31,14 @@ import {
   type CurrentUserContextType,
   withCurrentUserContext,
 } from '../contexts/current-user-context'
-import { type AggregatedPageMeta, withAggregatedPageMeta } from '../lib/app-pages'
+import {
+  type AggregatedPageMeta,
+  withAggregatedPageMeta,
+} from '../lib/app-pages'
 import { tabItems } from '../lib/navigation-menus'
-import MainLayout, { type MainLayoutProps as MainLayoutProps } from './MainLayout'
+import MainLayout, {
+  type MainLayoutProps as MainLayoutProps,
+} from './MainLayout'
 
 export const CONTENT_MAX_WIDTH = 'lg'
 const getHeader = (first, second) => (
@@ -76,11 +85,13 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
     icon: { path: mainArea?.icon },
     children: getHeader(
       mainArea ? mainArea.name.default : rootArea?.name.default,
-      subArea ? subArea.name.plural : (overrideMeta ?? pageMeta)?.name.default
+      subArea ? subArea.name.plural : (overrideMeta ?? pageMeta)?.name.default,
     ),
     ...headerProp,
   }
-  const breadcrumbItems = /*breadcrumbItemsProp ??*/ ([...pageAncestors] as any[])
+  const breadcrumbItems = /*breadcrumbItemsProp ??*/ (
+    [...pageAncestors] as any[]
+  )
     .concat(overrideMeta ?? pageMeta)
     .map((item: any) => ({
       href: str(item?.id),
@@ -123,7 +134,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
     >
       <header>
         <StyledNavBarSpacer />
-        <ContainerComponent maxWidth={CONTENT_MAX_WIDTH}>
+        <Container maxWidth={CONTENT_MAX_WIDTH}>
           <Typography component="h1" variant="h4">
             {!header?.icon || isElement(header.icon) ? (
               header.icon
@@ -133,15 +144,15 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
             {header?.children ?? title}
           </Typography>
           <Breadcrumbs items={breadcrumbItems} />
-        </ContainerComponent>
+        </Container>
       </header>
       <main /*className={classes.content}*/>
-        <ContainerComponent maxWidth={CONTENT_MAX_WIDTH}>
+        <Container maxWidth={CONTENT_MAX_WIDTH}>
           {items || ContentGridItemsProps ? (
             <GridItems items={items} spacing={3} {...ContentGridItemsProps} />
           ) : null}
           {children}
-        </ContainerComponent>
+        </Container>
       </main>
     </MainLayout>
   )
@@ -149,7 +160,8 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
 
 ConsoleLayoutRaw.displayName = 'ConsoleLayoutRaw'
 ConsoleLayoutRaw.aglyn = true
-ConsoleLayoutRaw.defaultProps = {}
 
-export const ConsoleLayout = withCurrentUserContext(withAggregatedPageMeta(ConsoleLayoutRaw))
+export const ConsoleLayout = withCurrentUserContext(
+  withAggregatedPageMeta(ConsoleLayoutRaw),
+)
 export default ConsoleLayout

@@ -80,9 +80,6 @@ export const RulerComponent = styled(
 }))
 RulerComponent.displayName = 'RulerComponent'
 RulerComponent.aglyn = true
-RulerComponent.defaultProps = {
-  component: 'div',
-}
 
 const guideClassKey = generateComponentClassKeys('AglynGuide', [
   'vertical',
@@ -148,9 +145,6 @@ const GuideComponent = styled(
 }))
 GuideComponent.displayName = 'GuideComponent'
 GuideComponent.aglyn = true
-GuideComponent.defaultProps = {
-  component: 'div',
-}
 
 const RulerGuidesContainer = styled(Box, { name: 'RulerGuidesContainer' })(
   ({ theme }) => ({
@@ -193,8 +187,5 @@ export const RulerGuidesComponent = React.forwardRef<any, RulerGuidesProps>(
 
 RulerGuidesComponent.displayName = 'RulerGuidesComponent'
 RulerGuidesComponent.aglyn = true
-RulerGuidesComponent.defaultProps = {
-  component: 'div',
-}
 
 export default RulerGuidesComponent

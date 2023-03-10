@@ -120,62 +120,59 @@ export interface WorkspacePanelComponentProps extends WorkspacePanelProps {
   anchor?: MuiDrawerProps['anchor']
 }
 
-const WorkspacePanelComponent = forwardRef<any, WorkspacePanelComponentProps>(
-  (props, ref) => {
-    const {
-      children,
-      className: classNameProp,
-      DrawerProps,
-      size,
-      open: openProp,
-      anchor,
-      id,
-      ...rest
-    } = props
-    const open = Boolean(openProp)
-    const {
-      className: drawerClassName,
-      open: _,
-      ...drawerProps
-    } = { ...DrawerProps }
-    const className = clsx(
-      {
-        [classKeys.open]: open,
-        [classKeys.anchorLeft]: anchor === 'left',
-        [classKeys.anchorRight]: anchor === 'right',
-        [classKeys.anchorTop]: anchor === 'top',
-        [classKeys.anchorBottom]: anchor === 'bottom',
-      },
-      classNameProp,
-    )
+export const WorkspacePanelComponent = forwardRef<
+  any,
+  WorkspacePanelComponentProps
+>((props, ref) => {
+  const {
+    children,
+    className: classNameProp,
+    DrawerProps,
+    size,
+    open: openProp,
+    anchor = 'left',
+    id,
+    ...rest
+  } = props
+  const open = Boolean(openProp)
+  const {
+    className: drawerClassName,
+    open: _,
+    ...drawerProps
+  } = { ...DrawerProps }
+  const className = clsx(
+    {
+      [classKeys.open]: open,
+      [classKeys.anchorLeft]: anchor === 'left',
+      [classKeys.anchorRight]: anchor === 'right',
+      [classKeys.anchorTop]: anchor === 'top',
+      [classKeys.anchorBottom]: anchor === 'bottom',
+    },
+    classNameProp,
+  )
 
-    return (
-      <WorkspacePanel
-        ref={ref}
-        id={id}
-        size={size}
-        className={className}
-        {...rest}
+  return (
+    <WorkspacePanel
+      ref={ref}
+      id={id}
+      size={size}
+      className={className}
+      {...rest}
+    >
+      <MuiDrawer
+        variant="persistent"
+        open={open}
+        anchor={anchor}
+        className={clsx(classKeys.drawer, drawerClassName)}
+        {...drawerProps}
       >
-        <MuiDrawer
-          variant="persistent"
-          open={open}
-          anchor={anchor}
-          className={clsx(classKeys.drawer, drawerClassName)}
-          {...drawerProps}
-        >
-          {children}
-        </MuiDrawer>
-      </WorkspacePanel>
-    )
-  },
-)
+        {children}
+      </MuiDrawer>
+    </WorkspacePanel>
+  )
+})
 
 WorkspacePanelComponent.displayName = 'WorkspacePanelComponent'
 WorkspacePanelComponent.aglyn = true
-WorkspacePanelComponent.defaultProps = {
-  anchor: 'left',
-}
 
-export { WorkspacePanelComponent }
 export default WorkspacePanelComponent
