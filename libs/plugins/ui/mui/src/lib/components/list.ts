@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import {
-  type AglynComponentSchema,
-  ComponentCategory,
-  type ComponentId,
-} from '@aglyn/core-data-foundation'
 import { mdiFormatListBulletedSquare } from '@aglyn/shared-ui-mdi-jsx'
 import List, { type ListProps } from '@mui/material/List'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
-import { schema as listItemSchema } from './list-item'
+import {
+  presets as listItemPresets,
+  schema as listItemSchema,
+} from './list-item'
 
-const ID: ComponentId = 'list'
+const ID: Aglyn.ComponentId = 'list'
 
-export const schema: AglynComponentSchema<ListProps> = {
+export const schema: Aglyn.ComponentSchema<ListProps> = {
   $id: ID,
   pluginId: 'mui',
   displayName: 'List',
@@ -40,26 +38,28 @@ export const schema: AglynComponentSchema<ListProps> = {
       components: [listItemSchema.$id],
     },
   ],
-  presets: [
-    {
-      $id: generatePresetId(ID),
-      label: 'List',
-      icon: { path: mdiFormatListBulletedSquare.path },
-      category: ComponentCategory.DATA_DISPLAY,
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        nodes: [
-          {
-            ...listItemSchema.presets![0]!.data,
-          },
-          {
-            ...listItemSchema.presets![0]!.data,
-          },
-        ],
-      },
-    },
-  ],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'List',
+    icon: { path: mdiFormatListBulletedSquare.path },
+    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      nodes: [
+        {
+          ...listItemPresets[0].data,
+        },
+        {
+          ...listItemPresets[0].data,
+        },
+      ],
+    },
+  },
+]
 
 export default List

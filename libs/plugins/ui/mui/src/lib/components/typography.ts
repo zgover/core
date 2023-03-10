@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  type AglynComponentSchema,
-  ComponentCategory,
-  type ComponentId,
-  FieldComponentType,
-} from '@aglyn/core-data-foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import {
   mdiAlphabetical,
   mdiFormatHeader1,
@@ -32,11 +27,11 @@ import {
   mdiFormatParagraph,
   mdiFormatText,
 } from '@aglyn/shared-ui-mdi-jsx'
-import Typography, { type TypographyProps } from '@mui/material/Typography'
+import Typography from '@mui/material/Typography'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: ComponentId = 'typography'
+const ID: Aglyn.ComponentId = 'typography'
 const typographyVariants = [
   { value: 'h1', label: 'Heading 1', icon: { path: mdiFormatHeader1.path } },
   { value: 'h2', label: 'Heading 2', icon: { path: mdiFormatHeader2.path } },
@@ -65,7 +60,7 @@ const typographyVariants = [
   },
 ]
 
-export const schema: AglynComponentSchema<TypographyProps> = {
+export const schema: Aglyn.ComponentSchema = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Typography',
@@ -78,14 +73,14 @@ export const schema: AglynComponentSchema<TypographyProps> = {
     {
       name: 'variant',
       description: 'The variant to use.',
-      component: FieldComponentType.SELECT,
+      component: Aglyn.FieldComponentType.SELECT,
       label: 'Variant',
       options: [{ value: '', label: 'Default' }, ...typographyVariants],
     },
     {
       name: 'component',
       description: 'The html element to use.',
-      component: FieldComponentType.SELECT,
+      component: Aglyn.FieldComponentType.SELECT,
       label: 'Component',
       options: [
         { value: '', label: 'Default' },
@@ -103,7 +98,7 @@ export const schema: AglynComponentSchema<TypographyProps> = {
     {
       name: 'align',
       description: 'The text alignment',
-      component: FieldComponentType.SELECT,
+      component: Aglyn.FieldComponentType.SELECT,
       label: 'Alignment',
       options: [
         { value: '', label: 'Default' },
@@ -117,51 +112,54 @@ export const schema: AglynComponentSchema<TypographyProps> = {
     {
       name: 'noWrap',
       description: 'If true, the text will not wrap/fold.',
-      component: FieldComponentType.SWITCH,
+      component: Aglyn.FieldComponentType.SWITCH,
       label: 'Disable wrapping?',
     },
     {
       name: 'gutterBottom',
       description: 'If true, the text will have a space beneath.',
-      component: FieldComponentType.SWITCH,
+      component: Aglyn.FieldComponentType.SWITCH,
       label: 'Gutter bottom?',
     },
   ],
-  presets: [
-    {
-      $id: generatePresetId(ID),
-      label: 'Typography',
-      icon: {
-        path: mdiAlphabetical.path,
-        sx: { color: '#057822' },
-      },
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        props: {
-          variant: 'outlined',
-          children: 'Typographical text element',
-        },
+}
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'Typography',
+    icon: {
+      path: mdiAlphabetical.path,
+      sx: { color: '#057822' },
+    },
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {
+        variant: 'outlined',
+        children: 'Typographical text element',
       },
     },
-    ...typographyVariants.map((item) => ({
-      $id: generatePresetId(ID, item.value),
-      label: item.label,
-      icon: {
-        sx: { color: '#057822' },
-        ...item.icon,
+  },
+  ...typographyVariants.map((item) => ({
+    $id: generatePresetId(ID, item.value),
+    labdisplayNameel: item.label,
+    icon: {
+      sx: { color: '#057822' },
+      ...item.icon,
+    },
+    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {
+        variant: item.value,
+        children: item.label,
       },
-      category: ComponentCategory.DATA_DISPLAY,
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        props: {
-          variant: item.value,
-          children: item.label,
-        },
-      },
-    })),
-  ],
-}
+    },
+  })),
+]
 
 export default Typography

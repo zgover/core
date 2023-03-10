@@ -126,6 +126,15 @@ export const ComponentPicker = observer(
       [onClose],
     )
 
+    const handleItemClick = useCallback((e, item: Aglyn.NodeSchema<any>) => {
+      setSelected((prev) => {
+        if (prev && prev?.$id === item?.$id) {
+          return null
+        }
+        return item
+      })
+    }, [])
+
     return (
       <Dialog
         ref={forwardRef}
@@ -245,7 +254,7 @@ export const ComponentPicker = observer(
                                       : null,
                                   ]}
                                   node={node as any}
-                                  onClick={(e) => setSelected(node)}
+                                  onClick={(e) => handleItemClick(e, node)}
                                 />
                               </Grid>
                             )}

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import { mdiViewArrayOutline } from '@aglyn/shared-ui-mdi-jsx'
 import Container from '@mui/material/Container'
 import { PLUGIN_ID } from '../constants/common'
+import generatePresetId from '../utils/generate-preset-id'
 
 export const ID: Aglyn.ComponentId = 'muiContainer'
 
@@ -63,5 +64,23 @@ export const schema: Aglyn.ComponentSchema = {
     },
   ],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'Container',
+    icon: {
+      path: mdiViewArrayOutline.path,
+      sx: { color: '#2196f3' },
+    },
+    category: Aglyn.ComponentCategory.LAYOUT,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: PLUGIN_ID,
+      props: {},
+    },
+  },
+]
 
 export default Container

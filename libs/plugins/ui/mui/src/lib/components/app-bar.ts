@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,17 @@
  * limitations under the License.
  */
 
-import type {
-  AglynComponentSchema,
-  ComponentId,
-} from '@aglyn/core-data-foundation'
-import { ComponentCategory } from '@aglyn/core-data-foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import { mdiPageLayoutHeader } from '@aglyn/shared-ui-mdi-jsx'
 import AppBar, { type AppBarProps } from '@mui/material/AppBar'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { FIELD_COLOR_ALT1, FIELD_POSITION } from '../constants/field-presets'
 import { generatePresetId } from '../utils/generate-preset-id'
-import { schema as toolbarSchema } from './toolbar'
+import { presets as toolbarPresets } from './toolbar'
 
-const ID: ComponentId = 'app-bar'
+const ID: Aglyn.ComponentId = 'app-bar'
 
-export const schema: AglynComponentSchema<AppBarProps> = {
+export const schema: Aglyn.ComponentSchema<AppBarProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'App Toolbar',
@@ -38,29 +34,31 @@ export const schema: AglynComponentSchema<AppBarProps> = {
     sx: { color: '#2196f3' },
   },
   attributes: [FIELD_COLOR_ALT1, FIELD_POSITION],
-  presets: [
-    {
-      $id: generatePresetId(ID),
-      label: 'App Toolbar',
-      icon: {
-        path: mdiPageLayoutHeader.path,
-        sx: { color: '#2196f3' },
-      },
-      category: ComponentCategory.SURFACE,
-      data: {
-        componentId: ID,
-        pluginId: BUNDLE_ID,
-        props: {
-          position: 'sticky',
-        },
-        nodes: [
-          {
-            ...toolbarSchema.presets![0]!.data,
-          },
-        ],
-      },
-    },
-  ],
 }
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    displayName: 'App Toolbar',
+    icon: {
+      path: mdiPageLayoutHeader.path,
+      sx: { color: '#2196f3' },
+    },
+    category: Aglyn.ComponentCategory.SURFACE,
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {
+        position: 'sticky',
+      },
+      nodes: [
+        {
+          ...toolbarPresets[0].data,
+        },
+      ],
+    },
+  },
+]
 
 export default AppBar
