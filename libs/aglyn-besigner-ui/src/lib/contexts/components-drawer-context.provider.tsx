@@ -99,7 +99,7 @@ export function ComponentsDrawerContextProvider(
       <ComponentPicker
         open={open}
         onClose={handleReject}
-        onItemSelect={handleResolve}
+        onSelectItem={handleResolve}
       />
       {false && (
         <AglynComponentsContext.Consumer>

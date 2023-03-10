@@ -18,30 +18,45 @@
 import * as Aglyn from '@aglyn/aglyn'
 import {
   ICON_VARIANT_CLEAR,
+  ICON_VARIANT_CLOSE,
   ICON_VARIANT_FILTER,
   ICON_VARIANT_SEARCH,
 } from '@aglyn/shared-data-enums'
-import useAsyncEffect from '@aglyn/shared-ui-jsx/hooks/use-async-effect'
 import MdiIcon from '@aglyn/shared-ui-mdi-jsx/components/mdi-icon'
 import {
+  AppBar,
   Box,
+  Button,
   Collapse,
+  Dialog,
+  DialogContent,
   Divider,
+  DrawerProps,
   Grid,
   IconButton,
   InputBase,
+  Slide,
+  Toolbar,
+  Typography,
 } from '@mui/material'
+import type { TransitionProps } from '@mui/material/transitions'
 import { Observer, observer } from 'mobx-react-lite'
 import { forwardRef, SyntheticEvent, useCallback, useState } from 'react'
 import AccordionListComponent from './accordion-list.component'
-import CloseableDrawerComponent, {
-  type CloseableDrawerProps,
-} from './closeable-drawer.component'
 import EmptyResults from './empty-results'
 import NodeCard from './node-card'
 
-export interface ComponentPickerProps extends CloseableDrawerProps {
-  onItemSelect?: (
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />
+})
+
+export interface ComponentPickerProps extends DrawerProps {
+  onSelectItem?: (
     e: SyntheticEvent,
     item?: { option: Aglyn.NodeSchema<any> },
   ) => void
@@ -49,16 +64,19 @@ export interface ComponentPickerProps extends CloseableDrawerProps {
 
 export const ComponentPicker = observer(
   forwardRef<any, ComponentPickerProps>((props, forwardRef) => {
-    const { open, onClose, onItemSelect, ...rest } = props
+    const { open, onClose, onSelectItem, ...rest } = props
     const allItems = Aglyn.components.schemasBySortedCategories
 
-    const [searching, setSearching] = useState(false)
-    const [filter, setFilter] = useState<string>('')
+    const [filterOpen, setFilterOpen] = useState(false)
+    const [filter, setFilter] = useState('')
     const [items, setItems] = useState(allItems)
 
-    useAsyncEffect(
-      async (isMounted) => {
+    const handleFilterChange = useCallback(
+      async (e) => {
+        const filter = e.currentTarget?.value || ''
+        setFilter(filter)
         let items = allItems
+
         if (filter) {
           // Dynamically load fuse.js
           const Fuse = (await import('fuse.js')).default
@@ -84,128 +102,150 @@ export const ComponentPicker = observer(
             .filter((i) => Boolean(i.items.length))
         }
 
-        isMounted && setItems(items)
+        setItems(items)
       },
-      [filter, allItems],
+      [allItems],
     )
 
-    const handleFilterChange = useCallback((e) => {
-      const value = e.currentTarget?.value || ''
-      setFilter(value)
-    }, [])
+    const handleClose = useCallback(
+      (e, reason = 'unknown') => {
+        onClose?.(e, reason as any)
+      },
+      [onClose],
+    )
 
     return (
-      <CloseableDrawerComponent
+      <Dialog
         ref={forwardRef}
-        action={'Close'}
-        onActionClick={onClose}
-        onClose={onClose}
-        drawerTitle={'Add new element'}
+        onClose={handleClose}
         open={open}
-        extraActions={
-          <>
+        maxWidth="sm"
+        PaperProps={{ sx: { width: '100%' } }}
+        {...rest}
+      >
+        <AppBar position="relative">
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={handleClose}
+              aria-label="close"
+            >
+              <MdiIcon path={ICON_VARIANT_CLOSE.path} />
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+              {'Choose element'}
+            </Typography>
             <IconButton
               type="button"
               color="inherit"
               sx={{ p: '10px' }}
               aria-label="search"
-              onClick={() => setSearching((prev) => !prev)}
+              onClick={() => setFilterOpen((prev) => !prev)}
             >
               <MdiIcon path={ICON_VARIANT_FILTER.path} />
             </IconButton>
             <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-          </>
-        }
-        childrenAfterToolbar={
-          <Collapse orientation="vertical" in={searching}>
-            <Box
-              component="form"
-              sx={{
-                p: '2px 4px',
-                display: 'flex',
-                alignItems: 'center',
-                width: 1,
-                borderTop: 1,
-                borderColor: 'divider',
-              }}
-            >
-              <IconButton
-                type="button"
+            <Button autoFocus color="inherit" onClick={handleClose}>
+              {'Close'}
+            </Button>
+          </Toolbar>
+
+          <Collapse orientation="vertical" in={filterOpen}>
+            <Toolbar>
+              <Box
+                component="form"
                 color="inherit"
-                sx={{ p: '10px' }}
-                aria-label="search"
-                disabled
+                sx={{
+                  p: '2px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: 1,
+                  borderTop: 1,
+                  borderColor: 'divider',
+                }}
               >
-                <MdiIcon path={ICON_VARIANT_SEARCH.path} />
-              </IconButton>
-              {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
-              <InputBase
-                sx={{ ml: 1, flex: 1 }}
-                placeholder="Search Elements"
-                inputProps={{ 'aria-label': 'search elements' }}
-                value={filter}
-                onChange={handleFilterChange}
-              />
-              {Boolean(filter) && (
-                <>
-                  <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                  <IconButton
-                    type="button"
-                    color="inherit"
-                    sx={{ p: '10px' }}
-                    aria-label="search"
-                    onClick={() => setFilter('')}
-                  >
-                    <MdiIcon path={ICON_VARIANT_CLEAR.path} />
-                  </IconButton>
-                </>
-              )}
-            </Box>
-          </Collapse>
-        }
-        {...rest}
-      >
-        {!items?.length ? (
-          <EmptyResults sx={{ minHeight: '40vh', height: 1 }} />
-        ) : (
-          <AccordionListComponent
-            items={items}
-            defaultExpanded={items.map((i) => i.$id)}
-            getItemId={(item) => item?.$id}
-            onRenderSummary={({ item }) => (
-              <Observer>{() => <>{item?.label}</>}</Observer>
-            )}
-            AccordionDetailsProps={{
-              sx: { overflowX: 'hidden' },
-            }}
-            onRenderDetail={({ item }) => (
-              <Observer>
-                {() => (
-                  <Box>
-                    <Grid spacing={3} container sx={{ overflowX: 'hidden' }}>
-                      {item?.items?.map((node: any, index) => (
-                        <Observer key={node?.$id ?? index}>
-                          {() => (
-                            <Grid xs={4} sm={3} item>
-                              <NodeCard
-                                sx={{ cursor: 'pointer' }}
-                                node={node as any}
-                                onClick={(e) =>
-                                  onItemSelect(e, { option: node })
-                                }
-                              />
-                            </Grid>
-                          )}
-                        </Observer>
-                      ))}
-                    </Grid>
-                  </Box>
+                {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
+                <InputBase
+                  sx={{ ml: 1, flex: 1, color: 'inherit' }}
+                  placeholder="Search Elements"
+                  inputProps={{ 'aria-label': 'search elements' }}
+                  value={filter}
+                  onChange={handleFilterChange}
+                />
+                {Boolean(filter) && (
+                  <>
+                    <Divider
+                      sx={{ height: 28, m: 0.5 }}
+                      orientation="vertical"
+                    />
+                    <IconButton
+                      type="button"
+                      color="inherit"
+                      sx={{ p: '10px' }}
+                      aria-label="clear filter"
+                      onClick={handleFilterChange}
+                    >
+                      <MdiIcon path={ICON_VARIANT_CLEAR.path} />
+                    </IconButton>
+                  </>
                 )}
-              </Observer>
-            )}
-          />
-        )}
-      </CloseableDrawerComponent>
+                <IconButton
+                  type="button"
+                  sx={{ p: '10px' }}
+                  aria-label="search"
+                  disabled
+                >
+                  <MdiIcon path={ICON_VARIANT_SEARCH.path} />
+                </IconButton>
+              </Box>
+            </Toolbar>
+          </Collapse>
+        </AppBar>
+
+        <DialogContent dividers sx={{ p: 0 }}>
+          {!items?.length ? (
+            <EmptyResults sx={{ minHeight: '40vh', height: 1 }} />
+          ) : (
+            <AccordionListComponent
+              items={items}
+              defaultExpanded={items.map((i) => i.$id)}
+              getItemId={(item) => item?.$id}
+              onRenderSummary={({ item }) => (
+                <Observer>{() => <>{item?.label}</>}</Observer>
+              )}
+              AccordionDetailsProps={{
+                sx: { overflowX: 'hidden' },
+              }}
+              onRenderDetail={({ item }) => (
+                <Observer>
+                  {() => (
+                    <Box>
+                      <Grid spacing={3} container sx={{ overflowX: 'hidden' }}>
+                        {item?.items?.map((node: any, index) => (
+                          <Observer key={node?.$id ?? index}>
+                            {() => (
+                              <Grid xs={4} sm={3} item>
+                                <NodeCard
+                                  sx={{ cursor: 'pointer' }}
+                                  node={node as any}
+                                  onClick={(e) =>
+                                    onSelectItem(e, { option: node })
+                                  }
+                                />
+                              </Grid>
+                            )}
+                          </Observer>
+                        ))}
+                      </Grid>
+                    </Box>
+                  )}
+                </Observer>
+              )}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     )
   }),
 )
