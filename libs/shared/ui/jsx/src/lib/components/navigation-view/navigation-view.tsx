@@ -27,7 +27,7 @@ import {
 } from '@mui/material'
 import { motion } from 'framer-motion'
 import { forwardRef, useState } from 'react'
-import ScrollResponse from '../scroll-response'
+import ScrollReaction from '../scroll-reaction'
 
 const classKeys = generateComponentClassKeys('AglynNavigationDrawer', [
   'root',
@@ -67,7 +67,7 @@ export const NavigationAppBar = forwardRef<any, NavigationAppBarProps>(
     } = props
 
     return (
-      <ScrollResponse threshold={50} target={scrollView}>
+      <ScrollReaction threshold={50} target={scrollView}>
         {({ activeWithoutHysteresis, activeWithHysteresis }) => (
           <StyledAppBar
             ref={forwardRef}
@@ -92,7 +92,7 @@ export const NavigationAppBar = forwardRef<any, NavigationAppBarProps>(
             {children}
           </StyledAppBar>
         )}
-      </ScrollResponse>
+      </ScrollReaction>
     )
   },
 )

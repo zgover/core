@@ -18,14 +18,14 @@
 import { render } from '@testing-library/react'
 import React from 'react'
 
-import ScrollResponse from './scroll-response'
+import ScrollReaction from './scroll-reaction'
 
-describe('ScrollResponse', () => {
+describe('ScrollReaction', () => {
   it('should render successfully', () => {
     const { baseElement } = render(
-      <ScrollResponse>
+      <ScrollReaction>
         <div />
-      </ScrollResponse>,
+      </ScrollReaction>,
     )
     expect(baseElement).toBeTruthy()
   })

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ScrollResponse } from '@aglyn/shared-ui-jsx'
+import { ScrollReaction } from '@aglyn/shared-ui-jsx'
 import { _isArrEmpty } from '@aglyn/shared-util-guards'
 import {
   AppBar,
@@ -40,7 +40,7 @@ export function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
   const { children, tabBarTitle, navTabItems, activeTab, ...rest } = props
 
   return (
-    <ScrollResponse threshold={TOP_BAR_HEIGHT}>
+    <ScrollReaction threshold={TOP_BAR_HEIGHT}>
       {({ activeWithoutHysteresis }) => (
         <AppBar
           component="aside"
@@ -97,7 +97,7 @@ export function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
           </Toolbar>
         </AppBar>
       )}
-    </ScrollResponse>
+    </ScrollReaction>
   )
 }
 SecondaryAppBarComponent.displayName = 'SecondaryAppBarComponent'

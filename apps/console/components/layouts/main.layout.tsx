@@ -32,7 +32,7 @@ import {
   Menu,
   type MenuItemProps,
   type MenuProps,
-  ScrollResponse,
+  ScrollReaction,
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
@@ -146,7 +146,7 @@ const TopAppBar = (props: TopAppBarProps) => {
   } = props
 
   return (
-    <ScrollResponse>
+    <ScrollReaction>
       {({ activeWithoutHysteresis }) => (
         <AppBar
           component="header"
@@ -283,7 +283,7 @@ const TopAppBar = (props: TopAppBarProps) => {
           </Toolbar>
         </AppBar>
       )}
-    </ScrollResponse>
+    </ScrollReaction>
   )
 }
 TopAppBar.displayName = 'TopAppBar'

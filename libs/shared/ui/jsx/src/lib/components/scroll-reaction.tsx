@@ -31,7 +31,7 @@ export type ScrollTriggerOptions = Omit<
   'disableHysteresis'
 >
 
-export interface ScrollResponseProps<P = any> extends ScrollTriggerOptions {
+export interface ScrollReactionProps<P = any> extends ScrollTriggerOptions {
   /**
    * If children is a render function then passes local state to parameter.
    * Otherwise will clone child element, passing or calling renderProps
@@ -62,7 +62,7 @@ export interface ScrollResponseProps<P = any> extends ScrollTriggerOptions {
   withoutHysteresis?: ScrollTriggerOptions
 }
 
-export function ScrollResponse<P>(props: ScrollResponseProps<P>) {
+export function ScrollReaction<P>(props: ScrollReactionProps<P>) {
   const {
     children,
     renderProps,
@@ -94,7 +94,7 @@ export function ScrollResponse<P>(props: ScrollResponseProps<P>) {
   )
 }
 
-ScrollResponse.displayName = 'ScrollResponse'
-ScrollResponse.aglyn = true
+ScrollReaction.displayName = 'ScrollReaction'
+ScrollReaction.aglyn = true
 
-export default ScrollResponse
+export default ScrollReaction
