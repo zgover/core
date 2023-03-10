@@ -6,21 +6,33 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared/data/operators",
         "main": "libs/shared/data/operators/src/index.ts",
         "tsConfig": "libs/shared/data/operators/tsconfig.lib.json",
-        "assets": ["libs/shared/data/operators/*.md"]
+        "assets": [
+          "libs/shared/data/operators/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/shared/data/operators/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/shared/data/operators/**/*.ts"
+        ]
       }
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:data"]
+  "tags": [
+    "scope:lib",
+    "scope:shared",
+    "scope:data"
+  ]
 }

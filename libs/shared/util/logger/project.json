@@ -6,29 +6,43 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared/util/logger",
         "main": "libs/shared/util/logger/src/index.ts",
         "tsConfig": "libs/shared/util/logger/tsconfig.lib.json",
-        "assets": ["libs/shared/util/logger/*.md"]
+        "assets": [
+          "libs/shared/util/logger/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/shared/util/logger/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/shared/util/logger/**/*.ts"
+        ]
       },
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/shared/util/logger"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/shared/util/logger"
+      ],
       "options": {
         "jestConfig": "libs/shared/util/logger/jest.config.ts",
         "passWithNoTests": true
       }
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:util"]
+  "tags": [
+    "scope:lib",
+    "scope:shared",
+    "scope:util"
+  ]
 }

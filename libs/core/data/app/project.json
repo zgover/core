@@ -6,24 +6,34 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/core/data/app",
         "main": "libs/core/data/app/src/index.ts",
         "tsConfig": "libs/core/data/app/tsconfig.lib.json",
-        "assets": ["libs/core/data/app/*.md"]
+        "assets": [
+          "libs/core/data/app/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/core/data/app/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/core/data/app/**/*.ts"
+        ]
       },
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/core/data/app"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/core/data/app"
+      ],
       "options": {
         "jestConfig": "libs/core/data/app/jest.config.ts",
         "passWithNoTests": true
@@ -36,5 +46,10 @@
       }
     }
   },
-  "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:framework"]
+  "tags": [
+    "scope:lib",
+    "scope:aglyn",
+    "scope:data",
+    "aglyn:framework"
+  ]
 }

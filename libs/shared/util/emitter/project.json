@@ -6,29 +6,43 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared/util/emitter",
         "main": "libs/shared/util/emitter/src/index.ts",
         "tsConfig": "libs/shared/util/emitter/tsconfig.lib.json",
-        "assets": ["libs/shared/util/emitter/*.md"]
+        "assets": [
+          "libs/shared/util/emitter/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/shared/util/emitter/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/shared/util/emitter/**/*.ts"
+        ]
       },
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/shared/util/emitter"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/shared/util/emitter"
+      ],
       "options": {
         "jestConfig": "libs/shared/util/emitter/jest.config.ts",
         "passWithNoTests": true
       }
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:util"]
+  "tags": [
+    "scope:lib",
+    "scope:shared",
+    "scope:util"
+  ]
 }

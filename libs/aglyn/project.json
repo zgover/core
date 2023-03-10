@@ -6,12 +6,16 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/aglyn",
         "main": "libs/aglyn/src/index.ts",
         "tsConfig": "libs/aglyn/tsconfig.lib.json",
-        "assets": ["libs/aglyn/*.md"]
+        "assets": [
+          "libs/aglyn/*.md"
+        ]
       }
     },
     "publish": {
@@ -28,19 +32,29 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/aglyn/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/aglyn/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/aglyn"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/aglyn"
+      ],
       "options": {
         "jestConfig": "libs/aglyn/jest.config.ts",
         "passWithNoTests": true
       }
     }
   },
-  "tags": ["scope:lib", "scope:aglyn", "scope:feature"]
+  "tags": [
+    "scope:lib",
+    "scope:aglyn",
+    "scope:feature"
+  ]
 }

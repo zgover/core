@@ -6,29 +6,43 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared/util/dom",
         "main": "libs/shared/util/dom/src/index.ts",
         "tsConfig": "libs/shared/util/dom/tsconfig.lib.json",
-        "assets": ["libs/shared/util/dom/*.md"]
+        "assets": [
+          "libs/shared/util/dom/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/shared/util/dom/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/shared/util/dom/**/*.ts"
+        ]
       },
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/shared/util/dom"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/shared/util/dom"
+      ],
       "options": {
         "jestConfig": "libs/shared/util/dom/jest.config.ts",
         "passWithNoTests": true
       }
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:util"]
+  "tags": [
+    "scope:lib",
+    "scope:shared",
+    "scope:util"
+  ]
 }
