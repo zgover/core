@@ -21,15 +21,15 @@ import { styled } from '@aglyn/shared-ui-theme'
 import {
   Accordion as MuiAccordion,
   AccordionDetails as MuiAccordionDetails,
-  type AccordionDetailsProps,
-  type AccordionProps,
+  type AccordionDetailsProps as MuiAccordionDetailsProps,
+  AccordionProps as MuiAccordionProps,
   AccordionSummary as MuiAccordionSummary,
-  type AccordionSummaryProps,
+  type AccordionSummaryProps as MuiAccordionSummaryProps,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useState } from 'react'
+import { forwardRef, useCallback, useState } from 'react'
 
-const Accordion = styled(MuiAccordion)(({ theme }) => ({
+const StyledAccordion = styled(MuiAccordion)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   borderLeft: 0,
   borderRight: 0,
@@ -61,15 +61,69 @@ const Accordion = styled(MuiAccordion)(({ theme }) => ({
     padding: theme.spacing(2),
     borderTop: `1px solid ${theme.palette.divider}`,
   },
-}))
+})) as typeof MuiAccordion
+
+export interface AccordionProps extends MuiAccordionProps {
+  AccordionSummaryProps?: MuiAccordionSummaryProps
+  AccordionDetailsProps?: MuiAccordionDetailsProps
+  summary?: JSX.Children
+}
+
+export const Accordion = forwardRef<any, AccordionProps>((props, ref) => {
+  const {
+    expanded: expandedProp,
+    onChange,
+    AccordionSummaryProps,
+    AccordionDetailsProps,
+    summary,
+    children,
+    ...rest
+  } = props
+  const [expanded, setExpanded] = useState(expandedProp)
+  const handleToggle = useCallback(
+    (e, expanded: boolean) => {
+      setExpanded(Boolean(expanded))
+      onChange?.(e, expanded)
+    },
+    [onChange],
+  )
+
+  return (
+    <StyledAccordion
+      ref={ref}
+      onChange={handleToggle}
+      elevation={0}
+      expanded={expanded}
+      disableGutters
+      square
+      {...rest}
+    >
+      <MuiAccordionSummary
+        sx={{ position: 'sticky', top: 0, zIndex: 5 }}
+        expandIcon={
+          <MdiIcon
+            path={ICON_VARIANT_COLLAPSIBLE_OPEN.path}
+            sx={{ fontSize: '0.9rem' }}
+          />
+        }
+        {...AccordionSummaryProps}
+      >
+        {summary}
+      </MuiAccordionSummary>
+      <MuiAccordionDetails sx={{ zIndex: 1 }} {...AccordionDetailsProps}>
+        {children}
+      </MuiAccordionDetails>
+    </StyledAccordion>
+  )
+})
 
 export interface AccordionListProps<T = any> {
   items: T[]
   unique?: boolean
   defaultExpanded?: JSX.Key[]
-  AccordionProps?: AccordionProps
-  AccordionSummaryProps?: AccordionSummaryProps
-  AccordionDetailsProps?: AccordionDetailsProps
+  AccordionProps?: MuiAccordionProps
+  AccordionSummaryProps?: MuiAccordionSummaryProps
+  AccordionDetailsProps?: MuiAccordionDetailsProps
   onRenderSummary: (props: { item: T }) => JSX.Children
   onRenderDetail: (props: { item: T }) => JSX.Children
   getItemId: (item: T) => string | number
@@ -118,23 +172,12 @@ export const AccordionListComponent = observer(
               elevation={0}
               disableGutters
               square
+              summary={onRenderSummary({ item })}
+              AccordionSummaryProps={AccordionSummaryProps}
+              AccordionDetailsProps={AccordionDetailsProps}
               {...AccordionProps}
             >
-              <MuiAccordionSummary
-                sx={{ position: 'sticky', top: 0 }}
-                expandIcon={
-                  <MdiIcon
-                    path={ICON_VARIANT_COLLAPSIBLE_OPEN.path}
-                    sx={{ fontSize: '0.9rem' }}
-                  />
-                }
-                {...AccordionSummaryProps}
-              >
-                {onRenderSummary({ item })}
-              </MuiAccordionSummary>
-              <MuiAccordionDetails {...AccordionDetailsProps}>
-                {onRenderDetail({ item })}
-              </MuiAccordionDetails>
+              {onRenderDetail({ item })}
             </Accordion>
           )
         })}

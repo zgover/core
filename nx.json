@@ -110,6 +110,10 @@
       "{workspaceRoot}/tslint.json",
       "{workspaceRoot}/nx.json"
     ],
-    "production": ["default"]
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json"
+    ]
   }
 }

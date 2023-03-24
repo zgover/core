@@ -17,6 +17,10 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { BoxStyler, Measurements } from '@aglyn/besigner-ui-box-styler'
+import {
+  ButtonGroupFormControl,
+  ToggleButtonFormControl,
+} from '@aglyn/besigner-ui-form-fields'
 import { FieldComponentType } from '@aglyn/core-data-foundation'
 import { useAglynSiteTheme } from '@aglyn/core-feature-renderer'
 import {
@@ -27,10 +31,36 @@ import {
   ICON_VARIANT_CSS_INHERIT,
 } from '@aglyn/shared-data-enums'
 import {
+  alignContentCenterIcon,
+  alignContentEndIcon,
+  alignContentSpaceAroundIcon,
+  alignContentSpaceBetweenIcon,
+  alignContentSpaceEvenlyIcon,
+  alignContentStartIcon,
+  alignContentStretchIcon,
+  alignItemsCenterIcon,
+  alignItemsFlexEndIcon,
+  alignItemsFlexStartIcon,
+  alignItemsStretchIcon,
+  alignSelfCenterIcon,
+  alignSelfFlexEndIcon,
+  alignSelfFlexStartIcon,
+  alignSelfStretchIcon,
+  flexDirectionIcon,
+  flexNowrapIcon,
+  flexWrapIcon,
+  justifyContentCenterIcon,
+  justifyContentFlexEndIcon,
+  justifyContentFlexStartIcon,
+  justifyContentSpaceAroundIcon,
+  justifyContentSpaceBetweenIcon,
+} from '@aglyn/shared-svg-icons'
+import {
   componentMapper,
   FormRenderer,
   type FormRendererProps,
 } from '@aglyn/shared-ui-jsx-forms'
+import Container from '@aglyn/shared-ui-jsx/components/container'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { objectFlatten } from '@aglyn/shared-util-vendor'
 import {
@@ -45,6 +75,7 @@ import FormControl from '@mui/material/FormControl'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useCallback, useMemo } from 'react'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
+import { Accordion } from './accordion-list.component'
 import { ElementPropsFormTemplate } from './element-props-form.component'
 
 const stylesSchema = (presetColors) => ({
@@ -399,6 +430,361 @@ const stylesSchema = (presetColors) => ({
   ],
 })
 
+const alignItems: ButtonGroupFormControl = {
+  name: 'alignItems',
+  label: 'Align items',
+  helperText:
+    'The CSS align-items property sets the align-self value on all direct children as a group. In Flexbox, it controls the alignment of items on the Cross Axis. In Grid Layout, it controls the alignment of items on the Block Axis within their grid area.',
+  options: [
+    {
+      value: 'center',
+      label: 'Center',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignItemsCenterIcon,
+      },
+    },
+    {
+      value: 'flex-end',
+      label: 'Flex end',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignItemsFlexEndIcon,
+      },
+    },
+    {
+      value: 'flex-start',
+      label: 'Flex start',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignItemsFlexStartIcon,
+      },
+    },
+    {
+      value: 'stretch',
+      label: 'Stretch',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignItemsStretchIcon,
+      },
+    },
+  ],
+}
+
+const alignContent: ButtonGroupFormControl = {
+  name: 'alignContent',
+  label: 'Align content',
+  helperText:
+    "The CSS align-content property sets the distribution of space between and around content items along a flexbox's cross-axis or a grid's block axis.",
+  options: [
+    {
+      value: 'center',
+      label: 'Center',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignContentCenterIcon,
+      },
+    },
+    {
+      value: 'end',
+      label: 'End',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignContentEndIcon,
+      },
+    },
+    {
+      value: 'space-around',
+      label: 'Space around',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignContentSpaceAroundIcon,
+      },
+    },
+    {
+      value: 'space-between',
+      label: 'Space between',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignContentSpaceBetweenIcon,
+      },
+    },
+    {
+      value: 'space-evenly',
+      label: 'Space evenly',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignContentSpaceEvenlyIcon,
+      },
+    },
+    {
+      value: 'start',
+      label: 'Start',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignContentStartIcon,
+      },
+    },
+    {
+      value: 'stretch',
+      label: 'Stretch',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignContentStretchIcon,
+      },
+    },
+  ],
+}
+
+const alignSelf: ButtonGroupFormControl = {
+  name: 'alignSelf',
+  label: 'Align self',
+  helperText:
+    "The align-self CSS property overrides a grid or flex item's align-items value. In Grid, it aligns the item inside the grid area. In Flexbox, it aligns the item on the cross axis.",
+  options: [
+    {
+      value: 'center',
+      label: 'Center',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfCenterIcon,
+      },
+    },
+    {
+      value: 'end',
+      label: 'End',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfFlexEndIcon,
+      },
+    },
+    {
+      value: 'start',
+      label: 'Start',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfFlexStartIcon,
+      },
+    },
+    {
+      value: 'stretch',
+      label: 'Stretch',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfStretchIcon,
+      },
+    },
+  ],
+}
+
+const flexWrap: ButtonGroupFormControl = {
+  name: 'flexWrap',
+  label: 'Flex wrap',
+  helperText:
+    'The flex-wrap CSS property sets whether flex items are forced onto one line or can wrap onto multiple lines. If wrapping is allowed, it sets the direction that lines are stacked.',
+  options: [
+    {
+      value: 'nowrap',
+      label: 'No wrap',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: flexNowrapIcon,
+      },
+    },
+    {
+      value: 'wrap',
+      label: 'Wrap',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: flexWrapIcon,
+      },
+    },
+    {
+      value: 'wrap-reverse',
+      label: 'Wrap reverse',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: flexWrapIcon,
+      },
+    },
+  ],
+}
+
+const flexDirection: ButtonGroupFormControl = {
+  name: 'flexDirection',
+  label: 'Flex direction',
+  helperText:
+    'The flex-direction CSS property sets how flex items are placed in the flex container defining the main axis and the direction (normal or reversed).',
+  options: [
+    {
+      value: 'column',
+      label: 'Column',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: flexDirectionIcon,
+      },
+    },
+    {
+      value: 'column-reverse',
+      label: 'Column reverse',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: flexDirectionIcon,
+        sx: { transform: 'rotate(-180deg)' },
+      },
+    },
+    {
+      value: 'row',
+      label: 'Row',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: flexDirectionIcon,
+        sx: { transform: 'rotate(-90deg)' },
+      },
+    },
+    {
+      value: 'row-reverse',
+      label: 'Row reverse',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: flexDirectionIcon,
+        sx: { transform: 'rotate(90deg)' },
+      },
+    },
+  ],
+}
+
+const justifyItems: ButtonGroupFormControl = {
+  name: 'justifyItems',
+  label: 'Justify items',
+  helperText:
+    'The CSS justify-items property defines the default justify-self for all items of the box, giving them all a default way of justifying each box along the appropriate axis.',
+  options: [
+    {
+      value: 'center',
+      label: 'Center',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfCenterIcon,
+      },
+    },
+    {
+      value: 'end',
+      label: 'End',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfFlexEndIcon,
+      },
+    },
+    {
+      value: 'start',
+      label: 'Start',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfFlexStartIcon,
+      },
+    },
+    {
+      value: 'stretch',
+      label: 'Stretch',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfStretchIcon,
+      },
+    },
+  ],
+}
+
+const justifyContent: ButtonGroupFormControl = {
+  name: 'justifyContent',
+  label: 'Justify content',
+  helperText:
+    'The CSS justify-content property defines how the browser distributes space between and around content items along the main-axis of a flex container, and the inline axis of a grid container.',
+  options: [
+    {
+      value: 'center',
+      label: 'Center',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: justifyContentCenterIcon,
+      },
+    },
+    {
+      value: 'flex-end',
+      label: 'Flex end',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: justifyContentFlexEndIcon,
+      },
+    },
+    {
+      value: 'flex-start',
+      label: 'Flex start',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: justifyContentFlexStartIcon,
+      },
+    },
+    {
+      value: 'space-around',
+      label: 'Space around',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: justifyContentSpaceAroundIcon,
+      },
+    },
+    {
+      value: 'space-between',
+      label: 'Space between',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: justifyContentSpaceBetweenIcon,
+      },
+    },
+  ],
+}
+
+const justifySelf: ButtonGroupFormControl = {
+  name: 'justifySelf',
+  label: 'Justify self',
+  helperText:
+    'The CSS justify-self property sets the way a box is justified inside its alignment container along the appropriate axis.',
+  options: [
+    {
+      value: 'center',
+      label: 'Center',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfCenterIcon,
+      },
+    },
+    {
+      value: 'end',
+      label: 'End',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfFlexEndIcon,
+      },
+    },
+    {
+      value: 'start',
+      label: 'Start',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfFlexStartIcon,
+      },
+    },
+    {
+      value: 'stretch',
+      label: 'Stretch',
+      icon: {
+        viewBox: '0 0 13 13',
+        component: alignSelfStretchIcon,
+      },
+    },
+  ],
+}
+
 const TextAlignToggleButtonGroup = (props) => {
   const { onChange, value, field } = props
 
@@ -470,97 +856,143 @@ const ElementStylesForm = observer(
       [nodeSx, handleElementSave],
     )
 
+    const boxMeasurements = {
+      marginTop: nodeSx?.['marginTop'] ?? undefined,
+      marginLeft: nodeSx?.['marginLeft'] ?? undefined,
+      marginRight: nodeSx?.['marginRight'] ?? undefined,
+      marginBottom: nodeSx?.['marginBottom'] ?? undefined,
+      paddingTop: nodeSx?.['paddingTop'] ?? undefined,
+      paddingLeft: nodeSx?.['paddingLeft'] ?? undefined,
+      paddingRight: nodeSx?.['paddingRight'] ?? undefined,
+      paddingBottom: nodeSx?.['paddingBottom'] ?? undefined,
+    }
+
     const handleTextAlignChange = useCallback(
       (e, value: string) => {
         handleElementSave({
           ...nodeSx,
-          textAlign: value || 'undefined',
+          textAlign: value || undefined,
         })
       },
       [nodeSx, handleElementSave],
     )
 
-    const boxMeasurements = useMemo(
-      () => ({
-        marginTop: nodeSx?.['marginTop'] ?? undefined,
-        marginLeft: nodeSx?.['marginLeft'] ?? undefined,
-        marginRight: nodeSx?.['marginRight'] ?? undefined,
-        marginBottom: nodeSx?.['marginBottom'] ?? undefined,
-        paddingTop: nodeSx?.['paddingTop'] ?? undefined,
-        paddingLeft: nodeSx?.['paddingLeft'] ?? undefined,
-        paddingRight: nodeSx?.['paddingRight'] ?? undefined,
-        paddingBottom: nodeSx?.['paddingBottom'] ?? undefined,
-      }),
-      [nodeSx],
+    const handleFlexboxChange = useCallback(
+      (name: string) => (e, value: string) => {
+        handleElementSave({
+          ...nodeSx,
+          [name]: value || undefined,
+        })
+      },
+      [nodeSx, handleElementSave],
     )
 
     return (
       <>
-        <BoxStyler
-          measurements={boxMeasurements}
-          onChange={handleBoxStylerChange}
-        />
+        <Container gutterY={[2]} dense>
+          <BoxStyler
+            measurements={boxMeasurements}
+            onChange={handleBoxStylerChange}
+          />
+        </Container>
 
-        <TextAlignToggleButtonGroup
-          onChange={handleTextAlignChange}
-          value={nodeSx?.['textAlign']}
-          field={{
-            component: FieldComponentType.TOGGLE_BUTTON,
-            name: 'textAlign',
-            label: 'Text Alignment',
-            description:
-              'Sets the horizontal alignment of the inline-level content inside a block element or table-cell box.',
-            exclusive: true,
-            options: [
-              {
-                value: 'inherit',
-                icon: ICON_VARIANT_CSS_INHERIT.path,
-                label: 'Inherit',
-              },
-              {
-                value: 'left',
-                icon: ICON_VARIANT_ALIGN_LEFT.path,
-                label: 'Left',
-              },
-              {
-                value: 'center',
-                icon: ICON_VARIANT_ALIGN_CENTER.path,
-                label: 'Center',
-              },
-              {
-                value: 'right',
-                icon: ICON_VARIANT_ALIGN_RIGHT.path,
-                label: 'Right',
-              },
-              {
-                value: 'justify',
-                icon: ICON_VARIANT_ALIGN_JUSTIFY.path,
-                label: 'Justify',
-              },
-            ],
-          }}
-        />
+        <Accordion summary="Flexbox & Grids" sx={{ mb: 2 }}>
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(alignItems.name)}
+            schema={alignItems}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(alignContent.name)}
+            schema={alignContent}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(alignSelf.name)}
+            schema={alignSelf}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(flexWrap.name)}
+            schema={flexWrap}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(flexDirection.name)}
+            schema={flexDirection}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(justifyItems.name)}
+            schema={justifyItems}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(justifyContent.name)}
+            schema={justifyContent}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(justifySelf.name)}
+            schema={justifySelf}
+          />
+        </Accordion>
 
-        <FormRenderer
-          ref={ref}
-          FormTemplate={ElementPropsFormTemplate}
-          componentMapper={componentMapper}
-          onCancel={handleFormCancel}
-          onSubmit={handleElementSave}
-          initialValues={nodeSx}
-          schema={schema}
-          {...rest}
-        />
+        <Container gutterY={[2]} dense>
+          <TextAlignToggleButtonGroup
+            onChange={handleTextAlignChange}
+            value={nodeSx?.['textAlign']}
+            field={{
+              component: FieldComponentType.TOGGLE_BUTTON,
+              name: 'textAlign',
+              label: 'Text Alignment',
+              description:
+                'Sets the horizontal alignment of the inline-level content inside a block element or table-cell box.',
+              exclusive: true,
+              options: [
+                {
+                  value: 'inherit',
+                  icon: ICON_VARIANT_CSS_INHERIT.path,
+                  label: 'Inherit',
+                },
+                {
+                  value: 'left',
+                  icon: ICON_VARIANT_ALIGN_LEFT.path,
+                  label: 'Left',
+                },
+                {
+                  value: 'center',
+                  icon: ICON_VARIANT_ALIGN_CENTER.path,
+                  label: 'Center',
+                },
+                {
+                  value: 'right',
+                  icon: ICON_VARIANT_ALIGN_RIGHT.path,
+                  label: 'Right',
+                },
+                {
+                  value: 'justify',
+                  icon: ICON_VARIANT_ALIGN_JUSTIFY.path,
+                  label: 'Justify',
+                },
+              ],
+            }}
+          />
 
-        <FormControl margin="none" fullWidth>
-          <Button
-            onClick={() => deleteElementCallback(node)}
-            sx={{ mt: 2, color: 'error.main' }}
-            fullWidth
-          >
-            Delete Element
-          </Button>
-        </FormControl>
+          <FormRenderer
+            ref={ref}
+            FormTemplate={ElementPropsFormTemplate}
+            componentMapper={componentMapper}
+            onCancel={handleFormCancel}
+            onSubmit={handleElementSave}
+            initialValues={nodeSx}
+            schema={schema}
+            {...rest}
+          />
+
+          <FormControl margin="none" fullWidth>
+            <Button
+              onClick={() => deleteElementCallback(node)}
+              sx={{ mt: 2, color: 'error.main' }}
+              fullWidth
+            >
+              Delete Element
+            </Button>
+          </FormControl>
+        </Container>
       </>
     )
   }),

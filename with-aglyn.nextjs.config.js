@@ -270,7 +270,7 @@ const AGLYN_CONFIG = {
      * Set this to false if you do not want to use SVGR
      * @see https://github.com/gregberge/svgr
      */
-    svgr: false,
+    svgr: true,
   },
   // onDemandEntries: {
   //   /**

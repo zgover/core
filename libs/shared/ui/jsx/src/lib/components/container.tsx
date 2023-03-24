@@ -26,7 +26,7 @@ import type { Spacing } from '@mui/system/createTheme/createSpacing'
 
 export interface ContainerProps extends MuiContainerProps {
   gutterMode?: 'margin' | 'padding'
-  gutterY?: Parameters<Spacing> | boolean
+  gutterY?: Partial<Parameters<Spacing>> | boolean
   dense?: boolean
 }
 
@@ -39,36 +39,34 @@ export const Container = styled(MuiContainer, {
   shouldForwardProp: (propName) =>
     !_isEqualitySameType(propName, null, 'gutterMode', 'gutterY', 'dense'),
 })<ContainerProps>(({ disableGutters, gutterMode, gutterY, theme, dense }) => {
-  const base = !dense
-    ? {}
-    : {
-        [`paddingLeft`]: theme.spacing(2),
-        [`paddingRight`]: theme.spacing(2),
-        [theme.breakpoints.up('sm')]: {
-          [`paddingLeft`]: theme.spacing(2),
-          [`paddingRight`]: theme.spacing(2),
+  const mode = gutterMode === 'margin' ? 'margin' : 'padding'
+  const base = dense
+    ? {
+        [`${mode}Left`]: theme.spacing(1),
+        [`${mode}Right`]: theme.spacing(1),
+        [theme.breakpoints.up('md')]: {
+          [`${mode}Left`]: theme.spacing(2),
+          [`${mode}Right`]: theme.spacing(2),
         },
       }
+    : {}
   if (disableGutters) return base
-
-  const mode = gutterMode === 'margin' ? 'margin' : 'padding'
 
   if (isBoolean(gutterY) && gutterY) {
     return {
       ...base,
       [`${mode}Top`]: theme.spacing(2),
       [`${mode}Bottom`]: theme.spacing(2),
-      [theme.breakpoints.up('md')]: {
+      [theme.breakpoints.up('sm')]: {
         [`${mode}Top`]: theme.spacing(3),
         [`${mode}Bottom`]: theme.spacing(3),
       },
     }
   } else if (!isBoolean(gutterY) && gutterY) {
-    const space = theme.spacing(
-      ...((Array.isArray(gutterY)
-        ? gutterY
-        : [gutterY]) as Parameters<Spacing>),
-    )
+    const param = (
+      Array.isArray(gutterY) ? gutterY : [gutterY]
+    ) as Parameters<Spacing>
+    const space = theme.spacing(...param)
     return {
       ...base,
       [`${mode}Top`]: space,

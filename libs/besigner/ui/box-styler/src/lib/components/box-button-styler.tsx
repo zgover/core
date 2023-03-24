@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { FlexboxButtonGroup } from '@aglyn/besigner-ui-form-fields'
 import type { Measurement } from '@aglyn/shared-data-enums'
 import '@aglyn/shared-data-jsx'
 import { alpha, darken } from '@aglyn/shared-ui-theme'
@@ -23,22 +22,50 @@ import { ButtonBase, Collapse, lighten, styled } from '@mui/material'
 import { emphasize } from '@mui/system/colorManipulator'
 import { forwardRef, useCallback, useState } from 'react'
 import type { Measurements } from '../types'
+import Legend, { LegendItem } from './legend'
 
 export { Measurements }
 
-const GAP = 1
+const GAP = 2
 const BTN_SIZE = 20
+const HORZ_BTN = {
+  H: 48,
+  W: 100,
+}
 const HEIGHT = 200
+
+export type PolyType = {
+  topLX: string
+  topLY: string
+  topRX: string
+  topRY: string
+  btmRX: string
+  btmRY: string
+  btmLX: string
+  btmLY: string
+}
+
+const polygon = (options: PolyType) => {
+  const topL = `${options.topLX || '0%'} ${options.topLY || '0%'}`
+  const topR = `${options.topRX || '0%'} ${options.topRY || '0%'}`
+  const btmR = `${options.btmRX || '0%'} ${options.btmRY || '0%'}`
+  const btmL = `${options.btmLX || '0%'} ${options.btmLY || '0%'}`
+  return `polygon(${topL}, ${topR}, ${btmR}, ${btmL})`
+}
 
 const StyledWrapper = styled('div')(({ theme }) => ({
   width: '100%',
   height: HEIGHT,
-  backgroundColor: theme.palette.surface.dark,
+  backgroundColor: theme.palette.common.black,
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
   textAlign: 'center',
   overflow: 'hidden',
+  borderStyle: 'dashed',
+  borderWidth: 1,
+  borderColor: theme.palette.warning.dark,
+  padding: 1,
 
   '.marginButton': {
     overflow: 'hidden',
@@ -46,9 +73,6 @@ const StyledWrapper = styled('div')(({ theme }) => ({
     bgcolor: 'secondary.light',
     cursor: 'pointer',
     backfaceVisibility: 'hidden',
-    borderStyle: 'dashed',
-    borderWidth: 1,
-    borderColor: theme.palette.warning.dark,
     backgroundColor: alpha(theme.palette.surface.main, 0.96),
     color: theme.palette.getContrastText(
       alpha(theme.palette.surface.main, 0.96),
@@ -64,68 +88,94 @@ const StyledWrapper = styled('div')(({ theme }) => ({
     '&.marginTop': {
       width: `calc(100% - ${GAP * 2}px)`,
       marginLeft: GAP,
-      marginBottom: GAP,
-      height: `${BTN_SIZE}%`,
-      borderBottomWidth: 0,
-      clipPath: `polygon(0% 0%, 100% 0%, ${
-        100 - BTN_SIZE
-      }% 100%, ${BTN_SIZE}% 100%)`,
-    },
-
-    '&.marginLeft': {
-      top: 0,
-      left: 0,
-      position: 'absolute',
-      borderRightWidth: 0,
-      height: '100%',
-      width: `calc(${BTN_SIZE}% - ${GAP}px)`,
       marginRight: GAP,
-      clipPath: `polygon(0% 0%, 100% ${BTN_SIZE}%, 100% ${
-        100 - BTN_SIZE
-      }%, 0% 100%)`,
-    },
-
-    '&.marginRight': {
-      top: 0,
-      right: 0,
-      borderLeftWidth: 0,
-      height: '100%',
-      width: `calc(${BTN_SIZE}% - ${GAP}px)`,
-      marginLeft: GAP,
-      position: 'absolute',
-      clipPath: `polygon(0% ${BTN_SIZE}%, 100% 0%, 100% 100%, 0% ${
-        100 - BTN_SIZE
-      }%)`,
+      height: `calc(${BTN_SIZE}% - ${GAP}px)`,
+      borderBottomWidth: 0,
+      clipPath: polygon({
+        topLX: '0%',
+        topLY: '0%',
+        topRX: '100%',
+        topRY: '0%',
+        btmRX: `${100 - BTN_SIZE}%`,
+        btmRY: '100%',
+        btmLX: `${BTN_SIZE}%`,
+        btmLY: '100%',
+      }),
     },
 
     '&.marginBottom': {
-      width: `calc(100% - ${GAP * 2}px)`,
+      width: `calc(100% - ${GAP}px)`,
       marginLeft: GAP,
-      marginTop: GAP,
       borderTopWidth: 0,
       height: `${BTN_SIZE}%`,
-      clipPath: `polygon(${BTN_SIZE}% 0%, ${
-        100 - BTN_SIZE
-      }% 0%, 100% 100%, 0% 100%)`,
+      clipPath: polygon({
+        topLX: `${BTN_SIZE}%`,
+        topLY: `0%`,
+        topRX: `${100 - BTN_SIZE}%`,
+        topRY: '0%',
+        btmRX: `100%`,
+        btmRY: '100%',
+        btmLX: `0%`,
+        btmLY: `100%`,
+      }),
+    },
+
+    '&.marginLeft': {
+      left: 1,
+      top: 0,
+      position: 'absolute',
+      borderRightWidth: 0,
+      height: `calc(100% - ${GAP}px)`,
+      width: `${BTN_SIZE}%`,
+      clipPath: polygon({
+        topLX: `0%`,
+        topLY: `0%`,
+        topRX: `100%`,
+        topRY: `${BTN_SIZE}%`,
+        btmRX: `100%`,
+        btmRY: `${100 - BTN_SIZE}%`,
+        btmLX: `0%`,
+        btmLY: `100%`,
+      }),
+    },
+
+    '&.marginRight': {
+      right: 1,
+      borderLeftWidth: 0,
+      height: `calc(100% - ${GAP * 2}px)`,
+      width: `${BTN_SIZE}%`,
+      position: 'absolute',
+      clipPath: polygon({
+        topLX: '0%',
+        topLY: `${BTN_SIZE}%`,
+        topRX: '100%',
+        topRY: '0%',
+        btmRX: `100%`,
+        btmRY: '100%',
+        btmLX: `0%`,
+        btmLY: `${100 - BTN_SIZE}%`,
+      }),
     },
   },
 
   '.paddingContainer': {
-    width: `calc(100% - ${BTN_SIZE * 2}%)`,
-    height: `calc(100% - ${BTN_SIZE * 2}%)`,
+    width: `calc(${BTN_SIZE * 3}% - ${GAP * 2}px)`,
+    height: `${BTN_SIZE * 3}%`,
     display: 'flex',
+    padding: 1,
     flexDirection: 'column',
-    margin: '0 auto',
+    margin: `${GAP}px auto`,
     position: 'relative',
     textAlign: 'center',
-    overflow: 'hidden',
-  },
-
-  '.paddingButton': {
     overflow: 'hidden',
     borderStyle: 'dashed',
     borderWidth: 1,
     borderColor: theme.palette.success.dark,
+    boxSizing: 'border-box',
+  },
+
+  '.paddingButton': {
+    overflow: 'hidden',
     backfaceVisibility: 'hidden',
     backgroundColor: darken(theme.palette.surface.main, 0.12),
     background: [
@@ -141,57 +191,84 @@ const StyledWrapper = styled('div')(({ theme }) => ({
 
     '&.paddingTop': {
       width: `calc(100% - ${GAP * 2}px)`,
-      marginLeft: GAP,
-      marginBottom: GAP,
       height: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334))`,
-      borderBottomWidth: 0,
-      clipPath: `polygon(0% 0%, 100% 0%, calc(${BTN_SIZE * 2}% + (${
-        100 - BTN_SIZE
-      }% * 0.3333334)) 100%, calc(${BTN_SIZE}% + (${
-        BTN_SIZE * 2
-      }% * 0.3333334)) 100%)`,
+      marginLeft: GAP,
+      // marginRight: GAP,
+      clipPath: polygon({
+        topLX: `0%`,
+        topLY: `0%`,
+        topRX: `100%`,
+        topRY: `0%`,
+        btmRX: `calc(${BTN_SIZE * 2}% + (${
+          100 - BTN_SIZE
+        }% * 0.3333334) - ${GAP}px)`,
+        btmRY: `100%`,
+        btmLX: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334) + ${GAP}px)`,
+        btmLY: `100%`,
+      }),
     },
 
     '&.paddingLeft': {
-      top: 0,
-      left: 0,
       position: 'absolute',
-      borderRightWidth: 0,
-      height: '100%',
+      top: 0,
+      left: 1,
+      height: `calc(100% - ${GAP * 2}px)`,
       width: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334))`,
-      clipPath: `polygon(0% 0%, 100% calc(${BTN_SIZE}% + (${
-        BTN_SIZE * 2
-      }% * 0.3333334)), 100% calc(${BTN_SIZE * 2}% + (${
-        100 - BTN_SIZE
-      }% * 0.3333334)), 0% 100%)`,
+      marginTop: GAP,
+      marginBottom: GAP,
+      clipPath: polygon({
+        topLX: `0%`,
+        topLY: `0%`,
+        topRX: `100%`,
+        topRY: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334) + ${GAP}px)`,
+        btmRX: `100%`,
+        btmRY: `calc(${BTN_SIZE * 2}% + (${
+          100 - BTN_SIZE
+        }% * 0.3333334) - ${GAP}px)`,
+        btmLX: `0%`,
+        btmLY: `100%`,
+      }),
     },
 
     '&.paddingRight': {
-      top: 0,
-      right: 0,
       position: 'absolute',
-      height: '100%',
-      marginLeft: GAP,
+      top: 0,
+      right: 1,
+      height: `calc(100% - ${GAP * 2}px)`,
       width: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334))`,
-      borderLeftWidth: 0,
-      clipPath: `polygon(0% calc(${BTN_SIZE}% + (${
-        BTN_SIZE * 2
-      }% * 0.3333334)), 100% 0%, 100% 100%, 0% calc(${BTN_SIZE * 2}% + (${
-        100 - BTN_SIZE
-      }% * 0.3333334)))`,
+      marginTop: GAP,
+      marginBottom: GAP,
+      clipPath: polygon({
+        topLX: `0%`,
+        topLY: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334) + ${GAP}px)`,
+        topRX: `100%`,
+        topRY: `0%`,
+        btmRX: `100%`,
+        btmRY: `100%`,
+        btmLX: `0%`,
+        btmLY: `calc(${BTN_SIZE * 2}% + (${
+          100 - BTN_SIZE
+        }% * 0.3333334) - ${GAP}px)`,
+      }),
     },
 
     '&.paddingBottom': {
       width: `calc(100% - ${GAP * 2}px)`,
-      marginLeft: GAP,
-      marginTop: GAP,
       height: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334))`,
-      borderTopWidth: 0,
-      clipPath: `polygon(calc(${BTN_SIZE}% + (${
-        BTN_SIZE * 2
-      }% * 0.3333334)) 0%, calc(${BTN_SIZE * 2}% + (${
-        100 - BTN_SIZE
-      }% * 0.3333334)) 0%, 100% 100%, 0% 100%)`,
+      marginLeft: GAP,
+      marginRight: GAP,
+      clipPath: polygon({
+        topLX: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334) + ${GAP}px)`,
+        topLY: `0%`,
+        topRX: `calc(${BTN_SIZE * 2}% + (${
+          100 - BTN_SIZE
+        }% * 0.3333334) - ${GAP}px)`,
+        topRY: `0%`,
+        btmRX: `100%`,
+        btmRY: `100%`,
+        btmLX: `0%`,
+        btmLY: `100%`,
+      }),
     },
   },
 
@@ -201,9 +278,11 @@ const StyledWrapper = styled('div')(({ theme }) => ({
     borderColor: theme.palette.info.dark,
     color: theme.palette.text.primary,
     backgroundColor: theme.palette.surface.light,
-    width: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334))`,
-    height: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334))`,
-    margin: '0 auto',
+    width: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334) - ${GAP * 2}px)`,
+    height: `calc(${BTN_SIZE}% + (${BTN_SIZE * 2}% * 0.3333334) - ${
+      GAP * 2
+    }px)`,
+    margin: `${GAP}px auto`,
     position: 'relative',
     textAlign: 'center',
     display: 'flex',
@@ -335,6 +414,19 @@ export const BoxButtonStyler = forwardRef<any, BoxButtonStylerProps>(
             {'Margin'}
           </div>
         </StyledWrapper>
+
+        <Legend
+          direction="row"
+          alignItems="center"
+          justifyContent="space-around"
+          spacing={1}
+          marginTop={1}
+          marginBottom={2}
+        >
+          <LegendItem item={'margin'} />
+          <LegendItem item={'padding'} />
+          <LegendItem item={'contents'} />
+        </Legend>
         <Collapse in={editing}></Collapse>
       </>
     )

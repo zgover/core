@@ -32,6 +32,7 @@ import {
 import { Fragment } from 'react'
 import HostIdProvider from '../components/host-id-provider'
 import FirebaseAppLayout from '../components/layouts/firebase-app.layout'
+import OsfaTooltip from '../components/osfa-tooltip'
 import './styles.css'
 
 // enableStaticRendering(true)
@@ -50,6 +51,7 @@ const MainComponent = withThemeCssVarProvider(
             <SnackbarProvider>
               <HostIdProvider>{children}</HostIdProvider>
             </SnackbarProvider>
+            <OsfaTooltip />
           </ConfirmationProviderComponent>
         </LoadingLayoutComponent>
       </FirebaseAppLayout>
