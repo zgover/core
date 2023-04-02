@@ -16,7 +16,7 @@
  */
 
 import { ITimestamp } from '@aglyn/shared-util-timestamp'
-import { NodeId, NodeSchema } from '../canvas-manager/index'
+import { type NodeId, type NodeSchema } from '../types/nodes'
 import { AglynAccessRule } from './auth'
 import { AglynDocument } from './shared'
 import {

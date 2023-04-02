@@ -18,7 +18,6 @@
 import type { PartialKeys } from '@aglyn/shared-data-types'
 import _isObj from '@aglyn/shared-util-guards/_is-obj'
 import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
-import { ITimestamp } from '@aglyn/shared-util-timestamp'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
 import cloneDeep from 'lodash-es/cloneDeep'
 import isEqual from 'lodash-es/isEqual'
@@ -32,6 +31,7 @@ import {
 } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { Aglyn } from '../aglyn'
+import { NodeType } from '../aglyn'
 import {
   ComponentId,
   ComponentSchema,
@@ -39,130 +39,15 @@ import {
 } from '../components-manager'
 import { createIdUrlSafe } from '../constants'
 import type { PluginId } from '../plugin-manager'
-
-import { HostUid } from '../types/workspace'
-
-export enum NodeType {
-  NODE = 'node',
-  TEXT = 'text',
-  SCREEN = 'screen',
-  REF = 'ref',
-  PRESET = 'preset',
-}
-
-export type NodeId = string
-
-export interface AbstractNodeSchema<TYPE extends NodeType = any> {
-  /**
-   * The unique identifier for a node
-   */
-  $id: NodeId
-  /**
-   * Display name of node to override inherited label. Only used in editor
-   */
-  name?: string
-  /**
-   * The node type to describe the IST
-   */
-  type?: TYPE
-}
-
-export interface NodeSchema<P = JSX.AnyProps> extends AbstractNodeSchema {
-  /**
-   * The unique identifier of the node component
-   */
-  componentId?: ComponentId
-  /**
-   * The unique identifier of the node component plugin bundle
-   */
-  pluginId?: PluginId
-  /**
-   * The unique identifier of the node parent
-   */
-  parentId?: NodeId
-  /**
-   * List of the children unique identifiers for the node
-   */
-  nodes?: NodeId[]
-  /**
-   * Class name to pass the DOM node, can also be defined in props
-   */
-  className?: string
-  /**
-   * The node props/attributes passed to the component
-   */
-  props?: P
-  /**
-   * The node style properties for emotion
-   */
-  sx?: JSX.SxProps
-  /**
-   * The computed node parent (only for type completion)
-   */
-  readonly parent?: NodeSchema<any> | null
-  /**
-   * The computed node parent (only for type completion)
-   */
-  readonly children?: NodeSchema<any>[]
-  /**
-   * The computed index in parent nodes (only for type completion)
-   */
-  readonly index?: number | null
-  /**
-   * The computed label (only for type completion)
-   */
-  readonly labelShort?: string | undefined
-  /**
-   * The computed breadcrumb path (only for type completion)
-   */
-  readonly breadcrumbPath?: NodeBreadcrumbPath
-  /**
-   * The computed component schema (only for type completion)
-   */
-  readonly componentSchema?: ComponentSchema | undefined
-  /**
-   * The computed guard for of child nodes (only for type completion)
-   */
-  readonly hasNodes?: boolean
-  /**
-   * The computed property for the resolved props from component schema
-   */
-  readonly resolvedProps?: P
-}
-
-export type NodeSchemaJSON<P = JSX.AnyProps> = Omit<
-  NodeSchema<P>,
-  | 'parent'
-  | 'index'
-  | 'labelShort'
-  | 'breadcrumbPath'
-  | 'componentSchema'
-  | 'hasNodes'
->
-
-export type NodeSchemaNested<P = JSX.AnyProps> = Omit<
-  NodeSchemaJSON<P>,
-  'nodes'
-> & { nodes?: NodeSchemaNested<any>[] }
-
-export type NodesMap = Record<NodeId, NodeSchema<any>>
-
-export interface ScreenSchema {
-  nodes: NodeSchemaNested
-  createdAt?: ITimestamp
-  updatedAt?: ITimestamp
-  hostId?: HostUid
-}
-
-export type NodeBreadcrumbPath = [
-  root: string & typeof NODE_ROOT_ID,
-  ...nodes: [...ancestors: NodeId[], node: NodeId],
-]
-
-export type ProcessableNodes =
-  | NodeSchemaNested<any>[]
-  | NodeSchemaNested<any>
-  | Record<NodeId, NodeSchema>
+import type {
+  NodeBreadcrumbPath,
+  NodeId,
+  NodeSchema,
+  NodeSchemaJSON,
+  NodeSchemaNested,
+  NodesMap,
+  ProcessableNodes,
+} from '../types/nodes'
 
 export const NODE_ROOT_ID = '_@_'
 export const NODE_ID_LENGTH = 10
@@ -612,7 +497,30 @@ export class CanvasManager {
     node.props = { ...props }
   }
 
+  public static nestDenormalizedNodes(
+    nodes: NodesMap,
+    rootId: NodeId = NODE_ROOT_ID,
+  ): NodeSchemaNested<any> {
+    const rootNode = nodes[rootId]
+    const response = { ...(rootNode as unknown as NodeSchemaNested<any>) }
+    const children = []
+    for (const id of rootNode.nodes) {
+      const child = { ...nodes[id] }
+      const nestedChild = this.nestDenormalizedNodes(nodes, child.$id)
+      children.push(nestedChild)
+    }
+    response.nodes = children
+    return response
+  }
+
   public denormalizeNodes(
+    nodes: NodeSchemaNested<any>[],
+    parentId: NodeId,
+    accumulator: NodesMap = {},
+  ): NodesMap {
+    return CanvasManager.denormalizeNodes(nodes, parentId, accumulator)
+  }
+  public static denormalizeNodes(
     nodes: NodeSchemaNested<any>[],
     parentId: NodeId,
     accumulator: NodesMap = {},
@@ -659,6 +567,9 @@ export class CanvasManager {
   }
 
   public processNodesToDenormalized(value: ProcessableNodes): NodesMap {
+    return CanvasManager.processNodesToDenormalized(value)
+  }
+  public static processNodesToDenormalized(value: ProcessableNodes): NodesMap {
     let response: NodesMap = {}
     const isArray = Array.isArray(value)
 

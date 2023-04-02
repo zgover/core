@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,21 @@ export * from './canvas-manager'
 export * from './ua-manager'
 
 export class Aglyn extends EmitManager {
-  logger = new LogManager(namespace)
-  emitter = this
-  ua = new UAManager()
-  plugins = new PluginManager(this)
-  components = new ComponentManager(this)
-  canvas = new CanvasManager(this)
+  logger: LogManager
+  emitter: this
+  ua: UAManager
+  plugins: PluginManager
+  components: ComponentManager
+  canvas: CanvasManager
+  constructor() {
+    super()
+    this.logger = new LogManager(namespace)
+    this.emitter = this
+    this.ua = new UAManager()
+    this.plugins = new PluginManager(this)
+    this.components = new ComponentManager(this)
+    this.canvas = new CanvasManager(this)
+  }
 }
 
 export const aglyn = new Aglyn()

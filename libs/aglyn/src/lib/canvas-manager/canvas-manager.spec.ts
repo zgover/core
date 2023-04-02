@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,8 @@
  * limitations under the License.
  */
 
-import {
-  denormalizeNodes,
-  nestNodes,
-  NODE_ROOT_ID,
-  NodeId,
-  NodeSchema,
-  NodeSchemaNested,
-} from './canvas-manager'
+import type { NodeId, NodeSchema, NodeSchemaNested } from '../types/nodes'
+import { CanvasManager, NODE_ROOT_ID } from './canvas-manager'
 
 describe('Aglyn: Screen Manager', () => {
   const nodes: Record<NodeId, NodeSchema> = {
@@ -114,38 +108,38 @@ describe('Aglyn: Screen Manager', () => {
   ]
 
   it('Denormalize Nodes', () => {
-    const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
+    const denormal = CanvasManager.nestDenormalizedNodes(nodes, NODE_ROOT_ID)
     expect(denormal).toEqual(denormalized[0])
   })
 
   it('Normalize Nodes', () => {
-    const normal = denormalizeNodes(denormalized, NODE_ROOT_ID)
+    const normal = CanvasManager.denormalizeNodes(denormalized, NODE_ROOT_ID)
     expect(normal).toEqual(nodes)
   })
 
   it('Normalize Nodes then Denormalize', () => {
-    const normal = denormalizeNodes(denormalized, NODE_ROOT_ID)
-    const denormal = nestNodes(normal, normal[NODE_ROOT_ID])
+    const normal = CanvasManager.denormalizeNodes(denormalized, NODE_ROOT_ID)
+    const denormal = CanvasManager.nestDenormalizedNodes(normal, NODE_ROOT_ID)
     expect(denormal).toEqual(denormalized[0])
   })
 
   it('Denormalize Nodes then Normalize', () => {
-    const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
-    const normal = denormalizeNodes([denormal], NODE_ROOT_ID)
+    const denormal = CanvasManager.nestDenormalizedNodes(nodes, NODE_ROOT_ID)
+    const normal = CanvasManager.denormalizeNodes([denormal], NODE_ROOT_ID)
     expect(normal).toEqual(nodes)
   })
 
   it('Denormalize Nodes then Normalize then Denormalize again', () => {
-    const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
-    const normal = denormalizeNodes([denormal], NODE_ROOT_ID)
-    const denormal2 = nestNodes(normal, normal[NODE_ROOT_ID])
+    const denormal = CanvasManager.nestDenormalizedNodes(nodes, NODE_ROOT_ID)
+    const normal = CanvasManager.denormalizeNodes([denormal], NODE_ROOT_ID)
+    const denormal2 = CanvasManager.nestDenormalizedNodes(normal, NODE_ROOT_ID)
     expect(denormal2).toEqual(denormalized[0])
   })
 
   it('Normalize Nodes then Denormalize then Normalize again', () => {
-    const normal = denormalizeNodes(denormalized, NODE_ROOT_ID)
-    const denormal = nestNodes(normal, normal[NODE_ROOT_ID])
-    const normal2 = denormalizeNodes([denormal], NODE_ROOT_ID)
+    const normal = CanvasManager.denormalizeNodes(denormalized, NODE_ROOT_ID)
+    const denormal = CanvasManager.nestDenormalizedNodes(normal, NODE_ROOT_ID)
+    const normal2 = CanvasManager.denormalizeNodes([denormal], NODE_ROOT_ID)
     expect(normal2).toEqual(nodes)
   })
 })

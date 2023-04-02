@@ -32,12 +32,6 @@ import { makeAutoObservable, toJS } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { ComponentClass, ComponentProps } from 'react'
 import { type Aglyn, lifecycleEvent } from '../aglyn'
-import type { NodeSchema } from '../canvas-manager'
-import {
-  type AbstractNodeSchema,
-  type NodeSchemaNested,
-  NodeType,
-} from '../canvas-manager'
 import {
   createIdUrlSafe,
   FEATURE_FLAG,
@@ -46,6 +40,12 @@ import {
 } from '../constants'
 import { AglynEvent } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'
+import {
+  type AbstractNodeSchema,
+  type NodeSchema,
+  type NodeSchemaNested,
+  NodeType,
+} from '../types/nodes'
 
 export enum ComponentCategory {
   INPUT = 'Input',
@@ -165,8 +165,7 @@ export interface ComponentSchema<P = any> {
   }
 }
 
-export interface PresetSchema<P = JSX.AnyProps>
-  extends AbstractNodeSchema<NodeType.PRESET> {
+export interface PresetSchema<P = JSX.AnyProps> extends AbstractNodeSchema {
   $id: PresetId
   pluginId?: PluginId
   displayName?: string
@@ -174,6 +173,7 @@ export interface PresetSchema<P = JSX.AnyProps>
   category?: string | ComponentCategory
   icon?: MdiIconProps
   data: NodeSchemaNested<P>
+  type?: NodeType.PRESET
 }
 
 export class AglynPreset<P = JSX.AnyProps> implements PresetSchema<P> {
