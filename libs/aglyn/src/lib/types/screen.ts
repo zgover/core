@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 
-import { ITimestamp } from '@aglyn/shared-util-timestamp'
-import { type NodeId, type NodeSchema } from '../types/nodes'
-import { AglynAccessRule } from './auth'
+import type { ITimestamp } from '@aglyn/shared-util-timestamp'
+import type { NodeId, NodeSchema } from '../types/nodes'
 import { AglynDocument } from './shared'
 import {
-  HostMediaUid,
+  type AglynAccessRule,
+  type HostMediaUid,
   HostScreenStatus,
   HostScreenVisibility,
-  HostUid,
-  TenantUid,
-  UserUid,
+  type HostUid,
+  type TenantUid,
+  type UserUid,
 } from './workspace'
 
 export type ScreenUid = string

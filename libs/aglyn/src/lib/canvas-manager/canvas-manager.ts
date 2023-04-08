@@ -31,20 +31,20 @@ import {
 } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { Aglyn } from '../aglyn'
-import { NodeType } from '../aglyn'
 import { createIdUrlSafe } from '../constants'
 import type { PluginId } from '../plugin-manager'
-import type {
-  ComponentId,
-  ComponentSchema,
-  NodeBreadcrumbPath,
-  NodeId,
-  NodeSchema,
-  NodeSchemaJSON,
-  NodeSchemaNested,
-  NodesMap,
-  PresetSchema,
-  ProcessableNodes,
+import {
+  type ComponentId,
+  type ComponentSchema,
+  type NodeBreadcrumbPath,
+  type NodeId,
+  type NodeSchema,
+  type NodeSchemaJSON,
+  type NodeSchemaNested,
+  type NodesMap,
+  NodeType,
+  type PresetSchema,
+  type ProcessableNodes,
 } from '../types/nodes'
 
 export const NODE_ROOT_ID = '_@_'
@@ -55,7 +55,7 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
   // public store: CanvasManager = null
   public $id: NodeId = null
   public name: string = null
-  public type: NodeType = null
+  public type: NodeType | string = null
   public pluginId?: PluginId = null
   public componentId?: ComponentId = null
   public parentId?: NodeId = null
@@ -213,7 +213,7 @@ export class CanvasManager {
       reorderNode: action,
     })
 
-    this._history = new HistoryManager<NodeId, NodeSchema<any>>()
+    this._history = new HistoryManager()
   }
 
   public get nodes() {
@@ -339,8 +339,8 @@ export class CanvasManager {
     return new AglynNode<any>(
       {
         ...schema,
-        $id: schema?.$id ?? this.createNodeId(),
-      },
+        $id: schema?.$id || this.createNodeId(),
+      } as NodeSchema<any>,
       this,
     )
   }
