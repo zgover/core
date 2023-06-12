@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { NormalizedData, NormalizedModel } from '@aglyn/shared-data-types'
 import { _isNum, _isObj } from '@aglyn/shared-util-guards'
 import { arrayMoveAtIndex } from './array/array-move-at-index'

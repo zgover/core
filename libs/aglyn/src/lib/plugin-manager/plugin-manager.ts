@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { makeAutoObservable } from 'mobx'
 import { type Aglyn, lifecycleEvent } from '../aglyn'

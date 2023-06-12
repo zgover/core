@@ -20,7 +20,7 @@ import type {
   AppUUN,
   IAglynComponentsController,
 } from '@aglyn/core-data-foundation'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { FieldComponentType } from '@aglyn/shared-ui-jsx-forms'
 
 // export { FieldComponentType }

@@ -11,7 +11,7 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/nx-cloud",
+      "runner": "nx-cloud",
       "options": {
         "cacheableOperations": ["build", "lint", "test", "e2e"],
         "parallel": 1,
@@ -21,7 +21,7 @@
     }
   },
   "generators": {
-    "@nrwl/js": {
+    "@nx/js": {
       "library": {
         "buildable": true,
         "publishable": true,
@@ -34,20 +34,7 @@
         "linter": "eslint"
       }
     },
-    "@nrwl/node": {
-      "library": {
-        "buildable": true,
-        "publishable": true,
-        "includeBabelRc": true,
-        "standaloneConfig": true,
-        "compiler": "swc",
-        "config": "project",
-        "testEnvironment": "node",
-        "unitTestRunner": "jest",
-        "linter": "eslint"
-      }
-    },
-    "@nrwl/react": {
+    "@nx/react": {
       "library": {
         "buildable": true,
         "publishable": true,
@@ -64,7 +51,20 @@
         "babel": true
       }
     },
-    "@nrwl/next": {
+    "@nx/node": {
+      "library": {
+        "buildable": true,
+        "publishable": true,
+        "includeBabelRc": true,
+        "standaloneConfig": true,
+        "compiler": "swc",
+        "config": "project",
+        "testEnvironment": "node",
+        "unitTestRunner": "jest",
+        "linter": "eslint"
+      }
+    },
+    "@nx/next": {
       "application": {
         "swc": true,
         "standaloneConfig": true,
@@ -94,9 +94,6 @@
     },
     "lint": {
       "inputs": ["default", "{workspaceRoot}/.eslintrc.js"]
-    },
-    "build-storybook": {
-      "inputs": ["default", "^default", "{workspaceRoot}/.storybook/**/*"]
     },
     "build": {
       "inputs": ["production", "^production"]

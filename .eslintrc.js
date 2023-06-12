@@ -18,7 +18,7 @@
 module.exports = {
   root: true,
   ignorePatterns: ['**/*'],
-  plugins: ['@nrwl/nx', 'eslint-plugin-tsdoc', 'mobx'],
+  plugins: ['@nx', 'eslint-plugin-tsdoc', 'mobx'],
   overrides: [
     {
       files: ['*.ts', '*.tsx', '*.js', '*.jsx'],
@@ -27,9 +27,8 @@ module.exports = {
         'mobx/unconditional-make-observable': 'off',
         'mobx/missing-make-observable': 'off',
         'mobx/missing-observer': 'off',
-
         'node/no-extraneous-import': 'off',
-        '@nrwl/nx/enforce-module-boundaries': [
+        '@nx/enforce-module-boundaries': [
           'error',
           {
             allow: [],
@@ -99,10 +98,7 @@ module.exports = {
     },
     {
       files: ['*.ts'],
-      extends: [
-        'plugin:@nrwl/nx/typescript',
-        'plugin:@next/next/core-web-vitals',
-      ],
+      extends: ['plugin:@nx/typescript', 'plugin:@next/next/core-web-vitals'],
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-empty-function': 'off',
@@ -128,8 +124,8 @@ module.exports = {
     {
       files: ['*.tsx'],
       extends: [
-        'plugin:@nrwl/nx/typescript',
-        'plugin:@nrwl/nx/react-typescript',
+        'plugin:@nx/typescript',
+        'plugin:@nx/react-typescript',
         'plugin:@next/next/core-web-vitals',
       ],
       rules: {
@@ -155,7 +151,7 @@ module.exports = {
     },
     {
       files: ['*.js'],
-      extends: ['plugin:@nrwl/nx/javascript', 'plugin:react-hooks/recommended'],
+      extends: ['plugin:@nx/javascript', 'plugin:react-hooks/recommended'],
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
@@ -171,7 +167,7 @@ module.exports = {
     },
     {
       files: ['*.jsx'],
-      extends: ['plugin:@nrwl/nx/javascript', 'plugin:react-hooks/recommended'],
+      extends: ['plugin:@nx/javascript', 'plugin:react-hooks/recommended'],
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
@@ -186,4 +182,5 @@ module.exports = {
       },
     },
   ],
+  extends: ['plugin:storybook/recommended'],
 }

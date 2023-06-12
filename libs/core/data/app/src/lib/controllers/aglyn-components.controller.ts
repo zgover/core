@@ -46,9 +46,9 @@ import {
   AglynEventTriggerFlag,
 } from '@aglyn/core-data-foundation'
 import { isAglynComponentElement } from '@aglyn/core-util-app'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type { OrUndef } from '@aglyn/shared-data-types'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { _isArr } from '@aglyn/shared-util-guards'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 

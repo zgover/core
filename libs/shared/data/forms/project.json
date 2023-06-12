@@ -5,34 +5,22 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/data/forms",
         "main": "libs/shared/data/forms/src/index.ts",
         "tsConfig": "libs/shared/data/forms/tsconfig.lib.json",
-        "assets": [
-          "libs/shared/data/forms/*.md"
-        ]
+        "assets": ["libs/shared/data/forms/*.md"]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/shared/data/forms/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/shared/data/forms/**/*.ts"]
       }
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:data"
-  ]
+  "tags": ["scope:lib", "scope:shared", "scope:data"]
 }

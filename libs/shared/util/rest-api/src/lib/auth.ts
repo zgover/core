@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { HttpResponseStatus, HttpStatusCode } from '@aglyn/shared-data-enums'
 import { getRequestHeader } from '@aglyn/shared-util-http'
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'

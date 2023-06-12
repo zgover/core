@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import type { Dictionary, OrUndef } from '@aglyn/shared-data-types'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type {
   ConditionDefinition,
   DataType,
@@ -25,11 +25,11 @@ import type {
   ResolvePropsFunction,
   Validator,
 } from '@aglyn/shared-ui-jsx-forms'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx' // eslint-disable-next-line
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type { ComponentClass, ComponentProps } from 'react'
 import type { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
 import type { ComponentCategory } from '../constants/components'

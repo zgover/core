@@ -16,7 +16,7 @@
  */
 
 import type { AnyProps, Dictionary } from '@aglyn/shared-data-types'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { EmitterFn } from '@aglyn/shared-util-emitter'
 import type {
   createEffect as createEffectorEffect,

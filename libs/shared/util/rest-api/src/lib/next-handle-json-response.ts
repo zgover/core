@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { HttpStatusCode } from '@aglyn/shared-data-enums'
 import type { NextApiResponse } from 'next'
 import type { JsonResponse } from './types'

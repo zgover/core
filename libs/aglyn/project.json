@@ -5,17 +5,13 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/aglyn",
         "main": "libs/aglyn/src/index.ts",
         "tsConfig": "libs/aglyn/tsconfig.lib.json",
-        "assets": [
-          "libs/aglyn/*.md"
-        ]
+        "assets": ["libs/aglyn/*.md"]
       }
     },
     "publish": {
@@ -25,36 +21,25 @@
       },
       "dependsOn": [
         {
-          "projects": "self",
           "target": "build"
         }
       ]
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/aglyn/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/aglyn/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/libs/aglyn"
-      ],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/aglyn"],
       "options": {
         "jestConfig": "libs/aglyn/jest.config.ts",
         "passWithNoTests": true
       }
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:aglyn",
-    "scope:feature"
-  ]
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature"]
 }

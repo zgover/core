@@ -6,7 +6,7 @@
   "tags": ["scope:lib", "scope:aglyn", "scope:besigner", "scope:ui"],
   "targets": {
     "build": {
-      "executor": "@nrwl/rollup:rollup",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/besigner/ui/color-picker",
@@ -14,7 +14,7 @@
         "project": "libs/besigner/ui/color-picker/package.json",
         "entryFile": "libs/besigner/ui/color-picker/src/index.ts",
         "external": ["@emotion/react/jsx-runtime"],
-        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "rollupConfig": "@nx/react/plugins/bundle-rollup",
         "compiler": "swc",
         "assets": [
           {
@@ -26,7 +26,7 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
@@ -35,35 +35,11 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/besigner/ui/color-picker"],
       "options": {
         "jestConfig": "libs/besigner/ui/color-picker/jest.config.ts",
         "passWithNoTests": true
-      }
-    },
-    "storybook": {
-      "executor": "@nrwl/storybook:storybook",
-      "options": {
-        "uiFramework": "@storybook/react",
-        "port": 4400
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
-      }
-    },
-    "build-storybook": {
-      "executor": "@nrwl/storybook:build",
-      "outputs": ["{options.outputDir}"],
-      "options": {
-        "uiFramework": "@storybook/react"
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
       }
     }
   }

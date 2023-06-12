@@ -5,35 +5,22 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/tenant/feature/instance",
         "main": "libs/tenant/feature/instance/src/index.ts",
         "tsConfig": "libs/tenant/feature/instance/tsconfig.lib.json",
-        "assets": [
-          "libs/tenant/feature/instance/*.md"
-        ]
+        "assets": ["libs/tenant/feature/instance/*.md"]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/tenant/feature/instance/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/tenant/feature/instance/**/*.ts"]
       }
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:aglyn",
-    "scope:feature",
-    "scope:tenant"
-  ]
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "scope:tenant"]
 }

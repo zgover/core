@@ -17,7 +17,7 @@
 
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const pkg = require('./package.json')
-const withNx = require('@nrwl/next/plugins/with-nx')
+const withNx = require('@nx/next/plugins/with-nx')
 const deepFillIn = require('mout/object/deepFillIn')
 
 const PACKAGE_VERSION = String(pkg?.version ?? '0.0.0')
