@@ -34,7 +34,7 @@ export const GridItems = forwardRef<any, GridItemsProps>((props, ref) => {
   return (
     <MuiGrid ref={ref} container {...rest}>
       {items.map((item, key) => (
-        <ItemComponent item key={item?.key ?? item?.id ?? key} {...item} />
+        <ItemComponent key={item?.key ?? item?.id ?? key} {...item} />
       ))}
     </MuiGrid>
   )

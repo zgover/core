@@ -191,7 +191,9 @@ export class _EmotionDocumentComponent<
           {makeLinkElements(LINK_PREF)}
         </Head>
         <body>
-          {getInitColorSchemeScript()}
+          {getInitColorSchemeScript({
+            defaultMode: 'system',
+          })}
           <Main />
           <NextScript />
         </body>

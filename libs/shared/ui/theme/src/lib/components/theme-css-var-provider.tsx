@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
+import { createResponsiveCssVarTheme } from '@aglyn/shared-ui-theme/util/create-responsive-theme'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { CssBaseline } from '@mui/material'
-import {
-  Experimental_CssVarsProvider as MuiCssVarsProvider,
-  experimental_extendTheme as muiExtendTheme,
-} from '@mui/material/styles'
+import { Experimental_CssVarsProvider as MuiCssVarsProvider } from '@mui/material/styles'
 import { forwardRef, useMemo } from 'react'
 
 export interface ThemeCssVarProviderProps
   extends Omit<JSX.ComponentProps<typeof MuiCssVarsProvider>, 'theme'> {
-  theme?: Parameters<typeof muiExtendTheme>[0]
+  theme?: {
+    light: Parameters<typeof createResponsiveCssVarTheme>[0]
+    dark: Parameters<typeof createResponsiveCssVarTheme>[1]
+  }
 }
 
 /**
@@ -43,7 +44,7 @@ export function ThemeCssVarProvider<T>(props: ThemeCssVarProviderProps) {
   const { theme, children, ...rest } = props
 
   const _theme = useMemo(() => {
-    return muiExtendTheme(theme)
+    return createResponsiveCssVarTheme(theme.light, theme.dark)
   }, [theme])
 
   return (

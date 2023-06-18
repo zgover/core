@@ -31,7 +31,7 @@
     "strict": false,
     "strictBindCallApply": true,
     "stripInternal": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "rootDir": ".",
     "baseUrl": ".",
