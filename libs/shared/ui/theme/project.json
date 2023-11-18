@@ -21,11 +21,12 @@
             "input": ".",
             "output": "."
           }
-        ]
+        ],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": ["libs/shared/ui/theme/**/*.ts"]
       },
@@ -35,8 +36,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/shared/ui/theme"],
       "options": {
-        "jestConfig": "libs/shared/ui/theme/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/shared/ui/theme/jest.config.ts"
       }
     }
   },

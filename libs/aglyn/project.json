@@ -26,7 +26,7 @@
       ]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["libs/aglyn/**/*.ts"]
@@ -36,8 +36,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/aglyn"],
       "options": {
-        "jestConfig": "libs/aglyn/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/aglyn/jest.config.ts"
       }
     }
   },

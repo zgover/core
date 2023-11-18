@@ -5,3 +5,5 @@
 /nx.json
 /.eslintrc.js
 /workspace.json
+
+/.nx/cache

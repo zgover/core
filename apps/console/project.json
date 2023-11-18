@@ -6,9 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/console"
       },
@@ -47,24 +45,17 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/apps/console"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/apps/console"],
       "options": {
-        "jestConfig": "apps/console/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/console/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "apps/console/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/console/**/*.{ts,tsx,js,jsx}"]
       },
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "outputs": ["{options.outputFile}"]
     },
     "version": {
       "executor": "@jscutlery/semver:version",
@@ -73,8 +64,5 @@
       }
     }
   },
-  "tags": [
-    "scope:app",
-    "scope:private"
-  ]
+  "tags": ["scope:app", "scope:private"]
 }

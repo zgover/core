@@ -1,29 +1,12 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultProject": "console",
-  "npmScope": "aglyn",
   "workspaceLayout": {
     "appsDir": "apps",
     "libsDir": "libs"
   },
   "affected": {
     "defaultBase": "main"
-  },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx-cloud",
-      "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ],
-        "parallel": 1,
-        "useDaemonProcess": true,
-        "accessToken": "MmI2Y2NlN2MtNjM4NC00NTQ0LTgxODItNGI3YzMwZTQyZTM1fHJlYWQtd3JpdGU="
-      }
-    }
   },
   "generators": {
     "@nx/js": {
@@ -92,36 +75,41 @@
   },
   "targetDefaults": {
     "e2e": {
-      "inputs": [
-        "default",
-        "^default"
-      ]
-    },
-    "test": {
-      "inputs": [
-        "default",
-        "^default",
-        "{workspaceRoot}/jest.preset.js"
-      ]
+      "inputs": ["default", "^default"],
+      "cache": true
     },
     "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.js"
-      ]
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.js"],
+      "cache": true
     },
     "build": {
+      "inputs": ["production", "^production"],
+      "cache": true
+    },
+    "@nx/jest:jest": {
+      "inputs": ["default", "^default", "{workspaceRoot}/jest.preset.js"],
+      "cache": true,
+      "options": {
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "build-storybook": {
       "inputs": [
-        "production",
-        "^production"
+        "default",
+        "^production",
+        "{projectRoot}/.storybook/**/*",
+        "{projectRoot}/tsconfig.storybook.json"
       ]
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "sharedGlobals": [
       "{workspaceRoot}/workspace.json",
       "{workspaceRoot}/tsconfig.base.json",
@@ -131,7 +119,14 @@
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json"
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
+      "!{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/tsconfig.storybook.json"
     ]
-  }
+  },
+  "useDaemonProcess": true,
+  "nxCloudAccessToken": "MmI2Y2NlN2MtNjM4NC00NTQ0LTgxODItNGI3YzMwZTQyZTM1fHJlYWQtd3JpdGU=",
+  "parallel": 1
 }

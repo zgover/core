@@ -22,11 +22,12 @@
             "input": ".",
             "output": "."
           }
-        ]
+        ],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
@@ -38,8 +39,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/besigner/ui/color-picker"],
       "options": {
-        "jestConfig": "libs/besigner/ui/color-picker/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/besigner/ui/color-picker/jest.config.ts"
       }
     }
   }

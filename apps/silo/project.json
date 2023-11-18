@@ -6,9 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nx/next:build",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/silo"
@@ -46,19 +44,12 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "apps/silo/**/*.{ts,tsx,js,jsx}"
-        ]
+        "lintFilePatterns": ["apps/silo/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },
-  "tags": [
-    "scope:app",
-    "scope:private"
-  ]
+  "tags": ["scope:app", "scope:private"]
 }
