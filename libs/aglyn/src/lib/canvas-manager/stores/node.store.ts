@@ -15,32 +15,32 @@
  * limitations under the License.
  */
 
-import { types } from 'mobx-state-tree'
+import { type IAnyModelType, types } from 'mobx-state-tree'
 
 // Interface for LeafModel
 interface ILeafModel {
-  name: string
+  aa: string
 }
 
 // Interface for BranchModel
 interface IBranchModel {
   name: string
-  children: ITreeNodeModel[]
+  children?: Array<IBranchModel | ILeafModel>
 }
-
-// Interface for TreeNodeModel
-export interface ITreeNodeModel extends ILeafModel, IBranchModel {}
 
 // Define a leaf-level model
 const LeafModel = types.model('LeafModel', {
-  name: types.string,
+  aa: types.string,
 })
 
 // Define a branch-level model with a reference to child nodes
 // @ts-ignore
-const BranchModel = types.model('BranchModel', {
+const BranchModel = types.model<IBranchModel>('BranchModel', {
   name: types.string,
-  children: types.array(types.late(() => BranchModel)),
+  children: types.maybe(
+    types.array(types.late((): IAnyModelType => BranchModel)),
+  ),
+  // then typecast each array element to Instance<typeof BranchModel>
 })
 
 // Define the root-level model with a reference to child nodes
@@ -60,7 +60,11 @@ const rootNode = BranchModel.create({
       children: [{ name: 'Child2.1' }, { name: 'Child2.2' }],
     },
     {
-      name: 'Child2',
+      name: 'Child3',
+    },
+    {
+      name: 'Child4',
+      aa: 'Child2',
     },
   ],
 })
