@@ -15,55 +15,68 @@
  * limitations under the License.
  */
 
-import { type IAnyModelType, types } from 'mobx-state-tree'
+import { types } from 'mobx-state-tree'
+import { PluginId } from '../../plugin-manager'
+import { ComponentId, NodeId, NodeType } from '../../types'
 
-// Interface for LeafModel
-interface ILeafModel {
-  aa: string
+// Interface for NodeModel
+interface INodeModel {
+  $id: string
+  nodes?: NodeId[]
+  name?: string
+  type: NodeType | string
+  pluginId?: PluginId
+  componentId?: ComponentId
+  parentId?: NodeId
+  props: P
+  sx?: JSX.SxProps
+  className?: string
 }
-
-// Interface for BranchModel
-interface IBranchModel {
-  name: string
-  children?: Array<IBranchModel | ILeafModel>
-}
-
-// Define a leaf-level model
-const LeafModel = types.model('LeafModel', {
-  aa: types.string,
-})
 
 // Define a branch-level model with a reference to child nodes
 // @ts-ignore
-const BranchModel = types.model<IBranchModel>('BranchModel', {
+const NodeModel = types.model<INodeModel>('NodeModel', {
+  $id: types.identifier,
+  // children: types.maybe(
+  //   // then typecast each array element to Instance<typeof INodeModel>
+  //   types.array(types.late((): IAnyModelType => NodeModel)),
+  // ),
+  nodes: types.array(types.string),
   name: types.string,
-  children: types.maybe(
-    types.array(types.late((): IAnyModelType => BranchModel)),
-  ),
-  // then typecast each array element to Instance<typeof BranchModel>
+  type: types.string,
+  pluginId: types.string,
+  componentId: types.string,
+  parentId: types.string,
+  props: types.model,
+  sx: types.model,
+  className: types.string,
+})
+
+const CanvasModel = types.model('NodeStoreModel', {
+  nodes: types.map(NodeModel),
 })
 
 // Define the root-level model with a reference to child nodes
 // @ts-ignore
-export const TreeNodeModel = types.union(LeafModel, BranchModel)
+export const TreeNodeModel = types.union(LeafModel, NodeModel)
 
 // Create the root tree node
-const rootNode = BranchModel.create({
-  name: 'Root',
+const rootNode = NodeModel.create({
+  $id: 'Root',
   children: [
     {
-      name: 'Child1',
-      children: [{ name: 'Child1.1', hh: '' }, { name: 'Child1.2' }],
+      $id: 'Child1',
+      children: [{ $id: 'Child1.1', hh: '' }, { $id: 'Child1.2' }],
     },
     {
-      name: 'Child2',
-      children: [{ name: 'Child2.1' }, { name: 'Child2.2' }],
+      $id: 'Child2',
+      children: [{ $id: 'Child2.1' }, { $id: 'Child2.2' }],
     },
     {
-      name: 'Child3',
+      $id: 'Child3',
     },
     {
-      name: 'Child4',
+      $id: 'Child4',
       aa: 'Child2',
     },
   ],
