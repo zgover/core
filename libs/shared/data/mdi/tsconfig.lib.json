@@ -6,6 +6,6 @@
     "declaration": true,
     "types": ["@tshelpers", "node", "@jsx"]
   },
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "jest.config.ts"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts", "jest.config.ts", "scripts/**"],
   "include": ["**/*.ts"]
 }

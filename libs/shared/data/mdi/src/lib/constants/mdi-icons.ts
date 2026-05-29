@@ -25,7 +25,7 @@ if (typeof window !== 'undefined') {
     'Temporarily disabled',
   )
     .then(({ data }) => {
-      if (_isArr) {
+      if (_isArr(data)) {
         data.forEach((value) => {
           if (
             _isObj(value) &&

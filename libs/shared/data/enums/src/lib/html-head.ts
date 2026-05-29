@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-import type {
-  MakeLinkElementsConfig,
-  MakeMetaElementsConfig,
-} from '@aglyn/shared-ui-jsx'
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import type { MakeLinkElementsConfig, MakeMetaElementsConfig, } from '@aglyn/shared-ui-jsx'
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { getConsoleMetaThemeColor } from '@aglyn/shared-ui-theme'
 
 export const META_PREF: MakeMetaElementsConfig = [

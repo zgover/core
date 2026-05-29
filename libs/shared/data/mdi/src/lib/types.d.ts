@@ -14,15 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { DEFAULT_ICON } from '@aglyn/shared-data-mdi/constants/default-icon'
-import type { Icon, IconId } from '../types'
-
-export function handleIconNotFound(id: IconId, icon: Icon | undefined) {
-  if (!icon) {
-    console.warn(`Icon not found with id(${id})`)
-    return DEFAULT_ICON
-  }
-  return icon
-}
-export default handleIconNotFound
+export type IconId = string;
+export type IconPath = string;
+export type IconTag = string;
+export type IconName = string;
+export type IconAliases = IconId[];
+export type IconTags = IconTag[];
+export type Icons = Icon[];
+export type Icon = {
+    id: IconId;
+    name: IconName;
+    path: IconPath;
+    as: IconAliases;
+    tags: IconTags;
+};
+export type IdParam = IconId[] | IconId;
+export type IconResponse<T extends IdParam> = T extends any[] ? Icon[] : Icon;

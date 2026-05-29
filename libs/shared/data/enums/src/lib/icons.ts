@@ -93,7 +93,7 @@ import {
   mdiWebBox,
   mdiWhiteBalanceSunny,
   mdiWindowClose,
-} from '@aglyn/shared-ui-mdi-jsx'
+} from '@aglyn/shared-data-mdi'
 
 // Data-Type
 export const ICON_VARIANT_ARRAY = mdiCodeArray
