@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { readFileSync } from 'fs'
+const { readFileSync } = require('fs')
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
@@ -13,7 +13,7 @@ if (swcJestConfig.swcrc === undefined) {
   swcJestConfig.swcrc = false
 }
 
-export default {
+module.exports = {
   displayName: 'aglyn-besigner',
   preset: '../../jest.preset.js',
   transform: {

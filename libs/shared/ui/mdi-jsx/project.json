@@ -3,6 +3,7 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/ui/mdi-jsx/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:shared", "scope:ui"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -36,6 +37,5 @@
         "jestConfig": "libs/shared/ui/mdi-jsx/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:shared", "scope:ui"]
+  }
 }

@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'shared-ui-next',
   preset: '../../../../jest.preset.js',
   transform: {

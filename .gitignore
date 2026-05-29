@@ -62,3 +62,8 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
+
+vite.config.*.timestamp*
+.claude/worktrees
+.nx/polygraph
+.nx/self-healing

@@ -3,6 +3,7 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/util/emitter/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:shared", "scope:util"],
   "targets": {
     "build": {
       "executor": "@nx/js:swc",
@@ -25,6 +26,5 @@
         "jestConfig": "libs/shared/util/emitter/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:shared", "scope:util"]
+  }
 }

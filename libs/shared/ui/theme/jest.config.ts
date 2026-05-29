@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'shared-ui-theme',
   preset: '../../../../jest.preset.js',
   globals: {},

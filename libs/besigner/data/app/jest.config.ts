@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'besigner-data-app',
   preset: '../../../../jest.preset.js',
   globals: {},

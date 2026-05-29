@@ -16,7 +16,7 @@
  */
 
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'aglyn',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',

@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'tenant',
   preset: '../../jest.preset.js',
   transform: {

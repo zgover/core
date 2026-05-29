@@ -3,6 +3,7 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/core/util/app/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:framework"],
   "targets": {
     "build": {
       "executor": "@nx/js:swc",
@@ -25,6 +26,5 @@
         "jestConfig": "libs/core/util/app/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:framework"]
+  }
 }

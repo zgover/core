@@ -16,7 +16,7 @@
  */
 
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'besigner-ui-color-picker',
   preset: '../../../../jest.preset.js',
   transform: {

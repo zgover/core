@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'shared-util-dom',
   preset: '../../../../jest.preset.js',
   globals: {},

@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'besigner-ui-form-fields',
   preset: '../../../../jest.preset.js',
   testEnvironment: 'node',

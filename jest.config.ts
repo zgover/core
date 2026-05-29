@@ -17,6 +17,6 @@
 
 const { getJestProjects } = require('@nx/jest')
 
-export default {
+module.exports = {
   projects: [...getJestProjects()],
 }

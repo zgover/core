@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/aglyn-besigner-ui/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:besigner"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -36,6 +37,5 @@
         "jestConfig": "libs/aglyn-besigner-ui/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:besigner"]
+  }
 }

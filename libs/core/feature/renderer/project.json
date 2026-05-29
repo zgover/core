@@ -3,6 +3,7 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/core/feature/renderer/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:renderer"],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -36,6 +37,5 @@
         "jestConfig": "libs/core/feature/renderer/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:renderer"]
+  }
 }

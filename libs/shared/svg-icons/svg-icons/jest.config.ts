@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'shared-svg-icons-svg-icons',
   preset: '../../../../jest.preset.js',
   testEnvironment: 'node',

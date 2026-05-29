@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'besigner-ui-box-styler',
   preset: '../../../../jest.preset.js',
   transform: {

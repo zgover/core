@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/aglyn-besigner/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:besigner"],
   "targets": {
     "build": {
       "executor": "@nx/js:swc",
@@ -25,6 +26,5 @@
         "jestConfig": "libs/aglyn-besigner/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:besigner"]
+  }
 }

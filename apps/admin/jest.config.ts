@@ -1,5 +1,5 @@
 /* eslint-disable */
-export default {
+module.exports = {
   displayName: 'admin',
   preset: '../../jest.preset.js',
   transform: {
