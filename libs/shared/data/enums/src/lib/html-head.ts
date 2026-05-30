@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { getConsoleMetaThemeColor } from '@aglyn/shared-ui-theme'
-
-
 type MetaElementAttrs = { [key: string]: string | undefined }
 type LinkElementAttrs = { [key: string]: string | undefined }
-type MakeMetaElementsConfig = Array<
-  [name?: string, content?: string, other?: MetaElementAttrs]
->
+type MakeMetaElementsConfig = (
+  themeColorLight: string,
+  themeColorDark: string,
+) => Array<[name?: string, content?: string, other?: MetaElementAttrs]>
 type MakeLinkElementsConfig = Array<
   [rel?: string, href?: string, other?: LinkElementAttrs]
 >
 
-export const META_PREF: MakeMetaElementsConfig = [
+export const META_PREF: MakeMetaElementsConfig = (
+  themeColorLight = '#FFF',
+  themeColorDark = '#000',
+) => [
   [
     undefined,
     'en-us',
@@ -42,12 +42,12 @@ export const META_PREF: MakeMetaElementsConfig = [
   // ['color-scheme', 'light dark'],
   [
     'theme-color',
-    getConsoleMetaThemeColor('light'),
+    themeColorLight,
     { media: '(prefers-color-scheme: light)', id: 'theme-color-media-light' },
   ],
   [
     'theme-color',
-    getConsoleMetaThemeColor('dark'),
+    themeColorDark,
     { media: '(prefers-color-scheme: dark)', id: 'theme-color-media-dark' },
   ],
 ]

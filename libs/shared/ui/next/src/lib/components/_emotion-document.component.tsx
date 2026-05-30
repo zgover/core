@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,19 @@
  * limitations under the License.
  */
 
-import {
-  IS_PRODUCTION,
-  LINK_PREF,
-  LINK_PRIORITY,
-  META_PREF,
-} from '@aglyn/shared-data-enums'
+import { IS_PRODUCTION, LINK_PREF, LINK_PRIORITY, META_PREF, } from '@aglyn/shared-data-enums'
 import { makeLinkElements, makeMetaElements } from '@aglyn/shared-ui-jsx'
 import {
   createEmotionCache,
   createEmotionServer,
   type EmotionCache,
+  getConsoleMetaThemeColor,
 } from '@aglyn/shared-ui-theme'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { getInitColorSchemeScript } from '@mui/material/styles'
 import crypto from 'crypto'
-import type { AppType, Enhancer } from 'next/dist/shared/lib/utils'
-// eslint-disable-next-line @next/next/no-document-import-in-page
+import type { AppType, Enhancer } from 'next/dist/shared/lib/utils' // eslint-disable-next-line @next/next/no-document-import-in-page
 import NextDocument, {
   type DocumentContext,
   type DocumentInitialProps,
@@ -42,6 +37,7 @@ import NextDocument, {
   NextScript,
 } from 'next/document'
 import { Children, type ComponentType } from 'react'
+
 
 const cspHashOf = (text: string) => {
   const hash = crypto.createHash('sha256')
@@ -187,7 +183,12 @@ export class _EmotionDocumentComponent<
           <meta charSet="utf-8" />
           {/*<meta httpEquiv="Content-Security-Policy" content={csp}/>*/}
           {makeLinkElements(LINK_PRIORITY)}
-          {makeMetaElements(META_PREF)}
+          {makeMetaElements(
+            META_PREF(
+              getConsoleMetaThemeColor('light'),
+              getConsoleMetaThemeColor('dark'),
+            ),
+          )}
           {makeLinkElements(LINK_PREF)}
         </Head>
         <body>

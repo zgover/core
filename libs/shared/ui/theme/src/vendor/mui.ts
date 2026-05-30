@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,11 @@
 import type { Theme as MuiTheme } from '@mui/material/styles'
 // eslint-disable-next-line no-restricted-imports
 import type { CSSProperties } from '@mui/material/styles/createMixins'
-import type { ExtraColorOptions } from '@mui/material/styles/createPalette'
+// import type { ExtraColorOptions } from '@mui/material/styles/createPalette'
 // eslint-disable-next-line no-restricted-imports
 import type { Shadows } from '@mui/material/styles/shadows'
 // import type { WithStyles } from '@mui/styles'
 // import type { ClassKeyInferable } from '@mui/styles/withStyles'
-import * as React from 'react'
 import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
 // import type {ContainerTypeMap} from '@mui/material/Container'
 
