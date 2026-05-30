@@ -42,7 +42,7 @@ export const BoxStyler = forwardRef<any, BoxStylerProps>((props, ref) => {
 
   const handleChange = useCallback(
     (key: keyof Measurements) => (dimension: Measurement) => {
-      const res = { ...measurements, [key]: dimension }
+      const res = { ...(measurements ?? {}), [key]: dimension }
       onChange && onChange(res)
     },
     [onChange, measurements],
