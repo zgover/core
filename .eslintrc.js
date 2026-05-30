@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ module.exports = {
               },
               {
                 sourceTag: 'scope:util',
-                onlyDependOnLibsWithTags: ['scope:util'],
+                onlyDependOnLibsWithTags: ['scope:util', 'scope:data'],
               },
               {
                 sourceTag: 'scope:addons',

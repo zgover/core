@@ -19,7 +19,7 @@ import {COOKIE_KEY_USER_TOKEN} from '@aglyn/shared-data-enums'
 import {type NextRequest} from 'next/server'
 
 
-export function cookieGetUserIdToken(request: NextRequest): typeof request.cookies[typeof COOKIE_KEY_USER_TOKEN] {
-  return request.cookies[COOKIE_KEY_USER_TOKEN]
+export function cookieGetUserIdToken(request: NextRequest): string | undefined {
+  return request.cookies.get(COOKIE_KEY_USER_TOKEN)?.value
 }
 export default cookieGetUserIdToken
