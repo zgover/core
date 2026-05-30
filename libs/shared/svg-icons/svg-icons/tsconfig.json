@@ -5,7 +5,8 @@
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["@tshelpers", "vite/client", "@jsx"]
+    "moduleResolution": "bundler",
+    "types": ["@tshelpers", "@jsx"]
   },
   "files": [],
   "include": [],

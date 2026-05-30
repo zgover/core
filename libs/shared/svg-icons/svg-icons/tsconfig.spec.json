@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../../dist/out-tsc",
-    "types": ["@tshelpers", "jest", "@jsx", "node", "@nx/react/typings/cssmodule.d.ts", "@nx/react/typings/image.d.ts"]
+    "types": ["@tshelpers", "jest", "@jsx", "node"]
   },
   "include": [
     "jest.config.ts",
