@@ -39,6 +39,7 @@ export const schema: Aglyn.ComponentSchema<AppBarProps> = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'App Toolbar',
     icon: {
       path: mdiPageLayoutHeader.path,

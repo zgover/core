@@ -35,6 +35,7 @@ export const schema: Aglyn.ComponentSchema<ListItemTextProps> = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'List Item Text',
     icon: { path: mdiFormatListChecks.path },
     category: Aglyn.ComponentCategory.DATA_DISPLAY,

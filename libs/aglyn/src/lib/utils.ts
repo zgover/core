@@ -17,22 +17,22 @@
 
 import {
   decode as msgpackDecode,
-  type DecodeOptions,
+  type DecoderOptions,
   encode as msgpackEncode,
-  type EncodeOptions,
+  type EncoderOptions,
 } from '@msgpack/msgpack'
 import type { SplitUndefined } from '@msgpack/msgpack/src/context'
 import { FEATURE_FLAG } from './constants'
 
 export function encode<ContextType = undefined>(
   value: unknown,
-  options?: EncodeOptions<SplitUndefined<ContextType>>,
+  options?: EncoderOptions<SplitUndefined<ContextType>>,
 ): Uint8Array {
   return msgpackEncode(value, options)
 }
 export function decode<ContextType = undefined>(
   buffer: ArrayLike<number> | BufferSource,
-  options?: DecodeOptions<SplitUndefined<ContextType>>,
+  options?: DecoderOptions<SplitUndefined<ContextType>>,
 ): unknown {
   return msgpackDecode(buffer, options)
 }

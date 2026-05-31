@@ -126,7 +126,8 @@ export const schema: Aglyn.ComponentSchema = {
 }
 
 export const presets: Aglyn.PresetSchema[] = [
-  ...typographyVariants.map((item) => ({
+  ...typographyVariants.map((item): Aglyn.PresetSchema => ({
+    type: 'preset',
     $id: GeneratePresetId(ID, item.value),
     displayName: item.label,
     pluginId: PLUGIN_ID,

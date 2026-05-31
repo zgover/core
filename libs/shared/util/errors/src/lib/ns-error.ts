@@ -19,14 +19,16 @@ import { NsErrorFactory } from './ns-error-factory'
 import type { ErrorPayload } from './types'
 
 export class NsError extends Error {
-  readonly name = 'NsError'
+  override readonly name = 'NsError'
+  override message: string
 
   constructor(
     public readonly code: string,
-    public message: string,
+    message: string,
     public payload: ErrorPayload,
   ) {
     super(message)
+    this.message = message
     // Fix For ES5
     // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, NsError.prototype)

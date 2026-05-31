@@ -42,10 +42,10 @@ export const TreeRoot = observer(
 
     const Components = useMemo<RenderComponentsContext>(
       () => ({
-        TrunkComponent: TrunkComponent ?? Trunk,
-        StemComponent: StemComponent ?? Stem,
-        BranchComponent: BranchComponent ?? Branch,
-        LeafComponent: LeafComponent ?? Leaf,
+        TrunkComponent: (TrunkComponent ?? Trunk) as RenderComponentsContext['TrunkComponent'],
+        StemComponent: (StemComponent ?? Stem) as RenderComponentsContext['StemComponent'],
+        BranchComponent: (BranchComponent ?? Branch) as RenderComponentsContext['BranchComponent'],
+        LeafComponent: (LeafComponent ?? Leaf) as RenderComponentsContext['LeafComponent'],
       }),
       [TrunkComponent, StemComponent, BranchComponent, LeafComponent],
     )

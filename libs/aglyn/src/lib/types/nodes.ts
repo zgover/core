@@ -21,10 +21,15 @@ import type {
   FieldActions,
   ResolvePropsFunction,
   Validator,
-} from '@aglyn/shared-ui-jsx-forms'
-import type { MdiIconProps } from '@aglyn/shared-ui-jsx'
-import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
+} from '@data-driven-forms/react-form-renderer'
+import type { MuiStyledOptions } from '@mui/system/createStyled'
+import type { SvgIconProps } from '@mui/material/SvgIcon'
+/** Minimal icon-props type used in component/preset schemas. Structurally compatible with @aglyn/shared-ui-jsx MdiIconProps. */
+export type MdiIconProps<D extends React.ElementType = 'svg', P = object> = SvgIconProps<D, P> & {
+  path?: string
+}
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
+import type React from 'react'
 import type { ComponentClass, ComponentProps } from 'react'
 import type { NODE_ROOT_ID } from '../canvas-manager'
 
@@ -189,7 +194,7 @@ export interface AbstractNodeSchema<P = JSX.AnyProps> extends CanvasNode {
  * CanvasPreset represents an encapsulated 'node' type as the root node for
  * crafting a living JSX Element
  */
-export interface CanvasPreset extends Node<CanvasNode>, Taxonomic {
+export interface CanvasPreset extends Node, Taxonomic {
   /**
    * Represents this variant of a Node.
    */

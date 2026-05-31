@@ -21,7 +21,7 @@ import { forwardRef, Fragment, useMemo } from 'react'
 import LeafComponent from './leaf.component'
 
 export interface BranchComponentProps extends JSX.OverrideableComponentProps {
-  leafComponent?: LeafComponent
+  leafComponent?: typeof LeafComponent
   $id?: NodeId
 }
 

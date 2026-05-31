@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-jsx'
+import { MdiIcon, type MdiIconProps } from './mdi-icon/mdi-icon'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   Box,

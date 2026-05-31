@@ -16,11 +16,7 @@
  */
 
 import type { Instance, ISimpleType, SnapshotIn } from 'mobx-state-tree'
-import { JsonableValue } from 'ts-jest'
 
 export type Identifier = Instance<ISimpleType<string>>
 export type SnapshotInOrId<T> = SnapshotIn<T> | Identifier
-export type SnapshotInOrInstance<T> =
-  | SnapshotIn<T>
-  | Instance<T>
-  | JsonableValue
+export type SnapshotInOrInstance<T> = SnapshotIn<T> | Instance<T>

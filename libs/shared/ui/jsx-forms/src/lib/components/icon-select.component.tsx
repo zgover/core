@@ -15,15 +15,8 @@
  * limitations under the License.
  */
 
-import { CardListItem, GridList } from '@aglyn/shared-ui-jsx'
-import {
-  DEFAULT_ICON,
-  type Icon,
-  mdiChevronDown,
-  mdiChevronUp,
-  MdiIcon,
-  useMdiIconsFuzzy,
-} from '@aglyn/shared-ui-jsx'
+import { DEFAULT_ICON, type Icon, mdiChevronDown, mdiChevronUp } from '@aglyn/shared-data-mdi'
+import { CardListItem, GridList, MdiIcon, useMdiIconsFuzzy } from '@aglyn/shared-ui-jsx'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
 import { useDebouncedCallback } from '@aglyn/shared-util-vendor'
 import {

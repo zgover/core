@@ -13,7 +13,6 @@ export default defineConfig({
     dts({
       entryRoot: 'src',
       tsconfigPath: join(__dirname, 'tsconfig.lib.json'),
-      skipDiagnostics: true,
     }),
     react(),
     nxViteTsPaths(),

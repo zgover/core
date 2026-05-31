@@ -60,6 +60,7 @@ export const schema: Aglyn.ComponentSchema<ButtonProps> = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'Outlined Button',
     icon: {
       path: mdiGestureTapButton.path,

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { MdiIconProps } from '@aglyn/shared-ui-jsx'
+import type { MdiIconProps } from '../types/nodes'
 import { makeAutoObservable, toJS } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import { type Aglyn, lifecycleEvent } from '../aglyn'

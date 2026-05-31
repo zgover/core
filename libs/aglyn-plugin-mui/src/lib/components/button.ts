@@ -60,6 +60,7 @@ export const schema: Aglyn.ComponentSchema = {
 
 export const presets: Aglyn.PresetSchema[] = [
   {
+    type: 'preset',
     $id: generatePresetId(ID),
     displayName: 'Outlined Button',
     icon: {

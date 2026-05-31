@@ -75,6 +75,7 @@ export const schema: Aglyn.ComponentSchema = {
 
 export const presets: Aglyn.PresetSchema[] = [
   {
+    type: 'preset',
     $id: generatePresetId(ID),
     displayName: 'Stack Horizontal',
     icon: {
@@ -91,6 +92,7 @@ export const presets: Aglyn.PresetSchema[] = [
     },
   },
   {
+    type: 'preset',
     $id: generatePresetId(ID, 'vertical'),
     displayName: 'Stack Vertical',
     icon: {

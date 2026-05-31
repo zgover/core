@@ -16,7 +16,7 @@
  */
 
 import { ICON_VARIANT_CLOSE } from '@aglyn/shared-data-enums'
-import MdiIcon from '@aglyn/shared-ui-jsx/components/mdi-icon/mdi-icon'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import {
   Alert,
   AlertTitle,

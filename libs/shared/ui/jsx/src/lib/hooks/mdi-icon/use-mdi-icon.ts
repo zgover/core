@@ -16,7 +16,7 @@
  */
 
 import DEFAULT_ICON from '@aglyn/shared-data-mdi/constants/default-icon'
-import { useAsyncEffect } from '@aglyn/shared-ui-jsx'
+import useAsyncEffect from '../use-async-effect'
 import type * as MdiJs from '@mdi/js'
 import { useState } from 'react'
 

@@ -13,19 +13,18 @@
         "tsConfig": "libs/shared/ui/theme/tsconfig.lib.json",
         "project": "libs/shared/ui/theme/package.json",
         "entryFile": "libs/shared/ui/theme/src/index.ts",
-        "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
+        "external": [
+          "react/jsx-runtime",
+          "@aglyn/shared-util-tools",
+          "@aglyn/shared-util-vendor"
+        ],
+        "rollupConfig": ["@nx/react/plugins/bundle-rollup", "libs/shared/ui/theme/rollup.config.cjs"],
         "compiler": "swc",
         "assets": [
           {
             "glob": "libs/shared/ui/theme/README.md",
             "input": ".",
             "output": "."
-          },
-          {
-            "glob": "index.d.ts",
-            "input": "libs/shared/ui/theme/types-proxy",
-            "output": "./src"
           }
         ],
         "updateBuildableProjectDepsInPackageJson": true

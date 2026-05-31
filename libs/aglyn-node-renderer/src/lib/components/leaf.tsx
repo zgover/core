@@ -16,9 +16,9 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import ShadowDom from '@aglyn/shared-ui-jsx/components/shadow-dom/index'
+import { ShadowDom } from '@aglyn/shared-ui-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
-import mergeSxProps from '@aglyn/shared-ui-theme/util/merge-sx-props'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, type HTMLAttributes } from 'react'
 import { isValidElementType } from 'react-is'
@@ -44,7 +44,7 @@ export const Leaf = observer(
         key={node?.$id}
         ref={ref}
         data-aglyn={`leaf:${node?.$id}`}
-        sx={mergeSxProps(sx, node?.sx, resolvedProps?.sx)}
+        sx={mergeSxProps(sx as any, node?.sx as any, resolvedProps?.sx as any)}
         {...resolvedProps}
         {...rest}
       >

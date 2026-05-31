@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { useCallbackParamRef } from '@aglyn/shared-ui-jsx'
+import useCallbackParamRef from './use-callback-param-ref'
 import { DependencyList, useEffect } from 'react'
 
 export type EffectCallback<T = unknown> = (

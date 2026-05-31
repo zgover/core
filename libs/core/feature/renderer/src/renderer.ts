@@ -39,4 +39,4 @@ export * from './lib/hooks/use-aglyn-element-resolved-props'
 export * from './lib/hooks/use-aglyn-site-theme'
 export * from './lib/hooks/with-aglyn-element-data'
 
-export * from './lib/utils/create-aglyn-component'
+export { createAglynComponent } from './lib/utils/create-aglyn-component'

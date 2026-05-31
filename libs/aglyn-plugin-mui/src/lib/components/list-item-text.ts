@@ -33,6 +33,7 @@ export const schema: Aglyn.ComponentSchema = {
 
 export const presets: Aglyn.PresetSchema[] = [
   {
+    type: 'preset',
     $id: generatePresetId(ID),
     displayName: 'List Item Text',
     icon: { path: mdiFormatListChecks.path },

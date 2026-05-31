@@ -16,18 +16,15 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import type {
   ConditionDefinition,
   DataType,
   FieldActions,
   ResolvePropsFunction,
   Validator,
-} from '@aglyn/shared-ui-jsx-forms'
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import type { MdiIconProps } from '@aglyn/shared-ui-jsx' // eslint-disable-next-line
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
+} from '@data-driven-forms/react-form-renderer'
+import type { SvgIconProps } from '@mui/material'
+import type { MuiStyledOptions } from '@mui/system/createStyled'
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import type { ComponentClass, ComponentProps } from 'react'
 import type { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
@@ -180,7 +177,7 @@ export interface AglynComponentSchema<P = any> {
   /**
    * Icon props for display around besigner
    */
-  icon?: MdiIconProps
+  icon?: SvgIconProps
   /**
    * Options to be passed to styled(Component, \{...styledOptions\})
    */
@@ -257,7 +254,7 @@ export type AglynNodePresetSchema = {
   componentId?: ComponentId
   pluginId?: BundleId
   description?: string
-  icon?: MdiIconProps
+  icon?: SvgIconProps
   category?: string | ComponentCategory
   data: NodePresetData
 }
@@ -330,7 +327,7 @@ export interface AglynBundleSchema {
   title?: string
   subtitle?: string
   description?: string
-  icon?: MdiIconProps
+  icon?: SvgIconProps
 }
 
 export interface ComponentsRegistryContext {

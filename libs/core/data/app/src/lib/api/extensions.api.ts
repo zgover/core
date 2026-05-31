@@ -40,7 +40,7 @@ export function getExtension<T extends IAglynExtension>(
   const extensionController = _getExtensionController(app)
   return extensionController.getExtensionByName(name) as T
 }
-export function getExtensions(app: IAglynAppController): IAglynExtension[] {
+export function getExtensions(app: IAglynAppController): ReadonlyArray<IAglynExtension> {
   const extensionController = _getExtensionController(app)
   return extensionController.getAllExtensions()
 }

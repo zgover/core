@@ -96,11 +96,12 @@ export class DndManager {
     }
 
     if (this.drag?.type === Aglyn.NodeType.PRESET) {
-      const itemNode = this.drag?.data
+      const preset = this.drag as Aglyn.PresetSchema<any>
+      const itemNode = preset.data
       const itemSchema = Aglyn.components.getSchema(itemNode?.$id)
       return confirmValidLinealRelationship(
         {
-          pluginId: this.drag?.data?.pluginId,
+          pluginId: preset.data?.pluginId,
           componentId: itemNode?.$id,
           restrictChildren: itemSchema?.restrictChildren,
           restrictParent: itemSchema?.restrictParent,
@@ -136,7 +137,7 @@ export class DndManager {
     const breadcrumbs = this.dropBreadcrumbs
     return Array.isArray(breadcrumbs) && breadcrumbs.indexOf(node?.$id) >= 0
   }
-  canDragNode(node: Aglyn.AbstractNodeSchema): boolean {
+  canDragNode(node: DraggableNode): boolean {
     if (!node) throw new Error('Invalid node')
     switch (true) {
       case Aglyn.canvas.isRootNode(node):
@@ -194,7 +195,7 @@ export class DndManager {
 
     if (dragNode.type === Aglyn.NodeType.PRESET) {
       // console.log('drag node', dragNode)
-      const newNode = Aglyn.canvas.addNodeFromPreset(dragNode, parent, position)
+      const newNode = Aglyn.canvas.addNodeFromPreset(dragNode as Aglyn.PresetSchema<any>, parent, position)
       console.log('new node', newNode)
       // Besigner.focus.setSelectedNode(newNode)
     } else {

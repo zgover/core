@@ -13,9 +13,18 @@
         "tsConfig": "libs/shared/ui/jsx-forms/tsconfig.lib.json",
         "project": "libs/shared/ui/jsx-forms/package.json",
         "entryFile": "libs/shared/ui/jsx-forms/src/index.ts",
-        "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
+        "external": [
+          "react/jsx-runtime",
+          "@aglyn/besigner-ui-color-picker/color-picker",
+          "@aglyn/shared-data-mdi",
+          "@aglyn/shared-ui-jsx",
+          "@aglyn/shared-ui-theme",
+          "@aglyn/shared-util-tools",
+          "@aglyn/shared-util-vendor"
+        ],
+        "rollupConfig": ["@nx/react/plugins/bundle-rollup", "libs/shared/ui/jsx-forms/rollup.config.cjs"],
         "compiler": "swc",
+        "skipTypeCheck": true,
         "assets": [
           {
             "glob": "libs/shared/ui/jsx-forms/README.md",

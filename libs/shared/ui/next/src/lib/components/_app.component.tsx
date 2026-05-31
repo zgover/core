@@ -16,10 +16,7 @@
  */
 
 import { HAS_DOCUMENT } from '@aglyn/shared-data-enums'
-import {
-  type EmotionCacheProps,
-  EmotionCacheProvider,
-} from '@aglyn/shared-ui-jsx'
+import { EmotionCacheProvider } from '@aglyn/shared-ui-jsx'
 import Head from 'next/head'
 import {
   Fragment,
@@ -31,7 +28,7 @@ import NextPageTitleProvider from '../contexts/next-page-title-provider'
 import PageDecorated, { type PageDecoratedProps } from './page-decorated'
 
 type BaseProps<Props, InitialProps> = PageDecoratedProps<Props, InitialProps> &
-  EmotionCacheProps
+  Parameters<typeof EmotionCacheProvider>[0]
 
 export type _AppProps<Props, InitialProps> = BaseProps<Props, InitialProps> & {
   children?: JSX.Children

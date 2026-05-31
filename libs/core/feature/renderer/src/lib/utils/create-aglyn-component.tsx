@@ -31,7 +31,7 @@ import { cloneDeep } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics, pascalCase } from '@aglyn/shared-util-vendor'
 import { forwardRef } from 'react'
 
-export function createAglynComponent<P = any, C = any>(
+export function createAglynComponent<P extends JSX.AnyProps = any, C = any>(
   schema: Aglyn.ComponentSchema<P>,
   component: C | any,
   options?: Partial<ErrorBoundaryProps>,
@@ -63,7 +63,7 @@ export function createAglynComponent<P = any, C = any>(
       AglynComponent,
       options,
     ) as AglynExoticComponent<P>,
-    schema: cloneDeep(schema),
+    schema: cloneDeep(schema) as any,
   }
 }
 

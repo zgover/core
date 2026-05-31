@@ -15,4 +15,4 @@
  * limitations under the License.
  */
 
-export * from './color-picker'
+export { ColorPicker, type ColorPickerProps } from './color-picker'

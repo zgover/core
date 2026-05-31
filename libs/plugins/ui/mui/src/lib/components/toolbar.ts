@@ -51,6 +51,7 @@ export const schema: Aglyn.ComponentSchema = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'Toolbar Content',
     icon: {
       path: mdiBorderInside.path,

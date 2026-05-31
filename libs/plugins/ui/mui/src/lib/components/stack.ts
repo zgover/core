@@ -37,6 +37,7 @@ export const schema: Aglyn.ComponentSchema = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'Stack Horizontal',
     icon: {
       path: mdiViewColumn.path,
@@ -53,6 +54,7 @@ export const presets: Aglyn.PresetSchema[] = [
   },
   {
     $id: generatePresetId(ID, 'vertical'),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'Stack Vertical',
     icon: {
       path: mdiViewSequential.path,

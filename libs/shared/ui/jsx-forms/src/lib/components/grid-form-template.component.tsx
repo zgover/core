@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { mdiContentSave, MdiIcon } from '@aglyn/shared-ui-jsx'
+import { mdiContentSave } from '@aglyn/shared-data-mdi'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 
 import { Box, Button, FormControl, Grid } from '@mui/material'
 import { forwardRef } from 'react'

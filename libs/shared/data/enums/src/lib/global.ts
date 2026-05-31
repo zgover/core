@@ -16,24 +16,24 @@
  */
 
 
-export const PACKAGE_VERSION = String(process.env.PACKAGE_VERSION || 'NULL')
-export const BUILD_ID = String(process.env.BUILD_ID || 'NULL')
-export const COMMIT_REF = String(process.env.COMMIT_REF || 'NULL')
+export const PACKAGE_VERSION = String(process.env['PACKAGE_VERSION'] || 'NULL')
+export const BUILD_ID = String(process.env['BUILD_ID'] || 'NULL')
+export const COMMIT_REF = String(process.env['COMMIT_REF'] || 'NULL')
 
-export const IS_PRODUCTION = process.env.NODE_ENV === 'production'
-export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
-export const IS_TEST = process.env.NODE_ENV === 'test'
+export const IS_PRODUCTION = process.env['NODE_ENV'] === 'production'
+export const IS_DEVELOPMENT = process.env['NODE_ENV'] === 'development'
+export const IS_TEST = process.env['NODE_ENV'] === 'test'
 
-export const FIREBASE_FIRESTORE_EMULATOR_ENABLED = process.env.FIREBASE_FIRESTORE_EMULATOR_ENABLED === 'true'
-export const FIREBASE_AUTH_EMULATOR_ENABLED = process.env.FIREBASE_AUTH_EMULATOR_ENABLED === 'true'
-export const FIREBASE_STORAGE_EMULATOR_ENABLED = process.env.FIREBASE_STORAGE_EMULATOR_ENABLED === 'true'
-export const FIREBASE_DATABASE_EMULATOR_ENABLED = process.env.FIREBASE_DATABASE_EMULATOR_ENABLED === 'true'
+export const FIREBASE_FIRESTORE_EMULATOR_ENABLED = process.env['FIREBASE_FIRESTORE_EMULATOR_ENABLED'] === 'true'
+export const FIREBASE_AUTH_EMULATOR_ENABLED = process.env['FIREBASE_AUTH_EMULATOR_ENABLED'] === 'true'
+export const FIREBASE_STORAGE_EMULATOR_ENABLED = process.env['FIREBASE_STORAGE_EMULATOR_ENABLED'] === 'true'
+export const FIREBASE_DATABASE_EMULATOR_ENABLED = process.env['FIREBASE_DATABASE_EMULATOR_ENABLED'] === 'true'
 
-export const AGLYN_SILOED_HOST = String(process.env.AGLYN_SILOED_HOST || '')
+export const AGLYN_SILOED_HOST = String(process.env['AGLYN_SILOED_HOST'] || '')
 
 export const HAS_WINDOW = () => typeof window !== 'undefined'
 export const HAS_DOCUMENT = () => typeof document !== 'undefined'
-export const HAS_BROWSER = () => typeof process['browser'] !== 'undefined'
+export const HAS_BROWSER = () => typeof (process as any)['browser'] !== 'undefined'
 
 export const CURRENT_YEAR = new Date().getFullYear()
 export const CURRENT_YEAR_UTC = new Date().getUTCFullYear()

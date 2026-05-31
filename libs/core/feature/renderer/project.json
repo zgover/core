@@ -14,7 +14,10 @@
         "project": "libs/core/feature/renderer/package.json",
         "entryFile": "libs/core/feature/renderer/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup",
+          "./rollup.config.cjs"
+        ],
         "compiler": "swc",
         "assets": [
           {

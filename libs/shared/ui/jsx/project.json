@@ -13,8 +13,15 @@
         "tsConfig": "libs/shared/ui/jsx/tsconfig.lib.json",
         "project": "libs/shared/ui/jsx/package.json",
         "entryFile": "libs/shared/ui/jsx/src/index.ts",
-        "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nx/react/plugins/bundle-rollup",
+        "external": [
+          "react/jsx-runtime",
+          "@aglyn/shared-data-mdi",
+          "@aglyn/shared-data-mdi/constants/default-icon",
+          "@aglyn/shared-ui-theme",
+          "@aglyn/shared-util-tools",
+          "@aglyn/shared-util-vendor"
+        ],
+        "rollupConfig": ["@nx/react/plugins/bundle-rollup", "libs/shared/ui/jsx/rollup.config.cjs"],
         "compiler": "swc",
         "assets": [
           {

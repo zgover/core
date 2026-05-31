@@ -19,6 +19,7 @@ import {
   destroy,
   getParent,
   getSnapshot,
+  IAnyModelType,
   Instance,
   SnapshotIn,
   SnapshotOut,
@@ -34,10 +35,10 @@ import {
 } from '../mst'
 import { NodeType } from '../types/nodes'
 
-export type Node = typeof Node
-export type NodeInstance = Instance<typeof Node>
+export type AglynNodeModel = typeof AglynNodeModel
+export type AglynNodeInstance = Instance<typeof AglynNodeModel>
 
-export const Node = t
+export const AglynNodeModel = t
   .model('AglynNode', {
     id: SafeId,
     type: t.enumeration<NodeType>('NodeType', Object.values(NodeType)),
@@ -46,8 +47,13 @@ export const Node = t
     componentId: t.maybe(t.string),
     className: t.maybe(t.string),
     sx: t.maybe(AnyJsonObject),
-    nodes: t.optional(t.array(t.safeReference(t.late(() => Node))), []),
-    parent: t.maybeNull(t.safeReference(t.late(() => Node))),
+    nodes: t.optional(
+      t.array(t.safeReference(t.late((): IAnyModelType => AglynNodeModel))),
+      [],
+    ),
+    parent: t.maybeNull(
+      t.safeReference(t.late((): IAnyModelType => AglynNodeModel)),
+    ),
   })
   .actions((self) => ({
     remove() {
@@ -55,14 +61,10 @@ export const Node = t
     },
   }))
   .views((self) => ({
-    // get parent() {
-    //   if (!self.parentId) return undefined
-    //   return getParent<typeof RootNode>(self, 2).getNode(self.parentId)
-    // },
-    get nodesById(): OrUndef<NodeInstance[]> {
+    get nodesById(): OrUndef<AglynNodeInstance[]> {
       if (!self.nodes) return undefined
       const parentStore = getParent<typeof RootNode>(self, 2)
-      const nodes: NodeInstance[] = []
+      const nodes: AglynNodeInstance[] = []
       for (const id of self.nodes || []) {
         const node = parentStore.getNode(id)
         nodes.push(node)
@@ -76,22 +78,17 @@ export const Node = t
   }))
   .preProcessSnapshot((snapshot) => {
     console.log('node aaa preProcessSnapshot', snapshot)
-    // console.log('node aaa preProcess isArrayType')
     return snapshot
   })
   .postProcessSnapshot((snapshot) => {
     console.log('node aaa postProcessSnapshot', snapshot)
-    // if (snapshot.parent) snapshot.parent = snapshot.parent.id
-    // if (snapshot.nodes) {
-    //   snapshot.nodes = snapshot.nodes.map((node) => node.id)
-    // }
     return snapshot
   })
 
 export const RootNode = t
   .model('AglynRootNode', {
-    nodes: t.optional(t.array(t.safeReference(Node)), []),
-    nodesById: t.optional(t.map<Node>(Node), {}),
+    nodes: t.optional(t.array(t.safeReference(AglynNodeModel)), []),
+    nodesById: t.optional(t.map<AglynNodeModel>(AglynNodeModel), {}),
     sx: t.maybe(AnyJsonObject),
   })
   .actions((store) => {
@@ -104,38 +101,38 @@ export const RootNode = t
       duplicateNode,
     }
 
-    function createNode(node: SnapshotInOrInstance<Node>) {
-      return Node.create(node)
+    function createNode(node: SnapshotInOrInstance<AglynNodeModel>) {
+      return AglynNodeModel.create(node as SnapshotIn<AglynNodeModel>)
     }
-    function resolveNode(item: SnapshotInOrId<Node>): OrUndef<NodeInstance> {
-      return typeof item === 'string' ? getNode(item) : item
+    function resolveNode(
+      item: SnapshotInOrId<AglynNodeModel>,
+    ): OrUndef<AglynNodeInstance> {
+      return typeof item === 'string' ? getNode(item) : (item as AglynNodeInstance)
     }
     function hasNode(id: Identifier): boolean {
       return store.nodesById.has(id)
     }
-    function getNode(id: Identifier): OrUndef<NodeInstance> {
+    function getNode(id: Identifier): OrUndef<AglynNodeInstance> {
       return store.nodesById.get(id)
     }
-    function addNode(node: SnapshotInOrInstance<Node>, index = -1) {
-      const parent = node.parent ? getNode(node.parent) : store
+    function addNode(
+      node: SnapshotIn<AglynNodeModel> | AglynNodeInstance,
+      index = -1,
+    ) {
+      const n = node as AglynNodeInstance
+      const parent = n.parent ? getNode(n.parent as unknown as string) : store
       if (!parent) throw new Error('Parent not found')
-      if (!Array.isArray(parent.nodes)) parent.nodes = []
-      store.nodesById.set(node.id, node)
+      if (!Array.isArray(parent.nodes)) (parent as AglynNodeInstance).nodes = [] as unknown as AglynNodeInstance['nodes']
+      store.nodesById.set(n.id, node as AglynNodeInstance)
       if (index === -1) {
-        parent.nodes.push(node.id)
+        parent.nodes.push(n.id)
       } else {
-        parent.nodes.splice(index, 0, node.id)
+        parent.nodes.splice(index, 0, n.id)
       }
     }
-    function removeNode(item: SnapshotInOrId<Node>) {
+    function removeNode(item: SnapshotInOrId<AglynNodeModel>) {
       const node = resolveNode(item)
       if (node) {
-        // for (const child of node.nodes || []) {
-        //   removeNode(child)
-        // }
-        // if (node.parent) {
-        //   node.parent.nodes?.remove(node.id)
-        // }
         destroy(node)
       } else {
         throw new Error('Invalid node')
@@ -143,25 +140,28 @@ export const RootNode = t
     }
 
     function __cloneNode(
-      item: SnapshotInOrId<Node>,
+      item: SnapshotInOrId<AglynNodeModel>,
       parent?: OrUndef<Identifier>,
-      accumulator: SnapshotIn<Node>[] = [],
-    ): [newNode: SnapshotIn<Node>, accumulator: SnapshotIn<Node>[]] {
+      accumulator: SnapshotIn<AglynNodeModel>[] = [],
+    ): [
+      newNode: SnapshotIn<AglynNodeModel>,
+      accumulator: SnapshotIn<AglynNodeModel>[],
+    ] {
       const resolved = resolveNode(item)
       if (!resolved) return [undefined, accumulator]
-      const snapshot = getSnapshot<SnapshotOut<Node>>(resolved)
-      const newParent = parent || snapshot.parent
-      const clone = {
+      const snapshot = getSnapshot<SnapshotOut<AglynNodeModel>>(resolved)
+      const newParent = parent || (snapshot.parent as string | undefined)
+      const clone: SnapshotIn<AglynNodeModel> = {
         ...snapshot,
         id: createIdUrlSafe(),
         parent: newParent,
-        nodes: [],
+        nodes: [] as string[],
       }
       accumulator.push(clone)
       for (const child of resolved.nodes || []) {
         const [childClone] = __cloneNode(child, clone.id, accumulator)
         if (childClone) {
-          clone.nodes.push(childClone.id)
+          ;(clone.nodes as string[]).push(childClone.id)
           console.log('node aaa childClone', clone, childClone)
         } else {
           console.error('node aaa childClone', childClone)
@@ -170,14 +170,17 @@ export const RootNode = t
 
       return [clone, accumulator]
     }
-    function duplicateNode(item: SnapshotInOrId<Node>) {
+    function duplicateNode(item: SnapshotInOrId<AglynNodeModel>) {
       const resolved = resolveNode(item)
       if (!resolved) throw new Error('Invalid node')
-      const [itemClone, allClones] = __cloneNode(resolved, resolved.parent)
+      const [itemClone, allClones] = __cloneNode(
+        resolved,
+        resolved.parent as unknown as string | undefined,
+      )
       console.log('node aaa itemClone', itemClone)
 
       for (const clone of allClones) {
-        store.nodesById.set(clone.id, Node.create(clone))
+        store.nodesById.set(clone.id, AglynNodeModel.create(clone))
       }
       const parent = resolved.parent || store
       const indexOf = resolved.parentIndex ?? -1

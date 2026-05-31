@@ -81,7 +81,7 @@ export function lifecycleEvent(
   } catch (e) {
     emitter.emit(AglynEvent.ERROR_GENERAL, {
       message:
-        e?.message || `An error has occurred before event ${beforeEvent}`,
+        (e as Error)?.message || `An error has occurred before event ${beforeEvent}`,
     })
     onCatch && onCatch(e)
   }

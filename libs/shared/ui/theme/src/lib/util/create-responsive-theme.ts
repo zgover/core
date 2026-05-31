@@ -34,12 +34,12 @@ enum ContrastText {
   DARK = '#FFFFFF',
 }
 
-function getContrastTextColor(background, contrastThreshold) {
+function getContrastTextColor(background: string, contrastThreshold: number) {
   return getContrastRatio(background, ContrastText.DARK) >= (contrastThreshold ?? 3)
     ? ContrastText.DARK
     : ContrastText.LIGHT
 }
-function addShade(paletteColor, shade, variant, tonalOffset) {
+function addShade(paletteColor: any, shade: string, variant: string | undefined, tonalOffset: any) {
   const tonalOffsetLight = tonalOffset['light'] || (tonalOffset ?? 0.2)
   const tonalOffsetDark = tonalOffset['dark'] || (tonalOffset ?? 0.2) * 1.5
 
@@ -59,7 +59,7 @@ function addShade(paletteColor, shade, variant, tonalOffset) {
     }
   }
 }
-function addShadeVariants(paletteColor, tonalOffset?) {
+function addShadeVariants(paletteColor: any, tonalOffset?: any) {
   addShade(paletteColor, 'dark', undefined, tonalOffset)
   addShade(paletteColor, 'light', undefined, tonalOffset)
   addShade(paletteColor, 'contrastText', undefined, tonalOffset)

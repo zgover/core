@@ -72,7 +72,7 @@ export type LogCallback = (callbackParams: LogCallbackParams) => void
  * (i.e. once for firebase, and once in the console), we are sending `DEBUG`
  * logs to the `console.log` function.
  */
-export const ConsoleMethodKey = {
+export const ConsoleMethodKey: Partial<Record<string, string>> = {
   [LogLevel.DEBUG]: 'log',
   [LogLevel.VERBOSE]: 'log',
   [LogLevel.INFO]: 'info',
@@ -96,7 +96,7 @@ export const defaultLogHandler: LogHandler = (
   const method = ConsoleMethodKey[level]
 
   if (method) {
-    return console[method](`[${now}]  ${instance.name}`, ...args)
+    return (console as unknown as Record<string, (...a: any[]) => void>)[method](`[${now}]  ${instance.name}`, ...args)
   }
 
   throw new Error(
@@ -181,7 +181,7 @@ export class Logger {
    * Workaround for setter/getter having to be the same type
    */
   public setLogLevel(val?: LogLevelString): this {
-    if ((val && LogLevel[LogLevel[val]]) || console[val])
+    if ((val && (LogLevel as Record<string, unknown>)[(LogLevel as Record<string, unknown>)[val as string] as string]) || (console as unknown as Record<string, unknown>)[val as string])
       this.#logLevel = val as LogLevel
     else this.#logLevel = FALLBACK_LOG_LEVEL
     return this
@@ -201,10 +201,10 @@ export class Logger {
     logCallback: LogCallback | null,
     options?: LogOptions,
   ): void {
-    let customLogLevel: LogLevelString = null
+    let customLogLevel: LogLevelString | null = null
     if (
       options?.level &&
-      (LogLevel[LogLevel[options.level]] || console[options.level])
+      ((LogLevel as Record<string, unknown>)[(LogLevel as Record<string, unknown>)[options.level as string] as string] || (console as unknown as Record<string, unknown>)[options.level as string])
     ) {
       customLogLevel = options.level
     }
@@ -213,7 +213,7 @@ export class Logger {
     } else {
       this.userLogHandler = (
         instance: Logger,
-        level: LogLevel,
+        level: LogLevelString,
         ...args: unknown[]
       ) => {
         const message = args
@@ -243,8 +243,8 @@ export class Logger {
             type: instance.name,
             level:
               (options?.level &&
-                (LogLevel[LogLevel[options.level]] ||
-                  console[options.level])) ||
+                ((LogLevel as Record<string, unknown>)[(LogLevel as Record<string, unknown>)[options.level as string] as string] ||
+                  (console as unknown as Record<string, unknown>)[options.level as string])) as LogLevel ||
               FALLBACK_LOG_LEVEL,
           })
         }

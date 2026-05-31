@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { isValidElementType } from '@aglyn/shared-ui-jsx'
+import { isValidElementType } from 'react-is'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
 import { Box, type BoxProps } from '@mui/material'
@@ -51,7 +51,7 @@ export const LeafComponent = forwardRef<any, LeafComponentProps>(
         ref={ref}
         id={`element-leaf-${$id}`}
         className={_className}
-        sx={mergeSxProps(sx, resolved?.sx, resolved?.props?.sx)}
+        sx={mergeSxProps(sx as any, resolved?.sx as any, resolved?.props?.sx as any)}
         {...resolved?.props}
         {...rest}
       >
