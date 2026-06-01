@@ -16,7 +16,7 @@
  */
 
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import type { CrudModel } from '@aglyn/shared-data-types'
+import type { CrudModel } from '@aglyn/shared-data-types/crud'
 
 /**
  * Methods (set, get, has, del) to c.r.u.d. an index of the data property

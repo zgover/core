@@ -16,7 +16,7 @@
  */
 
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { NormalizedData, NormalizedModel } from '@aglyn/shared-data-types'
+import { NormalizedData, NormalizedModel } from '@aglyn/shared-data-types/normalized'
 import { arrayMoveAtIndex } from './array/array-move-at-index'
 import { arrayRemoveItem } from './array/array-remove-item'
 import { _isNum, _isObj } from './guards'
