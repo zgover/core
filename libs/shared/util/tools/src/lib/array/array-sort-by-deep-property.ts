@@ -31,8 +31,8 @@ export function arraySortByDeepProperty<T>(
   firstPath: string,
   secondPath?: string,
 ): T[] {
-  const lgr = (a, b, p) => objectGetDeepProperty(a, p) > objectGetDeepProperty(b, p)
-  const eq = (a, b, p) => objectGetDeepProperty(a, p) === objectGetDeepProperty(b, p)
+  const lgr = (a: T, b: T, p: string) => objectGetDeepProperty(a, p) > objectGetDeepProperty(b, p)
+  const eq = (a: T, b: T, p: string) => objectGetDeepProperty(a, p) === objectGetDeepProperty(b, p)
   return items.sort((a, b) => {
     if (lgr(a, b, firstPath)) return 1
     if (secondPath) {

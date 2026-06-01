@@ -1,13 +1,14 @@
 /**
  * Custom rollup config that:
- * 1. Patches the NX dts-bundle plugin to use workspace-root-relative paths.
+ * 1. Patches the NX dts-bundle plugin to use workspace-root-relative paths so
+ *    the stub matches where TypeScript actually emits the declarations.
  * 2. Replaces the TypeScript plugin with one that has rootDir derived from
  *    __dirname (always accurate) rather than NX's workspaceRoot detection,
  *    which can resolve to the project directory on Vercel causing TS6059.
  */
 const path = require('path');
 const WORKSPACE_ROOT = path.resolve(__dirname, '../../../..');
-const TSCONFIG_PATH = path.join(WORKSPACE_ROOT, 'libs/besigner/ui/color-picker/tsconfig.lib.json');
+const TSCONFIG_PATH = path.join(WORKSPACE_ROOT, 'libs/shared/ui/snackstack/tsconfig.lib.json');
 
 function computeNxPaths() {
   try {
@@ -23,7 +24,7 @@ function computeNxPaths() {
       undefined,
       projectGraph,
       WORKSPACE_ROOT,
-      'besigner-ui-color-picker',
+      'shared-ui-snackstack',
       process.env.NX_TASK_TARGET_TARGET || 'build',
       process.env.NX_TASK_TARGET_CONFIGURATION,
       true,
