@@ -22,7 +22,7 @@
           "@aglyn/shared-util-tools",
           "@aglyn/shared-util-vendor"
         ],
-        "rollupConfig": ["@nx/react/plugins/bundle-rollup", "libs/shared/ui/jsx-forms/rollup.config.cjs"],
+        "rollupConfig": ["@nx/react/plugins/bundle-rollup"],
         "compiler": "swc",
         "skipTypeCheck": true,
         "assets": [

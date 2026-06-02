@@ -18,7 +18,7 @@
           "@aglyn/shared-util-tools",
           "@aglyn/shared-util-vendor"
         ],
-        "rollupConfig": ["@nx/react/plugins/bundle-rollup", "libs/shared/ui/theme/rollup.config.cjs"],
+        "rollupConfig": ["@nx/react/plugins/bundle-rollup"],
         "compiler": "swc",
         "assets": [
           {

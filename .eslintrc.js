@@ -69,6 +69,13 @@ module.exports = {
                   'scope:addons',
                   'scope:aglyn',
                   'scope:shared',
+                  'scope:ui',
+                  'scope:framework',
+                  'scope:util',
+                  'scope:data',
+                  'scope:renderer',
+                  'scope:feature',
+                  'scope:lib',
                 ],
               },
               {

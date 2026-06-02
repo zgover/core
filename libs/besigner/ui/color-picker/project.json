@@ -13,11 +13,8 @@
         "tsConfig": "libs/besigner/ui/color-picker/tsconfig.lib.json",
         "project": "libs/besigner/ui/color-picker/package.json",
         "entryFile": "libs/besigner/ui/color-picker/src/index.ts",
-        "external": [
-          "@emotion/react/jsx-runtime",
-          "@aglyn/shared-util-tools"
-        ],
-        "rollupConfig": ["@nx/react/plugins/bundle-rollup", "libs/besigner/ui/color-picker/rollup.config.cjs"],
+        "external": ["@emotion/react/jsx-runtime", "@aglyn/shared-util-tools"],
+        "rollupConfig": ["@nx/react/plugins/bundle-rollup"],
         "compiler": "swc",
         "assets": [
           {

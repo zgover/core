@@ -13,7 +13,7 @@
         "project": "libs/shared/ui/snackstack/package.json",
         "entryFile": "libs/shared/ui/snackstack/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": ["@nx/react/plugins/bundle-rollup", "libs/shared/ui/snackstack/rollup.config.cjs"],
+        "rollupConfig": ["@nx/react/plugins/bundle-rollup"],
         "compiler": "swc",
         "assets": [
           {
