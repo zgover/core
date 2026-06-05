@@ -27,6 +27,7 @@ import {
   makeObservable,
   observable,
   type ObservableMap,
+  runInAction,
   toJS,
 } from 'mobx'
 import { computedFn } from 'mobx-utils'
@@ -557,8 +558,10 @@ export class CanvasManager {
     const parsed = this.processNodesToDenormalized(duplicate)
     this.setNodes(parsed, true)
 
-    if (isNaN(index)) (parent.nodes ||= []).push(duplicate.$id)
-    else (parent.nodes ||= []).splice(index, 0, duplicate.$id)
+    runInAction(() => {
+      if (isNaN(index)) (parent.nodes ||= []).push(duplicate.$id)
+      else (parent.nodes ||= []).splice(index, 0, duplicate.$id)
+    })
 
     return this.getNode(duplicate.$id)!
   }

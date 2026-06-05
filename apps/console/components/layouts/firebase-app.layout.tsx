@@ -135,9 +135,10 @@ function GetInnerLayout({ children }) {
       if (FIREBASE_FIRESTORE_EMULATOR_ENABLED) {
         connectFirestoreEmulator(getFirestore(app), 'localhost', 8082)
       }
+    } catch {
+      // already initialized (e.g. HMR reset the module flag) — getFirestore() returns the existing instance
+    } finally {
       connectedFirestore = true
-    } catch (error) {
-      console.error(error)
     }
   }
 
