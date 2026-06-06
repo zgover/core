@@ -258,6 +258,7 @@ export class CanvasManager {
       deleteNode: action,
       reparentNode: action,
       reorderNode: action,
+      updateNodeProps: action,
     })
 
     this._history = new HistoryManager()
