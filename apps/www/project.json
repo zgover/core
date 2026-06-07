@@ -12,7 +12,9 @@
         "outputPath": "dist/apps/www"
       },
       "configurations": {
-        "production": {},
+        "production": {
+          "webpack": true
+        },
         "development": {
           "outputPath": "apps/www"
         }

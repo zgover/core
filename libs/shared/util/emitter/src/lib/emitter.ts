@@ -25,7 +25,7 @@ export type {
   EventHandlerList,
   WildCardEventHandlerList,
   EventHandlerMap,
-  Emitter,
+  Emitter as MittEmitter,
 } from 'mitt'
 export type {
   event,
