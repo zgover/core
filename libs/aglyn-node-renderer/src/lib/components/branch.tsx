@@ -17,30 +17,30 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { observer } from 'mobx-react-lite'
-import { forwardRef, Fragment } from 'react'
+import { Fragment } from 'react'
 import RendererComponents from '../contexts/renderer-components'
 
 export interface BranchProps {
   node: Aglyn.NodeSchema<any>
 }
 
-export const Branch = observer(
-  forwardRef<any, BranchProps>((props, ref) => {
-    const { node } = props
-    const nodes = node?.children ?? []
-    return (
-      <RendererComponents.Consumer>
-        {({ StemComponent }) => (
-          <Fragment>
-            {nodes.map((child, key) => (
-              <StemComponent key={child?.$id ?? key} node={child} />
-            ))}
-          </Fragment>
-        )}
-      </RendererComponents.Consumer>
-    )
-  }),
-)
+// Branch renders a Fragment — no single DOM root to attach a ref to,
+// so forwardRef is intentionally omitted here.
+export const Branch = observer((props: BranchProps) => {
+  const { node } = props
+  const nodes = node?.children ?? []
+  return (
+    <RendererComponents.Consumer>
+      {({ StemComponent }) => (
+        <Fragment>
+          {nodes.map((child, key) => (
+            <StemComponent key={child?.$id ?? key} node={child} />
+          ))}
+        </Fragment>
+      )}
+    </RendererComponents.Consumer>
+  )
+})
 Branch.displayName = 'Branch'
 Branch['aglyn'] = true
 
