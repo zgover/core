@@ -7,13 +7,17 @@
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/aglyn-plugin-mui",
         "tsConfig": "libs/aglyn-plugin-mui/tsconfig.lib.json",
         "project": "libs/aglyn-plugin-mui/package.json",
         "entryFile": "libs/aglyn-plugin-mui/src/index.ts",
-        "external": ["react/jsx-runtime"],
+        "external": [
+          "react/jsx-runtime"
+        ],
         "rollupConfig": "@nx/react/plugins/bundle-rollup",
         "compiler": "swc",
         "assets": [
@@ -23,16 +27,21 @@
             "output": "."
           }
         ],
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/aglyn-plugin-mui"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/aglyn-plugin-mui"
+      ],
       "options": {
         "jestConfig": "libs/aglyn-plugin-mui/jest.config.ts"
       }

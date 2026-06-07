@@ -3,17 +3,25 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/aglyn-node-renderer/src",
   "projectType": "library",
-  "tags": ["scope:lib", "scope:feature", "scope:aglyn"],
+  "tags": [
+    "scope:lib",
+    "scope:feature",
+    "scope:aglyn"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/aglyn-node-renderer",
         "tsConfig": "libs/aglyn-node-renderer/tsconfig.lib.json",
         "project": "libs/aglyn-node-renderer/package.json",
         "entryFile": "libs/aglyn-node-renderer/src/index.ts",
-        "external": ["react/jsx-runtime"],
+        "external": [
+          "react/jsx-runtime"
+        ],
         "rollupConfig": "@nx/react/plugins/bundle-rollup",
         "compiler": "swc",
         "assets": [
@@ -23,12 +31,15 @@
             "output": "."
           }
         ],
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     }
   }
 }

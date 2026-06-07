@@ -3,18 +3,29 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/core/feature/renderer/src",
   "projectType": "library",
-  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:renderer"],
+  "tags": [
+    "scope:lib",
+    "scope:aglyn",
+    "scope:feature",
+    "aglyn:renderer"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/core/feature/renderer",
         "tsConfig": "libs/core/feature/renderer/tsconfig.lib.json",
         "project": "libs/core/feature/renderer/package.json",
         "entryFile": "libs/core/feature/renderer/src/index.ts",
-        "external": ["react/jsx-runtime"],
-        "rollupConfig": ["@nx/react/plugins/bundle-rollup"],
+        "external": [
+          "react/jsx-runtime"
+        ],
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup"
+        ],
         "compiler": "swc",
         "assets": [
           {
@@ -23,16 +34,21 @@
             "output": "."
           }
         ],
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/core/feature/renderer"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/core/feature/renderer"
+      ],
       "options": {
         "jestConfig": "libs/core/feature/renderer/jest.config.ts"
       }

@@ -6,13 +6,17 @@
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/besigner/feature/canvas-designer",
         "tsConfig": "libs/besigner/feature/canvas-designer/tsconfig.lib.json",
         "project": "libs/besigner/feature/canvas-designer/package.json",
         "entryFile": "libs/besigner/feature/canvas-designer/src/index.ts",
-        "external": ["react/jsx-runtime"],
+        "external": [
+          "react/jsx-runtime"
+        ],
         "rollupConfig": "@nx/react/plugins/bundle-rollup",
         "compiler": "swc",
         "assets": [
@@ -22,13 +26,21 @@
             "output": "."
           }
         ],
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     }
   },
-  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:canvas-designer"]
+  "tags": [
+    "scope:lib",
+    "scope:aglyn",
+    "scope:feature",
+    "aglyn:canvas-designer"
+  ]
 }

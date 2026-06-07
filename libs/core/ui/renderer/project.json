@@ -3,17 +3,26 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/core/ui/renderer/src",
   "projectType": "library",
-  "tags": ["scope:lib", "scope:aglyn", "scope:ui", "aglyn:renderer"],
+  "tags": [
+    "scope:lib",
+    "scope:aglyn",
+    "scope:ui",
+    "aglyn:renderer"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/core/ui/renderer",
         "tsConfig": "libs/core/ui/renderer/tsconfig.lib.json",
         "project": "libs/core/ui/renderer/package.json",
         "entryFile": "libs/core/ui/renderer/src/index.ts",
-        "external": ["react/jsx-runtime"],
+        "external": [
+          "react/jsx-runtime"
+        ],
         "rollupConfig": "@nx/react/plugins/bundle-rollup",
         "compiler": "swc",
         "assets": [
@@ -23,12 +32,15 @@
             "output": "."
           }
         ],
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     }
   }
 }

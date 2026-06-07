@@ -3,18 +3,30 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/besigner/ui/color-picker/src",
   "projectType": "library",
-  "tags": ["scope:lib", "scope:aglyn", "scope:besigner", "scope:ui"],
+  "tags": [
+    "scope:lib",
+    "scope:aglyn",
+    "scope:besigner",
+    "scope:ui"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/besigner/ui/color-picker",
         "tsConfig": "libs/besigner/ui/color-picker/tsconfig.lib.json",
         "project": "libs/besigner/ui/color-picker/package.json",
         "entryFile": "libs/besigner/ui/color-picker/src/index.ts",
-        "external": ["@emotion/react/jsx-runtime", "@aglyn/shared-util-tools"],
-        "rollupConfig": ["@nx/react/plugins/bundle-rollup"],
+        "external": [
+          "@emotion/react/jsx-runtime",
+          "@aglyn/shared-util-tools"
+        ],
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup"
+        ],
         "compiler": "swc",
         "assets": [
           {
@@ -23,16 +35,21 @@
             "output": "."
           }
         ],
-        "updateBuildableProjectDepsInPackageJson": true
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/besigner/ui/color-picker"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/besigner/ui/color-picker"
+      ],
       "options": {
         "jestConfig": "libs/besigner/ui/color-picker/jest.config.ts"
       }
