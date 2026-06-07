@@ -102,7 +102,7 @@ export const NodeOutline = observer(
       <NodeOutlineRoot
         ref={ref}
         data-aglyn={`outline:${$id}`}
-        style={{ ...style, width: rect?.width, height: rect?.height }}
+        style={{ width: rect?.width, height: rect?.height, ...style }}
         className={clsx(
           {
             [classKeys.selectedSelf]: Boolean(isSelected),

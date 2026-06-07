@@ -106,8 +106,28 @@ const NodeOverlay = observer(
 
     useIsomorphicLayoutEffect(() => {
       const el = elementRef?.current
-      if (el && 'getBoundingClientRect' in el) {
-        setRect(serializeRect(el.getBoundingClientRect()))
+      if (!el || !('getBoundingClientRect' in el)) return
+
+      const update = () => setRect(serializeRect(el.getBoundingClientRect()))
+      update()
+
+      // Re-sync when the canvas container resizes (panel open/close) or the
+      // window resizes — both shift the element's viewport-relative position.
+      const ro = new ResizeObserver(update)
+      const shadowHost = (el.getRootNode() as ShadowRoot | null)?.host ?? null
+      if (shadowHost) ro.observe(shadowHost)
+      window.addEventListener('resize', update, { passive: true })
+
+      // In device preview mode the artboard has a fixed width so the canvas
+      // scroll container can scroll — scroll shifts getBoundingClientRect()
+      // values without triggering a resize, so we need a scroll listener too.
+      const scrollContainer = document.getElementById('aglyn:viewport-canvas')
+      scrollContainer?.addEventListener('scroll', update, { passive: true })
+
+      return () => {
+        ro.disconnect()
+        window.removeEventListener('resize', update)
+        scrollContainer?.removeEventListener('scroll', update)
       }
     }, [elementRef])
 
@@ -130,7 +150,7 @@ const NodeOverlay = observer(
         {...rest}
       >
         <div>
-          <NodeOutline node={node} />
+          <NodeOutline node={node} style={{ width: rect.width, height: rect.height }} />
 
           <MuiPopper
             open={isOpen}
