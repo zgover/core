@@ -30,6 +30,7 @@
         ],
         "rollupConfig": [
           "@nx/react/plugins/bundle-rollup",
+          "tools/rollup-external-packages.js",
           "tools/rollup-suppress-use-client.js",
           "tools/rollup-skip-typecheck.js"
         ],
