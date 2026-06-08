@@ -1,12 +1,17 @@
 /**
- * Rollup config plugin to suppress "use client" module-level directive warnings.
+ * Rollup config plugin to suppress known non-fatal build log noise.
  *
- * When bundling libraries that import MUI components, rollup emits hundreds of
- * MODULE_LEVEL_DIRECTIVE warnings (one per MUI file). These are non-fatal,
- * completely expected, and flood the build log — hiding real errors.
- * This plugin silences them.
+ * Covers two categories of warnings that flood build logs and hide real errors:
+ *
+ * 1. MODULE_LEVEL_DIRECTIVE — emitted when bundling files with "use client" /
+ *    "use server" directives (MUI, and library source files). Non-fatal but
+ *    generates hundreds of events per build.
+ *
+ * 2. INVALID_ANNOTATION — emitted when a bundled dependency (e.g. react-virtuoso)
+ *    has /* @__PURE__ *\/ comments in positions rollup cannot interpret. Non-fatal,
+ *    but each warning spans multiple lines (~5 log events each).
  */
-module.exports = function suppressUseClientWarnings(config) {
+module.exports = function suppressRollupNoise(config) {
   const originalOnwarn = config.onwarn
 
   config.onwarn = function (warning, warn) {
@@ -19,6 +24,19 @@ module.exports = function suppressUseClientWarnings(config) {
     ) {
       return
     }
+
+    // Suppress @__PURE__ annotation position warnings from node_modules.
+    // These come from packages like react-virtuoso that use tree-shaking
+    // annotations in positions rollup cannot process. Completely non-fatal —
+    // rollup removes the comment and continues bundling.
+    if (
+      warning.code === 'INVALID_ANNOTATION' &&
+      warning.message &&
+      warning.message.includes('node_modules')
+    ) {
+      return
+    }
+
     if (originalOnwarn) {
       originalOnwarn(warning, warn)
     } else {

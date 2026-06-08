@@ -44,9 +44,11 @@ module.exports = function skipTypecheckConfig(config) {
       }
     }
 
-    // Wrap buildStart to silence TypeScript type errors
+    // Wrap buildStart to silence TypeScript type errors AND suppress TS6059 rootDir warnings.
+    // TS6059 fires during buildStart (TypeScript compilation phase) as context.warn()
+    // when noEmitOnError:false. These are non-fatal but flood build logs.
     if (typeof plugin.buildStart === 'function') {
-      plugin.buildStart = wrapHook(plugin.buildStart, null)
+      plugin.buildStart = wrapHook(plugin.buildStart, /TS6059/)
     }
 
     // Wrap generateBundle to suppress TS6059 rootDir warnings.

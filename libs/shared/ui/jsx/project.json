@@ -21,6 +21,7 @@
         "entryFile": "libs/shared/ui/jsx/src/index.ts",
         "external": [
           "react/jsx-runtime",
+          "react-virtuoso",
           "@aglyn/shared-data-mdi",
           "@aglyn/shared-data-mdi/constants/default-icon",
           "@aglyn/shared-ui-theme",
