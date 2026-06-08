@@ -28,7 +28,9 @@
           "@aglyn/shared-util-vendor"
         ],
         "rollupConfig": [
-          "@nx/react/plugins/bundle-rollup"
+          "@nx/react/plugins/bundle-rollup",
+          "tools/rollup-suppress-use-client.js",
+          "tools/rollup-skip-typecheck.js"
         ],
         "compiler": "swc",
         "assets": [
