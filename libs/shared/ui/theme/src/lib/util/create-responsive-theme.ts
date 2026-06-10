@@ -143,6 +143,10 @@ export function createResponsiveCssVarTheme(
 
   return muiExtendTheme({
     ...lightTheme,
+    // Allow setMode() to work by driving the color scheme via a CSS class on
+    // <html> instead of the OS-level @media query (the default 'media' selector
+    // makes setMode() a no-op because media queries can't be overridden in JS).
+    colorSchemeSelector: 'class',
     ...options,
     colorSchemes: {
       ...options?.colorSchemes,
