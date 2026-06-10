@@ -417,9 +417,7 @@ export const BoxButtonStyler = forwardRef<any, BoxButtonStylerProps>(
         <Legend
           direction="row"
           spacing={1}
-          sx={{ alignItems: 'center', justifyContent: 'space-around' }}
-          marginTop={1}
-          marginBottom={2}
+          sx={{ alignItems: 'center', justifyContent: 'space-around', mt: 1, mb: 2 }}
         >
           <LegendItem item={'margin'} />
           <LegendItem item={'padding'} />
