@@ -151,10 +151,7 @@ const TreeItem = styled(MuiListItem, {
   const depthOpacity = 0.2 - 1 / (1 << depth)
   return {
     [`&:has(.${classKey.subTreeView}):has(.${listItemClasses.selected})`]: {
-      backgroundColor: alpha(
-        theme.palette.common.black,
-        depthOpacity < 0 ? 0 : depthOpacity,
-      ),
+      backgroundColor: `rgba(0 0 0 / ${depthOpacity < 0 ? 0 : depthOpacity})`,
     },
   }
 })
