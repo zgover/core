@@ -40,17 +40,24 @@ import NodeOverlay from './node-overlay'
 
 const ViewportFrame = styled('div', {
   name: 'AglynViewportFrame',
-})(({ theme }) => ({
-  flexGrow: 1,
-  minHeight: '100%',
-  width: '100%',
-  background: theme.palette.background.paper,
-  borderColor: theme.palette.divider,
-  borderWidth: `0.3em`,
-  borderStyle: 'solid',
-  display: 'flex',
-  // position: 'relative',
-}))
+})(({ theme }) => {
+  // In CSS vars mode, theme.palette.* is pinned to the static light-mode values.
+  // Use (theme.vars || theme) so these resolve to CSS custom-property references
+  // that update automatically when setMode() applies the .dark class.
+  const t = theme as any
+  const tv = t.vars || theme
+  return {
+    flexGrow: 1,
+    minHeight: '100%',
+    width: '100%',
+    background: tv.palette.background.paper,
+    borderColor: tv.palette.divider,
+    borderWidth: `0.3em`,
+    borderStyle: 'solid',
+    display: 'flex',
+    // position: 'relative',
+  }
+})
 ViewportFrame.displayName = 'ViewportFrame'
 
 type SiteShadowDomProps = HTMLAttributes<HTMLDivElement> & MuiShadowRootProps

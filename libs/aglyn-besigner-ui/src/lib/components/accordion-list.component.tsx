@@ -29,8 +29,12 @@ import {
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useCallback, useState } from 'react'
 
-const StyledAccordion = styled(MuiAccordion)(({ theme }) => ({
-  border: `1px solid ${theme.palette.divider}`,
+const StyledAccordion = styled(MuiAccordion)(({ theme }) => {
+  // In CSS vars mode, theme.palette.* is always the static light values.
+  // Use (theme.vars || theme) so these become live CSS custom-property refs.
+  const tv = (theme as any).vars || theme
+  return {
+  border: `1px solid ${tv.palette.divider}`,
   borderLeft: 0,
   borderRight: 0,
   '&:not(:last-of-type)': {
@@ -42,7 +46,7 @@ const StyledAccordion = styled(MuiAccordion)(({ theme }) => ({
 
   '& .MuiAccordionSummary-root': {
     textTransform: 'uppercase',
-    backgroundColor: theme.palette.surface.main,
+    backgroundColor: tv.palette.surface.main,
     flexDirection: 'row-reverse',
     minHeight: 38,
     fontSize: theme.typography.pxToRem(14),
@@ -59,9 +63,9 @@ const StyledAccordion = styled(MuiAccordion)(({ theme }) => ({
   },
   '& .MuiAccordionDetails-root': {
     padding: theme.spacing(2),
-    borderTop: `1px solid ${theme.palette.divider}`,
+    borderTop: `1px solid ${tv.palette.divider}`,
   },
-})) as typeof MuiAccordion
+}}) as typeof MuiAccordion
 
 export interface AccordionProps extends MuiAccordionProps {
   AccordionSummaryProps?: MuiAccordionSummaryProps

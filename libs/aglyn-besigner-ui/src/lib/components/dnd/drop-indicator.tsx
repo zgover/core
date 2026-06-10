@@ -45,6 +45,9 @@ const Indicator = styled(motion.div, {
     !_isEqualitySameType(propName, null, 'variant', 'visible'),
 })<IndicatorProps>(({ theme, variant }) => {
   const vertical = variant === 'vertical'
+  // In CSS vars mode, theme.palette.* is always the static light values.
+  // Use (theme.vars || theme) so these become live CSS custom-property refs.
+  const tv = (theme as any).vars || theme
 
   return {
     position: 'absolute',
@@ -55,7 +58,7 @@ const Indicator = styled(motion.div, {
     zIndex: theme.zIndex.modal,
 
     [`& .${classes.line}`]: {
-      border: `${lineW / 2}px solid ${theme.palette.secondary.main}`,
+      border: `${lineW / 2}px solid ${tv.palette.secondary.main}`,
       flexGrow: 1,
       width: !vertical ? undefined : lineW,
       height: !vertical ? lineW : undefined,
@@ -63,9 +66,9 @@ const Indicator = styled(motion.div, {
       content: '""',
     },
     [`& .${classes.handle}`]: {
-      backgroundColor: theme.palette.surface.main,
+      backgroundColor: tv.palette.surface.main,
       borderRadius: handleW,
-      border: `1px solid ${theme.palette.secondary.dark}`,
+      border: `1px solid ${tv.palette.secondary.dark}`,
       width: handleW,
       height: handleW,
       display: 'block',
