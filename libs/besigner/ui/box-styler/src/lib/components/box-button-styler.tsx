@@ -416,9 +416,8 @@ export const BoxButtonStyler = forwardRef<any, BoxButtonStylerProps>(
 
         <Legend
           direction="row"
-          alignItems="center"
-          justifyContent="space-around"
           spacing={1}
+          sx={{ alignItems: 'center', justifyContent: 'space-around' }}
           marginTop={1}
           marginBottom={2}
         >
