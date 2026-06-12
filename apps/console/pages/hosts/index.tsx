@@ -23,7 +23,6 @@ import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import AppLink from '@aglyn/shared-ui-jsx/components/app-link'
 import MdiIcon from '@aglyn/shared-ui-jsx/components/mdi-icon'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
-import { alpha } from '@aglyn/shared-ui-theme'
 import { Typography } from '@mui/material'
 import { collection, query, where } from 'firebase/firestore'
 import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire'
@@ -50,15 +49,18 @@ function HostInfoItem({ label, value }) {
           variant="body1"
           sx={[{
             display: "inline"
-          }, (theme) => ({
-            bgcolor: alpha(theme.palette.tertiary.light, 0.18),
-            border: `1px solid ${alpha(theme.palette.tertiary.light, 0.72)}`,
-            borderRadius: '0.3em',
-            px: 0.5,
-            py: 0.15,
-            wordBreak: 'break-word',
-            fontSize: '0.8rem',
-          })]}>
+          }, (theme) => {
+            const tv = (theme as any).vars || theme
+            return {
+              bgcolor: `rgba(${tv.palette.tertiary.lightChannel} / 0.18)`,
+              border: `1px solid rgba(${tv.palette.tertiary.lightChannel} / 0.72)`,
+              borderRadius: '0.3em',
+              px: 0.5,
+              py: 0.15,
+              wordBreak: 'break-word',
+              fontSize: '0.8rem',
+            }
+          }]}>
           {value || <i>{'None'}</i>}
         </Typography>
       </Typography>
