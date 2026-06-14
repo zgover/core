@@ -211,15 +211,18 @@ const ElementInfo = function ElementInfo({
                     sx={[{
                       display: "inline"
                     }, mergeSxProps(
-                      (theme) => ({
-                        bgcolor: `rgba(${(theme as any).vars.palette.secondary.lightChannel} / 0.18)`,
-                        border: `1px solid rgba(${(theme as any).vars.palette.secondary.lightChannel} / 0.72)`,
-                        borderRadius: '0.3em',
-                        px: 0.5,
-                        py: 0.15,
-                        wordBreak: 'break-word',
-                        fontSize: '0.8rem',
-                      }),
+                      (theme) => {
+                        const tv = (theme as any).vars || theme
+                        return {
+                          bgcolor: `rgba(${tv.palette.secondary.lightChannel} / 0.18)`,
+                          border: `1px solid rgba(${tv.palette.secondary.lightChannel} / 0.72)`,
+                          borderRadius: '0.3em',
+                          px: 0.5,
+                          py: 0.15,
+                          wordBreak: 'break-word',
+                          fontSize: '0.8rem',
+                        }
+                      },
                       ValueTypographyProps?.sx,
                     )]}>
                     {value || <i>{failoverText}</i>}
