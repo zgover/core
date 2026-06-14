@@ -31,7 +31,7 @@ import {
   ICON_VARIANT_MODIFY_ADD,
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
-import { mergeSxProps, styled } from '@aglyn/shared-ui-theme'
+import { styled } from '@aglyn/shared-ui-theme'
 import {
   getDisplayName,
   numberFromHexadecimal,
@@ -208,9 +208,8 @@ const ElementInfo = function ElementInfo({
                   <Typography
                     variant="body1"
                     {...ValueTypographyProps}
-                    sx={[{
-                      display: "inline"
-                    }, mergeSxProps(
+                    sx={[
+                      { display: 'inline' },
                       (theme) => {
                         const tv = (theme as any).vars || theme
                         return {
@@ -223,8 +222,10 @@ const ElementInfo = function ElementInfo({
                           fontSize: '0.8rem',
                         }
                       },
-                      ValueTypographyProps?.sx,
-                    )]}>
+                      ...(Array.isArray(ValueTypographyProps?.sx)
+                        ? ValueTypographyProps.sx
+                        : [ValueTypographyProps?.sx]),
+                    ]}>
                     {value || <i>{failoverText}</i>}
                   </Typography>
                 </Typography>
