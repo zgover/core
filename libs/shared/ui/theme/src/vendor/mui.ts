@@ -66,31 +66,6 @@ declare module '@mui/system' {
   }
 }
 declare module '@mui/material/styles' {
-  type ExtraColor = PaletteColor
-  type ExtraColorOptions = PaletteColorOptions
-
-  interface TypeBackground {}
-
-  interface PaletteOptions {
-    tertiary?: ExtraColorOptions
-    surface?: ExtraColorOptions
-  }
-
-  interface Palette {
-    tertiary: ExtraColor
-    surface: ExtraColor
-  }
-
-  interface ZIndex {
-    max: number
-    min: number
-  }
-
-  interface Mixins {
-    menuArrow: CSSProperties
-  }
-}
-declare module '@mui/material/styles' {
   type ExtraColor = Palette['primary']
   type ExtraColorOptions = PaletteOptions['primary']
 
@@ -148,6 +123,8 @@ declare module '@mui/material/styles' {
     text?: PaletteOptions['text']
   }
 
+  interface TypeBackground {}
+
   interface Palette {
     background: Palette['background']
     tertiary: ExtraColor
@@ -156,6 +133,15 @@ declare module '@mui/material/styles' {
     svgFilled: IActionStates
     svgStroke: IActionStates
     text: Palette['text']
+  }
+
+  interface ZIndex {
+    max: number
+    min: number
+  }
+
+  interface Mixins {
+    menuArrow: CSSProperties
   }
 
   interface ThemeOptions {
@@ -247,7 +233,6 @@ export {
   decomposeColor,
   easing,
   emphasize,
-  experimentalStyled,
   getContrastRatio,
   getLuminance,
   hexToRgb,
@@ -265,12 +250,11 @@ export {
   getInitColorSchemeScript,
 } from '@mui/material/styles'
 
+export { type ColorPartial } from '@mui/material/styles/createPalette'
 export {
-  type ColorPartial,
   type CommonColors,
   type TypeBackground,
   type TypeText,
-  type TypographyOptions,
   type Shadows,
 } from '@mui/material/styles'
 
