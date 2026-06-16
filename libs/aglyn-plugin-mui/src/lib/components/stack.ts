@@ -18,12 +18,18 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { mdiViewColumn, mdiViewSequential } from '@aglyn/shared-ui-jsx'
 import MuiStack, { type StackProps } from '@mui/material/Stack'
+import type { CSSProperties } from 'react'
 import { createElement, forwardRef } from 'react'
 import { PLUGIN_ID } from '../constants/common'
 import generatePresetId from '../utils/generate-preset-id'
 
-// In MUI v9 justifyContent/alignItems are no longer direct Stack props; redirect them to sx.
-const Stack = forwardRef<HTMLDivElement, StackProps>(
+// justifyContent/alignItems are no longer direct StackProps in MUI v6+; pass them through sx.
+type StackWithFlexProps = StackProps & {
+  justifyContent?: CSSProperties['justifyContent']
+  alignItems?: CSSProperties['alignItems']
+}
+
+const Stack = forwardRef<HTMLDivElement, StackWithFlexProps>(
   ({ justifyContent, alignItems, sx, ...props }, ref) =>
     createElement(MuiStack, {
       ref,
