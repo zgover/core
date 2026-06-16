@@ -176,14 +176,13 @@ const IconSelectComponent = forwardRef<any, IconSelectProps>((props, ref) => {
         >
           <CardListItem
             item={item}
-            onActionClick={handleItemClick}
             selected={selected && selected === item.id}
-            renderItem={
-              <div>
-                <MdiIcon fontSize="medium" path={item.path} />
-              </div>
-            }
-          />
+            onClick={(e) => handleItemClick(e, item)}
+          >
+            <div>
+              <MdiIcon fontSize="medium" path={item.path} />
+            </div>
+          </CardListItem>
         </Tooltip>
       )
     },
