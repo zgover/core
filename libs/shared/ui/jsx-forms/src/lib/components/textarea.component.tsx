@@ -49,7 +49,7 @@ const TextareaComponent = forwardRef<any, TextareaProps>((props, ref) => {
     meta,
     inputProps,
     ...rest
-  } = useFieldApi(props)
+  } = useFieldApi(props as UseFieldApiConfig)
   const invalidMessage = validationMessage(meta, validateOnMount)
   const helpText =
     invalidMessage ||

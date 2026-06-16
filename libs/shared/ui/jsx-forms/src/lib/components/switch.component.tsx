@@ -79,7 +79,7 @@ const SwitchComponent = forwardRef<any, SwitchProps>((props, ref) => {
   } = useFieldApi({
     ...props,
     type: 'checkbox',
-  })
+  } as UseFieldApiConfig)
   const invalid = validationMessage(meta, validateOnMount)
   const helpText =
     invalid ||
