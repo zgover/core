@@ -247,6 +247,7 @@ const AGLYN_CONFIG = {
             options: {
               exportType: 'named',
               namedExport: 'ReactComponent',
+              svgo: false,
             },
           },
         ],
@@ -355,6 +356,32 @@ const AGLYN_CONFIG = {
         'process.env.BUILD_ID': JSON.stringify(buildId),
       }),
     )
+
+    // SVGR: process *.svg files imported from JS/TS with named ReactComponent export.
+    // nx.svgr:true is a no-op in @nx/next v22 withNx; the rule must be added explicitly.
+    // Exclude SVGs from any existing asset/resource rule first to avoid double-processing.
+    const existingSvgRule = config.module.rules.find(
+      (rule) => rule.test instanceof RegExp && rule.test.test('.svg'),
+    )
+    if (existingSvgRule) {
+      existingSvgRule.exclude = /\.svg$/i
+    }
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      use: [
+        {
+          loader: '@svgr/webpack',
+          options: {
+            exportType: 'named',
+            namedExport: 'ReactComponent',
+            // SVG files contain Apache license headers before <svg> tag; SVGO can't parse them.
+            svgo: false,
+          },
+        },
+      ],
+    })
+
     return config
   },
 }
