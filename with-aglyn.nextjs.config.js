@@ -247,7 +247,7 @@ const AGLYN_CONFIG = {
             options: {
               exportType: 'named',
               namedExport: 'ReactComponent',
-              svgo: false,
+              plugins: ['@svgr/plugin-jsx'],
             },
           },
         ],
@@ -359,24 +359,27 @@ const AGLYN_CONFIG = {
 
     // SVGR: process *.svg files imported from JS/TS with named ReactComponent export.
     // nx.svgr:true is a no-op in @nx/next v22 withNx; the rule must be added explicitly.
-    // Exclude SVGs from any existing asset/resource rule first to avoid double-processing.
-    const existingSvgRule = config.module.rules.find(
-      (rule) => rule.test instanceof RegExp && rule.test.test('.svg'),
-    )
-    if (existingSvgRule) {
-      existingSvgRule.exclude = /\.svg$/i
-    }
+    // Exclude SVGs from ALL existing asset/resource rules (Next.js may register more than one).
+    config.module.rules.forEach((rule) => {
+      if (rule.test instanceof RegExp && rule.test.test('.svg')) {
+        rule.exclude = /\.svg$/i
+      }
+    })
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
+      // Prevent webpack 5 asset module type from overriding loader output.
+      type: 'javascript/auto',
       use: [
         {
           loader: '@svgr/webpack',
           options: {
             exportType: 'named',
             namedExport: 'ReactComponent',
-            // SVG files contain Apache license headers before <svg> tag; SVGO can't parse them.
-            svgo: false,
+            // Explicitly list only the JSX plugin so SVGO never runs.
+            // SVGO (included by @svgr/webpack's defaultPlugins) fails on SVG files
+            // that start with a comment node instead of the <svg> element.
+            plugins: ['@svgr/plugin-jsx'],
           },
         },
       ],
