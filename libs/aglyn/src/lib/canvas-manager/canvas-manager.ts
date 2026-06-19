@@ -108,11 +108,6 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     schema: NodeSchema<P>,
     public store: CanvasManager,
   ) {
-    makeAutoObservable(this, {
-      store: false,
-      toJSON: false,
-    })
-
     this.$id = schema.$id
     this.name = schema.name
     this.type = schema.type || NodeType.NODE
@@ -124,8 +119,10 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     this.props = { ...schema.props } as P
     this.sx = Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx }
 
-    // this.store = store
-    // console.log('canvas node', this)
+    makeAutoObservable(this, {
+      store: false,
+      toJSON: false,
+    })
   }
 
   public delete() {
