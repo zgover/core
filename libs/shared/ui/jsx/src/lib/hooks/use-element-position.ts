@@ -41,8 +41,8 @@ function getOffset(el) {
       : (doc.documentElement || doc.body.parentNode || doc.body)?.['scrollTop']
 
   return {
-    top: rect.top + (isNaN(winX) ? 0 : winX),
-    left: rect.left + (isNaN(winY) ? 0 : winY),
+    top: rect.top + (isNaN(winY) ? 0 : winY),
+    left: rect.left + (isNaN(winX) ? 0 : winX),
   }
 }
 
