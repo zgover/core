@@ -333,10 +333,10 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
   }
 
   onKeyUp = (e: KeyboardEvent<any>) => {
-    const {disableKeyInteraction, onKeyDown} = this.props
+    const {disableKeyInteraction, onKeyUp} = this.props
 
-    if (typeof onKeyDown === 'function') {
-      onKeyDown(e)
+    if (typeof onKeyUp === 'function') {
+      onKeyUp(e)
     }
 
     if (disableKeyInteraction) {
