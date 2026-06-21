@@ -52,7 +52,7 @@ export function useInterval(
       interval = setInterval(handler, delay, ...args)
       return () => clearInterval(interval)
     }
-  }, [delay, count, args])
+  }, [delay, count]) // args is a rest param (new array each render) — omit from deps
 }
 
 export default useInterval
