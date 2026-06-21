@@ -32,12 +32,12 @@ export interface RateLimiterOptions<K, V> extends LRUCache.Options<K, V> {
 }
 
 export function createRateLimiter<K, V>(options?: RateLimiterOptions<K, V>): RateLimiter<K, V> {
-  const {limit: _limit, max: _max, maxAge: _maxAge, token: _token, ...opts} = options
+  const {limit: _limit, max: _max, ttl: _ttl, token: _token, ...opts} = options
   const max = _max ?? 100 /* 100 users per second */
-  const maxAge = _maxAge ?? 60000 /* 60 seconds */
+  const ttl = _ttl ?? 60000 /* 60 seconds */
   const limit = _limit ?? 10 /* 10 requests per minute */
   const token = _token ?? 'CACHE_TOKEN' /* Key inside LRUCache */
-  const tokenCache = new LRUCache<K, V>({max, maxAge, ...opts})
+  const tokenCache = new LRUCache<K, V>({max, ttl, ...opts})
   const getTokenCache = (): LRUCache<K, V> => {
     return tokenCache
   }
