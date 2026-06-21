@@ -30,10 +30,8 @@ export const useScreenRef = ({ hostId, screenId }) => {
   const ref = doc(firestore, 'hosts', hostId, 'screens', screenId)
   return ref.withConverter({
     toFirestore(data: Aglyn.AglynScreen) {
-      if (data.$id) delete data.$id
-      data.updatedAt = Timestamp.now()
-      data.nodes = data.versionRef?.get()?.nodes
-      return data
+      const { $id, ...rest } = data
+      return { ...rest, updatedAt: Timestamp.now() }
     },
     fromFirestore(
       snapshot: DocumentSnapshot<Aglyn.AglynScreen>,
