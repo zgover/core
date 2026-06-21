@@ -105,7 +105,7 @@ export function useTimeoutDelay(
   // Start the interval or timeout
   const start = useCallback(
     (opt?: Options) => {
-      if (mounted) {
+      if (!mounted) {
         console.error("Can't start timeout or interval when unmounted")
         return
       } else if (ref.current.timeoutRef) {
