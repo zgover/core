@@ -18,7 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { ComponentCategory } from '@aglyn/core-data-foundation'
 import { mdiPageLayoutHeader } from '@aglyn/shared-data-mdi'
-import Toolbar from '@mui/material/AppBar'
+import AppBar from '@mui/material/AppBar'
 import { PLUGIN_ID } from '../constants/common'
 import { FIELD_COLOR_ALT1, FIELD_POSITION } from '../constants/field-presets'
 import GeneratePresetId from '../utils/generate-preset-id'
@@ -63,4 +63,4 @@ export const presets: Aglyn.PresetSchema[] = [
   },
 ]
 
-export default Toolbar
+export default AppBar
