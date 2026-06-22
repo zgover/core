@@ -87,7 +87,7 @@ export abstract class AglynModuleModel<
   }
 
   public onDestroy(): this {
-    super.onInitialize()
+    super.onDestroy()
     return this
   }
 
