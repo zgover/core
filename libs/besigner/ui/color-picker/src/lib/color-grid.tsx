@@ -40,22 +40,14 @@ export const ColorGrid = forwardRef<any, ColorGridProps>((props, ref) => {
           key={id}
           direction="column"
           spacing={0}
-          {...rest}
-          sx={[{
-            alignItems: "center",
-            justifyContent: "flex-start"
-          }, ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx])]}>
+          sx={{ alignItems: 'center', justifyContent: 'flex-start' }}>
           {shades.map(([shade, color]) => (
             <Stack
               key={shade}
               title={`${id}/${shade}/${color}`}
               direction="column"
               spacing={0}
-              {...rest}
-              sx={[{
-                alignItems: "center",
-                justifyContent: "flex-start"
-              }, ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx])]}>
+              sx={{ alignItems: 'center', justifyContent: 'flex-start' }}>
               <ColorSwatch color={color} />
             </Stack>
           ))}
