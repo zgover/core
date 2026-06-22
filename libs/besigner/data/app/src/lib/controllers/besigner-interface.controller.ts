@@ -91,7 +91,7 @@ export class BesignerInterfaceController
     options: BesignerInterfaceControllerOptions,
   ) {
     super(app, options)
-    const state = defaultsDeep(options.defaults, {
+    const state = defaultsDeep({}, options.defaults, {
       flags: {
         debug: true,
         logLevel: 'info',
