@@ -31,7 +31,13 @@ export function useCanvasDesigner(
     })
 
     setInstance(editor)
-  }, [options])
+
+    return () => {
+      editor.board.stage.destroy()
+      setInstance(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return [ref, instance]
 }
