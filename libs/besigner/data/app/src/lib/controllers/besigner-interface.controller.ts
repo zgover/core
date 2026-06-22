@@ -224,7 +224,7 @@ export class BesignerInterfaceController
     const { dnd } = payload || {}
     const prev = this.__store__?.dnd?.getValue()
     const now = dnd(prev)
-    this.__store__?.dnd?.next(now)
+    !this.isDeepEqual(prev, now) && this.__store__?.dnd?.next(now)
     return this
   }
   public setCanvasItem(payload: BesignerSetCanvasItemPayload): this {
