@@ -104,8 +104,7 @@ export const presets: Aglyn.PresetSchema[] = [
       $id: null,
       componentId: ID,
       pluginId: PLUGIN_ID,
-      props: {},
-      sx: { flexDirection: 'row' },
+      props: { direction: 'row' },
     },
   },
   {
@@ -121,8 +120,7 @@ export const presets: Aglyn.PresetSchema[] = [
       $id: null,
       componentId: ID,
       pluginId: PLUGIN_ID,
-      props: {},
-      sx: { flexDirection: 'column' },
+      props: { direction: 'column' },
     },
   },
 ]
