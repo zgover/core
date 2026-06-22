@@ -49,11 +49,12 @@ export function getBesignerApp(name?: AppUUN): IBesignerAppController {
 }
 
 export function deleteBesignerApp(appName?: AppUUN): void {
-  const app = getBesignerApp(appName || DEFAULT_APP_UUN)
-  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETING, { appName })
-  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETING, { appName })
+  const resolvedName = appName || DEFAULT_APP_UUN
+  const app = getBesignerApp(resolvedName)
+  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETING, { appName: resolvedName })
+  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETING, { appName: resolvedName })
   app.onDestroy?.()
-  _INTERNAL_APPS_.delete(appName)
+  _INTERNAL_APPS_.delete(resolvedName)
   app.setDeleted(true)
   AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETED, { appName })
   AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETED, { appName })
