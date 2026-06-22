@@ -24,7 +24,6 @@ import {
   mdiFormatHeader4,
   mdiFormatHeader5,
   mdiFormatHeader6,
-  mdiFormatParagraph,
   mdiFormatText,
 } from '@aglyn/shared-ui-jsx'
 import Typography from '@mui/material/Typography'
@@ -53,11 +52,6 @@ const typographyVariants = [
   { value: 'body2', label: 'Body 2', icon: { path: mdiFormatText.path } },
   { value: 'overline', label: 'Overline', icon: { path: mdiFormatText.path } },
   { value: 'caption', label: 'Caption', icon: { path: mdiFormatText.path } },
-  {
-    value: 'paragraph',
-    label: 'Paragraph',
-    icon: { path: mdiFormatParagraph.path },
-  },
 ]
 
 export const schema: Aglyn.ComponentSchema = {
