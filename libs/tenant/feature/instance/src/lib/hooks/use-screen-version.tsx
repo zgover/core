@@ -36,16 +36,17 @@ export const useScreenVersionRef = ({ hostId, screenId, versionId }) => {
   )
   return ref.withConverter({
     toFirestore(data) {
-      const nodes = data?.nodes instanceof Bytes
-        ? data.nodes
-        : compress(data?.nodes || {})
-      return { ...data, nodes, updatedAt: Timestamp.now() }
+      const { $id, ...rest } = data
+      const nodes = rest?.nodes instanceof Bytes
+        ? rest.nodes
+        : compress(rest?.nodes || {})
+      return { ...rest, nodes, updatedAt: Timestamp.now() }
     },
     fromFirestore(snapshot, options) {
       if (!snapshot.exists()) return undefined
       const data = snapshot.data(options)
       if (data?.nodes instanceof Bytes) {
-        data.nodes = decompress(data.nodes)
+        return { ...data, nodes: decompress(data.nodes) } as Aglyn.AglynScreenVersion
       }
       return data as Aglyn.AglynScreenVersion
     },
