@@ -63,7 +63,7 @@ export const state = observable<PanelState>({
     }, {})
   },
   isPanelOpen: computedFn(($id: PanelId) => {
-    return Boolean(state.panels.get($id))
+    return Boolean(state.panels.get($id)?.open)
   }),
 })
 
