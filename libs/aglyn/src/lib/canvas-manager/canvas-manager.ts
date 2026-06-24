@@ -527,7 +527,7 @@ export class CanvasManager {
     this.saveHistory()
     const nodeIndex = this.getNodeIndex(node)
     const index =
-      nodeIndex === -1 ? (parent.nodes?.length ?? 1) - 1 : nodeIndex + 1
+      nodeIndex === -1 ? parent.nodes?.length ?? 0 : nodeIndex + 1
     const newNode = duplicateNodeAndChildren(node, node.parentId!)
     ;(parent.nodes ||= []).splice(index, 0, newNode.$id)
 
