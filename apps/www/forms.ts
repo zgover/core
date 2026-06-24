@@ -284,7 +284,7 @@ export const fieldHasError = (field: Fields.FieldT) =>
 export const fieldHasValid = (field: Fields.FieldT) =>
   Boolean(field.status & Fields.FieldStatus.VALID)
 export const formIsValid = (fields: Fields.FieldGroup) =>
-  Object.values(fields).some((field) => fieldHasValid(field))
+  Object.values(fields).every((field) => fieldHasValid(field))
 export const validateField = (
   field: Fields.FieldT,
   value: any,
