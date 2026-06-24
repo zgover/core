@@ -57,10 +57,7 @@ interface PanelState {
 export const state = observable<PanelState>({
   panels: new Map<PanelId, PanelSchema>(),
   get panelsById(): Record<PanelId, PanelSchema> {
-    return this.panels.reduce((byId, panel) => {
-      if (panel?.$id) byId[panel?.$id] = panel
-      return byId
-    }, {})
+    return Object.fromEntries(this.panels.entries())
   },
   isPanelOpen: computedFn(($id: PanelId) => {
     return Boolean(state.panels.get($id)?.open)
