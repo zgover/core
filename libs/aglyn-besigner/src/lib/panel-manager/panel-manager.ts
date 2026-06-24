@@ -106,7 +106,7 @@ export function addPanel(panel: PanelSchema): PanelSchema {
 }
 
 export function setPanel(panel: PanelSchema): PanelSchema {
-  if (panel?.$id) return
+  if (!panel?.$id) return
   return runInAction(() => {
     state.panels.set(panel?.$id, panel)
     return getPanel(panel?.$id)
