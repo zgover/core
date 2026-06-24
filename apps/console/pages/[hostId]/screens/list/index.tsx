@@ -199,7 +199,7 @@ function Screens(props) {
           dequeueLoading = queueLoading()
         })
         .then(() =>
-          updateDoc(doc(firestore, 'screens', id), {
+          updateDoc(doc(firestore, 'hosts', hostId, 'screens', id), {
             deletedAt: Timestamp.now(),
           }),
         )
