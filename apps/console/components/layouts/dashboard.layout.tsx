@@ -126,7 +126,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
           header={header}
         />
 
-        <Box component="main" sx={{ flexGrow: 1 }}>
+        <Box component="section" sx={{ flexGrow: 1 }}>
           {children}
         </Box>
 
