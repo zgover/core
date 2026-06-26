@@ -130,7 +130,7 @@ export const middleware: NextMiddleware = (req, event) => {
         "reqHost === 'localhost:4500'=",
         reqHost === 'localhost:4500',
         'request.match=',
-        AGLYN_TENANT_DEMO || 'tenant',
+        AGLYN_TENANT_DEMO || 'demo',
       )
       tenantHost = AGLYN_TENANT_DEMO || 'demo'
       break
@@ -171,7 +171,7 @@ export const middleware: NextMiddleware = (req, event) => {
       '"" OR=',
       req.cookies.get('__Secure-next-auth.session-token'),
     )
-    return NextResponse.redirect('/')
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
   // rewrite to the current hostname under the pages/_sites folder
