@@ -126,7 +126,6 @@ function GetInnerLayout({ children }) {
   console.log('[Firebase] app.options.apiKey present:', !!app?.options?.apiKey, '| projectId:', app?.options?.projectId)
   const auth = getAuth(app)
   const database = getDatabase(app)
-  let status
 
   if (!connectedFirestore) {
     try {
@@ -186,10 +185,6 @@ function GetInnerLayout({ children }) {
     analytics = getAnalytics(app)
   } catch (error) {
     console.error(error)
-  }
-
-  if (status === 'loading') {
-    return <SplashScreen />
   }
 
   return (
