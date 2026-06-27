@@ -297,8 +297,8 @@ export class PluginManager {
   }
 
   private handleAddingDependencyAndDependents(dependency: Plugin) {
-    const dependencyId: PluginId = dependency.$id
     if (!dependency) throw new Error('Invalid dependency')
+    const dependencyId: PluginId = dependency.$id
     if (!dependencyId) throw new Error('Invalid dependencyId')
     /**
      * Set properties on local dependencies object
