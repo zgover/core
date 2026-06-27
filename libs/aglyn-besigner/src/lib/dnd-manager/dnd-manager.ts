@@ -194,16 +194,12 @@ export class DndManager {
     }
 
     if (dragNode.type === Aglyn.NodeType.PRESET) {
-      // console.log('drag node', dragNode)
-      const newNode = Aglyn.canvas.addNodeFromPreset(dragNode as Aglyn.PresetSchema<any>, parent, position)
-      console.log('new node', newNode)
+      Aglyn.canvas.addNodeFromPreset(dragNode as Aglyn.PresetSchema<any>, parent, position)
       // Besigner.focus.setSelectedNode(newNode)
     } else {
       Aglyn.canvas.reparentNode(dragNode, parent, position)
     }
 
-    console.log('handleDragEnd dragNode', dragNode)
-    console.log('handleDragEnd dropNode', dropNode)
     this.clearDndStatus()
   }
 }
