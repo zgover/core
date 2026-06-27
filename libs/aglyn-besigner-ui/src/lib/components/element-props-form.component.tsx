@@ -132,13 +132,10 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback(
       (values) => {
-        console.log('Update node props', { ...node?.props }, values)
         Aglyn.canvas.updateNodeProps(node, values)
       },
       [node],
     )
-
-    console.log('attributes', attributes)
 
     return (
       <>

@@ -410,9 +410,6 @@ export const NodeTreeView = observer(
       Besigner.focus.toggleNodeExpansion(node)
     }, [])
 
-    console.log('allExpanded', allExpanded)
-    console.log('expanded', expanded)
-
     const handleTreeItemSelect = useCallback((e, $id: Aglyn.NodeId) => {
       e.stopPropagation()
       e.preventDefault()

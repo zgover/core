@@ -128,7 +128,6 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
       },
       onDragStart({ active }: DragStartEvent) {
         const node = active?.data.current.node
-        console.log('handleDragStart', node)
         Besigner.dnd.setDragNode(node)
       },
       onDragEnd(e: DragEndEvent) {

@@ -60,15 +60,6 @@ export function useAddElementDrawerCallback(): Response {
           //   Aglyn.canvas.denormalizeNodes([templateData as any],
           // parent?.$id), )  const node =
           // Aglyn.canvas.getNode(templateData.$id)
-          console.log(
-            'Add New Node: \n',
-            node,
-            '\n\nParentNode: ',
-            parentNode,
-            '\n\nPreset: ',
-            preset,
-          )
-
           Besigner.focus.setSelectedNode(node)
 
           return node

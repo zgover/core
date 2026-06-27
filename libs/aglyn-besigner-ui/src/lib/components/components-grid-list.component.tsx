@@ -68,7 +68,6 @@ export const ComponentsGridListComponent = forwardRef<
   )
   const handleOnActionClick = useCallback(
     (e, item) => {
-      console.log('item', item)
       onActionClick?.call(null, e, { type: 'selection', data: item?.data })
     },
     [onActionClick],

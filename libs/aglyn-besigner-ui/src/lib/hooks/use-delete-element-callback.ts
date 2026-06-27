@@ -28,7 +28,6 @@ export function useDeleteElementCallback(): (
   return useCallback(
     (node: Aglyn.NodeSchema) => {
       function handleDelete() {
-        console.log('delete node', node)
         Besigner.focus.clearFocusStatus()
         Aglyn.canvas.deleteNode(node)
       }
@@ -43,7 +42,7 @@ export function useDeleteElementCallback(): (
         },
       })
         .then(handleDelete)
-        .catch(console.log)
+        .catch(() => {})
     },
     [confirm],
   )
