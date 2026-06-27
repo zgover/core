@@ -228,10 +228,6 @@ class HistoryManager<K extends string, T> {
 
   public saveHistory(): this {
     this.clearFuture()
-    console.log(
-      'save history',
-      toJS(Object.fromEntries(this.present.entries())),
-    )
     this.past.push(toJS(this.present))
     return this
   }
@@ -282,7 +278,6 @@ export class CanvasManager {
   }
   public get nestedNodes(): NodeSchemaNested<any> {
     const root = this.rootNode
-    console.log('root', this.rootNode, this.nodes)
     if (!root) throw new Error('Missing root node')
     return this.makeNested(root)
   }
@@ -370,19 +365,13 @@ export class CanvasManager {
   public redo(): this {
     const state = this._history.redo()
     const json = Object.fromEntries(state!.entries())
-    console.log('redo', json)
-    console.log('redo present state', this.nodes.get(NODE_ROOT_ID)!.nodes)
     this.setNodes(json)
-    console.log('redo new state', this.nodes.get(NODE_ROOT_ID)!.nodes)
     return this
   }
   public undo(): this {
     const state = this._history.undo()
     const json = Object.fromEntries(state!.entries())
-    console.log('undo', json)
-    console.log('undo present state', this.nodes.get(NODE_ROOT_ID)!.nodes)
     this.setNodes(json)
-    console.log('undo new state', this.nodes.get(NODE_ROOT_ID)!.nodes)
     return this
   }
   public saveHistory(): this {
@@ -427,7 +416,6 @@ export class CanvasManager {
     const nodes: Record<NodeId, NodeSchema<any>> = {}
     for (const nodeId in cloned) {
       const node = cloned[nodeId]
-      if (node.$id === NODE_ROOT_ID) console.log('root node!!!!!!', node)
       if (node) nodes[nodeId] = this.createNode(node)
     }
     if (merge) {
