@@ -59,5 +59,5 @@ export function numeronym(str: string, opt?: NumeronymOpts) {
     },
   }
 
-  return builder[NumeronymKind[kind] ?? NumeronymKind.n19s]()
+  return builder[kind ?? NumeronymKind.n19s]()
 }
