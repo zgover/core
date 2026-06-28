@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import type { IndexOf } from './operator/inference'
+
 export type ChainableFunction<T, A extends any[], R> = {
   (this: T, ...args: A): R
 }
