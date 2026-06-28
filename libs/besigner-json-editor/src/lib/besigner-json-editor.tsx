@@ -41,8 +41,9 @@ import {
 } from 'react'
 import { Else, If, Then, When } from 'react-if'
 import type { CodeMirrorProps } from './components/code-mirror-editor'
+import type { MonacoEditorProps } from './components/monaco-editor'
 
-const Editor = dynamic(() => import('./components/monaco-editor'), {
+const Editor = dynamic<MonacoEditorProps>(() => import('./components/monaco-editor'), {
   ssr: false,
 })
 
