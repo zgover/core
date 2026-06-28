@@ -20,8 +20,8 @@ import {
   ICON_VARIANT_HOST_GROUP,
 } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
-import AppLink from '@aglyn/shared-ui-jsx/components/app-link'
-import MdiIcon from '@aglyn/shared-ui-jsx/components/mdi-icon'
+import { AppLink } from '@aglyn/shared-ui-jsx'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { Typography } from '@mui/material'
 import { collection, query, where } from 'firebase/firestore'

@@ -27,7 +27,7 @@ import {
 } from '@aglyn/shared-ui-jsx-forms'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import useHost from '@aglyn/tenant-feature-instance/hooks/use-host'
+import { useHost } from '@aglyn/tenant-feature-instance'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { InputAdornment, Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
