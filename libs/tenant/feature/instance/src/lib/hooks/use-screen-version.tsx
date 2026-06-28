@@ -23,7 +23,7 @@ import { Bytes, doc } from 'firebase/firestore'
 import { ReactFireOptions, useFirestore } from 'reactfire'
 import useDoc from './helpers/use-doc'
 
-export const useScreenVersionRef = ({ hostId, screenId, versionId }) => {
+export const useScreenVersionRef = ({ hostId, screenId, versionId }: { hostId: string; screenId: string; versionId: string }) => {
   const firestore = useFirestore()
   const ref = doc(
     firestore,
