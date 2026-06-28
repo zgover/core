@@ -111,9 +111,11 @@ const NodeOverlay = observer(
       const update = () => setRect(serializeRect(el.getBoundingClientRect()))
       update()
 
-      // Re-sync when the canvas container resizes (panel open/close) or the
-      // window resizes — both shift the element's viewport-relative position.
+      // Re-sync when the element or its shadow-DOM host resizes (covers prop
+      // changes that affect layout, e.g. flexDirection column→row) and when
+      // the canvas container resizes or the window resizes.
       const ro = new ResizeObserver(update)
+      ro.observe(el)
       const shadowHost = (el.getRootNode() as ShadowRoot | null)?.host ?? null
       if (shadowHost) ro.observe(shadowHost)
       window.addEventListener('resize', update, { passive: true })
