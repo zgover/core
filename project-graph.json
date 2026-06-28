@@ -1,0 +1,6268 @@
+{
+  "graph": {
+    "nodes": {
+      "besigner-feature-canvas-designer": {
+        "name": "besigner-feature-canvas-designer",
+        "type": "lib",
+        "data": {
+          "root": "libs/besigner/feature/canvas-designer",
+          "name": "besigner-feature-canvas-designer",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:feature",
+            "aglyn:canvas-designer"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner-feature-canvas-designer",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/besigner/feature/canvas-designer",
+                "tsConfig": "libs/besigner/feature/canvas-designer/tsconfig.lib.json",
+                "project": "libs/besigner/feature/canvas-designer/package.json",
+                "entryFile": "libs/besigner/feature/canvas-designer/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/besigner/feature/canvas-designer/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/besigner/feature/canvas-designer/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-svg-icons-svg-icons": {
+        "name": "shared-svg-icons-svg-icons",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/svg-icons/svg-icons",
+          "name": "shared-svg-icons-svg-icons",
+          "projectType": "library",
+          "tags": [
+            "npm:public"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-svg-icons",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                ".": {
+                  "import": "./index.mjs",
+                  "require": "./index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "build": {
+              "executor": "@nx/vite:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "outputPath": "dist/libs/shared/svg-icons/svg-icons"
+              },
+              "configurations": {
+                "development": {
+                  "mode": "development"
+                },
+                "production": {
+                  "mode": "production"
+                }
+              },
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/svg-icons/svg-icons/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/svg-icons/svg-icons/src",
+          "implicitDependencies": []
+        }
+      },
+      "besigner-ui-color-picker": {
+        "name": "besigner-ui-color-picker",
+        "type": "lib",
+        "data": {
+          "root": "libs/besigner/ui/color-picker",
+          "name": "besigner-ui-color-picker",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:besigner",
+            "scope:ui"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner-ui-color-picker",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/besigner/ui/color-picker",
+                "tsConfig": "libs/besigner/ui/color-picker/tsconfig.lib.json",
+                "project": "libs/besigner/ui/color-picker/package.json",
+                "entryFile": "libs/besigner/ui/color-picker/src/index.ts",
+                "external": [
+                  "@emotion/react/jsx-runtime",
+                  "@aglyn/shared-util-tools"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/besigner/ui/color-picker/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/besigner/ui/color-picker"
+              ],
+              "options": {
+                "jestConfig": "libs/besigner/ui/color-picker/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/besigner/ui/color-picker/src",
+          "implicitDependencies": []
+        }
+      },
+      "besigner-ui-form-fields": {
+        "name": "besigner-ui-form-fields",
+        "type": "lib",
+        "data": {
+          "root": "libs/besigner/ui/form-fields",
+          "name": "besigner-ui-form-fields",
+          "projectType": "library",
+          "tags": [
+            "npm:public"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner-ui-form-fields",
+              "packageVersion": "0.0.1",
+              "packageExports": {
+                ".": {
+                  "import": "./index.mjs",
+                  "require": "./index.js"
+                }
+              },
+              "packageMain": "./index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "build": {
+              "executor": "@nx/vite:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "outputPath": "dist/libs/besigner/ui/form-fields"
+              },
+              "configurations": {
+                "development": {
+                  "mode": "development"
+                },
+                "production": {
+                  "mode": "production"
+                }
+              },
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/besigner/ui/form-fields/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/besigner/ui/form-fields/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-feature-fbserver": {
+        "name": "shared-feature-fbserver",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/feature/fbserver",
+          "name": "shared-feature-fbserver",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:feature"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-feature-fbserver",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/feature/fbserver",
+                "main": "libs/shared/feature/fbserver/src/index.ts",
+                "tsConfig": "libs/shared/feature/fbserver/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/feature/fbserver/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/feature/fbserver/src",
+          "implicitDependencies": []
+        }
+      },
+      "tenant-feature-instance": {
+        "name": "tenant-feature-instance",
+        "type": "lib",
+        "data": {
+          "root": "libs/tenant/feature/instance",
+          "name": "tenant-feature-instance",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:feature",
+            "scope:tenant"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/tenant-feature-instance",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/tenant/feature/instance",
+                "main": "libs/tenant/feature/instance/src/index.ts",
+                "tsConfig": "libs/tenant/feature/instance/tsconfig.lib.json",
+                "assets": [
+                  "libs/tenant/feature/instance/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/tenant/feature/instance/src",
+          "implicitDependencies": []
+        }
+      },
+      "besigner-ui-box-styler": {
+        "name": "besigner-ui-box-styler",
+        "type": "lib",
+        "data": {
+          "root": "libs/besigner/ui/box-styler",
+          "name": "besigner-ui-box-styler",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:ui",
+            "aglyn:besigner"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner-ui-box-styler",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/besigner/ui/box-styler",
+                "tsConfig": "libs/besigner/ui/box-styler/tsconfig.lib.json",
+                "project": "libs/besigner/ui/box-styler/package.json",
+                "entryFile": "libs/besigner/ui/box-styler/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "skipTypeCheck": true,
+                "assets": [
+                  {
+                    "glob": "libs/besigner/ui/box-styler/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/besigner/ui/box-styler"
+              ],
+              "options": {
+                "jestConfig": "libs/besigner/ui/box-styler/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/besigner/ui/box-styler/src",
+          "implicitDependencies": []
+        }
+      },
+      "core-feature-singleton": {
+        "name": "core-feature-singleton",
+        "type": "lib",
+        "data": {
+          "root": "libs/core/feature/singleton",
+          "name": "core-feature-singleton",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:feature",
+            "aglyn:framework"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/core-feature-singleton",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/core/feature/singleton",
+                "tsConfig": "libs/core/feature/singleton/tsconfig.lib.json",
+                "project": "libs/core/feature/singleton/package.json",
+                "entryFile": "libs/core/feature/singleton/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/core/feature/singleton/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/core/feature/singleton/src",
+          "implicitDependencies": []
+        }
+      },
+      "core-feature-renderer": {
+        "name": "core-feature-renderer",
+        "type": "lib",
+        "data": {
+          "root": "libs/core/feature/renderer",
+          "name": "core-feature-renderer",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:feature",
+            "aglyn:renderer"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/core-feature-renderer",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/core/feature/renderer",
+                "tsConfig": "libs/core/feature/renderer/tsconfig.lib.json",
+                "project": "libs/core/feature/renderer/package.json",
+                "entryFile": "libs/core/feature/renderer/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/core/feature/renderer/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/core/feature/renderer"
+              ],
+              "options": {
+                "jestConfig": "libs/core/feature/renderer/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/core/feature/renderer/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-timestamp": {
+        "name": "shared-util-timestamp",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/timestamp",
+          "name": "shared-util-timestamp",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-timestamp",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/timestamp",
+                "main": "libs/shared/util/timestamp/src/index.ts",
+                "tsConfig": "libs/shared/util/timestamp/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/timestamp/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/util/timestamp"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/util/timestamp/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/timestamp/src",
+          "implicitDependencies": []
+        }
+      },
+      "besigner-json-editor": {
+        "name": "besigner-json-editor",
+        "type": "lib",
+        "data": {
+          "root": "libs/besigner-json-editor",
+          "name": "besigner-json-editor",
+          "projectType": "library",
+          "tags": [
+            "npm:public"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner-json-editor",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/besigner-json-editor",
+                "tsConfig": "libs/besigner-json-editor/tsconfig.lib.json",
+                "project": "libs/besigner-json-editor/package.json",
+                "entryFile": "libs/besigner-json-editor/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "skipTypeCheck": true,
+                "assets": [
+                  {
+                    "glob": "libs/besigner-json-editor/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/besigner-json-editor/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/besigner-json-editor/src",
+          "implicitDependencies": []
+        }
+      },
+      "core-data-foundation": {
+        "name": "core-data-foundation",
+        "type": "lib",
+        "data": {
+          "root": "libs/core/data/foundation",
+          "name": "core-data-foundation",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:data",
+            "aglyn:framework"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/core-data-foundation",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/core/data/foundation",
+                "main": "libs/core/data/foundation/src/index.ts",
+                "tsConfig": "libs/core/data/foundation/tsconfig.lib.json",
+                "assets": [
+                  "libs/core/data/foundation/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/core/data/foundation/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-ui-snackstack": {
+        "name": "shared-ui-snackstack",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/ui/snackstack",
+          "name": "shared-ui-snackstack",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:ui"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-ui-snackstack",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/ui/snackstack",
+                "tsConfig": "libs/shared/ui/snackstack/tsconfig.lib.json",
+                "project": "libs/shared/ui/snackstack/package.json",
+                "entryFile": "libs/shared/ui/snackstack/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/shared/ui/snackstack/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/ui/snackstack/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-fbclient": {
+        "name": "shared-util-fbclient",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/fbclient",
+          "name": "shared-util-fbclient",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-fbclient",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/fbclient",
+                "main": "libs/shared/util/fbclient/src/index.ts",
+                "tsConfig": "libs/shared/util/fbclient/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/fbclient/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/fbclient/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-fbserver": {
+        "name": "shared-util-fbserver",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/fbserver",
+          "name": "shared-util-fbserver",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-fbserver",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/fbserver",
+                "main": "libs/shared/util/fbserver/src/index.ts",
+                "tsConfig": "libs/shared/util/fbserver/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/fbserver/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/fbserver/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-rest-api": {
+        "name": "shared-util-rest-api",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/rest-api",
+          "name": "shared-util-rest-api",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-rest-api",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/rest-api",
+                "main": "libs/shared/util/rest-api/src/index.ts",
+                "tsConfig": "libs/shared/util/rest-api/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/rest-api/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/rest-api/src",
+          "implicitDependencies": []
+        }
+      },
+      "aglyn-node-renderer": {
+        "name": "aglyn-node-renderer",
+        "type": "lib",
+        "data": {
+          "root": "libs/aglyn-node-renderer",
+          "name": "aglyn-node-renderer",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:feature",
+            "scope:aglyn"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/aglyn-node-renderer",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/aglyn-node-renderer",
+                "tsConfig": "libs/aglyn-node-renderer/tsconfig.lib.json",
+                "project": "libs/aglyn-node-renderer/package.json",
+                "entryFile": "libs/aglyn-node-renderer/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/aglyn-node-renderer/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/aglyn-node-renderer/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-ui-jsx-forms": {
+        "name": "shared-ui-jsx-forms",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/ui/jsx-forms",
+          "name": "shared-ui-jsx-forms",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:ui"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-ui-jsx-forms",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/ui/jsx-forms",
+                "tsConfig": "libs/shared/ui/jsx-forms/tsconfig.lib.json",
+                "project": "libs/shared/ui/jsx-forms/package.json",
+                "entryFile": "libs/shared/ui/jsx-forms/src/index.ts",
+                "external": [
+                  "react/jsx-runtime",
+                  "@aglyn/besigner-ui-color-picker/color-picker",
+                  "@aglyn/shared-data-mdi",
+                  "@aglyn/shared-ui-jsx",
+                  "@aglyn/shared-ui-theme",
+                  "@aglyn/shared-util-tools",
+                  "@aglyn/shared-util-vendor"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "skipTypeCheck": true,
+                "assets": [
+                  {
+                    "glob": "libs/shared/ui/jsx-forms/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/ui/jsx-forms"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/ui/jsx-forms/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/ui/jsx-forms/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-emitter": {
+        "name": "shared-util-emitter",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/emitter",
+          "name": "shared-util-emitter",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-emitter",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/emitter",
+                "main": "libs/shared/util/emitter/src/index.ts",
+                "tsConfig": "libs/shared/util/emitter/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/emitter/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/util/emitter"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/util/emitter/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/emitter/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-errors": {
+        "name": "shared-util-errors",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/errors",
+          "name": "shared-util-errors",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-errors",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/errors",
+                "main": "libs/shared/util/errors/src/index.ts",
+                "tsConfig": "libs/shared/util/errors/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/errors/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/util/errors"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/util/errors/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/errors/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-logger": {
+        "name": "shared-util-logger",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/logger",
+          "name": "shared-util-logger",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-logger",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/logger",
+                "main": "libs/shared/util/logger/src/index.ts",
+                "tsConfig": "libs/shared/util/logger/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/logger/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/util/logger"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/util/logger/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/logger/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-vendor": {
+        "name": "shared-util-vendor",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/vendor",
+          "name": "shared-util-vendor",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-vendor",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/vendor",
+                "main": "libs/shared/util/vendor/src/index.ts",
+                "tsConfig": "libs/shared/util/vendor/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/vendor/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/util/vendor"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/util/vendor/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/vendor/src",
+          "implicitDependencies": []
+        }
+      },
+      "aglyn-besigner-ui": {
+        "name": "aglyn-besigner-ui",
+        "type": "lib",
+        "data": {
+          "root": "libs/aglyn-besigner-ui",
+          "name": "aglyn-besigner-ui",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:feature",
+            "aglyn:besigner"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner-ui",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/aglyn-besigner-ui",
+                "tsConfig": "libs/aglyn-besigner-ui/tsconfig.lib.json",
+                "project": "libs/aglyn-besigner-ui/package.json",
+                "entryFile": "libs/aglyn-besigner-ui/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "skipTypeCheck": true,
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/aglyn-besigner-ui/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/aglyn-besigner-ui"
+              ],
+              "options": {
+                "jestConfig": "libs/aglyn-besigner-ui/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/aglyn-besigner-ui/src",
+          "implicitDependencies": []
+        }
+      },
+      "besigner-data-app": {
+        "name": "besigner-data-app",
+        "type": "lib",
+        "data": {
+          "root": "libs/besigner/data/app",
+          "name": "besigner-data-app",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:data",
+            "aglyn:besigner"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner-data-app",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/besigner/data/app",
+                "main": "libs/besigner/data/app/src/index.ts",
+                "tsConfig": "libs/besigner/data/app/tsconfig.lib.json",
+                "assets": [
+                  "libs/besigner/data/app/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/besigner/data/app"
+              ],
+              "options": {
+                "jestConfig": "libs/besigner/data/app/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/besigner/data/app/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-data-enums": {
+        "name": "shared-data-enums",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/data/enums",
+          "name": "shared-data-enums",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:data"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-data-enums",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/data/enums",
+                "main": "libs/shared/data/enums/src/index.ts",
+                "tsConfig": "libs/shared/data/enums/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/data/enums/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/data/enums/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-data-forms": {
+        "name": "shared-data-forms",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/data/forms",
+          "name": "shared-data-forms",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:data"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-data-forms",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/data/forms",
+                "main": "libs/shared/data/forms/src/index.ts",
+                "tsConfig": "libs/shared/data/forms/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/data/forms/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/data/forms/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-data-regex": {
+        "name": "shared-data-regex",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/data/regex",
+          "name": "shared-data-regex",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-data-regex",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/data/regex",
+                "main": "libs/shared/data/regex/src/index.ts",
+                "tsConfig": "libs/shared/data/regex/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/data/regex/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/data/regex/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-data-types": {
+        "name": "shared-data-types",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/data/types",
+          "name": "shared-data-types",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:data"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-data-types",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/data/types",
+                "main": "libs/shared/data/types/src/index.ts",
+                "tsConfig": "libs/shared/data/types/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/data/types/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/data/types"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/data/types/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/data/types/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-tools": {
+        "name": "shared-util-tools",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/tools",
+          "name": "shared-util-tools",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-tools",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/tools",
+                "main": "libs/shared/util/tools/src/index.ts",
+                "tsConfig": "libs/shared/util/tools/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/tools/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/util/tools"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/util/tools/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/tools/src",
+          "implicitDependencies": []
+        }
+      },
+      "aglyn-plugin-mui": {
+        "name": "aglyn-plugin-mui",
+        "type": "lib",
+        "data": {
+          "root": "libs/aglyn-plugin-mui",
+          "name": "aglyn-plugin-mui",
+          "projectType": "library",
+          "tags": [
+            "npm:public"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/aglyn-plugin-mui",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/aglyn-plugin-mui",
+                "tsConfig": "libs/aglyn-plugin-mui/tsconfig.lib.json",
+                "project": "libs/aglyn-plugin-mui/package.json",
+                "entryFile": "libs/aglyn-plugin-mui/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/aglyn-plugin-mui/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/aglyn-plugin-mui"
+              ],
+              "options": {
+                "jestConfig": "libs/aglyn-plugin-mui/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/aglyn-plugin-mui/src",
+          "implicitDependencies": []
+        }
+      },
+      "core-ui-renderer": {
+        "name": "core-ui-renderer",
+        "type": "lib",
+        "data": {
+          "root": "libs/core/ui/renderer",
+          "name": "core-ui-renderer",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:ui",
+            "aglyn:renderer"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/core-ui-renderer",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/core/ui/renderer",
+                "tsConfig": "libs/core/ui/renderer/tsconfig.lib.json",
+                "project": "libs/core/ui/renderer/package.json",
+                "entryFile": "libs/core/ui/renderer/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/core/ui/renderer/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/core/ui/renderer/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-http": {
+        "name": "shared-util-http",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/http",
+          "name": "shared-util-http",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-http",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/http",
+                "main": "libs/shared/util/http/src/index.ts",
+                "tsConfig": "libs/shared/util/http/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/http/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/http/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-next": {
+        "name": "shared-util-next",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/next",
+          "name": "shared-util-next",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-next",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/next",
+                "main": "libs/shared/util/next/src/index.ts",
+                "tsConfig": "libs/shared/util/next/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/next/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/next/src",
+          "implicitDependencies": []
+        }
+      },
+      "core-data-admin": {
+        "name": "core-data-admin",
+        "type": "lib",
+        "data": {
+          "root": "libs/core/data/admin",
+          "name": "core-data-admin",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:data",
+            "aglyn:tenancy"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/core-data-admin",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/core/data/admin",
+                "main": "libs/core/data/admin/src/index.ts",
+                "tsConfig": "libs/core/data/admin/tsconfig.lib.json",
+                "assets": [
+                  "libs/core/data/admin/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/core/data/admin"
+              ],
+              "options": {
+                "jestConfig": "libs/core/data/admin/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/core/data/admin/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-data-mdi": {
+        "name": "shared-data-mdi",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/data/mdi",
+          "name": "shared-data-mdi",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:data"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-data-mdi",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/data/mdi",
+                "main": "libs/shared/data/mdi/src/index.ts",
+                "tsConfig": "libs/shared/data/mdi/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/data/mdi/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/data/mdi"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/data/mdi/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/data/mdi/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-ui-theme": {
+        "name": "shared-ui-theme",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/ui/theme",
+          "name": "shared-ui-theme",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:ui"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-ui-theme",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/ui/theme",
+                "tsConfig": "libs/shared/ui/theme/tsconfig.lib.json",
+                "project": "libs/shared/ui/theme/package.json",
+                "entryFile": "libs/shared/ui/theme/src/index.ts",
+                "external": [
+                  "react/jsx-runtime",
+                  "@aglyn/shared-util-tools",
+                  "@aglyn/shared-util-vendor"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/shared/ui/theme/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/ui/theme"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/ui/theme/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/ui/theme/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-util-dom": {
+        "name": "shared-util-dom",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/util/dom",
+          "name": "shared-util-dom",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:util"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-util-dom",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/util/dom",
+                "main": "libs/shared/util/dom/src/index.ts",
+                "tsConfig": "libs/shared/util/dom/tsconfig.lib.json",
+                "assets": [
+                  "libs/shared/util/dom/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/util/dom"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/util/dom/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/util/dom/src",
+          "implicitDependencies": []
+        }
+      },
+      "aglyn-besigner": {
+        "name": "aglyn-besigner",
+        "type": "lib",
+        "data": {
+          "root": "libs/aglyn-besigner",
+          "name": "aglyn-besigner",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:feature",
+            "aglyn:besigner"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/besigner",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/aglyn-besigner",
+                "main": "libs/aglyn-besigner/src/index.ts",
+                "tsConfig": "libs/aglyn-besigner/tsconfig.lib.json",
+                "assets": [
+                  "libs/aglyn-besigner/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/aglyn-besigner"
+              ],
+              "options": {
+                "jestConfig": "libs/aglyn-besigner/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/aglyn-besigner/src",
+          "implicitDependencies": []
+        }
+      },
+      "plugins-ui-mui": {
+        "name": "plugins-ui-mui",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/ui/mui",
+          "name": "plugins-ui-mui",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-ui-mui",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/ui/mui",
+                "main": "libs/plugins/ui/mui/src/index.ts",
+                "tsConfig": "libs/plugins/ui/mui/tsconfig.lib.json",
+                "assets": [
+                  "libs/plugins/ui/mui/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/ui/mui"
+              ],
+              "options": {
+                "jestConfig": "libs/plugins/ui/mui/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/ui/mui/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-ui-next": {
+        "name": "shared-ui-next",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/ui/next",
+          "name": "shared-ui-next",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:ui"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-ui-next",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/ui/next",
+                "tsConfig": "libs/shared/ui/next/tsconfig.lib.json",
+                "project": "libs/shared/ui/next/package.json",
+                "entryFile": "libs/shared/ui/next/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "skipTypeCheck": true,
+                "assets": [
+                  {
+                    "glob": "libs/shared/ui/next/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/ui/next"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/ui/next/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/ui/next/src",
+          "implicitDependencies": []
+        }
+      },
+      "core-data-app": {
+        "name": "core-data-app",
+        "type": "lib",
+        "data": {
+          "root": "libs/core/data/app",
+          "name": "core-data-app",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:data",
+            "aglyn:framework"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/core-data-app",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/core/data/app",
+                "main": "libs/core/data/app/src/index.ts",
+                "tsConfig": "libs/core/data/app/tsconfig.lib.json",
+                "assets": [
+                  "libs/core/data/app/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/core/data/app"
+              ],
+              "options": {
+                "jestConfig": "libs/core/data/app/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            },
+            "version": {
+              "executor": "@jscutlery/semver:version",
+              "options": {
+                "syncVersions": false
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/core/data/app/src",
+          "implicitDependencies": []
+        }
+      },
+      "core-util-app": {
+        "name": "core-util-app",
+        "type": "lib",
+        "data": {
+          "root": "libs/core/util/app",
+          "name": "core-util-app",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:data",
+            "aglyn:framework"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/core-util-app",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/core/util/app",
+                "main": "libs/core/util/app/src/index.ts",
+                "tsConfig": "libs/core/util/app/tsconfig.lib.json",
+                "assets": [
+                  "libs/core/util/app/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/core/util/app"
+              ],
+              "options": {
+                "jestConfig": "libs/core/util/app/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/core/util/app/src",
+          "implicitDependencies": []
+        }
+      },
+      "shared-ui-jsx": {
+        "name": "shared-ui-jsx",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared/ui/jsx",
+          "name": "shared-ui-jsx",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:shared",
+            "scope:ui"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/shared-ui-jsx",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared/ui/jsx",
+                "tsConfig": "libs/shared/ui/jsx/tsconfig.lib.json",
+                "project": "libs/shared/ui/jsx/package.json",
+                "entryFile": "libs/shared/ui/jsx/src/index.ts",
+                "external": [
+                  "react/jsx-runtime",
+                  "react-virtuoso",
+                  "@aglyn/shared-data-mdi",
+                  "@aglyn/shared-data-mdi/constants/default-icon",
+                  "@aglyn/shared-ui-theme",
+                  "@aglyn/shared-util-tools",
+                  "@aglyn/shared-util-vendor"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/shared/ui/jsx/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/shared/ui/jsx"
+              ],
+              "options": {
+                "jestConfig": "libs/shared/ui/jsx/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared/ui/jsx/src",
+          "implicitDependencies": []
+        }
+      },
+      "console-e2e": {
+        "name": "console-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/console-e2e",
+          "name": "console-e2e",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/console-e2e/src",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:private",
+            "scope:e2e"
+          ],
+          "implicitDependencies": [
+            "console"
+          ],
+          "targets": {
+            "e2e": {
+              "executor": "@nx/cypress:cypress",
+              "options": {
+                "cypressConfig": "apps/console-e2e/cypress.json",
+                "devServerTarget": "console:serve"
+              },
+              "configurations": {
+                "production": {
+                  "devServerTarget": "console:serve:production"
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          }
+        }
+      },
+      "tenant-e2e": {
+        "name": "tenant-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/tenant-e2e",
+          "name": "tenant-e2e",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/tenant-e2e/src",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:public",
+            "scope:e2e"
+          ],
+          "implicitDependencies": [
+            "tenant"
+          ],
+          "targets": {
+            "e2e": {
+              "executor": "@nx/cypress:cypress",
+              "options": {
+                "cypressConfig": "apps/tenant-e2e/cypress.json",
+                "devServerTarget": "tenant:serve"
+              },
+              "configurations": {
+                "production": {
+                  "devServerTarget": "tenant:serve:production"
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          }
+        }
+      },
+      "admin-e2e": {
+        "name": "admin-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/admin-e2e",
+          "name": "admin-e2e",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/admin-e2e/src",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:private",
+            "scope:e2e"
+          ],
+          "implicitDependencies": [
+            "admin"
+          ],
+          "targets": {
+            "e2e": {
+              "executor": "@nx/cypress:cypress",
+              "options": {
+                "cypressConfig": "apps/admin-e2e/cypress.json",
+                "devServerTarget": "admin:serve"
+              },
+              "configurations": {
+                "production": {
+                  "devServerTarget": "admin:serve:production"
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          }
+        }
+      },
+      "api-e2e": {
+        "name": "api-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/api-e2e",
+          "name": "api-e2e",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/api-e2e/src",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:private",
+            "scope:e2e"
+          ],
+          "implicitDependencies": [
+            "api"
+          ],
+          "targets": {
+            "e2e": {
+              "executor": "@nx/cypress:cypress",
+              "options": {
+                "cypressConfig": "apps/api-e2e/cypress.json",
+                "devServerTarget": "api:serve"
+              },
+              "configurations": {
+                "production": {
+                  "devServerTarget": "api:serve:production"
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          }
+        }
+      },
+      "console": {
+        "name": "console",
+        "type": "app",
+        "data": {
+          "root": "apps/console",
+          "name": "console",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/console",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:private"
+          ],
+          "targets": {
+            "build": {
+              "executor": "@nx/next:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/apps/console"
+              },
+              "configurations": {
+                "production": {
+                  "webpack": true
+                },
+                "development": {
+                  "outputPath": "apps/console"
+                }
+              },
+              "defaultConfiguration": "production",
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/next:server",
+              "options": {
+                "buildTarget": "console:build",
+                "dev": true,
+                "port": 4200
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "console:build:production",
+                  "dev": false
+                },
+                "development": {
+                  "buildTarget": "console:build:development",
+                  "dev": true
+                }
+              },
+              "defaultConfiguration": "development",
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/next:export",
+              "options": {
+                "buildTarget": "console:build:production"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/apps/console"
+              ],
+              "options": {
+                "jestConfig": "apps/console/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "version": {
+              "executor": "@jscutlery/semver:version",
+              "options": {
+                "syncVersions": false
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "www-e2e": {
+        "name": "www-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/www-e2e",
+          "name": "www-e2e",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/www-e2e/src",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:public",
+            "scope:e2e"
+          ],
+          "implicitDependencies": [
+            "www"
+          ],
+          "targets": {
+            "e2e": {
+              "executor": "@nx/cypress:cypress",
+              "options": {
+                "cypressConfig": "apps/www-e2e/cypress.json",
+                "devServerTarget": "www:serve"
+              },
+              "configurations": {
+                "production": {
+                  "devServerTarget": "www:serve:production"
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          }
+        }
+      },
+      "tenant": {
+        "name": "tenant",
+        "type": "app",
+        "data": {
+          "root": "apps/tenant",
+          "name": "tenant",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/tenant",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:public"
+          ],
+          "targets": {
+            "build": {
+              "executor": "@nx/next:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "outputPath": "dist/apps/tenant"
+              },
+              "configurations": {
+                "production": {
+                  "webpack": true
+                },
+                "development": {
+                  "outputPath": "apps/tenant"
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/next:server",
+              "options": {
+                "buildTarget": "tenant:build",
+                "dev": true,
+                "port": 4500
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "tenant:build:production",
+                  "dev": false
+                },
+                "development": {
+                  "buildTarget": "tenant:build:development",
+                  "dev": true
+                }
+              },
+              "defaultConfiguration": "development",
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/next:export",
+              "options": {
+                "buildTarget": "tenant:build:production"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/apps/tenant"
+              ],
+              "options": {
+                "jestConfig": "apps/tenant/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "admin": {
+        "name": "admin",
+        "type": "app",
+        "data": {
+          "root": "apps/admin",
+          "name": "admin",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/admin",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:private"
+          ],
+          "targets": {
+            "build": {
+              "executor": "@nx/next:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "outputPath": "dist/apps/admin"
+              },
+              "configurations": {
+                "production": {},
+                "development": {
+                  "outputPath": "apps/admin"
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/next:server",
+              "options": {
+                "buildTarget": "admin:build",
+                "dev": true
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "admin:build:production",
+                  "dev": false
+                },
+                "development": {
+                  "buildTarget": "admin:build:development",
+                  "dev": true
+                }
+              },
+              "defaultConfiguration": "development",
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/next:export",
+              "options": {
+                "buildTarget": "admin:build:production"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/apps/admin"
+              ],
+              "options": {
+                "jestConfig": "apps/admin/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "aglyn": {
+        "name": "aglyn",
+        "type": "lib",
+        "data": {
+          "root": "libs/aglyn",
+          "name": "aglyn",
+          "projectType": "library",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "scope:feature",
+            "scope:framework"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/aglyn",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:swc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/aglyn",
+                "main": "libs/aglyn/src/index.ts",
+                "tsConfig": "libs/aglyn/tsconfig.lib.json",
+                "assets": [
+                  "libs/aglyn/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true
+            },
+            "publish": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "node tools/scripts/publish.mjs aglyn {args.ver} {args.tag}"
+              },
+              "dependsOn": [
+                {
+                  "target": "build"
+                }
+              ],
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/aglyn"
+              ],
+              "options": {
+                "jestConfig": "libs/aglyn/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/aglyn/src",
+          "implicitDependencies": []
+        }
+      },
+      "silo": {
+        "name": "silo",
+        "type": "app",
+        "data": {
+          "root": "apps/silo",
+          "name": "silo",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/silo",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:private"
+          ],
+          "targets": {
+            "build": {
+              "executor": "@nx/next:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "outputPath": "dist/apps/silo"
+              },
+              "configurations": {
+                "production": {},
+                "development": {
+                  "outputPath": "apps/silo"
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/next:server",
+              "options": {
+                "buildTarget": "silo:build",
+                "dev": true,
+                "port": 4210
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "silo:build:production",
+                  "dev": false
+                },
+                "development": {
+                  "buildTarget": "silo:build:development",
+                  "dev": true
+                }
+              },
+              "defaultConfiguration": "development",
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/next:export",
+              "options": {
+                "buildTarget": "silo:build:production"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "api": {
+        "name": "api",
+        "type": "app",
+        "data": {
+          "root": "apps/api",
+          "name": "api",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/api",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:private"
+          ],
+          "targets": {
+            "build": {
+              "executor": "@nx/next:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "outputPath": "dist/apps/api"
+              },
+              "configurations": {
+                "production": {},
+                "development": {
+                  "outputPath": "apps/api"
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/next:server",
+              "options": {
+                "buildTarget": "api:build",
+                "dev": true
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "api:build:production",
+                  "dev": false
+                },
+                "development": {
+                  "buildTarget": "api:build:development",
+                  "dev": true
+                }
+              },
+              "defaultConfiguration": "development",
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/next:export",
+              "options": {
+                "buildTarget": "api:build:production"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/apps/api"
+              ],
+              "options": {
+                "jestConfig": "apps/api/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "www": {
+        "name": "www",
+        "type": "app",
+        "data": {
+          "root": "apps/www",
+          "name": "www",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/www",
+          "projectType": "application",
+          "tags": [
+            "scope:app",
+            "scope:public"
+          ],
+          "targets": {
+            "build": {
+              "executor": "@nx/next:build",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/apps/www"
+              },
+              "configurations": {
+                "production": {
+                  "webpack": true
+                },
+                "development": {
+                  "outputPath": "apps/www"
+                }
+              },
+              "defaultConfiguration": "production",
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ]
+            },
+            "serve": {
+              "executor": "@nx/next:server",
+              "options": {
+                "buildTarget": "www:build",
+                "dev": true,
+                "port": 4100
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "www:build:production",
+                  "dev": false
+                },
+                "development": {
+                  "buildTarget": "www:build:development",
+                  "dev": true
+                }
+              },
+              "defaultConfiguration": "development",
+              "parallelism": true,
+              "continuous": true
+            },
+            "export": {
+              "executor": "@nx/next:export",
+              "options": {
+                "buildTarget": "www:build:production"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/apps/www"
+              ],
+              "options": {
+                "jestConfig": "apps/www/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.js",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+              ],
+              "cache": true
+            },
+            "version": {
+              "executor": "@jscutlery/semver:version",
+              "options": {
+                "syncVersions": false
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      }
+    },
+    "dependencies": {
+      "besigner-feature-canvas-designer": [],
+      "shared-svg-icons-svg-icons": [],
+      "besigner-ui-color-picker": [
+        {
+          "source": "besigner-ui-color-picker",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "besigner-ui-form-fields": [
+        {
+          "source": "besigner-ui-form-fields",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        }
+      ],
+      "shared-feature-fbserver": [],
+      "tenant-feature-instance": [
+        {
+          "source": "tenant-feature-instance",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "tenant-feature-instance",
+          "target": "core-util-app",
+          "type": "static"
+        },
+        {
+          "source": "tenant-feature-instance",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "tenant-feature-instance",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "besigner-ui-box-styler": [
+        {
+          "source": "besigner-ui-box-styler",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "besigner-ui-box-styler",
+          "target": "shared-ui-theme",
+          "type": "static"
+        }
+      ],
+      "core-feature-singleton": [
+        {
+          "source": "core-feature-singleton",
+          "target": "core-data-app",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-singleton",
+          "target": "core-data-foundation",
+          "type": "static"
+        }
+      ],
+      "core-feature-renderer": [
+        {
+          "source": "core-feature-renderer",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-renderer",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-renderer",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-renderer",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-renderer",
+          "target": "core-data-app",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-renderer",
+          "target": "core-util-app",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-renderer",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "core-feature-renderer",
+          "target": "shared-util-vendor",
+          "type": "static"
+        }
+      ],
+      "shared-util-timestamp": [],
+      "besigner-json-editor": [
+        {
+          "source": "besigner-json-editor",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "besigner-json-editor",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        }
+      ],
+      "core-data-foundation": [
+        {
+          "source": "core-data-foundation",
+          "target": "shared-util-emitter",
+          "type": "static"
+        },
+        {
+          "source": "core-data-foundation",
+          "target": "shared-util-errors",
+          "type": "static"
+        },
+        {
+          "source": "core-data-foundation",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "core-data-foundation",
+          "target": "shared-util-logger",
+          "type": "static"
+        },
+        {
+          "source": "core-data-foundation",
+          "target": "shared-util-vendor",
+          "type": "static"
+        },
+        {
+          "source": "core-data-foundation",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "core-data-foundation",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        }
+      ],
+      "shared-ui-snackstack": [
+        {
+          "source": "shared-ui-snackstack",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-snackstack",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-snackstack",
+          "target": "shared-util-vendor",
+          "type": "static"
+        }
+      ],
+      "shared-util-fbclient": [],
+      "shared-util-fbserver": [],
+      "shared-util-rest-api": [
+        {
+          "source": "shared-util-rest-api",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "shared-util-rest-api",
+          "target": "shared-util-http",
+          "type": "static"
+        },
+        {
+          "source": "shared-util-rest-api",
+          "target": "shared-util-errors",
+          "type": "static"
+        }
+      ],
+      "aglyn-node-renderer": [
+        {
+          "source": "aglyn-node-renderer",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-node-renderer",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-node-renderer",
+          "target": "shared-ui-theme",
+          "type": "static"
+        }
+      ],
+      "shared-ui-jsx-forms": [
+        {
+          "source": "shared-ui-jsx-forms",
+          "target": "besigner-ui-color-picker",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx-forms",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx-forms",
+          "target": "shared-data-mdi",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx-forms",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx-forms",
+          "target": "shared-util-vendor",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx-forms",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "shared-util-emitter": [],
+      "shared-util-errors": [
+        {
+          "source": "shared-util-errors",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "shared-util-errors",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "shared-util-logger": [],
+      "shared-util-vendor": [],
+      "aglyn-besigner-ui": [
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "aglyn-besigner",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "besigner-data-app",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-util-vendor",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "core-feature-renderer",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-ui-jsx-forms",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "besigner-ui-box-styler",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "besigner-ui-form-fields",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-svg-icons-svg-icons",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "plugins-ui-mui",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "aglyn-node-renderer",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "shared-util-dom",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "core-util-app",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner-ui",
+          "target": "core-data-app",
+          "type": "static"
+        }
+      ],
+      "besigner-data-app": [
+        {
+          "source": "besigner-data-app",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "besigner-data-app",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "besigner-data-app",
+          "target": "core-data-app",
+          "type": "static"
+        },
+        {
+          "source": "besigner-data-app",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "besigner-data-app",
+          "target": "shared-util-logger",
+          "type": "static"
+        }
+      ],
+      "shared-data-enums": [
+        {
+          "source": "shared-data-enums",
+          "target": "shared-data-mdi",
+          "type": "static"
+        },
+        {
+          "source": "shared-data-enums",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "shared-data-forms": [
+        {
+          "source": "shared-data-forms",
+          "target": "shared-data-regex",
+          "type": "static"
+        }
+      ],
+      "shared-data-regex": [],
+      "shared-data-types": [],
+      "shared-util-tools": [
+        {
+          "source": "shared-util-tools",
+          "target": "shared-data-types",
+          "type": "static"
+        }
+      ],
+      "aglyn-plugin-mui": [
+        {
+          "source": "aglyn-plugin-mui",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-plugin-mui",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-plugin-mui",
+          "target": "shared-data-mdi",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-plugin-mui",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        }
+      ],
+      "core-ui-renderer": [],
+      "shared-util-http": [
+        {
+          "source": "shared-util-http",
+          "target": "shared-data-enums",
+          "type": "static"
+        }
+      ],
+      "shared-util-next": [
+        {
+          "source": "shared-util-next",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "core-data-admin": [
+        {
+          "source": "core-data-admin",
+          "target": "aglyn",
+          "type": "static"
+        }
+      ],
+      "shared-data-mdi": [
+        {
+          "source": "shared-data-mdi",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "shared-ui-theme": [
+        {
+          "source": "shared-ui-theme",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-theme",
+          "target": "shared-util-vendor",
+          "type": "static"
+        }
+      ],
+      "shared-util-dom": [
+        {
+          "source": "shared-util-dom",
+          "target": "shared-util-tools",
+          "type": "static"
+        }
+      ],
+      "aglyn-besigner": [
+        {
+          "source": "aglyn-besigner",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "aglyn-besigner",
+          "target": "core-util-app",
+          "type": "static"
+        }
+      ],
+      "plugins-ui-mui": [
+        {
+          "source": "plugins-ui-mui",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-ui-mui",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-ui-mui",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "plugins-ui-mui",
+          "target": "core-feature-renderer",
+          "type": "static"
+        },
+        {
+          "source": "plugins-ui-mui",
+          "target": "core-util-app",
+          "type": "static"
+        }
+      ],
+      "shared-ui-next": [
+        {
+          "source": "shared-ui-next",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-next",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-next",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-next",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-next",
+          "target": "shared-util-vendor",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-next",
+          "target": "shared-util-dom",
+          "type": "static"
+        }
+      ],
+      "core-data-app": [
+        {
+          "source": "core-data-app",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "core-data-app",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "core-data-app",
+          "target": "shared-util-logger",
+          "type": "static"
+        },
+        {
+          "source": "core-data-app",
+          "target": "core-util-app",
+          "type": "static"
+        },
+        {
+          "source": "core-data-app",
+          "target": "shared-util-emitter",
+          "type": "static"
+        },
+        {
+          "source": "core-data-app",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        }
+      ],
+      "core-util-app": [
+        {
+          "source": "core-util-app",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "core-util-app",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "core-util-app",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "core-util-app",
+          "target": "shared-util-vendor",
+          "type": "static"
+        }
+      ],
+      "shared-ui-jsx": [
+        {
+          "source": "shared-ui-jsx",
+          "target": "shared-data-mdi",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "shared-ui-jsx",
+          "target": "shared-util-vendor",
+          "type": "static"
+        }
+      ],
+      "console-e2e": [
+        {
+          "source": "console-e2e",
+          "target": "console",
+          "type": "implicit"
+        }
+      ],
+      "tenant-e2e": [
+        {
+          "source": "tenant-e2e",
+          "target": "tenant",
+          "type": "implicit"
+        }
+      ],
+      "admin-e2e": [
+        {
+          "source": "admin-e2e",
+          "target": "admin",
+          "type": "implicit"
+        }
+      ],
+      "api-e2e": [
+        {
+          "source": "api-e2e",
+          "target": "api",
+          "type": "implicit"
+        }
+      ],
+      "console": [
+        {
+          "source": "console",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-ui-jsx-forms",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "aglyn-besigner-ui",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "aglyn-besigner-ui",
+          "type": "dynamic"
+        },
+        {
+          "source": "console",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-util-next",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "besigner-data-app",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "core-data-app",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "core-feature-renderer",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-ui-mui",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "aglyn-plugin-mui",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "aglyn-besigner",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "besigner-json-editor",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "besigner-json-editor",
+          "type": "dynamic"
+        },
+        {
+          "source": "console",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "core-data-foundation",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "core-util-app",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "core-data-admin",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-util-rest-api",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "shared-data-forms",
+          "type": "static"
+        }
+      ],
+      "www-e2e": [
+        {
+          "source": "www-e2e",
+          "target": "www",
+          "type": "implicit"
+        }
+      ],
+      "tenant": [
+        {
+          "source": "tenant",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "aglyn-node-renderer",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "aglyn-plugin-mui",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "shared-util-rest-api",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "core-data-admin",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        }
+      ],
+      "admin": [
+        {
+          "source": "admin",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "admin",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "admin",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "admin",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        }
+      ],
+      "aglyn": [
+        {
+          "source": "aglyn",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "aglyn",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "aglyn",
+          "target": "shared-util-logger",
+          "type": "static"
+        },
+        {
+          "source": "aglyn",
+          "target": "shared-data-enums",
+          "type": "static"
+        }
+      ],
+      "silo": [
+        {
+          "source": "silo",
+          "target": "plugins-ui-mui",
+          "type": "static"
+        },
+        {
+          "source": "silo",
+          "target": "core-data-app",
+          "type": "static"
+        },
+        {
+          "source": "silo",
+          "target": "core-feature-renderer",
+          "type": "static"
+        },
+        {
+          "source": "silo",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "silo",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "silo",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "silo",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "silo",
+          "target": "shared-ui-theme",
+          "type": "static"
+        }
+      ],
+      "api": [],
+      "www": [
+        {
+          "source": "www",
+          "target": "shared-ui-theme",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-util-tools",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-data-enums",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-data-types",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-ui-jsx-forms",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-util-rest-api",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "shared-util-vendor",
+          "type": "static"
+        },
+        {
+          "source": "www",
+          "target": "console",
+          "type": "static"
+        }
+      ]
+    }
+  }
+}

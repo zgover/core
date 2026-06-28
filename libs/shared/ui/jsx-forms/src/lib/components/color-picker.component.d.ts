@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { type ColorPickerProps as AglynColorPickerProps } from '@aglyn/besigner-ui-color-picker/color-picker';
+import { type ColorPickerProps as AglynColorPickerProps } from '@aglyn/besigner-ui-color-picker';
 import { type UseFieldApiComponentConfig } from '@data-driven-forms/react-form-renderer';
 import { type FormControlProps as MuiFormControlProps, type GridProps, type PopperProps, type TextFieldProps } from '@mui/material';
 type InternalColorPickerProps = Partial<TextFieldProps> & {
