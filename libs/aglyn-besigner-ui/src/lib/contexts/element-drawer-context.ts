@@ -51,7 +51,7 @@ export const DEFAULT_OPTIONS: ElementDrawerOptions = {
   cancellationButtonProps: {},
 }
 
-export const buildOptions = (defaultOptions, options) => {
+export const buildOptions = (defaultOptions: ElementDrawerOptions, options: ElementDrawerOptions) => {
   const dialogProps = {
     ...(defaultOptions.dialogProps || DEFAULT_OPTIONS.dialogProps),
     ...(options.dialogProps || {}),

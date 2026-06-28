@@ -78,7 +78,7 @@ import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 import { Accordion } from './accordion-list.component'
 import { ElementPropsFormTemplate } from './element-props-form.component'
 
-const stylesSchema = (presetColors) => ({
+const stylesSchema = (presetColors: string[]) => ({
   fields: [
     {
       component: FieldComponentType.SELECT,

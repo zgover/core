@@ -54,6 +54,7 @@ import {
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import {
+  type ComponentType,
   forwardRef,
   type SyntheticEvent,
   useCallback,
@@ -264,7 +265,7 @@ function withLastSelectedNode<P>(
   return WithLastSelectedNode
 }
 
-const withTabPanelInner = (Component) => (props: any) => {
+const withTabPanelInner = (Component: ComponentType<any>) => (props: any) => {
   return (
     <TabPanelInner sx={{ p: 2 }}>
       <Component {...props} />
