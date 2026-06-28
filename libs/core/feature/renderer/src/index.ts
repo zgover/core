@@ -16,4 +16,3 @@
  */
 
 export * from './renderer'
-export default './lib/components/trunk.component'
