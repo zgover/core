@@ -20,7 +20,7 @@ import {useCallback, useEffect, useLayoutEffect, useRef} from 'react'
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-export default function useEventCallback(fn) {
+export default function useEventCallback(fn: (...args: any[]) => any) {
   const ref = useRef(fn)
   useIsomorphicLayoutEffect(() => {
     ref.current = fn
