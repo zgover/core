@@ -21,7 +21,6 @@ import {
   BesignerPanelTabFlag,
   setBesignerPanels,
 } from '@aglyn/besigner-data-app'
-import Typography from '@aglyn/plugins-ui-mui/components/typography'
 import {
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_DUPLICATE,
@@ -36,7 +35,8 @@ import {
   MenuItem,
   MenuList,
   Paper,
-  PaperProps,
+  type PaperProps,
+  Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import { ChangeEvent, forwardRef, useCallback, useState } from 'react'

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import Timestamp from '@aglyn/shared-util-timestamp/timestamp'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
 import CanvasManager from './canvas-manager'
 import ComponentManager from './components-manager'
 import { namespace } from './constants'

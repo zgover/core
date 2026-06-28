@@ -18,7 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { isValidElementType } from 'react-is'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
-import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
+import { arraySafe } from '@aglyn/shared-util-tools'
 import { Box, type BoxProps } from '@mui/material'
 import clsx from 'clsx'
 import { forwardRef, Fragment, useMemo } from 'react'

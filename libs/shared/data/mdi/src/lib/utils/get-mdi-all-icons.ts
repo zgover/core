@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { MdiIcons } from '@aglyn/shared-data-mdi/constants/mdi-icons'
+import { MdiIcons } from '@aglyn/shared-data-mdi'
 import type { Icon, IconId } from '../types'
 
 export function getMdiAllIcons(): Map<IconId, Icon> {
