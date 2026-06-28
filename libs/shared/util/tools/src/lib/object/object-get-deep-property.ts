@@ -39,7 +39,7 @@ export function objectGetDeepProperty<U, T = any>(
 ): U {
   const keys = path.split(separator)
   const lastKey = keys.pop()
-  const lastObj = keys.reduce((v, k) => v?.[k], obj)
+  const lastObj = keys.reduce((v: any, k) => v?.[k], obj as any)
   return lastObj?.[lastKey]
 }
 
