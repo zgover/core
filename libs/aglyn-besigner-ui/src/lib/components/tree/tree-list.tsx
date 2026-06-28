@@ -14,8 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { styled } from '@aglyn/shared-ui-theme'
-import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
 import {
   List as MuiList,
   listItemButtonClasses,

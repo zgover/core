@@ -28,7 +28,7 @@ import {
   ICON_VARIANT_MODIFY_MOVE_DOWN,
   ICON_VARIANT_MODIFY_MOVE_UP,
 } from '@aglyn/shared-data-enums'
-import MdiIcon from '@aglyn/shared-ui-jsx/components/mdi-icon/mdi-icon'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import {
   Divider,
   ListItemIcon,

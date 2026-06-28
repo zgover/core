@@ -22,7 +22,7 @@ import {
   ICON_VARIANT_FILTER,
   ICON_VARIANT_SEARCH,
 } from '@aglyn/shared-data-enums'
-import MdiIcon from '@aglyn/shared-ui-jsx/components/mdi-icon/mdi-icon'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import {
   AppBar,
   Box,

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import mergeSxProps from '@aglyn/shared-ui-theme/util/merge-sx-props'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { type BoxProps, SvgIcon } from '@mui/material'
 import { Box } from '@mui/system'
 import { forwardRef } from 'react'

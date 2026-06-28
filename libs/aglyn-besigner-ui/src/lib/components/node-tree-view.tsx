@@ -23,9 +23,8 @@ import {
   ICON_VARIANT_MODIFY_DRAG,
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
-import { styled } from '@aglyn/shared-ui-theme'
-import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
-import noop from '@aglyn/shared-util-tools/noop'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
+import { noop } from '@aglyn/shared-util-tools'
 import {
   Box,
   BoxProps,

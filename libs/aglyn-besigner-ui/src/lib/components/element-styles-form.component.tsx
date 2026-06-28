@@ -60,8 +60,7 @@ import {
   FormRenderer,
   type FormRendererProps,
 } from '@aglyn/shared-ui-jsx-forms'
-import Container from '@aglyn/shared-ui-jsx/components/container'
-import { MdiIcon } from '@aglyn/shared-ui-jsx'
+import { Container, MdiIcon } from '@aglyn/shared-ui-jsx'
 import { objectFlatten } from '@aglyn/shared-util-vendor'
 import {
   FormHelperText,

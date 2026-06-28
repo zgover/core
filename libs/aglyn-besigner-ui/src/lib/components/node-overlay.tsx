@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
-import useIsomorphicLayoutEffect from '@aglyn/shared-ui-jsx/hooks/use-isomorphic-layout-effect'
+import { useIsomorphicLayoutEffect } from '@aglyn/shared-ui-jsx'
 import {
   Popper as MuiPopper,
   type PopperProps as MuiPopperProps,

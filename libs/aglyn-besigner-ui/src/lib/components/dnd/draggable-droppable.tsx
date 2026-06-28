@@ -16,8 +16,7 @@
  */
 
 import * as Besigner from '@aglyn/besigner'
-import { mergeRefs } from '@aglyn/shared-ui-jsx'
-import useId from '@aglyn/shared-ui-jsx/hooks/use-id'
+import { mergeRefs, useId } from '@aglyn/shared-ui-jsx'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CSS as css } from '@dnd-kit/utilities'
 import { mergeProps } from '@react-aria/utils'
