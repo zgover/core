@@ -279,14 +279,16 @@ const baseOptions: ThemeOptions = {
         root: ({ theme }) => {
           const tv = (theme as any).vars || theme
           return {
-            '&.Mui-focusVisible': {
+            // Double-ampersand raises specificity above MUI v9 variant rules so
+            // these overrides win regardless of CSS injection order.
+            '&&.Mui-focusVisible': {
               outline: `2px solid ${tv.palette.secondary.main}`,
               outlineOffset: -2,
             },
             // MUI v9: alpha(text.primary, selectedOpacity) resolves text.primaryChannel
             // to the light-mode value (0 0 0) even in dark mode, producing a dark overlay
-            // on a dark background. Use secondary channel which resolves correctly.
-            '&.Mui-selected': {
+            // on an already-dark background. Use secondary channel which resolves correctly.
+            '&&.Mui-selected': {
               color: tv.palette.secondary.main,
               backgroundColor: `rgba(${tv.palette.secondary.lightChannel} / 0.18)`,
               '&:hover': {
