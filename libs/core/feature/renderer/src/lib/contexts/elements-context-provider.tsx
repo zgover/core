@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { ElementsContext } from './elements-context'
 
 export interface ElementsContextProviderProps {
   children?: JSX.Children
@@ -25,11 +24,8 @@ export interface ElementsContextProviderProps {
 export function ElementsContextProvider(props: ElementsContextProviderProps) {
   const { children } = props
 
-  return (
-    <ElementsContext.Provider>
-      {children}
-    </ElementsContext.Provider>
-  )
+  return <>{children}</>
+
 }
 ElementsContextProvider.displayName = 'ElementsContextProvider'
 ElementsContextProvider.aglyn = true
