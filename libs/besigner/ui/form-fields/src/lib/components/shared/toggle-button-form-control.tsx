@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-import MdiIcon, {
-  type MdiIconProps,
-} from '@aglyn/shared-ui-jsx/components/mdi-icon/mdi-icon'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-jsx'
 import { ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material'
 import { forwardRef, type MouseEvent, useCallback, useEffect, useState } from 'react'
 import InlineFormControl, {
