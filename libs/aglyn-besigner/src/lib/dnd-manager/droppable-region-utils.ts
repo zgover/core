@@ -86,7 +86,7 @@ export function buildDroppableRects(rect: DOMRect) {
   }
 }
 
-export function withinRegion(rect, x, y) {
+export function withinRegion(rect: { left: number; top: number; width: number; height: number }, x: number, y: number) {
   const { left, top } = rect
   const { width, height } = rect
   const xis = x >= left && x <= left + width
