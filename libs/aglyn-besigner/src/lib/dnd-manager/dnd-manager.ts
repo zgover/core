@@ -44,7 +44,7 @@ export type DraggableNode = Aglyn.NodeSchema<any> | Aglyn.PresetSchema<any>
 export class DndManager {
   drag?: DraggableNode = null
   drop?: DraggableNode = null
-  dropRegion?: any = null
+  dropRegion?: DropRegion | null = null
   public get intoArea(): DropAreaType {
     switch (this.dropRegion) {
       case DropRegion.TOP:

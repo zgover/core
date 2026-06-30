@@ -94,7 +94,7 @@ export function withinRegion(rect: { left: number; top: number; width: number; h
   return xis && yis
 }
 
-export function determineDropRegion(clientRect: DOMRect, x: number, y: number, regions?: any) {
+export function determineDropRegion(clientRect: DOMRect, x: number, y: number, regions?: ReturnType<typeof buildDroppableRects>) {
   const _regions = regions || buildDroppableRects(clientRect)
   switch (true) {
     case withinRegion(_regions.top, x, y):
