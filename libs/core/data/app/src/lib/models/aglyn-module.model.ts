@@ -57,12 +57,12 @@ export abstract class AglynModuleModel<
     super(options)
   }
 
-  public load(...args): void {
+  public load(...args: unknown[]): void {
     this.__initialize__()
     this.__activate__()
     this.setupListeners()
   }
-  public destroy(...args): void {
+  public destroy(...args: unknown[]): void {
     this.breakdownListeners()
     this.__deactivate__()
     this.__destroy__()
