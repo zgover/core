@@ -24,6 +24,7 @@ import {
   darken,
   getContrastRatio,
   lighten,
+  type PaletteColor,
   responsiveFontSizes,
   type Theme,
   type ThemeOptions,
@@ -39,7 +40,7 @@ function getContrastTextColor(background: string, contrastThreshold: number) {
     ? ContrastText.DARK
     : ContrastText.LIGHT
 }
-function addShade(paletteColor: any, shade: string, variant: string | undefined, tonalOffset: any) {
+function addShade(paletteColor: PaletteColor & Record<string, string>, shade: string, variant: string | undefined, tonalOffset: number | { light?: number; dark?: number }) {
   const tonalOffsetLight = tonalOffset['light'] || (tonalOffset ?? 0.2)
   const tonalOffsetDark = tonalOffset['dark'] || (tonalOffset ?? 0.2) * 1.5
 
@@ -59,7 +60,7 @@ function addShade(paletteColor: any, shade: string, variant: string | undefined,
     }
   }
 }
-function addShadeVariants(paletteColor: any, tonalOffset?: any) {
+function addShadeVariants(paletteColor: PaletteColor & Record<string, string>, tonalOffset?: number | { light?: number; dark?: number }) {
   addShade(paletteColor, 'dark', undefined, tonalOffset)
   addShade(paletteColor, 'light', undefined, tonalOffset)
   addShade(paletteColor, 'contrastText', undefined, tonalOffset)
@@ -67,7 +68,7 @@ function addShadeVariants(paletteColor: any, tonalOffset?: any) {
 
 export type CreateResponsiveThemeOptions = {
   themeOptions?: ThemeOptions
-  responsiveFontSizesOptions?: any
+  responsiveFontSizesOptions?: Parameters<typeof responsiveFontSizes>[1]
 }
 
 /**
