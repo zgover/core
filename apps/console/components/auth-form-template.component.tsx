@@ -40,7 +40,7 @@ const AuthFormTemplateComponent = forwardRef<any, FormTemplateRenderProps>(
         <Grid spacing={2} container>
           {formFields}
         </Grid>
-        <AuthErrorAlertComponent error={error as any} sx={{ mt: 2, mb: 1 }} />
+        <AuthErrorAlertComponent error={error} sx={{ mt: 2, mb: 1 }} />
         <FormSpy>
           {({ submitting, pristine, valid }) => (
             <Box sx={{

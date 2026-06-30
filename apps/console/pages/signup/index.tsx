@@ -147,7 +147,7 @@ function SignUp() {
         subscription={{ values: true }}
         clearOnUnmount
       />
-      <AuthErrorAlertComponent error={error as any} sx={{ mt: 2, mb: 1 }} />
+      <AuthErrorAlertComponent error={error} sx={{ mt: 2, mb: 1 }} />
       <Divider flexItem variant="middle" sx={{ my: 3 }}>
         {'Or sign up with'}
       </Divider>
