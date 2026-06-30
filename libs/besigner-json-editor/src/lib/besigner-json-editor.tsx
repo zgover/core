@@ -169,7 +169,7 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
         <DialogActions>
           <Button
             variant="contained"
-            onClick={(e) => handleClose(e as any, 'cancelClick')}
+            onClick={(e) => handleClose(e, 'cancelClick')}
           >
             {'Cancel'}
           </Button>
