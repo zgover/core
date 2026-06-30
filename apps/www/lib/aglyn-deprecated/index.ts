@@ -20,16 +20,12 @@ export * from './lib/types'
 export * from './lib/overrides'
 
 // Interfaces
-export * from '../../../../libs/shared/data/types/src/lib/groups/crud'
-export * from '../../../../libs/shared/data/types/src/lib/groups/dod'
-export * from '../../../../libs/shared/data/types/src/lib/groups/initializable'
-export * from '../../../../libs/shared/data/types/src/lib/groups/serializable'
-export * from '../../../../libs/shared/data/types/src/lib/groups/normalized'
+export * from '@aglyn/shared-data-types'
 export * from './lib/interfaces/ref-controller'
 
 // Models
-export * from '../../../../libs/shared/util/tools/src/lib/crud'
-export * from '../../../../libs/shared/util/tools/src/lib/normalized'
+export { Crud } from '@aglyn/shared-util-tools'
+export { Normalized } from '@aglyn/shared-util-tools'
 
 // Controllers
 export * from './lib/controllers/app-controller'
