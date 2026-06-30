@@ -225,7 +225,7 @@ const StyledMenu = styled(Menu, {
 //   },
 // }))
 
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `scrollable-auto-tab-${index}`,
     'aria-controls': `scrollable-auto-tabpanel-${index}`,

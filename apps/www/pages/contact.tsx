@@ -126,7 +126,7 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
   );
 }
 
-function Contact(props) {
+function Contact(props: Record<string, unknown>) {
   const handleSubmit = useCallback(async (values) => {
     return await fetch(`/api/h/f/${DdfForms.formIds.contact}`, {
       method: 'POST',

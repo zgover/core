@@ -32,7 +32,7 @@ import SiteFooterView from '../views/SiteFooterView'
 
 const TITLE = 'Build websites for your business goals'
 
-function Index(props) {
+function Index(props: Record<string, unknown>) {
   return (
     <MainLayout
       title={APP_WWW.TITLE}
