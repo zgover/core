@@ -16,7 +16,6 @@
  */
 'use client'
 
-import { type AccordionRenderProps } from '@aglyn/besigner-ui'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import { createResourceUid } from '@aglyn/core-util-app'
 import {
@@ -40,7 +39,7 @@ import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { Button, IconButton, Typography } from '@mui/material'
-import { GridActionsCellItem, type GridColumns } from '@mui/x-data-grid'
+import { GridActionsCellItem, type GridColDef } from '@mui/x-data-grid'
 import {
   collection,
   doc,
@@ -64,27 +63,6 @@ import {
   CONTENT_MAX_WIDTH,
   TABLE_ROW_HEIGHT,
 } from '../../../../constants/shared'
-
-// eslint-disable-next-line react/display-name
-const DetailsContentComponent = forwardRef<any, AccordionRenderProps>(
-  (props, ref) => {
-    return (
-      <>
-        <div ref={ref}>{JSON.stringify(props)}</div>
-      </>
-    )
-  },
-)
-// eslint-disable-next-line react/display-name
-const SummaryContentComponent = forwardRef<any, AccordionRenderProps>(
-  (props, ref) => {
-    return (
-      <>
-        <div ref={ref}>{JSON.stringify(props)}</div>
-      </>
-    )
-  },
-)
 
 const CellItemLinkComponent = forwardRef<any, AppLinkNakedLinkProps>(
   (props, ref) => {
@@ -211,7 +189,7 @@ function Screens(props) {
     [confirm, firestore, queueLoading],
   )
 
-  const columns: GridColumns = [
+  const columns: GridColDef[] = [
     {
       field: 'actions',
       type: 'actions',
