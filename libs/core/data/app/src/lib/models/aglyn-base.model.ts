@@ -263,25 +263,28 @@ export class AglynBaseModel<
     this.#logger = value
     return this
   }
-  public setLogLevel(val) {
-    return this.#logger.setLogLevel(val) as any
+  public setLogLevel(val: Parameters<AglynLogger['setLogLevel']>[0]) {
+    return this.#logger.setLogLevel(val)
   }
-  public setUserLogHandler(logCallback, options) {
+  public setUserLogHandler(
+    logCallback: Parameters<AglynLogger['setUserLogHandler']>[0],
+    options: Parameters<AglynLogger['setUserLogHandler']>[1],
+  ) {
     return this.#logger.setUserLogHandler(logCallback, options)
   }
-  public debug(...args) {
+  public debug(...args: Parameters<AglynLogger['debug']>) {
     return this.#logger.debug(...args)
   }
-  public error(...args) {
+  public error(...args: Parameters<AglynLogger['error']>) {
     return this.#logger.error(...args)
   }
-  public info(...args) {
+  public info(...args: Parameters<AglynLogger['info']>) {
     return this.#logger.info(...args)
   }
-  public log(...args) {
+  public log(...args: Parameters<AglynLogger['log']>) {
     return this.#logger.log(...args)
   }
-  public warn(...args) {
+  public warn(...args: Parameters<AglynLogger['warn']>) {
     return this.#logger.warn(...args)
   }
   public get logHandler() {
