@@ -57,7 +57,7 @@ export const NodeContextMenu = observer(
     const handleAddElementClick = useAddElementDrawerCallback()
     const elementRef = Besigner.refs.get(node?.$id)
     const [moreOpen, setMoreOpen] = useState(false)
-    const [moreButton, moreButtonRef] = useState(null)
+    const [moreButton, moreButtonRef] = useState<HTMLButtonElement | null>(null)
 
     const closeMore = useCallback(() => setMoreOpen(false), [])
     const openMore = useCallback(() => setMoreOpen(true), [])

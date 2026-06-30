@@ -133,7 +133,7 @@ export const NodePinnedActions = observer(
     const parent = node?.parent
     const handleProps = Besigner.handles.get($id)
     const [moreOpen, setMoreOpen] = useState(false)
-    const [moreButton, moreButtonRef] = useState(null)
+    const [moreButton, moreButtonRef] = useState<HTMLButtonElement | null>(null)
 
     const closeMore = useCallback(() => setMoreOpen(false), [])
     const openMore = useCallback(() => setMoreOpen(true), [])
