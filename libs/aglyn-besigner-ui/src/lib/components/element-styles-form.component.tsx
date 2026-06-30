@@ -783,7 +783,7 @@ const justifySelf: ButtonGroupFormControl = {
   ],
 }
 
-const TextAlignToggleButtonGroup = (props: { onChange: (e: SyntheticEvent, value: string) => void; value: string; field: { name: string; label: string; options: { value: string; icon: string; label: string }[]; description?: string } }) => {
+const TextAlignToggleButtonGroup = (props: { onChange: (e: SyntheticEvent, value: string) => void; value: string; field: { component?: FieldComponentType; name: string; label: string; exclusive?: boolean; options: { value: string; icon: string; label: string }[]; description?: string } }) => {
   const { onChange, value, field } = props
 
   return (
@@ -829,8 +829,8 @@ const ElementStylesForm = observer(
     const schema = useMemo(() => {
       const flatMap = objectFlatten(siteTheme.palette)
       const values = Object.entries(flatMap)
-        .map(([name, value]) => ({ color: value, title: name }))
-        .filter((i) => Boolean(String(i.color).match(/^(rgb|#)/)?.[0]))
+        .map(([, value]) => String(value))
+        .filter((color) => Boolean(color.match(/^(rgb|#)/)?.[0]))
       return stylesSchema(values)
     }, [siteTheme])
 
