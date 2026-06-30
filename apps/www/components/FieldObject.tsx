@@ -94,7 +94,6 @@ function FieldObject(props: Props) {
     startIcon: <MdiIcon path={mdiPlus.path} />,
     children: 'Add',
     onClick: (e) => {
-      console.log('click')
       handleAddProperty(e)
     },
   }

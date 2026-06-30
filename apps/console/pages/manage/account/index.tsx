@@ -26,8 +26,6 @@ import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
 const Settings: NextPageWithLayout = (props) => {
-  console.log('index props', props)
-
   return (
     <>
       <NextPageTitle screen={'Settings'} />

@@ -91,7 +91,6 @@ function FieldArray(props: Props) {
     setFields((prev) => [...prev, emptyArrayItem(prev.length)])
   }, [])
 
-  console.log(fields)
   return (
     <FormFields
       items={fields.concat([
@@ -102,8 +101,6 @@ function FieldArray(props: Props) {
           startIcon: <MdiIcon path={mdiPlus.path} />,
           children: 'Add',
           onClick: (e) => {
-            console.log('click')
-
             handleAddItem(e)
           },
         },

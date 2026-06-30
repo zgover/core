@@ -52,7 +52,6 @@ function checkboxListRow(props: ListChildComponentProps) {
   const { index, style, data } = props
   const { items, field, onUpdate } = data
   const item = (items ?? [])[index]
-  console.log('data', data)
   return (
     <ListItem key={data.value} dense button style={style} onClick={() => {}}>
       <ListItemIcon>

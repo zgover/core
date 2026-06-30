@@ -34,7 +34,7 @@ export async function getAllUsers(nextPageToken?: string) {
       }
     })
     .catch((error) => {
-      console.log('Error listing users:', error)
+      console.error('Error listing users:', error)
       data.error = error
     })
 

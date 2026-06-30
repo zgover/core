@@ -131,8 +131,7 @@ function BesignerPage(props) {
 
     const nodes = Aglyn.canvas.toJSON().nodes
     await updateScreen({nodes: nodes}, {merge: true})
-      .then((...args) => {
-        console.log('updaye screen then promise', args)
+      .then(() => {
         Aglyn.canvas.updateInitialNodes(nodes)
         enqueueSnackbar('Canvas saved successfully', {
           variant: 'success',
@@ -158,18 +157,6 @@ function BesignerPage(props) {
     setJsonOpen(false)
   }, [])
 
-  useEffect(() => {
-    if (HAS_BROWSER()) {
-      console.log('page:/besigner app', Aglyn)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (HAS_BROWSER()) {
-      console.log('Besigner props.tenant,', props.tenant, props)
-      console.log('Besigner status screen,', status, data)
-    }
-  }, [props, data, status])
 
   useEffect(() => {
     if (hasError) {

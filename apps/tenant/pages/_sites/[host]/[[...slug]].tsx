@@ -41,7 +41,6 @@ interface Props {
 }
 
 export const getStaticPaths: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
-  console.log('!!!!!getStaticPaths ctx', ctx)
   return {
     paths: [],
     fallback: 'blocking', // ISR server-render if static cache is not available
@@ -178,8 +177,6 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 export default function CatchAllPage(props: Props) {
   // const props = { data: exampleData }
   const nodes = props.nodes
-
-  console.log('!!!!!CatchAllPage', props)
 
   useEffect(() => {
     Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: nodes })
