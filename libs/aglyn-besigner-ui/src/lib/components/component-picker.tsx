@@ -83,35 +83,39 @@ export const ComponentPicker = observer(
     )
 
     const handleFilterChange = useCallback(
-      async (e) => {
+      async (e: { currentTarget?: { value?: string } }) => {
         const filter = e.currentTarget?.value || ''
         setFilter(filter)
         clearSelected()
         let items = allItems
 
         if (filter) {
-          // Dynamically load fuse.js
-          const Fuse = (await import('fuse.js')).default
-          const fuse = new Fuse<typeof allItems[number]['items'][number]>([], {
-            shouldSort: true,
-            keys: [
-              'displayName',
-              'title',
-              'description',
-              'subtitle',
-              'category',
-              'pluginId',
-              'kind',
-              '$id',
-            ],
-          })
-
-          items = allItems
-            .map((i) => {
-              fuse.setCollection(i.items)
-              return { ...i, items: fuse.search(filter).map((i) => i.item) }
+          try {
+            // Dynamically load fuse.js
+            const Fuse = (await import('fuse.js')).default
+            const fuse = new Fuse<typeof allItems[number]['items'][number]>([], {
+              shouldSort: true,
+              keys: [
+                'displayName',
+                'title',
+                'description',
+                'subtitle',
+                'category',
+                'pluginId',
+                'kind',
+                '$id',
+              ],
             })
-            .filter((i) => Boolean(i.items.length))
+
+            items = allItems
+              .map((i) => {
+                fuse.setCollection(i.items)
+                return { ...i, items: fuse.search(filter).map((i) => i.item) }
+              })
+              .filter((i) => Boolean(i.items.length))
+          } catch (error) {
+            console.error('Failed to load fuse.js', error)
+          }
         }
 
         setItems(items)
@@ -120,8 +124,8 @@ export const ComponentPicker = observer(
     )
 
     const handleClose = useCallback(
-      (e, reason = 'canceled') => {
-        onClose?.(e, reason as any)
+      (e: object, reason: string = 'canceled') => {
+        onClose?.(e, reason as Parameters<NonNullable<DrawerProps['onClose']>>[1])
       },
       [onClose],
     )
