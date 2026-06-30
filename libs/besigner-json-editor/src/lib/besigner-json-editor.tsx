@@ -158,7 +158,7 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
               <Else>
                 <Editor
                   height="50vh"
-                  defaultValue={defaultValue}
+                  defaultValue={data}
                   value={JSON.stringify(parsedValue, null, 2)}
                   onChange={handleChange}
                 />
