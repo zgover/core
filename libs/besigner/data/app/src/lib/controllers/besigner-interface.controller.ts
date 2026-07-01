@@ -131,9 +131,9 @@ export class BesignerInterfaceController
       flags: new BehaviorSubject(state.flags),
       panels: new BehaviorSubject(state.panels),
     }
-    this.#setup()
+    this.setupInternal()
   }
-  #setup() {}
+  private setupInternal() {}
 
   public toJSON() {
     return {

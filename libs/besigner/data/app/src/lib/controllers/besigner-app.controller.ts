@@ -32,7 +32,7 @@ export class BesignerAppController
   extends AglynAppController<BesignerAppOptions>
   implements IBesignerAppController
 {
-  #interfaceController: IBesignerInterfaceController = null
+  interfaceController: IBesignerInterfaceController = null
 
   public static get [Symbol.toStringTag](): string {
     return TAG
@@ -41,12 +41,12 @@ export class BesignerAppController
     return NS
   }
   public get interface(): IBesignerInterfaceController {
-    return this.#interfaceController
+    return this.interfaceController
   }
   protected get modules(): IAglynModuleModel[] {
     const modules = super.modules,
       extModule = modules.pop()
-    return [...modules, this.#interfaceController, extModule]
+    return [...modules, this.interfaceController, extModule]
   }
 
   constructor(options: BesignerAppOptions) {
@@ -57,7 +57,7 @@ export class BesignerAppController
     super.setupExtensions()
     _INTERNAL_BESIGNERS_.set(
       this.appName,
-      (this.#interfaceController = new BesignerInterfaceController(this, {
+      (this.interfaceController = new BesignerInterfaceController(this, {
         ...this.options.modulesOptions?.interface,
       })),
     )
@@ -65,7 +65,7 @@ export class BesignerAppController
   }
 
   public getBesignerController(): IBesignerInterfaceController {
-    return this.#interfaceController
+    return this.interfaceController
   }
 }
 
