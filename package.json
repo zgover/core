@@ -190,6 +190,7 @@
     "@swc/cli": "0.7.10",
     "@swc/core": "1.15.8",
     "@swc/jest": "0.2.39",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "16.1.0",
     "@types/cookie": "^0.5.4",
     "@types/cookie-signature": "^1.1.2",
