@@ -15,14 +15,24 @@
  * limitations under the License.
  */
 
+import { deleteBesignerApp, initializeBesignerApp } from '@aglyn/besigner-data-app'
 import { render } from '@testing-library/react'
 
 import BesignerRootProviderComponent from './besigner-root-provider.component'
 
 describe('BesignerRootProviderComponent', () => {
+  const appName = 'besigner-root-provider-test'
+
+  beforeEach(() => {
+    initializeBesignerApp({ appName })
+  })
+  afterEach(() => {
+    deleteBesignerApp(appName)
+  })
+
   it('should render successfully', () => {
     const { baseElement } = render(
-      <BesignerRootProviderComponent elementComponents={[]} />,
+      <BesignerRootProviderComponent appName={appName} elementComponents={[]} />,
     )
     expect(baseElement).toBeTruthy()
   })

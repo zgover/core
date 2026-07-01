@@ -21,7 +21,15 @@ import ElementLeafComponent from './node-leaf'
 
 describe('NodeLeaf', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<ElementLeafComponent />)
+    const node = {
+      $id: 'test-node',
+      type: 'node',
+      componentId: 'div',
+      props: {},
+      sx: {},
+      nodes: [],
+    }
+    const { baseElement } = render(<ElementLeafComponent node={node} />)
     expect(baseElement).toBeTruthy()
   })
 })
