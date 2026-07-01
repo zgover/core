@@ -2,7 +2,7 @@
 module.exports = {
   displayName: 'aglyn-plugin-mui',
   preset: '../../jest.preset.js',
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   transform: {
     '^.+\\.[tj]sx?$': [
       '@swc/jest',
