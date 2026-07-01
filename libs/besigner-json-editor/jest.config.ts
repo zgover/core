@@ -2,7 +2,7 @@
 module.exports = {
   displayName: 'besigner-json-editor',
   preset: '../../jest.preset.js',
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   transform: {
     '^.+\\.[tj]sx?$': [
       '@swc/jest',
