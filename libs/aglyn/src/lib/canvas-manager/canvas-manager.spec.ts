@@ -23,7 +23,7 @@ describe('Aglyn: Screen Manager', () => {
     [NODE_ROOT_ID]: {
       $id: NODE_ROOT_ID,
       type: NodeType.NODE,
-      parentId: null,
+      parentId: NODE_ROOT_ID,
       componentId: 'div',
       props: {},
       sx: {},
@@ -70,13 +70,15 @@ describe('Aglyn: Screen Manager', () => {
   const denormalized: NodeSchemaNested[] = [
     {
       $id: NODE_ROOT_ID,
-      parentId: null,
+      type: NodeType.NODE,
+      parentId: NODE_ROOT_ID,
       componentId: 'div',
       props: {},
       sx: {},
       nodes: [
         {
           $id: 'child1',
+          type: NodeType.NODE,
           parentId: NODE_ROOT_ID,
           componentId: 'div',
           props: {},
@@ -84,6 +86,7 @@ describe('Aglyn: Screen Manager', () => {
           nodes: [
             {
               $id: 'child1-1',
+              type: NodeType.NODE,
               parentId: 'child1',
               componentId: 'div',
               props: {},
@@ -92,6 +95,7 @@ describe('Aglyn: Screen Manager', () => {
             },
             {
               $id: 'child1-2',
+              type: NodeType.NODE,
               parentId: 'child1',
               componentId: 'div',
               props: {},
@@ -102,6 +106,7 @@ describe('Aglyn: Screen Manager', () => {
         },
         {
           $id: 'child2',
+          type: NodeType.NODE,
           parentId: NODE_ROOT_ID,
           componentId: 'div',
           props: {},
