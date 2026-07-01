@@ -56,10 +56,10 @@ export class AglynExtensionsController
     return NS
   }
 
-  #extensions: AglynExtensionMap = new Map()
+  _extensions: AglynExtensionMap = new Map()
 
   public get extensions(): Readonly<IAglynExtension[]> {
-    return [...this.#extensions.values()]
+    return [...this._extensions.values()]
   }
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
@@ -77,12 +77,12 @@ export class AglynExtensionsController
     options: AglynExtensionsControllerOptions,
   ) {
     super(app, options)
-    this.#setup()
+    this.setupInternal()
   }
-  #setup() {
-    this.#setupInitialExtensions()
+  private setupInternal() {
+    this.setupInitialExtensions()
   }
-  #setupInitialExtensions(): this {
+  private setupInitialExtensions(): this {
     this.options.defaults?.extensions?.forEach((p) => this.handleLoader(p))
     return this
   }
@@ -133,7 +133,7 @@ export class AglynExtensionsController
   }
 
   public getExtensionByName(extensionName: ExtensionUUN): IAglynExtension {
-    const extension = this.#extensions.get(extensionName)
+    const extension = this._extensions.get(extensionName)
     if (extension) {
       const current = extension?.lifecycle
       const autoload = extension?.getOptions?.()?.autoload
@@ -148,7 +148,7 @@ export class AglynExtensionsController
   }
 
   public getAllExtensions(): Readonly<IAglynExtension[]> {
-    return [...this.#extensions.values()]
+    return [...this._extensions.values()]
   }
 
   public registerExtension(payload: ExtensionRegisterPayload): this {
@@ -164,7 +164,7 @@ export class AglynExtensionsController
         ],
         { namespace },
         () => {
-          this.#extensions.set(extensionName, extension)
+          this._extensions.set(extensionName, extension)
           extension.lifecycle = AglynLifecycleFlag.REGISTERED
         },
       )
@@ -205,7 +205,7 @@ export class AglynExtensionsController
 
   public activateExtension(payload: ExtensionLoadPayload): this {
     const { extensionName } = payload
-    const extension = this.#extensions.get(
+    const extension = this._extensions.get(
       extensionName,
     ) as MutableShallow<IAglynExtension>
     const lifecycle = extension.lifecycle
@@ -240,7 +240,7 @@ export class AglynExtensionsController
 
   public deactivateExtension(payload: ExtensionUnloadPayload): this {
     const { extensionName } = payload
-    const extension = this.#extensions.get(
+    const extension = this._extensions.get(
       extensionName,
     ) as MutableShallow<IAglynExtension>
     if (extension) {
@@ -266,7 +266,7 @@ export class AglynExtensionsController
 
   public destroyExtension(payload: ExtensionDestroyPayload): this {
     const { extensionName } = payload
-    const extension = this.#extensions.get(extensionName)
+    const extension = this._extensions.get(extensionName)
     if (extension) {
       extension.lifecycle = AglynLifecycleFlag.DESTROYING
       const namespace = extension?.namespace
@@ -278,7 +278,7 @@ export class AglynExtensionsController
         { namespace },
         () => {
           extension.onDestroy?.(this.app)
-          this.#extensions.delete(extensionName)
+          this._extensions.delete(extensionName)
           extension.lifecycle = AglynLifecycleFlag.DESTROYED
         },
       )
@@ -290,7 +290,7 @@ export class AglynExtensionsController
   }
 
   public deactivateAllExtensions(): this {
-    this.#extensions.forEach((extension, extensionName) => {
+    this._extensions.forEach((extension, extensionName) => {
       if (extension.lifecycle === AglynLifecycleFlag.ACTIVATED) {
         this.deactivateExtension({ extensionName })
       }
@@ -299,7 +299,7 @@ export class AglynExtensionsController
   }
 
   public destroyAllExtensions(): this {
-    this.#extensions.forEach((extension, extensionName) => {
+    this._extensions.forEach((extension, extensionName) => {
       if (extension.lifecycle !== AglynLifecycleFlag.UNREGISTERED) {
         this.destroyExtension({ extensionName })
       }
