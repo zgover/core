@@ -31,7 +31,7 @@ function RouterLoading({ children }: { children: ReactNode }) {
   const router = useRouter()
   const { queueLoading } = useLoading()
   useEffect(() => {
-    const dequeue = []
+    const dequeue: ReturnType<typeof queueLoading>[] = []
     const handleStart = (url: string) => {
       dequeue.push(queueLoading())
     }

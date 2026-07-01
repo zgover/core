@@ -34,7 +34,7 @@ import {
 import clsx from 'clsx'
 import dynamic, { type DynamicOptionsLoadingProps } from 'next/dynamic'
 import { usePathname } from 'next/navigation'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef, type Ref, useMemo } from 'react'
 import NextLink, { type NextLinkProps } from './next-link'
 
 const Placeholder = (props: DynamicOptionsLoadingProps) => {
@@ -124,7 +124,7 @@ export const appLinkClassKey = generateComponentClassKeys('AglynAppLink', [
  * componentVariant === any = MuiLink
  */
 const AppLink = forwardRef(
-  <T extends AppLinkVariant>(props: AppLinkProps<T>, ref) => {
+  <T extends AppLinkVariant>(props: AppLinkProps<T>, ref: Ref<any>) => {
     const { className, componentVariant, href, ...rest } = props
 
     const variant = componentVariant

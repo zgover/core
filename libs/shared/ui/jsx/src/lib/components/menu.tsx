@@ -47,7 +47,7 @@ import {
 } from 'react'
 
 const ITEM_HEIGHT = 48
-const defaultState = {
+const defaultState: { anchorEl: Element; mouseX: number; mouseY: number } = {
   anchorEl: null,
   mouseX: null,
   mouseY: null,

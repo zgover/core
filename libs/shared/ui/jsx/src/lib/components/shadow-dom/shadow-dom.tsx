@@ -85,7 +85,7 @@ export function shadowDomRootFactory<P = any>(options: FactoryOptions<P>) {
         styleSheets.length > 0 && (root.adoptedStyleSheets = styleSheets)
         setRoot(root)
       } catch (error) {
-        if (error?.name !== 'NotSupportedError') throw error
+        if ((error as Error)?.name !== 'NotSupportedError') throw error
         styleSheets.length > 0 && (root.adoptedStyleSheets = styleSheets)
       }
     }, [styleSheets, delegatesFocus, mode, ssr])
