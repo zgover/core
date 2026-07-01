@@ -64,7 +64,7 @@ export class AglynComponentsController
     return NS
   }
 
-  #context: ComponentsRegistryContext = {
+  _context: ComponentsRegistryContext = {
     bundles: new Map(),
     components: new Map(),
     schemas: new Map(),
@@ -72,16 +72,16 @@ export class AglynComponentsController
   }
 
   public get bundles(): InstanceBundles {
-    return this.#context.bundles
+    return this._context.bundles
   }
   public get components(): InstanceComponents {
-    return this.#context.components
+    return this._context.components
   }
   public get schemas(): InstanceSchemas {
-    return this.#context.schemas
+    return this._context.schemas
   }
   public get presets(): InstanceNodePresets {
-    return this.#context.presets
+    return this._context.presets
   }
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
