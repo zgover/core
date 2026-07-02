@@ -101,7 +101,6 @@ export class _EmotionDocumentComponent<
         id={`emotion-server-${key}`}
         key={key}
         data-emotion={`${key} ${ids.join(' ')}`}
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: css }}
       />
     )
