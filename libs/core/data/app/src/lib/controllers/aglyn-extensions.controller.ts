@@ -103,29 +103,29 @@ export class AglynExtensionsController
 
   public handleLoader(payload: ExtensionHandleLoaderPayload): IAglynExtension {
     const { loader, options } = payload
-    const module = loader()
+    const loadedModule = loader()
     const appName = this.app.getName()
-    if (!module) {
+    if (!loadedModule) {
       throw AGLYN_ERROR.create(
         AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER,
         { appName },
       )
     }
     if (
-      !isAglynModule(module) ||
-      !isAglynExtension(module) ||
-      !_isCtor(module)
+      !isAglynModule(loadedModule) ||
+      !isAglynExtension(loadedModule) ||
+      !_isCtor(loadedModule)
     ) {
       throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE, {
         appName,
-        extensionName: module?.['moduleName'] ?? 'unknown',
+        extensionName: loadedModule?.['moduleName'] ?? 'unknown',
       })
     }
-    const instance = new module({ ...options, app: this.app })
+    const instance = new loadedModule({ ...options, app: this.app })
     if (!(instance instanceof AglynExtension)) {
       throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE, {
         appName,
-        extensionName: module?.['extensionName'] ?? 'unknown',
+        extensionName: loadedModule?.['extensionName'] ?? 'unknown',
       })
     }
     this.registerExtension({ extension: instance })
