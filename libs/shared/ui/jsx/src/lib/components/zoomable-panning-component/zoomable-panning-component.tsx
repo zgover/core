@@ -123,14 +123,14 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
   transformMatrixString = `matrix(1, 0, 0, 1, 0, 0)`
   intermediateTransformMatrixString = `matrix(1, 0, 0, 1, 0, 0)`
 
-  state: State = {
+  override state: State = {
     x: 0,
     y: 0,
     scale: 1,
     angle: 0,
   }
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     const {autoCenter, autoCenterZoomLevel, minZoom, maxZoom} = this.props
 
     if (this.container.current) {
@@ -145,7 +145,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
     }
   }
 
-  componentDidUpdate(prevProps: ZoomablePanningComponentProps, prevState: State): void {
+  override componentDidUpdate(prevProps: ZoomablePanningComponentProps, prevState: State): void {
     if (prevProps.autoCenter !== this.props.autoCenter
       && this.props.autoCenter) {
       this.autoCenter(this.props.autoCenterZoomLevel)
@@ -166,7 +166,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
     }
   }
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     this.cleanMouseListeners()
     this.cleanTouchListeners()
     releaseTextSelection()
@@ -205,7 +205,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
     // be considered as we will handle touch event separately
     if (this.touchInProgress) {
       e.stopPropagation()
-      return false
+      return
     }
 
     const isLeftButton = ((e.button === 1 && window.event !== null) || e.button === 0)
@@ -777,7 +777,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
     )
   }
 
-  render() {
+  override render() {
     const {
       children,
       autoCenter,
@@ -812,7 +812,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
     const {x, y, scale, angle} = this.state
     const transform = getTransformMatrixString(this.getTransformMatrix(x, y, scale, angle))
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env['NODE_ENV'] !== 'production') {
       warning(
         onDoubleClick === undefined || typeof onDoubleClick === 'function',
         'Expected `onDoubleClick` listener to be a function, instead got a value of `%s` type.',

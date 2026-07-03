@@ -146,7 +146,7 @@ const AspectRatioRoot = styled('div', {
 const AspectRatioContent = styled('div', {
   name: 'MuiAspectRatio',
   slot: 'Content',
-  overridesResolver: (props, styles) => styles.content,
+  overridesResolver: (props, styles) => styles['content'],
 })<{ ownerState: AspectRatioOwnerState }>(({ theme, ownerState }) => [
   {
     flex: 1,

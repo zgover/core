@@ -42,6 +42,7 @@ export function useOnMouseEnter(
         node.removeEventListener('mouseenter', callback)
       }
     }
+    return undefined
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

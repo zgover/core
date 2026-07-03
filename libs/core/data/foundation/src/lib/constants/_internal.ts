@@ -41,6 +41,6 @@ email to 'info@aglyn.com'.
 — Aglyn Engineering Team
 `
 
-if (process?.['browser']) {
+if (typeof window !== 'undefined') {
   console.log(CONSOLE_GREETING, CONSOLE_GREETING_STYLES)
 }

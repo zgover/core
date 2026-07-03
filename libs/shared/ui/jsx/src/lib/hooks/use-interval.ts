@@ -52,6 +52,7 @@ export function useInterval(
       interval = setInterval(handler, delay, ...args)
       return () => clearInterval(interval)
     }
+    return undefined
     // args is a rest param (new array each render) — omit from deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [delay, count])

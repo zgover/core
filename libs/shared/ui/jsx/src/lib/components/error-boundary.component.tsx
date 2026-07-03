@@ -60,7 +60,7 @@ class ErrorBoundaryComponentClass extends Component<ErrorBoundaryProps, State> {
     return { hasError: true, error }
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // You can also log the error to an error reporting service
     // logErrorToMyService(error, errorInfo)
     console.error(error, errorInfo, 'componentDidCatch')
@@ -70,7 +70,7 @@ class ErrorBoundaryComponentClass extends Component<ErrorBoundaryProps, State> {
     }
   }
 
-  public render() {
+  public override render() {
     return this.state.hasError
       ? this.props.fallback ?? <h6>Something went wrong...</h6>
       : this.props.children
