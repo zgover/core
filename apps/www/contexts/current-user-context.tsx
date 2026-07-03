@@ -17,7 +17,7 @@
 
 import {createHocWithContextConsumer} from '@aglyn/shared-ui-jsx'
 import {createContext, type PropsWithChildren, useContext, useEffect, useState} from 'react'
-import {type  FbUser} from '../lib/aglyn-deprecated'
+import {type FbUser} from '@aglyn/shared-util-fbclient'
 import {type AppContextType, withAppContext} from './app-context'
 
 
