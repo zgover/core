@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
 import { mergeRefs, useId } from '@aglyn/shared-ui-jsx'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
@@ -23,7 +24,7 @@ import { mergeProps } from '@react-aria/utils'
 import { observer } from 'mobx-react-lite'
 import { Children, cloneElement, CSSProperties, useEffect, useRef } from 'react'
 
-export interface DraggableDroppableProps<T extends { $id: string }> {
+export interface DraggableDroppableProps<T extends Aglyn.NodeSchema<any>> {
   children: JSX.Element
   node: T
   type: Besigner.DragType
@@ -34,7 +35,7 @@ export interface DraggableDroppableProps<T extends { $id: string }> {
 }
 
 export const DraggableDroppable = observer(
-  <T extends { $id: string }>(props: DraggableDroppableProps<T>) => {
+  <T extends Aglyn.NodeSchema<any>>(props: DraggableDroppableProps<T>) => {
     const {
       node,
       type,

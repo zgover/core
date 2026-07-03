@@ -31,7 +31,7 @@ import {
   Dialog,
   DialogContent,
   Divider,
-  DrawerProps,
+  DialogProps,
   Grid,
   IconButton,
   InputAdornment,
@@ -57,11 +57,10 @@ const Transition = forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />
 })
 
-export interface ComponentPickerProps extends DrawerProps {
-  onSelectItem?: (
-    e: SyntheticEvent,
-    item?: { option: Aglyn.NodeSchema<any> },
-  ) => void
+type PickerOption = Aglyn.ComponentSchema<any> | Aglyn.PresetSchema<any>
+
+export interface ComponentPickerProps extends DialogProps {
+  onSelectItem?: (e: SyntheticEvent, item?: { option: PickerOption }) => void
 }
 
 export const ComponentPicker = observer(
@@ -72,7 +71,7 @@ export const ComponentPicker = observer(
     const [filterOpen, setFilterOpen] = useState(false)
     const [filter, setFilter] = useState('')
     const [items, setItems] = useState(allItems)
-    const [selected, setSelected] = useState<Aglyn.NodeSchema<any>>(null)
+    const [selected, setSelected] = useState<PickerOption>(null)
 
     const clearSelected = useCallback(() => setSelected(null), [])
     const handleConfirm = useCallback(
@@ -125,12 +124,12 @@ export const ComponentPicker = observer(
 
     const handleClose = useCallback(
       (e: object, reason = 'canceled') => {
-        onClose?.(e, reason as Parameters<NonNullable<DrawerProps['onClose']>>[1])
+        onClose?.(e, reason as Parameters<NonNullable<DialogProps['onClose']>>[1])
       },
       [onClose],
     )
 
-    const handleItemClick = useCallback((e, item: Aglyn.NodeSchema<any>) => {
+    const handleItemClick = useCallback((e, item: PickerOption) => {
       setSelected((prev) => {
         if (prev && prev?.$id === item?.$id) {
           return null
@@ -146,7 +145,7 @@ export const ComponentPicker = observer(
         open={open}
         maxWidth="sm"
         slotProps={{ paper: { sx: { width: '100%' } } }}
-        TransitionComponent={Transition}
+        slots={{ transition: Transition }}
         {...rest}
       >
         <AppBar position="relative">

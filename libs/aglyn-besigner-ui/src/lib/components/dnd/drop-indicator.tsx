@@ -33,6 +33,8 @@ const classes = generateComponentClassKeys('DropIndicator', [
 
 type IndicatorProps = ComponentProps<typeof motion.div> & {
   variant?: 'vertical' | 'horizontal'
+  // framer-motion's HTML prop types omit className; MUI styled() accepts it.
+  className?: string
 }
 
 const lineW = 6
@@ -81,6 +83,8 @@ export interface DropIndicatorProps extends ComponentProps<typeof Indicator> {
   visible?: boolean
   rect: ClientRect
   region: Besigner.DropRegion
+  // framer-motion's HTML prop types omit className; MUI styled() accepts it.
+  className?: string
 }
 
 export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(

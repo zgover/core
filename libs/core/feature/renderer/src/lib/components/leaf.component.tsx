@@ -21,7 +21,7 @@ import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { arraySafe } from '@aglyn/shared-util-tools'
 import { Box, type BoxProps } from '@mui/material'
 import clsx from 'clsx'
-import { forwardRef, Fragment, useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import useAglynElementResolvedProps from '../hooks/use-aglyn-element-resolved-props'
 import BranchComponent from './branch.component'
@@ -57,11 +57,14 @@ export const LeafComponent = forwardRef<any, LeafComponentProps>(
       >
         {children}
         <ReactMarkdown
-          children={resolved?.props?.children}
           components={{
-            p: Fragment,
+            // Unwrap paragraphs; Fragment itself is not assignable to the
+            // markdown 'p' component type.
+            p: ({ children: pChildren }) => <>{pChildren}</>,
           }}
-        />
+        >
+          {resolved?.props?.children}
+        </ReactMarkdown>
         <BranchComponent
           key={`element-branch-${$id}`}
           $id={$id}

@@ -146,7 +146,6 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
       <>
         <NoSsr>
           <FormRenderer
-            ref={ref}
             componentMapper={simpleComponentMapper}
             onCancel={handleFormCancel}
             onSubmit={handleElementSave}

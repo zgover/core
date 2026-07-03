@@ -48,7 +48,9 @@ export function useAglynElementData<
   return useSubscribable(
     getCanvasNormalizedNodesStore(app),
     defaultValue,
-    (store) => {
+    // The overall result is cast below; the map result union defeats
+    // useSubscribable's MapObservable inference for conditional K.
+    (store): any => {
       const element = store?.[$id]
       return property ? element?.[property] : element
     },

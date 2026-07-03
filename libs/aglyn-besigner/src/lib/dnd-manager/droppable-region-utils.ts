@@ -16,7 +16,15 @@
  */
 import { DropRegion } from './dnd-manager'
 
-export function buildDroppableRects(rect: DOMRect) {
+// Structural rect type: dnd-kit passes a ClientRect that lacks DOMRect's
+// x/y/toJSON, and x/y are defaulted below anyway.
+export type DroppableClientRect = Pick<
+  DOMRect,
+  'width' | 'height' | 'top' | 'right' | 'bottom' | 'left'
+> &
+  Partial<Pick<DOMRect, 'x' | 'y'>>
+
+export function buildDroppableRects(rect: DroppableClientRect) {
   const {
     width = 0,
     height = 0,
@@ -94,7 +102,7 @@ export function withinRegion(rect: { left: number; top: number; width: number; h
   return xis && yis
 }
 
-export function determineDropRegion(clientRect: DOMRect, x: number, y: number, regions?: ReturnType<typeof buildDroppableRects>) {
+export function determineDropRegion(clientRect: DroppableClientRect, x: number, y: number, regions?: ReturnType<typeof buildDroppableRects>) {
   const _regions = regions || buildDroppableRects(clientRect)
   switch (true) {
     case withinRegion(_regions.top, x, y):

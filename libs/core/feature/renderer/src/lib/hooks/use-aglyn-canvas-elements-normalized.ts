@@ -16,12 +16,12 @@
  */
 
 import { getCanvasNormalizedNodesStore } from '@aglyn/core-data-app'
-import type { AglynNodesList } from '@aglyn/core-data-foundation'
+import type { AglynNodesById } from '@aglyn/core-data-foundation'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
-export function useAglynCanvasElementsNormalized(): AglynNodesList {
+export function useAglynCanvasElementsNormalized(): AglynNodesById {
   const app = useAglynAppContext()
-  return useSubscribable(getCanvasNormalizedNodesStore(app)) as AglynNodesList
+  return useSubscribable(getCanvasNormalizedNodesStore(app))
 }
 export default useAglynCanvasElementsNormalized

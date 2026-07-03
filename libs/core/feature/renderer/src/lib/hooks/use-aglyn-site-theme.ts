@@ -19,11 +19,13 @@ import { createTheme } from '@aglyn/shared-ui-theme'
 import { useMemo } from 'react'
 
 export type UseAglynSiteThemeOptions = {
-  container?: Element
+  // Node covers ShadowRoot containers, which MUI accepts at runtime but
+  // types as Element only.
+  container?: Element | Node
 }
 
 export function useAglynSiteTheme(options: UseAglynSiteThemeOptions = {}) {
-  const { container } = options
+  const container = options.container as Element | undefined
 
   return useMemo(() => {
     return createTheme({

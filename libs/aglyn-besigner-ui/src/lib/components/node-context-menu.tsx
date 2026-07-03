@@ -136,11 +136,10 @@ export const NodeContextMenu = observer(
             variant="caption"
             color="text.secondary"
             component="div"
-            bgcolor="primary.dark"
-            px={1}
-            py={0.15}
-            mb={1}
             sx={{
+              px: 1,
+              py: 0.15,
+              mb: 1,
               textAlign: 'center',
               textOverflow: 'ellipsis',
               overflow: 'hidden',

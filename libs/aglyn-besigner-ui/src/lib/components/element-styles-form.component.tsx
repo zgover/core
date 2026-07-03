@@ -973,7 +973,6 @@ const ElementStylesForm = observer(
           />
 
           <FormRenderer
-            ref={ref}
             FormTemplate={ElementPropsFormTemplate}
             componentMapper={componentMapper}
             onCancel={handleFormCancel}
