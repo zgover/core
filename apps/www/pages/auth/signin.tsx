@@ -94,21 +94,20 @@ export default withAppContext<Props>(function SignIn(props) {
       <form autoComplete="on" onSubmit={onSubmit}>
         <div>
           <Typography
-            children="Enter your credentials"
             variant="h5"
             gutterBottom
             sx={{ textTransform: 'uppercase' }}
-          />
+          >
+            Enter your credentials
+          </Typography>
           <FieldSet
             fields={fields}
             loading={submitting}
             onUpdate={handleUpdate}
           />
-          <AppLink
-            children="Forgot password?"
-            color="primary"
-            href="/auth/recovery"
-          />
+          <AppLink color="primary" href="/auth/recovery">
+            Forgot password?
+          </AppLink>
           {formError && (
             <Box
               sx={{
@@ -119,8 +118,9 @@ export default withAppContext<Props>(function SignIn(props) {
                 color: 'error.contrastText',
                 my: 2,
                 px: 2,
-                py: 2
-              }}>
+                py: 2,
+              }}
+            >
               <Typography>
                 <b>{'Error: '}</b>
                 {formError}
@@ -128,7 +128,6 @@ export default withAppContext<Props>(function SignIn(props) {
             </Box>
           )}
           <Button
-            children={submitting ? 'Please wait...' : 'Continue'}
             color="secondary"
             disabled={Boolean(submitting)}
             size="large"
@@ -136,7 +135,9 @@ export default withAppContext<Props>(function SignIn(props) {
             variant="contained"
             fullWidth
             sx={{ my: 2 }}
-          />
+          >
+            {submitting ? 'Please wait...' : 'Continue'}
+          </Button>
         </div>
       </form>
       <Typography
@@ -146,14 +147,12 @@ export default withAppContext<Props>(function SignIn(props) {
         variant="overline"
         sx={{ lineHeight: 1.5, marginTop: 4 }}
       >
-        <b children={"Don't have an account?"} />
+        <b>{"Don't have an account?"}</b>
         <br />
-        <AppLink
-          children="Create an account"
-          color="secondary"
-          href="/auth/signup"
-        />
+        <AppLink color="secondary" href="/auth/signup">
+          Create an account
+        </AppLink>
       </Typography>
     </AuthLayout>
-  );
+  )
 })

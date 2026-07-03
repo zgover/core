@@ -21,17 +21,17 @@ import {type Middleware} from 'next-api-middleware'
 import {Res} from '../helpers'
 
 
-export interface RateLimiter<K extends {}, V extends {}> {
+export interface RateLimiter<K extends NonNullable<unknown>, V extends NonNullable<unknown>> {
   getTokenCache: () => LRUCache<K, V>
   checkLimit: (res: NextApiResponse, token?: string, limit?: number) => Promise<void>
 }
 
-export interface RateLimiterOptions<K extends {}, V extends {}> extends Partial<LRUCache.OptionsMaxLimit<K, V, unknown>> {
+export interface RateLimiterOptions<K extends NonNullable<unknown>, V extends NonNullable<unknown>> extends Partial<LRUCache.OptionsMaxLimit<K, V, unknown>> {
   limit?: number
   token?: string
 }
 
-export function createRateLimiter<K extends {}, V extends {}>(options?: RateLimiterOptions<K, V>): RateLimiter<K, V> {
+export function createRateLimiter<K extends NonNullable<unknown>, V extends NonNullable<unknown>>(options?: RateLimiterOptions<K, V>): RateLimiter<K, V> {
   const {limit: _limit, max: _max, ttl: _ttl, token: _token, ...opts} = options
   const max = _max ?? 100 /* 100 users per second */
   const ttl = _ttl ?? 60000 /* 60 seconds */
@@ -66,7 +66,7 @@ export function createRateLimiter<K extends {}, V extends {}>(options?: RateLimi
   }
 }
 
-export function rateLimiterFactory<K extends {}, V extends {}>(options?: RateLimiterOptions<K, V>): Middleware {
+export function rateLimiterFactory<K extends NonNullable<unknown>, V extends NonNullable<unknown>>(options?: RateLimiterOptions<K, V>): Middleware {
   const rateLimiter = createRateLimiter<K, V>(options)
 
   return async (req: NextApiRequest, res: NextApiResponse, next) => {

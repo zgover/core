@@ -39,7 +39,7 @@ export const {
 
 export type CurrentUserContextConsumer = typeof CurrentUserContextConsumer
 
-export interface CurrentUserProviderComponentProps extends PropsWithChildren<{}> {
+export interface CurrentUserProviderComponentProps extends PropsWithChildren {
   app: AppContextType
 }
 
