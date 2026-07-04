@@ -15,13 +15,8 @@
  * limitations under the License.
  */
 
-import type { IBesignerAppController } from '@aglyn/besigner-data-app'
-import { useAglynAppContext } from '@aglyn/aglyn-node-renderer'
-
-export function useBesignerAppContext(
-  ...args: Parameters<typeof useAglynAppContext>
-): IBesignerAppController {
-  return useAglynAppContext<IBesignerAppController>(...args)
-}
-
-export default useBesignerAppContext
+export {
+  useBesignerAppContext,
+  default as BesignerAppContext,
+} from '../contexts/besigner-app-context'
+export { useBesignerAppContext as default } from '../contexts/besigner-app-context'

@@ -16,16 +16,13 @@
  */
 
 import type {
-  AglynModuleModelOptions,
-  AglynModuleModelT,
   AglynNodeHierarchy,
   BundleId,
   ComponentId,
   ComponentsLinealOrder,
-  IAglynAppController,
-  IAglynModuleModel,
   NodeId,
 } from '@aglyn/aglyn'
+import type { IBesignerAppController } from './besigner-app.types'
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import type { LogLevelString } from '@aglyn/shared-util-logger'
 import type { BehaviorSubject } from 'rxjs'
@@ -120,13 +117,12 @@ export type BesignerDndElementBaseData<T extends DndDragType | DndDropType> =
     restrictChildren?: ComponentsLinealOrder
   }
 
-export interface BesignerInterfaceControllerOptions
-  extends AglynModuleModelOptions {
+export interface BesignerInterfaceControllerOptions {
+  logLevel?: LogLevelString
   defaults?: Partial<BesignerContext>
 }
 
-export interface IBesignerInterfaceController
-  extends IAglynModuleModel<BesignerInterfaceControllerOptions> {
+export interface IBesignerInterfaceController {
   readonly __store__: {
     [K in keyof BesignerContext]: BehaviorSubject<BesignerContext[K]>
   }
@@ -154,10 +150,9 @@ export interface IBesignerInterfaceController
   togglePanel(payload: BesignerTogglePanelPayload): this
 }
 
-export interface BesignerInterfaceControllerT
-  extends AglynModuleModelT<BesignerInterfaceControllerOptions> {
+export interface BesignerInterfaceControllerT {
   new (
-    app: IAglynAppController,
+    app: IBesignerAppController,
     options: BesignerInterfaceControllerOptions,
   ): IBesignerInterfaceController
 }

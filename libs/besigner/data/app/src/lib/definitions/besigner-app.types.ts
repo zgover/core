@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,37 @@
  * limitations under the License.
  */
 
-import type {
-  AglynAppControllerT,
-  AglynAppOptions,
-  IAglynAppController,
-} from '@aglyn/aglyn'
+import type { LogLevelString } from '@aglyn/shared-util-logger'
 import type {
   BesignerInterfaceControllerOptions,
   IBesignerInterfaceController,
 } from './besigner-interface.types'
 
-export interface BesignerAppOptions extends AglynAppOptions {
-  modulesOptions?: AglynAppOptions['modulesOptions'] & {
+/** Unique app name */
+export type AppUUN = string
+
+export const DEFAULT_APP_UUN: AppUUN = '[DEFAULT]'
+
+export interface BesignerAppOptions {
+  appName?: AppUUN
+  logLevel?: LogLevelString
+  modulesOptions?: {
     interface?: BesignerInterfaceControllerOptions
   }
 }
 
-export interface IBesignerAppController
-  extends IAglynAppController<BesignerAppOptions> {
+export interface IBesignerAppController {
+  readonly appName: AppUUN
+  readonly deleted: boolean
+  readonly options: BesignerAppOptions
   readonly interface?: IBesignerInterfaceController
 
+  getName(): AppUUN
   getBesignerController(): IBesignerInterfaceController
+  onDestroy?(): void
+  setDeleted(value: boolean): void
 }
 
-export interface BesignerAppControllerT
-  extends AglynAppControllerT<BesignerAppOptions> {
+export interface BesignerAppControllerT {
   new (options: BesignerAppOptions): IBesignerAppController
 }

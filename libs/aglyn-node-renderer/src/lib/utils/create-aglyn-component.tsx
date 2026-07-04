@@ -18,9 +18,9 @@
 import * as Aglyn from '@aglyn/aglyn'
 import {
   AGLYN_OF,
+  type AglynComponentSchema,
   type AglynExoticComponent,
   COMPONENT_ELEMENT_TYPE,
-  type ComponentRegisterPayload,
 } from '@aglyn/aglyn'
 import {
   type ErrorBoundaryProps,
@@ -30,6 +30,11 @@ import { styled } from '@aglyn/shared-ui-theme'
 import { cloneDeep } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics, pascalCase } from '@aglyn/shared-util-vendor'
 import { forwardRef } from 'react'
+
+export type ComponentRegisterPayload<P extends JSX.AnyProps = any> = {
+  schema: AglynComponentSchema<P>
+  component: AglynExoticComponent<P>
+}
 
 export function createAglynComponent<P extends JSX.AnyProps = any, C = any>(
   schema: Aglyn.ComponentSchema<P>,

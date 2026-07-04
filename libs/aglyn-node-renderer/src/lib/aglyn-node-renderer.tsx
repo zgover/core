@@ -35,6 +35,5 @@ export * from './contexts/renderer-components'
 export { default as RendererComponents } from './contexts/renderer-components'
 
 // Absorbed from core-feature-renderer (controller-framework react bindings)
-export * from './contexts/aglyn-app-context'
 export * from './hooks/use-aglyn-site-theme'
 export * from './utils/create-aglyn-component'

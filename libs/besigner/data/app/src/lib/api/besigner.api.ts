@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import type { IAglynAppController } from '@aglyn/aglyn'
 import { BehaviorSubject } from 'rxjs'
 import { _INTERNAL_BESIGNERS_ } from '../constants/_internal'
 import type {
@@ -42,14 +41,14 @@ import type {
 import { _validateBesignerAppArg } from './app.api'
 
 export function _getBesignerController(
-  app: IAglynAppController,
+  app: IBesignerAppController,
 ): IBesignerInterfaceController {
   _validateBesignerAppArg(app as IBesignerAppController)
   return _INTERNAL_BESIGNERS_.get(app.getName())
 }
 
 export function getBesignerStore<K extends keyof BesignerContext>(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerGetStorePayload<K>,
 ): BehaviorSubject<BesignerContext[K]> {
   const besignerController = _getBesignerController(
@@ -59,7 +58,7 @@ export function getBesignerStore<K extends keyof BesignerContext>(
 }
 
 export function setBesignerFlag(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerSetFlagPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -69,7 +68,7 @@ export function setBesignerFlag(
 }
 
 export function setBesignerFlags(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerSetFlagsPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -79,7 +78,7 @@ export function setBesignerFlags(
 }
 
 export function setBesignerPanel(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerSetPanelPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -89,7 +88,7 @@ export function setBesignerPanel(
 }
 
 export function setBesignerPanels(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerSetPanelsPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -99,7 +98,7 @@ export function setBesignerPanels(
 }
 
 export function toggleBesignerPanel(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerTogglePanelPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -109,7 +108,7 @@ export function toggleBesignerPanel(
 }
 
 export function openBesignerPanel(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerOpenPanelPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -119,7 +118,7 @@ export function openBesignerPanel(
 }
 
 export function closeBesignerPanel(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload: BesignerClosePanelPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -129,7 +128,7 @@ export function closeBesignerPanel(
 }
 
 export function setBesignerDndItem(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetDndItemPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -139,7 +138,7 @@ export function setBesignerDndItem(
 }
 
 export function setBesignerDnd(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetDndPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -149,7 +148,7 @@ export function setBesignerDnd(
 }
 
 export function setBesignerCanvasItem(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetCanvasItemPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -159,7 +158,7 @@ export function setBesignerCanvasItem(
 }
 
 export function setBesignerCanvas(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetCanvasPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -169,7 +168,7 @@ export function setBesignerCanvas(
 }
 
 export function setBesignerCanvasSelected(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetCanvasSelectedPayload,
 ) {
   const besignerController = _getBesignerController(
@@ -179,7 +178,7 @@ export function setBesignerCanvasSelected(
 }
 
 export function setBesignerCanvasHovered(
-  app: IAglynAppController,
+  app: IBesignerAppController,
   payload?: BesignerSetCanvasHoveredPayload,
 ) {
   const besignerController = _getBesignerController(

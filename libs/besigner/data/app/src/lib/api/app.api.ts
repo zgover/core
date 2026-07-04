@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,49 +15,38 @@
  * limitations under the License.
  */
 
-import {
-  _INTERNAL_APPS_,
-  AGLYN_EMITTER,
-  AGLYN_ERROR,
-  AGLYN_LOGGER,
-  AglynErrorEventFlag,
-  AglynEventStateFlag,
-  type AppUUN,
-  DEFAULT_APP_UUN,
-} from '@aglyn/aglyn'
 import { _isObj, _isStrEmpty } from '@aglyn/shared-util-tools'
+import { _INTERNAL_BESIGNER_APPS_ } from '../constants/_internal'
 import BesignerAppController from '../controllers/besigner-app.controller'
-import type {
-  BesignerAppOptions,
-  IBesignerAppController,
+import {
+  type AppUUN,
+  type BesignerAppOptions,
+  DEFAULT_APP_UUN,
+  type IBesignerAppController,
 } from '../definitions/besigner-app.types'
 
 export function getAllBesignerApps(): IBesignerAppController[] {
-  return [..._INTERNAL_APPS_.values()] as IBesignerAppController[]
+  return [..._INTERNAL_BESIGNER_APPS_.values()]
 }
 
 export function doesBesignerAppExist(appName?: AppUUN): boolean {
-  return _INTERNAL_APPS_.has(appName || DEFAULT_APP_UUN)
+  return _INTERNAL_BESIGNER_APPS_.has(appName || DEFAULT_APP_UUN)
 }
 
 export function getBesignerApp(name?: AppUUN): IBesignerAppController {
   const appName = name || DEFAULT_APP_UUN
   if (!doesBesignerAppExist(appName)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_NONE, { appName })
+    throw new Error(`[Besigner] No app initialized with name "${appName}"`)
   }
-  return _INTERNAL_APPS_.get(appName) as IBesignerAppController
+  return _INTERNAL_BESIGNER_APPS_.get(appName)
 }
 
 export function deleteBesignerApp(appName?: AppUUN): void {
   const resolvedName = appName || DEFAULT_APP_UUN
   const app = getBesignerApp(resolvedName)
-  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETING, { appName: resolvedName })
-  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETING, { appName: resolvedName })
   app.onDestroy?.()
-  _INTERNAL_APPS_.delete(resolvedName)
+  _INTERNAL_BESIGNER_APPS_.delete(resolvedName)
   app.setDeleted(true)
-  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETED, { appName })
-  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETED, { appName })
 }
 
 export function initializeBesignerApp(
@@ -65,37 +54,22 @@ export function initializeBesignerApp(
 ): IBesignerAppController {
   const appName: string = opts?.appName || DEFAULT_APP_UUN
   if (_isStrEmpty(appName)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_NAME, { appName })
+    throw new Error('[Besigner] App name must be a non-empty string')
   }
   if (doesBesignerAppExist(appName)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_EXISTS, { appName })
+    throw new Error(`[Besigner] App "${appName}" is already initialized`)
   }
   const app: IBesignerAppController = new BesignerAppController({
     ...opts,
     appName,
   })
-  app.setupModules()
-  app.setupExtensions()
-  _INTERNAL_APPS_.set(appName, app)
-
-  app.onInitialize()
-
+  _INTERNAL_BESIGNER_APPS_.set(appName, app)
   return app
 }
 
 export function _validateBesignerAppArg(app: IBesignerAppController): void {
-  if (
-    !(app as IBesignerAppController) ||
-    !_isObj(app) /*!(app instanceof BesignerAppController)*/
-  ) {
-    console.warn('Not instanceof BesignerAppController', app)
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_INSTANCE, {
-      appName: app?.getName?.(),
-    })
-  }
-  if (app['deleted']) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_DELETED, {
-      appName: app?.getName?.(),
-    })
+  if (!app || !_isObj(app)) {
+    console.warn('Not a BesignerAppController instance', app)
+    throw new Error('[Besigner] Invalid app instance argument')
   }
 }

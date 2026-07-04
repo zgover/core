@@ -15,11 +15,6 @@
  * limitations under the License.
  */
 
-import { AglynModuleModel } from '@aglyn/aglyn'
-import type {
-  AglynModuleEffectListener,
-  IAglynAppController,
-} from '@aglyn/aglyn'
 import { cloneDeep } from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
 import isEqual from 'lodash-es/isEqual'
@@ -46,6 +41,7 @@ import type {
   BesignerSetPanelsPayload,
   BesignerTogglePanelPayload,
 } from '../constants/emitter'
+import type { IBesignerAppController } from '../definitions/besigner-app.types'
 import type {
   BesignerContext,
   BesignerInterfaceControllerOptions,
@@ -56,7 +52,6 @@ const TAG = 'BesignerInterface'
 const NS = 'com.aglyn.besigner.data.controller.interface'
 
 export class BesignerInterfaceController
-  extends AglynModuleModel<BesignerInterfaceControllerOptions>
   implements IBesignerInterfaceController
 {
   public readonly __store__: {
@@ -82,15 +77,10 @@ export class BesignerInterfaceController
     return this.__store__?.panels
   }
 
-  protected get listeners(): AglynModuleEffectListener<any>[] {
-    return []
-  }
-
   constructor(
-    app: IAglynAppController,
-    options: BesignerInterfaceControllerOptions,
+    protected readonly app: IBesignerAppController,
+    protected readonly options: BesignerInterfaceControllerOptions,
   ) {
-    super(app, options)
     const state = defaultsDeep({}, options.defaults, {
       flags: {
         debug: true,
@@ -136,9 +126,7 @@ export class BesignerInterfaceController
   private setupInternal() {}
 
   public toJSON() {
-    return {
-      ...super.toJSON(),
-    }
+    return { tag: TAG, namespace: NS, appName: this.app?.getName?.() }
   }
 
   private isDeepEqual<T>(prev: unknown, now: T): prev is T {
