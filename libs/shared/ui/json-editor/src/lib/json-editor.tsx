@@ -57,14 +57,14 @@ type OnSave = {
   bivarianceHack(event: SyntheticEvent<any, any>, value: iJSON): void
 }['bivarianceHack']
 
-export interface BesignerJsonEditorProps
+export interface JsonEditorProps
   extends Omit<DialogProps, 'defaultValue'> {
   defaultValue?: CodeMirrorProps['defaultValue']
   onSave?: OnSave
   onClose?: OnClose
 }
 
-const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
+const JsonEditorRaw = forwardRef<any, JsonEditorProps>(
   (props, ref) => {
     const { onClose, onSave, defaultValue, open, ...rest } = props
     const [data, setData] = useState(
@@ -181,8 +181,8 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
     );
   },
 )
-BesignerJsonEditorRaw.displayName = 'BesignerJsonEditor'
+JsonEditorRaw.displayName = 'JsonEditor'
 
-export const BesignerJsonEditor = observer(BesignerJsonEditorRaw)
+export const JsonEditor = observer(JsonEditorRaw)
 
-export default BesignerJsonEditor
+export default JsonEditor

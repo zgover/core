@@ -15,4 +15,4 @@
  * limitations under the License.
  */
 
-export * from './lib/besigner-json-editor'
+export * from './lib/json-editor'

@@ -18,7 +18,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
-import type { BesignerJsonEditorProps } from '@aglyn/besigner-json-editor'
+import type { JsonEditorProps } from '@aglyn/shared-ui-json-editor'
 import {
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
@@ -68,9 +68,9 @@ const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
   () => import('@aglyn/besigner-ui').then((mod) => mod.ViewportCanvasComponent),
   {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
-const BesignerJsonEditor = dynamic<BesignerJsonEditorProps>(
+const JsonEditor = dynamic<JsonEditorProps>(
   () =>
-    import('@aglyn/besigner-json-editor').then((mod) => mod.BesignerJsonEditor),
+    import('@aglyn/shared-ui-json-editor').then((mod) => mod.JsonEditor),
   {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
@@ -333,7 +333,7 @@ function BesignerPage(props) {
         }}
       />
       {Boolean(Aglyn.canvas.rootNode && jsonOpen) && (
-        <BesignerJsonEditor
+        <JsonEditor
           open={Boolean(Aglyn.canvas.rootNode && jsonOpen)}
           onClose={closeJsonEditor}
           onSave={handleJsonSave}

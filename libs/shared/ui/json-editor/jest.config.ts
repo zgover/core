@@ -1,7 +1,7 @@
 /* eslint-disable */
 module.exports = {
-  displayName: 'besigner-json-editor',
-  preset: '../../jest.preset.js',
+  displayName: 'shared-ui-json-editor',
+  preset: '../../../../jest.preset.js',
   testEnvironment: 'jsdom',
   transform: {
     '^.+\\.[tj]sx?$': [
@@ -10,5 +10,5 @@ module.exports = {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/libs/besigner-json-editor',
+  coverageDirectory: '../../../../coverage/libs/shared/ui/json-editor',
 }
