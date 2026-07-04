@@ -4360,12 +4360,12 @@
         },
         {
           "source": "besigner-core",
-          "target": "aglyn",
+          "target": "shared-util-logger",
           "type": "static"
         },
         {
           "source": "besigner-core",
-          "target": "shared-util-logger",
+          "target": "aglyn",
           "type": "static"
         }
       ],
@@ -4615,12 +4615,12 @@
       "aglyn": [
         {
           "source": "aglyn",
-          "target": "shared-util-timestamp",
+          "target": "shared-util-logger",
           "type": "static"
         },
         {
           "source": "aglyn",
-          "target": "shared-util-tools",
+          "target": "shared-util-timestamp",
           "type": "static"
         },
         {
@@ -4630,12 +4630,12 @@
         },
         {
           "source": "aglyn",
-          "target": "shared-data-enums",
+          "target": "shared-util-tools",
           "type": "static"
         },
         {
           "source": "aglyn",
-          "target": "shared-util-logger",
+          "target": "shared-data-enums",
           "type": "static"
         }
       ],
