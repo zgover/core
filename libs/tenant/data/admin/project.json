@@ -1,7 +1,7 @@
 {
-  "name": "core-data-admin",
+  "name": "tenant-data-admin",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/core/data/admin/src",
+  "sourceRoot": "libs/tenant/data/admin/src",
   "projectType": "library",
   "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:tenancy"],
   "targets": {
@@ -9,10 +9,10 @@
       "executor": "@nx/js:swc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/core/data/admin",
-        "main": "libs/core/data/admin/src/index.ts",
-        "tsConfig": "libs/core/data/admin/tsconfig.lib.json",
-        "assets": ["libs/core/data/admin/*.md"]
+        "outputPath": "dist/libs/tenant/data/admin",
+        "main": "libs/tenant/data/admin/src/index.ts",
+        "tsConfig": "libs/tenant/data/admin/tsconfig.lib.json",
+        "assets": ["libs/tenant/data/admin/*.md"]
       }
     },
     "lint": {
@@ -21,9 +21,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/core/data/admin"],
+      "outputs": ["{workspaceRoot}/coverage/libs/tenant/data/admin"],
       "options": {
-        "jestConfig": "libs/core/data/admin/jest.config.ts"
+        "jestConfig": "libs/tenant/data/admin/jest.config.ts"
       }
     }
   }

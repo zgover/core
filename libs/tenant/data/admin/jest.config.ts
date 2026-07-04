@@ -18,7 +18,7 @@
 
 /* eslint-disable */
 export default {
-  displayName: 'core-data-admin',
+  displayName: 'tenant-data-admin',
   preset: '../../../../jest.preset.js',
   globals: {},
   testEnvironment: 'node',
@@ -31,5 +31,5 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../../../coverage/libs/core/data/admin',
+  coverageDirectory: '../../../../coverage/libs/tenant/data/admin',
 }
