@@ -48,8 +48,6 @@
       "@aglyn/besigner": ["libs/aglyn-besigner/src/index.ts"],
       "@aglyn/besigner-data-app": ["libs/besigner/data/app/src/index.ts"],
       "@aglyn/besigner-data-app/*": ["libs/besigner/data/app/src/lib/*"],
-      "@aglyn/besigner-feature-canvas-designer": ["libs/besigner/feature/canvas-designer/src/index.ts"],
-      "@aglyn/besigner-feature-canvas-designer/*": ["libs/besigner/feature/canvas-designer/src/lib/*"],
       "@aglyn/besigner-json-editor": ["libs/besigner-json-editor/src/index.ts"],
       "@aglyn/besigner-json-editor/*": ["libs/besigner-json-editor/src/lib/*"],
       "@aglyn/besigner-ui": ["libs/aglyn-besigner-ui/src/index.ts"],
