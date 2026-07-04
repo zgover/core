@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { EmitterFn } from '@aglyn/shared-util-emitter'
+import type { Emitter as EmitterFn } from 'mitt'
 import type {
   CommandsRegisterListenerPayload,
   CommandsRemoveResolverPayload,

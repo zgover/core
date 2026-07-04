@@ -33,7 +33,7 @@ import {
   type CommandsTriggerPayload,
   type CommandsUnregisterListenerPayload,
 } from '../../foundation'
-import { EmitterFn } from '@aglyn/shared-util-emitter'
+import mitt, { type Emitter as EmitterFn } from 'mitt'
 import { _isFnT } from '@aglyn/shared-util-tools'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
@@ -51,7 +51,7 @@ export class AglynCommandsController
     return NS
   }
 
-  _commander: AglynCommander = EmitterFn()
+  _commander: AglynCommander = mitt()
   _resolvers: Map<CommandUId, AglynCommandResolver> = new Map()
 
   public get commander(): AglynCommander {

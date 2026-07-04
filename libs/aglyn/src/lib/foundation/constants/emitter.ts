@@ -16,7 +16,7 @@
  */
 
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { EmitterFn } from '@aglyn/shared-util-emitter'
+import mitt, { type Emitter as EmitterFn } from 'mitt'
 import type {
   createEffect as createEffectorEffect,
   createEvent as createEffectorEvent,
@@ -458,4 +458,4 @@ export type AglynEventPayloads = EventPayload<AglynEventStatePayload> &
 export type AglynEmitterPayload = PayloadData<Dictionary>
 export type AglynEmitter = EmitterFn<AglynEventPayloads>
 
-export const AGLYN_EMITTER: AglynEmitter = EmitterFn()
+export const AGLYN_EMITTER: AglynEmitter = mitt()
