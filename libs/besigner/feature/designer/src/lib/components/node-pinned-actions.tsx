@@ -21,7 +21,7 @@ import {
   BesignerPanelTabFlag,
   setBesignerPanels,
 } from '@aglyn/besigner'
-import { isRootElementId } from '@aglyn/aglyn'
+import { isRootElementId } from '@aglyn/besigner'
 import {
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_DRAG,

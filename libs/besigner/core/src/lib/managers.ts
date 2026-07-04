@@ -17,7 +17,7 @@
 
 import { DndManager } from './dnd-manager'
 
-export * from './canvas-manager'
+export * from './node-refs'
 export * from './dnd-manager'
 export * from './focus-manager'
 

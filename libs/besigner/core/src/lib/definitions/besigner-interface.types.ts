@@ -49,7 +49,7 @@ import type {
   BesignerSetPanelPayload,
   BesignerSetPanelsPayload,
   BesignerTogglePanelPayload,
-} from '../constants/emitter'
+} from './emitter.types'
 
 export type BesignerContext = {
   flags: {

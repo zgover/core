@@ -43,8 +43,8 @@ import type { NODE_ROOT_ID } from '../canvas-manager'
 import type { FEATURE_FLAG, FieldComponentType } from '../constants'
 import type { PluginId } from '../plugin-manager'
 import type { ElementContentMap, Node, Props, Taxonomic } from './ast'
-import type { AglynDocument } from './shared'
-import type { HostUid } from './workspace'
+import type { AglynDocument } from '../foundation'
+import type { HostUid } from '../foundation'
 
 declare module './ast' {
   /**

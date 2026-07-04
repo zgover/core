@@ -40,7 +40,7 @@ import type {
   BesignerSetPanelPayload,
   BesignerSetPanelsPayload,
   BesignerTogglePanelPayload,
-} from '../constants/emitter'
+} from '../definitions/emitter.types'
 import type { IBesignerAppController } from '../definitions/besigner-app.types'
 import type {
   BesignerContext,

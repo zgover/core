@@ -14,6 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { CANVAS_ROOT_ELEMENT_ID, NodeId } from '@aglyn/aglyn'
 
-export * as canvas from './canvas-manager'
-export * from './canvas-manager'
+export const isRootElementId = ($id: NodeId): $id is CANVAS_ROOT_ELEMENT_ID => {
+  return $id === CANVAS_ROOT_ELEMENT_ID
+}
+
+export default isRootElementId

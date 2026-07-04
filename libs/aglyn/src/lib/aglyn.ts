@@ -56,33 +56,6 @@ emitter.prependListener(['error', '**'], (...payload) => {
   logger.error(Timestamp.now().toJSON(), ...payload)
 })
 
-export function lifecycleEvent(
-  callbackFn: () => void,
-  options: {
-    beforeEvent: AglynEvent
-    beforePayload: any[]
-    afterEvent: AglynEvent
-    afterPayload: any[]
-    onCatch?: (e: unknown) => void
-  },
-): void {
-  const { beforeEvent, beforePayload, afterEvent, afterPayload, onCatch } =
-    options
-  try {
-    logger.debug(Timestamp.now().toJSON(), beforeEvent, beforePayload)
-    emitter.emit(beforeEvent, Timestamp.now().toJSON(), ...beforePayload)
-    callbackFn()
-    logger.debug(Timestamp.now().toJSON(), afterEvent, afterPayload)
-    emitter.emit(afterEvent, Timestamp.now().toJSON(), ...afterPayload)
-  } catch (e) {
-    emitter.emit(AglynEvent.ERROR_GENERAL, {
-      message:
-        (e as Error)?.message || `An error has occurred before event ${beforeEvent}`,
-    })
-    onCatch && onCatch(e)
-  }
-}
-
 emitter.on(AglynEvent.PLUGIN_REGISTER, ({ plugin }) => {
   plugins.addDependency(plugin)
 })

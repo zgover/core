@@ -17,7 +17,8 @@
 
 import type { MdiIconProps } from '../types/nodes'
 import { makeAutoObservable } from 'mobx'
-import { type Aglyn, lifecycleEvent } from '../aglyn'
+import type { Aglyn } from '../aglyn'
+import { lifecycleEvent } from '../lifecycle'
 import { AglynEvent } from '../emit-manager'
 
 export enum PluginStatus {

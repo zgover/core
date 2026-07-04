@@ -16,7 +16,5 @@
  */
 
 export * from './compress'
-export * from './confirm-valid-lineal-relationship'
 export * from './create-resource-uid'
 export * from './decompress'
-export * from './is-root-element-id'

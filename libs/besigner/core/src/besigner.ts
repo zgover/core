@@ -34,7 +34,6 @@ export * from './lib/api/besigner.api'
 
 export * from './lib/constants/_internal'
 export * from './lib/constants/besigner'
-export * from './lib/constants/emitter'
 
 //    __________  _   ____________  ____  __    __    __________ _____
 //   / ____/ __ \/ | / /_  __/ __ \/ __ \/ /   / /   / ____/ __ / ___/
@@ -55,6 +54,7 @@ export * from './lib/controllers/besigner-app.controller'
 
 export * from './lib/definitions/besigner-app.types'
 export * from './lib/definitions/besigner-interface.types'
+export * from './lib/definitions/emitter.types'
 
 //     __  ______    _   _____   ______________  _____
 //    /  |/  /   |  / | / /   | / ____/ ____/ __ \/ ___/
@@ -63,4 +63,5 @@ export * from './lib/definitions/besigner-interface.types'
 // /_/  /_/_/  |_/_/ |_/_/  |_\____/_____/_/ |_|/____/
 // 👇
 
+export * from './lib/is-root-element-id'
 export * from './lib/managers'

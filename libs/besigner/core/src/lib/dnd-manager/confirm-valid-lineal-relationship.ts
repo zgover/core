@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as Aglyn from '../foundation'
+import * as Aglyn from '@aglyn/aglyn'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-tools'
 
 export enum InvalidLinealRelationFlag {

@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { confirmValidLinealRelationship } from '@aglyn/aglyn'
+import { confirmValidLinealRelationship } from './confirm-valid-lineal-relationship'
 import { makeAutoObservable } from 'mobx'
 
 export enum DragType {

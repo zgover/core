@@ -29,7 +29,7 @@ import type {
   BesignerSetFlagsPayload,
   BesignerSetPanelPayload,
   BesignerSetPanelsPayload,
-} from '../constants/emitter'
+} from '../definitions/emitter.types'
 import type { IBesignerAppController } from '../definitions/besigner-app.types'
 import type { IBesignerInterfaceController } from '../definitions/besigner-interface.types'
 import { _validateBesignerAppArg } from './app.api'
