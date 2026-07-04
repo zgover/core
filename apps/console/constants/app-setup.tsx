@@ -22,10 +22,7 @@ import {
   IBesignerAppController,
   initializeBesignerApp,
 } from '@aglyn/besigner-data-app'
-import { samplePageData } from '@aglyn/besigner-ui'
-import { registerBundle, registerComponent } from '@aglyn/aglyn'
 import { createAglynComponent } from '@aglyn/aglyn-node-renderer'
-import { bundle as muiBundle } from '@aglyn/plugins-ui-mui'
 import { IS_PRODUCTION } from '@aglyn/shared-data-enums'
 
 const c1 = createAglynComponent(
@@ -96,21 +93,12 @@ try {
   if (!_Aglyn && !doesBesignerAppExist() && hasWindow) {
     _Aglyn = globalThis.Aglyn = initializeBesignerApp({
       logLevel: 'debug',
-      modulesOptions: {
-        canvas: {
-          defaults: {
-            present: samplePageData,
-          },
-        },
-      },
     })
     if (!IS_PRODUCTION) console.info('set global Aglyn', _Aglyn)
     if (!IS_PRODUCTION) {
       ;(window as Window & { Aglyn: typeof Aglyn }).Aglyn = Aglyn
     }
 
-    components.forEach((i) => registerComponent(_Aglyn, i))
-    registerBundle(_Aglyn, muiBundle)
   } else if (!_Aglyn && doesBesignerAppExist() && hasWindow) {
     _Aglyn = getBesignerApp()
   }

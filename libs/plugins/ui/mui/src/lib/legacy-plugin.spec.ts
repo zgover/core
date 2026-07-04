@@ -1,5 +1,13 @@
 import * as Aglyn from '@aglyn/aglyn'
-import { components } from '../mui'
+import { schema as appBar } from './components/app-bar'
+import { schema as button } from './components/button'
+import { schema as container } from './components/container'
+import { schema as list } from './components/list'
+import { schema as listItem } from './components/list-item'
+import { schema as listItemText } from './components/list-item-text'
+import { schema as stack } from './components/stack'
+import { schema as toolbar } from './components/toolbar'
+import { schema as typography } from './components/typography'
 import { BUNDLE_ID } from './constants/bundle-common'
 import { registerLegacyMuiPlugin } from './legacy-plugin'
 
@@ -28,8 +36,19 @@ describe('plugins-ui-mui', () => {
     expect(() => registerLegacyMuiPlugin()).not.toThrow()
   })
 
-  it('keeps the persisted legacy component ids in the bundle', () => {
-    const ids = components.map((i) => i.schema.$id).sort()
+  it('keeps the persisted legacy component ids in the plugin', () => {
+    const schemas = [
+      appBar,
+      button,
+      container,
+      list,
+      listItem,
+      listItemText,
+      stack,
+      toolbar,
+      typography,
+    ]
+    const ids = schemas.map((i) => i.$id).sort()
     expect(ids).toEqual(PERSISTED_COMPONENT_IDS)
   })
 })

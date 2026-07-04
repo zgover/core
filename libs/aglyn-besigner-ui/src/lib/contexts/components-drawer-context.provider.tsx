@@ -15,14 +15,9 @@
  * limitations under the License.
  */
 
-import { AglynComponentsContext } from '@aglyn/aglyn-node-renderer'
 import { type ElementType, Fragment, useCallback, useState } from 'react'
-import {
-  CloseableDrawerComponent,
-  type CloseableDrawerProps,
-} from '../components/closeable-drawer.component'
+import { type CloseableDrawerProps } from '../components/closeable-drawer.component'
 import ComponentPicker from '../components/component-picker'
-import ComponentsGridListComponent from '../components/components-grid-list.component'
 import {
   buildOptions,
   DEFAULT_OPTIONS,
@@ -43,8 +38,7 @@ export type ComponentPickerReject = (reason?: unknown) => void
 export function ComponentsDrawerContextProvider(
   props: ComponentsDrawerContextProviderProps,
 ) {
-  const { children, defaultOptions = {}, component, ...rest } = props
-  const Component = component || CloseableDrawerComponent
+  const { children, defaultOptions = {} } = props
   const [options, setOptions] = useState(() => ({
     ...DEFAULT_OPTIONS,
     ...defaultOptions,
@@ -101,25 +95,6 @@ export function ComponentsDrawerContextProvider(
         onClose={handleReject}
         onSelectItem={handleResolve}
       />
-      {false && (
-        <AglynComponentsContext.Consumer>
-          {({ nodePresets }) => (
-            <Component
-              open={open}
-              onClose={handleReject}
-              action={'Close'}
-              onActionClick={handleReject}
-              drawerTitle={options?.title}
-              {...rest}
-            >
-              <ComponentsGridListComponent
-                onActionClick={handleResolve}
-                items={nodePresets}
-              />
-            </Component>
-          )}
-        </AglynComponentsContext.Consumer>
-      )}
     </Fragment>
   )
 }
