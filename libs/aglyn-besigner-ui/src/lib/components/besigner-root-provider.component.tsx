@@ -19,11 +19,7 @@ import type {
   AppUUN,
   CanvasSetElementsPayload,
 } from '@aglyn/aglyn'
-import {
-  AglynAppProvider,
-  ElementComponentsContextProvider,
-  ElementsContextProvider,
-} from '@aglyn/aglyn-node-renderer'
+import { AglynAppProvider } from '@aglyn/aglyn-node-renderer'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { NoSsr } from '@mui/material'
@@ -66,15 +62,11 @@ export const BesignerRootProviderComponent = (
     <Wrapper>
       <AglynAppProvider canvasElements={canvasElements} appName={appName}>
         <BesignerDndContext>
-          <ElementComponentsContextProvider>
-            <ElementsContextProvider>
-              <RenderedCanvasElementsProvider>
-                <ComponentsDrawerContextProvider>
-                  {children}
-                </ComponentsDrawerContextProvider>
-              </RenderedCanvasElementsProvider>
-            </ElementsContextProvider>
-          </ElementComponentsContextProvider>
+          <RenderedCanvasElementsProvider>
+            <ComponentsDrawerContextProvider>
+              {children}
+            </ComponentsDrawerContextProvider>
+          </RenderedCanvasElementsProvider>
         </BesignerDndContext>
       </AglynAppProvider>
     </Wrapper>
