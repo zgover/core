@@ -69,8 +69,6 @@
       "@aglyn/core-data-foundation/*": ["libs/core/data/foundation/src/lib/*"],
       "@aglyn/core-feature-renderer": ["libs/core/feature/renderer/src/index.ts"],
       "@aglyn/core-feature-renderer/*": ["libs/core/feature/renderer/src/lib/*"],
-      "@aglyn/core-feature-singleton": ["libs/core/feature/singleton/src/index.ts"],
-      "@aglyn/core-feature-singleton/*": ["libs/core/feature/singleton/src/lib/*"],
       "@aglyn/core-util-app": ["libs/core/util/app/src/index.ts"],
       "@aglyn/core-util-app/*": ["libs/core/util/app/src/lib/*"],
       "@aglyn/plugins-ui-mui": ["libs/plugins/ui/mui/src/index.ts"],
