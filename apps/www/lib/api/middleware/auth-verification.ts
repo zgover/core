@@ -21,7 +21,7 @@ import {
   withIdTokenHeader,
 } from '@aglyn/shared-util-rest-api'
 import type {NextApiHandler} from 'next'
-import {verifyIdToken} from '../../fetch-data/profile-data'
+import {verifyIdToken} from '../../firebase/fb-admin'
 
 
 export const requireIdToken = <T = any>(handler: NextApiHandler<T>): NextApiHandler<T> => {

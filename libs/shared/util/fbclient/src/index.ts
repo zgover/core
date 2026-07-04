@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+export * from './lib/firebase-app'
 export * from './lib/types'
 
 export * from './lib/interfaces/ref-controller'

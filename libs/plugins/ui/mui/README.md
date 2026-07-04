@@ -4,7 +4,7 @@ The canonical MUI component plugin. It absorbs the former
 `@aglyn/aglyn-plugin-mui` library and serves both runtimes:
 
 - **New runtime** (silo, console app-setup): register the exported `bundle`
-  with `registerBundle` from `@aglyn/core-data-app`.
+  with `registerBundle` from `@aglyn/aglyn`.
 - **Legacy runtime** (`AglynNodeRenderer` pages in tenant and the console
   besigner page): call `registerLegacyMuiPlugin()` at module scope.
 

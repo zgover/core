@@ -31,7 +31,7 @@ import { BUNDLE_ID } from './constants/bundle-common'
  * Registers the MUI components with the legacy `@aglyn/aglyn` global plugin
  * registry, for pages still running on the legacy runtime
  * (`AglynNodeRenderer`, `Aglyn.canvas`, ...). New code should register the
- * exported `bundle` with `registerBundle` from `@aglyn/core-data-app` instead.
+ * exported `bundle` with `registerBundle` from `@aglyn/aglyn` instead.
  */
 export function registerLegacyMuiPlugin(): void {
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return

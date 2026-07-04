@@ -27,7 +27,8 @@ export enum PluginStatus {
   UNLOADING = 'unloading',
 }
 
-export type PluginId = string
+import type { PluginId } from '../foundation'
+export type { PluginId }
 export type PluginStatusById = Record<PluginId, PluginStatus>
 export type PluginsById = Record<PluginId, Plugin>
 export type PluginDependencies = Record<PluginId, true>

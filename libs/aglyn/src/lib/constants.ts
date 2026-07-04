@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { LinealDirectiveFlag } from '@aglyn/core-data-foundation'
+import {
+  FEATURE_FLAG,
+  FieldComponentType,
+  LinealDirectiveFlag,
+} from './foundation'
 import { customAlphabet, urlAlphabet } from 'nanoid'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -27,40 +31,9 @@ export const namespace = pkg.name
 export const ID_CHAR_LENGTH = 10
 export const createIdUrlSafe = customAlphabet(urlAlphabet, ID_CHAR_LENGTH)
 
-export enum FEATURE_FLAG {
-  UNKNOWN,
-  DEFAULT = 1,
-  ENABLED = 1 << 1,
-  DISABLED = 1 << 2,
-  ENABLED_DEFAULT = DEFAULT | ENABLED,
-  DISABLED_DEFAULT = DEFAULT | DISABLED,
-}
+export { FEATURE_FLAG }
 
-export enum FieldComponentType {
-  BUTTON = 'button',
-  BUTTON_GROUP = 'button-group',
-  CHECKBOX = 'checkbox',
-  COLOR_PICKER = 'color-picker',
-  DATE_PICKER = 'date-picker',
-  DUAL_LIST_SELECT = 'dual-list-select',
-  FIELD_ARRAY = 'field-array',
-  ICON_PICKER = 'icon-picker',
-  INPUT_ADDON_BUTTON_GROUP = 'input-addon-button-group',
-  INPUT_ADDON_GROUP = 'input-addon-group',
-  PLAIN_TEXT = 'plain-text',
-  RADIO = 'radio',
-  SELECT = 'select',
-  SLIDER = 'slider',
-  SUB_FORM = 'sub-form',
-  SWITCH = 'switch',
-  TAB_ITEM = 'tab-item',
-  TABS = 'tabs',
-  TEXT_FIELD = 'text-field',
-  TEXTAREA = 'textarea',
-  TIME_PICKER = 'time-picker',
-  TOGGLE_BUTTON = 'toggle-button',
-  WIZARD = 'wizard',
-}
+export { FieldComponentType }
 
 export { LinealDirectiveFlag }
 

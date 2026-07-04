@@ -28,7 +28,13 @@ import type { SvgIconProps } from '@mui/material/SvgIcon'
 export type MdiIconProps<D extends React.ElementType = 'svg', P = object> = SvgIconProps<D, P> & {
   path?: string
 }
-import type { ComponentsLinealOrder } from '@aglyn/core-data-foundation'
+import type {
+  ComponentId,
+  ComponentsLinealOrder,
+  NodeId,
+  PresetId,
+} from '../foundation'
+import { ComponentCategory } from '../foundation'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type React from 'react'
 import type { ComponentClass, ComponentProps } from 'react'
@@ -223,7 +229,7 @@ export interface CanvasPreset extends Node, Taxonomic {
   name?: string | undefined
 }
 
-export type NodeId = string
+export type { NodeId }
 
 // @TODO ⚠️ Refactor for better adoption of hast
 type PresetI = AglynDocument &
@@ -327,19 +333,10 @@ export type ProcessableNodes =
   | NodeSchemaNested<any>
   | Record<NodeId, NodeSchema>
 
-export enum ComponentCategory {
-  INPUT = 'Input',
-  SURFACE = 'Surface',
-  NAVIGATION = 'Navigation',
-  LAYOUT = 'Layout',
-  DATA_DISPLAY = 'Data Display',
-  TEXT = 'Text',
-  UNCATEGORIZED = 'Uncategorized',
-  ALL = 'All',
-}
+export { ComponentCategory }
 
-export type ComponentId = string
-export type PresetId = string
+export type { ComponentId }
+export type { PresetId }
 
 export type ComponentFactory<
   P extends ComponentProps<C> | any = any,

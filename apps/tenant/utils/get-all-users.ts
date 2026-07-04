@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/core-data-admin'
+import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 export async function getAllUsers(nextPageToken?: string) {
   const data: { users: object[]; nextPageToken: string | null; error: Error | null } = { users: [], nextPageToken: null, error: null }
