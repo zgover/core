@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
@@ -45,7 +46,7 @@ class ErrorBoundaryComponentClass extends Component<ErrorBoundaryProps, State> {
   public static displayName = 'ErrorBoundaryComponentClass'
   public static readonly aglyn = true
 
-  constructor(props) {
+  constructor(props: ErrorBoundaryProps) {
     super(props)
     this.state = {
       hasError: false,
@@ -53,13 +54,13 @@ class ErrorBoundaryComponentClass extends Component<ErrorBoundaryProps, State> {
     }
   }
 
-  public static getDerivedStateFromError(error) {
+  public static getDerivedStateFromError(error: Error) {
     // Update state so the next render will show the fallback UI.
     console.error(error, 'getDerivedStateFromError')
     return { hasError: true, error }
   }
 
-  public componentDidCatch(error, errorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // You can also log the error to an error reporting service
     // logErrorToMyService(error, errorInfo)
     console.error(error, errorInfo, 'componentDidCatch')
@@ -69,7 +70,7 @@ class ErrorBoundaryComponentClass extends Component<ErrorBoundaryProps, State> {
     }
   }
 
-  public render() {
+  public override render() {
     return this.state.hasError
       ? this.props.fallback ?? <h6>Something went wrong...</h6>
       : this.props.children
@@ -99,7 +100,8 @@ export function withErrorBoundary<P, T>(
   const WithErrorBoundary = forwardRef<T, P>((props, ref) => {
     return (
       <ErrorBoundaryComponentClass {...options}>
-        <WrappedComponent ref={ref} {...props} />
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        <WrappedComponent ref={ref as any} {...(props as any)} />
       </ErrorBoundaryComponentClass>
     )
   })

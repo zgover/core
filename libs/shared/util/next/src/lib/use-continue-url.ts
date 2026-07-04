@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
-import { _isArr } from '@aglyn/shared-util-guards'
-import { useRouter } from 'next/router'
+import { _isArr } from '@aglyn/shared-util-tools'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
-import type { UrlObject } from 'url'
 
 export type UseContinueUrlDecodedRoutePusher = (
-  url?: UrlObject | string,
-  as?: UrlObject | string,
+  url?: string,
+  as?: string,
   options?: { shallow?: boolean; locale?: string | false; scroll?: boolean },
-) => Promise<boolean>
+) => void
 
 export type UseContinueUrlDecodedResponse = [
   decoded: string,
@@ -42,25 +42,25 @@ export const continueParam = (value: string) => `${ContinueParamName}=${value}`
 
 export function useContinueUrlDecoded(): UseContinueUrlDecodedResponse {
   const router = useRouter()
-  const { query } = router
+  const params = useParams()
 
   const continueUrl = useMemo(() => {
-    const { ['continue']: url } = query
+    const url = params?.continue
     const continueUrl = (_isArr(url) ? url[0] : url) || ''
     return decodeURIComponent(continueUrl || '')
-  }, [query])
+  }, [params])
 
   const pushNext = useCallback(
     (
-      url: UrlObject | string = '/',
-      as: UrlObject | string | undefined = undefined,
+      url = '/',
+      as: string | undefined = undefined,
       options?: {
         shallow?: boolean
         locale?: string | false
         scroll?: boolean
       },
-    ): Promise<boolean> => {
-      return router.push(continueUrl || url, as, options)
+    ): void => {
+      return router.push(continueUrl || url, options)
     },
     [router, continueUrl],
   )
@@ -71,12 +71,11 @@ export function useContinueUrlDecoded(): UseContinueUrlDecodedResponse {
 }
 
 export function useContinueUrlEncoded() {
-  const router = useRouter()
+  const pathname = usePathname()
 
   return useMemo(() => {
-    const pathname = router.asPath
     return encodeURIComponent(pathname || '')
-  }, [router])
+  }, [pathname])
 }
 
 export function useContinueUrl(): UseContinueUrlResponse {

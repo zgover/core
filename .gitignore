@@ -6,6 +6,8 @@
 /out-tsc
 /.firebase
 /.migrations.json
+*.tsbuildinfo
+.rollup.cache
 
 # dependencies
 /node_modules
@@ -58,3 +60,12 @@ Thumbs.db
 
 # Next.js
 .next
+
+.nx/cache
+.nx/workspace-data
+
+vite.config.*.timestamp*
+.claude/worktrees
+.nx/polygraph
+.nx/self-healing
+.vercel

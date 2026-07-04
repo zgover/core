@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import {
   useFirestoreDocData,
   useUser,
 } from 'reactfire'
-import CardDisplay from '../../../components/card-display'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import CardDisplayFormTemplate from '../../../components/card-display-form-template'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
@@ -178,8 +178,10 @@ const ManageUser: NextPageWithLayout = (props) => {
               spacing={3}
               items={[
                 {
-                  xs: 12,
-                  sm: 3,
+                  size: {
+                    xs: 12,
+                    sm: 3,
+                  },
                   children: (
                     <CardDisplay header="Navigation">
                       <TabList
@@ -206,8 +208,10 @@ const ManageUser: NextPageWithLayout = (props) => {
                   ),
                 },
                 {
-                  xs: 12,
-                  sm: 9,
+                  size: {
+                    xs: 12,
+                    sm: 9,
+                  },
                   children: (
                     <>
                       {forms.map(({ initialValues, onSubmit, schema }) => (

@@ -231,7 +231,7 @@ export interface SnackbarProps
  * @category Shared
  */
 export interface SharedProps
-  extends Omit<SnackbarProps, 'classes'>,
+  extends Omit<SnackbarProps, 'classes' | 'content'>,
     Partial<TransitionHandlerProps> {
   /**
    * Used to easily display different variant of snackbars. When passed to

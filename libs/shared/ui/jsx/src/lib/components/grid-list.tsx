@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import type { MapKey } from '@aglyn/shared-data-types'
 import {
   generateComponentClassKeys,
   mergeSxProps,
@@ -86,7 +85,7 @@ const ItemWrapper = styled(
   },
 )({})
 
-export type VirtualizedGridProps = VirtuosoGridProps & {
+export type VirtualizedGridProps = VirtuosoGridProps<any> & {
   sx?: SxProps
   as?: any
 }
@@ -162,29 +161,20 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
     )
 
     const GridItem = useMemo(() => {
-      const Component = forwardRef<any, MuiGridProps>(function RefRenderFn(
-        itemProps,
-        ref,
-      ) {
-        const { className: gridClassName, ...restGridProps } = GridItemProps
-        const { className, ...rest } = itemProps
-        return (
-          <Grid
-            ref={ref}
-            className={clsx(classKey.gridItem, gridClassName, className)}
-            item
-            {...restGridProps}
-            {...rest}
-          />
-        )
-      })
+      const Component = forwardRef<any, MuiGridProps>(
+        function RefRenderFn(itemProps, ref) {
+          const { className: gridClassName, ...restGridProps } = GridItemProps
+          const { className, ...rest } = itemProps
+          return (<Grid ref={ref} className={clsx(classKey.gridItem, gridClassName, className)} />);
+        },
+      )
       Component.displayName = 'Component'
       Component.aglyn = true
       return Component
     }, [GridItemProps])
 
     const handleItemContent = useCallback(
-      (index) => {
+      (index: number) => {
         return (
           <ItemWrapper>
             {renderItemContent(items[index], index, items)}

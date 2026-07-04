@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,14 @@
  * limitations under the License.
  */
 
-import {_isArr, _isFnT, _isNum, _isNumPos, _isObj} from '@aglyn/shared-util-guards'
-import {useCallback, useEffect, useRef, useState} from 'react'
-
+import {
+  _isArr,
+  _isFnT,
+  _isNum,
+  _isNumPos,
+  _isObj,
+} from '@aglyn/shared-util-tools'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface Options {
   // The millisecond delay count
@@ -33,7 +38,7 @@ interface Options {
   limit?: number
 
   // Will be called if limit count has been reached
-  onLimitReach?: (params: {startTime: number; endTime: number}) => void
+  onLimitReach?: (params: { startTime: number; endTime: number }) => void
 
   // If true will run timeout/interval immediately when initializing after mount
   immediate?: boolean
@@ -66,11 +71,14 @@ type HandlerParams = {
  * @param {Options} options
  * @return {TimeoutReturn}
  */
-export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutReturn {
+export function useTimeoutDelay(
+  callback: Handler,
+  options?: Options,
+): TimeoutReturn {
   const [state] = useState<Options>(() => (_isObj(options) ? options : {}))
   const [mounted, setMounted] = useState(false)
   const savedCallback = useRef(null)
-  const ref = useRef({runCount: 0, timeoutRef: null, startTime: null})
+  const ref = useRef({ runCount: 0, timeoutRef: null, startTime: null })
 
   // On mount and callback updates update the ref
   useEffect(() => {
@@ -84,9 +92,9 @@ export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutRe
   // Clear the interval or timeout
   const clear = useCallback(() => {
     if (ref.current.timeoutRef) {
-      console.log('clear-del', ref)
-
-      state.repeat ? clearInterval(ref.current.timeoutRef) : clearTimeout(ref.current.timeoutRef)
+      state.repeat
+        ? clearInterval(ref.current.timeoutRef)
+        : clearTimeout(ref.current.timeoutRef)
 
       ref.current.timeoutRef = null
     }
@@ -95,13 +103,12 @@ export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutRe
   // Start the interval or timeout
   const start = useCallback(
     (opt?: Options) => {
-      if (mounted) {
-        console.error('Can\'t start timeout or interval when unmounted')
+      if (!mounted) {
+        console.error("Can't start timeout or interval when unmounted")
         return
-      }
-      else if (ref.current.timeoutRef) {
+      } else if (ref.current.timeoutRef) {
         console.warn(
-          'Can\'t start timeout or interval when one is already running',
+          "Can't start timeout or interval when one is already running",
           ref.current.timeoutRef,
         )
       }
@@ -120,10 +127,14 @@ export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutRe
 
       // Args array
       const argArgs = _isArr(optArgs) ? optArgs : []
-      // Determine if we're using global delay or parameter delay
-      const ms = _isNum(optDelay) ? (_isNum(state.msDelay) ? state.msDelay : 0) : optDelay || 0
+      // Parameter delay takes priority over global delay
+      const ms = _isNum(optDelay)
+        ? optDelay
+        : _isNum(state.msDelay)
+          ? state.msDelay
+          : 0
 
-      const max = _isNumPos(optLimit) ? optLimit : null
+      const max: number = _isNumPos(optLimit) ? optLimit : null
 
       // If run limit was provide ensure we don't run more than specified
       const handler = (arg: HandlerParams['args']) => {
@@ -144,7 +155,9 @@ export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutRe
           }
         }
 
-        const limitReached = Boolean(optRepeat && max && ref.current.runCount >= max)
+        const limitReached = Boolean(
+          optRepeat && max && ref.current.runCount >= max,
+        )
         const toCancel = Boolean(optRepeat && reqCancel)
 
         // Make sure to clear the interval if on last run
@@ -153,11 +166,11 @@ export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutRe
 
           // Run limit reach callback
           limitReached &&
-          _isFnT(optOnLimitReach) &&
-          optOnLimitReach({
-            startTime: Number(ref.current.startTime),
-            endTime: Number(Date.now()),
-          })
+            _isFnT(optOnLimitReach) &&
+            optOnLimitReach({
+              startTime: Number(ref.current.startTime),
+              endTime: Number(Date.now()),
+            })
         }
       }
 
@@ -175,6 +188,12 @@ export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutRe
 
   // When mounted set mounted
   // Otherwise clear the timeout/interval when we unmount
+  //
+  // `start` is intentionally excluded: it's memoized with `mounted` as one
+  // of its own deps, and this effect is what flips `mounted` to true, so
+  // including `start` here would retrigger the effect right after mount and
+  // double-fire `start()` when `state.immediate` is set.
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     setMounted(true)
 
@@ -187,6 +206,7 @@ export function useTimeoutDelay(callback: Handler, options?: Options): TimeoutRe
       setMounted(false)
     }
   }, [state.immediate, clear])
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return [start, clear]
 }

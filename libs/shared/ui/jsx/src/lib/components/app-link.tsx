@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
-import { _isObj } from '@aglyn/shared-util-guards'
+import { _isObj } from '@aglyn/shared-util-tools'
 import { truthy } from '@aglyn/shared-util-tools'
 import type {
   ButtonBaseProps as MuiButtonBaseProps,
@@ -25,18 +26,19 @@ import type {
   IconButtonProps as MuiIconButtonProps,
   LinkProps as MuiLinkProps,
 } from '@mui/material'
-import MuiButton from '@mui/material/Button'
-import MuiButtonBase from '@mui/material/ButtonBase'
-import MuiLink from '@mui/material/Link'
+import {
+  Button as MuiButton,
+  ButtonBase as MuiButtonBase,
+  Link as MuiLink,
+} from '@mui/material'
 import clsx from 'clsx'
 import dynamic, { type DynamicOptionsLoadingProps } from 'next/dynamic'
-import { useRouter } from 'next/router'
-import { forwardRef, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
+import { forwardRef, type Ref, useMemo } from 'react'
 import NextLink, { type NextLinkProps } from './next-link'
 
 const Placeholder = (props: DynamicOptionsLoadingProps) => {
   const { error } = props
-  console.log('props', props)
   if (error) console.error(error)
   return <a href={'#'}>{error ? 'error!' : 'loading'}</a>
 }
@@ -61,7 +63,7 @@ export type AppLinkVariant =
   | undefined
   | never
 
-type BaseLinkProps = Omit<NextLinkProps, 'as' | 'hrefTo'>
+type BaseLinkProps = Omit<NextLinkProps, 'hrefTo'>
 export type ButtonBaseProps = MuiButtonBaseProps<any, BaseLinkProps>
 export type ButtonProps = MuiButtonProps<any, BaseLinkProps>
 export type DefaultProps = TextProps
@@ -80,16 +82,16 @@ export type AppLinkProps<T = AppLinkVariant> = T extends string
     ? T extends AppLinkVariantDefault
       ? DefaultProps & { componentVariant?: T }
       : T extends 'button'
-      ? ButtonProps & { componentVariant: T }
-      : T extends 'button-base'
-      ? ButtonBaseProps & { componentVariant: T }
-      : T extends 'icon-button'
-      ? IconButtonProps & { componentVariant: T }
-      : T extends 'fab'
-      ? FabProps & { componentVariant: T }
-      : T extends 'naked'
-      ? NakedProps & { componentVariant: T }
-      : never
+        ? ButtonProps & { componentVariant: T }
+        : T extends 'button-base'
+          ? ButtonBaseProps & { componentVariant: T }
+          : T extends 'icon-button'
+            ? IconButtonProps & { componentVariant: T }
+            : T extends 'fab'
+              ? FabProps & { componentVariant: T }
+              : T extends 'naked'
+                ? NakedProps & { componentVariant: T }
+                : never
     : never
   : DefaultProps & { componentVariant?: undefined | never }
 
@@ -122,31 +124,23 @@ export const appLinkClassKey = generateComponentClassKeys('AglynAppLink', [
  * componentVariant === any = MuiLink
  */
 const AppLink = forwardRef(
-  <T extends AppLinkVariant>(props: AppLinkProps<T>, ref) => {
-    const { className, componentVariant, href, hrefAs, ...rest } = props
+  <T extends AppLinkVariant>(props: AppLinkProps<T>, ref: Ref<any>) => {
+    const { className, componentVariant, href, ...rest } = props
 
     const variant = componentVariant
-    const { pathname, asPath } = useRouter()
+    const pathname = usePathname() ?? ''
     const [active, activeAsAncestor] = useMemo(() => {
       const hrefPath = _isObj(href) ? href['pathname'] : href,
-        samePath = hrefPath === pathname || hrefPath === asPath,
-        sameAsPath = hrefAs === pathname || hrefAs === asPath,
-        isRootHref = hrefPath === '/' || hrefAs === '/',
-        pathIsAncestor =
-          pathname.startsWith(hrefPath) || pathname.startsWith(hrefAs),
-        asPathIsAncestor =
-          asPath.startsWith(hrefPath) || asPath.startsWith(hrefAs),
-        currentlyNested =
-          pathname.lastIndexOf('/') > 0 || asPath.lastIndexOf('/') > 0,
-        isSpecified = truthy(hrefPath || hrefAs)
-      const active = isSpecified && (samePath || sameAsPath)
+        samePath = hrefPath === pathname,
+        isRootHref = hrefPath === '/',
+        pathIsAncestor = pathname.startsWith(hrefPath),
+        currentlyNested = pathname.lastIndexOf('/') > 0,
+        isSpecified = truthy(hrefPath)
+      const active = isSpecified && samePath
       const activeAsAncestor =
-        isSpecified &&
-        !isRootHref &&
-        currentlyNested &&
-        (pathIsAncestor || asPathIsAncestor)
+        isSpecified && !isRootHref && currentlyNested && pathIsAncestor
       return [active, !active && activeAsAncestor]
-    }, [asPath, href, hrefAs, pathname])
+    }, [href, pathname])
 
     const elemClassName = clsx(
       {
@@ -172,7 +166,6 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             hrefTo={href || ''}
-            hrefAs={hrefAs}
             {...rest}
           />
         )
@@ -183,8 +176,8 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
-            hrefAs={hrefAs}
             {...rest}
           />
         )
@@ -195,8 +188,8 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
-            hrefAs={hrefAs}
             {...rest}
           />
         )
@@ -207,8 +200,8 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
-            hrefAs={hrefAs}
             {...rest}
           />
         )
@@ -219,8 +212,8 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
-            hrefAs={hrefAs}
             {...rest}
           />
         )
@@ -232,7 +225,6 @@ const AppLink = forwardRef(
             className={elemClassName}
             component={NextLink}
             hrefTo={href || ''}
-            hrefAs={hrefAs}
             {...rest}
           />
         )

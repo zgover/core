@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import {
   FIREBASE_AUTH_EMULATOR_ENABLED,
@@ -38,9 +39,12 @@ import { connectAuthEmulator, getAuth } from 'firebase/auth'
 import { connectDatabaseEmulator, getDatabase } from 'firebase/database'
 import {
   connectFirestoreEmulator,
-  enableMultiTabIndexedDbPersistence,
   getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
 } from 'firebase/firestore'
+import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import {
@@ -66,17 +70,18 @@ FirestoreProvider['displayName'] = 'FirestoreProvider'
 function AnalyticsGlobalEvents({ children }) {
   const analytics = useAnalytics()
   const router = useRouter()
+  const pathname = usePathname()
   const user = useUser()
 
   useEffect(() => {
-    const logPageView = (asPath) => {
+    const logPageView = (pathname) => {
       logEvent(analytics, 'page_view', {
-        page_location: asPath,
+        page_location: pathname,
       })
     }
-    const logRouteError = (error, asPath) => {
+    const logRouteError = (error, pathname) => {
       logEvent(analytics, 'exception', {
-        page_location: asPath,
+        page_location: pathname,
         description: `code(${error.code || 'none'}): ${
           error.message || 'none'
         }`,
@@ -120,21 +125,25 @@ function GetInnerLayout({ children }) {
   const app = useFirebaseApp()
   const auth = getAuth(app)
   const database = getDatabase(app)
-  const store = getFirestore(app)
-  let status
 
-  // Set up development emulators
   if (!connectedFirestore) {
     try {
+      initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager(),
+        }),
+      })
       if (FIREBASE_FIRESTORE_EMULATOR_ENABLED) {
-        connectFirestoreEmulator(store, 'localhost', 8082)
+        connectFirestoreEmulator(getFirestore(app), 'localhost', 8082)
       }
-      void enableMultiTabIndexedDbPersistence(store)
+    } catch {
+      // already initialized (e.g. HMR reset the module flag) — getFirestore() returns the existing instance
+    } finally {
       connectedFirestore = true
-    } catch (error) {
-      console.error(error)
     }
   }
+
+  const store = getFirestore(app)
   if (!connectedDatabase) {
     try {
       if (FIREBASE_DATABASE_EMULATOR_ENABLED) {
@@ -157,7 +166,6 @@ function GetInnerLayout({ children }) {
   }
   let appCheck
   try {
-    console.log('RECAPTCHA_API_KEY sitekey', RECAPTCHA_API_KEY)
     appCheck = initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(RECAPTCHA_API_KEY),
       isTokenAutoRefreshEnabled: true,
@@ -170,10 +178,6 @@ function GetInnerLayout({ children }) {
     analytics = getAnalytics(app)
   } catch (error) {
     console.error(error)
-  }
-
-  if (status === 'loading') {
-    return <SplashScreen />
   }
 
   return (

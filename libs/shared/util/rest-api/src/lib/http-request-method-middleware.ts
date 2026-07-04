@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   createHttpRefCode,
   HttpRefCodeSimple,
@@ -26,8 +26,9 @@ import {
   HttpStatusCode,
 } from '@aglyn/shared-data-enums'
 import { HttpResponseError } from '@aglyn/shared-util-errors'
-import type { NextMiddleware } from 'next-api-middleware'
+import type { Middleware as NextMiddleware } from 'next-api-middleware'
 import nextHandleJsonResponse from './next-handle-json-response'
+
 
 /**
  * @example
@@ -56,9 +57,9 @@ export function httpRequestMethodMiddleware(
         HttpStatusCode.METHOD_NOT_ALLOWED,
         HttpRefCodeSimple.METHOD_NOT_ALLOWED,
       )
-      nextHandleJsonResponse(res, HttpStatusCode.NOT_FOUND, {
+      nextHandleJsonResponse(res, HttpStatusCode.METHOD_NOT_ALLOWED, {
         status: HttpResponseStatus.ERROR,
-        statusMessage: HttpRefCodeSimple.RESOURCE_NOT_FOUND,
+        statusMessage: HttpRefCodeSimple.METHOD_NOT_ALLOWED,
         error: err,
         errorCode: createHttpRefCode(
           HttpRefCodeSimple.METHOD_NOT_ALLOWED,

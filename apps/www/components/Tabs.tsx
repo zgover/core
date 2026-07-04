@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { alpha, styled } from '@aglyn/shared-ui-theme'
 import { GridButtons } from '@aglyn/shared-ui-jsx'
 import {
   mdiChartSankeyVariant,
@@ -25,13 +24,19 @@ import {
   mdiHome,
   MdiIcon,
   mdiVariable,
-} from '@aglyn/shared-ui-mdi-jsx'
+} from '@aglyn/shared-ui-jsx'
+import { alpha, styled } from '@aglyn/shared-ui-theme'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import MuiTab from '@mui/material/Tab'
 import MuiTabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
-import { type ReactNode, type SyntheticEvent, useCallback, useState } from 'react'
+import {
+  type ReactNode,
+  type SyntheticEvent,
+  useCallback,
+  useState,
+} from 'react'
 
 interface TabPanelProps {
   children?: ReactNode
@@ -51,12 +56,14 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box p={3}>
+        <Box sx={{
+          p: 3
+        }}>
           <Typography>{children}</Typography>
         </Box>
       )}
     </div>
-  )
+  );
 }
 
 function a11yProps(index: any) {
@@ -66,7 +73,7 @@ function a11yProps(index: any) {
   }
 }
 
-const TabsContainer = styled(Box, {
+const TabsContainer = styled('div', {
   name: 'AglynTabsContainer',
 })(({ theme }) => ({
   flexGrow: 1,
@@ -94,8 +101,16 @@ export default function Tabs() {
           variant="scrollable"
           onChange={handleChange}
         >
-          <MuiTab label="Home" {...a11yProps(0)} icon={<MdiIcon path={mdiHome.path} />} />
-          <MuiTab label="View" {...a11yProps(1)} icon={<MdiIcon path={mdiEye.path} />} />
+          <MuiTab
+            label="Home"
+            {...a11yProps(0)}
+            icon={<MdiIcon path={mdiHome.path} />}
+          />
+          <MuiTab
+            label="View"
+            {...a11yProps(1)}
+            icon={<MdiIcon path={mdiEye.path} />}
+          />
           {/* <MuiTab label="Item Two" {...a11yProps(2)} />
            <MuiTab label="Item Three" {...a11yProps(3)} /> */}
         </MuiTabs>
@@ -110,7 +125,10 @@ export default function Tabs() {
               children: (
                 <Box sx={{ textAlign: 'center' }}>
                   <div>
-                    <MdiIcon fontSize="large" path={mdiFileDocumentMultiple.path} />
+                    <MdiIcon
+                      fontSize="large"
+                      path={mdiFileDocumentMultiple.path}
+                    />
                   </div>
                   <div>Entries</div>
                 </Box>
@@ -156,7 +174,10 @@ export default function Tabs() {
               children: (
                 <Box sx={{ textAlign: 'center' }}>
                   <div>
-                    <MdiIcon fontSize="large" path={mdiChartSankeyVariant.path} />
+                    <MdiIcon
+                      fontSize="large"
+                      path={mdiChartSankeyVariant.path}
+                    />
                   </div>
                   <div>Workflows</div>
                 </Box>

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isArr } from '@aglyn/shared-util-guards'
+import { _isArr } from '@aglyn/shared-util-tools'
 import { NsError } from './ns-error'
 import { replaceTemplate } from './tools'
 import type {
@@ -122,9 +122,9 @@ export class NsErrorFactory<
     private readonly scope: string,
     private readonly namespace: string,
     private readonly templates: ErrorTagMessages<T>,
-    private readonly nsDelimiter: string = '/',
-    private readonly scopeDelimiter: string = ':',
-    private readonly defaultMessage: string = 'Error',
+    private readonly nsDelimiter = '/',
+    private readonly scopeDelimiter = ':',
+    private readonly defaultMessage = 'Error',
   ) {
     this.create = this.create.bind(this)
     this.buildNamespace = namespaceFactory({

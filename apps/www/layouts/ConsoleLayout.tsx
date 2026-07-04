@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,18 @@
  * limitations under the License.
  */
 
-import { Container, GridItems, type GridItemsProps } from '@aglyn/shared-ui-jsx'
+import {
+  Container,
+  GridItems,
+  type GridItemsProps,
+} from '@aglyn/shared-ui-jsx'
 import {
   mdiCogOutline,
+} from '@aglyn/shared-data-mdi'
+import {
   MdiIcon,
   type MdiIconProps,
-} from '@aglyn/shared-ui-mdi-jsx'
+} from '@aglyn/shared-ui-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
 import { str } from '@aglyn/shared-util-tools'
 import { Typography } from '@mui/material'

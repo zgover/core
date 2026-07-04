@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ export * from './lib/copy-shallow'
 export * from './lib/create-chained-function'
 export * from './lib/crud'
 export * from './lib/css'
-export * from './lib/operator/compare'
 export * from './lib/falsy'
 export * from './lib/get-display-name'
 export * from './lib/get-property'
@@ -61,6 +60,10 @@ export * from './lib/bitwise/bitwise-has-all-attributes'
 export * from './lib/bitwise/bitwise-has-attribute'
 export * from './lib/bitwise/bitwise-has-only-attributes'
 
+// GUARDS
+
+export * from './lib/guards'
+
 // NUMBER
 
 export * from './lib/number/to-num'
@@ -69,8 +72,8 @@ export * from './lib/number/number-from-hexadecimal'
 
 // OBJECT
 
-export * from '@aglyn/shared-util-tools/object/object-clone'
-export * from '@aglyn/shared-util-tools/object/object-clone-deep'
+export * from './lib/object/object-clone'
+export * from './lib/object/object-clone-deep'
 export * from './lib/object/object-delete-property'
 export * from './lib/object/object-get-deep-property'
 export * from './lib/object/object-get-keys-and-symbol-properties'
@@ -78,6 +81,10 @@ export * from './lib/object/object-remap'
 export * from './lib/object/object-safe'
 export * from './lib/object/object-set-deep-property'
 export * from './lib/object/object-update'
+
+// OPERATOR
+
+export * from './lib/operator'
 
 // SERIALIZE
 

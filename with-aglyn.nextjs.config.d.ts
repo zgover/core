@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { WithNxOptions } from '@nrwl/next/plugins/with-nx'
+import type { WithNxOptions } from '@nx/next/plugins/with-nx'
 
 export interface WithAglynOptions extends WithNxOptions {
   aglyn?: {

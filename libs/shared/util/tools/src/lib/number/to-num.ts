@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,19 @@
  * limitations under the License.
  */
 
-import {type ConditionalNonDist} from '@aglyn/shared-data-types'
-import {_isNumT} from '@aglyn/shared-util-guards'
-
+import { _isNumT } from '../guards/lib/_is-num-t'
 
 type ToNumType = 'int' | 'float' | 'eval'
-type ToNumResult<T extends ToNumType = never> = ConditionalNonDist<T, 'eval', any, number>
-
+type ToNumResult<T extends ToNumType = never> = ConditionalNonDist<
+  T,
+  'eval',
+  any,
+  number
+>
 
 export type ToNumOptions<T extends ToNumType = never, N = 0> =
-  | {onNaN?: N, type?: 'int', radix?: number}
-  | {onNaN?: N, type?: T, radix?: never}
+  | { onNaN?: N; type?: 'int'; radix?: number }
+  | { onNaN?: N; type?: T; radix?: never }
 
 /**
  * Ensure and parse any value to a number.
@@ -43,7 +45,7 @@ export function toNum<T extends ToNumType, N = 0>(
   val: string | any,
   options?: ToNumOptions<T, N>,
 ): ToNumResult<T> | N {
-  const {type, onNaN, radix} = {...options}
+  const { type, onNaN, radix } = { ...options }
   let parsed: ToNumResult<T> | N = NaN
 
   if (_isNumT(radix)) parsed = parseInt(val, radix)

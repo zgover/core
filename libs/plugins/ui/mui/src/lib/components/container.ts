@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,21 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { mdiViewArrayOutline } from '@aglyn/shared-ui-mdi-jsx'
+import {
+  mdiViewArrayOutline,
+} from '@aglyn/shared-data-mdi'
 import Container, { type ContainerProps } from '@mui/material/Container'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'container'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiContainer'
 
 export const schema: Aglyn.ComponentSchema<ContainerProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Container',
+  category: Aglyn.ComponentCategory.LAYOUT,
   icon: {
     path: mdiViewArrayOutline.path,
     sx: { color: '#2196f3' },
@@ -67,6 +71,7 @@ export const schema: Aglyn.ComponentSchema<ContainerProps> = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'Container',
     icon: {
       path: mdiViewArrayOutline.path,

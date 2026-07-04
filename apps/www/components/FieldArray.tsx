@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,23 @@
  * limitations under the License.
  */
 
-import {DoD} from '@aglyn/shared-data-types'
-import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import {useCallback, useState} from 'react'
-import {Components} from '../lib/input-fields'
-import FormFields, {type Props as FormFieldsProps} from './FormFields'
-
+import { DoD } from '@aglyn/shared-data-types'
+import {
+  mdiPlus,
+} from '@aglyn/shared-data-mdi'
+import {
+  MdiIcon,
+} from '@aglyn/shared-ui-jsx'
+import { useCallback, useState } from 'react'
+import { Components } from '../lib/input-fields'
+import FormFields, { type Props as FormFieldsProps } from './FormFields'
 
 function FieldArrayItem(props: ArrayItemProps) {
-  const {value, ...rest} = props
+  const { value, ...rest } = props
   const [index, property] = value
   const fields = [
     {
-      GridItemProps: {xs: 1},
+      GridItemProps: { size: { xs: 1 } },
       component: Components.Elements.byKey.TextField,
       name: 'index',
       label: 'Index',
@@ -36,11 +40,11 @@ function FieldArrayItem(props: ArrayItemProps) {
       fullWidth: true,
       disabled: true,
       size: 'small',
-      InputLabelProps: {shrink: true},
+      InputLabelProps: { shrink: true },
       value: String(index),
     },
     {
-      GridItemProps: {xs: 3},
+      GridItemProps: { size: { xs: 3 } },
       component: Components.Elements.byKey.TextField,
       name: 'kind',
       label: 'Kind',
@@ -52,10 +56,10 @@ function FieldArrayItem(props: ArrayItemProps) {
       value: property.type,
       items: DoD.FT.Tag.all.map(
         (sym: any) =>
-          ({
+          (({
             value: sym,
-            children: DoD.lbl[sym],
-          } as any),
+            children: DoD.lbl[sym]
+          }) as any),
       ),
     },
   ]
@@ -65,19 +69,21 @@ FieldArrayItem.displayName = 'FieldArrayItem'
 FieldArrayItem.aglyn = true
 
 interface ArrayItemProps extends FormFieldsProps {
-  value: [index: number, schema: {type: symbol}]
+  value: [index: number, schema: { type: symbol }]
 }
 
 const emptyArrayItem = (index: number) => {
   return {
-    GridItemProps: {xs: 12},
+    GridItemProps: {
+      size: { xs: 12 },
+    },
     component: FieldArrayItem,
-    value: [index, {type: DoD.FT.Tag.sorted}],
+    value: [index, { type: DoD.FT.Tag.sorted }],
   }
 }
 
 function FieldArray(props: Props) {
-  const {value, ...rest} = props
+  const { value, ...rest } = props
   const [fields, setFields] = useState<any>(
     Array.from(new Array(3)).map((_, index) => emptyArrayItem(index)),
   )
@@ -85,19 +91,16 @@ function FieldArray(props: Props) {
     setFields((prev) => [...prev, emptyArrayItem(prev.length)])
   }, [])
 
-  console.log(fields)
   return (
     <FormFields
       items={fields.concat([
         {
-          GridItemProps: {xs: 12},
+          GridItemProps: { size: { xs: 12 } },
           component: Components.Elements.byKey.Button,
           variant: 'outlined',
           startIcon: <MdiIcon path={mdiPlus.path} />,
           children: 'Add',
           onClick: (e) => {
-            console.log('click')
-
             handleAddItem(e)
           },
         },

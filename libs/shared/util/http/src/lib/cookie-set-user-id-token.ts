@@ -16,7 +16,7 @@
  */
 
 import {COOKIE_KEY_USER_TOKEN} from '@aglyn/shared-data-enums'
-import type {CookieSerializeOptions} from 'next/dist/server/web/types'
+import type {ResponseCookie} from 'next/dist/compiled/@edge-runtime/cookies'
 import type {NextRequest, NextResponse} from 'next/server'
 
 
@@ -24,9 +24,9 @@ export function cookieSetUserIdToken(
   request: NextRequest,
   response: NextResponse,
   token: string,
-  options?: CookieSerializeOptions,
+  options?: Partial<ResponseCookie>,
 ) {
-  return response.cookie(COOKIE_KEY_USER_TOKEN, token, {
+  return response.cookies.set(COOKIE_KEY_USER_TOKEN, token, {
     httpOnly: true,
     ...options,
   })

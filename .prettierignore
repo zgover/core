@@ -5,3 +5,7 @@
 /nx.json
 /.eslintrc.js
 /workspace.json
+
+/.nx/cache
+/.nx/workspace-data
+.nx/self-healing

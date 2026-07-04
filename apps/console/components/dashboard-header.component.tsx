@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import {
   type BackgroundImageComponentProps,
   Container,
 } from '@aglyn/shared-ui-jsx'
-import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { Grid, Stack, Typography, type TypographyProps } from '@mui/material'
 import { useMemo } from 'react'
@@ -82,11 +82,12 @@ export function DashboardHeaderComponent(props: DashboardHeaderProps) {
         <Grid
           container
           direction="row"
-          justifyContent="space-between"
-          alignItems="center"
           spacing={2}
-        >
-          <Grid item>
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
+          <Grid>
             <Stack>
               <Typography
                 component="h1"
@@ -146,12 +147,12 @@ export function DashboardHeaderComponent(props: DashboardHeaderProps) {
             </Stack>
           </Grid>
 
-          {headerRight && <Grid item>{headerRight}</Grid>}
+          {headerRight && <Grid>{headerRight}</Grid>}
         </Grid>
         {children}
       </Container>
     </BackgroundImageComponent>
-  )
+  );
 }
 DashboardHeaderComponent.displayName = 'DashboardHeaderComponent'
 DashboardHeaderComponent.aglyn = true

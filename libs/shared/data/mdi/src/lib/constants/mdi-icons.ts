@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { _hasOwnProperty, _isArr, _isObj } from '@aglyn/shared-util-guards'
-import type { Icon, IconId } from 'libs/shared/data/mdi/src/lib/types'
+import { _hasOwnProperty, _isArr, _isObj } from '@aglyn/shared-util-tools'
+import type { Icon, IconId } from '../types'
 
 export const MdiIcons = new Map<IconId, Icon>()
 
@@ -25,14 +25,14 @@ if (typeof window !== 'undefined') {
     'Temporarily disabled',
   )
     .then(({ data }) => {
-      if (_isArr) {
+      if (_isArr(data)) {
         data.forEach((value) => {
           if (
             _isObj(value) &&
             _hasOwnProperty('path', value) &&
             _hasOwnProperty('id', value)
           ) {
-            MdiIcons.set(value.id as IconId, value as Icon)
+            MdiIcons.set(value['id'] as IconId, value as Icon)
           }
         })
       }

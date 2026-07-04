@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import '@aglyn/aglyn-plugin-mui'
 import * as Besigner from '@aglyn/besigner'
+import type { JsonEditorProps } from '@aglyn/shared-ui-json-editor'
 import {
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
   withBesignerContext,
   type WorkspaceEditorComponentProps,
 } from '@aglyn/besigner-ui'
-import { BesignerJsonEditor } from '@aglyn/besigner-json-editor'
 // import '@aglyn/foundation-feature-singleton'
 import {
   HAS_BROWSER,
@@ -40,17 +40,20 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
 import { useScreenVersion } from '@aglyn/tenant-feature-instance'
 import { Stack, Typography } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
-import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import '../../../../../../../constants/app-setup'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
+
+registerLegacyMuiPlugin()
 
 const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
   () =>
@@ -59,11 +62,16 @@ const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
 )
 const ViewportRootComponent = dynamic<WorkspaceEditorComponentProps>(
   () => import('@aglyn/besigner-ui').then((mod) => mod.ViewportRootComponent),
-  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
   () => import('@aglyn/besigner-ui').then((mod) => mod.ViewportCanvasComponent),
-  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
+)
+const JsonEditor = dynamic<JsonEditorProps>(
+  () =>
+    import('@aglyn/shared-ui-json-editor').then((mod) => mod.JsonEditor),
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
 function setLocalNodes(value: Aglyn.ProcessableNodes) {
@@ -73,11 +81,16 @@ function setLocalNodes(value: Aglyn.ProcessableNodes) {
 }
 
 function BesignerPage(props) {
-  const {
-    query: { hostId, screenId, versionId },
-  } = useRouter()
-  const { enqueueSnackbar } = useSnackbar()
-  const { queueLoading } = useLoading()
+  const params = useParams<{
+    hostId: string,
+    screenId: string,
+    versionId: string
+  }>()
+  const hostId = params?.hostId as string
+  const screenId = params?.screenId as string
+  const versionId = params?.versionId as string
+  const {enqueueSnackbar} = useSnackbar()
+  const {queueLoading} = useLoading()
   const saveAvailable = !Aglyn.canvas.isInitialSame
   const [screenDialog, setScreenDialog] = useState(false)
   const handleAddElementClick = useAddElementDrawerCallback()
@@ -86,17 +99,28 @@ function BesignerPage(props) {
     screenId: screenId as string,
     versionId: versionId as string,
   })
-  const { doc: result, setDoc: updateScreen } = useScreenVersion({
+  const {doc: result, setDoc: updateScreen} = useScreenVersion({
     hostId: hostId as string,
     screenId: screenId as string,
     versionId: versionId as string,
   })
-  const { data, status, error } = result
+  const {data, status, error} = result
   const nodes = data?.nodes
-  const [sss] = useState(() => nodes)
-  console.log('result', result)
   const hasError = Boolean(error) || status === 'error'
   const notFound = status === 'success' && !data
+
+  useEffect(() => {
+    if (status === 'loading') {
+      return queueLoading()
+    }
+  }, [status])
+
+  useEffect(() => {
+    if (nodes && !Aglyn.canvas.didSetInitial) {
+      setLocalNodes(nodes)
+      Aglyn.canvas.updateInitialNodes()
+    }
+  }, [nodes])
 
   const handleSave = useCallback(async () => {
     if (!saveAvailable) {
@@ -107,11 +131,21 @@ function BesignerPage(props) {
     }
     const dequeueLoading = queueLoading()
 
-    const nodes = Aglyn.canvas.nodesToJSON()
-    await updateScreen({ nodes: nodes }, { merge: true })
-      .then((...args) => {
-        console.log('updaye screen then promise', args)
+    const nodes = Aglyn.canvas.toJSON().nodes
+    const saveScreen = updateScreen as unknown as (
+      data: Partial<Aglyn.AglynScreenVersion>,
+      options?: Parameters<typeof updateScreen>[1],
+    ) => Promise<void>
+    await saveScreen(
+      {nodes: nodes as unknown as Aglyn.AglynScreenVersion['nodes']},
+      {merge: true},
+    )
+      .then(() => {
         Aglyn.canvas.updateInitialNodes(nodes)
+        enqueueSnackbar('Canvas saved successfully', {
+          variant: 'success',
+          persist: false,
+        })
       })
       .catch((e) => {
         enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
@@ -132,27 +166,6 @@ function BesignerPage(props) {
     setJsonOpen(false)
   }, [])
 
-  useEffect(() => {
-    if (nodes && !Aglyn.canvas.didSetInitial) {
-      console.log('decoded update', nodes)
-      console.log('decoded update previous nodes', sss)
-      const updated = setLocalNodes(nodes)
-      Aglyn.canvas.updateInitialNodes(updated)
-    }
-  }, [nodes, sss])
-
-  useEffect(() => {
-    if (HAS_BROWSER()) {
-      console.log('page:/besigner app', Aglyn)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (HAS_BROWSER()) {
-      console.log('Besigner props.tenant,', props.tenant, props)
-      console.log('Besigner status screen,', status, data)
-    }
-  }, [props, data, status])
 
   useEffect(() => {
     if (hasError) {
@@ -160,18 +173,14 @@ function BesignerPage(props) {
         variant: 'error',
         allowDuplicate: true,
       })
-    } else if (notFound) {
+    }
+    else if (notFound) {
       enqueueSnackbar('404: Screen not found', {
         variant: 'error',
         allowDuplicate: true,
       })
     }
   }, [enqueueSnackbar, hasError, error, notFound])
-
-  console.log(
-    'Aglyn.screen.nestedNodes as any',
-    Aglyn.canvas.nestedNodes as any,
-  )
 
   return (
     <>
@@ -201,8 +210,8 @@ function BesignerPage(props) {
                 id: 'center-nav-file-save',
                 disabled: !saveAvailable,
                 icon: saveAvailable
-                  ? { path: ICON_VARIANT_MODIFY_SAVE.path }
-                  : { path: ICON_VARIANT_SYMBOL_CONFIRMED.path },
+                  ? {path: ICON_VARIANT_MODIFY_SAVE.path}
+                  : {path: ICON_VARIANT_SYMBOL_CONFIRMED.path},
                 children: saveAvailable ? 'Save' : 'Up to Date',
                 onClick: handleSave,
               },
@@ -212,7 +221,7 @@ function BesignerPage(props) {
                 href: detailUrl,
                 component: AppLink,
                 componentVariant: 'naked',
-                ListItemTextProps: { inset: true },
+                ListItemTextProps: {inset: true},
               },
               {
                 type: 'divider',
@@ -228,9 +237,9 @@ function BesignerPage(props) {
                   </Typography>
                 ),
                 onClick: () =>
-                  handleAddElementClick(Besigner.focus.state.lastSelected),
+                  handleAddElementClick(Besigner.focus.getLastSelected()),
                 disabled: true,
-                ListItemTextProps: { inset: true },
+                ListItemTextProps: {inset: true},
               },
               {
                 type: 'divider',
@@ -255,14 +264,14 @@ function BesignerPage(props) {
                 children: 'Undo',
                 onClick: () => Aglyn.canvas.undo(),
                 disabled: !Aglyn.canvas.canUndo,
-                ListItemTextProps: { inset: true },
+                ListItemTextProps: {inset: true},
               },
               {
                 id: 'center-nav-edit-redo',
                 children: 'Redo',
                 onClick: () => Aglyn.canvas.redo(),
                 disabled: !Aglyn.canvas.canRedo,
-                ListItemTextProps: { inset: true },
+                ListItemTextProps: {inset: true},
               },
               {
                 type: 'divider',
@@ -271,7 +280,7 @@ function BesignerPage(props) {
                 id: 'center-nav-edit-rawjson',
                 children: 'Raw JSON',
                 onClick: () => openJsonEditor(),
-                ListItemTextProps: { inset: true },
+                ListItemTextProps: {inset: true},
               },
             ],
           },
@@ -295,7 +304,11 @@ function BesignerPage(props) {
         <NextPageTitle screen={'Besigner'} />
 
         {error || notFound ? (
-          <Stack alignItems="center" justifyContent="center">
+          <Stack
+            sx={{
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
             <Typography>{'Not found'}</Typography>
           </Stack>
         ) : status === 'loading' ? (
@@ -326,53 +339,35 @@ function BesignerPage(props) {
           setScreenDialog(false)
         }}
       />
-      <BesignerJsonEditor
-        open={Boolean(Aglyn.canvas.rootNode && jsonOpen)}
-        onClose={closeJsonEditor}
-        onSave={handleJsonSave}
-        defaultValue={Aglyn.canvas.nestedNodes as any}
-      />
+      {Boolean(Aglyn.canvas.rootNode && jsonOpen) && (
+        <JsonEditor
+          open={Boolean(Aglyn.canvas.rootNode && jsonOpen)}
+          onClose={closeJsonEditor}
+          onSave={handleJsonSave}
+          defaultValue={Aglyn.canvas.nestedNodes as any}
+        />
+      )}
     </>
-  )
+  );
 }
 
 BesignerPage.displayName = 'Page:Besigner'
-BesignerPage.layouts = [{ Component: AuthenticatedLayout }]
+BesignerPage.layouts = [{Component: AuthenticatedLayout}]
 
 export default withBesignerContext(observer(BesignerPage))
 
 // export const getServerSideProps = async (ctx) => {
-//   // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'sample tenant', hosts: []})
-//   console.log('Page:Besigner getStaticProps START')
-//   const tenantId = '-atN0g5dZgoDp4rfMaO_'
-//   const tenant = await getAdminTenant(tenantId)
-//     .then((snapshot) => {
-//       if (snapshot.exists()) {
-//         console.log('getAdminTenant exists', tenantId, snapshot.val())
-//         console.log(snapshot.val())
-//         return snapshot.val()
-//       }
-//       else {
-//         console.log('getAdminTenant No data available', tenantId)
-//         return null
-//       }
-//     }).catch((error) => {
-//       console.error(`getAdminTenant error`, tenantId, error)
-//       return null
-//     })
-//   console.log('Page:Besigner getStaticProps AWAIT DONE', tenant)
-//
-//
-//   if (!tenant && ctx) {
-//     console.log('Page:Besigner WRITE START')
-//     // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake tenant'})
-//     // tenant = await getServerSideProps(null).then((data) => data.props.tenant)
-//     console.log('Page:Besigner WRITE DONE', tenant)
-//   }
-//
-//   return {
-//     props: {
-//       tenant,
-//     },
-//   }
-// }
+//   // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'sample
+// tenant', hosts: []}) console.log('Page:Besigner getStaticProps START') const
+// tenantId = '-atN0g5dZgoDp4rfMaO_' const tenant = await
+// getAdminTenant(tenantId) .then((snapshot) => { if (snapshot.exists()) {
+// console.log('getAdminTenant exists', tenantId, snapshot.val())
+// console.log(snapshot.val()) return snapshot.val() } else {
+// console.log('getAdminTenant No data available', tenantId) return null }
+// }).catch((error) => { console.error(`getAdminTenant error`, tenantId, error)
+// return null }) console.log('Page:Besigner getStaticProps AWAIT DONE',
+// tenant)   if (!tenant && ctx) { console.log('Page:Besigner WRITE START') //
+// await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake
+// tenant'}) // tenant = await getServerSideProps(null).then((data) =>
+// data.props.tenant) console.log('Page:Besigner WRITE DONE', tenant) }  return
+// { props: { tenant, }, } }

@@ -1,4 +1,5 @@
-export const mdiMusicRestWhole = {
+import type { Icon } from '../../../src/lib/types'
+export const mdiMusicRestWhole: Icon = {
   "id": "music-rest-whole",
   "name": "Music Rest Whole",
   "path": "M18 10H16V14H8V10H6V9H18V10Z",

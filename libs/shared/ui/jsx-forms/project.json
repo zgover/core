@@ -3,42 +3,53 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/ui/jsx-forms/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:shared", "scope:ui"],
   "targets": {
     "build": {
-      "executor": "@nrwl/rollup:rollup",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/ui/jsx-forms",
         "tsConfig": "libs/shared/ui/jsx-forms/tsconfig.lib.json",
         "project": "libs/shared/ui/jsx-forms/package.json",
         "entryFile": "libs/shared/ui/jsx-forms/src/index.ts",
-        "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "external": [
+          "react/jsx-runtime",
+          "@aglyn/shared-ui-color-picker",
+          "@aglyn/shared-data-mdi",
+          "@aglyn/shared-ui-jsx",
+          "@aglyn/shared-ui-theme",
+          "@aglyn/shared-util-tools",
+          "@aglyn/shared-util-vendor"
+        ],
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup",
+          "tools/rollup-external-packages.js",
+          "tools/rollup-suppress-use-client.js",
+          "tools/rollup-skip-typecheck.js"
+        ],
         "compiler": "swc",
+        "skipTypeCheck": true,
         "assets": [
           {
             "glob": "libs/shared/ui/jsx-forms/README.md",
             "input": ".",
             "output": "."
           }
-        ]
+        ],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/shared/ui/jsx-forms/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/shared/ui/jsx-forms"],
       "options": {
-        "jestConfig": "libs/shared/ui/jsx-forms/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/shared/ui/jsx-forms/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:shared", "scope:ui"]
+  }
 }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { mdiFormatListBulletedSquare } from '@aglyn/shared-ui-mdi-jsx'
+import {
+  mdiFormatListBulletedSquare,
+} from '@aglyn/shared-data-mdi'
 import List, { type ListProps } from '@mui/material/List'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
@@ -25,12 +27,14 @@ import {
   schema as listItemSchema,
 } from './list-item'
 
-const ID: Aglyn.ComponentId = 'list'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiList'
 
 export const schema: Aglyn.ComponentSchema<ListProps> = {
   $id: ID,
-  pluginId: 'mui',
+  pluginId: BUNDLE_ID,
   displayName: 'List',
+  category: Aglyn.ComponentCategory.DATA_DISPLAY,
   icon: { path: mdiFormatListBulletedSquare.path },
   restrictChildren: [
     Aglyn.LinealDirectiveFlag.LIMIT_TO,
@@ -43,6 +47,7 @@ export const schema: Aglyn.ComponentSchema<ListProps> = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'List',
     icon: { path: mdiFormatListBulletedSquare.path },
     category: Aglyn.ComponentCategory.DATA_DISPLAY,

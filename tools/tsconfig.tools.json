@@ -3,9 +3,8 @@
   "compilerOptions": {
     "outDir": "../dist/out-tsc/tools",
     "rootDir": ".",
-    "module": "commonjs",
     "target": "es5",
-    "types": ["node"],
+    "types": ["@tshelpers", "node", "@jsx"],
     "importHelpers": false,
     "resolveJsonModule": true
   },

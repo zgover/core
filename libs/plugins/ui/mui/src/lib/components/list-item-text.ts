@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,30 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { mdiFormatListChecks } from '@aglyn/shared-ui-mdi-jsx'
+import {
+  mdiFormatListChecks,
+} from '@aglyn/shared-data-mdi'
 import ListItemText, {
   type ListItemTextProps,
 } from '@mui/material/ListItemText'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'list-item-text'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiListItemText'
 
 export const schema: Aglyn.ComponentSchema<ListItemTextProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'List Item Text',
+  category: Aglyn.ComponentCategory.DATA_DISPLAY,
   icon: { path: mdiFormatListChecks.path },
 }
 
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'List Item Text',
     icon: { path: mdiFormatListChecks.path },
     category: Aglyn.ComponentCategory.DATA_DISPLAY,

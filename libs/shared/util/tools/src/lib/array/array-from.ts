@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  */
 export function arrayFrom<T, U>(
   iterable: Iterable<T> | ArrayLike<T>,
-  callbackFn?: (v: T, k: number) => U,
+  callbackFn: (v: T, k: number) => U,
   thisArg?: any,
 ): U[] {
   return Array.from(iterable, callbackFn, thisArg)

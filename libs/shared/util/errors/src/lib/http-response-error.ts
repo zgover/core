@@ -19,13 +19,16 @@ import {HttpStatusCode} from '@aglyn/shared-data-enums'
 
 
 export class HttpResponseError extends Error {
-  readonly name = 'HttpResponseError'
+  override readonly name = 'HttpResponseError'
+
+  override message: string
 
   constructor(
     public readonly code: HttpStatusCode = HttpStatusCode.OK,
-    public message: string,
+    message: string,
   ) {
     super(message)
+    this.message = message
 
     // Fix For ES5
     // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work

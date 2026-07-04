@@ -17,7 +17,7 @@
 
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const pkg = require('./package.json')
-const withNx = require('@nrwl/next/plugins/with-nx')
+const withNx = require('@nx/next/plugins/with-nx')
 const deepFillIn = require('mout/object/deepFillIn')
 
 const PACKAGE_VERSION = String(pkg?.version ?? '0.0.0')
@@ -219,6 +219,15 @@ const AGLYN_CONFIG = {
   eslint: {
     ignoreDuringBuilds: IS_PRODUCTION,
   },
+  /**
+   * Disable the static/dynamic page dev indicator.
+   * In Next.js 16 the handleStaticIndicator function accesses
+   * window.next.router.components before the Pages Router is initialized,
+   * causing a race-condition TypeError on every page load in dev.
+   * Setting this to false compiles out the entire indicator code path.
+   */
+  devIndicators: false,
+
   experimental: {
     workerThreads: true,
 
@@ -228,6 +237,53 @@ const AGLYN_CONFIG = {
     esmExternals: false,
 
     // optimizeCss: true,
+  },
+
+  /**
+   * Bundle @mui/* packages through webpack instead of treating them as Node.js
+   * externals. This resolves a systemic ESM/CJS interop mismatch: with
+   * esmExternals:false, MUI's *.mjs files are compiled by webpack without the
+   * c.n() harmony interop wrapper (because webpack sees their imports as ESM at
+   * build time), but at runtime require() returns { __esModule:true, default:fn }
+   * instead of a callable function — causing TypeError: m is not a function
+   * during Next.js "Collecting page data". Transpiling keeps all interop inside
+   * webpack's own module graph, where it is handled correctly.
+   */
+  transpilePackages: [
+    '@emotion/cache',
+    '@emotion/react',
+    '@emotion/serialize',
+    '@emotion/styled',
+    '@mui/base',
+    '@mui/icons-material',
+    '@mui/lab',
+    '@mui/material',
+    '@mui/private-theming',
+    '@mui/styled-engine',
+    '@mui/styles',
+    '@mui/system',
+    '@mui/utils',
+    '@mui/x-data-grid',
+    '@mui/x-date-pickers',
+    '@mui/x-virtualizer',
+    '@popperjs/core',
+  ],
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: [
+          {
+            loader: '@svgr/webpack',
+            options: {
+              exportType: 'named',
+              namedExport: 'ReactComponent',
+              plugins: ['@svgr/plugin-jsx'],
+            },
+          },
+        ],
+        as: '*.js',
+      },
+    },
   },
   /**
    * Next.js can automatically create a standalone folder which copies only
@@ -270,7 +326,7 @@ const AGLYN_CONFIG = {
      * Set this to false if you do not want to use SVGR
      * @see https://github.com/gregberge/svgr
      */
-    svgr: false,
+    svgr: true,
   },
   // onDemandEntries: {
   //   /**
@@ -330,6 +386,35 @@ const AGLYN_CONFIG = {
         'process.env.BUILD_ID': JSON.stringify(buildId),
       }),
     )
+
+    // SVGR: process *.svg files imported from JS/TS with named ReactComponent export.
+    // nx.svgr:true is a no-op in @nx/next v22 withNx; the rule must be added explicitly.
+    // Exclude SVGs from ALL existing asset/resource rules (Next.js may register more than one).
+    config.module.rules.forEach((rule) => {
+      if (rule.test instanceof RegExp && rule.test.test('.svg')) {
+        rule.exclude = /\.svg$/i
+      }
+    })
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      // Prevent webpack 5 asset module type from overriding loader output.
+      type: 'javascript/auto',
+      use: [
+        {
+          loader: '@svgr/webpack',
+          options: {
+            exportType: 'named',
+            namedExport: 'ReactComponent',
+            // Explicitly list only the JSX plugin so SVGO never runs.
+            // SVGO (included by @svgr/webpack's defaultPlugins) fails on SVG files
+            // that start with a comment node instead of the <svg> element.
+            plugins: ['@svgr/plugin-jsx'],
+          },
+        },
+      ],
+    })
+
     return config
   },
 }
@@ -407,8 +492,8 @@ function withAglyn(nextConfig = {}) {
           )
         }
 
-        if (typeof merged.webpack === 'function') {
-          return merged.webpack(config, options)
+        if (typeof userConfig.webpack === 'function') {
+          return userConfig.webpack(config, options)
         }
 
         return config

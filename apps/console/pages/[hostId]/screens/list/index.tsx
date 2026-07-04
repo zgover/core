@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
-import { type AccordionRenderProps } from '@aglyn/besigner-ui'
-import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
-import { createResourceUid } from '@aglyn/core-util-app'
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/aglyn'
+import { createResourceUid } from '@aglyn/aglyn'
 import {
   ICON_VARIANT_CLOSE,
   ICON_VARIANT_MODIFY_DELETE,
@@ -34,12 +34,12 @@ import {
   useLoading,
 } from '@aglyn/shared-ui-jsx'
 import { FormRenderer, simpleComponentMapper } from '@aglyn/shared-ui-jsx-forms'
-import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { Button, IconButton, Typography } from '@mui/material'
-import { GridActionsCellItem, type GridColumns } from '@mui/x-data-grid'
+import { GridActionsCellItem, type GridColDef } from '@mui/x-data-grid'
 import {
   collection,
   doc,
@@ -48,13 +48,13 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../../components/auth-form-template.component'
-import CardDisplay from '../../../../components/card-display'
-import DataTableComponent from '../../../../components/data-table.component'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
+import { DataTableComponent } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
@@ -64,27 +64,6 @@ import {
   TABLE_ROW_HEIGHT,
 } from '../../../../constants/shared'
 
-// eslint-disable-next-line react/display-name
-const DetailsContentComponent = forwardRef<any, AccordionRenderProps>(
-  (props, ref) => {
-    return (
-      <>
-        <div ref={ref}>{JSON.stringify(props)}</div>
-      </>
-    )
-  },
-)
-// eslint-disable-next-line react/display-name
-const SummaryContentComponent = forwardRef<any, AccordionRenderProps>(
-  (props, ref) => {
-    return (
-      <>
-        <div ref={ref}>{JSON.stringify(props)}</div>
-      </>
-    )
-  },
-)
-
 const CellItemLinkComponent = forwardRef<any, AppLinkNakedLinkProps>(
   (props, ref) => {
     return <AppLink ref={ref} {...props} componentVariant={'naked'} />
@@ -93,8 +72,8 @@ const CellItemLinkComponent = forwardRef<any, AppLinkNakedLinkProps>(
 CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 
 function Screens(props) {
-  const { query: routerQuery } = useRouter()
-  const hostId = routerQuery.hostId as string
+  const params = useParams<{ hostId: string }>()
+  const hostId = params?.hostId as string
   const { queueLoading, loading } = useLoading()
   const { confirm } = useConfirmationContext()
   const [quickDrawerOpen, setQuickDrawerOpen] = useState<boolean>(false)
@@ -198,7 +177,7 @@ function Screens(props) {
           dequeueLoading = queueLoading()
         })
         .then(() =>
-          updateDoc(doc(firestore, 'screens', id), {
+          updateDoc(doc(firestore, 'hosts', hostId, 'screens', id), {
             deletedAt: Timestamp.now(),
           }),
         )
@@ -210,7 +189,7 @@ function Screens(props) {
     [confirm, firestore, queueLoading],
   )
 
-  const columns: GridColumns = [
+  const columns: GridColDef[] = [
     {
       field: 'actions',
       type: 'actions',
@@ -234,10 +213,9 @@ function Screens(props) {
           />,
           <GridActionsCellItem
             key="action-delete"
-            icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
+            icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} color="error" />}
             label="Delete"
             onClick={handleDeleteScreen(screenId, versionId)}
-            color="error"
           />,
         ]
       },
@@ -386,9 +364,9 @@ function Screens(props) {
               noRowsLabel="No screens"
               rows={screens}
               loading={status === 'loading'}
-              pageSize={pageSize}
-              onPageSizeChange={setPageSize}
-              rowsPerPageOptions={[5, 10, 15]}
+              initialState={{ pagination: { paginationModel: { pageSize } } }}
+              onPaginationModelChange={(model) => setPageSize(model.pageSize)}
+              pageSizeOptions={[5, 10, 15]}
               pagination
             />
           </CardDisplay>

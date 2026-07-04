@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,30 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { mdiBorderInside } from '@aglyn/shared-ui-mdi-jsx'
-import Toolbar from '@mui/material/Toolbar'
+import {
+  mdiBorderInside,
+} from '@aglyn/shared-data-mdi'
+import Toolbar, { type ToolbarProps } from '@mui/material/Toolbar'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { FIELD_DISABLE_GUTTERS } from '../constants/field-presets'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'toolbar'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiToolbar'
 
-export const schema: Aglyn.ComponentSchema = {
+export const schema: Aglyn.ComponentSchema<ToolbarProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Toolbar Content',
+  category: Aglyn.ComponentCategory.SURFACE,
   icon: {
     path: mdiBorderInside.path,
     sx: { color: '#2196f3' },
   },
+  restrictParent: [
+    Aglyn.LinealDirectiveFlag.LIMIT_TO,
+    { components: ['muiAppBar'], plugins: [BUNDLE_ID] },
+  ],
   attributes: [
     FIELD_DISABLE_GUTTERS,
     {
@@ -51,6 +59,7 @@ export const schema: Aglyn.ComponentSchema = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'Toolbar Content',
     icon: {
       path: mdiBorderInside.path,

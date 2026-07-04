@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import {
   mdiFormatHeader4,
   mdiFormatHeader5,
   mdiFormatHeader6,
-  mdiFormatParagraph,
   mdiFormatText,
-} from '@aglyn/shared-ui-mdi-jsx'
+} from '@aglyn/shared-data-mdi'
 import Typography from '@mui/material/Typography'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'typography'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiTypography'
 const typographyVariants = [
   { value: 'h1', label: 'Heading 1', icon: { path: mdiFormatHeader1.path } },
   { value: 'h2', label: 'Heading 2', icon: { path: mdiFormatHeader2.path } },
@@ -53,17 +53,13 @@ const typographyVariants = [
   { value: 'body2', label: 'Body 2', icon: { path: mdiFormatText.path } },
   { value: 'overline', label: 'Overline', icon: { path: mdiFormatText.path } },
   { value: 'caption', label: 'Caption', icon: { path: mdiFormatText.path } },
-  {
-    value: 'paragraph',
-    label: 'Paragraph',
-    icon: { path: mdiFormatParagraph.path },
-  },
 ]
 
 export const schema: Aglyn.ComponentSchema = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Typography',
+  category: Aglyn.ComponentCategory.TEXT,
   icon: {
     path: mdiAlphabetical.path,
     sx: { color: '#057822' },
@@ -90,7 +86,7 @@ export const schema: Aglyn.ComponentSchema = {
         { value: 'h4', label: 'Heading 4' },
         { value: 'h5', label: 'Heading 5' },
         { value: 'h6', label: 'Heading 6' },
-        { value: 'paragraph', label: 'Paragraph' },
+        { value: 'p', label: 'Paragraph' },
         { value: 'div', label: 'Div' },
         { value: 'span', label: 'Span' },
       ],
@@ -125,31 +121,17 @@ export const schema: Aglyn.ComponentSchema = {
 }
 
 export const presets: Aglyn.PresetSchema[] = [
-  {
-    $id: generatePresetId(ID),
-    displayName: 'Typography',
-    icon: {
-      path: mdiAlphabetical.path,
-      sx: { color: '#057822' },
-    },
-    data: {
-      $id: null,
-      componentId: ID,
-      pluginId: BUNDLE_ID,
-      props: {
-        variant: 'outlined',
-        children: 'Typographical text element',
-      },
-    },
-  },
-  ...typographyVariants.map((item) => ({
+  ...typographyVariants.map((item): Aglyn.PresetSchema => ({
     $id: generatePresetId(ID, item.value),
-    labdisplayNameel: item.label,
+    type: Aglyn.NodeType.PRESET,
+    displayName: item.label,
+    pluginId: BUNDLE_ID,
+    description: `Element with ${item.label} styles`,
+    category: Aglyn.ComponentCategory.TEXT,
     icon: {
       sx: { color: '#057822' },
       ...item.icon,
     },
-    category: Aglyn.ComponentCategory.DATA_DISPLAY,
     data: {
       $id: null,
       componentId: ID,

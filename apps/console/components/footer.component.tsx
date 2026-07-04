@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { BUILD_ID, PACKAGE_VERSION } from '@aglyn/shared-data-enums'
 import {
@@ -40,12 +41,21 @@ const FooterComponent = forwardRef<any, FooterProps>((props, ref) => {
       <Container maxWidth={FOOTER_MAX_WIDTH} sx={{ mt: 6, pb: 1 }}>
         <Divider sx={{ mb: 2 }} />
         <Container dense maxWidth={false}>
-          <Stack flexWrap="wrap" alignItems="center" direction="row">
-            <Stack component="div" flexGrow={1}>
+          <Stack
+            direction="row"
+            sx={{
+              flexWrap: "wrap",
+              alignItems: "center"
+            }}>
+            <Stack component="div" sx={{
+              flexGrow: 1
+            }}>
               <CopyrightComponent />
             </Stack>
 
-            <Stack display="flex">
+            <Stack sx={{
+              display: "flex"
+            }}>
               <GridButtons
                 spacing={1}
                 ItemComponent={AppLink}
@@ -58,11 +68,12 @@ const FooterComponent = forwardRef<any, FooterProps>((props, ref) => {
             </Stack>
 
             <Stack
-              alignItems="space-around"
-              flex="1 1 auto"
-              flexBasis="100%"
-              justifyContent="center"
-            >
+              sx={{
+                alignItems: "space-around",
+                flex: "1 1 auto",
+                flexBasis: "100%",
+                justifyContent: "center"
+              }}>
               <Typography
                 align="center"
                 color="textSecondary"
@@ -76,7 +87,7 @@ const FooterComponent = forwardRef<any, FooterProps>((props, ref) => {
         </Container>
       </Container>
     </Box>
-  )
+  );
 })
 FooterComponent.displayName = 'FooterComponent'
 FooterComponent.aglyn = true

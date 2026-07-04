@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { APP_WWW, BUILD_ID, PACKAGE_VERSION } from '@aglyn/shared-data-enums'
 import {
@@ -25,10 +26,10 @@ import {
   type GridButtonsProps,
   Menu,
 } from '@aglyn/shared-ui-jsx'
-import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-jsx'
 import { useNextPageTitle } from '@aglyn/shared-ui-next'
 import { styled } from '@aglyn/shared-ui-theme'
-import { _isArr, _isArrEmpty, _isObj } from '@aglyn/shared-util-guards'
+import { _isArr, _isArrEmpty, _isObj } from '@aglyn/shared-util-tools'
 import {
   AppBar,
   type AppBarProps,
@@ -44,7 +45,7 @@ import {
   Typography,
 } from '@mui/material'
 import { cyan } from '@mui/material/colors'
-import { useRouter } from 'next/router'
+import { usePathname } from 'next/navigation'
 import { type ElementType, Fragment, type ReactNode } from 'react'
 // import {BreadcrumbsComponent, BreadcrumbsProps} from
 // '../components/BreadcrumbsComponent'
@@ -224,7 +225,7 @@ const StyledMenu = styled(Menu, {
 //   },
 // }))
 
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `scrollable-auto-tab-${index}`,
     'aria-controls': `scrollable-auto-tabpanel-${index}`,
@@ -261,7 +262,7 @@ export interface MainLayoutProps {
 }
 
 export function MainLayout(props: MainLayoutProps) {
-  const router = useRouter()
+  const pathname = usePathname()
   const {
     children,
     title,
@@ -274,7 +275,7 @@ export function MainLayout(props: MainLayoutProps) {
   } = props
   const tabValue = navTabItems
     ? navTabItems
-        .filter((i) => router.asPath.includes(i.href))
+        .filter((i) => pathname.includes(i.href))
         .reduce((prev, current) => {
           const currentHref = (
             _isObj(current.href) ? current.href.paths : current.href
@@ -347,7 +348,7 @@ export function MainLayout(props: MainLayoutProps) {
             <Toolbar>
               <StyledLeft>
                 <StyledLogoWrapper>
-                  <AppLink hrefAs="/" color="inherit" href="/" underline="none">
+                  <AppLink color="inherit" href="/" underline="none">
                     <StyledLogoInner>
                       <StyledLogo color="inherit" />
                     </StyledLogoInner>
@@ -439,12 +440,13 @@ export function MainLayout(props: MainLayoutProps) {
             </StyledRight>
 
             <Box
-              alignItems="space-around"
-              display="flex"
-              flex="1 1 auto"
-              flexBasis="100%"
-              justifyContent="center"
-            >
+              sx={{
+                alignItems: "space-around",
+                display: "flex",
+                flex: "1 1 auto",
+                flexBasis: "100%",
+                justifyContent: "center"
+              }}>
               <Typography
                 align="center"
                 color="textSecondary"
@@ -458,7 +460,7 @@ export function MainLayout(props: MainLayoutProps) {
         </Container>
       </footer>
     </Fragment>
-  )
+  );
 }
 
 MainLayout.displayName = 'MainLayout'

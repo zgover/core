@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import NavigationView from '@aglyn/shared-ui-jsx/components/navigation-view/navigation-view'
+import NavigationView from './navigation-view/navigation-view'
 import {
   generateComponentClassKeys,
   mergeSxProps,

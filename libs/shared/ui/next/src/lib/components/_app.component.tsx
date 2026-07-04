@@ -16,10 +16,7 @@
  */
 
 import { HAS_DOCUMENT } from '@aglyn/shared-data-enums'
-import {
-  type EmotionCacheProps,
-  EmotionCacheProvider,
-} from '@aglyn/shared-ui-jsx'
+import { EmotionCacheProvider } from '@aglyn/shared-ui-jsx'
 import Head from 'next/head'
 import {
   Fragment,
@@ -31,7 +28,7 @@ import NextPageTitleProvider from '../contexts/next-page-title-provider'
 import PageDecorated, { type PageDecoratedProps } from './page-decorated'
 
 type BaseProps<Props, InitialProps> = PageDecoratedProps<Props, InitialProps> &
-  EmotionCacheProps
+  Parameters<typeof EmotionCacheProvider>[0]
 
 export type _AppProps<Props, InitialProps> = BaseProps<Props, InitialProps> & {
   children?: JSX.Children
@@ -103,11 +100,11 @@ export function _AppComponent<Props, InitialProps>(
     <EmotionCacheProvider emotionCache={emotionCache}>
       <NextPageTitleProvider>
         <Head>
-          {meta?.map((props, i) => (
-            <meta {...props} key={props.id ?? props.key ?? i} />
+          {meta?.map(({ key: metaKey, id: metaId, ...metaProps }, i) => (
+            <meta key={metaKey ?? metaId ?? i} {...metaProps} />
           ))}
-          {link?.map((props, i) => (
-            <link {...props} key={props.id ?? props.key ?? i} />
+          {link?.map(({ key: linkKey, id: linkId, ...linkProps }, i) => (
+            <link key={linkKey ?? linkId ?? i} {...linkProps} />
           ))}
           {headChildren}
         </Head>

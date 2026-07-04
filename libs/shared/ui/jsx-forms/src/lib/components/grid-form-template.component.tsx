@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { mdiContentSave, MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { mdiContentSave } from '@aglyn/shared-data-mdi'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 
 import { Box, Button, FormControl, Grid } from '@mui/material'
 import { forwardRef } from 'react'
@@ -40,7 +41,9 @@ export const GridFormTemplateComponent = forwardRef<any, GridFormTemplateProps>(
         </Grid>
         <FormSpy>
           {({ submitting, validating, pristine, valid }) => (
-            <Box mt={2}>
+            <Box sx={{
+              mt: 2
+            }}>
               <FormControl margin="normal" fullWidth>
                 <Button
                   variant="outlined"
@@ -68,7 +71,7 @@ export const GridFormTemplateComponent = forwardRef<any, GridFormTemplateProps>(
           )}
         </FormSpy>
       </form>
-    )
+    );
   },
 )
 GridFormTemplateComponent.displayName = 'GridFormTemplateComponent'

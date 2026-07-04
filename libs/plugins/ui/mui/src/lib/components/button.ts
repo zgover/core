@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { mdiGestureTapButton } from '@aglyn/shared-ui-mdi-jsx'
+import {
+  mdiGestureTapButton,
+} from '@aglyn/shared-data-mdi'
 import Button, { type ButtonProps } from '@mui/material/Button'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import {
@@ -27,12 +29,14 @@ import {
 } from '../constants/field-presets'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'button'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiButton'
 
 export const schema: Aglyn.ComponentSchema<ButtonProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Button',
+  category: Aglyn.ComponentCategory.INPUT,
   icon: {
     path: mdiGestureTapButton.path,
     sx: { color: '#2196f3' },
@@ -60,6 +64,7 @@ export const schema: Aglyn.ComponentSchema<ButtonProps> = {
 export const presets: Aglyn.PresetSchema[] = [
   {
     $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
     displayName: 'Outlined Button',
     icon: {
       path: mdiGestureTapButton.path,

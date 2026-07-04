@@ -3,46 +3,28 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/data/types/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:shared", "scope:data"],
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/data/types",
         "main": "libs/shared/data/types/src/index.ts",
         "tsConfig": "libs/shared/data/types/tsconfig.lib.json",
-        "assets": [
-          "libs/shared/data/types/*.md"
-        ]
+        "assets": ["libs/shared/data/types/*.md"]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "libs/shared/data/types/**/*.ts"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/libs/shared/data/types"
-      ],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/shared/data/types"],
       "options": {
-        "jestConfig": "libs/shared/data/types/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/shared/data/types/jest.config.ts"
       }
     }
-  },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:data"
-  ]
+  }
 }

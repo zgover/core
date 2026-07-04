@@ -3,17 +3,37 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/ui/jsx/src",
   "projectType": "library",
+  "tags": [
+    "scope:lib",
+    "scope:shared",
+    "scope:ui"
+  ],
   "targets": {
     "build": {
-      "executor": "@nrwl/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared/ui/jsx",
         "tsConfig": "libs/shared/ui/jsx/tsconfig.lib.json",
         "project": "libs/shared/ui/jsx/package.json",
         "entryFile": "libs/shared/ui/jsx/src/index.ts",
-        "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "external": [
+          "react/jsx-runtime",
+          "react-virtuoso",
+          "@aglyn/shared-data-mdi",
+          "@aglyn/shared-data-mdi/constants/default-icon",
+          "@aglyn/shared-ui-theme",
+          "@aglyn/shared-util-tools",
+          "@aglyn/shared-util-vendor"
+        ],
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup",
+          "tools/rollup-external-packages.js",
+          "tools/rollup-suppress-use-client.js",
+          "tools/rollup-skip-typecheck.js"
+        ],
         "compiler": "swc",
         "assets": [
           {
@@ -21,24 +41,25 @@
             "input": ".",
             "output": "."
           }
-        ]
+        ],
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": ["libs/shared/ui/jsx/**/*.{ts,tsx,js,jsx}"]
-      },
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/shared/ui/jsx"],
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/shared/ui/jsx"
+      ],
       "options": {
-        "jestConfig": "libs/shared/ui/jsx/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/shared/ui/jsx/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:shared", "scope:ui"]
+  }
 }

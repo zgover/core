@@ -16,7 +16,7 @@
  */
 
 import { ScrollReaction } from '@aglyn/shared-ui-jsx'
-import { _isArrEmpty } from '@aglyn/shared-util-guards'
+import { _isArrEmpty } from '@aglyn/shared-util-tools'
 import {
   AppBar,
   type AppBarProps,
@@ -82,9 +82,8 @@ export function SecondaryAppBarComponent(props: SecondaryAppBarProps) {
 
                 <Divider
                   orientation="vertical"
-                  sx={{ ml: 1.25, mr: 1 }}
+                  sx={{ ml: 1.25, mr: 1, opacity: 0.5 }}
                   flexItem
-                  light
                 />
               </Fragment>
             )}

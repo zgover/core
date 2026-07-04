@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { useRouter } from 'next/router'
-import { type ComponentType, forwardRef, useEffect } from 'react'
+import { type ComponentType, forwardRef, type ReactNode, useEffect } from 'react'
 import {
   LoadingProviderComponent,
   useLoading,
 } from '../contexts/loading.context'
 import { NextRouterEvent } from '../hooks/router-events'
-import {
-  LoadingOverlayComponent,
-  type LoadingOverlayComponentProps,
-} from './loading-overlay.component'
+import { LoadingModal, type LoadingModalProps } from './loading-modal'
 
-function RouterLoading({ children }) {
+function RouterLoading({ children }: { children: ReactNode }) {
   const router = useRouter()
   const { queueLoading } = useLoading()
   useEffect(() => {
-    const dequeue = []
-    const handleStart = (url) => {
+    const dequeue: ReturnType<typeof queueLoading>[] = []
+    const handleStart = (url: string) => {
       dequeue.push(queueLoading())
     }
     const handleStop = () => {
@@ -60,7 +58,7 @@ RouterLoading.displayName = 'RouterLoading'
 RouterLoading.aglyn = true
 
 export interface LoadingLayoutComponentProps
-  extends Partial<LoadingOverlayComponentProps> {}
+  extends Partial<LoadingModalProps> {}
 
 const LoadingLayoutComponent = forwardRef<any, LoadingLayoutComponentProps>(
   (props, ref) => {
@@ -68,9 +66,9 @@ const LoadingLayoutComponent = forwardRef<any, LoadingLayoutComponentProps>(
 
     return (
       <LoadingProviderComponent>
-        <LoadingOverlayComponent ref={ref} {...rest}>
+        <LoadingModal ref={ref} {...rest}>
           <RouterLoading>{children}</RouterLoading>
-        </LoadingOverlayComponent>
+        </LoadingModal>
       </LoadingProviderComponent>
     )
   },
@@ -85,8 +83,8 @@ export function withLoadingLayoutComponent<P>(
   const displayName = getDisplayName(WrappedComponent)
   const WithLoadingLayoutComponent = forwardRef<any, P>((props, ref) => {
     return (
-      <LoadingLayoutComponent ref={ref} {...loadingLoadingProps}>
-        <WrappedComponent {...props} />
+      <LoadingLayoutComponent ref={ref as any} {...loadingLoadingProps}>
+        <WrappedComponent {...(props as any)} />
       </LoadingLayoutComponent>
     )
   })

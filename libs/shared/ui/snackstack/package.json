@@ -4,5 +4,10 @@
   "dependencies": {
     "@swc/helpers": "~0.3.3"
   },
+  "peerDependencies": {
+    "@aglyn/shared-ui-theme": "*",
+    "@aglyn/shared-util-tools": "*",
+    "@aglyn/shared-util-vendor": "*"
+  },
   "devDependencies": {}
 }

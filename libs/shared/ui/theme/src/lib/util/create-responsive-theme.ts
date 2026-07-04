@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 
 import {
   CssVarsThemeOptions,
-  experimental_extendTheme as muiExtendTheme,
+  extendTheme as muiExtendTheme,
 } from '@mui/material/styles'
 import {
   createTheme,
   darken,
   getContrastRatio,
   lighten,
+  type PaletteColor,
   responsiveFontSizes,
   type Theme,
   type ThemeOptions,
@@ -34,20 +35,22 @@ enum ContrastText {
   DARK = '#FFFFFF',
 }
 
-function getContrastTextColor(background, contrastThreshold) {
-  return getContrastRatio(background, ContrastText.DARK) >= contrastThreshold ??
-    3
+function getContrastTextColor(background: string, contrastThreshold: number) {
+  return getContrastRatio(background, ContrastText.DARK) >= (contrastThreshold ?? 3)
     ? ContrastText.DARK
     : ContrastText.LIGHT
 }
-function addShade(paletteColor, shade, variant, tonalOffset) {
-  const tonalOffsetLight = tonalOffset['light'] || (tonalOffset ?? 0.2)
-  const tonalOffsetDark = tonalOffset['dark'] || (tonalOffset ?? 0.2) * 1.5
+function addShade(paletteColor: PaletteColor, shade: string, variant: string | undefined, tonalOffset: number | { light?: number; dark?: number }) {
+  const offsetObj = typeof tonalOffset === 'number' ? undefined : tonalOffset
+  const offsetNum = typeof tonalOffset === 'number' ? tonalOffset : undefined
+  const tonalOffsetLight = offsetObj?.light ?? offsetNum ?? 0.2
+  const tonalOffsetDark = offsetObj?.dark ?? (offsetNum ?? 0.2) * 1.5
+  const indexed = paletteColor as unknown as Record<string, string>
 
-  if (!paletteColor[shade]) {
+  if (!indexed[shade]) {
     // eslint-disable-next-line no-prototype-builtins
     if (paletteColor.hasOwnProperty(variant)) {
-      paletteColor[shade] = paletteColor[variant]
+      indexed[shade] = indexed[variant]
     } else if (shade === 'light') {
       paletteColor.light = lighten(paletteColor.main, tonalOffsetLight)
     } else if (shade === 'dark') {
@@ -60,7 +63,7 @@ function addShade(paletteColor, shade, variant, tonalOffset) {
     }
   }
 }
-function addShadeVariants(paletteColor, tonalOffset?) {
+function addShadeVariants(paletteColor: PaletteColor, tonalOffset?: number | { light?: number; dark?: number }) {
   addShade(paletteColor, 'dark', undefined, tonalOffset)
   addShade(paletteColor, 'light', undefined, tonalOffset)
   addShade(paletteColor, 'contrastText', undefined, tonalOffset)
@@ -68,7 +71,7 @@ function addShadeVariants(paletteColor, tonalOffset?) {
 
 export type CreateResponsiveThemeOptions = {
   themeOptions?: ThemeOptions
-  responsiveFontSizesOptions?: any
+  responsiveFontSizesOptions?: Parameters<typeof responsiveFontSizes>[1]
 }
 
 /**
@@ -144,11 +147,15 @@ export function createResponsiveCssVarTheme(
 
   return muiExtendTheme({
     ...lightTheme,
+    // Allow setMode() to work by driving the color scheme via a CSS class on
+    // <html> instead of the OS-level @media query (the default 'media' selector
+    // makes setMode() a no-op because media queries can't be overridden in JS).
+    colorSchemeSelector: 'class',
     ...options,
     colorSchemes: {
       ...options?.colorSchemes,
-      light: { palette: lightPalette, ...options?.colorSchemes?.light },
-      dark: { palette: darkPalette, ...options?.colorSchemes?.dark },
+      light: { palette: lightPalette, ...((options?.colorSchemes?.light ?? {}) as object) },
+      dark: { palette: darkPalette, ...((options?.colorSchemes?.dark ?? {}) as object) },
     },
   })
 }

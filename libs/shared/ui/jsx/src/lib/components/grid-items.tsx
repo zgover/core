@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,25 @@
  * limitations under the License.
  */
 
-import type { ReplaceKey } from '@aglyn/shared-data-types'
-import MuiGrid, {
-  type Grid2Props as MuiGridProps,
-} from '@mui/material/Unstable_Grid2'
+import { Grid, type GridProps } from '@mui/material'
 import { forwardRef } from 'react'
 
 /* eslint-disable-next-line */
 export interface GridItemsProps
-  extends MuiGridProps,
+  extends GridProps,
     ReplaceKey<JSX.OverrideableComponentProps, 'component', 'itemComponent'> {
-  items: MuiGridProps[]
+  items: GridProps[]
 }
 
 export const GridItems = forwardRef<any, GridItemsProps>((props, ref) => {
-  const { items = [], itemComponent: ItemComponent = MuiGrid, ...rest } = props
+  const { items = [], itemComponent: ItemComponent = Grid, ...rest } = props
 
   return (
-    <MuiGrid ref={ref} container {...rest}>
-      {items.map((item, key) => (
-        <ItemComponent item key={item?.key ?? item?.id ?? key} {...item} />
+    <Grid ref={ref} container {...rest}>
+      {items.map(({ key: itemKey, id, ...item }: GridProps & { id?: unknown }, index: number) => (
+        <ItemComponent key={itemKey ?? id ?? index} {...item} />
       ))}
-    </MuiGrid>
+    </Grid>
   )
 })
 

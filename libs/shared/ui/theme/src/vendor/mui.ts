@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,11 @@
  * limitations under the License.
  */
 
-import type { OverridableComponent } from '@mui/material/OverridableComponent'
 import type { Theme as MuiTheme } from '@mui/material/styles'
-// eslint-disable-next-line no-restricted-imports
-import type { CSSProperties } from '@mui/material/styles/createMixins'
-import type { ExtraColorOptions } from '@mui/material/styles/createPalette'
-// eslint-disable-next-line no-restricted-imports
-import type { Shadows } from '@mui/material/styles/shadows'
+import type { Color as MuiColor, CSSProperties, Shadows } from '@mui/material/styles'
+// import type { ExtraColorOptions } from '@mui/material/styles/createPalette'
 // import type { WithStyles } from '@mui/styles'
 // import type { ClassKeyInferable } from '@mui/styles/withStyles'
-import * as React from 'react'
 import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
 // import type {ContainerTypeMap} from '@mui/material/Container'
 
@@ -41,20 +36,9 @@ declare module '@mui/material/ButtonGroup' {
   interface ButtonGroupPropsColorOverrides extends ColorPropOverrides {}
 }
 declare module '@mui/material/Container' {
-  interface VariantProps {
-    props: {
-      variant?: 'vertical' | 'horizontal' | 'boxed'
-    }
+  interface ContainerOwnProps {
+    variant?: 'vertical' | 'horizontal' | 'boxed'
   }
-
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  interface ContainerTypeMap<P = {}, D extends React.ElementType = 'div'>
-    extends VariantProps {
-    props: P & ContainerTypeMap['props']
-    defaultComponent: D
-  }
-
-  const Container: OverridableComponent<ContainerTypeMap>
 }
 declare module '@mui/material/ToggleButtonGroup' {
   interface ToggleButtonGroupPropsColorOverrides extends ColorPropOverrides {}
@@ -76,36 +60,9 @@ declare module '@mui/material/IconButton' {
 declare module '@mui/material/Tabs' {
   interface TabsPropsIndicatorColorOverrides extends ColorPropOverrides {}
 }
-declare module '@mui/system/createTheme/shape' {
+declare module '@mui/system' {
   interface Shape {
     appIconBorderRadius: number | string
-  }
-}
-declare module '@mui/material/styles/createPalette' {
-  type ExtraColor = PaletteColor
-  type ExtraColorOptions = PaletteColorOptions
-
-  interface TypeBackground {}
-
-  interface PaletteOptions {
-    tertiary?: ExtraColorOptions
-    surface?: ExtraColorOptions
-  }
-
-  interface Palette {
-    tertiary: ExtraColor
-    surface: ExtraColor
-  }
-}
-declare module '@mui/material/styles/zIndex' {
-  interface ZIndex {
-    max: number
-    min: number
-  }
-}
-declare module '@mui/material/styles/createMixins' {
-  interface Mixins {
-    menuArrow: CSSProperties
   }
 }
 declare module '@mui/material/styles' {
@@ -166,6 +123,8 @@ declare module '@mui/material/styles' {
     text?: PaletteOptions['text']
   }
 
+  interface TypeBackground {}
+
   interface Palette {
     background: Palette['background']
     tertiary: ExtraColor
@@ -174,6 +133,15 @@ declare module '@mui/material/styles' {
     svgFilled: IActionStates
     svgStroke: IActionStates
     text: Palette['text']
+  }
+
+  interface ZIndex {
+    max: number
+    min: number
+  }
+
+  interface Mixins {
+    menuArrow: CSSProperties
   }
 
   interface ThemeOptions {
@@ -265,7 +233,6 @@ export {
   decomposeColor,
   easing,
   emphasize,
-  experimentalStyled,
   getContrastRatio,
   getLuminance,
   hexToRgb,
@@ -283,24 +250,17 @@ export {
   getInitColorSchemeScript,
 } from '@mui/material/styles'
 
-// eslint-disable-next-line no-restricted-imports
+export type ColorPartial = Partial<MuiColor>
 export {
-  type ColorPartial,
   type CommonColors,
   type TypeBackground,
   type TypeText,
-} from '@mui/material/styles/createPalette'
-
-// eslint-disable-next-line no-restricted-imports
-export { type TypographyOptions } from '@mui/material/styles/createTypography'
-
-// eslint-disable-next-line no-restricted-imports
-export { type Shadows } from '@mui/material/styles/shadows'
+  type Shadows,
+} from '@mui/material/styles'
 
 // export { type ClassKeyInferable, type CreateCSSProperties } from '@mui/styles/withStyles'
 
-// eslint-disable-next-line no-restricted-imports
-export { type Shape } from '@mui/system/createTheme/shape'
+export { type Shape } from '@mui/system'
 
 export {
   type BaseCreateCSSProperties,

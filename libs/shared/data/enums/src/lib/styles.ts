@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isEqualitySameType, _isNum, _isStrT } from '@aglyn/shared-util-guards'
+import { _isEqualitySameType, _isNum, _isStrT } from '@aglyn/shared-util-tools'
 
 export enum FontWeight {
   THIN = 100,

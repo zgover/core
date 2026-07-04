@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import {
   type TypographyProps,
 } from '@mui/material'
 import clsx from 'clsx'
+import type { ComponentProps } from 'react'
 import { forwardRef } from 'react'
 import ChildrenFunctionProp from './children-function-prop'
 import type { GridListItemData } from './grid-list'
@@ -40,11 +41,13 @@ const cardClasses = generateComponentClassKeys('CardListItem', [
 
 const CardBox = styled('div')({})
 
-const Card = styled(MuiCard)(({ theme }) => ({
+const Card = styled(MuiCard)(({ theme }) => {
+  const tv = (theme as any).vars || theme
+  return {
   [`&.${cardClasses.selected}`]: {
     [`.${cardClasses.actionArea}`]: {
-      backgroundColor: theme.palette.secondary.main,
-      color: theme.palette.secondary.contrastText,
+      backgroundColor: tv.palette.secondary.main,
+      color: tv.palette.secondary.contrastText,
     },
   },
   [`.${cardClasses.aspectContainer}`]: {
@@ -74,7 +77,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
     fontSize: theme.typography.pxToRem(10),
     textTransform: 'uppercase',
   },
-}))
+  }
+})
 
 export interface CardListItemProps
   extends Omit<Partial<MuiCardProps>, 'children'> {
@@ -85,8 +89,8 @@ export interface CardListItemProps
   label?: JSX.Children
   selected?: boolean
   CardActionAreaProps?: Partial<MuiCardActionAreaProps>
-  WrapperBoxProps?: Partial<JSX.ComponentProps<typeof CardBox>>
-  ContentBoxProps?: Partial<JSX.ComponentProps<typeof CardBox>>
+  WrapperBoxProps?: Partial<ComponentProps<typeof CardBox>>
+  ContentBoxProps?: Partial<ComponentProps<typeof CardBox>>
   LabelTypographyProps?: Partial<TypographyProps>
 }
 
@@ -135,14 +139,15 @@ export const CardListItem = forwardRef<any, CardListItemProps>(
               {label && (
                 <Typography
                   component="span"
-                  display="block"
                   variant="subtitle2"
                   {...LabelTypographyProps}
                   className={clsx(
                     cardClasses.label,
                     LabelTypographyProps?.className,
                   )}
-                >
+                  sx={[{
+                    display: "block"
+                  }, ...(Array.isArray(LabelTypographyProps?.sx) ? LabelTypographyProps.sx : [LabelTypographyProps?.sx])]}>
                   {label}
                 </Typography>
               )}
@@ -150,7 +155,7 @@ export const CardListItem = forwardRef<any, CardListItemProps>(
           </Box>
         </Box>
       </Card>
-    )
+    );
   },
 )
 

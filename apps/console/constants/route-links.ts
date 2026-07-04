@@ -57,6 +57,6 @@ export function buildRoute<Tmpl extends Route>(
 ) {
   return template.replace(routeReplacePattern, (match, key) => {
     const value = payload?.[key]
-    return value !== null ? String(value) : `<${key}?>`
+    return value != null ? String(value) : `<${key}?>`
   })
 }

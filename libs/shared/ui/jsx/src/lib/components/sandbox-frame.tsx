@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import '@aglyn/shared-data-jsx'
 import { jssPreset, StylesProvider, useTheme } from '@mui/styles'
 
 import { create, type Jss, type JssOptions } from 'jss'
 import rtl from 'jss-rtl'
+import type { ComponentProps } from 'react'
 import React, {
   Children,
   cloneElement,
@@ -32,11 +32,12 @@ import React, {
   useRef,
   useState,
 } from 'react'
+
 import ReactFrameComponent from 'react-frame-component'
 
 import { useMergeRefs } from '../hooks/use-merge-refs'
 
-export type FrameComponentProps = JSX.ComponentProps<typeof ReactFrameComponent>
+export type FrameComponentProps = ComponentProps<typeof ReactFrameComponent>
 export type SandboxFrameDocument = HTMLIFrameElement['contentDocument']
 export type SandboxFrameWindow = HTMLIFrameElement['contentWindow']
 type State = {
@@ -103,22 +104,22 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(
       const instance = frameRef.current
       const styleInstance = styleRef.current
       if (instance) {
-        setState((prev) => ({
-          ...prev,
+        const nextState = {
+          ...state,
           ready: true,
           sandboxFrameDocument: instance.contentDocument,
           sandboxFrameWindow: instance.contentWindow,
-          /**
-           * Setup the stylesheets for JSS
-           */
           sheetsManager: new Map(),
           jss: create({
             plugins: [...jssPreset().plugins, rtl(), ...jssPlugins],
             insertionPoint: styleInstance,
           }),
-        }))
+        }
+        setState(nextState)
+        onContentDidMount && onContentDidMount(nextState)
+      } else {
+        onContentDidMount && onContentDidMount(state)
       }
-      onContentDidMount && onContentDidMount(state)
     }, [onContentDidMount, state, jssPlugins])
     const handleContentDidUpdate = useCallback(() => {
       const instance = frameRef.current

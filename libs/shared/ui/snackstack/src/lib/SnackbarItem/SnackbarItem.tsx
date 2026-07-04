@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { createChainedFunction } from '@aglyn/shared-util-tools'
 import {
   Collapse,
@@ -134,7 +134,7 @@ export interface SnackbarItemProps
 
 const SnackbarItem = forwardRef<any, SnackbarItemProps>((props, ref) => {
   const { classes: propClasses, ...rest } = props
-  const timeout = useRef<ReturnType<typeof setTimeout>>()
+  const timeout = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [collapsed, setCollapsed] = useState(true)
 
   useEffect(
@@ -154,7 +154,7 @@ const SnackbarItem = forwardRef<any, SnackbarItemProps>((props, ref) => {
 
   const handleEntered: TransitionHandlerProps['onEntered'] = () => {
     if (rest.snack.requestClose) {
-      handleClose(null, REASONS.INSTRCUTED)
+      handleClose(null, REASONS.INSTRUCTED)
     }
   }
 
@@ -302,8 +302,7 @@ const SnackbarItem = forwardRef<any, SnackbarItemProps>((props, ref) => {
             handleEntered,
           ])}
         >
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore */}
+          {/* @ts-expect-error — SnackbarContent children typing is overly strict */}
           {content || (
             <SnackbarContent
               {...ariaAttributes}

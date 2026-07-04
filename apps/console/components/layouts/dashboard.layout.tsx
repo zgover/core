@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import {
   ICON_VARIANT_HOME,
   ICON_VARIANT_SYMBOL_SECURE,
 } from '@aglyn/shared-data-enums'
-import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { Box, Stack } from '@mui/material'
-import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
 import { buildRoute, Route } from '../../constants/route-links'
 import DashboardHeaderComponent, {
@@ -36,11 +37,12 @@ const defaultTabBarTitle = (
   <Stack
     direction="row"
     spacing={{ sm: 0.15, md: 0.5 }}
-    alignItems="center"
-    typography={'subtitle2'}
-    lineHeight={'normal'}
-    sx={{ color: 'tertiary.main' }}
-  >
+    sx={{
+      alignItems: "center",
+      typography: 'subtitle2',
+      lineHeight: 'normal',
+      color: 'tertiary.main'
+    }}>
     <span>{'Secure'}</span>
     <MdiIcon path={ICON_VARIANT_SYMBOL_SECURE.path} fontSize={'small'} />
   </Stack>
@@ -81,8 +83,8 @@ export function DashboardLayout(props: DashboardLayoutProps) {
     aside,
     activeTab,
   } = props
-  const { query: routerQuery } = useRouter()
-  const hostId = routerQuery.hostId as string
+  const params = useParams<{ hostId: string }>()
+  const hostId = params?.hostId
 
   const breadcrumbs = useMemo(() => {
     return [
@@ -124,7 +126,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
           header={header}
         />
 
-        <Box component="main" sx={{ flexGrow: 1 }}>
+        <Box component="section" sx={{ flexGrow: 1 }}>
           {children}
         </Box>
 

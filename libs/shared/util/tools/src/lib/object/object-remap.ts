@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type {
-  Conditional,
-  NUN,
-  OmitIndexOfType,
-  PKey,
-} from '@aglyn/shared-data-types'
-import { _isUndT } from '@aglyn/shared-util-guards'
+import { _isUndT } from '../guards/lib/_is-und-t'
 import cloneDeep from '../copy'
 
 export type RemapOptions = {

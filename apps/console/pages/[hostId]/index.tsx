@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { ICON_VARIANT_HOME } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageWithLayout, useNextPageTitle } from '@aglyn/shared-ui-next'
-import { useRouter } from 'next/router'
-import DataTableComponent from '../../components/data-table.component'
+import { useParams } from 'next/navigation'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
+import { DataTableComponent } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
-import CardDisplay from '../../components/card-display'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
 
 const Index: NextPageWithLayout = (props) => {
-  const { query } = useRouter()
-  const hostId = query.hostId as string
+  const params = useParams<{ hostId: string }>()
+  const hostId = params?.hostId
   useNextPageTitle({ screen: 'My Dashboard' })
 
   return (
@@ -67,8 +68,10 @@ const Index: NextPageWithLayout = (props) => {
           spacing={3}
           items={[
             {
-              xs: 12,
-              md: 6,
+              size: {
+                xs: 12,
+                md: 6,
+              },
               children: (
                 <CardDisplay header={'Users'}>
                   <DataTableComponent
@@ -109,11 +112,11 @@ const Index: NextPageWithLayout = (props) => {
               ),
             },
             {
-              xs: 12,
-              md: 6,
-              children: (
-                <CardDisplay contentGutterX>hello</CardDisplay>
-              ),
+              size: {
+                xs: 12,
+                md: 6,
+              },
+              children: <CardDisplay contentGutterX>hello</CardDisplay>,
             },
           ]}
         />

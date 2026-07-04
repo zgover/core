@@ -3,9 +3,10 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/ui/next/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:shared", "scope:ui"],
   "targets": {
     "build": {
-      "executor": "@nrwl/rollup:rollup",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/ui/next",
@@ -13,32 +14,34 @@
         "project": "libs/shared/ui/next/package.json",
         "entryFile": "libs/shared/ui/next/src/index.ts",
         "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup",
+          "tools/rollup-external-packages.js",
+          "tools/rollup-suppress-use-client.js",
+          "tools/rollup-skip-typecheck.js"
+        ],
         "compiler": "swc",
+        "skipTypeCheck": true,
         "assets": [
           {
             "glob": "libs/shared/ui/next/README.md",
             "input": ".",
             "output": "."
           }
-        ]
+        ],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/shared/ui/next/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/shared/ui/next"],
       "options": {
-        "jestConfig": "libs/shared/ui/next/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/shared/ui/next/jest.config.ts"
       }
     }
-  },
-  "tags": ["scope:lib", "scope:shared", "scope:ui"]
+  }
 }

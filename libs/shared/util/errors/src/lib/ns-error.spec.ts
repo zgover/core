@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {NsErrorFactory} from './ns-error-factory'
-
+import { NsErrorFactory } from './ns-error-factory'
+import { NsError } from './ns-error'
 
 describe('namespaced-error', () => {
   // Closure enum for type-safe error codes
@@ -34,18 +34,10 @@ describe('namespaced-error', () => {
   const error = new NsErrorFactory<Err>('service', 'Service', errors)
 
   function getMissingFile() {
-    try {
-      // Service: Could not file file: foo.txt (service/file-not-found).
-      throw error.create(Err.FILE_NOT_FOUND, {file: 'fileName.txt'})
-    }
-    catch (e) {
-      if (e['code'] === 'service/file-not-found') {
-        console.log('Could not read file: ' + e['file'])
-      }
-    }
+    throw error.create(Err.FILE_NOT_FOUND, { file: 'fileName.txt' })
   }
 
   it('should work', () => {
-    expect(getMissingFile()).toThrowError(NsErrorFactory)
+    expect(getMissingFile).toThrow(NsError)
   })
 })

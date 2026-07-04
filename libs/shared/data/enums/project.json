@@ -5,34 +5,19 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/data/enums",
         "main": "libs/shared/data/enums/src/index.ts",
         "tsConfig": "libs/shared/data/enums/tsconfig.lib.json",
-        "assets": [
-          "libs/shared/data/enums/*.md"
-        ]
+        "assets": ["libs/shared/data/enums/*.md"]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "libs/shared/data/enums/**/*.ts"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:data"
-  ]
+  "tags": ["scope:lib", "scope:shared", "scope:data"]
 }

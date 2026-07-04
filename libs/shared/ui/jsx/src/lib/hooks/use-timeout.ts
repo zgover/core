@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-import {_isFnT} from '@aglyn/shared-util-guards'
-import {useEffect, useRef} from 'react'
+import { _isFnT } from '@aglyn/shared-util-tools'
+import { useEffect, useRef } from 'react'
 
-
-export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]): void {
+export function useTimeout(
+  callback: TimerHandler,
+  delay: number,
+  ...args: any[]
+): void {
   const savedCallback = useRef(null)
 
   useEffect(() => {
@@ -27,9 +30,9 @@ export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]
   }, [callback])
 
   useEffect(() => {
-    let timeout = undefined
+    let timeout: ReturnType<typeof setTimeout> = undefined
 
-    const handler = (...args) => {
+    const handler = (...args: unknown[]) => {
       if (_isFnT(savedCallback.current)) {
         savedCallback.current(...args)
       }
@@ -39,7 +42,10 @@ export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]
       timeout = setTimeout(handler, delay, ...args)
       return () => clearTimeout(timeout)
     }
-  }, [args, delay])
+    return undefined
+    // args is a rest param (new array each render) — omit from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delay])
 }
 
 export default useTimeout

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import {
   ICON_VARIANT_BESIGNER,
@@ -23,14 +24,19 @@ import {
   ICON_VARIANT_PRIMARY_KEY,
   ICON_VARIANT_TEXT,
 } from '@aglyn/shared-data-enums'
-import { AppLink, Container, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
-import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import {
+  AppLink,
+  Container,
+  GridItems,
+  MdiIcon,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { useScreen } from '@aglyn/tenant-feature-instance'
 import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
-import { useRouter } from 'next/router'
+import { useParams } from 'next/navigation'
 import { useEffect, useMemo } from 'react'
-import CardDisplay from '../../../../../../../components/card-display'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
@@ -40,10 +46,14 @@ import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 const whiteSpace = '--'
 
 function ScreenDetails(props) {
-  const { query } = useRouter()
-  const hostId = query.hostId as string
-  const screenId = query.screenId as string
-  const versionId = query.versionId as string
+  const params = useParams<{
+    hostId: string
+    screenId: string
+    versionId: string
+  }>()
+  const hostId = params?.hostId as string
+  const screenId = params?.screenId as string
+  const versionId = params?.versionId as string
   const { queueLoading } = useLoading()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const {
@@ -176,9 +186,11 @@ function ScreenDetails(props) {
             spacing={3}
             items={[
               {
-                xs: 12,
-                md: 6,
-                lg: 4,
+                size: {
+                  xs: 12,
+                  md: 6,
+                  lg: 4,
+                },
                 children: (
                   <CardDisplay
                     header={'Basic Details'}
@@ -188,9 +200,9 @@ function ScreenDetails(props) {
                   >
                     <List dense disablePadding>
                       {details.map(
-                        ({ primary, secondary, icon, ...item }, key) => (
+                        ({ primary, secondary, icon, key: itemKey, ...item }, index) => (
                           <ListItem
-                            key={item['key'] ?? item['id'] ?? key}
+                            key={itemKey ?? index}
                             alignItems="flex-start"
                             dense
                           >
@@ -220,9 +232,11 @@ function ScreenDetails(props) {
                 ),
               },
               {
-                xs: 12,
-                md: 6,
-                lg: 8,
+                size: {
+                  xs: 12,
+                  md: 6,
+                  lg: 8,
+                },
                 children: (
                   <CardDisplay
                     header={'Raw JSON'}

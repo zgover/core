@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,14 @@
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import CardDisplay from '../../../components/card-display'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
 const Settings: NextPageWithLayout = (props) => {
-  console.log('index props', props)
-
   return (
     <>
       <NextPageTitle screen={'Settings'} />
@@ -60,21 +58,19 @@ const Settings: NextPageWithLayout = (props) => {
             spacing={3}
             items={[
               {
-                xs: 12,
-                md: 6,
-                children: (
-                  <CardDisplay header={'Login'}>
-                    hello
-                  </CardDisplay>
-                ),
+                size: {
+                  xs: 12,
+                  md: 6,
+                },
+                children: <CardDisplay header={'Login'}>hello</CardDisplay>,
               },
               {
-                xs: 12,
-                md: 6,
+                size: {
+                  xs: 12,
+                  md: 6,
+                },
                 children: (
-                  <CardDisplay header={'Profile Details'}>
-                    hello
-                  </CardDisplay>
+                  <CardDisplay header={'Profile Details'}>hello</CardDisplay>
                 ),
               },
             ]}

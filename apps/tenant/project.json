@@ -3,24 +3,26 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/tenant",
   "projectType": "application",
+  "tags": ["scope:app", "scope:public"],
   "targets": {
     "build": {
-      "executor": "@nrwl/next:build",
+      "executor": "@nx/next:build",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "root": "apps/tenant",
         "outputPath": "dist/apps/tenant"
       },
       "configurations": {
-        "production": {},
+        "production": {
+          "webpack": true
+        },
         "development": {
           "outputPath": "apps/tenant"
         }
       }
     },
     "serve": {
-      "executor": "@nrwl/next:server",
+      "executor": "@nx/next:server",
       "options": {
         "buildTarget": "tenant:build",
         "dev": true,
@@ -39,26 +41,21 @@
       "defaultConfiguration": "development"
     },
     "export": {
-      "executor": "@nrwl/next:export",
+      "executor": "@nx/next:export",
       "options": {
         "buildTarget": "tenant:build:production"
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/tenant"],
       "options": {
-        "jestConfig": "apps/tenant/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/tenant/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/tenant/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     }
-  },
-  "tags": ["scope:app", "scope:public"]
+  }
 }

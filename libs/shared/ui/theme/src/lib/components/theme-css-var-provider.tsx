@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,17 @@
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { CssBaseline } from '@mui/material'
-import {
-  Experimental_CssVarsProvider as MuiCssVarsProvider,
-  experimental_extendTheme as muiExtendTheme,
-} from '@mui/material/styles'
-import { forwardRef, useMemo } from 'react'
+import { CssVarsProvider as MuiCssVarsProvider } from '@mui/material/styles'
+import type { ComponentProps } from 'react'
+import { type ComponentType, forwardRef, useMemo } from 'react'
+import { createResponsiveCssVarTheme } from '../util/create-responsive-theme'
 
 export interface ThemeCssVarProviderProps
-  extends Omit<JSX.ComponentProps<typeof MuiCssVarsProvider>, 'theme'> {
-  theme?: Parameters<typeof muiExtendTheme>[0]
+  extends Omit<ComponentProps<typeof MuiCssVarsProvider>, 'theme'> {
+  theme?: {
+    light: Parameters<typeof createResponsiveCssVarTheme>[0]
+    dark: Parameters<typeof createResponsiveCssVarTheme>[1]
+  }
 }
 
 /**
@@ -43,7 +45,7 @@ export function ThemeCssVarProvider<T>(props: ThemeCssVarProviderProps) {
   const { theme, children, ...rest } = props
 
   const _theme = useMemo(() => {
-    return muiExtendTheme(theme)
+    return createResponsiveCssVarTheme(theme.light, theme.dark)
   }, [theme])
 
   return (
@@ -65,13 +67,15 @@ export function withThemeCssVarProvider<P>(
 
   const WithThemeCssVarProvider = forwardRef<any, P>((props, ref) => {
     const { ...rest } = props
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const WrappedAny = WrappedComponent as ComponentType<any>
     return (
       <ThemeCssVarProvider {...opts}>
         {disableCssBaseline ? (
-          <WrappedComponent ref={ref} {...rest} />
+          <WrappedAny ref={ref} {...rest} />
         ) : (
           <CssBaseline enableColorScheme>
-            <WrappedComponent ref={ref} {...rest} />
+            <WrappedAny ref={ref} {...rest} />
           </CssBaseline>
         )}
       </ThemeCssVarProvider>

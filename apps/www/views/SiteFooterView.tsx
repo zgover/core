@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,11 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(
               justifyContent="space-between"
               items={[
                 {
-                  xs: 12,
-                  sm: 6,
-                  md: 3,
+                  size: {
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  },
                   children: (
                     <>
                       <NextImage
@@ -59,7 +61,9 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(
                       />
                       <br />
                       <br />
-                      <Box fontSize={16}>
+                      <Box sx={{
+                        fontSize: 16
+                      }}>
                         <strong>Mailing Address</strong>
                       </Box>
                       125 JOHNSTON LN
@@ -70,22 +74,23 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(
                       <br />
                       <br />
                       Email:{' '}
-                      <MuiLink
-                        href="mailto:info@aglyn.com"
-                        children={'info@aglyn.com'}
-                      />
+                      <MuiLink href="mailto:info@aglyn.com">
+                        {'info@aglyn.com'}
+                      </MuiLink>
                       <br />
                     </>
                   ),
                 },
                 ...footerNavigation.map(({ items, ...item }, key) => ({
-                  xs: 12 as any,
-                  sm: 6 as any,
-                  md: 3 as any,
+                  size: {
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  },
                   children: (
                     <>
                       <Typography variant="overline">
-                        <b children={item.children} />
+                        <b>{item.children}</b>
                       </Typography>
                       <Typography component="ul">
                         {items.map((item, key) => (
@@ -102,7 +107,7 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(
           </Container>
         </Box>
       </FooterElement>
-    )
+    );
   },
 )
 

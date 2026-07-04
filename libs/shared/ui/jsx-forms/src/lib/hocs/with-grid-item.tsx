@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import type { EmptyObj } from '@aglyn/shared-data-types'
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
-import MuiGrid, { type GridProps as MuiGridProps } from '@mui/material/Grid'
+import { Grid as MuiGrid, type GridProps as MuiGridProps } from '@mui/material'
 import {
   type ComponentType,
   type ElementType,
@@ -29,6 +28,7 @@ import {
   type PropsWithoutRef,
   type RefAttributes,
 } from 'react'
+
 
 export interface GridWrappedMergeProps {
   FieldGridProps?: Partial<MuiGridProps>
@@ -56,7 +56,6 @@ export function withGridItem<P>(
       return (
         <MuiGrid
           ref={ref}
-          item
           sx={mergeSxProps({ position: 'relative' }, sx)}
           {...gridProps}
         >

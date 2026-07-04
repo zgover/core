@@ -5,15 +5,24 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/rollup:rollup",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/rollup:rollup",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared/ui/snackstack",
         "tsConfig": "libs/shared/ui/snackstack/tsconfig.lib.json",
         "project": "libs/shared/ui/snackstack/package.json",
         "entryFile": "libs/shared/ui/snackstack/src/index.ts",
-        "external": ["react/jsx-runtime"],
-        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "external": [
+          "react/jsx-runtime"
+        ],
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup",
+          "tools/rollup-external-packages.js",
+          "tools/rollup-suppress-use-client.js",
+          "tools/rollup-skip-typecheck.js"
+        ],
         "compiler": "swc",
         "assets": [
           {
@@ -21,16 +30,21 @@
             "input": ".",
             "output": "."
           }
-        ]
+        ],
+        "updateBuildableProjectDepsInPackageJson": true,
+        "skipTypeCheck": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/shared/ui/snackstack/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:ui"]
+  "tags": [
+    "scope:lib",
+    "scope:shared",
+    "scope:ui"
+  ]
 }

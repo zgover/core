@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import {
   ICON_VARIANT_MODIFY_SAVE,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
-import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { Button, type ButtonProps, Divider, Stack } from '@mui/material'
 import { forwardRef } from 'react'
 import SecondaryAppBarComponent, {
@@ -65,11 +65,12 @@ export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
       >
         <Stack
           direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          flexGrow={1}
           spacing={1}
-        >
+          sx={{
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexGrow: 1
+          }}>
           <AddControlsComponent />
           <HistoryControlsComponent sx={{ flexGrow: 1 }} />
           <DevicePreviewControlsComponent />
@@ -79,9 +80,9 @@ export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
             orientation="vertical"
             sx={(theme) => ({
               ml: `${theme.spacing(2)} !important`,
+              opacity: 0.5,
             })}
             flexItem
-            light
           />
           <Button
             onClick={onSave}
@@ -102,7 +103,7 @@ export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
           </Button>
         </Stack>
       </SecondaryAppBarComponent>
-    )
+    );
   },
 )
 BesignerAppBarComponent.displayName = 'BesignerAppBarComponent'

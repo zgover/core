@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ import {
 } from '@aglyn/shared-ui-jsx-forms'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import useHost from '@aglyn/tenant-feature-instance/hooks/use-host'
+import { useHost } from '@aglyn/tenant-feature-instance'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { InputAdornment, Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
 import { doc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
 import { useAnalytics, useFirestore } from 'reactfire'
-import CardDisplay from '../../../components/card-display'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import CardDisplayFormTemplate from '../../../components/card-display-form-template'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -53,8 +53,10 @@ const basicSchema: FormSchema = {
       label: 'Display name',
       type: 'text',
       FormFieldGridProps: {
-        xs: 12,
-        sm: 6,
+        size: {
+          xs: 12,
+          sm: 6,
+        },
       },
       isRequired: true,
       validate: [
@@ -258,7 +260,7 @@ const HostSetup: NextPageWithLayout = (props) => {
   const forms = [
     {
       schema: basicSchema,
-      initialValues: doc,
+      initialValues: data,
       onSubmit: handleBasicSave,
     },
     {
@@ -322,8 +324,10 @@ const HostSetup: NextPageWithLayout = (props) => {
               spacing={3}
               items={[
                 {
-                  xs: 12,
-                  sm: 3,
+                  size: {
+                    xs: 12,
+                    sm: 3,
+                  },
                   children: (
                     <CardDisplay header="Navigation">
                       <TabList
@@ -350,8 +354,10 @@ const HostSetup: NextPageWithLayout = (props) => {
                   ),
                 },
                 {
-                  xs: 12,
-                  sm: 9,
+                  size: {
+                    xs: 12,
+                    sm: 9,
+                  },
                   children: (
                     <>
                       {forms.map(({ initialValues, onSubmit, schema }) => (

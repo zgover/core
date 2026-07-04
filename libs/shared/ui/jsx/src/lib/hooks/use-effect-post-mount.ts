@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,26 @@
  * limitations under the License.
  */
 
-import {_isFnT} from '@aglyn/shared-util-guards'
-import {DependencyList, EffectCallback, useEffect, useRef} from 'react'
+import { _isFnT } from '@aglyn/shared-util-tools'
+import { DependencyList, EffectCallback, useEffect, useRef } from 'react'
 
-
-export function useEffectPostMount(callback: EffectCallback, deps?: DependencyList): void {
+export function useEffectPostMount(
+  callback: EffectCallback,
+  deps?: DependencyList,
+): void {
   const isOnInitialMount = useRef(true)
 
+  // `deps` is caller-provided and forwarded as-is by design, and `callback`
+  // is intentionally excluded so a new callback identity alone doesn't
+  // retrigger the effect (that would defeat post-mount-only semantics).
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (!isOnInitialMount.current) {
       return _isFnT(callback) && callback()
     }
     isOnInitialMount.current = false
   }, deps)
+  /* eslint-enable react-hooks/exhaustive-deps */
 }
 
 export default useEffectPostMount

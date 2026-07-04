@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,9 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
   if (submitFailed) {
     return (
       <>
-        <Box mt={2}>
+        <Box sx={{
+          mt: 2
+        }}>
           <Alert severity="error">
             <AlertTitle>Error — Form Submission Failed</AlertTitle>
             Sorry, please try again later. If the issue persists please send a
@@ -66,13 +68,15 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
           </Alert>
         </Box>
       </>
-    )
+    );
   }
 
   if (submitSucceeded) {
     return (
       <>
-        <Box mt={2}>
+        <Box sx={{
+          mt: 2
+        }}>
           <Alert severity="success">
             <AlertTitle>Success</AlertTitle>
             We have received your submission. If you have any immediate
@@ -80,7 +84,7 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
           </Alert>
         </Box>
       </>
-    )
+    );
   }
 
   return (
@@ -99,9 +103,11 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
       {/*})}*/}
       <FormSpy>
         {() => (
-          <Grid item xs={12} sx={{ textAlign: 'center' }}>
+          <Grid sx={{ textAlign: 'center' }} size={12}>
             {submitting && (
-              <Box mb={1}>
+              <Box sx={{
+                mb: 1
+              }}>
                 <LinearProgress color="secondary" />
               </Box>
             )}
@@ -117,10 +123,10 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
         )}
       </FormSpy>
     </Grid>
-  )
+  );
 }
 
-function Contact(props) {
+function Contact(props: Record<string, unknown>) {
   const handleSubmit = useCallback(async (values) => {
     return await fetch(`/api/h/f/${DdfForms.formIds.contact}`, {
       method: 'POST',
@@ -141,7 +147,11 @@ function Contact(props) {
       productName={BRAND_NAMES.WWW}
     >
       <main>
-        <Box py={12} bgcolor={'background.paper'}>
+        <Box
+          sx={{
+            py: 12,
+            bgcolor: 'background.paper'
+          }}>
           <Container maxWidth={'lg'} gutterY>
             <GridItems
               alignItems="center"
@@ -149,8 +159,10 @@ function Contact(props) {
               spacing={2}
               items={[
                 {
-                  xs: 12,
-                  md: 8,
+                  size: {
+                    xs: 12,
+                    md: 8,
+                  },
                   children: (
                     <>
                       <Typography
@@ -179,8 +191,10 @@ function Contact(props) {
                   ),
                 },
                 {
-                  xs: 12,
-                  md: 9,
+                  size: {
+                    xs: 12,
+                    md: 9,
+                  },
                   children: (
                     <Container maxWidth="sm">
                       <FormRenderer
@@ -199,7 +213,7 @@ function Contact(props) {
       </main>
       <SiteFooterView />
     </MainLayout>
-  )
+  );
 }
 
 export default Contact

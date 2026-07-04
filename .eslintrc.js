@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 module.exports = {
   root: true,
   ignorePatterns: ['**/*'],
-  plugins: ['@nrwl/nx', 'eslint-plugin-tsdoc', 'mobx'],
+  plugins: ['@nx', 'eslint-plugin-tsdoc', 'mobx'],
   overrides: [
     {
       files: ['*.ts', '*.tsx', '*.js', '*.jsx'],
@@ -27,13 +27,16 @@ module.exports = {
         'mobx/unconditional-make-observable': 'off',
         'mobx/missing-make-observable': 'off',
         'mobx/missing-observer': 'off',
-
         'node/no-extraneous-import': 'off',
-        '@nrwl/nx/enforce-module-boundaries': [
+        '@nx/enforce-module-boundaries': [
           'error',
           {
             allow: [],
             enforceBuildableLibDependency: true,
+            // besigner-ui is dynamic()-imported only for ssr: false; the same
+            // pages also need its hooks/HOCs statically, so code-splitting is
+            // not achievable for this lib.
+            checkDynamicDependenciesExceptions: ['@aglyn/besigner-ui'],
             depConstraints: [
               {
                 sourceTag: 'scope:lib',
@@ -62,7 +65,7 @@ module.exports = {
               },
               {
                 sourceTag: 'scope:util',
-                onlyDependOnLibsWithTags: ['scope:util'],
+                onlyDependOnLibsWithTags: ['scope:util', 'scope:data'],
               },
               {
                 sourceTag: 'scope:addons',
@@ -70,6 +73,13 @@ module.exports = {
                   'scope:addons',
                   'scope:aglyn',
                   'scope:shared',
+                  'scope:ui',
+                  'scope:framework',
+                  'scope:util',
+                  'scope:data',
+                  'scope:renderer',
+                  'scope:feature',
+                  'scope:lib',
                 ],
               },
               {
@@ -99,10 +109,7 @@ module.exports = {
     },
     {
       files: ['*.ts'],
-      extends: [
-        'plugin:@nrwl/nx/typescript',
-        'plugin:@next/next/core-web-vitals',
-      ],
+      extends: ['plugin:@nx/typescript', 'plugin:@next/next/core-web-vitals'],
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-empty-function': 'off',
@@ -128,8 +135,8 @@ module.exports = {
     {
       files: ['*.tsx'],
       extends: [
-        'plugin:@nrwl/nx/typescript',
-        'plugin:@nrwl/nx/react-typescript',
+        'plugin:@nx/typescript',
+        'plugin:@nx/react-typescript',
         'plugin:@next/next/core-web-vitals',
       ],
       rules: {
@@ -155,7 +162,7 @@ module.exports = {
     },
     {
       files: ['*.js'],
-      extends: ['plugin:@nrwl/nx/javascript', 'plugin:react-hooks/recommended'],
+      extends: ['plugin:@nx/javascript', 'plugin:react-hooks/recommended'],
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
@@ -171,7 +178,7 @@ module.exports = {
     },
     {
       files: ['*.jsx'],
-      extends: ['plugin:@nrwl/nx/javascript', 'plugin:react-hooks/recommended'],
+      extends: ['plugin:@nx/javascript', 'plugin:react-hooks/recommended'],
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
@@ -186,4 +193,5 @@ module.exports = {
       },
     },
   ],
+  extends: ['plugin:storybook/recommended'],
 }

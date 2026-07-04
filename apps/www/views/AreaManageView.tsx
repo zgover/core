@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
-import { useLoading } from '@aglyn/shared-ui-jsx'
-import { mdiFilterVariant, MdiIcon, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'
+import {
+  mdiFilterVariant,
+  MdiIcon,
+  mdiPlus,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { objectRemap, str } from '@aglyn/shared-util-tools'
 import { createUid } from '@aglyn/shared-util-vendor'
 import IconButton from '@mui/material/IconButton'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useSnackbar } from 'notistack'
 import {
   type ChangeEvent,
@@ -29,10 +34,8 @@ import {
   useEffect,
   useState,
 } from 'react'
-import CardDisplay from '../../console/components/card-display'
-import DataTableComponent, {
-  type DataTableProps,
-} from '../../console/components/data-table.component'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
+import { DataTableComponent, type DataTableProps } from '@aglyn/shared-ui-jsx'
 import { type AppContextType, withAppContext } from '../contexts/app-context'
 import { type Fields } from '../forms'
 import ConsoleLayout from '../layouts/ConsoleLayout'
@@ -227,38 +230,33 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
       <ConsoleLayout
         items={[
           {
-            xs: 12,
-            md: 3,
+            size: { xs: 12, md: 3 },
             children: <AreaManageNavigationListWidgetView />,
           },
           {
-            xs: 12,
-            md: 9,
+            size: { xs: 12, md: 9 },
             children: (
               <CardDisplay
                 header={{
                   title: `All ${documentName.plural}`,
                   action: (
                     <Fragment>
+                      <IconButton title="Filter list" disabled>
+                        {<MdiIcon path={mdiFilterVariant.path} />}
+                      </IconButton>
                       <IconButton
-                        children={<MdiIcon path={mdiFilterVariant.path} />}
-                        title="Filter list"
-                        disabled
-                      />
-                      <IconButton
-                        children={<MdiIcon path={mdiPlus.path} />}
                         title="Add item"
                         onClick={handleCreateDocumentFormOpen}
-                      />
+                      >
+                        {<MdiIcon path={mdiPlus.path} />}
+                      </IconButton>
                     </Fragment>
                   ),
                 }}
               >
                 <DataTableComponent
-                  DataGridProps={{
-                    loading: loadingDocuments,
-                    onRowClick: handleRowClick,
-                  }}
+                  loading={loadingDocuments}
+                  onRowClick={handleRowClick}
                   columns={columns}
                   noRowsLabel={documentName.plural}
                   rows={rows}

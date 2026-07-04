@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-import {_isFnT} from '@aglyn/shared-util-guards'
-import {useEffect, useRef} from 'react'
-
+import { _isFnT } from '@aglyn/shared-util-tools'
+import { useEffect, useRef } from 'react'
 
 export function useInterval(
   callback: TimerHandler,
@@ -33,9 +32,9 @@ export function useInterval(
   }, [callback])
 
   useEffect(() => {
-    let interval = undefined
+    let interval: ReturnType<typeof setInterval> = undefined
 
-    const handler = (...handlerArgs) => {
+    const handler = (...handlerArgs: unknown[]) => {
       if (_isFnT(savedCallback.current)) {
         if (runCount.current < count || !count) {
           runCount.current = runCount.current + 1
@@ -53,7 +52,10 @@ export function useInterval(
       interval = setInterval(handler, delay, ...args)
       return () => clearInterval(interval)
     }
-  }, [delay, count, args])
+    return undefined
+    // args is a rest param (new array each render) — omit from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delay, count])
 }
 
 export default useInterval

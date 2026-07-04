@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import { MapKey } from '@aglyn/shared-data-types'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { getDisplayName } from '@aglyn/shared-util-tools'
+import { _isFnT, getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { ComponentType, createElement } from 'react'
+
 
 /** Merge props for WithHoc utility functions */
 export type WithHocProps<P, N extends MapKey, T> = P & { [K in N]: T }

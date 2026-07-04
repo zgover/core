@@ -45,7 +45,7 @@ export interface NextAppWithLayoutProps<Props = AnyProps, InitialProps = Props>
   Component: NextPageWithLayout<Props, InitialProps>
 }
 
-function GetLayout(page: JSX.Element, initialProps?: any) {
+function GetLayout(page: JSX.Element, initialProps?: NextAppWithLayoutProps) {
   return page
 }
 
@@ -80,7 +80,7 @@ export function PageDecorated<Props, InitialProps>(
   props: PageDecoratedProps<Props, InitialProps>,
 ) {
   const Component = props.Component
-  return getNextPageLayout(props)(<Component {...props.pageProps} />, props)
+  return getNextPageLayout(props)(<Component {...props.pageProps} />, props as NextAppWithLayoutProps)
 }
 
 PageDecorated.displayName = 'PageDecorated'

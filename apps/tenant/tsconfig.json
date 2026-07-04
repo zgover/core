@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node", "jest"],
+    "types": ["@tshelpers", "node", "jest", "@jsx"]
   },
   "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts"],
   "exclude": ["node_modules", "jest.config.ts"]

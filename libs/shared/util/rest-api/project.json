@@ -5,34 +5,19 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/util/rest-api",
         "main": "libs/shared/util/rest-api/src/index.ts",
         "tsConfig": "libs/shared/util/rest-api/tsconfig.lib.json",
-        "assets": [
-          "libs/shared/util/rest-api/*.md"
-        ]
+        "assets": ["libs/shared/util/rest-api/*.md"]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "libs/shared/util/rest-api/**/*.ts"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:util"
-  ]
+  "tags": ["scope:lib", "scope:shared", "scope:util"]
 }

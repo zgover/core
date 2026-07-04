@@ -16,7 +16,7 @@
  */
 
 // MARK – IMPORTS
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @nx/enforce-module-boundaries
 const withAglyn = require('../../with-aglyn.nextjs.config')
 
 // MARK – GLOBALS
@@ -26,7 +26,7 @@ const isProduction = process.env.NODE_ENV !== 'production'
  * @type {import('/tools/nextjs-base.config').WithAglynOptions}
  **/
 module.exports = withAglyn({
-  experimental: { appDir: isProduction },
+  // experimental: { appDir: isProduction },
   env: {
     AGLYN_SILOED_HOST: process.env.AGLYN_SILOED_HOST,
   },

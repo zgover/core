@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,172 +15,57 @@
  * limitations under the License.
  */
 
-import type { PartialKeys } from '@aglyn/shared-data-types'
-import _isObj from '@aglyn/shared-util-guards/_is-obj'
-import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
-import { ITimestamp } from '@aglyn/shared-util-timestamp'
-import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
+import { _isObj, _isStrT } from '@aglyn/shared-util-tools'
+import { arraySafe } from '@aglyn/shared-util-tools'
 import cloneDeep from 'lodash-es/cloneDeep'
 import isEqual from 'lodash-es/isEqual'
 import {
   action,
   computed,
+  type IObservableArray,
   makeAutoObservable,
   makeObservable,
   observable,
+  type ObservableMap,
+  runInAction,
   toJS,
 } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { Aglyn } from '../aglyn'
-import {
-  ComponentId,
-  ComponentSchema,
-  PresetSchema,
-} from '../components-manager'
-import { createIdUrlSafe } from '../constants'
+import { createIdUrlSafe } from '../foundation'
 import type { PluginId } from '../plugin-manager'
-import type { HostUid } from '../types'
-
-export enum NodeType {
-  NODE = 'node',
-  TEXT = 'text',
-  SCREEN = 'screen',
-  REF = 'ref',
-  PRESET = 'preset',
-}
-
-export type NodeId = string
-
-export interface AbstractNodeSchema<TYPE extends NodeType = any> {
-  /**
-   * The unique identifier for a node
-   */
-  $id: NodeId
-  /**
-   * Display name of node to override inherited label. Only used in editor
-   */
-  name?: string
-  /**
-   * The node type to describe the IST
-   */
-  type?: TYPE
-}
-
-export interface NodeSchema<P = JSX.AnyProps> extends AbstractNodeSchema {
-  /**
-   * The unique identifier of the node component
-   */
-  componentId?: ComponentId
-  /**
-   * The unique identifier of the node component plugin bundle
-   */
-  pluginId?: PluginId
-  /**
-   * The unique identifier of the node parent
-   */
-  parentId?: NodeId
-  /**
-   * List of the children unique identifiers for the node
-   */
-  nodes?: NodeId[]
-  /**
-   * Class name to pass the DOM node, can also be defined in props
-   */
-  className?: string
-  /**
-   * The node props/attributes passed to the component
-   */
-  props?: P
-  /**
-   * The node style properties for emotion
-   */
-  sx?: JSX.SxProps
-  /**
-   * The computed node parent (only for type completion)
-   */
-  readonly parent?: NodeSchema<any> | null
-  /**
-   * The computed node parent (only for type completion)
-   */
-  readonly children?: NodeSchema<any>[]
-  /**
-   * The computed index in parent nodes (only for type completion)
-   */
-  readonly index?: number | null
-  /**
-   * The computed label (only for type completion)
-   */
-  readonly labelShort?: string | undefined
-  /**
-   * The computed breadcrumb path (only for type completion)
-   */
-  readonly breadcrumbPath?: NodeBreadcrumbPath
-  /**
-   * The computed component schema (only for type completion)
-   */
-  readonly componentSchema?: ComponentSchema | undefined
-  /**
-   * The computed guard for of child nodes (only for type completion)
-   */
-  readonly hasNodes?: boolean
-  /**
-   * The computed property for the resolved props from component schema
-   */
-  readonly resolvedProps?: P
-}
-
-export type NodeSchemaJSON<P = JSX.AnyProps> = Omit<
-  NodeSchema<P>,
-  | 'parent'
-  | 'index'
-  | 'labelShort'
-  | 'breadcrumbPath'
-  | 'componentSchema'
-  | 'hasNodes'
->
-
-export type NodeSchemaNested<P = JSX.AnyProps> = Omit<
-  NodeSchemaJSON<P>,
-  'nodes'
-> & { nodes?: NodeSchemaNested<any>[] }
-
-export type NodesMap = Record<NodeId, NodeSchema<any>>
-
-export interface ScreenSchema {
-  nodes: NodeSchemaNested
-  createdAt?: ITimestamp
-  updatedAt?: ITimestamp
-  hostId?: HostUid
-}
-
-export type NodeBreadcrumbPath = [
-  root: string & typeof NODE_ROOT_ID,
-  ...nodes: [...ancestors: NodeId[], node: NodeId],
-]
-
-export type ProcessableNodes =
-  | NodeSchemaNested<any>[]
-  | NodeSchemaNested<any>
-  | Record<NodeId, NodeSchema>
+import {
+  type ComponentId,
+  type ComponentSchema,
+  type NodeBreadcrumbPath,
+  type NodeId,
+  type NodeSchema,
+  type NodeSchemaJSON,
+  type NodeSchemaNested,
+  type NodesMap,
+  NodeType,
+  type PresetSchema,
+  type ProcessableNodes,
+} from '../types/nodes'
 
 export const NODE_ROOT_ID = '_@_'
-export const NODE_ID_LENGTH = 10
 export const NODE_ROOT_LABEL = 'Document'
 
 export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
-  // public store: CanvasManager = null
-  public $id: NodeId = null
-  public name: string = null
-  public type: NodeType = null
-  public pluginId?: PluginId = null
-  public componentId?: ComponentId = null
-  public parentId?: NodeId = null
-  public nodes?: NodeId[] = null
-  public props?: P = null
-  public sx?: JSX.SxProps = null
-  public className?: string = null
+  // public store: CanvasManager
+  public $id: NodeId
+  public name?: string
+  public type: NodeType | string
+  public pluginId?: PluginId
+  public componentId?: ComponentId
+  public parentId?: NodeId
+  public nodes?: NodeId[]
+  public props: P
+  public sx?: JSX.SxProps
+  public className?: string
 
-  get parent(): NodeSchema<any> | null {
+  get parent(): NodeSchema<any> | undefined {
+    if (!this.parentId) return
     return this.store.getNode(this.parentId)
   }
   get index(): number | null {
@@ -188,9 +73,9 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
   }
   get children(): NodeSchema<any>[] {
     const res: NodeSchema[] = []
-    for (const $id of this.nodes) {
+    for (const $id of (this.nodes ||= [])) {
       const node = this.store.getNode($id)
-      res.push(node)
+      if (node) res.push(node)
     }
     return res
   }
@@ -201,6 +86,7 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     return this.store.getNodeBreadcrumbPath(this)
   }
   get componentSchema(): ComponentSchema | undefined {
+    if (!this.componentId) return
     return this.store.aglyn.components.getSchema(this.componentId)
   }
   get hasNodes(): boolean {
@@ -218,11 +104,10 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     return this.toJSON()
   }
 
-  constructor(schema: NodeSchema<P>, public store: CanvasManager) {
-    makeAutoObservable(this, {
-      store: false,
-    })
-
+  constructor(
+    schema: NodeSchema<P>,
+    public store: CanvasManager,
+  ) {
     this.$id = schema.$id
     this.name = schema.name
     this.type = schema.type || NodeType.NODE
@@ -234,34 +119,43 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     this.props = { ...schema.props } as P
     this.sx = Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx }
 
-    // this.store = store
-    console.log('canvase node', this)
+    makeAutoObservable(this, {
+      store: false,
+      toJSON: false,
+    })
   }
 
   public delete() {
     this.store.deleteNode(this)
   }
 
-  public toJSON = computedFn((): NodeSchemaJSON<P> => {
-    const { store, ...node } = toJS(this)
-    return node as NodeSchemaJSON<P>
-  })
+  public toJSON = (): NodeSchemaJSON<P> => {
+    const json: Record<string, unknown> = {
+      $id: this.$id,
+      type: this.type,
+    }
+    // Omit optional scalar fields when undefined — Firestore rejects undefined values
+    if (this.name !== undefined) json['name'] = this.name
+    if (this.parentId !== undefined) json['parentId'] = this.parentId
+    if (this.pluginId !== undefined) json['pluginId'] = this.pluginId
+    if (this.componentId !== undefined) json['componentId'] = this.componentId
+    if (this.className !== undefined) json['className'] = this.className
+    // Omit collection fields when empty to save Firestore storage
+    const nodes = this.nodes ? [...this.nodes] : []
+    if (nodes.length > 0) json['nodes'] = nodes
+    const props = toJS(this.props)
+    if (props && Object.keys(props).length > 0) json['props'] = props
+    const sx = toJS(this.sx)
+    const sxEmpty = Array.isArray(sx) ? sx.length === 0 : !sx || Object.keys(sx).length === 0
+    if (!sxEmpty) json['sx'] = sx
+    return json as NodeSchemaJSON<P>
+  }
 }
 
 class HistoryManager<K extends string, T> {
-  public past = observable.array<Map<K, T>>([], { deep: false })
-
   public present = observable.map<K, T>({})
-
+  public past = observable.array<Map<K, T>>([], { deep: false })
   public future = observable.array<Map<K, T>>([], { deep: false })
-
-  public get canUndo() {
-    return this.past.length >= 1
-  }
-
-  public get canRedo() {
-    return this.future.length >= 1
-  }
 
   constructor() {
     makeObservable(this, {
@@ -276,16 +170,44 @@ class HistoryManager<K extends string, T> {
     })
   }
 
-  public undo() {
-    if (!this.canUndo) throw new Error('No history to undo')
-    this.future.push(toJS(this.present))
-    return this.past.pop()
+  public get [Symbol.toStringTag]() {
+    return 'HistoryManager'
   }
 
-  public redo() {
+  public toString(): string {
+    return '[object HistoryManager]'
+  }
+
+  public toJSON(): {
+    past: IObservableArray<Map<K, T>>
+    present: ObservableMap<K, T>
+    future: IObservableArray<Map<K, T>>
+  } {
+    return {
+      past: toJS(this.past),
+      present: toJS(this.present),
+      future: toJS(this.future),
+    }
+  }
+
+  public get canUndo() {
+    return this.past.length >= 1
+  }
+
+  public get canRedo() {
+    return this.future.length >= 1
+  }
+
+  public undo(): Map<K, T> {
+    if (!this.canUndo) throw new Error('No history to undo')
+    this.future.push(toJS(this.present))
+    return this.past.pop()!
+  }
+
+  public redo(): Map<K, T> {
     if (!this.canRedo) throw new Error('No history to redo')
     this.past.push(toJS(this.present))
-    return this.future.pop()
+    return this.future.pop()!
   }
 
   public clearPast(): this {
@@ -312,8 +234,29 @@ class HistoryManager<K extends string, T> {
 }
 
 export class CanvasManager {
-  private _initial = null
-  private _history: HistoryManager<NodeId, NodeSchema<any>> = null
+  private _initial: NodesMap | undefined
+  private _history: HistoryManager<NodeId, NodeSchema<any>>
+
+  constructor(public aglyn: Aglyn) {
+    makeObservable(this, {
+      nodes: computed,
+      undo: action,
+      redo: action,
+      saveHistory: action,
+      clearHistory: action,
+      clearNodes: action,
+      updateInitialNodes: action,
+      setNode: action,
+      setNodes: action,
+      deleteNode: action,
+      reparentNode: action,
+      reorderNode: action,
+      updateNodeProps: action,
+    })
+
+    this._history = new HistoryManager()
+  }
+
   public get nodes() {
     return this._history.present
   }
@@ -334,13 +277,16 @@ export class CanvasManager {
     return this.nodes.get(NODE_ROOT_ID)
   }
   public get nestedNodes(): NodeSchemaNested<any> {
-    return this.makeNested(this.rootNode)
+    const root = this.rootNode
+    if (!root) throw new Error('Missing root node')
+    return this.makeNested(root)
   }
 
   public hasNode = computedFn(($id: NodeId): boolean => {
     return this.nodes.has($id)
   })
   public getNode = computedFn(($id: NodeId): NodeSchema<any> | undefined => {
+    if (!$id) return
     return this.nodes.get($id)
   })
   public nodesAreEqual = computedFn(
@@ -350,16 +296,17 @@ export class CanvasManager {
     },
   )
   public getNodeParent = computedFn(
-    (node: NodeSchema<any>): NodeSchema<any> => {
+    (node: NodeSchema<any>): NodeSchema<any> | undefined => {
       if (!node) throw new Error('Invalid node')
+      if (!node.parentId) return
       return this.getNode(node.parentId)
     },
   )
   public getNodeIndex = computedFn((node: NodeSchema<any>): number => {
-    if (!node) throw new Error('Invalid node')
+    if (!node || !node.$id) throw new Error('Invalid node')
     const parent = this.getNodeParent(node)
     if (!parent) throw new Error('Invalid parent node')
-    return parent.nodes?.indexOf(node.$id)
+    return parent.nodes?.indexOf(node.$id) ?? -1
   })
   public isRootNodeId = computedFn(
     (id: NodeId): id is string & typeof NODE_ROOT_ID => {
@@ -373,7 +320,8 @@ export class CanvasManager {
     (nodeOrId: NodeId | NodeSchema<any>): NodeBreadcrumbPath => {
       const hierarchy = [NODE_ROOT_ID]
 
-      let currentId = typeof nodeOrId !== 'string' ? nodeOrId?.$id : nodeOrId
+      let currentId: string | undefined =
+        typeof nodeOrId !== 'string' ? nodeOrId?.$id : nodeOrId
       while (currentId && !this.isRootNodeId(currentId)) {
         hierarchy.splice(1, 0, currentId)
         currentId = this.getNode(currentId)?.parentId
@@ -383,60 +331,46 @@ export class CanvasManager {
     },
   )
   public getNodeLabelShort = computedFn((node: NodeSchema<any>): any => {
+    if (!node) throw new Error('Invalid node')
     if (this.isRootNode(node)) return NODE_ROOT_LABEL
-    const componentLabel = this.aglyn.components.getLabel(node?.componentId)
+    const componentLabel =
+      node.componentId && this.aglyn.components.getLabel(node.componentId)
     return node?.name || componentLabel || node?.$id
   })
+
   public makeNested = computedFn((node: NodeSchema<any>) => {
-    if (!node) return null
     const newNode = toJS(node) as unknown as NodeSchemaNested<any>
 
-    const childNodes = []
+    const childNodes: NodeSchemaNested<any>[] = []
     for (const childId of (newNode.nodes ||= []) as unknown as NodeId[]) {
       const child = this.getNode(childId)
-      if (child) childNodes.push(this.makeNested(child))
+      if (child) {
+        const nested = this.makeNested(child)
+        childNodes.push(nested)
+      }
     }
     newNode.nodes = childNodes
 
     return newNode
   })
 
-  constructor(public aglyn?: Aglyn) {
-    makeObservable(this, {
-      nodes: computed,
-      undo: action,
-      redo: action,
-      saveHistory: action,
-      clearHistory: action,
-      clearNodes: action,
-      updateInitialNodes: action,
-      setNode: action,
-      setNodes: action,
-      deleteNode: action,
-      reparentNode: action,
-      reorderNode: action,
-    })
-
-    this._history = new HistoryManager<NodeId, NodeSchema<any>>()
-  }
-
   public toJSON() {
-    return {
-      nodes: toJS(this.nodes),
-    }
+    const nodes: NodesMap = {}
+    this.nodes.forEach((node, id) => {
+      nodes[id] = node.toJSON()
+    })
+    return { nodes }
   }
 
   public redo(): this {
     const state = this._history.redo()
-    const json = Object.fromEntries(state.entries())
-    console.log('redo', json)
+    const json = Object.fromEntries(state!.entries())
     this.setNodes(json)
     return this
   }
   public undo(): this {
     const state = this._history.undo()
-    const json = Object.fromEntries(state.entries())
-    console.log('undo', json)
+    const json = Object.fromEntries(state!.entries())
     this.setNodes(json)
     return this
   }
@@ -448,7 +382,7 @@ export class CanvasManager {
     this._history.clearPast()
   }
   public createNodeId(): NodeId {
-    return createIdUrlSafe(NODE_ID_LENGTH)
+    return createIdUrlSafe()
   }
   public createNode(
     schema: PartialKeys<NodeSchema<any>, '$id'>,
@@ -456,8 +390,8 @@ export class CanvasManager {
     return new AglynNode<any>(
       {
         ...schema,
-        $id: schema?.$id ?? this.createNodeId(),
-      },
+        $id: schema?.$id || this.createNodeId(),
+      } as NodeSchema<any>,
       this,
     )
   }
@@ -466,22 +400,23 @@ export class CanvasManager {
     return this
   }
   public updateInitialNodes(nodes?: NodesMap) {
-    this._initial = toJS(nodes || this.nodes)
+    this._initial = toJS(nodes || this.nodes) as NodesMap
     return this
   }
   public setNode(node: NodeSchema<any>, create = false) {
-    if (!node || (!create && !node.$id)) throw new Error('Invalid node')
+    if (!node) throw new Error('Invalid node')
+    if (!create && !node.$id) throw new Error('Invalid node id')
     const _node = create ? this.createNode(node) : node
-    this.nodes.set(_node.$id, _node)
+    this.nodes.set(_node.$id!, _node)
     return this.nodes.get(_node.$id)
   }
   public setNodes(schemas: NodesMap, merge = false): this {
     if (!schemas) throw new Error('Invalid schemas')
     const cloned = toJS(schemas)
-    const nodes = {}
+    const nodes: Record<NodeId, NodeSchema<any>> = {}
     for (const nodeId in cloned) {
-      if (!cloned[nodeId]) continue
-      nodes[nodeId] = this.createNode(cloned[nodeId])
+      const node = cloned[nodeId]
+      if (node) nodes[nodeId] = this.createNode(node)
     }
     if (merge) {
       this.nodes.merge(nodes)
@@ -491,18 +426,31 @@ export class CanvasManager {
     return this
   }
   public deleteNode(node: NodeSchema<any>): this {
-    if (!node) throw new Error('Invalid node')
-    if (this.isRootNode(node)) throw new Error('Cannot delete root node')
-    this.saveHistory()
-    const parent = this.getNode(node.parentId)
-    const index = parent.nodes.indexOf(node.$id)
-    for (const childId of toJS(node.nodes)) {
-      const child = this.getNode(childId)
-      this.deleteNode(child)
+    const validateNode = (node: NodeSchema<any>) => {
+      if (!node || !node?.$id || !node?.parentId)
+        throw new Error('Invalid node')
+      if (this.isRootNode(node)) throw new Error('Cannot delete root node')
     }
 
-    if (index > -1) parent.nodes.splice(index, 1)
-    this.nodes.delete(node.$id)
+    validateNode(node)
+    this.saveHistory()
+
+    const del = (node: NodeSchema<any>) => {
+      validateNode(node)
+      const parent = this.getNode(node.parentId!)
+      if (!parent) throw new Error('Invalid parent node')
+      const index = parent.nodes?.indexOf(node.$id) ?? -1
+      const nodes = toJS(node.nodes || [])
+
+      for (const childId of [...nodes]) {
+        const child = this.getNode(childId)
+        if (child) del(child)
+      }
+
+      if (index > -1) parent.nodes?.splice(index, 1)
+      this.nodes.delete(node.$id)
+    }
+    del(node)
     return this
   }
   public reparentNode(
@@ -516,16 +464,19 @@ export class CanvasManager {
 
     this.saveHistory()
     const oldParent = this.getNodeParent(node)
-    const oldIndex = oldParent?.nodes?.indexOf(node?.$id)
-    if (oldIndex > -1) oldParent.nodes.splice(oldIndex, 1)
+    const oldIndex = oldParent?.nodes?.indexOf(node?.$id) ?? -1
+    if (oldIndex > -1) oldParent?.nodes?.splice(oldIndex, 1)
     if (oldParent?.$id !== newParent.$id) node.parentId = newParent?.$id
 
-    if (isNaN(index)) newParent.nodes.push(node?.$id)
-    else newParent.nodes.splice(index, 0, node?.$id)
+    if (isNaN(index)) (newParent.nodes ||= []).push(node?.$id)
+    else (newParent.nodes ||= []).splice(index, 0, node?.$id)
     return node
   }
   public reorderNode(node: NodeSchema<any>, index = NaN): typeof node {
-    return this.reparentNode(node, this.getNodeParent(node), index)
+    if (!node) throw new Error('Invalid node')
+    const parent = this.getNodeParent(node)
+    if (!parent) throw new Error('Invalid parent node')
+    return this.reparentNode(node, parent, index)
   }
   public duplicateNode(node: NodeSchema<any>): NodeSchema<any> {
     if (!node) throw new Error('Invalid node')
@@ -537,7 +488,7 @@ export class CanvasManager {
       node: NodeSchema<any>,
       parentId: NodeId,
     ): NodeSchema<any> => {
-      if (!node) return
+      if (!node) throw new Error('Invalid node')
 
       const json = toJS(node)
       const newNode = this.setNode(
@@ -547,13 +498,15 @@ export class CanvasManager {
           parentId,
           nodes: [],
         }),
-      )
-      for (const childId of arraySafe(json?.nodes)) {
-        const childNode = duplicateNodeAndChildren(
-          this.getNode(childId),
-          newNode.$id,
-        )
-        if (childNode) newNode.nodes.push(childNode?.$id)
+      )!
+      if (!json) return newNode
+
+      for (const childId of arraySafe(json.nodes)) {
+        const child = childId && this.getNode(childId)
+        if (child) {
+          const copy = duplicateNodeAndChildren(child, newNode.$id!)
+          if (copy) newNode.nodes!.push(copy.$id!)
+        }
       }
 
       return newNode
@@ -561,9 +514,10 @@ export class CanvasManager {
 
     this.saveHistory()
     const nodeIndex = this.getNodeIndex(node)
-    const index = nodeIndex === -1 ? parent.nodes.length - 1 : nodeIndex + 1
-    const newNode = duplicateNodeAndChildren(node, node?.parentId)
-    parent.nodes.splice(index, 0, newNode.$id)
+    const index =
+      nodeIndex === -1 ? parent.nodes?.length ?? 0 : nodeIndex + 1
+    const newNode = duplicateNodeAndChildren(node, node.parentId!)
+    ;(parent.nodes ||= []).splice(index, 0, newNode.$id)
 
     return newNode
   }
@@ -573,13 +527,13 @@ export class CanvasManager {
     const $id = this.createNodeId()
     const cloned = toJS(node)
     const nodes = Array.isArray(cloned?.nodes) ? [...cloned.nodes] : []
-    const res = { ...cloned, $id, nodes: [] }
+    const res: NodeSchemaNested<any> = { ...cloned, $id, nodes: [] }
     for (const child of nodes) {
       const childDuplicate = this.createDuplicateNode({
         ...child,
         parentId: $id,
       })
-      res.nodes.push(childDuplicate)
+      res.nodes!.push(childDuplicate)
     }
     return res
   }
@@ -597,10 +551,12 @@ export class CanvasManager {
     const parsed = this.processNodesToDenormalized(duplicate)
     this.setNodes(parsed, true)
 
-    if (isNaN(index)) parent.nodes.push(duplicate.$id)
-    else parent.nodes.splice(index, 0, duplicate.$id)
+    runInAction(() => {
+      if (isNaN(index)) (parent.nodes ||= []).push(duplicate.$id)
+      else (parent.nodes ||= []).splice(index, 0, duplicate.$id)
+    })
 
-    return this.getNode(duplicate.$id)
+    return this.getNode(duplicate.$id)!
   }
   public updateNodeProps(
     node: NodeSchema<any>,
@@ -611,7 +567,31 @@ export class CanvasManager {
     node.props = { ...props }
   }
 
+  public static nestDenormalizedNodes(
+    nodes: NodesMap,
+    rootId: NodeId = NODE_ROOT_ID,
+  ): NodeSchemaNested<any> {
+    const rootNode = nodes[rootId]
+    if (!rootNode) throw new Error('Invalid root node')
+    const response = { ...(rootNode as unknown as NodeSchemaNested<any>) }
+    const children: NodeSchemaNested<any>[] = []
+    for (const id of (rootNode.nodes ||= [])) {
+      const child = { ...nodes[id] }
+      const nestedChild = this.nestDenormalizedNodes(nodes, child.$id)
+      children.push(nestedChild)
+    }
+    response.nodes = children
+    return response
+  }
+
   public denormalizeNodes(
+    nodes: NodeSchemaNested<any>[],
+    parentId: NodeId,
+    accumulator: NodesMap = {},
+  ): NodesMap {
+    return CanvasManager.denormalizeNodes(nodes, parentId, accumulator)
+  }
+  public static denormalizeNodes(
     nodes: NodeSchemaNested<any>[],
     parentId: NodeId,
     accumulator: NodesMap = {},
@@ -658,6 +638,9 @@ export class CanvasManager {
   }
 
   public processNodesToDenormalized(value: ProcessableNodes): NodesMap {
+    return CanvasManager.processNodesToDenormalized(value)
+  }
+  public static processNodesToDenormalized(value: ProcessableNodes): NodesMap {
     let response: NodesMap = {}
     const isArray = Array.isArray(value)
 
@@ -669,7 +652,7 @@ export class CanvasManager {
           NODE_ROOT_ID,
           response,
         )
-      } else if (item?.parentId === NODE_ROOT_ID || !item?.parentId) {
+      } else if (item?.parentId === NODE_ROOT_ID || (item && item.parentId)) {
         response = this.denormalizeNodes(
           [{ $id: NODE_ROOT_ID, componentId: 'div', nodes: [item] }],
           NODE_ROOT_ID,

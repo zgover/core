@@ -5,34 +5,19 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/util/http",
         "main": "libs/shared/util/http/src/index.ts",
         "tsConfig": "libs/shared/util/http/tsconfig.lib.json",
-        "assets": [
-          "libs/shared/util/http/*.md"
-        ]
+        "assets": ["libs/shared/util/http/*.md"]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "libs/shared/util/http/**/*.ts"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:util"
-  ]
+  "tags": ["scope:lib", "scope:shared", "scope:util"]
 }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { NormalizedData, NormalizedModel } from '@aglyn/shared-data-types'
-import { _isNum, _isObj } from '@aglyn/shared-util-guards'
 import { arrayMoveAtIndex } from './array/array-move-at-index'
 import { arrayRemoveItem } from './array/array-remove-item'
+import { _isNum, _isObj } from './guards'
 import { objectDeleteProperty } from './object/object-delete-property'
+
 
 type ID = string
 
@@ -51,7 +52,7 @@ export class Normalized<T = any, K extends ID = ID>
 
   constructor(public readonly props?: NormalizedData<T, K>) {
     const { ids, byId } = { ...props }
-    this.ids = [...ids]
+    this.ids = [...(ids ?? [])]
     this.byId = { ...byId }
   }
 

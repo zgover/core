@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { _isObj } from '@aglyn/shared-util-guards'
+import { _isObj } from '../guards'
+
 
 /**
  * Safe object/{} will always return an object

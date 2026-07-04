@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { Conditional } from '@aglyn/shared-data-types'
-import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { MdiIcon, type MdiIconProps } from './mdi-icon/mdi-icon'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   Box,
@@ -48,7 +47,7 @@ import {
 } from 'react'
 
 const ITEM_HEIGHT = 48
-const defaultState = {
+const defaultState: { anchorEl: Element; mouseX: number; mouseY: number } = {
   anchorEl: null,
   mouseX: null,
   mouseY: null,
@@ -104,8 +103,8 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
   } = props
 
   const [state, setState] = useState(defaultState)
-  const child = Children.only(children)
-  const onChildClick = child.props?.onClick?.bind(null) as MouseEventHandler
+  const child = Children.only(children) as ReactElement<any>
+  const onChildClick = (child.props as any)?.onClick?.bind(null) as MouseEventHandler
   const handleClose = () => setState(defaultState)
   const handleClick = useCallback(
     (event: MouseEvent<any>) => {
@@ -129,14 +128,16 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
     'aria-expanded': open ? 'true' : 'false',
   })
 
-  const { PaperProps, ...menuProps } = MenuProps || ({} as any)
-  const { sx: paperSx, ...paperProps } = PaperProps || ({} as any)
+  // MUI v9: PaperProps → slotProps.paper. Accept both for backward compat.
+  const { PaperProps: legacyPaperProps, slotProps: menuSlotProps, ...menuProps } = MenuProps || ({} as any)
+  const resolvedPaperProps = legacyPaperProps ?? menuSlotProps?.paper ?? {}
+  const { sx: paperSx, ...paperProps } = resolvedPaperProps
   const arrowPlacement =
     horizontalOrigin === 'right'
       ? { right: 14 }
       : horizontalOrigin === 'center'
-      ? { right: 'auto', left: 'auto' }
-      : { left: 14 }
+        ? { right: 'auto', left: 'auto' }
+        : { left: 14 }
 
   return (
     <Box
@@ -174,8 +175,8 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                 horizontal: horizontalOrigin || 'left',
               }
         }
-        PaperProps={
-          context
+        slotProps={{
+          paper: context
             ? undefined
             : {
                 elevation: 0,
@@ -202,8 +203,8 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                   paperSx,
                 ),
                 ...paperProps,
-              }
-        }
+              },
+        }}
         // getContentAnchorEl={null}
         open={open}
         onClose={handleClose}
@@ -265,17 +266,16 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                         )}
                       </ListItemIcon>
                     )}
-
                     <ListItemText {...ListItemTextProps}>
                       {children}
                     </ListItemText>
-
                     {!endIcon?.path || !endIcon ? null : (
                       <Typography
                         variant="body2"
-                        color="text.secondary"
                         {...EndIconTypographyProps}
-                      >
+                        sx={[{
+                          color: "text.secondary"
+                        }, ...(Array.isArray(EndIconTypographyProps?.sx) ? EndIconTypographyProps.sx : [EndIconTypographyProps?.sx])]}>
                         {!endIcon?.path ? (
                           endIcon
                         ) : (
@@ -284,13 +284,13 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                       </Typography>
                     )}
                   </MuiMenuItem>
-                )
+                );
             }
           },
         )}
       </MuiMenu>
     </Box>
-  )
+  );
 })
 
 Menu.displayName = 'Menu'

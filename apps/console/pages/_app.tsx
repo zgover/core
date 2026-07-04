@@ -23,7 +23,6 @@ import {
 import { _AppComponent, type _AppProps } from '@aglyn/shared-ui-next'
 import { SnackbarProvider } from '@aglyn/shared-ui-snackstack'
 import {
-  consoleThemeCssVar,
   consoleThemeDark,
   consoleThemeLight,
   createWithThemeProvider,
@@ -32,7 +31,8 @@ import {
 import { Fragment } from 'react'
 import HostIdProvider from '../components/host-id-provider'
 import FirebaseAppLayout from '../components/layouts/firebase-app.layout'
-import './styles.css'
+import OsfaTooltip from '../components/osfa-tooltip'
+import '../public/_static/styles/styles.css'
 
 // enableStaticRendering(true)
 const withThemeProvider = createWithThemeProvider({
@@ -50,12 +50,13 @@ const MainComponent = withThemeCssVarProvider(
             <SnackbarProvider>
               <HostIdProvider>{children}</HostIdProvider>
             </SnackbarProvider>
+            <OsfaTooltip />
           </ConfirmationProviderComponent>
         </LoadingLayoutComponent>
       </FirebaseAppLayout>
     )
   },
-  { theme: consoleThemeCssVar },
+  { theme: { light: consoleThemeLight, dark: consoleThemeDark } },
 )
 
 export type _Props<Props, InitialProps> = _AppProps<Props, InitialProps>

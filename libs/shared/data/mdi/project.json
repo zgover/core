@@ -3,46 +3,28 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/data/mdi/src",
   "projectType": "library",
+  "tags": ["scope:lib", "scope:shared", "scope:data"],
   "targets": {
     "build": {
-      "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/data/mdi",
         "main": "libs/shared/data/mdi/src/index.ts",
         "tsConfig": "libs/shared/data/mdi/tsconfig.lib.json",
-        "assets": [
-          "libs/shared/data/mdi/*.md"
-        ]
+        "assets": ["libs/shared/data/mdi/*.md"]
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/shared/data/mdi/**/*.ts"
-        ]
-      },
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/libs/shared/data/mdi"
-      ],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/shared/data/mdi"],
       "options": {
-        "jestConfig": "libs/shared/data/mdi/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "libs/shared/data/mdi/jest.config.ts"
       }
     }
-  },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:data"
-  ]
+  }
 }
