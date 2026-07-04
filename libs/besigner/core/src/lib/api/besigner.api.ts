@@ -19,12 +19,6 @@ import { _INTERNAL_BESIGNERS_ } from '../constants/_internal'
 import type {
   BesignerClosePanelPayload,
   BesignerOpenPanelPayload,
-  BesignerSetCanvasHoveredPayload,
-  BesignerSetCanvasItemPayload,
-  BesignerSetCanvasPayload,
-  BesignerSetCanvasSelectedPayload,
-  BesignerSetDndItemPayload,
-  BesignerSetDndPayload,
   BesignerSetFlagPayload,
   BesignerSetFlagsPayload,
   BesignerSetPanelPayload,
@@ -99,64 +93,4 @@ export function closeBesignerPanel(
     app as IBesignerAppController,
   )
   return besignerController.closePanel(payload)
-}
-
-export function setBesignerDndItem(
-  app: IBesignerAppController,
-  payload?: BesignerSetDndItemPayload,
-) {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.setDndItem(payload)
-}
-
-export function setBesignerDnd(
-  app: IBesignerAppController,
-  payload?: BesignerSetDndPayload,
-) {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.setDnd(payload)
-}
-
-export function setBesignerCanvasItem(
-  app: IBesignerAppController,
-  payload?: BesignerSetCanvasItemPayload,
-) {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.setCanvasItem(payload)
-}
-
-export function setBesignerCanvas(
-  app: IBesignerAppController,
-  payload?: BesignerSetCanvasPayload,
-) {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.setCanvas(payload)
-}
-
-export function setBesignerCanvasSelected(
-  app: IBesignerAppController,
-  payload?: BesignerSetCanvasSelectedPayload,
-) {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.setCanvasSelected(payload)
-}
-
-export function setBesignerCanvasHovered(
-  app: IBesignerAppController,
-  payload?: BesignerSetCanvasHoveredPayload,
-) {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.setCanvasHovered(payload)
 }

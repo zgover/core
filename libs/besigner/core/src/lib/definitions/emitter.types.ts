@@ -17,20 +17,12 @@
 
 import type { PayloadData } from '@aglyn/aglyn'
 import type {
-  BesignerCanvasHoveredElement,
-  BesignerCanvasSelectedElement,
-  BesignerCanvasState,
   BesignerContext,
-  BesignerDndState,
   BesignerFlagsState,
   BesignerPanelKey,
   BesignerPanelsState,
 } from '../definitions/besigner-interface.types'
 import {
-  BesignerCanvasItemKey,
-  BesignerCanvasItemValue,
-  BesignerDndItemKey,
-  BesignerDndItemValue,
   BesignerFlagValue,
   BesignerPanelValue,
 } from '../definitions/besigner-interface.types'
@@ -74,41 +66,6 @@ export type BesignerTogglePanelPayload = PayloadData<{
 }>
 export type BesignerOpenPanelPayload = PayloadData<{ panel: BesignerPanelKey }>
 export type BesignerClosePanelPayload = PayloadData<{ panel: BesignerPanelKey }>
-export type BesignerSetDndPayload = PayloadData<{
-  dnd: (prev: BesignerDndState) => BesignerDndState
-}>
-export type BesignerSetDndItemPayload<K extends BesignerDndItemKey = any> =
-  PayloadData<{
-    item: K
-    value: (
-      prev: BesignerDndItemValue<K>,
-      dnd: BesignerDndState,
-    ) => BesignerDndItemValue<K>
-  }>
-export type BesignerSetCanvasPayload = PayloadData<{
-  canvas: (prev: BesignerCanvasState) => BesignerCanvasState
-}>
-export type BesignerSetCanvasItemPayload<
-  K extends BesignerCanvasItemKey = any,
-> = PayloadData<{
-  item: K
-  value: (
-    prev: BesignerCanvasItemValue<K>,
-    canvas: BesignerCanvasState,
-  ) => BesignerCanvasItemValue<K>
-}>
-export type BesignerSetCanvasSelectedPayload = PayloadData<{
-  selected: (
-    prev: BesignerCanvasSelectedElement,
-    canvas: BesignerCanvasState,
-  ) => BesignerCanvasSelectedElement
-}>
-export type BesignerSetCanvasHoveredPayload = PayloadData<{
-  hovered: (
-    prev: BesignerCanvasHoveredElement,
-    canvas: BesignerCanvasState,
-  ) => BesignerCanvasHoveredElement
-}>
 
 declare module '@aglyn/aglyn' {
   interface AglynModuleEffectPayload {

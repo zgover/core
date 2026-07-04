@@ -29,12 +29,6 @@ import type {
   BesignerClosePanelPayload,
   BesignerGetStorePayload,
   BesignerOpenPanelPayload,
-  BesignerSetCanvasHoveredPayload,
-  BesignerSetCanvasItemPayload,
-  BesignerSetCanvasPayload,
-  BesignerSetCanvasSelectedPayload,
-  BesignerSetDndItemPayload,
-  BesignerSetDndPayload,
   BesignerSetFlagPayload,
   BesignerSetFlagsPayload,
   BesignerSetPanelPayload,
@@ -63,12 +57,6 @@ export class BesignerInterfaceController
   }
   public static get namespace(): string {
     return NS
-  }
-  public get canvas(): this['__store__']['canvas'] {
-    return this.__store__?.canvas
-  }
-  public get dnd(): this['__store__']['dnd'] {
-    return this.__store__?.dnd
   }
   public get flags(): this['__store__']['flags'] {
     return this.__store__?.flags
@@ -104,20 +92,9 @@ export class BesignerInterfaceController
           toggled: false,
         },
       },
-      canvas: {
-        hovered: {},
-        selected: {},
-      },
-      dnd: {
-        active: null,
-        over: null,
-      },
     })
 
     this.__store__ = {
-      canvas: new BehaviorSubject(state.canvas),
-      // .pipe(throttleTime(20, undefined, {leading: false, trailing: true})),
-      dnd: new BehaviorSubject(state.dnd),
       flags: new BehaviorSubject(state.flags),
       panels: new BehaviorSubject(state.panels),
     }
@@ -197,54 +174,6 @@ export class BesignerInterfaceController
     const prevPanel = prev?.[panel]
     const now = { ...prev, [panel]: { ...prevPanel, toggled: false } }
     prevPanel?.toggled && this.__store__?.panels?.next(now)
-    return this
-  }
-  public setDndItem(payload: BesignerSetDndItemPayload): this {
-    const { item, value } = payload || {}
-    const prev = this.__store__?.dnd?.getValue()
-    const prevItem = prev?.[item]
-    const nowItem = value(prevItem, prev)
-    const now = { ...prev, [item]: nowItem }
-    !this.isDeepEqual(prevItem, nowItem) && this.__store__?.dnd?.next(now)
-    return this
-  }
-  public setDnd(payload: BesignerSetDndPayload): this {
-    const { dnd } = payload || {}
-    const prev = this.__store__?.dnd?.getValue()
-    const now = dnd(prev)
-    !this.isDeepEqual(prev, now) && this.__store__?.dnd?.next(now)
-    return this
-  }
-  public setCanvasItem(payload: BesignerSetCanvasItemPayload): this {
-    const { item, value } = payload || {}
-    const prev = this.__store__?.canvas?.getValue()
-    const prevItem = prev?.[item]
-    const nowItem = value(prevItem, prev)
-    const now = { ...prev, [item]: nowItem }
-    !this.isDeepEqual(prevItem, nowItem) && this.__store__?.canvas?.next(now)
-    return this
-  }
-  public setCanvas(payload: BesignerSetCanvasPayload): this {
-    const { canvas } = payload || {}
-    const prev = this.__store__?.canvas?.getValue()
-    const now = canvas(prev)
-    !this.isDeepEqual(prev, now) && this.__store__?.canvas?.next(now)
-    return this
-  }
-  public setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this {
-    const { selected } = payload || {}
-    const prev = this.__store__?.canvas?.getValue()
-    const now = { ...prev, selected: selected(prev?.selected, prev) }
-    !this.isDeepEqual(prev?.selected, now?.selected) &&
-      this.__store__?.canvas?.next(now)
-    return this
-  }
-  public setCanvasHovered(payload: BesignerSetCanvasHoveredPayload): this {
-    const { hovered } = payload || {}
-    const prev = this.__store__?.canvas?.getValue()
-    const now = { ...prev, hovered: hovered(prev?.hovered, prev) }
-    !this.isDeepEqual(prev?.hovered, now?.hovered) &&
-      this.__store__?.canvas?.next(now)
     return this
   }
 }
