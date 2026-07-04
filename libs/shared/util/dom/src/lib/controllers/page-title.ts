@@ -23,7 +23,7 @@ import { map } from 'rxjs/operators'
 
 export type PageTitleObject = {
   number?: number
-  screen?: string
+  screen?: string | string[]
   suffix?: string
   separator?: string
 }

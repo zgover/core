@@ -95,7 +95,7 @@ try {
     })
     if (!IS_PRODUCTION) console.info('set global Aglyn', _Aglyn)
     if (!IS_PRODUCTION) {
-      ;(window as Window & { Aglyn: typeof Aglyn }).Aglyn = Aglyn
+      ;(window as unknown as { AglynModule: typeof Aglyn }).AglynModule = Aglyn
     }
 
   } else if (!_Aglyn && doesBesignerAppExist() && hasWindow) {

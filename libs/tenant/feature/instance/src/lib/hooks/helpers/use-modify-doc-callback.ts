@@ -31,15 +31,10 @@ export type SetDocCallback<T> = (
   options?: SetOptions,
 ) => Promise<void>
 export type ModifyDocOptions = SetOptions & { shouldSet?: boolean }
-export type ModifyDocCallback<T> = {
-  (
-    data: typeof options extends { shouldSet: true }
-      ? Partial<T>
-      : UpdateData<T>,
-    options?: ModifyDocOptions,
-  ): Promise<void>
-  (data: UpdateData<T> | Partial<T>, options?: ModifyDocOptions): Promise<void>
-}
+export type ModifyDocCallback<T> = (
+  data: UpdateData<T> | Partial<T>,
+  options?: ModifyDocOptions,
+) => Promise<void>
 
 export function useUpdateDocCallback<T>(
   ref: DocumentReference<T>,

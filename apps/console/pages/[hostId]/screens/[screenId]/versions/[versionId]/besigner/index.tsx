@@ -117,8 +117,8 @@ function BesignerPage(props) {
 
   useEffect(() => {
     if (nodes && !Aglyn.canvas.didSetInitial) {
-      const updated = setLocalNodes(nodes)
-      Aglyn.canvas.updateInitialNodes(updated)
+      setLocalNodes(nodes)
+      Aglyn.canvas.updateInitialNodes()
     }
   }, [nodes])
 
@@ -132,7 +132,14 @@ function BesignerPage(props) {
     const dequeueLoading = queueLoading()
 
     const nodes = Aglyn.canvas.toJSON().nodes
-    await updateScreen({nodes: nodes}, {merge: true})
+    const saveScreen = updateScreen as unknown as (
+      data: Partial<Aglyn.AglynScreenVersion>,
+      options?: Parameters<typeof updateScreen>[1],
+    ) => Promise<void>
+    await saveScreen(
+      {nodes: nodes as unknown as Aglyn.AglynScreenVersion['nodes']},
+      {merge: true},
+    )
       .then(() => {
         Aglyn.canvas.updateInitialNodes(nodes)
         enqueueSnackbar('Canvas saved successfully', {

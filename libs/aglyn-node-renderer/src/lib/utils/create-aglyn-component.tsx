@@ -18,7 +18,6 @@
 import * as Aglyn from '@aglyn/aglyn'
 import {
   AGLYN_OF,
-  type AglynComponentSchema,
   type AglynExoticComponent,
   COMPONENT_ELEMENT_TYPE,
 } from '@aglyn/aglyn'
@@ -32,7 +31,7 @@ import { hoistNonReactStatics, pascalCase } from '@aglyn/shared-util-vendor'
 import { forwardRef } from 'react'
 
 export type ComponentRegisterPayload<P extends JSX.AnyProps = any> = {
-  schema: AglynComponentSchema<P>
+  schema: Aglyn.ComponentSchema<P>
   component: AglynExoticComponent<P>
 }
 
@@ -68,7 +67,7 @@ export function createAglynComponent<P extends JSX.AnyProps = any, C = any>(
       AglynComponent,
       options,
     ) as AglynExoticComponent<P>,
-    schema: cloneDeep(schema) as any,
+    schema: cloneDeep(schema),
   }
 }
 

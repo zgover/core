@@ -213,10 +213,9 @@ function Screens(props) {
           />,
           <GridActionsCellItem
             key="action-delete"
-            icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
+            icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} color="error" />}
             label="Delete"
             onClick={handleDeleteScreen(screenId, versionId)}
-            color="error"
           />,
         ]
       },
@@ -365,9 +364,9 @@ function Screens(props) {
               noRowsLabel="No screens"
               rows={screens}
               loading={status === 'loading'}
-              pageSize={pageSize}
-              onPageSizeChange={setPageSize}
-              rowsPerPageOptions={[5, 10, 15]}
+              initialState={{ pagination: { paginationModel: { pageSize } } }}
+              onPaginationModelChange={(model) => setPageSize(model.pageSize)}
+              pageSizeOptions={[5, 10, 15]}
               pagination
             />
           </CardDisplay>
