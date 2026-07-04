@@ -16,3 +16,4 @@
  */
 
 export * from './mui'
+export * from './lib/legacy-plugin'

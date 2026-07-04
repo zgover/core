@@ -29,12 +29,14 @@ import {
 } from '../constants/field-presets'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'button'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiButton'
 
 export const schema: Aglyn.ComponentSchema<ButtonProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Button',
+  category: Aglyn.ComponentCategory.INPUT,
   icon: {
     path: mdiGestureTapButton.path,
     sx: { color: '#2196f3' },

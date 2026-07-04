@@ -25,12 +25,14 @@ import ListItemText, {
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'list-item-text'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiListItemText'
 
 export const schema: Aglyn.ComponentSchema<ListItemTextProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'List Item Text',
+  category: Aglyn.ComponentCategory.DATA_DISPLAY,
   icon: { path: mdiFormatListChecks.path },
 }
 

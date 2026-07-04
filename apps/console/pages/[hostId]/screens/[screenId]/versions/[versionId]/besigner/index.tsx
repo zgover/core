@@ -17,7 +17,6 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import '@aglyn/aglyn-plugin-mui'
 import * as Besigner from '@aglyn/besigner'
 import type { BesignerJsonEditorProps } from '@aglyn/besigner-json-editor'
 import {
@@ -41,6 +40,7 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
 import { useScreenVersion } from '@aglyn/tenant-feature-instance'
 import { Stack, Typography } from '@mui/material'
 import { observer } from 'mobx-react-lite'
@@ -52,6 +52,8 @@ import AuthenticatedLayout from '../../../../../../../components/layouts/authent
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import '../../../../../../../constants/app-setup'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
+
+registerLegacyMuiPlugin()
 
 const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
   () =>

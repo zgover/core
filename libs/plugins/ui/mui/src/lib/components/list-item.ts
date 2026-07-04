@@ -19,7 +19,6 @@ import * as Aglyn from '@aglyn/aglyn'
 import {
   mdiFormatListText,
 } from '@aglyn/shared-data-mdi'
-
 import ListItem, { type ListItemProps } from '@mui/material/ListItem'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
@@ -28,12 +27,14 @@ import {
   schema as listItemTextSchema,
 } from './list-item-text'
 
-const ID: Aglyn.ComponentId = 'list-item'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiListItem'
 
 export const schema: Aglyn.ComponentSchema<ListItemProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'List Item',
+  category: Aglyn.ComponentCategory.DATA_DISPLAY,
   icon: { path: mdiFormatListText.path },
   restrictChildren: [
     Aglyn.LinealDirectiveFlag.LIMIT_TO,

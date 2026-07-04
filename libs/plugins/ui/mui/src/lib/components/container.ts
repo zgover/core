@@ -23,12 +23,14 @@ import Container, { type ContainerProps } from '@mui/material/Container'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 
-const ID: Aglyn.ComponentId = 'container'
+// Component ids are persisted in screen documents; keep the legacy ids.
+export const ID: Aglyn.ComponentId = 'muiContainer'
 
 export const schema: Aglyn.ComponentSchema<ContainerProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Container',
+  category: Aglyn.ComponentCategory.LAYOUT,
   icon: {
     path: mdiViewArrayOutline.path,
     sx: { color: '#2196f3' },

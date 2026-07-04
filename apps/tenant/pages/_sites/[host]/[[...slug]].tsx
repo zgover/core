@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
-import '@aglyn/aglyn-plugin-mui'
+import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
 import { doc } from 'firebase/firestore'
 import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
@@ -26,6 +26,8 @@ import { useFirestore, useFirestoreDocData } from 'reactfire'
 import getHost from '../../../utils/get-host'
 import getScreen from '../../../utils/get-screen'
 import getScreenVersion from '../../../utils/get-screen-version'
+
+registerLegacyMuiPlugin()
 
 interface StaticPathsCtx extends ParsedUrlQuery {}
 
