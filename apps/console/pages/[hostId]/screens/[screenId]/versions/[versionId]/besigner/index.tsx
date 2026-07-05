@@ -41,12 +41,12 @@ import {
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
-import { useScreenVersion } from '@aglyn/tenant-feature-instance'
+import { useHost, useScreenVersion } from '@aglyn/tenant-feature-instance'
 import { Stack, Typography } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import { useParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
@@ -103,6 +103,7 @@ function BesignerPage(props) {
     screenId: screenId as string,
     versionId: versionId as string,
   })
+  const {doc: hostResult} = useHost({ hostId: hostId as string })
   const {doc: result, setDoc: updateScreen} = useScreenVersion({
     hostId: hostId as string,
     screenId: screenId as string,
@@ -165,6 +166,17 @@ function BesignerPage(props) {
   const [jsonOpen, setJsonOpen] = useState(false)
   const openJsonEditor = useCallback(() => setJsonOpen(true), [])
   const closeJsonEditor = useCallback(() => setJsonOpen(false), [])
+  const liveUrl = useMemo(() => {
+    const host = hostResult?.data
+    if (!host) return undefined
+    const domain =
+      host.cname || (host.subdomain ? `${host.subdomain}.aglyn.app` : undefined)
+    if (!domain) return undefined
+    const slug = host.screens?.[screenId]
+    if (slug == null) return undefined
+    return `https://${domain}/${slug === '/' ? '' : slug}`
+  }, [hostResult?.data, screenId])
+
   const handlePreview = useCallback(() => {
     const ids = { hostId, screenId, versionId }
     writePreviewState(ids, Aglyn.canvas.toJSON().nodes)
@@ -329,6 +341,7 @@ function BesignerPage(props) {
               detailsUrl={detailUrl}
               onSave={handleSave}
               onPreview={handlePreview}
+              liveUrl={liveUrl}
               onPropertiesEdit={() => setScreenDialog(true)}
               saveAvailable={saveAvailable}
             />

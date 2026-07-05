@@ -25,6 +25,7 @@ import {
   ICON_VARIANT_APP_SETTINGS,
   ICON_VARIANT_MODIFY_SAVE,
   ICON_VARIANT_NEW_TAB,
+  ICON_VARIANT_PAGES,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
@@ -36,6 +37,7 @@ import SecondaryAppBarComponent, {
 
 export interface BesignerAppBarProps extends SecondaryAppBarProps {
   detailsUrl: string
+  liveUrl?: string
   onSave: ButtonProps['onClick']
   onPreview?: ButtonProps['onClick']
   onPropertiesEdit?: ButtonProps['onClick']
@@ -44,7 +46,7 @@ export interface BesignerAppBarProps extends SecondaryAppBarProps {
 
 export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
   (props, ref) => {
-    const { onPreview, onPropertiesEdit, onSave, saveAvailable } = props
+    const { liveUrl, onPreview, onPropertiesEdit, onSave, saveAvailable } = props
 
     return (
       <SecondaryAppBarComponent
@@ -86,6 +88,18 @@ export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
             })}
             flexItem
           />
+          <Button
+            component="a"
+            href={liveUrl || undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="small"
+            color="secondary"
+            disabled={!liveUrl}
+            endIcon={<MdiIcon path={ICON_VARIANT_PAGES.path} />}
+          >
+            {'Live'}
+          </Button>
           <Button
             onClick={onPreview}
             size="small"
