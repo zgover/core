@@ -59,7 +59,12 @@ export const config = {
 }
 
 type EnvVercelEnv = 'production' | 'development' | 'preview' | undefined
-const previewRegex = /^tenant-aglyn-([a-zA-Z0-9]+)-zgover\.vercel\.app$/
+
+// Preview/branch deployment urls have no tenant subdomain, so the host is
+// resolved from a ?tenantHost= override (persisted in a cookie for
+// subsequent navigations) and falls back to the demo host.
+const TENANT_HOST_PARAM = 'tenantHost'
+const TENANT_HOST_COOKIE = 'aglyn-tenant-host'
 
 export const middleware: NextMiddleware = (req, event) => {
   const reqHost = req?.headers?.get('host') || 'console.aglyn.io'
@@ -116,24 +121,30 @@ export const middleware: NextMiddleware = (req, event) => {
       )
       tenantHost = reqHost.replace(`.aglyn.app`, '')
       break
-    // Vercel preview deployment
-    case IS_VERCEL && previewRegex.test(reqHost):
+    // Vercel deployment urls (preview, branch and canonical project domains)
+    case IS_VERCEL && reqHost.endsWith('.vercel.app'):
     case reqHost === 'console.aglyn.io':
-    case reqHost === 'localhost:4500':
+    case reqHost === 'localhost:4500': {
+      const override =
+        req.nextUrl.searchParams.get(TENANT_HOST_PARAM) ||
+        req.cookies.get(TENANT_HOST_COOKIE)?.value
       console.debug(
         'Tenant Host Switch=',
         'assign',
-        'previewRegex=',
-        IS_VERCEL && previewRegex.test(reqHost),
+        "reqHost.endsWith('.vercel.app')=",
+        reqHost.endsWith('.vercel.app'),
         "reqHost === 'console.aglyn.io'=",
         reqHost === 'console.aglyn.io',
         "reqHost === 'localhost:4500'=",
         reqHost === 'localhost:4500',
+        'override=',
+        override,
         'request.match=',
-        AGLYN_TENANT_DEMO || 'demo',
+        override || AGLYN_TENANT_DEMO || 'demo',
       )
-      tenantHost = AGLYN_TENANT_DEMO || 'demo'
+      tenantHost = override || AGLYN_TENANT_DEMO || 'demo'
       break
+    }
     // Local preview dev/test
     case reqHost.endsWith(`.localhost:4500`):
       console.debug(
@@ -187,5 +198,10 @@ export const middleware: NextMiddleware = (req, event) => {
     'req.nextUrl.pathname=',
     req.nextUrl.pathname,
   )
-  return NextResponse.rewrite(new URL(rewrite, req.url))
+  const response = NextResponse.rewrite(new URL(rewrite, req.url))
+  const overrideParam = req.nextUrl.searchParams.get(TENANT_HOST_PARAM)
+  if (overrideParam) {
+    response.cookies.set(TENANT_HOST_COOKIE, overrideParam, { path: '/' })
+  }
+  return response
 }

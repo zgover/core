@@ -56,6 +56,7 @@ import {
   writePreviewState,
 } from '../../../../../../../constants/preview-state'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
+import { buildScreenLiveUrl } from '../../../../../../../constants/tenant-links'
 
 registerLegacyMuiPlugin()
 
@@ -166,16 +167,10 @@ function BesignerPage(props) {
   const [jsonOpen, setJsonOpen] = useState(false)
   const openJsonEditor = useCallback(() => setJsonOpen(true), [])
   const closeJsonEditor = useCallback(() => setJsonOpen(false), [])
-  const liveUrl = useMemo(() => {
-    const host = hostResult?.data
-    if (!host) return undefined
-    const domain =
-      host.cname || (host.subdomain ? `${host.subdomain}.aglyn.app` : undefined)
-    if (!domain) return undefined
-    const slug = host.screens?.[screenId]
-    if (slug == null) return undefined
-    return `https://${domain}/${slug === '/' ? '' : slug}`
-  }, [hostResult?.data, screenId])
+  const liveUrl = useMemo(
+    () => buildScreenLiveUrl(hostResult?.data, screenId),
+    [hostResult?.data, screenId],
+  )
 
   const handlePreview = useCallback(() => {
     const ids = { hostId, screenId, versionId }

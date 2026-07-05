@@ -164,7 +164,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 
     return {
       props: props,
-      revalidate: false, // never=false, always=1, since=SECONDS
+      revalidate: 60, // never=false, always=1, since=SECONDS
     }
   } catch (e) {
     console.error(e)
