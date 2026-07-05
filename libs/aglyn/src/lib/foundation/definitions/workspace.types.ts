@@ -16,6 +16,7 @@
  */
 
 import type { HttpStatusCode } from '@aglyn/shared-data-enums'
+import type { HostTheme } from '@aglyn/shared-data-types'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type { AglynNodeSchema, NodeId } from './components.types'
 
@@ -99,6 +100,13 @@ export type HostUid = string
 export type HostPath = string
 export type HostMediaUid = string
 
+/**
+ * Persisted MUI theme customization for a host's published site.
+ * Canonical shape lives in `@aglyn/shared-data-types` so UI-scope libs can
+ * consume it without depending on this framework lib.
+ */
+export type AglynHostTheme = HostTheme
+
 /** Hosted in tenants' host project */
 export interface AglynHost extends AglynDocument {
   $id: HostUid
@@ -119,6 +127,7 @@ export interface AglynHost extends AglynDocument {
     }
   }
   screens?: Record<ScreenUid, ScreenSlug>
+  theme?: AglynHostTheme
 
   // CONCEPT: Redirect screens
   redirects?: Record<RedirectUid, true>
