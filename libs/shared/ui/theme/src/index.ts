@@ -31,4 +31,5 @@ export * from './lib/hocs/create-with-theme-provider'
 
 export * from './lib/util/create-responsive-theme'
 export * from './lib/util/generate-component-class-keys'
+export * from './lib/util/host-theme'
 export * from './lib/util/merge-sx-props'
