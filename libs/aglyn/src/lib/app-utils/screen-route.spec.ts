@@ -16,10 +16,13 @@
  */
 
 import {
+  collectScreenDescendantIds,
+  composeScreenRoutePath,
   findScreenIdByRoutePath,
   normalizeScreenSlug,
   SCREEN_ROOT_PATH,
   screenRoutePathToUrl,
+  wouldCreateScreenCycle,
 } from './screen-route'
 
 describe('normalizeScreenSlug', () => {
@@ -64,5 +67,80 @@ describe('screenRoutePathToUrl', () => {
   it('prefixes non-root paths with a slash', () => {
     expect(screenRoutePathToUrl('/')).toBe('/')
     expect(screenRoutePathToUrl('about')).toBe('/about')
+  })
+})
+
+describe('composeScreenRoutePath', () => {
+  const screens = {
+    home: { slug: '/' },
+    company: { slug: 'company' },
+    about: { slug: 'about', parentId: 'company' },
+    team: { slug: 'team', parentId: 'about' },
+    homeChild: { slug: 'news', parentId: 'home' },
+    unslugged: { parentId: 'company' },
+    orphan: { slug: 'orphan', parentId: 'missing' },
+  }
+
+  it('composes ancestor chains into slash-joined paths', () => {
+    expect(composeScreenRoutePath('company', screens)).toBe('company')
+    expect(composeScreenRoutePath('about', screens)).toBe('company/about')
+    expect(composeScreenRoutePath('team', screens)).toBe('company/about/team')
+  })
+
+  it('treats the home screen as an empty segment', () => {
+    expect(composeScreenRoutePath('home', screens)).toBe(SCREEN_ROOT_PATH)
+    expect(composeScreenRoutePath('homeChild', screens)).toBe('news')
+  })
+
+  it('returns undefined for unslugged screens, broken chains, and rooted parents', () => {
+    expect(composeScreenRoutePath('unslugged', screens)).toBeUndefined()
+    expect(composeScreenRoutePath('orphan', screens)).toBeUndefined()
+    expect(
+      composeScreenRoutePath('rootedChild', {
+        rootedChild: { slug: '/', parentId: 'company' },
+        company: { slug: 'company' },
+      }),
+    ).toBeUndefined()
+  })
+
+  it('returns undefined on parent cycles', () => {
+    const cyclic = {
+      a: { slug: 'a', parentId: 'b' },
+      b: { slug: 'b', parentId: 'a' },
+    }
+    expect(composeScreenRoutePath('a', cyclic)).toBeUndefined()
+  })
+})
+
+describe('collectScreenDescendantIds', () => {
+  const screens = {
+    company: { slug: 'company' },
+    about: { slug: 'about', parentId: 'company' },
+    team: { slug: 'team', parentId: 'about' },
+    blog: { slug: 'blog' },
+  }
+
+  it('returns children and grandchildren', () => {
+    expect(collectScreenDescendantIds('company', screens)).toEqual([
+      'about',
+      'team',
+    ])
+    expect(collectScreenDescendantIds('about', screens)).toEqual(['team'])
+    expect(collectScreenDescendantIds('blog', screens)).toEqual([])
+  })
+})
+
+describe('wouldCreateScreenCycle', () => {
+  const screens = {
+    company: { slug: 'company' },
+    about: { slug: 'about', parentId: 'company' },
+    team: { slug: 'team', parentId: 'about' },
+  }
+
+  it('rejects self and descendants as parents', () => {
+    expect(wouldCreateScreenCycle('company', 'company', screens)).toBe(true)
+    expect(wouldCreateScreenCycle('company', 'team', screens)).toBe(true)
+    expect(wouldCreateScreenCycle('team', 'company', screens)).toBe(false)
+    expect(wouldCreateScreenCycle('company', undefined, screens)).toBe(false)
   })
 })
