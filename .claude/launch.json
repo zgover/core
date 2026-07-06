@@ -7,8 +7,7 @@
       "runtimeArgs": [
         "nx",
         "serve",
-        "console",
-        "--prod"
+        "console"
       ],
       "port": 4200
     },

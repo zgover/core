@@ -50,6 +50,100 @@ export function normalizeScreenSlug(
   return segment || undefined
 }
 
+/** Minimal screen shape the hierarchy helpers need. */
+export interface ScreenRouteNode {
+  slug?: string
+  parentId?: ScreenUid
+}
+
+/** Defensive cap: parent chains deeper than this are treated as invalid. */
+const MAX_SCREEN_DEPTH = 32
+
+/**
+ * Composes a screen's routing-map path from its own slug plus its ancestor
+ * chain: parent `company` + own `about` → `company/about`. Root (`'/'`)
+ * segments contribute nothing, so children of the home screen sit at the
+ * top level. Returns `undefined` when the screen (or any ancestor) has no
+ * slug, when the screen's own slug is `'/'` while it has a parent, or when
+ * the chain has a cycle / exceeds {@link MAX_SCREEN_DEPTH}.
+ */
+export function composeScreenRoutePath(
+  screenId: ScreenUid,
+  screensById: Record<ScreenUid, ScreenRouteNode | undefined>,
+): string | undefined {
+  const segments: string[] = []
+  const visited = new Set<ScreenUid>()
+  let currentId: ScreenUid | undefined = screenId
+
+  while (currentId) {
+    if (visited.has(currentId) || visited.size >= MAX_SCREEN_DEPTH) {
+      return undefined
+    }
+    visited.add(currentId)
+    const screen = screensById[currentId]
+    if (!screen?.slug) return undefined
+    if (screen.slug === SCREEN_ROOT_PATH) {
+      // The home screen's segment is empty (children of home sit at the top
+      // level), but a screen can't itself be the home page AND have a parent.
+      if (currentId === screenId && screen.parentId) return undefined
+    } else {
+      segments.unshift(screen.slug)
+    }
+    currentId = screen.parentId
+  }
+
+  if (!segments.length) {
+    return screensById[screenId]?.slug === SCREEN_ROOT_PATH
+      ? SCREEN_ROOT_PATH
+      : undefined
+  }
+  return segments.join('/')
+}
+
+/**
+ * All screens whose parent chain passes through `screenId` (children,
+ * grandchildren, …). Used to cascade routing-map rewrites when a screen's
+ * slug or parent changes.
+ */
+export function collectScreenDescendantIds(
+  screenId: ScreenUid,
+  screensById: Record<ScreenUid, ScreenRouteNode | undefined>,
+): ScreenUid[] {
+  const childrenByParent = new Map<ScreenUid, ScreenUid[]>()
+  for (const [id, screen] of Object.entries(screensById)) {
+    if (!screen?.parentId) continue
+    const siblings = childrenByParent.get(screen.parentId) ?? []
+    siblings.push(id)
+    childrenByParent.set(screen.parentId, siblings)
+  }
+  const result: ScreenUid[] = []
+  const queue = [...(childrenByParent.get(screenId) ?? [])]
+  while (queue.length) {
+    const id = queue.shift() as ScreenUid
+    if (result.includes(id)) continue
+    result.push(id)
+    queue.push(...(childrenByParent.get(id) ?? []))
+  }
+  return result
+}
+
+/**
+ * True when making `nextParentId` the parent of `screenId` would create a
+ * loop — i.e. the candidate parent is the screen itself or one of its own
+ * descendants.
+ */
+export function wouldCreateScreenCycle(
+  screenId: ScreenUid,
+  nextParentId: ScreenUid | undefined,
+  screensById: Record<ScreenUid, ScreenRouteNode | undefined>,
+): boolean {
+  if (!nextParentId) return false
+  if (nextParentId === screenId) return true
+  return collectScreenDescendantIds(screenId, screensById).includes(
+    nextParentId,
+  )
+}
+
 /**
  * Looks up which screen currently owns a routing path, for sibling-slug
  * uniqueness checks before publishing.
