@@ -19,6 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import * as AppBar from './components/app-bar'
 import * as Button from './components/button'
 import * as Container from './components/container'
+import * as LayoutSlot from './components/layout-slot'
 import * as List from './components/list'
 import * as ListItem from './components/list-item'
 import * as ListItemText from './components/list-item-text'
@@ -48,6 +49,7 @@ export function registerLegacyMuiPlugin(): void {
       Aglyn.components.registerComponent(Typography.default, Typography.schema)
       Aglyn.components.registerComponent(Button.default, Button.schema)
       Aglyn.components.registerComponent(Container.default, Container.schema)
+      Aglyn.components.registerComponent(LayoutSlot.default, LayoutSlot.schema)
       Aglyn.components.registerComponent(List.default, List.schema)
       Aglyn.components.registerComponent(ListItem.default, ListItem.schema)
       Aglyn.components.registerComponent(
@@ -61,6 +63,7 @@ export function registerLegacyMuiPlugin(): void {
       Aglyn.components.registerPreset(Typography.presets)
       Aglyn.components.registerPreset(Button.presets)
       Aglyn.components.registerPreset(Container.presets)
+      Aglyn.components.registerPreset(LayoutSlot.presets)
       Aglyn.components.registerPreset(List.presets)
       Aglyn.components.registerPreset(ListItem.presets)
       Aglyn.components.registerPreset(ListItemText.presets)
@@ -72,6 +75,7 @@ export function registerLegacyMuiPlugin(): void {
       Aglyn.components.unregisterPreset(Typography.presets.map((i) => i.$id))
       Aglyn.components.unregisterPreset(Button.presets.map((i) => i.$id))
       Aglyn.components.unregisterPreset(Container.presets.map((i) => i.$id))
+      Aglyn.components.unregisterPreset(LayoutSlot.presets.map((i) => i.$id))
       Aglyn.components.unregisterPreset(List.presets.map((i) => i.$id))
       Aglyn.components.unregisterPreset(ListItem.presets.map((i) => i.$id))
       Aglyn.components.unregisterPreset(ListItemText.presets.map((i) => i.$id))
@@ -82,6 +86,7 @@ export function registerLegacyMuiPlugin(): void {
       Aglyn.components.unregisterComponent(Typography.ID)
       Aglyn.components.unregisterComponent(Button.ID)
       Aglyn.components.unregisterComponent(Container.ID)
+      Aglyn.components.unregisterComponent(LayoutSlot.ID)
       Aglyn.components.unregisterComponent(List.ID)
       Aglyn.components.unregisterComponent(ListItem.ID)
       Aglyn.components.unregisterComponent(ListItemText.ID)

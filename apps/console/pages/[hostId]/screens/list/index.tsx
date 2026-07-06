@@ -122,7 +122,13 @@ function Screens(props) {
         screenId: newId,
         createdAt: timestamp,
         updatedAt: timestamp,
-        nodes: { [CANVAS_ROOT_ELEMENT_ID]: { nodes: [] } },
+        nodes: {
+          [CANVAS_ROOT_ELEMENT_ID]: {
+            $id: CANVAS_ROOT_ELEMENT_ID,
+            componentId: 'div',
+            nodes: [],
+          },
+        },
       }
       await Promise.all([
         setDoc(doc(firestore, 'hosts', hostId, 'screens', newId), newValues),
@@ -270,6 +276,16 @@ function Screens(props) {
             id: 'nav-tab-screens',
             label: 'Screens',
             href: buildRoute(Route.SCREEN_LIST, { hostId }),
+          },
+          {
+            id: 'nav-tab-layouts',
+            label: 'Layouts',
+            href: buildRoute(Route.LAYOUT_LIST, { hostId }),
+          },
+          {
+            id: 'nav-tab-theme',
+            label: 'Theme',
+            href: buildRoute(Route.HOST_THEME, { hostId }),
           },
           {
             id: 'nav-tab-setup',

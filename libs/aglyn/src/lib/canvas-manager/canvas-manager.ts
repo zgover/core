@@ -248,6 +248,7 @@ export class CanvasManager {
       saveHistory: action,
       clearHistory: action,
       clearNodes: action,
+      reset: action,
       updateInitialNodes: action,
       setNode: action,
       setNodes: action,
@@ -413,6 +414,18 @@ export class CanvasManager {
     this.nodes.clear()
     return this
   }
+  /**
+   * Returns the canvas to its pristine state (no nodes, no history, no
+   * recorded initial snapshot). The canvas is an app-level singleton shared
+   * by every editing session — call this when a session ends so the next
+   * document doesn't inherit stale content.
+   */
+  public reset() {
+    this.clearNodes()
+    this.clearHistory()
+    this._initial = undefined
+    return this
+  }
   public updateInitialNodes(nodes?: NodesMap) {
     this._initial = nodes ? (toJS(nodes) as NodesMap) : this.serializeNodes()
     return this
@@ -430,7 +443,13 @@ export class CanvasManager {
     const nodes: Record<NodeId, NodeSchema<any>> = {}
     for (const nodeId in cloned) {
       const node = cloned[nodeId]
-      if (node) nodes[nodeId] = this.createNode(node)
+      if (!node) continue
+      // Persisted maps key nodes by id. Early seeds omitted $id (which used
+      // to mint a random one), and the root must always keep the canonical
+      // id — the map key is authoritative.
+      const $id =
+        nodeId === NODE_ROOT_ID ? NODE_ROOT_ID : (node.$id ?? nodeId)
+      nodes[nodeId] = this.createNode({ ...node, $id })
     }
     if (merge) {
       this.nodes.merge(nodes)

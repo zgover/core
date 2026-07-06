@@ -24,6 +24,7 @@ export * from './lib/constants'
 
 export * from './lib/console.theme'
 
+export * from './lib/components/host-theme-provider'
 export * from './lib/components/theme-css-var-provider'
 
 export * from './lib/hocs/create-with-emotion-client-cache'
@@ -31,4 +32,5 @@ export * from './lib/hocs/create-with-theme-provider'
 
 export * from './lib/util/create-responsive-theme'
 export * from './lib/util/generate-component-class-keys'
+export * from './lib/util/host-theme'
 export * from './lib/util/merge-sx-props'

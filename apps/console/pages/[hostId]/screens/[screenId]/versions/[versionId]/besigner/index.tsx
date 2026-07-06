@@ -20,8 +20,10 @@ import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
 import type { JsonEditorProps } from '@aglyn/shared-ui-json-editor'
 import {
+  LayoutChromeContext,
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
+  useLayoutChromeCanvas,
   withBesignerContext,
   type WorkspaceEditorComponentProps,
 } from '@aglyn/besigner-ui'
@@ -40,11 +42,31 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import {
+  getGoogleFontsUrl,
+  HostThemeDocumentContext,
+} from '@aglyn/shared-ui-theme'
 import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
-import { useHost, useScreenVersion } from '@aglyn/tenant-feature-instance'
-import { Stack, Typography } from '@mui/material'
+import {
+  useHost,
+  useLayout,
+  useLayoutVersion,
+  useScreen,
+  useScreenVersion,
+} from '@aglyn/tenant-feature-instance'
+import {
+  Alert,
+  Button,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { collection, deleteField, limit, query } from 'firebase/firestore'
+import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
+import Head from 'next/head'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
@@ -105,6 +127,24 @@ function BesignerPage(props) {
     versionId: versionId as string,
   })
   const {doc: hostResult} = useHost({ hostId: hostId as string })
+  const {doc: screenResult, setDoc: updateScreenDoc} = useScreen({
+    hostId,
+    screenId,
+  })
+  const layoutId = screenResult?.data?.layoutId
+  const {doc: layoutResult} = useLayout({
+    hostId,
+    layoutId: layoutId ?? '-no-layout-',
+  })
+  const layoutVersionId = layoutResult?.data?.versionId
+  const {doc: layoutVersionResult} = useLayoutVersion({
+    hostId,
+    layoutId: layoutId ?? '-no-layout-',
+    versionId: layoutVersionId ?? '-no-version-',
+  })
+  const chromeCanvas = useLayoutChromeCanvas(
+    layoutId ? layoutVersionResult?.data?.nodes : undefined,
+  )
   const {doc: result, setDoc: updateScreen} = useScreenVersion({
     hostId: hostId as string,
     screenId: screenId as string,
@@ -114,6 +154,16 @@ function BesignerPage(props) {
   const nodes = data?.nodes
   const hasError = Boolean(error) || status === 'error'
   const notFound = status === 'success' && !data
+
+  // The canvas is a singleton shared by every editing session; without a
+  // reset on leave, client-side navigation to another screen or a layout
+  // keeps (and could save) this document's nodes.
+  useEffect(() => {
+    return () => {
+      Aglyn.canvas.reset()
+      Besigner.focus.clearFocusStatus()
+    }
+  }, [hostId, screenId, versionId])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -171,12 +221,66 @@ function BesignerPage(props) {
     () => buildScreenLiveUrl(hostResult?.data, screenId),
     [hostResult?.data, screenId],
   )
+  const hostTheme = hostResult?.data?.theme
+  const hostFontsHref = useMemo(
+    () => getGoogleFontsUrl(hostTheme?.fonts),
+    [hostTheme?.fonts],
+  )
+  const firestore = useFirestore()
+  const layoutsQuery = query(
+    collection(firestore, 'hosts', hostId, 'layouts'),
+    limit(50),
+  )
+  const { data: layoutOptions } = useFirestoreCollectionData<any>(
+    layoutsQuery,
+    { idField: '$id' },
+  )
+  const chromeContextValue = useMemo(
+    () => ({ chromeCanvas }),
+    [chromeCanvas],
+  )
+
+  const handleLayoutChange = useCallback(
+    async (event) => {
+      const value = event.target.value as string
+      const nextLayoutId = value === '__none__' ? undefined : value
+      await updateScreenDoc({
+        layoutId: nextLayoutId ?? (deleteField() as any),
+      } as any)
+        .then(() => {
+          enqueueSnackbar(
+            nextLayoutId ? 'Layout assigned' : 'Layout removed',
+            { variant: 'success', persist: false },
+          )
+        })
+        .catch((e) => {
+          enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
+            variant: 'error',
+            allowDuplicate: true,
+          })
+        })
+    },
+    [updateScreenDoc, enqueueSnackbar],
+  )
 
   const handlePreview = useCallback(() => {
     const ids = { hostId, screenId, versionId }
-    writePreviewState(ids, Aglyn.canvas.toJSON().nodes)
+    // Preview what the site will render: the draft screen composed into its
+    // bound layout's published version.
+    const composed = Aglyn.composeLayoutAndScreenNodes(
+      layoutId ? (layoutVersionResult?.data?.nodes as any) : undefined,
+      Aglyn.canvas.toJSON().nodes as any,
+    )
+    writePreviewState(ids, composed, hostTheme)
     window.open(buildRoute(Route.SCREEN_PREVIEW, ids), previewWindowName(ids))
-  }, [hostId, screenId, versionId])
+  }, [
+    hostId,
+    screenId,
+    versionId,
+    layoutId,
+    layoutVersionResult?.data?.nodes,
+    hostTheme,
+  ])
 
   const handleJsonSave = useCallback((e, value) => {
     Aglyn.canvas.applyNodes(value)
@@ -200,7 +304,18 @@ function BesignerPage(props) {
   }, [enqueueSnackbar, hasError, error, notFound])
 
   return (
-    <>
+    <HostThemeDocumentContext.Provider value={hostTheme}>
+      {hostFontsHref ? (
+        <Head>
+          <link
+            key="host-fonts-preconnect"
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+          <link key="host-fonts" rel="stylesheet" href={hostFontsHref} />
+        </Head>
+      ) : null}
       <MainLayout
         title={'Besigner'}
         enableAppBarElevation
@@ -340,11 +455,48 @@ function BesignerPage(props) {
               onPropertiesEdit={() => setScreenDialog(true)}
               saveAvailable={saveAvailable}
             />
-            <WorkspaceEditorComponent>
-              <ViewportRootComponent>
-                <ViewportCanvasComponent />
-              </ViewportRootComponent>
-            </WorkspaceEditorComponent>
+            {layoutId ? (
+              <Alert
+                severity="info"
+                sx={{
+                  borderRadius: 0,
+                  // Stack above the canvas selection overlays.
+                  position: 'relative',
+                  zIndex: 'appBar',
+                }}
+                action={
+                  <Button
+                    color="inherit"
+                    size="small"
+                    component={AppLink}
+                    componentVariant="naked"
+                    disabled={!layoutVersionId}
+                    href={
+                      layoutVersionId
+                        ? buildRoute(Route.LAYOUT_BESIGNER, {
+                            hostId,
+                            layoutId,
+                            versionId: layoutVersionId,
+                          })
+                        : undefined
+                    }
+                  >
+                    {'Edit layout'}
+                  </Button>
+                }
+              >
+                {`Shared layout "${
+                  layoutResult?.data?.displayName ?? layoutId
+                }" frames this screen — its elements are locked here.`}
+              </Alert>
+            ) : null}
+            <LayoutChromeContext.Provider value={chromeContextValue}>
+              <WorkspaceEditorComponent>
+                <ViewportRootComponent>
+                  <ViewportCanvasComponent />
+                </ViewportRootComponent>
+              </WorkspaceEditorComponent>
+            </LayoutChromeContext.Provider>
           </>
         )}
       </MainLayout>
@@ -357,7 +509,28 @@ function BesignerPage(props) {
           await handleSave()
           setScreenDialog(false)
         }}
-      />
+      >
+        <Stack spacing={1} sx={{ px: 3, pb: 3 }}>
+          <Typography variant="subtitle2">{'Shared layout'}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {'Wraps this screen in chrome (appbar, footer, …) maintained once for every bound screen. Saved immediately.'}
+          </Typography>
+          <TextField
+            select
+            size="small"
+            label="Layout"
+            value={layoutId ?? '__none__'}
+            onChange={handleLayoutChange}
+          >
+            <MenuItem value="__none__">{'None'}</MenuItem>
+            {(layoutOptions ?? []).map((layout) => (
+              <MenuItem key={layout.$id} value={layout.$id}>
+                {layout.displayName ?? layout.$id}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Stack>
+      </PropertiesDialogComponent>
       {Boolean(Aglyn.canvas.rootNode && jsonOpen) && (
         <JsonEditor
           open={Boolean(Aglyn.canvas.rootNode && jsonOpen)}
@@ -366,7 +539,7 @@ function BesignerPage(props) {
           defaultValue={Aglyn.canvas.nestedNodes as any}
         />
       )}
-    </>
+    </HostThemeDocumentContext.Provider>
   );
 }
 

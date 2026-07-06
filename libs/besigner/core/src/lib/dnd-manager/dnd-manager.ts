@@ -16,7 +16,13 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { confirmValidLinealRelationship } from './confirm-valid-lineal-relationship'
+import {
+  confirmValidLinealRelationship,
+  type ConfirmValidLinealRelationshipResponse,
+  describeInvalidLinealRelationship,
+  type InvalidLinealRelationFlag,
+  type LinealItem,
+} from './confirm-valid-lineal-relationship'
 import { makeAutoObservable } from 'mobx'
 
 export enum DragType {
@@ -85,10 +91,13 @@ export class DndManager {
       this.computedDrop?.breadcrumbPath?.some((i) => i === this.drag?.$id),
     )
   }
-  public get isValidLinealRelationship(): boolean {
-    if (!this.hasDragTarget) return false
-    if (!this.hasDropTarget) return false
-    const parent = {
+  /** Item/parent descriptors for the pending drop, or null without targets. */
+  private get dropRelationshipActors(): {
+    item: LinealItem
+    parent: LinealItem
+  } | null {
+    if (!this.hasDragTarget || !this.hasDropTarget) return null
+    const parent: LinealItem = {
       pluginId: this.computedDrop?.pluginId,
       componentId: this.computedDrop?.componentId,
       restrictChildren: this.computedDrop?.componentSchema?.restrictChildren,
@@ -99,25 +108,54 @@ export class DndManager {
       const preset = this.drag as Aglyn.PresetSchema<any>
       const itemNode = preset.data
       const itemSchema = Aglyn.components.getSchema(itemNode?.componentId)
-      return confirmValidLinealRelationship(
-        {
+      return {
+        item: {
           pluginId: preset.data?.pluginId,
           componentId: itemNode?.componentId,
           restrictChildren: itemSchema?.restrictChildren,
           restrictParent: itemSchema?.restrictParent,
         },
         parent,
-      )[0]
+      }
     }
-    return confirmValidLinealRelationship(
-      {
+    return {
+      item: {
         pluginId: this.drag?.pluginId,
         componentId: this.drag?.componentId,
         restrictChildren: this.drag?.componentSchema?.restrictChildren,
         restrictParent: this.drag?.componentSchema?.restrictParent,
       },
       parent,
-    )[0]
+    }
+  }
+
+  public get linealValidation(): ConfirmValidLinealRelationshipResponse {
+    const actors = this.dropRelationshipActors
+    if (!actors) return [false, 0 as InvalidLinealRelationFlag]
+    return confirmValidLinealRelationship(actors.item, actors.parent)
+  }
+
+  public get isValidLinealRelationship(): boolean {
+    return this.linealValidation[0]
+  }
+
+  /**
+   * Human-readable reason the pending drop would be rejected, or null when
+   * the drop is valid (or there is nothing to validate). Read this before
+   * onDragEnd — completing the drag clears the dnd state.
+   */
+  public describeDropRejection(): string | null {
+    const actors = this.dropRelationshipActors
+    if (!actors) return null
+    if (this.dropIsInsideDrag) {
+      return "An element can't be moved inside itself"
+    }
+    const [valid, reason] = confirmValidLinealRelationship(
+      actors.item,
+      actors.parent,
+    )
+    if (valid) return null
+    return describeInvalidLinealRelationship(actors.item, actors.parent, reason)
   }
 
   constructor() {

@@ -46,11 +46,13 @@ import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 export interface NodeContextMenuProps extends PaperProps {
   node: Aglyn.NodeSchema<any>
+  /** Invoked when a menu action should dismiss the hosting menu/tooltip. */
+  onAction?: () => void
 }
 
 export const NodeContextMenu = observer(
   forwardRef<any, NodeContextMenuProps>((props, ref) => {
-    const { node, ...rest } = props
+    const { node, onAction, ...rest } = props
 
     const isRootNode = Aglyn.canvas.isRootNode(node)
     const app = useBesignerAppContext()
@@ -65,9 +67,10 @@ export const NodeContextMenu = observer(
     const handleDuplicateClick = useCallback(
       (e: ChangeEvent<unknown>) => {
         if (isRootNode) return
+        onAction?.()
         Aglyn.canvas.duplicateNode(node)
       },
-      [node, isRootNode],
+      [node, isRootNode, onAction],
     )
 
     const handleModifyClick = useCallback(
@@ -126,8 +129,9 @@ export const NodeContextMenu = observer(
     const deleteElementCallback = useDeleteElementCallback()
     const handleDeleteClick = useCallback(() => {
       closeMore()
+      onAction?.()
       deleteElementCallback(node)
-    }, [node, closeMore, deleteElementCallback])
+    }, [node, closeMore, onAction, deleteElementCallback])
 
     return (
       <Paper ref={ref} sx={{ width: 240, overflow: 'hidden' }} {...rest}>
@@ -150,7 +154,12 @@ export const NodeContextMenu = observer(
           >
             {node?.labelShort}
           </Typography>
-          <MenuItem onClick={() => handleAddElementClick(node)}>
+          <MenuItem
+            onClick={() => {
+              onAction?.()
+              handleAddElementClick(node)
+            }}
+          >
             <ListItemText inset>Add element</ListItemText>
           </MenuItem>
           <Divider />

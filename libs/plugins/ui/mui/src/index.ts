@@ -15,4 +15,5 @@
  * limitations under the License.
  */
 
+export * from './lib/constants/bundle-common'
 export * from './lib/legacy-plugin'

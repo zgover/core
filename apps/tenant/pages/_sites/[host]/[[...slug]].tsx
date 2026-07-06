@@ -19,11 +19,13 @@ import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
 import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
 import { doc } from 'firebase/firestore'
+import { observer } from 'mobx-react-lite'
 import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
 import { useEffect } from 'react'
 import { useFirestore, useFirestoreDocData } from 'reactfire'
 import getHost from '../../../utils/get-host'
+import getPublishedLayoutVersion from '../../../utils/get-layout-version'
 import getScreen from '../../../utils/get-screen'
 import getScreenVersion from '../../../utils/get-screen-version'
 
@@ -142,11 +144,26 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 
     /*==========================================
      *
+     * MARK - COMPOSE LAYOUT (SHARED CHROME)
+     *
+     *=========================================*/
+
+    const layoutId = screenRes.screen.layoutId
+    const layoutRes = layoutId
+      ? await getPublishedLayoutVersion({ hostId, layoutId })
+      : undefined
+    console.debug('layoutRes', layoutRes)
+
+    /*==========================================
+     *
      * MARK - FORMAT NODES
      *
      *=========================================*/
 
-    const nodes = versionRes.version.nodes
+    const nodes = Aglyn.composeLayoutAndScreenNodes(
+      layoutRes?.version?.nodes,
+      versionRes.version.nodes,
+    )
     const denormalized = Aglyn.canvas.processNodesToDenormalized(nodes)
 
     const props = {
@@ -176,7 +193,10 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
   }
 }
 
-export default function CatchAllPage(props: Props) {
+// The canvas fills from an effect after the first render — observer makes
+// the page re-render when it does, instead of relying on an incidental
+// parent re-render to pick the root up.
+const CatchAllPage = observer(function CatchAllPage(props: Props) {
   // const props = { data: exampleData }
   const nodes = props.nodes
 
@@ -189,4 +209,6 @@ export default function CatchAllPage(props: Props) {
       <AglynNodeRenderer node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)} />
     </>
   )
-}
+})
+
+export default CatchAllPage

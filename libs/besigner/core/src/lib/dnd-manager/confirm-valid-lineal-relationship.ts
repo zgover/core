@@ -95,11 +95,63 @@ function validateLinealOrder(
   }
 }
 
-type LinealItem = {
+export type LinealItem = {
   componentId?: Aglyn.ComponentId
   pluginId?: Aglyn.PluginId
   restrictParent?: Aglyn.ComponentsLinealOrder
   restrictChildren?: Aglyn.ComponentsLinealOrder
+}
+
+function componentLabel(componentId?: Aglyn.ComponentId): string | undefined {
+  if (!componentId) return undefined
+  return Aglyn.components.getLabel(componentId) ?? componentId
+}
+
+function allowedComponentLabels(
+  linealOrder?: Aglyn.ComponentsLinealOrder,
+): string[] {
+  if (!linealOrder) return []
+  const [directiveType, directiveDefinition] = linealOrder
+  if (directiveType !== Aglyn.LinealDirectiveFlag.LIMIT_TO) return []
+  const components = _isArr(directiveDefinition)
+    ? directiveDefinition
+    : directiveDefinition?.components
+  return (components ?? [])
+    .map((id) => componentLabel(id))
+    .filter(Boolean) as string[]
+}
+
+/**
+ * Human-readable explanation for a failed lineal validation, e.g.
+ * "Toolbar Content must be placed inside App Bar". Pair with the reason
+ * flag returned by {@link confirmValidLinealRelationship}.
+ */
+export function describeInvalidLinealRelationship(
+  item: LinealItem,
+  parent: LinealItem,
+  reason: InvalidLinealRelationFlag,
+): string {
+  const itemLabel = componentLabel(item.componentId) ?? 'This element'
+  const parentLabel =
+    parent.componentId && parent.componentId !== 'div'
+      ? componentLabel(parent.componentId) ?? parent.componentId
+      : 'the document'
+
+  // ITEM governor: the dragged element's own restrictParent failed.
+  if (reason & InvalidLinealRelationFlag.ITEM) {
+    const allowed = allowedComponentLabels(item.restrictParent)
+    if (allowed.length) {
+      return `${itemLabel} must be placed inside ${allowed.join(' or ')}`
+    }
+    return `${itemLabel} can't be placed inside ${parentLabel}`
+  }
+
+  // PARENT governor: the target's restrictChildren failed.
+  const allowed = allowedComponentLabels(parent.restrictChildren)
+  if (allowed.length) {
+    return `${parentLabel} only accepts ${allowed.join(', ')}`
+  }
+  return `${parentLabel} doesn't accept ${itemLabel}`
 }
 
 export function confirmValidLinealRelationship(

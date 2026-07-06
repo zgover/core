@@ -36,7 +36,7 @@ import {
   Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { forwardRef } from 'react'
+import { forwardRef, useCallback, useState } from 'react'
 import { Else, If, Then } from 'react-if'
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
 import ComponentIconComponent from './component-icon.component'
@@ -86,6 +86,11 @@ export const NodeQuickActions = observer(
     const { node, children, variant, ...rest } = props
     const handleAddElementClick = useAddElementDrawerCallback()
     const handleProps = Besigner.handles.get(node?.$id)
+    // Controlled so menu actions can dismiss the tooltip — an uncontrolled
+    // tooltip stays open behind (or above) dialogs its actions launch.
+    const [moreOpen, setMoreOpen] = useState(false)
+    const openMore = useCallback(() => setMoreOpen(true), [])
+    const closeMore = useCallback(() => setMoreOpen(false), [])
     return (
       <Stack
         ref={ref}
@@ -180,9 +185,14 @@ export const NodeQuickActions = observer(
                 icon={{ path: ICON_VARIANT_SHOW_MORE_VERTICAL.path }}
                 enterDelay={200}
                 leaveDelay={500}
+                open={moreOpen}
+                onOpen={openMore}
+                onClose={closeMore}
                 slotProps={{
                   popper: {
                     disablePortal: false,
+                    // Below dialogs/drawers the menu actions open.
+                    sx: { zIndex: (theme) => theme.zIndex.modal - 1 },
                     modifiers: [
                       {
                         name: 'flip',
@@ -217,7 +227,7 @@ export const NodeQuickActions = observer(
                     },
                   },
                 }}
-                title={<NodeContextMenu node={node} />}
+                title={<NodeContextMenu node={node} onAction={closeMore} />}
               />
             </Stack>
           </Else>

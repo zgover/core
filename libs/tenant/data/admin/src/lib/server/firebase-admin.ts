@@ -98,5 +98,24 @@ export const screenVersionConverter: firebaseAdmin.firestore.FirestoreDataConver
     },
   }
 
+export const layoutConverter: firebaseAdmin.firestore.FirestoreDataConverter<Aglyn.AglynLayout> =
+  {
+    toFirestore(data) {
+      if (data.$id) delete data.$id
+      data.updatedAt = firebaseAdmin.firestore.Timestamp.now()
+      return data
+    },
+    fromFirestore(snapshot) {
+      if (!snapshot.exists) return undefined
+      const data = snapshot.data()
+      data.$id = snapshot.id
+      return data as Aglyn.AglynLayout
+    },
+  }
+
+// Layout versions persist nodes exactly like screen versions (compressed).
+export const layoutVersionConverter =
+  screenVersionConverter as unknown as firebaseAdmin.firestore.FirestoreDataConverter<Aglyn.AglynLayoutVersion>
+
 export { firebaseAdmin }
 export default firebaseAdmin

@@ -40,6 +40,7 @@ export type {
   AglynAuthRole,
   AglynDocument,
   AglynHost,
+  AglynHostTheme,
   AglynLayout,
   AglynRedirect,
   AglynRolePermission,

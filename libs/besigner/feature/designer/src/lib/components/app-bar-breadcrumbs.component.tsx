@@ -156,7 +156,11 @@ const BreadcrumbItem = observer((props: BreadcrumbItemProps) => {
   } = props
   const node = Aglyn.canvas.getNode($id)
   const isHovered = Besigner.focus.isNodeHovered(node)
-  const { setNodeRef: setDroppableNodeRef } = useLeafDrop(node)
+  const { setNodeRef: setDroppableNodeRef } = useLeafDrop(
+    node,
+    undefined,
+    'breadcrumbs',
+  )
 
   const handleClick = useCallback(
     (e) => {
@@ -261,6 +265,9 @@ export const AppBarBreadcrumbsComponent = forwardRef<
       sx={mergeSxProps(
         {
           top: 0,
+          // Stack above the canvas selection overlays (portaled, low z).
+          position: 'relative',
+          zIndex: 'appBar',
           borderBottomWidth: '1px',
           borderBottomStyle: 'solid',
           borderBottomColor: 'divider',

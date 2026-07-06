@@ -16,6 +16,7 @@
  */
 
 import type { HttpStatusCode } from '@aglyn/shared-data-enums'
+import type { HostTheme } from '@aglyn/shared-data-types'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type { AglynNodeSchema, NodeId } from './components.types'
 
@@ -99,6 +100,13 @@ export type HostUid = string
 export type HostPath = string
 export type HostMediaUid = string
 
+/**
+ * Persisted MUI theme customization for a host's published site.
+ * Canonical shape lives in `@aglyn/shared-data-types` so UI-scope libs can
+ * consume it without depending on this framework lib.
+ */
+export type AglynHostTheme = HostTheme
+
 /** Hosted in tenants' host project */
 export interface AglynHost extends AglynDocument {
   $id: HostUid
@@ -119,6 +127,9 @@ export interface AglynHost extends AglynDocument {
     }
   }
   screens?: Record<ScreenUid, ScreenSlug>
+  /** Directory of shared layouts by display name (mirrors `screens`). */
+  layouts?: Record<LayoutUid, string>
+  theme?: AglynHostTheme
 
   // CONCEPT: Redirect screens
   redirects?: Record<RedirectUid, true>
@@ -195,7 +206,7 @@ export interface AglynScreen extends AglynDocument {
     [P in string & UserUid]: true
   }
 
-  // CONCEPT: Shared layouts
+  /** Shared layout this screen renders inside (see {@link AglynLayout}). */
   layoutId?: LayoutUid
 }
 
@@ -215,12 +226,16 @@ export interface AglynScreenVersion<N = AglynNodeSchema>
   nodes?: Record<NodeId, N>
 }
 
-/** CONCEPT: Shared layouts. Hosted in tenants' host project */
-export interface AglynLayout {
+/**
+ * Shared layout: canvas chrome (appbar, footer, nav) designed once and
+ * rendered around every bound screen. Hosted in tenants' host project at
+ * `hosts/{hostId}/layouts/{layoutId}`.
+ */
+export interface AglynLayout extends AglynDocument {
   $id: LayoutUid
   tenantId?: TenantUid
   hostId?: HostUid
-  layoutId?: LayoutUid
+  /** Published version pointer; bound screens render this version. */
   versionId?: VersionUid
   versions?: Array<VersionUid>
   displayName?: string
@@ -230,10 +245,14 @@ export interface AglynLayout {
   updatedAt?: ITimestamp
 }
 
-/** CONCEPT: Shared layouts. Hosted in tenants' host project */
+/**
+ * Shared layout version. Node map has the same shape as a screen version
+ * (including compression at rest) plus a LayoutSlot node marking where the
+ * bound screen's content is grafted. Hosted at
+ * `hosts/{hostId}/layouts/{layoutId}/versions/{versionId}`.
+ */
 export interface AglynLayoutVersion<N = AglynNodeSchema>
   extends AglynScreenVersion<N> {
-  $id: LayoutUid
   layoutId?: LayoutUid
   hostId?: HostUid
 }
