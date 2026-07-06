@@ -47,8 +47,10 @@ function prefixChildIds(nodes: AglynNodeSchema['nodes']) {
  *
  * - Layout node ids are namespaced with {@link LAYOUT_NODE_ID_PREFIX} (the
  *   root id excepted) to avoid collisions with screen ids.
- * - The slot node's children become the screen root's children; their
- *   `parentId` is repointed at the slot.
+ * - The screen root's children are appended to the slot's own children and
+ *   repointed at the slot. Slot children shouldn't normally exist, but
+ *   designers do land chrome inside the slot — rendering it above the
+ *   screen content preserves their intent instead of silently dropping it.
  * - Inputs are never mutated. Without layout nodes — or when the layout has
  *   no slot — the screen nodes are returned unchanged so a stale or broken
  *   layout can't take a published screen down.
@@ -83,8 +85,14 @@ export function composeLayoutAndScreenNodes<
   const screenRootChildIds = Array.isArray(screenRoot?.nodes)
     ? ([...screenRoot.nodes] as NodeId[])
     : []
+  const slotChildIds = Array.isArray(composed[slotId]?.nodes)
+    ? (composed[slotId].nodes as NodeId[])
+    : []
 
-  composed[slotId] = { ...composed[slotId], nodes: screenRootChildIds }
+  composed[slotId] = {
+    ...composed[slotId],
+    nodes: [...slotChildIds, ...screenRootChildIds],
+  }
 
   for (const [id, node] of Object.entries(screenNodes)) {
     if (id === NODE_ROOT_ID) continue

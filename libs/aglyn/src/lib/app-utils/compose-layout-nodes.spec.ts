@@ -78,6 +78,30 @@ describe('composeLayoutAndScreenNodes', () => {
     expect(screenNodes).toEqual(screenCopy)
   })
 
+  it('keeps chrome that was left inside the slot above the screen content', () => {
+    const layoutWithSlotChrome: Record<string, AglynNodeSchema> = {
+      [ROOT]: { $id: ROOT, componentId: 'root', nodes: ['slot'] },
+      slot: {
+        $id: 'slot',
+        componentId: LAYOUT_SLOT_COMPONENT_ID,
+        parentId: ROOT,
+        nodes: ['appbar'],
+      },
+      appbar: { $id: 'appbar', componentId: 'muiAppBar', parentId: 'slot' },
+    }
+    const composed = composeLayoutAndScreenNodes(
+      layoutWithSlotChrome,
+      screenNodes,
+    )
+    const slotId = `${LAYOUT_NODE_ID_PREFIX}slot`
+    expect(composed[slotId].nodes).toEqual([
+      `${LAYOUT_NODE_ID_PREFIX}appbar`,
+      'hero',
+      'body',
+    ])
+    expect(composed[`${LAYOUT_NODE_ID_PREFIX}appbar`].parentId).toBe(slotId)
+  })
+
   it('avoids id collisions between layout and screen nodes', () => {
     const collidingLayout: Record<string, AglynNodeSchema> = {
       [ROOT]: { $id: ROOT, componentId: 'root', nodes: ['hero', 'slot'] },
