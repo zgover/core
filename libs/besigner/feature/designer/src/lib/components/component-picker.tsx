@@ -44,6 +44,7 @@ import {
 import type { TransitionProps } from '@mui/material/transitions'
 import { Observer, observer } from 'mobx-react-lite'
 import { forwardRef, SyntheticEvent, useCallback, useState } from 'react'
+import useVisibleComponentCategories from '../hooks/use-visible-component-categories'
 import AccordionListComponent from './accordion-list.component'
 import EmptyResults from './empty-results'
 import NodeCard from './node-card'
@@ -66,7 +67,7 @@ export interface ComponentPickerProps extends DialogProps {
 export const ComponentPicker = observer(
   forwardRef<any, ComponentPickerProps>((props, forwardRef) => {
     const { open, onClose, onSelectItem, ...rest } = props
-    const allItems = Aglyn.components.schemasBySortedCategories
+    const allItems = useVisibleComponentCategories()
 
     const [filterOpen, setFilterOpen] = useState(false)
     const [filter, setFilter] = useState('')

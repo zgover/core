@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import * as Aglyn from '@aglyn/aglyn'
 import { DragType } from '@aglyn/besigner'
 import { mergeRefs } from '@aglyn/shared-ui-jsx'
 import { DragOverlay } from '@dnd-kit/core'
 import { Box, Grid } from '@mui/material'
 import { Observer, observer } from 'mobx-react-lite'
+import useVisibleComponentCategories from '../hooks/use-visible-component-categories'
 import { AccordionListComponent } from './accordion-list.component'
 import Draggable from './dnd/draggable'
 import NodeCard, { type NodeCardItemData } from './node-card'
@@ -38,7 +38,7 @@ interface ComponentAccordionListProp {}
 export const ComponentAccordionList = observer(
   (props: ComponentAccordionListProp) => {
     const { ...rest } = props
-    const items = Aglyn.components.schemasBySortedCategories
+    const items = useVisibleComponentCategories()
 
     return (
       <AccordionListComponent
