@@ -19,7 +19,11 @@ import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer, useAglynSiteTheme } from '@aglyn/aglyn-node-renderer'
 import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
-import { getGoogleFontsUrl, ThemeProvider } from '@aglyn/shared-ui-theme'
+import {
+  getGoogleFontsUrl,
+  ThemeProvider,
+  useThemeModeState,
+} from '@aglyn/shared-ui-theme'
 import { CssBaseline, Stack, Typography } from '@mui/material'
 import Head from 'next/head'
 import { observer } from 'mobx-react-lite'
@@ -73,8 +77,12 @@ function ScreenPreviewPage() {
   }, [hostId, screenId, versionId])
 
   const root = Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)
-  // Style like the live site: the snapshot carries the host theme.
-  const siteTheme = useAglynSiteTheme({ theme: hostTheme })
+  // Style like the live site: the snapshot carries the host theme, and the
+  // scheme resolves from the shared cookie + prefers-color-scheme state so
+  // the preview goes dark exactly when the tenant site would.
+  const [[, themeMode]] = useThemeModeState()
+  const scheme = themeMode === 'dark' ? 'dark' : 'light'
+  const siteTheme = useAglynSiteTheme({ theme: hostTheme, scheme })
   const fontsHref = getGoogleFontsUrl(hostTheme?.fonts)
 
   if (missing) {
@@ -108,7 +116,7 @@ function ScreenPreviewPage() {
           <link key="host-fonts" rel="stylesheet" href={fontsHref} />
         </Head>
       ) : null}
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       <NextPageTitle screen={'Screen Preview'} />
       {root ? <AglynNodeRenderer node={root} /> : null}
     </ThemeProvider>
