@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { NodesMap } from '@aglyn/aglyn'
+import type { AglynHostTheme, NodesMap } from '@aglyn/aglyn'
 
 export interface PreviewStateIds {
   hostId: string
@@ -25,6 +25,8 @@ export interface PreviewStateIds {
 
 export interface PreviewState {
   nodes: NodesMap
+  /** Host theme at snapshot time so the preview styles like the live site. */
+  theme?: AglynHostTheme
   updatedAt: number
 }
 
@@ -36,8 +38,12 @@ export function previewWindowName(ids: PreviewStateIds): string {
   return `aglyn-preview-${ids.hostId}-${ids.screenId}-${ids.versionId}`
 }
 
-export function writePreviewState(ids: PreviewStateIds, nodes: NodesMap): void {
-  const state: PreviewState = { nodes, updatedAt: Date.now() }
+export function writePreviewState(
+  ids: PreviewStateIds,
+  nodes: NodesMap,
+  theme?: AglynHostTheme,
+): void {
+  const state: PreviewState = { nodes, theme, updatedAt: Date.now() }
   window.localStorage.setItem(previewStateKey(ids), JSON.stringify(state))
 }
 

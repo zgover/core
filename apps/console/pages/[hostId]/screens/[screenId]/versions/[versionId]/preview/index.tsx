@@ -16,10 +16,12 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
+import { AglynNodeRenderer, useAglynSiteTheme } from '@aglyn/aglyn-node-renderer'
 import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
-import { Stack, Typography } from '@mui/material'
+import { getGoogleFontsUrl, ThemeProvider } from '@aglyn/shared-ui-theme'
+import { CssBaseline, Stack, Typography } from '@mui/material'
+import Head from 'next/head'
 import { observer } from 'mobx-react-lite'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -41,6 +43,9 @@ function ScreenPreviewPage() {
   const screenId = params?.screenId as string
   const versionId = params?.versionId as string
   const [missing, setMissing] = useState(false)
+  const [hostTheme, setHostTheme] = useState<Aglyn.AglynHostTheme | undefined>(
+    undefined,
+  )
 
   useEffect(() => {
     if (!hostId || !screenId || !versionId) return
@@ -53,6 +58,7 @@ function ScreenPreviewPage() {
         return
       }
       setMissing(false)
+      setHostTheme(state.theme)
       Aglyn.canvas.setNodes(Aglyn.canvas.processNodesToDenormalized(state.nodes))
     }
     applyState()
@@ -67,6 +73,9 @@ function ScreenPreviewPage() {
   }, [hostId, screenId, versionId])
 
   const root = Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)
+  // Style like the live site: the snapshot carries the host theme.
+  const siteTheme = useAglynSiteTheme({ theme: hostTheme })
+  const fontsHref = getGoogleFontsUrl(hostTheme?.fonts)
 
   if (missing) {
     return (
@@ -87,10 +96,22 @@ function ScreenPreviewPage() {
   }
 
   return (
-    <>
+    <ThemeProvider theme={siteTheme}>
+      {fontsHref ? (
+        <Head>
+          <link
+            key="host-fonts-preconnect"
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+          <link key="host-fonts" rel="stylesheet" href={fontsHref} />
+        </Head>
+      ) : null}
+      <CssBaseline />
       <NextPageTitle screen={'Screen Preview'} />
       {root ? <AglynNodeRenderer node={root} /> : null}
-    </>
+    </ThemeProvider>
   )
 }
 

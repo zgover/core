@@ -261,9 +261,16 @@ function BesignerPage(props) {
       layoutId ? (layoutVersionResult?.data?.nodes as any) : undefined,
       Aglyn.canvas.toJSON().nodes as any,
     )
-    writePreviewState(ids, composed)
+    writePreviewState(ids, composed, hostTheme)
     window.open(buildRoute(Route.SCREEN_PREVIEW, ids), previewWindowName(ids))
-  }, [hostId, screenId, versionId, layoutId, layoutVersionResult?.data?.nodes])
+  }, [
+    hostId,
+    screenId,
+    versionId,
+    layoutId,
+    layoutVersionResult?.data?.nodes,
+    hostTheme,
+  ])
 
   const handleJsonSave = useCallback((e, value) => {
     Aglyn.canvas.applyNodes(value)
@@ -441,7 +448,12 @@ function BesignerPage(props) {
             {layoutId ? (
               <Alert
                 severity="info"
-                sx={{ borderRadius: 0 }}
+                sx={{
+                  borderRadius: 0,
+                  // Stack above the canvas selection overlays.
+                  position: 'relative',
+                  zIndex: 'appBar',
+                }}
                 action={
                   <Button
                     color="inherit"
