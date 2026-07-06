@@ -25,27 +25,48 @@ import {
 } from 'firebase/firestore'
 
 /**
- * Publishes a screen route: stores the slug on the screen doc and registers
- * the path in the host's `screens` routing map — the map is what the tenant
- * site matches request paths against, so a screen without an entry is
- * unreachable. Dotted field paths keep sibling map entries untouched.
+ * Publishes a screen route: stores the screen's OWN slug segment on the
+ * screen doc and registers the fully COMPOSED path (ancestor segments +
+ * own, see `composeScreenRoutePath`) in the host's `screens` routing map —
+ * the map is what the tenant site matches request paths against, so a
+ * screen without an entry is unreachable. Dotted field paths keep sibling
+ * map entries untouched. `path` defaults to `slug` for parent-less screens.
  */
 export async function publishScreenRoute(
   firestore: Firestore,
   ids: { hostId: HostUid; screenId: ScreenUid },
-  path: string,
+  slug: string,
+  path: string = slug,
 ): Promise<void> {
   const { hostId, screenId } = ids
   await Promise.all([
     setDoc(
       doc(firestore, 'hosts', hostId, 'screens', screenId),
-      { slug: path },
+      { slug },
       { merge: true },
     ),
     updateDoc(doc(firestore, 'hosts', hostId), {
       [`screens.${screenId}`]: path,
     }),
   ])
+}
+
+/**
+ * Applies a set of routing-map changes in one write: a `path` string sets
+ * the entry, `null` removes it. Used to cascade descendant path rewrites
+ * when a screen's slug or parent changes (hierarchical slugs).
+ */
+export async function syncScreenRouteEntries(
+  firestore: Firestore,
+  hostId: HostUid,
+  entries: Record<ScreenUid, string | null>,
+): Promise<void> {
+  if (!Object.keys(entries).length) return
+  const updates: Record<string, unknown> = {}
+  for (const [screenId, path] of Object.entries(entries)) {
+    updates[`screens.${screenId}`] = path ?? deleteField()
+  }
+  await updateDoc(doc(firestore, 'hosts', hostId), updates)
 }
 
 /**

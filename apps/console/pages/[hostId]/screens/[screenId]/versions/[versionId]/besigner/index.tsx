@@ -78,10 +78,7 @@ import {
   writePreviewState,
 } from '../../../../../../../constants/preview-state'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
-import {
-  publishScreenRoute,
-  unpublishScreenRoute,
-} from '../../../../../../../constants/screen-publishing'
+import { syncScreenRouteEntries } from '../../../../../../../constants/screen-publishing'
 import { buildScreenLiveUrl } from '../../../../../../../constants/tenant-links'
 
 registerLegacyMuiPlugin()
@@ -268,39 +265,122 @@ function BesignerPage(props) {
   )
 
   // Publishing: the tenant site only serves paths present in the host's
-  // `screens` routing map, so the slug save must register the entry there
-  // too — the screen doc's `slug` alone routes nothing.
-  const publishedPath = hostResult?.data?.screens?.[screenId]
+  // `screens` routing map. The routed path composes ancestor slugs (parent
+  // `company` + own `about` → /company/about), so slug and parent changes
+  // must rewrite this screen's entry AND every descendant's.
+  const screensQuery = query(
+    collection(firestore, 'hosts', hostId, 'screens'),
+    limit(200),
+  )
+  const { data: screenDocs } = useFirestoreCollectionData<any>(screensQuery, {
+    idField: '$id',
+  })
+  const screensById = useMemo(() => {
+    const map: Record<
+      string,
+      Aglyn.ScreenRouteNode & { displayName?: string }
+    > = {}
+    for (const screen of screenDocs ?? []) {
+      map[screen.$id] = {
+        slug: screen.slug,
+        parentId: screen.parentId,
+        displayName: screen.displayName,
+      }
+    }
+    return map
+  }, [screenDocs])
+  const routingMap = hostResult?.data?.screens as
+    | Record<string, string>
+    | undefined
+
+  const publishedPath = routingMap?.[screenId]
+  const parentId = screenResult?.data?.parentId
   const [slugInput, setSlugInput] = useState<string | null>(null)
   const slugValue =
     slugInput ?? screenResult?.data?.slug ?? publishedPath ?? ''
   const normalizedSlug = Aglyn.normalizeScreenSlug(slugValue)
-  const slugOwner = normalizedSlug
-    ? Aglyn.findScreenIdByRoutePath(
-        hostResult?.data?.screens as Record<string, string> | undefined,
-        normalizedSlug,
-      )
+  // Candidate map with the pending slug applied, so the composed path and
+  // conflict check reflect what Publish would write.
+  const candidateById = useMemo(
+    () => ({
+      ...screensById,
+      [screenId]: {
+        ...screensById[screenId],
+        slug: normalizedSlug,
+        parentId,
+      },
+    }),
+    [screensById, screenId, normalizedSlug, parentId],
+  )
+  const composedPath = normalizedSlug
+    ? Aglyn.composeScreenRoutePath(screenId, candidateById)
+    : undefined
+  const slugOwner = composedPath
+    ? Aglyn.findScreenIdByRoutePath(routingMap, composedPath)
     : undefined
   const slugConflict = Boolean(slugOwner && slugOwner !== screenId)
+  const unpublishedAncestor = Boolean(normalizedSlug && !composedPath)
+
+  // Routing entries for this screen plus all descendants under a candidate
+  // screens map; null removes entries whose chain no longer resolves.
+  const buildRouteEntries = useCallback(
+    (byId: Record<string, Aglyn.ScreenRouteNode | undefined>) => {
+      const entries: Record<string, string | null> = {}
+      const ids = [
+        screenId,
+        ...Aglyn.collectScreenDescendantIds(screenId, byId),
+      ]
+      for (const id of ids) {
+        const path = Aglyn.composeScreenRoutePath(id, byId)
+        if (path) entries[id] = path
+        else if (routingMap?.[id] !== undefined) entries[id] = null
+      }
+      return entries
+    },
+    [screenId, routingMap],
+  )
 
   const handlePublish = useCallback(async () => {
-    if (slugConflict) return
-    const ids = { hostId, screenId }
-    const action = normalizedSlug
-      ? publishScreenRoute(firestore, ids, normalizedSlug).then(() => {
-          setSlugInput(null)
-          enqueueSnackbar(
-            `Published at ${Aglyn.screenRoutePathToUrl(normalizedSlug)}`,
-            { variant: 'success', persist: false },
-          )
-        })
-      : unpublishScreenRoute(firestore, ids, { clearSlug: true }).then(() => {
-          setSlugInput(null)
-          enqueueSnackbar('Screen unpublished', {
-            variant: 'success',
-            persist: false,
-          })
-        })
+    if (slugConflict || unpublishedAncestor) return
+    const action =
+      normalizedSlug && composedPath
+        ? updateScreenDoc({ slug: normalizedSlug } as any)
+            .then(() =>
+              syncScreenRouteEntries(
+                firestore,
+                hostId,
+                buildRouteEntries(candidateById),
+              ),
+            )
+            .then(() => {
+              setSlugInput(null)
+              enqueueSnackbar(
+                `Published at ${Aglyn.screenRoutePathToUrl(composedPath)}`,
+                { variant: 'success', persist: false },
+              )
+            })
+        : updateScreenDoc({ slug: deleteField() } as any)
+            .then(() =>
+              syncScreenRouteEntries(
+                firestore,
+                hostId,
+                buildRouteEntries({
+                  ...screensById,
+                  [screenId]: {
+                    ...screensById[screenId],
+                    slug: undefined,
+                    parentId,
+                  },
+                }),
+              ),
+            )
+            .then(() => {
+              setSlugInput(null)
+              enqueueSnackbar('Screen unpublished', {
+                variant: 'success',
+                persist: false,
+              })
+            })
     await action.catch((e) => {
       enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
         variant: 'error',
@@ -309,12 +389,78 @@ function BesignerPage(props) {
     })
   }, [
     slugConflict,
+    unpublishedAncestor,
     normalizedSlug,
+    composedPath,
+    candidateById,
+    screensById,
+    parentId,
+    buildRouteEntries,
+    updateScreenDoc,
     firestore,
     hostId,
     screenId,
     enqueueSnackbar,
   ])
+
+  const handleParentChange = useCallback(
+    async (event) => {
+      const value = event.target.value as string
+      const nextParentId = value === '__none__' ? undefined : value
+      if (Aglyn.wouldCreateScreenCycle(screenId, nextParentId, screensById)) {
+        return enqueueSnackbar(
+          "A screen can't be nested inside itself or its own children",
+          { variant: 'warning', persist: false },
+        )
+      }
+      const nextById = {
+        ...screensById,
+        [screenId]: { ...screensById[screenId], parentId: nextParentId },
+      }
+      const nextSelfPath = Aglyn.composeScreenRoutePath(screenId, nextById)
+      const owner = nextSelfPath
+        ? Aglyn.findScreenIdByRoutePath(routingMap, nextSelfPath)
+        : undefined
+      if (owner && owner !== screenId) {
+        return enqueueSnackbar(
+          `Another screen is already published at ${Aglyn.screenRoutePathToUrl(nextSelfPath as string)}`,
+          { variant: 'warning', persist: false },
+        )
+      }
+      await updateScreenDoc({
+        parentId: nextParentId ?? (deleteField() as any),
+      } as any)
+        .then(() =>
+          syncScreenRouteEntries(
+            firestore,
+            hostId,
+            buildRouteEntries(nextById),
+          ),
+        )
+        .then(() => {
+          enqueueSnackbar(
+            nextParentId ? 'Parent screen assigned' : 'Parent screen removed',
+            { variant: 'success', persist: false },
+          )
+        })
+        .catch((e) => {
+          enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
+            variant: 'error',
+            allowDuplicate: true,
+          })
+        })
+    },
+    [
+      screenId,
+      screensById,
+      routingMap,
+      buildRouteEntries,
+      updateScreenDoc,
+      firestore,
+      hostId,
+      enqueueSnackbar,
+    ],
+  )
 
   const handlePreview = useCallback(() => {
     const ids = { hostId, screenId, versionId }
@@ -566,8 +712,32 @@ function BesignerPage(props) {
         <Stack spacing={1} sx={{ px: 3, pb: 3 }}>
           <Typography variant="subtitle2">{'Publishing'}</Typography>
           <Typography variant="caption" color="text.secondary">
-            {'The slug is the path this screen is served at on your site. Use "/" for the home page. Clearing it and pressing Unpublish removes the screen from the site.'}
+            {'The slug is this screen\'s own path segment; nesting under a parent screen composes the full path (parent "company" + slug "about" → /company/about). Use "/" for the home page. Clearing the slug and pressing Unpublish removes the screen (and unroutes its children) from the site.'}
           </Typography>
+          <TextField
+            select
+            size="small"
+            label="Parent screen"
+            value={parentId ?? '__none__'}
+            onChange={handleParentChange}
+          >
+            <MenuItem value="__none__">{'None (top level)'}</MenuItem>
+            {(screenDocs ?? [])
+              .filter(
+                (screen) =>
+                  screen.$id !== screenId &&
+                  !Aglyn.wouldCreateScreenCycle(
+                    screenId,
+                    screen.$id,
+                    screensById,
+                  ),
+              )
+              .map((screen) => (
+                <MenuItem key={screen.$id} value={screen.$id}>
+                  {screen.displayName ?? screen.$id}
+                </MenuItem>
+              ))}
+          </TextField>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
             <TextField
               size="small"
@@ -575,22 +745,28 @@ function BesignerPage(props) {
               fullWidth
               value={slugValue}
               onChange={(e) => setSlugInput(e.target.value)}
-              error={slugConflict}
+              error={slugConflict || unpublishedAncestor}
               helperText={
                 slugConflict
                   ? 'Another screen already uses this path'
-                  : normalizedSlug
-                    ? `Served at ${Aglyn.screenRoutePathToUrl(normalizedSlug)}`
-                    : publishedPath
-                      ? `Currently published at ${Aglyn.screenRoutePathToUrl(publishedPath)}`
-                      : 'Not published'
+                  : unpublishedAncestor
+                    ? 'A parent screen has no slug yet — publish the parent first'
+                    : composedPath
+                      ? `Served at ${Aglyn.screenRoutePathToUrl(composedPath)}`
+                      : publishedPath
+                        ? `Currently published at ${Aglyn.screenRoutePathToUrl(publishedPath)}`
+                        : 'Not published'
               }
             />
             <Button
               size="small"
               variant="outlined"
               onClick={handlePublish}
-              disabled={slugConflict || (!normalizedSlug && !publishedPath)}
+              disabled={
+                slugConflict ||
+                unpublishedAncestor ||
+                (!normalizedSlug && !publishedPath)
+              }
               sx={{ mt: 0.5, flexShrink: 0 }}
             >
               {normalizedSlug ? 'Publish' : 'Unpublish'}
