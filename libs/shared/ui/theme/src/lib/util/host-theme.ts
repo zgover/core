@@ -18,6 +18,7 @@
 import type {
   HostTheme,
   HostThemeComponentOverride,
+  HostThemeFont,
   HostThemePaletteColor,
   HostThemeScheme,
   HostThemeSchemeColors,
@@ -177,6 +178,29 @@ export function hostThemeToThemeOptions(
   }
 
   return options
+}
+
+/** True when the document customizes anything, i.e. consumers should build a theme from it rather than using their default. */
+export function hasHostTheme(theme: HostTheme | undefined): theme is HostTheme {
+  return !!theme && Object.keys(theme).length > 0
+}
+
+/**
+ * Builds a Google Fonts CSS2 stylesheet URL for the theme's loadable fonts.
+ * Returns undefined when nothing needs loading (system/absent fonts).
+ */
+export function getGoogleFontsUrl(fonts: Array<HostThemeFont> | undefined) {
+  const families = (fonts ?? [])
+    .filter((font) => font.family && (font.source ?? 'google') === 'google')
+    .map((font) => {
+      const family = font.family.trim().replace(/\s+/g, '+')
+      const weights = font.weights?.length
+        ? `:wght@${[...font.weights].sort((a, b) => a - b).join(';')}`
+        : ''
+      return `family=${family}${weights}`
+    })
+  if (!families.length) return undefined
+  return `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`
 }
 
 export default hostThemeToThemeOptions

@@ -17,7 +17,12 @@
 
 import type { HostTheme } from '@aglyn/shared-data-types'
 import { createTheme } from '../../vendor/mui'
-import { hostThemeToThemeOptions, sanitizeHostTheme } from './host-theme'
+import {
+  getGoogleFontsUrl,
+  hasHostTheme,
+  hostThemeToThemeOptions,
+  sanitizeHostTheme,
+} from './host-theme'
 
 describe('hostThemeToThemeOptions', () => {
   it('returns mode-only palette options for an empty theme', () => {
@@ -125,5 +130,34 @@ describe('sanitizeHostTheme', () => {
       components: { MuiDataGrid: { defaultProps: {} } },
     })
     expect(sanitized.components).toBeUndefined()
+  })
+})
+
+describe('hasHostTheme', () => {
+  it('treats undefined and empty documents as absent', () => {
+    expect(hasHostTheme(undefined)).toBe(false)
+    expect(hasHostTheme({})).toBe(false)
+    expect(hasHostTheme({ spacing: 8 })).toBe(true)
+  })
+})
+
+describe('getGoogleFontsUrl', () => {
+  it('returns undefined when nothing needs loading', () => {
+    expect(getGoogleFontsUrl(undefined)).toBeUndefined()
+    expect(getGoogleFontsUrl([])).toBeUndefined()
+    expect(
+      getGoogleFontsUrl([{ family: 'Menlo', source: 'system' }]),
+    ).toBeUndefined()
+  })
+
+  it('builds a css2 url with sorted weights and swap display', () => {
+    expect(
+      getGoogleFontsUrl([
+        { family: 'Open Sans', weights: [700, 400] },
+        { family: 'Inter', source: 'google' },
+      ]),
+    ).toBe(
+      'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Inter&display=swap',
+    )
   })
 })
