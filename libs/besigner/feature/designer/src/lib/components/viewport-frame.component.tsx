@@ -24,7 +24,11 @@ import {
   type MuiShadowRootProps,
   useMuiShadowDomContext,
 } from '@aglyn/shared-ui-jsx'
-import { styled, ThemeProvider } from '@aglyn/shared-ui-theme'
+import {
+  styled,
+  ThemeProvider,
+  useHostThemeDocument,
+} from '@aglyn/shared-ui-theme'
 import { Box, type BoxProps, CssBaseline, GlobalStyles } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
@@ -34,6 +38,7 @@ import {
   HTMLAttributes,
   useCallback,
 } from 'react'
+import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
 import CanvasDropIndicator from './dnd/canvas-drop-indicator'
 import NodeLeaf from './node-leaf'
 import NodeOverlay from './node-overlay'
@@ -100,7 +105,13 @@ const ViewportGlobalStyles = (
 )
 const ThemedElementContainer = ({ children }) => {
   const shadowDom = useMuiShadowDomContext()
-  const hostTheme = useAglynSiteTheme({ container: shadowDom })
+  const hostThemeDoc = useHostThemeDocument()
+  const [canvasScheme] = useAglynBesignerFlag('canvasScheme')
+  const hostTheme = useAglynSiteTheme({
+    container: shadowDom,
+    theme: hostThemeDoc,
+    scheme: canvasScheme,
+  })
   return (
     <ThemeProvider theme={hostTheme}>
       <CssBaseline />
