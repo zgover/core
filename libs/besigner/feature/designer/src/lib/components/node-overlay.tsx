@@ -101,6 +101,10 @@ const NodeOverlay = observer(
     const node = Aglyn.canvas.getNode($id)
 
     const elementRef = Besigner.refs.get($id)
+    // node.index throws for parentless nodes (the root, or a node whose
+    // parent isn't loaded) — selecting the root via the breadcrumbs must not
+    // crash the overlay.
+    const nodeIndex = node?.parent ? node.index : null
     const isOpen = Boolean(elementRef?.current)
     const [rect, setRect] = useState<DOMRect>(DEFAULT_RECT)
 
@@ -134,7 +138,7 @@ const NodeOverlay = observer(
       // "shift up"/"shift down"). Reordering moves the same DOM element to a
       // new position without resizing it, so ResizeObserver won't catch it —
       // this dependency forces a rect recompute when sibling order changes.
-    }, [elementRef, node?.index])
+    }, [elementRef, nodeIndex])
 
     const virtualElement = useMemo<() => VirtualElement>(() => {
       return () => ({
