@@ -246,7 +246,7 @@ export function ThemeEditor(props: ThemeEditorProps) {
       ) : null}
       <Grid size={{ xs: 12, md: 6 }}>
         <Stack spacing={3}>
-          <CardDisplay header="Color scheme">
+          <CardDisplay contentGutterY contentGutterX header="Color scheme">
             <TabContext value={scheme}>
               <TabList onChange={handleSchemeTab}>
                 <Tab label="Light" value="light" />
@@ -291,7 +291,7 @@ export function ThemeEditor(props: ThemeEditorProps) {
             </TabContext>
           </CardDisplay>
 
-          <CardDisplay header="Typography">
+          <CardDisplay contentGutterY contentGutterX header="Typography">
             <TextField
               select
               fullWidth
@@ -309,7 +309,7 @@ export function ThemeEditor(props: ThemeEditorProps) {
             </TextField>
           </CardDisplay>
 
-          <CardDisplay header="Shape & spacing">
+          <CardDisplay contentGutterY contentGutterX header="Shape & spacing">
             <Stack spacing={2}>
               <Stack spacing={0.5}>
                 <Typography variant="body2">
@@ -335,7 +335,7 @@ export function ThemeEditor(props: ThemeEditorProps) {
             </Stack>
           </CardDisplay>
 
-          <CardDisplay header="Component overrides">
+          <CardDisplay contentGutterY contentGutterX header="Component overrides">
             <Stack spacing={1}>
               <Typography variant="body2" color="text.secondary">
                 {`Advanced: JSON overrides for whitelisted components (${
@@ -370,7 +370,7 @@ export function ThemeEditor(props: ThemeEditorProps) {
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <CardDisplay header={`Preview (${scheme})`}>
+        <CardDisplay contentGutterY contentGutterX header={`Preview (${scheme})`}>
           <ThemePreview theme={draft} scheme={scheme} />
         </CardDisplay>
       </Grid>
