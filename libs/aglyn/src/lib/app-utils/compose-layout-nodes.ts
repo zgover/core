@@ -74,9 +74,13 @@ export function composeLayoutAndScreenNodes<
     const nextId = prefixLayoutId(id)
     composed[nextId] = {
       ...node,
-      // Early seeds stored roots without $id, letting the canvas assign a
-      // random one — trust the map key so root identity stays canonical.
+      // Early seeds stored roots without $id or componentId, letting the
+      // canvas assign fallbacks — trust the map key so root identity stays
+      // canonical, and pin the root to a plain container so production
+      // renderers (which have no canvas defaults) can resolve it.
       $id: id === NODE_ROOT_ID ? NODE_ROOT_ID : prefixLayoutId(node.$id ?? id),
+      ...(id === NODE_ROOT_ID &&
+        !node.componentId && { componentId: 'div' as N['componentId'] }),
       ...(node.parentId != null && { parentId: prefixLayoutId(node.parentId) }),
       ...(node.nodes != null && { nodes: prefixChildIds(node.nodes) }),
     }

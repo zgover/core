@@ -119,4 +119,21 @@ describe('composeLayoutAndScreenNodes', () => {
     )
     expect(composed['hero'].componentId).toBe('muiContainer')
   })
+
+  it('pins the root to a renderable container when the stored root has none', () => {
+    const bareRootLayout: Record<string, AglynNodeSchema> = {
+      [ROOT]: { $id: ROOT, nodes: ['slot'] } as AglynNodeSchema,
+      slot: {
+        $id: 'slot',
+        componentId: LAYOUT_SLOT_COMPONENT_ID,
+        parentId: ROOT,
+      },
+    }
+    const composed = composeLayoutAndScreenNodes(bareRootLayout, screenNodes)
+    expect(composed[ROOT].componentId).toBe('div')
+
+    // A stored root componentId is respected.
+    const composedKept = composeLayoutAndScreenNodes(layoutNodes, screenNodes)
+    expect(composedKept[ROOT].componentId).toBe('root')
+  })
 })
