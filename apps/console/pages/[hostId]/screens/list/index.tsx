@@ -277,7 +277,8 @@ function Screens(props) {
       headerName: 'Path',
       minWidth: 140,
       type: 'string',
-      valueFormatter: ({ value }: any) =>
+      // x-data-grid v9 passes the raw value (not a `{ value }` params object)
+      valueFormatter: (value: any) =>
         value ? screenRoutePathToUrl(value) : '--',
     },
     {
@@ -292,18 +293,16 @@ function Screens(props) {
       headerName: 'Updated',
       flex: 1,
       minWidth: 150,
-      type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      valueFormatter: (value: any) =>
+        value?.toDate?.().toLocaleString() || '--',
     },
     {
       field: 'createdAt',
       headerName: 'Created',
       flex: 1,
       minWidth: 150,
-      type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      valueFormatter: (value: any) =>
+        value?.toDate?.().toLocaleString() || '--',
     },
   ]
 
