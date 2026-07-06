@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import type { HostViewType } from '@aglyn/aglyn'
 import type { IBesignerAppController } from './besigner-app.types'
 import type { HostThemeScheme } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -42,6 +43,8 @@ export type BesignerContext = {
     devicePreview?: BesignerDeviceFlag
     /** Color scheme the canvas previews the host theme in; console UI is unaffected. */
     canvasScheme?: HostThemeScheme
+    /** What kind of host view the canvas is editing (screen or shared layout). */
+    viewType?: HostViewType
   }
   panels: {
     panelLeft?: BesignerPanelItem
