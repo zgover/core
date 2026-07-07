@@ -15,21 +15,30 @@
  * limitations under the License.
  */
 
-/**
- * Feature entitlements by plan. STUB until Tenant Billing & SaaS Plans
- * (AGL-38..41) lands real plan data on the tenant/host: everything resolves
- * to allowed so features ship dark-launched, and each gated surface already
- * routes through this check.
- */
+import {
+  type AglynTenant,
+  checkEntitlement,
+  type TenantFeatureFlags,
+} from '@aglyn/aglyn'
+
+/** Console-facing feature keys mapped onto the tenant feature flags. */
 export type Entitlement = 'versioning' | 'reusable-components'
 
-export function hasEntitlement(feature: Entitlement): boolean {
-  switch (feature) {
-    case 'versioning':
-    case 'reusable-components':
-      // TODO(AGL-38): resolve from the tenant's subscription tier.
-      return true
-    default:
-      return false
-  }
+const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
+  versioning: 'versioning',
+  'reusable-components': 'reusableComponents',
+}
+
+/**
+ * With a tenant doc, resolves through the plan/override model
+ * (`resolveTenantEntitlements`, AGL-38). Without tenant context the feature
+ * stays enabled — dark launch until the console surfaces are wired to the
+ * signed-in tenant (AGL-39/40 billing UI).
+ */
+export function hasEntitlement(
+  feature: Entitlement,
+  tenant?: Partial<AglynTenant> | null,
+): boolean {
+  if (tenant) return checkEntitlement(tenant, FEATURE_KEYS[feature])
+  return true
 }
