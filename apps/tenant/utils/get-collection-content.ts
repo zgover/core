@@ -23,7 +23,32 @@ export interface CollectionEntrySummary {
   slug: string
   excerpt?: string
   body?: string
+  coverImage?: string
   publishedAt?: { seconds: number } | null
+}
+
+/**
+ * Scheduled entries (AGL-123) go live lazily like AGL-61: a due
+ * `publishAt` counts as published for this render, and the doc is flipped
+ * to `published` fail-open so the state becomes durable.
+ */
+function isLive(value: FirebaseFirestore.DocumentData): boolean {
+  if (value['status'] === 'published') return true
+  return (
+    value['status'] === 'scheduled' &&
+    (value['publishAt']?.seconds ?? Number.POSITIVE_INFINITY) * 1000 <=
+      Date.now()
+  )
+}
+
+function flipDueEntry(
+  docRef: FirebaseFirestore.DocumentReference,
+  value: FirebaseFirestore.DocumentData,
+): void {
+  if (value['status'] !== 'scheduled') return
+  docRef
+    .update({ status: 'published', publishedAt: value['publishAt'] })
+    .catch((error) => console.error(error))
 }
 
 export interface CollectionContent {
@@ -72,20 +97,25 @@ export async function getCollectionContent(options: {
     if (entrySlug) {
       const entryQuery = await entriesRef
         .where('slug', '==', entrySlug)
-        .where('status', '==', 'published')
-        .limit(1)
+        .limit(5)
         .get()
-      const entryDoc = entryQuery.docs[0]
+      const entryDoc = entryQuery.docs.find((docSnapshot) =>
+        isLive(docSnapshot.data()),
+      )
       if (entryDoc) {
         const value = entryDoc.data()
+        flipDueEntry(entryDoc.ref, value)
         data.entry = {
           $id: entryDoc.id,
           title: value['title'] ?? entrySlug,
           slug: entrySlug,
           excerpt: value['excerpt'] ?? '',
           body: value['body'] ?? '',
-          publishedAt: value['publishedAt']
-            ? { seconds: value['publishedAt'].seconds }
+          coverImage: value['coverImage'] ?? '',
+          publishedAt: (value['publishedAt'] ?? value['publishAt'])
+            ? {
+                seconds: (value['publishedAt'] ?? value['publishAt']).seconds,
+              }
             : null,
         }
       }
@@ -95,19 +125,23 @@ export async function getCollectionContent(options: {
     // No orderBy: entries missing publishedAt would be dropped by Firestore;
     // sort client-side like the version lists.
     const entriesQuery = await entriesRef
-      .where('status', '==', 'published')
+      .where('status', 'in', ['published', 'scheduled'])
       .limit(100)
       .get()
     data.entries = entriesQuery.docs
+      .filter((entryDoc) => isLive(entryDoc.data()))
       .map((entryDoc) => {
         const value = entryDoc.data()
+        flipDueEntry(entryDoc.ref, value)
         return {
           $id: entryDoc.id,
           title: value['title'] ?? entryDoc.id,
           slug: value['slug'] ?? entryDoc.id,
           excerpt: value['excerpt'] ?? '',
-          publishedAt: value['publishedAt']
-            ? { seconds: value['publishedAt'].seconds }
+          publishedAt: (value['publishedAt'] ?? value['publishAt'])
+            ? {
+                seconds: (value['publishedAt'] ?? value['publishAt']).seconds,
+              }
             : null,
         }
       })
