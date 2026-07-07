@@ -110,7 +110,9 @@ export function runWorkflow(
       }
     }
     const run = evaluateHostFunction(definition, args)
-    if (!run.ok) {
+    // `=== false` (not `!run.ok`): the union fails to narrow under the
+    // stricter lib build tsconfig otherwise (same quirk as publish.ts).
+    if (run.ok === false) {
       return {
         ok: false,
         error: `Step ${index + 1} (${definition.name}): ${run.error}`,
