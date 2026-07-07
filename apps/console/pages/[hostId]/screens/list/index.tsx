@@ -73,6 +73,7 @@ import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
+import HostDisplayNameComponent from '../../../../components/host-display-name.component'
 import {
   compareScreenSiblings,
   ScreensHierarchyTableComponent,
@@ -445,7 +446,7 @@ function Screens(props) {
         activeTab={buildRoute(Route.SCREEN_LIST, { hostId })}
         breadcrumbItems={[
           {
-            children: hostId,
+            children: <HostDisplayNameComponent hostId={hostId} />,
             href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
           },
           {

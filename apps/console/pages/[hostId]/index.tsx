@@ -25,6 +25,7 @@ import { DataTableComponent } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
+import HostDisplayNameComponent from '../../components/host-display-name.component'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
 
@@ -68,7 +69,7 @@ const Index: NextPageWithLayout = (props) => {
       }}
       breadcrumbItems={[
         {
-          children: hostId,
+          children: <HostDisplayNameComponent hostId={hostId} />,
           href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
         },
       ]}

@@ -62,6 +62,7 @@ import AuthFormTemplateComponent from '../../../../components/auth-form-template
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
+import HostDisplayNameComponent from '../../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import {
   CONTENT_MAX_WIDTH,
@@ -309,7 +310,7 @@ function Layouts(props) {
         activeTab={buildRoute(Route.LAYOUT_LIST, { hostId })}
         breadcrumbItems={[
           {
-            children: hostId,
+            children: <HostDisplayNameComponent hostId={hostId} />,
             href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
           },
           {

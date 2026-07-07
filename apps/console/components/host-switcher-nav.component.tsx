@@ -117,7 +117,34 @@ function HostSwitcherMenu(props: { uid: string }) {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        slotProps={{ list: { dense: true } }}
+        slotProps={{
+          list: { dense: true },
+          // Match the shared Menu paper used by the File/Edit/Insert app-bar
+          // menus (width, flat elevation, drop shadow, anchor arrow) so the
+          // switcher reads as part of the same family (AGL-66).
+          paper: {
+            elevation: 0,
+            sx: {
+              width: '30ch',
+              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              backgroundColor: 'surface.main',
+              marginTop: 0.5,
+              overflow: 'visible',
+              '&:before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                left: 14,
+                width: 10,
+                height: 10,
+                bgcolor: 'surface.main',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+              },
+            },
+          },
+        }}
       >
         {(hosts ?? []).map((host: any) => (
           <MenuItem
@@ -137,7 +164,11 @@ function HostSwitcherMenu(props: { uid: string }) {
             </ListItemIcon>
             <ListItemText
               primary={host.displayName ?? host.$id}
-              slotProps={{ primary: { noWrap: true } }}
+              secondary={host.cname ?? host.subdomain ?? undefined}
+              slotProps={{
+                primary: { noWrap: true },
+                secondary: { noWrap: true, variant: 'caption' },
+              }}
             />
           </MenuItem>
         ))}
