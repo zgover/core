@@ -51,6 +51,7 @@ import Head from 'next/head'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
+import BesignerDocumentSwitcherComponent from '../../../../../../../components/besigner-document-switcher.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import '../../../../../../../constants/app-setup'
@@ -348,6 +349,12 @@ function LayoutBesignerPage(props) {
               detailsUrl={listUrl}
               onSave={handleSave}
               saveAvailable={saveAvailable}
+              documentSwitcher={
+                <BesignerDocumentSwitcherComponent
+                  hostId={hostId}
+                  current={{ kind: 'layout', id: layoutId }}
+                />
+              }
             />
             <WorkspaceEditorComponent>
               <ViewportRootComponent>

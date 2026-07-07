@@ -70,6 +70,7 @@ import Head from 'next/head'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
+import BesignerDocumentSwitcherComponent from '../../../../../../../components/besigner-document-switcher.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import '../../../../../../../constants/app-setup'
@@ -660,6 +661,12 @@ function BesignerPage(props) {
               liveUrl={liveUrl}
               onPropertiesEdit={() => setScreenDialog(true)}
               saveAvailable={saveAvailable}
+              documentSwitcher={
+                <BesignerDocumentSwitcherComponent
+                  hostId={hostId}
+                  current={{ kind: 'screen', id: screenId }}
+                />
+              }
             />
             {layoutId ? (
               <Alert

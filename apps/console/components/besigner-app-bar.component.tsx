@@ -43,11 +43,20 @@ export interface BesignerAppBarProps extends SecondaryAppBarProps {
   onPreview?: ButtonProps['onClick']
   onPropertiesEdit?: ButtonProps['onClick']
   saveAvailable?: boolean
+  /** Current-document indicator/switcher (see BesignerDocumentSwitcher). */
+  documentSwitcher?: JSX.Children
 }
 
 export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
   (props, ref) => {
-    const { liveUrl, onPreview, onPropertiesEdit, onSave, saveAvailable } = props
+    const {
+      documentSwitcher,
+      liveUrl,
+      onPreview,
+      onPropertiesEdit,
+      onSave,
+      saveAvailable,
+    } = props
 
     return (
       <SecondaryAppBarComponent
@@ -77,6 +86,7 @@ export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
             flexGrow: 1
           }}>
           <AddControlsComponent />
+          {documentSwitcher}
           <HistoryControlsComponent sx={{ flexGrow: 1 }} />
           <SchemePreviewControlsComponent />
           <DevicePreviewControlsComponent />
