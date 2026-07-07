@@ -350,7 +350,10 @@ export function MainLayout(props: MainLayoutProps) {
         sx={[{
           alignItems: "stretch",
           flexDirection: "column",
-          height: "100vh"
+          // minHeight, not height: a fixed 100vh box is the containing block
+          // for the sticky secondary toolbar, which stopped sticking after
+          // one viewport of scroll on longer pages (AGL-37).
+          minHeight: "100vh"
         }, ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx])]}>
         <TopAppBar
           enableAppBarElevation={enableAppBarElevation}
