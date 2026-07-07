@@ -30,6 +30,7 @@ import HostProductsCard from '../../components/commerce/host-products-card.compo
 import HostFunctionsCard from '../../components/host-functions-card.component'
 import QuotaWarningsBanner from '../../components/quota-warnings-banner.component'
 import HostVariablesCard from '../../components/host-variables-card.component'
+import HostWorkflowsCard from '../../components/host-workflows-card.component'
 import HostComponentsCard from '../../components/host-components-card.component'
 import HostDisplayNameComponent from '../../components/host-display-name.component'
 import { buildRoute, Route } from '../../constants/route-links'
@@ -138,6 +139,13 @@ const Index: NextPageWithLayout = (props) => {
                 md: 6,
               },
               children: <HostFunctionsCard hostId={hostId} />,
+            },
+            {
+              size: {
+                xs: 12,
+                md: 6,
+              },
+              children: <HostWorkflowsCard hostId={hostId} />,
             },
           ]}
         />
