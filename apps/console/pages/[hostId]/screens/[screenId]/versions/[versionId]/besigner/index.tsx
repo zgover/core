@@ -529,7 +529,7 @@ function BesignerPage(props) {
       <MainLayout
         title={'Besigner'}
         enableAppBarElevation
-        // besigner={true}
+        besigner
         // appBarSuffix={'Besigner'}
         centerPrefix={
           <BesignerVersionsComponent

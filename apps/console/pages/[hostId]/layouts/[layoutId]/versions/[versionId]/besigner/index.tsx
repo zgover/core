@@ -259,6 +259,7 @@ function LayoutBesignerPage(props) {
       <MainLayout
         title={'Besigner'}
         enableAppBarElevation
+        besigner
         centerPrefix={
           <BesignerVersionsComponent
             hostId={hostId}

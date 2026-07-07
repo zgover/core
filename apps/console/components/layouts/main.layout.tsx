@@ -45,6 +45,7 @@ import {
   AppBar,
   Avatar,
   type AvatarProps,
+  Box,
   Button,
   type ButtonProps,
   Divider,
@@ -361,7 +362,18 @@ export function MainLayout(props: MainLayoutProps) {
           // minHeight, not height: a fixed 100vh box is the containing block
           // for the sticky secondary toolbar, which stopped sticking after
           // one viewport of scroll on longer pages (AGL-37).
-          minHeight: "100vh"
+          minHeight: "100vh",
+          // Besigner is a fixed editor shell (AGL-58/63): exactly the window
+          // height, never page-scrollable — overflow lives inside the editor
+          // regions (canvas pan, panel scroll).
+          ...(besigner && {
+            height: "100vh",
+            overflow: "hidden",
+            '@supports (height: 100dvh)': {
+              minHeight: "100dvh",
+              height: "100dvh",
+            },
+          }),
         }, ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx])]}>
         <TopAppBar
           enableAppBarElevation={enableAppBarElevation}
@@ -434,7 +446,21 @@ export function MainLayout(props: MainLayoutProps) {
             },
           ]}
         />
-        {children}
+        {besigner ? (
+          <Box
+            sx={{
+              flexGrow: 1,
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            {children}
+          </Box>
+        ) : (
+          children
+        )}
       </Stack>
     </Fragment>
   );
