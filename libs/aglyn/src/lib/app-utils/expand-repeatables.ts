@@ -31,7 +31,10 @@ export interface RepeatableDataset {
   records: Array<Record<string, string>>
 }
 
-function substituteValue(value: unknown, record: Record<string, string>) {
+function substituteValue(
+  value: unknown,
+  record: Record<string, string>,
+): unknown {
   if (typeof value === 'string') {
     return value.replace(ITEM_TOKEN_PATTERN, (token, field) =>
       record[field] != null ? record[field] : token,
