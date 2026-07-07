@@ -217,6 +217,18 @@ export type ScreenSlug = string
 export type VersionUid = string
 export type LayoutUid = string
 
+/**
+ * Pending scheduled publication (AGL-61): when `publishAt` passes, the
+ * parent doc's `versionId` pointer moves to `versionId`. Applied lazily by
+ * the tenant's ISR revalidation (no dedicated cron needed).
+ */
+export interface PublishSchedule {
+  versionId: VersionUid
+  publishAt: ITimestamp
+  status: 'pending' | 'applied' | 'canceled'
+  createdAt?: ITimestamp
+}
+
 /** Hosted in tenants' host project */
 export interface AglynScreen extends AglynDocument {
   $id: ScreenUid
@@ -227,6 +239,7 @@ export interface AglynScreen extends AglynDocument {
   /** Position among siblings (screens sharing `parentId`) in the screens list. */
   order?: number
   versionId?: VersionUid
+  publishSchedule?: PublishSchedule
   status?: HostScreenStatus
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
@@ -313,6 +326,7 @@ export interface AglynLayout extends AglynDocument {
   hostId?: HostUid
   /** Published version pointer; bound screens render this version. */
   versionId?: VersionUid
+  publishSchedule?: PublishSchedule
   versions?: Array<VersionUid>
   displayName?: string
   description?: string

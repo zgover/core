@@ -60,6 +60,7 @@ export type {
   PermissionUid,
   ProjectNumber,
   ProjectUid,
+  PublishSchedule,
   RedirectUid,
   RoleUid,
   ScreenSlug,

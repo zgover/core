@@ -21,6 +21,7 @@ import {
   layoutConverter,
   layoutVersionConverter,
 } from '@aglyn/tenant-data-admin'
+import applyDuePublishSchedule from './apply-publish-schedule'
 
 /**
  * Fetches a layout's published version (the `versionId` pointer on the
@@ -53,7 +54,13 @@ export async function getPublishedLayoutVersion(options: {
     if (!layoutSnapshot.exists) return data
     data.layout = layoutSnapshot.data() as Aglyn.AglynLayout
 
-    const versionId = data.layout?.versionId
+    // Scheduled publishing applies to layouts too (AGL-61).
+    const versionId = await applyDuePublishSchedule({
+      hostId,
+      collectionName: 'layouts',
+      docId: layoutId,
+      parent: data.layout,
+    })
     if (!versionId) return data
 
     const versionSnapshot = await layoutRef

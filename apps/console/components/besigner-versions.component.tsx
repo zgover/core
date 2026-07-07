@@ -17,8 +17,17 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import { ICON_VARIANT_MENU_DOWN } from '@aglyn/shared-data-enums'
-import { MdiIcon, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  ICON_VARIANT_DATE_TIME,
+  ICON_VARIANT_MENU_DOWN,
+  ICON_VARIANT_MODIFY_DELETE,
+  ICON_VARIANT_MODIFY_EDIT,
+} from '@aglyn/shared-data-enums'
+import {
+  MdiIcon,
+  useConfirmationContext,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
@@ -28,16 +37,21 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import {
   collection,
+  deleteDoc,
+  deleteField,
   doc,
   getDoc,
   limit,
@@ -48,7 +62,11 @@ import {
 import { observer } from 'mobx-react-lite'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useFirestoreDocData,
+} from 'reactfire'
 import { hasEntitlement } from '../constants/entitlements'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentTenant from '../hooks/use-current-tenant'
@@ -78,7 +96,16 @@ export const BesignerVersionsComponent = observer(
     const { enqueueSnackbar } = useSnackbar()
     const { queueLoading } = useLoading()
     const { tenant } = useCurrentTenant()
+    const { confirm } = useConfirmationContext()
     const [open, setOpen] = useState(false)
+    // Name dialog serves both "create with a name" (AGL-59) and rename.
+    const [nameDialog, setNameDialog] = useState<
+      { mode: 'create' } | { mode: 'rename'; targetId: string } | null
+    >(null)
+    const [nameValue, setNameValue] = useState('')
+    // Schedule dialog (AGL-61): datetime-local string for the picked time.
+    const [scheduleFor, setScheduleFor] = useState<string | null>(null)
+    const [scheduleAt, setScheduleAt] = useState('')
 
     const parentCollection = parent.kind === 'screen' ? 'screens' : 'layouts'
     const parentPath = ['hosts', hostId, parentCollection, parent.id] as const
@@ -88,6 +115,15 @@ export const BesignerVersionsComponent = observer(
       query(collection(firestore, ...parentPath, 'versions'), limit(100)),
       { idField: '$id' },
     )
+    // Parent doc carries the pending publish schedule (AGL-61).
+    const { data: parentDoc } = useFirestoreDocData<any>(
+      doc(firestore, ...parentPath),
+      { idField: '$id' },
+    )
+    const schedule =
+      parentDoc?.publishSchedule?.status === 'pending'
+        ? parentDoc.publishSchedule
+        : undefined
     const versions = [...(versionDocs ?? [])].sort(
       (a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
     )
@@ -143,7 +179,7 @@ export const BesignerVersionsComponent = observer(
       [firestore, parentPath, queueLoading, enqueueSnackbar],
     )
 
-    const handleCreateVersion = useCallback(async () => {
+    const handleCreateVersion = useCallback(() => {
       if (!hasEntitlement('versioning', tenant)) {
         return enqueueSnackbar(
           'Versioning requires a Pro plan — see Billing to upgrade',
@@ -158,24 +194,54 @@ export const BesignerVersionsComponent = observer(
           persist: false,
         })
       }
+      const currentName =
+        (versionDocs ?? []).find((version: any) => version.$id === versionId)
+          ?.displayName ?? versionId
+      setNameValue(`Copy of ${currentName}`)
+      setNameDialog({ mode: 'create' })
+    }, [tenant, enqueueSnackbar, versionDocs, versionId])
+
+    const handleRename = useCallback(
+      (targetId: string, currentName: string) => () => {
+        setNameValue(currentName)
+        setNameDialog({ mode: 'rename', targetId })
+      },
+      [],
+    )
+
+    const handleNameConfirm = useCallback(async () => {
+      const dialog = nameDialog
+      if (!dialog || !nameValue.trim()) return
       const dequeue = queueLoading()
       try {
+        const timestamp = Timestamp.now()
+        if (dialog.mode === 'rename') {
+          await updateDoc(
+            doc(firestore, ...parentPath, 'versions', dialog.targetId),
+            { displayName: nameValue.trim(), updatedAt: timestamp },
+          )
+          setNameDialog(null)
+          return void enqueueSnackbar('Version renamed', {
+            variant: 'success',
+            persist: false,
+          })
+        }
         const source = await getDoc(
           doc(firestore, ...parentPath, 'versions', versionId),
         )
         if (!source.exists()) throw new Error('Source version missing')
         const newVersionId = Aglyn.createResourceUid()
-        const timestamp = Timestamp.now()
         await setDoc(doc(firestore, ...parentPath, 'versions', newVersionId), {
           ...source.data(),
-          displayName: `Copy of ${source.get('displayName') ?? versionId}`,
+          displayName: nameValue.trim(),
           createdAt: timestamp,
           updatedAt: timestamp,
         })
-        enqueueSnackbar('New version created', {
+        enqueueSnackbar(`Version "${nameValue.trim()}" created`, {
           variant: 'success',
           persist: false,
         })
+        setNameDialog(null)
         setOpen(false)
         void router.push(besignerUrl(newVersionId))
       } catch (error) {
@@ -188,15 +254,143 @@ export const BesignerVersionsComponent = observer(
         dequeue()
       }
     }, [
+      nameDialog,
+      nameValue,
       firestore,
       parentPath,
       versionId,
-      tenant,
       queueLoading,
       enqueueSnackbar,
       router,
       besignerUrl,
     ])
+
+    const handleDelete = useCallback(
+      (targetId: string, name: string) => async () => {
+        const confirmed = await confirm({
+          title: 'Delete this version?',
+          description:
+            `"${name}" will be permanently deleted. ` +
+            'This cannot be undone.',
+          confirmationText: 'Delete',
+          confirmationButtonProps: { color: 'error' },
+        })
+          .then(() => true)
+          .catch(() => false)
+        if (!confirmed) return
+        const dequeue = queueLoading()
+        try {
+          await deleteDoc(doc(firestore, ...parentPath, 'versions', targetId))
+          // Clear a pending schedule that pointed at the deleted version.
+          if (schedule?.versionId === targetId) {
+            await updateDoc(doc(firestore, ...parentPath), {
+              publishSchedule: deleteField(),
+              updatedAt: Timestamp.now(),
+            })
+          }
+          enqueueSnackbar('Version deleted', {
+            variant: 'success',
+            persist: false,
+          })
+        } catch (error) {
+          console.error(error)
+          enqueueSnackbar('An error has occurred', {
+            variant: 'error',
+            allowDuplicate: true,
+          })
+        } finally {
+          dequeue()
+        }
+      },
+      [confirm, firestore, parentPath, schedule, queueLoading, enqueueSnackbar],
+    )
+
+    const handleScheduleOpen = useCallback(
+      (targetId: string) => () => {
+        if (!hasEntitlement('scheduled-publishing', tenant)) {
+          return void enqueueSnackbar(
+            'Scheduled publishing requires a Business plan — see Billing',
+            { variant: 'warning', persist: false },
+          )
+        }
+        // Default one hour out, in the datetime-local format (local time).
+        const initial = new Date(Date.now() + 60 * 60 * 1000)
+        initial.setSeconds(0, 0)
+        const pad = (value: number) => String(value).padStart(2, '0')
+        setScheduleAt(
+          `${initial.getFullYear()}-${pad(initial.getMonth() + 1)}-` +
+            `${pad(initial.getDate())}T${pad(initial.getHours())}:` +
+            `${pad(initial.getMinutes())}`,
+        )
+        setScheduleFor(targetId)
+      },
+      [tenant, enqueueSnackbar],
+    )
+
+    const handleScheduleConfirm = useCallback(async () => {
+      if (!scheduleFor || !scheduleAt) return
+      const publishAt = new Date(scheduleAt)
+      if (Number.isNaN(publishAt.getTime()) || publishAt <= new Date()) {
+        return void enqueueSnackbar('Pick a future date and time', {
+          variant: 'warning',
+          persist: false,
+        })
+      }
+      const dequeue = queueLoading()
+      try {
+        await updateDoc(doc(firestore, ...parentPath), {
+          publishSchedule: {
+            versionId: scheduleFor,
+            publishAt: Timestamp.fromDate(publishAt),
+            status: 'pending',
+            createdAt: Timestamp.now(),
+          },
+          updatedAt: Timestamp.now(),
+        })
+        enqueueSnackbar(
+          `Scheduled to publish ${publishAt.toLocaleString()}`,
+          { variant: 'success', persist: false },
+        )
+        setScheduleFor(null)
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar('An error has occurred', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      } finally {
+        dequeue()
+      }
+    }, [
+      scheduleFor,
+      scheduleAt,
+      firestore,
+      parentPath,
+      queueLoading,
+      enqueueSnackbar,
+    ])
+
+    const handleScheduleCancel = useCallback(async () => {
+      const dequeue = queueLoading()
+      try {
+        await updateDoc(doc(firestore, ...parentPath), {
+          publishSchedule: deleteField(),
+          updatedAt: Timestamp.now(),
+        })
+        enqueueSnackbar('Scheduled publication canceled', {
+          variant: 'success',
+          persist: false,
+        })
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar('An error has occurred', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      } finally {
+        dequeue()
+      }
+    }, [firestore, parentPath, queueLoading, enqueueSnackbar])
 
     const current = (versions ?? []).find(
       (version: any) => version.$id === versionId,
@@ -282,6 +476,19 @@ export const BesignerVersionsComponent = observer(
                           {isCurrent ? (
                             <Chip label="Open" size="small" variant="outlined" />
                           ) : null}
+                          {schedule?.versionId === version.$id ? (
+                            <Chip
+                              label={`Publishes ${
+                                schedule.publishAt
+                                  ?.toDate?.()
+                                  .toLocaleString() ?? ''
+                              }`}
+                              color="info"
+                              size="small"
+                              variant="outlined"
+                              onDelete={handleScheduleCancel}
+                            />
+                          ) : null}
                         </Stack>
                       </TableCell>
                       <TableCell>
@@ -306,6 +513,63 @@ export const BesignerVersionsComponent = observer(
                         >
                           {'Publish'}
                         </Button>
+                        <Tooltip title="Schedule publish">
+                          <span>
+                            <IconButton
+                              size="small"
+                              disabled={isPublished}
+                              onClick={handleScheduleOpen(version.$id)}
+                              aria-label="schedule publish"
+                            >
+                              <MdiIcon
+                                fontSize="inherit"
+                                path={ICON_VARIANT_DATE_TIME.path}
+                              />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Rename">
+                          <IconButton
+                            size="small"
+                            onClick={handleRename(
+                              version.$id,
+                              version.displayName ?? version.$id,
+                            )}
+                            aria-label="rename version"
+                          >
+                            <MdiIcon
+                              fontSize="inherit"
+                              path={ICON_VARIANT_MODIFY_EDIT.path}
+                            />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title={
+                            isPublished
+                              ? 'The published version cannot be deleted'
+                              : isCurrent
+                                ? 'Close this version before deleting it'
+                                : 'Delete'
+                          }
+                        >
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              disabled={isPublished || isCurrent}
+                              onClick={handleDelete(
+                                version.$id,
+                                version.displayName ?? version.$id,
+                              )}
+                              aria-label="delete version"
+                            >
+                              <MdiIcon
+                                fontSize="inherit"
+                                path={ICON_VARIANT_MODIFY_DELETE.path}
+                              />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   )
@@ -315,6 +579,73 @@ export const BesignerVersionsComponent = observer(
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{'Close'}</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
+          open={Boolean(nameDialog)}
+          onClose={() => setNameDialog(null)}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>
+            {nameDialog?.mode === 'rename' ? 'Rename version' : 'New version'}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              label="Version name"
+              value={nameValue}
+              onChange={(event) => setNameValue(event.target.value)}
+              size="small"
+              fullWidth
+              autoFocus
+              sx={{ mt: 1 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setNameDialog(null)}>{'Cancel'}</Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              disabled={!nameValue.trim()}
+              onClick={handleNameConfirm}
+            >
+              {nameDialog?.mode === 'rename' ? 'Rename' : 'Create version'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
+          open={Boolean(scheduleFor)}
+          onClose={() => setScheduleFor(null)}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>{'Schedule publication'}</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {'The selected version becomes the published version at the ' +
+                'chosen time (applied on the next site refresh after it ' +
+                'passes). Only one pending schedule exists per document.'}
+            </Typography>
+            <TextField
+              label="Publish at"
+              type="datetime-local"
+              value={scheduleAt}
+              onChange={(event) => setScheduleAt(event.target.value)}
+              size="small"
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setScheduleFor(null)}>{'Cancel'}</Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              disabled={!scheduleAt}
+              onClick={handleScheduleConfirm}
+            >
+              {'Schedule'}
+            </Button>
           </DialogActions>
         </Dialog>
       </>

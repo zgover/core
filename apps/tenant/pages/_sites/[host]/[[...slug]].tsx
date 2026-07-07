@@ -24,6 +24,7 @@ import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
 import { useEffect, useMemo } from 'react'
 import { useFirestore, useFirestoreDocData } from 'reactfire'
+import applyDuePublishSchedule from '../../../utils/apply-publish-schedule'
 import getComponents from '../../../utils/get-components'
 import getTenant from '../../../utils/get-tenant'
 import getHost from '../../../utils/get-host'
@@ -132,10 +133,19 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
      *
      *=========================================*/
 
+    // Apply a due scheduled publication before resolving the version
+    // (AGL-61): ISR revalidation doubles as the schedule executor.
+    const effectiveVersionId = await applyDuePublishSchedule({
+      hostId,
+      collectionName: 'screens',
+      docId: screenId,
+      parent: screenRes.screen,
+    })
+
     const versionRes = await getScreenVersion({
       hostId,
       screenId: screenId,
-      versionId: screenRes.screen.versionId,
+      versionId: effectiveVersionId ?? screenRes.screen.versionId,
     })
     console.debug('versionRes', versionRes)
 
