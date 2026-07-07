@@ -275,6 +275,23 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
     Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: nodes })
   }, [nodes])
 
+  // Pageview beacon (AGL-82): privacy-friendly counter, no cookies.
+  const beaconHostId = props.data?.host?.$id
+  useEffect(() => {
+    if (!beaconHostId || typeof navigator === 'undefined') return
+    try {
+      navigator.sendBeacon(
+        '/api/analytics/collect',
+        JSON.stringify({
+          hostId: beaconHostId,
+          path: window.location.pathname,
+        }),
+      )
+    } catch {
+      // Analytics never breaks the page.
+    }
+  }, [beaconHostId])
+
   // Id-based screen links resolve against this routing map at render time;
   // ISR keeps it current (slug renames show up on the next revalidate).
   const screens = props.data?.host?.screens
