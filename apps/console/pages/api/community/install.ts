@@ -119,6 +119,15 @@ export default async function handler(
       },
       { merge: true },
     )
+    // First installs count toward the browse "Most installed" sort
+    // (AGL-95); updates don't inflate it.
+    if (existing.empty) {
+      await listingRef
+        .update({
+          installCount: firebaseAdmin.firestore.FieldValue.increment(1),
+        })
+        .catch(() => undefined)
+    }
     return res.status(200).json({
       installed: true,
       updated: !existing.empty,

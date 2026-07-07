@@ -18,7 +18,15 @@
 
 import { CardDisplay, useLoading } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { Button, Chip, Grid, Stack, Typography } from '@mui/material'
+import {
+  Button,
+  Chip,
+  Grid,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { collection, doc, getDoc, limit, query, where } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
@@ -193,9 +201,74 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
     [user, hostId, queueLoading, enqueueSnackbar],
   )
 
-  const items = listings ?? []
+  // Browse controls (AGL-95): client-side search/filter/sort over the
+  // fetched page of listings.
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState<string | null>(null)
+  const [sort, setSort] = useState<'newest' | 'installed'>('newest')
+  const categories = useMemo(
+    () =>
+      [
+        ...new Set(
+          (listings ?? [])
+            .map((listing: any) => listing.category)
+            .filter(Boolean),
+        ),
+      ].sort() as string[],
+    [listings],
+  )
+  const items = useMemo(() => {
+    const needle = search.trim().toLowerCase()
+    const filtered = (listings ?? []).filter((listing: any) => {
+      if (category && listing.category !== category) return false
+      if (!needle) return true
+      return [listing.displayName, listing.description, listing.category]
+        .filter(Boolean)
+        .some((value: string) => value.toLowerCase().includes(needle))
+    })
+    return [...filtered].sort((a: any, b: any) =>
+      sort === 'installed'
+        ? (b.installCount ?? 0) - (a.installCount ?? 0)
+        : (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
+    )
+  }, [listings, search, category, sort])
+
   return (
     <CardDisplay header={'Community components'} contentGutterX contentGutterY>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ mb: 2, alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}
+      >
+        <TextField
+          placeholder="Search components…"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          size="small"
+          sx={{ minWidth: 200 }}
+        />
+        {categories.map((value) => (
+          <Chip
+            key={value}
+            label={value}
+            variant={category === value ? 'filled' : 'outlined'}
+            color={category === value ? 'secondary' : 'default'}
+            onClick={() =>
+              setCategory((previous) => (previous === value ? null : value))
+            }
+          />
+        ))}
+        <TextField
+          value={sort}
+          onChange={(event) => setSort(event.target.value as any)}
+          size="small"
+          select
+          sx={{ ml: 'auto', minWidth: 150 }}
+        >
+          <MenuItem value="newest">{'Newest'}</MenuItem>
+          <MenuItem value="installed">{'Most installed'}</MenuItem>
+        </TextField>
+      </Stack>
       {items.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           {'No community components published yet — publish one of your ' +
@@ -249,6 +322,11 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     {`v${listing.latestVersion}`}
                     {handles[listing.profileId]
                       ? ` · by @${handles[listing.profileId]}`
+                      : ''}
+                    {listing.installCount
+                      ? ` · ${listing.installCount} install${
+                          listing.installCount === 1 ? '' : 's'
+                        }`
                       : ''}
                   </Typography>
                   {listing.description ? (
