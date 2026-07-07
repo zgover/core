@@ -86,26 +86,35 @@ export function shadowDomRootFactory<P = any>(options: FactoryOptions<P>) {
         setRoot(root)
       } catch (error) {
         if ((error as Error)?.name !== 'NotSupportedError') throw error
-        styleSheets.length > 0 && (root.adoptedStyleSheets = styleSheets)
+        // A shadow root already exists on the host (remount of the same
+        // element, e.g. StrictMode double-effects) — adopt it.
+        const existing = node.current.shadowRoot
+        if (existing) {
+          styleSheets.length > 0 && (existing.adoptedStyleSheets = styleSheets)
+          setRoot(existing)
+        }
       }
     }, [styleSheets, delegatesFocus, mode, ssr])
 
     return (
       <>
         <Tag key={key} ref={node} {...rest}>
-          {(root || ssr) && (
+          {root ? (
             <ShadowDomContext.Provider value={root}>
-              {ssr ? (
-                // @ts-expect-error — declarative shadowroot attr is not in React types
-                (<template shadowroot="open">
-                  {options.render?.({ root, ssr, children })}
-                </template>)
-              ) : (
-                <ShadowDomContentPortal root={root}>
-                  {options.render?.({ root, ssr, children })}
-                </ShadowDomContentPortal>
-              )}
+              <ShadowDomContentPortal root={root}>
+                {options.render?.({ root, ssr, children })}
+              </ShadowDomContentPortal>
             </ShadowDomContext.Provider>
+          ) : (
+            // No shadow root yet: on the server and during the first client
+            // (hydration) render the content renders as light DOM, so the
+            // SSR payload carries real text for SEO/crawlers. Once the
+            // shadow root attaches (layout effect, before paint) the light
+            // DOM stops displaying — a shadow host without slots never shows
+            // it — and the portal branch takes over. Hydration stays
+            // consistent because server and first client render both take
+            // this branch.
+            options.render?.({ root, ssr, children })
           )}
         </Tag>
       </>
