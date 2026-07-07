@@ -26,6 +26,10 @@ import {
   ICON_VARIANT_USER_SETTINGS,
 } from '@aglyn/shared-data-enums'
 import {
+  mdiAccountGroupOutline,
+  mdiCreditCardOutline,
+} from '@aglyn/shared-data-mdi'
+import {
   AglynConsoleLogoFull,
   AppLink,
   type AppLinkProps,
@@ -448,6 +452,18 @@ export function MainLayout(props: MainLayoutProps) {
                   component: AppLink,
                   href: Route.MANAGE_USER_SETTINGS,
                   icon: { path: ICON_VARIANT_USER_SETTINGS.path },
+                },
+                {
+                  children: 'Billing',
+                  component: AppLink,
+                  href: Route.MANAGE_BILLING,
+                  icon: { path: mdiCreditCardOutline.path },
+                },
+                {
+                  children: 'Community profile',
+                  component: AppLink,
+                  href: Route.MANAGE_COMMUNITY_PROFILE,
+                  icon: { path: mdiAccountGroupOutline.path },
                 },
                 {
                   children: 'Staff console',
