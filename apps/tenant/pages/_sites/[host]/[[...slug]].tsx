@@ -26,6 +26,9 @@ import { useEffect, useMemo } from 'react'
 import { useFirestore, useFirestoreDocData } from 'reactfire'
 import Head from 'next/head'
 import applyDuePublishSchedule from '../../../utils/apply-publish-schedule'
+import getCollectionContent, {
+  type CollectionContent,
+} from '../../../utils/get-collection-content'
 import getComponents from '../../../utils/get-components'
 import getTenant from '../../../utils/get-tenant'
 import getHost from '../../../utils/get-host'
@@ -45,9 +48,11 @@ interface Props {
       version?: Aglyn.AglynScreenVersion
     }
   }
-  nodes: Record<Aglyn.NodeId, Aglyn.NodeSchema>
+  nodes: Record<Aglyn.NodeId, Aglyn.NodeSchema> | null
   /** Free-tier "Made with Aglyn" badge (AGL-69, removeBranding gate). */
   showBranding?: boolean
+  /** Collection list/entry payload when the path is content, not a screen. */
+  content?: CollectionContent
 }
 
 export const getStaticPaths: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
@@ -105,6 +110,29 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     console.debug('screenEntry', screenEntry)
 
     if (!Array.isArray(screenEntry)) {
+      // Content collections fallback (AGL-81): /{collection} and
+      // /{collection}/{entry} paths that aren't screens render the themed
+      // blog surfaces.
+      const segments = path.split('/').filter(Boolean)
+      if (segments.length >= 1 && segments.length <= 2) {
+        const content = await getCollectionContent({
+          hostId,
+          collectionSlug: segments[0],
+          entrySlug: segments[1],
+        })
+        if (content.collection && (segments.length === 1 || content.entry)) {
+          return {
+            props: JSON.parse(
+              JSON.stringify({
+                data: { host: hostRes.host },
+                nodes: null,
+                content,
+              }),
+            ),
+            revalidate: 60,
+          }
+        }
+      }
       return {
         notFound: true,
         revalidate: 60, // never=false, always=1, since=SECONDS
@@ -243,6 +271,7 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
   }
 
   useEffect(() => {
+    if (!nodes) return
     Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: nodes })
   }, [nodes])
 
@@ -275,6 +304,69 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       : undefined
 
   const site = useMemo(() => ({ hostId: host?.$id }), [host?.$id])
+
+  // Collection surfaces render outside the canvas system (AGL-81).
+  if (props.content?.collection) {
+    const { collection, entries, entry } = props.content
+    const contentTitle = entry?.title ?? collection.displayName
+    const contentFullTitle =
+      [contentTitle, siteTitle].filter(Boolean).join(separator) || contentTitle
+    const formatDate = (value?: { seconds: number } | null) =>
+      value ? new Date(value.seconds * 1000).toLocaleDateString() : ''
+    return (
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: '48px 24px' }}>
+        <Head>
+          <title>{contentFullTitle}</title>
+          {entry?.excerpt ? (
+            <meta key="desc" name="description" content={entry.excerpt} />
+          ) : null}
+        </Head>
+        {entry ? (
+          <article>
+            <h1>{entry.title}</h1>
+            <p style={{ opacity: 0.7 }}>{formatDate(entry.publishedAt)}</p>
+            {(entry.body ?? '')
+              .split(/\n{2,}/)
+              .filter(Boolean)
+              .map((paragraph, index) => (
+                <p key={index} style={{ lineHeight: 1.7 }}>
+                  {paragraph}
+                </p>
+              ))}
+            <p>
+              <a href={`/${collection.slug}`}>{`← ${collection.displayName}`}</a>
+            </p>
+          </article>
+        ) : (
+          <>
+            <h1>{collection.displayName}</h1>
+            {entries.length === 0 ? (
+              <p style={{ opacity: 0.7 }}>{'Nothing published yet.'}</p>
+            ) : (
+              entries.map((item) => (
+                <article key={item.$id} style={{ marginBottom: 32 }}>
+                  <h2 style={{ marginBottom: 4 }}>
+                    <a
+                      href={`/${collection.slug}/${item.slug}`}
+                      style={{ color: 'inherit' }}
+                    >
+                      {item.title}
+                    </a>
+                  </h2>
+                  <p style={{ opacity: 0.7, margin: 0 }}>
+                    {formatDate(item.publishedAt)}
+                  </p>
+                  {item.excerpt ? (
+                    <p style={{ lineHeight: 1.7 }}>{item.excerpt}</p>
+                  ) : null}
+                </article>
+              ))
+            )}
+          </>
+        )}
+      </div>
+    )
+  }
 
   return (
     <Aglyn.SiteContext.Provider value={site}>
