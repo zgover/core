@@ -110,6 +110,11 @@ const Billing: NextPageWithLayout = () => {
             label: 'Billing',
             href: buildRoute(Route.MANAGE_BILLING),
           },
+          {
+            id: 'nav-tab-settings-community',
+            label: 'Community',
+            href: buildRoute(Route.MANAGE_COMMUNITY_PROFILE),
+          },
         ]}
         activeTab={buildRoute(Route.MANAGE_BILLING)}
         breadcrumbItems={[

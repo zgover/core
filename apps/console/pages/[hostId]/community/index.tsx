@@ -18,22 +18,22 @@
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import CommunityBrowse from '../../../components/community/community-browse.component'
 import { useHostId } from '../../../components/host-id-provider'
+import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import HostDisplayNameComponent from '../../../components/host-display-name.component'
-import MediaLibraryComponent from '../../../components/media/media-library.component'
-import { buildRoute, Route } from '../../../constants/route-links'
 import hostNavTabItems from '../../../constants/host-nav-tabs'
+import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
-const HostMedia: NextPageWithLayout = () => {
+const HostCommunity: NextPageWithLayout = () => {
   const hostId = useHostId()
 
   return (
     <>
-      <NextPageTitle screen={'Media'} />
+      <NextPageTitle screen={'Community'} />
       <DashboardLayout
         navTabItems={hostNavTabItems(hostId)}
         breadcrumbItems={[
@@ -42,33 +42,33 @@ const HostMedia: NextPageWithLayout = () => {
             href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
           },
           {
-            children: 'Media',
-            href: buildRoute(Route.HOST_MEDIA, { hostId }),
+            children: 'Community',
+            href: buildRoute(Route.HOST_COMMUNITY, { hostId }),
           },
         ]}
         header={{
-          children: 'Media',
+          children: 'Community',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <MediaLibraryComponent hostId={hostId} />
+          <CommunityBrowse hostId={hostId} />
         </Container>
       </DashboardLayout>
     </>
   )
 }
-HostMedia.displayName = 'Page:HostMedia'
-HostMedia.layouts = [
+HostCommunity.displayName = 'Page:HostCommunity'
+HostCommunity.layouts = [
   {
     Component: AuthenticatedLayout,
   },
   {
     Component: MainLayout,
     props: {
-      title: 'Media',
+      title: 'Community',
     },
   },
 ]
 
-export default HostMedia
+export default HostCommunity

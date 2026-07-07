@@ -41,6 +41,11 @@ const Settings: NextPageWithLayout = (props) => {
             label: 'Account',
             href: buildRoute(Route.MANAGE_ACCOUNT_SETTINGS),
           },
+          {
+            id: 'nav-tab-settings-community',
+            label: 'Community',
+            href: buildRoute(Route.MANAGE_COMMUNITY_PROFILE),
+          },
         ]}
         breadcrumbItems={[
           {
