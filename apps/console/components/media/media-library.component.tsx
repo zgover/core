@@ -25,13 +25,32 @@ import {
   Card,
   CardActions,
   CardMedia,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
   LinearProgress,
+  MenuItem,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material'
-import { collection, limit, query } from 'firebase/firestore'
-import { type ChangeEvent, useCallback, useRef, useState } from 'react'
+import {
+  collection,
+  doc,
+  limit,
+  query,
+  updateDoc,
+} from 'firebase/firestore'
+import {
+  type ChangeEvent,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   useFirestore,
   useFirestoreCollectionData,
@@ -99,6 +118,83 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     (sum, item) => sum + (item.sizeBytes ?? 0),
     0,
   )
+
+  // Organization (AGL-124): search + folder/tag filters over doc metadata.
+  const [search, setSearch] = useState('')
+  const [folderFilter, setFolderFilter] = useState('')
+  const [tagFilter, setTagFilter] = useState('')
+  const folders = useMemo(
+    () =>
+      [...new Set(items.map((item: any) => item.folder).filter(Boolean))].sort(),
+    [items],
+  )
+  const tags = useMemo(
+    () =>
+      [...new Set(items.flatMap((item: any) => item.tags ?? []))].sort(),
+    [items],
+  )
+  const visibleItems = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    return items.filter((item: any) => {
+      if (folderFilter && item.folder !== folderFilter) return false
+      if (tagFilter && !(item.tags ?? []).includes(tagFilter)) return false
+      if (!term) return true
+      const haystack = [
+        item.fileName,
+        item.folder,
+        item.alt,
+        item.description,
+        ...(item.tags ?? []),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return haystack.includes(term)
+    })
+  }, [items, search, folderFilter, tagFilter])
+
+  // Metadata editor (folder, tags, alt text, description) — metadata lives
+  // on the Firestore mirror doc, so host admins edit it client-side.
+  const [editor, setEditor] = useState<{
+    id: string
+    fileName: string
+    folder: string
+    tags: string
+    alt: string
+    description: string
+  } | null>(null)
+  const handleEditorSave = useCallback(async () => {
+    if (!editor) return
+    const tagList = [
+      ...new Set(
+        editor.tags
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+      ),
+    ]
+    await updateDoc(doc(firestore, 'hosts', hostId, 'media', editor.id), {
+      folder: editor.folder.trim(),
+      tags: tagList,
+      alt: editor.alt.trim(),
+      description: editor.description.trim(),
+    })
+      .then(() => {
+        enqueueSnackbar('Media details saved', {
+          variant: 'success',
+          persist: false,
+        })
+        logActivity('Updated media details', {
+          type: 'media',
+          id: editor.id,
+          name: editor.fileName,
+        })
+        setEditor(null)
+      })
+      .catch(() =>
+        enqueueSnackbar('An error has occurred', { variant: 'error' }),
+      )
+  }, [editor, firestore, hostId, enqueueSnackbar, logActivity])
 
   const handleUpload = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -237,6 +333,49 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           sx={{ display: 'none' }}
         />
       </Stack>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}
+      >
+        <TextField
+          size="small"
+          label="Search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          sx={{ minWidth: 200 }}
+        />
+        <TextField
+          select
+          size="small"
+          label="Folder"
+          value={folderFilter}
+          onChange={(event) => setFolderFilter(event.target.value)}
+          sx={{ minWidth: 140 }}
+        >
+          <MenuItem value="">{'All folders'}</MenuItem>
+          {folders.map((folder) => (
+            <MenuItem key={folder} value={folder}>
+              {folder}
+            </MenuItem>
+          ))}
+        </TextField>
+        {tags.length ? (
+          <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap' }}>
+            {tags.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                size="small"
+                color={tagFilter === tag ? 'secondary' : 'default'}
+                onClick={() =>
+                  setTagFilter((prev) => (prev === tag ? '' : tag))
+                }
+              />
+            ))}
+          </Stack>
+        ) : null}
+      </Stack>
       {busy ? <LinearProgress /> : null}
       {items.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
@@ -244,7 +383,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         </Typography>
       ) : (
         <Grid container spacing={2}>
-          {items.map((media) => (
+          {visibleItems.map((media: any) => (
             <Grid key={media.$id} size={{ xs: 6, sm: 4, md: 3, lg: 2 }}>
               <Card variant="outlined">
                 <CardMedia
@@ -282,6 +421,21 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
                       </Button>
                       <Button
                         size="small"
+                        onClick={() =>
+                          setEditor({
+                            id: media.$id as string,
+                            fileName: media.fileName ?? (media.$id as string),
+                            folder: (media as any).folder ?? '',
+                            tags: ((media as any).tags ?? []).join(', '),
+                            alt: (media as any).alt ?? '',
+                            description: (media as any).description ?? '',
+                          })
+                        }
+                      >
+                        {'Details'}
+                      </Button>
+                      <Button
+                        size="small"
                         color="error"
                         onClick={handleDelete(media)}
                       >
@@ -295,6 +449,75 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           ))}
         </Grid>
       )}
+      <Dialog
+        open={Boolean(editor)}
+        onClose={() => setEditor(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{editor?.fileName}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        >
+          <TextField
+            size="small"
+            label="Folder"
+            value={editor?.folder ?? ''}
+            onChange={(event) =>
+              setEditor((prev) =>
+                prev ? { ...prev, folder: event.target.value } : prev,
+              )
+            }
+            sx={{ mt: 1 }}
+            helperText={
+              folders.length ? `Existing: ${folders.join(', ')}` : undefined
+            }
+          />
+          <TextField
+            size="small"
+            label="Tags"
+            value={editor?.tags ?? ''}
+            onChange={(event) =>
+              setEditor((prev) =>
+                prev ? { ...prev, tags: event.target.value } : prev,
+              )
+            }
+            helperText="Comma-separated, e.g. hero, product"
+          />
+          <TextField
+            size="small"
+            label="Alt text"
+            value={editor?.alt ?? ''}
+            onChange={(event) =>
+              setEditor((prev) =>
+                prev ? { ...prev, alt: event.target.value } : prev,
+              )
+            }
+          />
+          <TextField
+            size="small"
+            label="Description"
+            value={editor?.description ?? ''}
+            onChange={(event) =>
+              setEditor((prev) =>
+                prev ? { ...prev, description: event.target.value } : prev,
+              )
+            }
+            multiline
+            minRows={2}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditor(null)}>{'Cancel'}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleEditorSave}
+          >
+            {'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   )
 }
