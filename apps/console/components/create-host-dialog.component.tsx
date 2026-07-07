@@ -16,14 +16,17 @@
  */
 'use client'
 
+import { generateSubdomain, SUBDOMAIN_PATTERN } from '@aglyn/aglyn'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   InputAdornment,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material'
@@ -31,8 +34,6 @@ import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
 import { useUser } from 'reactfire'
 import { buildRoute, Route } from '../constants/route-links'
-
-const SUBDOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]{2,29}$/
 
 export interface CreateHostDialogProps {
   open: boolean
@@ -51,6 +52,10 @@ export function CreateHostDialog(props: CreateHostDialogProps) {
   const { enqueueSnackbar } = useSnackbar()
   const [name, setName] = useState('')
   const [subdomain, setSubdomain] = useState('')
+  // Once the user edits the subdomain by hand, stop deriving it from the
+  // site name (AGL-147).
+  const [subdomainTouched, setSubdomainTouched] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const validSubdomain = SUBDOMAIN_PATTERN.test(subdomain)
 
@@ -69,6 +74,9 @@ export function CreateHostDialog(props: CreateHostDialogProps) {
       })
       const payload = await response.json()
       if (!response.ok || !payload?.hostId) {
+        if (Array.isArray(payload?.suggestions)) {
+          setSuggestions(payload.suggestions)
+        }
         return void enqueueSnackbar(payload?.error ?? 'Host creation failed', {
           variant: response.status === 409 ? 'warning' : 'error',
           allowDuplicate: true,
@@ -110,16 +118,24 @@ export function CreateHostDialog(props: CreateHostDialogProps) {
         <TextField
           label="Site name"
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) => {
+            setName(event.target.value)
+            if (!subdomainTouched) {
+              setSubdomain(generateSubdomain(event.target.value))
+              setSuggestions([])
+            }
+          }}
           size="small"
           autoFocus
         />
         <TextField
           label="Subdomain"
           value={subdomain}
-          onChange={(event) =>
+          onChange={(event) => {
+            setSubdomainTouched(true)
+            setSuggestions([])
             setSubdomain(event.target.value.toLowerCase())
-          }
+          }}
           error={Boolean(subdomain) && !validSubdomain}
           helperText={
             Boolean(subdomain) && !validSubdomain
@@ -135,6 +151,29 @@ export function CreateHostDialog(props: CreateHostDialogProps) {
           }}
           size="small"
         />
+        {suggestions.length ? (
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              {'Available:'}
+            </Typography>
+            {suggestions.map((candidate) => (
+              <Chip
+                key={candidate}
+                size="small"
+                label={candidate}
+                onClick={() => {
+                  setSubdomainTouched(true)
+                  setSubdomain(candidate)
+                  setSuggestions([])
+                }}
+              />
+            ))}
+          </Stack>
+        ) : null}
       </DialogContent>
       <DialogActions>
         <Button disabled={busy} onClick={onClose}>

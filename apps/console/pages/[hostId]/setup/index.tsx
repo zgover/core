@@ -33,7 +33,7 @@ import { InputAdornment, Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { useAnalytics } from 'reactfire'
+import { useAnalytics, useUser } from 'reactfire'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import CardDisplayFormTemplate from '../../../components/card-display-form-template'
 import { useHostId } from '../../../components/host-id-provider'
@@ -248,6 +248,7 @@ const HostSetup: NextPageWithLayout = (props) => {
       : basicSchema.id,
   )
   const analytics = useAnalytics()
+  const { data: user } = useUser()
   const hostId = useHostId()
   const {
     doc: { data, status },
@@ -281,6 +282,60 @@ const HostSetup: NextPageWithLayout = (props) => {
   const handleBasicSave = useCallback(
     async (fields: any) => {
       const dequeueLoading = queueLoading()
+      // Rename guards (AGL-147): the create API validates new hosts, but
+      // this save path could silently rename onto a taken or blocked
+      // subdomain — run the same server checks first.
+      const subdomainChanged =
+        typeof fields.subdomain === 'string' &&
+        fields.subdomain !== data?.subdomain
+      const displayNameChanged =
+        typeof fields.displayName === 'string' &&
+        fields.displayName !== data?.displayName
+      if (subdomainChanged || displayNameChanged) {
+        try {
+          const idToken = await (user as any)?.getIdToken?.()
+          const response = await fetch('/api/hosts/validate-name', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+            },
+            body: JSON.stringify({
+              hostId,
+              ...(subdomainChanged && { subdomain: fields.subdomain }),
+              ...(displayNameChanged && { displayName: fields.displayName }),
+            }),
+          })
+          const validation = response.ok ? await response.json() : null
+          if (validation) {
+            if (
+              !validation.subdomainValid ||
+              validation.subdomainBlocked ||
+              validation.subdomainTaken
+            ) {
+              dequeueLoading()
+              const hint = validation.suggestions?.length
+                ? ` Try: ${validation.suggestions.join(', ')}`
+                : ''
+              return void enqueueSnackbar(
+                (validation.subdomainTaken
+                  ? 'That subdomain is taken.'
+                  : 'That subdomain is not available.') + hint,
+                { variant: 'warning', persist: false },
+              )
+            }
+            if (validation.displayNameCollision) {
+              enqueueSnackbar(
+                'Another of your sites already uses this name — saved ' +
+                  'anyway, but consider renaming one.',
+                { variant: 'info', persist: false },
+              )
+            }
+          }
+        } catch {
+          // Validation is advisory on network failure; the save proceeds.
+        }
+      }
       await setDoc(fields, { merge: true })
         .then(() => {
           enqueueSnackbar('Saved!', { variant: 'success' })
@@ -293,7 +348,7 @@ const HostSetup: NextPageWithLayout = (props) => {
           dequeueLoading()
         })
     },
-    [enqueueSnackbar, queueLoading, setDoc, hostId, logActivity],
+    [enqueueSnackbar, queueLoading, setDoc, hostId, logActivity, data, user],
   )
 
   const forms = [

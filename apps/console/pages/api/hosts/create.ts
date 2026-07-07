@@ -15,23 +15,16 @@
  * limitations under the License.
  */
 
-import { checkQuota, createResourceUid } from '@aglyn/aglyn'
+import {
+  checkQuota,
+  createResourceUid,
+  isBlockedSubdomain,
+  SUBDOMAIN_PATTERN,
+  suggestSubdomains,
+} from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
-
-const SUBDOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]{2,29}$/
-// Platform/system names a tenant must not squat.
-const RESERVED_SUBDOMAINS = new Set([
-  'www',
-  'app',
-  'api',
-  'admin',
-  'console',
-  'mail',
-  'demo',
-  'staging',
-])
 
 /**
  * Creates a host (user request 2026-07-07 — the hosts page had no create
@@ -61,8 +54,9 @@ export default async function handler(
       error: 'Subdomain must be 3–30 lowercase letters, digits, or dashes',
     })
   }
-  if (RESERVED_SUBDOMAINS.has(subdomain)) {
-    return res.status(409).json({ error: 'That subdomain is reserved' })
+  // Shared reserved + profanity policy (AGL-147).
+  if (isBlockedSubdomain(subdomain)) {
+    return res.status(409).json({ error: 'That subdomain is not available' })
   }
 
   const authorization = req.headers.authorization ?? ''
@@ -88,7 +82,19 @@ export default async function handler(
       .limit(1)
       .get()
     if (!taken.empty) {
-      return res.status(409).json({ error: 'That subdomain is taken' })
+      // Offer available alternatives (AGL-147): name-2, name-<year>, …
+      const suggestions: string[] = []
+      for (const candidate of suggestSubdomains(subdomain)) {
+        const candidateTaken = await firestore
+          .collection('hosts')
+          .where('subdomain', '==', candidate)
+          .limit(1)
+          .get()
+        if (candidateTaken.empty) suggestions.push(candidate)
+      }
+      return res
+        .status(409)
+        .json({ error: 'That subdomain is taken', suggestions })
     }
 
     const tenantSnapshot = await firestore
