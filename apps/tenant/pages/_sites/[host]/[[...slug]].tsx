@@ -22,10 +22,11 @@ import { doc } from 'firebase/firestore'
 import { observer } from 'mobx-react-lite'
 import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useFirestore, useFirestoreDocData } from 'reactfire'
 import Head from 'next/head'
 import applyDuePublishSchedule from '../../../utils/apply-publish-schedule'
+import composeScreenNodes from '../../../utils/compose-screen-nodes'
 import getCollectionContent, {
   type CollectionContent,
 } from '../../../utils/get-collection-content'
@@ -53,6 +54,10 @@ interface Props {
   showBranding?: boolean
   /** Collection list/entry payload when the path is content, not a screen. */
   content?: CollectionContent
+  /** Password-protected screen: nodes withheld until unlock (AGL-87). */
+  protectedScreen?: boolean
+  /** Rendered as the custom not-found screen (noindex, AGL-87). */
+  notFoundFallback?: boolean
 }
 
 export const getStaticPaths: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
@@ -133,6 +138,38 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
           }
         }
       }
+      // Custom not-found screen (AGL-87): render the designated screen's
+      // content with noindex — SSG can't emit a real 404 status for
+      // dynamic content, so noindex keeps soft-404s out of search.
+      const notFoundScreenId = (hostRes.host as any)?.notFoundScreenId
+      if (notFoundScreenId) {
+        const fallbackScreen = await getScreen({
+          hostId,
+          screenId: notFoundScreenId,
+        })
+        if (fallbackScreen.screen) {
+          const fallbackNodes = await composeScreenNodes({
+            hostId,
+            screenId: notFoundScreenId,
+            screen: fallbackScreen.screen,
+          })
+          if (fallbackNodes) {
+            return {
+              props: JSON.parse(
+                JSON.stringify({
+                  data: {
+                    host: hostRes.host,
+                    screen: { data: fallbackScreen.screen },
+                  },
+                  nodes: fallbackNodes,
+                  notFoundFallback: true,
+                }),
+              ),
+              revalidate: 60,
+            }
+          }
+        }
+      }
       return {
         notFound: true,
         revalidate: 60, // never=false, always=1, since=SECONDS
@@ -162,59 +199,42 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
      *
      *=========================================*/
 
-    // Apply a due scheduled publication before resolving the version
-    // (AGL-61): ISR revalidation doubles as the schedule executor.
-    const effectiveVersionId = await applyDuePublishSchedule({
-      hostId,
-      collectionName: 'screens',
-      docId: screenId,
-      parent: screenRes.screen,
-    })
+    // Password protection (AGL-87): never embed a protected screen's nodes
+    // in the static HTML — the client unlocks via /api/protection/unlock.
+    const protection = (screenRes.screen as any)?.protection
+    if (protection?.passwordHash) {
+      const tenantRes = await getTenant({ tenantId: hostRes.host.tenantId })
+      return {
+        props: JSON.parse(
+          JSON.stringify({
+            data: {
+              host: hostRes.host,
+              screen: { data: { ...screenRes.screen, protection: null } },
+            },
+            nodes: null,
+            protectedScreen: true,
+            showBranding: Boolean(
+              tenantRes.tenant?.plan &&
+                !Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
+                  .removeBranding,
+            ),
+          }),
+        ),
+        revalidate: 60,
+      }
+    }
 
-    const versionRes = await getScreenVersion({
+    const denormalized = await composeScreenNodes({
       hostId,
-      screenId: screenId,
-      versionId: effectiveVersionId ?? screenRes.screen.versionId,
+      screenId,
+      screen: screenRes.screen,
     })
-    console.debug('versionRes', versionRes)
-
-    if (versionRes.error || !versionRes.version) {
+    if (!denormalized) {
       return {
         notFound: true,
         revalidate: 60, // never=false, always=1, since=SECONDS
       }
     }
-
-    /*==========================================
-     *
-     * MARK - COMPOSE LAYOUT (SHARED CHROME)
-     *
-     *=========================================*/
-
-    const layoutId = screenRes.screen.layoutId
-    const layoutRes = layoutId
-      ? await getPublishedLayoutVersion({ hostId, layoutId })
-      : undefined
-    console.debug('layoutRes', layoutRes)
-
-    /*==========================================
-     *
-     * MARK - FORMAT NODES
-     *
-     *=========================================*/
-
-    const composedNodes = Aglyn.composeLayoutAndScreenNodes(
-      layoutRes?.version?.nodes,
-      versionRes.version.nodes,
-    )
-    // Reusable components: graft each instance node's definition subtree
-    // (fail-open — a missing/broken definition leaves an empty wrapper).
-    const componentsRes = await getComponents({ hostId })
-    const nodes = Aglyn.composeReusableComponentNodes(
-      composedNodes as any,
-      componentsRes.definitions as any,
-    )
-    const denormalized = Aglyn.canvas.processNodesToDenormalized(nodes as any)
 
     // Free-tier branding (AGL-69): shown only once the owning tenant has an
     // explicit plan without the removeBranding feature; pre-billing tenants
@@ -257,6 +277,12 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 const CatchAllPage = observer(function CatchAllPage(props: Props) {
   // const props = { data: exampleData }
   const nodes = props.nodes
+  // Unlocked content for password-protected screens (AGL-87).
+  const [unlockedNodes, setUnlockedNodes] = useState<Record<
+    string,
+    any
+  > | null>(null)
+  const [unlockError, setUnlockError] = useState(false)
 
   // Fill the canvas DURING render, not only in an effect: the server
   // otherwise emits an empty page (crawlers see nothing) and hydration
@@ -321,6 +347,58 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       : undefined
 
   const site = useMemo(() => ({ hostId: host?.$id }), [host?.$id])
+
+  // Password-protected screens render an unlock form; the composed nodes
+  // arrive from /api/protection/unlock after verification (AGL-87).
+  if (props.protectedScreen && !unlockedNodes) {
+    return (
+      <div style={{ maxWidth: 420, margin: '15vh auto', padding: 24 }}>
+        <Head>
+          <title>{fullTitle}</title>
+          <meta key="robots" name="robots" content="noindex" />
+        </Head>
+        <h1 style={{ fontSize: 22 }}>{'This page is protected'}</h1>
+        <form
+          onSubmit={async (event) => {
+            event.preventDefault()
+            setUnlockError(false)
+            const form = new FormData(event.currentTarget)
+            const response = await fetch('/api/protection/unlock', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                hostId: host?.$id,
+                screenId: screen?.$id,
+                password: String(form.get('password') ?? ''),
+              }),
+            })
+            if (!response.ok) return setUnlockError(true)
+            const payload = await response.json()
+            if (payload?.nodes) {
+              Aglyn.canvas.setNodes(payload.nodes)
+              setUnlockedNodes(payload.nodes)
+            } else {
+              setUnlockError(true)
+            }
+          }}
+        >
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            autoFocus
+            style={{ padding: 8, width: '100%', boxSizing: 'border-box' }}
+          />
+          <button type="submit" style={{ marginTop: 12, padding: '8px 16px' }}>
+            {'Unlock'}
+          </button>
+          {unlockError ? (
+            <p style={{ color: '#c62828' }}>{'Wrong password — try again.'}</p>
+          ) : null}
+        </form>
+      </div>
+    )
+  }
 
   // Collection surfaces render outside the canvas system (AGL-81).
   if (props.content?.collection) {
@@ -408,6 +486,9 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
         <meta key="twitter:card" name="twitter:card" content="summary" />
         {canonical ? (
           <link key="canonical" rel="canonical" href={canonical} />
+        ) : null}
+        {props.notFoundFallback ? (
+          <meta key="robots" name="robots" content="noindex" />
         ) : null}
       </Head>
       <AglynNodeRenderer node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)} />

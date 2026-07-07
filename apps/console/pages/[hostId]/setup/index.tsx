@@ -41,6 +41,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import CustomDomainCard from '../../../components/custom-domain-card.component'
+import NotFoundScreenCard from '../../../components/not-found-screen-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
@@ -411,6 +412,7 @@ const HostSetup: NextPageWithLayout = (props) => {
             />
           </TabContext>
           <CustomDomainCard hostId={hostId} />
+          <NotFoundScreenCard hostId={hostId} />
         </Container>
       </DashboardLayout>
     </>

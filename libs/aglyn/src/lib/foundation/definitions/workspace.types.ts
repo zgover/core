@@ -178,6 +178,8 @@ export interface AglynHost extends AglynDocument {
     }
   }
   screens?: Record<ScreenUid, ScreenSlug>
+  /** Screen rendered (noindex) for unmatched paths (AGL-87). */
+  notFoundScreenId?: ScreenUid
   /** Directory of shared layouts by display name (mirrors `screens`). */
   layouts?: Record<LayoutUid, string>
   theme?: AglynHostTheme
@@ -258,6 +260,8 @@ export interface AglynScreen extends AglynDocument {
   order?: number
   versionId?: VersionUid
   publishSchedule?: PublishSchedule
+  /** Password protection (AGL-87): sha256 hex of the visitor password. */
+  protection?: { passwordHash?: string }
   status?: HostScreenStatus
   createdAt?: ITimestamp
   updatedAt?: ITimestamp

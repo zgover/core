@@ -127,6 +127,8 @@ function BesignerPage(props) {
   // Screen SEO fields (SEO Toolkit); null = untouched, falls back to doc.
   const [seoTitle, setSeoTitle] = useState<string | null>(null)
   const [seoDescription, setSeoDescription] = useState<string | null>(null)
+  // Screen password protection (AGL-87); null = untouched.
+  const [protectPassword, setProtectPassword] = useState<string | null>(null)
   const handleAddElementClick = useAddElementDrawerCallback()
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, {
     hostId: hostId as string,
@@ -246,6 +248,38 @@ function BesignerPage(props) {
     () => ({ chromeCanvas }),
     [chromeCanvas],
   )
+
+  const handleProtectionSave = useCallback(async () => {
+    if (protectPassword == null) return
+    const value = protectPassword.trim()
+    let update: Record<string, unknown>
+    if (!value) {
+      update = { protection: deleteField() as any }
+    } else {
+      const digest = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(value),
+      )
+      const passwordHash = Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .join('')
+      update = { protection: { passwordHash } }
+    }
+    await updateScreenDoc(update as any)
+      .then(() => {
+        enqueueSnackbar(
+          value ? 'Password protection enabled' : 'Password protection removed',
+          { variant: 'success', persist: false },
+        )
+        setProtectPassword(null)
+      })
+      .catch((e) => {
+        enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      })
+  }, [protectPassword, updateScreenDoc, enqueueSnackbar])
 
   const handleSeoSave = useCallback(async () => {
     const existing = (screenResult?.data as any)?.seo ?? {}
@@ -874,6 +908,32 @@ function BesignerPage(props) {
           >
             {'Save SEO'}
           </Button>
+          <Typography variant="subtitle2">{'Password protection'}</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {(screenResult?.data as any)?.protection?.passwordHash
+              ? 'This screen is password-protected. Enter a new password to ' +
+                'change it, or save empty to remove protection.'
+              : 'Visitors must enter this password to view the published ' +
+                'screen. Leave empty for public.'}
+          </Typography>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <TextField
+              size="small"
+              type="password"
+              label="Password"
+              value={protectPassword ?? ''}
+              onChange={(e) => setProtectPassword(e.target.value)}
+              sx={{ flex: 1 }}
+            />
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleProtectionSave}
+              disabled={protectPassword == null}
+            >
+              {'Save'}
+            </Button>
+          </Stack>
         </Stack>
       </PropertiesDialogComponent>
       {Boolean(Aglyn.canvas.rootNode && jsonOpen) && (
