@@ -44,6 +44,7 @@ import CustomDomainCard from '../../../components/custom-domain-card.component'
 import NotFoundScreenCard from '../../../components/not-found-screen-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../constants/route-links'
+import hostNavTabItems from '../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
 const basicSchema: FormSchema = {
@@ -289,48 +290,7 @@ const HostSetup: NextPageWithLayout = (props) => {
     <>
       <NextPageTitle screen={'Host Setup'} />
       <DashboardLayout
-        navTabItems={[
-          {
-            id: 'nav-tab-dashboard',
-            label: 'Dashboard',
-            href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
-          },
-          {
-            id: 'nav-tab-screens',
-            label: 'Screens',
-            href: buildRoute(Route.SCREEN_LIST, { hostId }),
-          },
-          {
-            id: 'nav-tab-layouts',
-            label: 'Layouts',
-            href: buildRoute(Route.LAYOUT_LIST, { hostId }),
-          },
-          {
-            id: 'nav-tab-theme',
-            label: 'Theme',
-            href: buildRoute(Route.HOST_THEME, { hostId }),
-          },
-          {
-            id: 'nav-tab-media',
-            label: 'Media',
-            href: buildRoute(Route.HOST_MEDIA, { hostId }),
-          },
-          {
-            id: 'nav-tab-content',
-            label: 'Content',
-            href: buildRoute(Route.HOST_CONTENT, { hostId }),
-          },
-          {
-            id: 'nav-tab-inbox',
-            label: 'Inbox',
-            href: buildRoute(Route.HOST_INBOX, { hostId }),
-          },
-          {
-            id: 'nav-tab-setup',
-            label: 'Setup',
-            href: buildRoute(Route.HOST_SETUP, { hostId }),
-          },
-        ]}
+        navTabItems={hostNavTabItems(hostId)}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

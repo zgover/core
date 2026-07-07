@@ -39,6 +39,36 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
+    // Community marketplace (AGL-44). Profiles are public publisher pages;
+    // the owner (tenants are keyed by uid) or staff may write. Handle and
+    // names are length-capped here since any owner writes client-side.
+    match /profiles/{tenantId} {
+      allow read: if true;
+      allow write: if (isStaff() ||
+          (isSignedIn() && request.auth.uid == tenantId)) &&
+        request.resource.data.handle is string &&
+        request.resource.data.handle.size() >= 3 &&
+        request.resource.data.handle.size() <= 30 &&
+        request.resource.data.handle.matches('[a-z0-9][a-z0-9-]*') &&
+        request.resource.data.displayName is string &&
+        request.resource.data.displayName.size() <= 80;
+    }
+
+    // Listings are public reads. Creates and version snapshots happen ONLY
+    // through the publish API (Admin SDK, server-side sanitization) — no
+    // client create. Owners may update/delete their own listing metadata
+    // (unpublish via deletedAt); staff may moderate anything.
+    match /communityListings/{listingId} {
+      allow read: if true;
+      allow create: if false;
+      allow update, delete: if isStaff() ||
+        (isSignedIn() && resource.data.profileId == request.auth.uid);
+      match /versions/{version} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
     // Staff-only, append-only audit log of admin actions
     // ({ actorUid, action, target, before, after, at }).
     match /adminAudit/{entryId} {

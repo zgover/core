@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+export * from './community'
 export * from './compose-layout-nodes'
 export * from './compose-reusable-components'
 export * from './compress'

@@ -31,7 +31,7 @@ import {
 } from '@mui/material'
 import { collection, doc, limit, query, updateDoc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire'
 
 export interface HostComponentsCardProps {
   hostId: string
@@ -65,6 +65,59 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     name: string
     description: string
   } | null>(null)
+
+  // Community publish (AGL-44): posts to the server-side publish API —
+  // sanitization/allowlisting happen there; clients cannot create listings.
+  const { data: user } = useUser()
+  const [publisher, setPublisher] = useState<{
+    id: string
+    name: string
+    description: string
+    category: string
+    busy?: boolean
+  } | null>(null)
+
+  const handlePublishConfirm = useCallback(async () => {
+    if (!publisher || !publisher.name.trim() || publisher.busy) return
+    setPublisher((prev) => (prev ? { ...prev, busy: true } : prev))
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/community/publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          hostId,
+          componentId: publisher.id,
+          displayName: publisher.name.trim(),
+          description: publisher.description.trim(),
+          category: publisher.category.trim(),
+        }),
+      })
+      const payload = await response.json()
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Publish failed', {
+          variant: response.status === 412 ? 'warning' : 'error',
+          allowDuplicate: true,
+        })
+      }
+      setPublisher(null)
+      enqueueSnackbar(`Published v${payload.version} to the community`, {
+        variant: 'success',
+        persist: false,
+      })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('An error has occurred', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } finally {
+      setPublisher((prev) => (prev ? { ...prev, busy: false } : prev))
+    }
+  }, [publisher, user, hostId, enqueueSnackbar])
 
   const handleSave = useCallback(async () => {
     if (!editor || !editor.name.trim()) return
@@ -146,6 +199,19 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
               </Button>
               <Button
                 size="small"
+                onClick={() =>
+                  setPublisher({
+                    id: definition.$id,
+                    name: definition.displayName ?? '',
+                    description: definition.description ?? '',
+                    category: '',
+                  })
+                }
+              >
+                {'Publish'}
+              </Button>
+              <Button
+                size="small"
                 color="error"
                 onClick={handleDelete(definition)}
               >
@@ -199,6 +265,73 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
             onClick={handleSave}
           >
             {'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={Boolean(publisher)}
+        onClose={() => (publisher?.busy ? null : setPublisher(null))}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{'Publish to community'}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            {'Publishes a snapshot as a public listing under your ' +
+              'community profile. Re-publishing releases a new version; ' +
+              'sites that installed it choose when to update.'}
+          </Typography>
+          <TextField
+            label="Listing name"
+            value={publisher?.name ?? ''}
+            onChange={(event) =>
+              setPublisher((prev) =>
+                prev ? { ...prev, name: event.target.value } : prev,
+              )
+            }
+            size="small"
+            autoFocus
+          />
+          <TextField
+            label="Description"
+            value={publisher?.description ?? ''}
+            onChange={(event) =>
+              setPublisher((prev) =>
+                prev ? { ...prev, description: event.target.value } : prev,
+              )
+            }
+            size="small"
+            multiline
+            minRows={2}
+          />
+          <TextField
+            label="Category"
+            placeholder="e.g. Hero, Footer, Pricing"
+            value={publisher?.category ?? ''}
+            onChange={(event) =>
+              setPublisher((prev) =>
+                prev ? { ...prev, category: event.target.value } : prev,
+              )
+            }
+            size="small"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            disabled={publisher?.busy}
+            onClick={() => setPublisher(null)}
+          >
+            {'Cancel'}
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!publisher?.name.trim() || publisher?.busy}
+            onClick={handlePublishConfirm}
+          >
+            {publisher?.busy ? 'Publishing…' : 'Publish'}
           </Button>
         </DialogActions>
       </Dialog>
