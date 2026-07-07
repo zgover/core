@@ -18,7 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import applyDuePublishSchedule from './apply-publish-schedule'
 import getComponents from './get-components'
-import getVariables from './get-variables'
+import getVariables, { getFunctions } from './get-variables'
 import getPublishedLayoutVersion from './get-layout-version'
 import getScreenVersion from './get-screen-version'
 
@@ -62,10 +62,14 @@ export async function composeScreenNodes(options: {
     composedNodes as any,
     componentsRes.definitions as any,
   )
-  // Host variable bindings (AGL-91): {{name}} in string props resolves to
-  // the variable's formatted value; unknown tokens stay literal.
-  const variables = await getVariables({ hostId })
-  const nodes = Aglyn.resolveNodesBindings(grafted as any, variables)
+  // Host variable + function bindings (AGL-91/93): {{name}} and
+  // {{fn:name(args)}} in string props resolve to values; unknown tokens
+  // and failed runs stay literal.
+  const [variables, functions] = await Promise.all([
+    getVariables({ hostId }),
+    getFunctions({ hostId }),
+  ])
+  const nodes = Aglyn.resolveNodesBindings(grafted as any, variables, functions)
   return Aglyn.canvas.processNodesToDenormalized(nodes as any)
 }
 

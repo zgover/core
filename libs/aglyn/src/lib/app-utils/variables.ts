@@ -15,10 +15,17 @@
  * limitations under the License.
  */
 
+import {
+  evaluateExpression,
+  evaluateHostFunction,
+  type HostFunction,
+} from './functions'
+
 /**
  * Host variables (Component Builder, AGL-91): typed values authored in the
- * console and bound into component text props with `{{name}}`. Pure data
- * module shared by the console editor UI and the tenant compose pipeline.
+ * console and bound into component text props with `{{name}}` — and, since
+ * AGL-93, function results with `{{fn:name(args)}}`. Pure data module
+ * shared by the console editor UI and the tenant compose pipeline.
  */
 
 /** Types from the mockup's Edit Variable dialog ("Function" lands with AGL-92). */
@@ -98,16 +105,61 @@ export function formatVariableValue(variable: HostVariable): string {
 }
 
 const BINDING_PATTERN = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]{0,39})\s*\}\}/g
+const FUNCTION_BINDING_PATTERN =
+  /\{\{\s*fn:([a-zA-Z_][a-zA-Z0-9_ ]{0,59}?)\s*\(([^)]*)\)\s*\}\}/g
+
+/** A function definition lookup keyed by function name (AGL-93). */
+export type HostFunctionLookup = Record<string, HostFunction>
+
+/** Variable values as an expression scope (numbers stay numeric). */
+function variableScope(
+  variables: Record<string, HostVariable>,
+): Record<string, number | string | boolean> {
+  const scope: Record<string, number | string | boolean> = {}
+  for (const [name, variable] of Object.entries(variables)) {
+    if (variable.type === 'number') scope[name] = Number(variable.value ?? 0)
+    else if (variable.type === 'boolean') scope[name] = variable.value === 'true'
+    else scope[name] = variable.value ?? ''
+  }
+  return scope
+}
 
 /**
- * Replaces `{{name}}` tokens with variable values. Unknown names keep the
- * literal token so typos stay visible instead of vanishing silently.
+ * Replaces `{{name}}` tokens with variable values and
+ * `{{fn:name(arg, ...)}}` tokens with function results (AGL-91/93).
+ * Function args are expressions over literals and variable names. Unknown
+ * names and failed runs keep the literal token so problems stay visible
+ * instead of vanishing silently.
  */
 export function resolveBindings(
   text: string,
   variables: Record<string, HostVariable>,
+  functions: HostFunctionLookup = {},
 ): string {
-  return text.replace(BINDING_PATTERN, (token, name) => {
+  const withFunctions = text.replace(
+    FUNCTION_BINDING_PATTERN,
+    (token, rawName, rawArgs) => {
+      const definition = functions[String(rawName).trim()]
+      if (!definition) return token
+      try {
+        const scope = variableScope(variables)
+        const argValues = String(rawArgs)
+          .split(',')
+          .map((argument) => argument.trim())
+          .filter((argument) => argument.length > 0)
+          .map((argument) => evaluateExpression(argument, scope))
+        const args: Record<string, unknown> = {}
+        definition.parameters?.forEach((parameter, index) => {
+          args[parameter.name] = argValues[index]
+        })
+        const result = evaluateHostFunction(definition, args)
+        return result.ok ? String(result.value) : token
+      } catch {
+        return token
+      }
+    },
+  )
+  return withFunctions.replace(BINDING_PATTERN, (token, name) => {
     const variable = variables[name]
     return variable ? formatVariableValue(variable) : token
   })
@@ -124,10 +176,14 @@ export function hasBindings(text: string): boolean {
  * option lists) pass through untouched; unsafe values in hrefs remain
  * covered by the render-time SAFE_HREF/sanitizer checks.
  */
-export function resolveNodesBindings<
-  T extends Record<string, any>,
->(nodes: T, variables: Record<string, HostVariable>): T {
-  if (!Object.keys(variables).length) return nodes
+export function resolveNodesBindings<T extends Record<string, any>>(
+  nodes: T,
+  variables: Record<string, HostVariable>,
+  functions: HostFunctionLookup = {},
+): T {
+  if (!Object.keys(variables).length && !Object.keys(functions).length) {
+    return nodes
+  }
   const next: Record<string, any> = {}
   for (const [id, node] of Object.entries(nodes)) {
     const props = node?.props
@@ -139,7 +195,7 @@ export function resolveNodesBindings<
     const nextProps: Record<string, unknown> = { ...props }
     for (const [key, value] of Object.entries(props)) {
       if (typeof value === 'string' && hasBindings(value)) {
-        nextProps[key] = resolveBindings(value, variables)
+        nextProps[key] = resolveBindings(value, variables, functions)
         changed = true
       }
     }
