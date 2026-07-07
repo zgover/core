@@ -513,19 +513,29 @@ export const BesignerVersionsComponent = observer(
                         >
                           {'Publish'}
                         </Button>
-                        <Tooltip title="Schedule publish">
+                        <Tooltip
+                          title={
+                            isPublished
+                              ? 'This version is already live — create a new version to schedule it'
+                              : 'Publish this version automatically at a date/time'
+                          }
+                        >
                           <span>
-                            <IconButton
+                            <Button
                               size="small"
+                              color="secondary"
                               disabled={isPublished}
                               onClick={handleScheduleOpen(version.$id)}
                               aria-label="schedule publish"
+                              startIcon={
+                                <MdiIcon
+                                  fontSize="inherit"
+                                  path={ICON_VARIANT_DATE_TIME.path}
+                                />
+                              }
                             >
-                              <MdiIcon
-                                fontSize="inherit"
-                                path={ICON_VARIANT_DATE_TIME.path}
-                              />
-                            </IconButton>
+                              {'Schedule'}
+                            </Button>
                           </span>
                         </Tooltip>
                         <Tooltip title="Rename">
