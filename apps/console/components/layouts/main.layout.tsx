@@ -57,8 +57,9 @@ import {
 } from '@mui/material'
 import { useColorScheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
-import { buildRoute, Route } from '../../constants/route-links'
+import { Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
+import HostSwitcherNavComponent from '../host-switcher-nav.component'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {
@@ -358,32 +359,13 @@ export function MainLayout(props: MainLayoutProps) {
         <TopAppBar
           enableAppBarElevation={enableAppBarElevation}
           backButton={backButton}
-          centerNavigationItems={
-            centerNavigationItems || [
-              // {
-              //   id: 'center-nav-site-picker',
-              //   children: ,
-              // },
-              {
-                id: 'center-nav-hosts',
-                children: 'Hosts',
-                href: buildRoute(Route.HOST_LIST),
-              },
-              // {
-              //   id: 'center-nav-app',
-              //   children: 'Website',
-              //   // href: '/besigner',
-              //   items: [
-              //     {
-              //       id: 'center-nav-screens',
-              //       children: 'View Screens',
-              //       href: Route.SCREEN_LIST,
-              //     },
-              //   ],
-              // },
-            ]
+          centerNavigationItems={centerNavigationItems || []}
+          customCenter={
+            // Default center nav is the host-switcher dropdown (AGL-36);
+            // pages that pass their own nav items or custom center keep them.
+            customCenter ??
+            (centerNavigationItems ? undefined : <HostSwitcherNavComponent />)
           }
-          customCenter={customCenter}
           appBarSuffix={appBarSuffix}
           quickActions={[
             ...(quickActions || []),
