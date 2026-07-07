@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import { parseMarkdownLite } from '@aglyn/aglyn'
 import { mdiFileDocumentMultipleOutline } from '@aglyn/shared-data-mdi'
 import {
   CardDisplay,
@@ -53,7 +54,9 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
+import { Divider, Link as MuiLink } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
+import { useFirestoreDocData } from 'reactfire'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { useHostId } from '../../../components/host-id-provider'
@@ -64,6 +67,7 @@ import { buildRoute, Route } from '../../../constants/route-links'
 import hostNavTabItems from '../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import useHostActivityLogger from '../../../hooks/use-host-activity-logger'
+import MediaPickerDialog from '../../../components/media/media-picker-dialog.component'
 
 const slugify = (value: string) =>
   value
@@ -88,6 +92,16 @@ const HostContent: NextPageWithLayout = () => {
     query(collection(firestore, 'hosts', hostId, 'collections'), limit(50)),
     { idField: '$id' },
   )
+  const { data: hostDoc } = useFirestoreDocData<any>(
+    doc(firestore, 'hosts', hostId),
+    { idField: '$id' },
+  )
+  // Live-entry links (AGL-123): custom domain first, subdomain fallback.
+  const siteBase = hostDoc?.cname
+    ? `https://${hostDoc.cname}`
+    : hostDoc?.subdomain
+      ? `https://${hostDoc.subdomain}.aglyn.app`
+      : null
   const collections = useMemo(
     () => [...(collectionDocs ?? [])].sort((a, b) =>
       String(a.displayName ?? '').localeCompare(String(b.displayName ?? '')),
@@ -151,6 +165,17 @@ const HostContent: NextPageWithLayout = () => {
     title: string
     excerpt: string
     body: string
+    coverImage: string
+  } | null>(null)
+  // Media picker target: entry cover image or an inline body image.
+  const [pickerTarget, setPickerTarget] = useState<'cover' | 'body' | null>(
+    null,
+  )
+  const [previewOpen, setPreviewOpen] = useState(false)
+  // Scheduled publishing (AGL-123): entry id being scheduled + datetime.
+  const [scheduler, setScheduler] = useState<{
+    entry: any
+    at: string
   } | null>(null)
 
   const handleSaveEntry = useCallback(async () => {
@@ -174,6 +199,7 @@ const HostContent: NextPageWithLayout = () => {
         slug: slugify(title),
         excerpt: editor.excerpt.trim(),
         body: editor.body,
+        coverImage: editor.coverImage.trim(),
         ...(editor.id ? {} : { status: 'draft', createdAt: timestamp }),
         updatedAt: timestamp,
       },
@@ -221,6 +247,42 @@ const HostContent: NextPageWithLayout = () => {
     },
     [selected, firestore, hostId, enqueueSnackbar, logActivity],
   )
+
+  const handleScheduleEntry = useCallback(async () => {
+    if (!scheduler || !selected) return
+    const publishAt = new Date(scheduler.at)
+    if (Number.isNaN(publishAt.getTime()) || publishAt <= new Date()) {
+      return enqueueSnackbar('Pick a future date/time', {
+        variant: 'warning',
+        persist: false,
+      })
+    }
+    await updateDoc(
+      doc(
+        firestore,
+        'hosts',
+        hostId,
+        'collections',
+        selected.$id,
+        'entries',
+        scheduler.entry.$id,
+      ),
+      {
+        status: 'scheduled',
+        publishAt: Timestamp.fromDate(publishAt),
+      },
+    )
+    enqueueSnackbar(`Scheduled for ${publishAt.toLocaleString()}`, {
+      variant: 'success',
+      persist: false,
+    })
+    logActivity('Scheduled entry', {
+      type: 'content',
+      id: scheduler.entry.$id,
+      name: scheduler.entry.title,
+    })
+    setScheduler(null)
+  }, [scheduler, selected, firestore, hostId, enqueueSnackbar, logActivity])
 
   const handleDeleteEntry = useCallback(
     (entry: any) => async () => {
@@ -318,7 +380,13 @@ const HostContent: NextPageWithLayout = () => {
                   variant="outlined"
                   color="secondary"
                   onClick={() =>
-                    setEditor({ id: null, title: '', excerpt: '', body: '' })
+                    setEditor({
+                      id: null,
+                      title: '',
+                      excerpt: '',
+                      body: '',
+                      coverImage: '',
+                    })
                   }
                 >
                   {'New entry'}
@@ -354,11 +422,17 @@ const HostContent: NextPageWithLayout = () => {
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={entry.status ?? 'draft'}
+                            label={
+                              entry.status === 'scheduled' && entry.publishAt
+                                ? `scheduled · ${entry.publishAt.toDate?.().toLocaleString() ?? ''}`
+                                : (entry.status ?? 'draft')
+                            }
                             color={
                               entry.status === 'published'
                                 ? 'success'
-                                : 'default'
+                                : entry.status === 'scheduled'
+                                  ? 'info'
+                                  : 'default'
                             }
                             size="small"
                           />
@@ -375,6 +449,7 @@ const HostContent: NextPageWithLayout = () => {
                                 title: entry.title ?? '',
                                 excerpt: entry.excerpt ?? '',
                                 body: entry.body ?? '',
+                                coverImage: entry.coverImage ?? '',
                               })
                             }
                           >
@@ -389,6 +464,37 @@ const HostContent: NextPageWithLayout = () => {
                               ? 'Unpublish'
                               : 'Publish'}
                           </Button>
+                          <Button
+                            size="small"
+                            color="secondary"
+                            onClick={() => {
+                              const initial = new Date(
+                                Date.now() + 60 * 60 * 1000,
+                              )
+                              initial.setMinutes(0, 0, 0)
+                              const pad = (value: number) =>
+                                String(value).padStart(2, '0')
+                              setScheduler({
+                                entry,
+                                at:
+                                  `${initial.getFullYear()}-${pad(initial.getMonth() + 1)}-` +
+                                  `${pad(initial.getDate())}T${pad(initial.getHours())}:${pad(initial.getMinutes())}`,
+                              })
+                            }}
+                          >
+                            {'Schedule'}
+                          </Button>
+                          {entry.status === 'published' && siteBase ? (
+                            <Button
+                              size="small"
+                              component={MuiLink as any}
+                              href={`${siteBase}/${selected?.slug}/${entry.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {'View'}
+                            </Button>
+                          ) : null}
                           <Button
                             size="small"
                             color="error"
@@ -483,6 +589,82 @@ const HostContent: NextPageWithLayout = () => {
             multiline
             minRows={2}
           />
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <TextField
+              label="Cover image URL"
+              value={editor?.coverImage ?? ''}
+              onChange={(event) =>
+                setEditor((prev) =>
+                  prev ? { ...prev, coverImage: event.target.value } : prev,
+                )
+              }
+              size="small"
+              sx={{ flexGrow: 1 }}
+            />
+            <Button size="small" onClick={() => setPickerTarget('cover')}>
+              {'Choose'}
+            </Button>
+          </Stack>
+          <Stack direction="row" spacing={1}>
+            <Button
+              size="small"
+              onClick={() =>
+                setEditor((prev) =>
+                  prev ? { ...prev, body: `${prev.body}**bold**` } : prev,
+                )
+              }
+            >
+              {'B'}
+            </Button>
+            <Button
+              size="small"
+              onClick={() =>
+                setEditor((prev) =>
+                  prev ? { ...prev, body: `${prev.body}*italic*` } : prev,
+                )
+              }
+            >
+              {'I'}
+            </Button>
+            <Button
+              size="small"
+              onClick={() =>
+                setEditor((prev) =>
+                  prev
+                    ? { ...prev, body: `${prev.body}\n\n## Heading` }
+                    : prev,
+                )
+              }
+            >
+              {'H2'}
+            </Button>
+            <Button
+              size="small"
+              onClick={() =>
+                setEditor((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        body: `${prev.body}\n\n[link text](https://)`,
+                      }
+                    : prev,
+                )
+              }
+            >
+              {'Link'}
+            </Button>
+            <Button size="small" onClick={() => setPickerTarget('body')}>
+              {'Insert image'}
+            </Button>
+            <Divider orientation="vertical" flexItem />
+            <Button
+              size="small"
+              color="secondary"
+              onClick={() => setPreviewOpen(true)}
+            >
+              {'Preview'}
+            </Button>
+          </Stack>
           <TextField
             label="Body"
             value={editor?.body ?? ''}
@@ -494,7 +676,7 @@ const HostContent: NextPageWithLayout = () => {
             size="small"
             multiline
             minRows={10}
-            helperText="Plain text; blank lines separate paragraphs."
+            helperText="Markdown-lite: **bold**, *italic*, ## headings, - lists, [links](https://), ![images](https://)."
           />
         </DialogContent>
         <DialogActions>
@@ -506,6 +688,139 @@ const HostContent: NextPageWithLayout = () => {
             onClick={handleSaveEntry}
           >
             {editor?.id ? 'Save' : 'Create draft'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <MediaPickerDialog
+        hostId={hostId}
+        open={pickerTarget != null}
+        onClose={() => setPickerTarget(null)}
+        onPick={(media) => {
+          const url = (media as any).url as string | undefined
+          if (url) {
+            setEditor((prev) =>
+              prev
+                ? pickerTarget === 'cover'
+                  ? { ...prev, coverImage: url }
+                  : {
+                      ...prev,
+                      body: `${prev.body}\n\n![${(media as any).alt ?? (media as any).fileName ?? ''}](${url})`,
+                    }
+                : prev,
+            )
+          }
+          setPickerTarget(null)
+        }}
+      />
+      <Dialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{editor?.title || 'Preview'}</DialogTitle>
+        <DialogContent>
+          {editor?.coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={editor.coverImage}
+              alt=""
+              style={{ maxWidth: '100%', borderRadius: 8 }}
+            />
+          ) : null}
+          {parseMarkdownLite(editor?.body ?? '').map((block, index) => {
+            const inline = (inlines: any[]) =>
+              inlines.map((item, i) =>
+                item.type === 'bold' ? (
+                  <strong key={i}>{item.text}</strong>
+                ) : item.type === 'italic' ? (
+                  <em key={i}>{item.text}</em>
+                ) : item.type === 'link' ? (
+                  <MuiLink key={i} href={item.href} target="_blank">
+                    {item.text}
+                  </MuiLink>
+                ) : (
+                  <span key={i}>{item.text}</span>
+                ),
+              )
+            if (block.type === 'heading') {
+              return (
+                <Typography
+                  key={index}
+                  variant={block.level === 2 ? 'h5' : 'h6'}
+                  sx={{ mt: 2 }}
+                >
+                  {inline(block.inlines)}
+                </Typography>
+              )
+            }
+            if (block.type === 'image') {
+              return (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={index}
+                  src={block.src}
+                  alt={block.alt}
+                  style={{ maxWidth: '100%', borderRadius: 8, marginTop: 16 }}
+                />
+              )
+            }
+            if (block.type === 'list') {
+              return (
+                <ul key={index}>
+                  {block.items.map((item, i) => (
+                    <li key={i}>{inline(item)}</li>
+                  ))}
+                </ul>
+              )
+            }
+            return (
+              <Typography key={index} variant="body1" sx={{ mt: 1.5 }}>
+                {inline(block.inlines)}
+              </Typography>
+            )
+          })}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPreviewOpen(false)}>{'Close'}</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={Boolean(scheduler)}
+        onClose={() => setScheduler(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{'Schedule entry'}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            {'The entry goes live once the time passes (applied on the ' +
+              'next site refresh).'}
+          </Typography>
+          <TextField
+            size="small"
+            type="datetime-local"
+            label="Publish at"
+            value={scheduler?.at ?? ''}
+            onChange={(event) =>
+              setScheduler((prev) =>
+                prev ? { ...prev, at: event.target.value } : prev,
+              )
+            }
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setScheduler(null)}>{'Cancel'}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!scheduler?.at}
+            onClick={handleScheduleEntry}
+          >
+            {'Schedule'}
           </Button>
         </DialogActions>
       </Dialog>

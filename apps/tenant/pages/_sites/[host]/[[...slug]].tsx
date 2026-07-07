@@ -428,14 +428,62 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
           <article>
             <h1>{entry.title}</h1>
             <p style={{ opacity: 0.7 }}>{formatDate(entry.publishedAt)}</p>
-            {(entry.body ?? '')
-              .split(/\n{2,}/)
-              .filter(Boolean)
-              .map((paragraph, index) => (
+            {(entry as any).coverImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={(entry as any).coverImage}
+                alt=""
+                style={{ maxWidth: '100%', borderRadius: 8 }}
+              />
+            ) : null}
+            {Aglyn.parseMarkdownLite(entry.body ?? '').map((block, index) => {
+              const inline = (inlines: Aglyn.MarkdownInline[]) =>
+                inlines.map((item, i) =>
+                  item.type === 'bold' ? (
+                    <strong key={i}>{item.text}</strong>
+                  ) : item.type === 'italic' ? (
+                    <em key={i}>{item.text}</em>
+                  ) : item.type === 'link' ? (
+                    <a key={i} href={item.href}>
+                      {item.text}
+                    </a>
+                  ) : (
+                    <span key={i}>{item.text}</span>
+                  ),
+                )
+              if (block.type === 'heading') {
+                return block.level === 2 ? (
+                  <h2 key={index}>{inline(block.inlines)}</h2>
+                ) : (
+                  <h3 key={index}>{inline(block.inlines)}</h3>
+                )
+              }
+              if (block.type === 'image') {
+                return (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={index}
+                    src={block.src}
+                    alt={block.alt}
+                    style={{ maxWidth: '100%', borderRadius: 8 }}
+                  />
+                )
+              }
+              if (block.type === 'list') {
+                return (
+                  <ul key={index} style={{ lineHeight: 1.7 }}>
+                    {block.items.map((item, i) => (
+                      <li key={i}>{inline(item)}</li>
+                    ))}
+                  </ul>
+                )
+              }
+              return (
                 <p key={index} style={{ lineHeight: 1.7 }}>
-                  {paragraph}
+                  {inline(block.inlines)}
                 </p>
-              ))}
+              )
+            })}
             <p>
               <a href={`/${collection.slug}`}>{`← ${collection.displayName}`}</a>
             </p>
