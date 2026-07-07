@@ -530,6 +530,12 @@ function BesignerPage(props) {
         title={'Besigner'}
         enableAppBarElevation
         besigner
+        centerPrefix={
+          <BesignerDocumentSwitcherComponent
+            hostId={hostId}
+            current={{ kind: 'screen', id: screenId }}
+          />
+        }
         // appBarSuffix={'Besigner'}
         actionsPrefix={
           <BesignerVersionsComponent
@@ -672,12 +678,6 @@ function BesignerPage(props) {
               liveUrl={liveUrl}
               onPropertiesEdit={() => setScreenDialog(true)}
               saveAvailable={saveAvailable}
-              documentSwitcher={
-                <BesignerDocumentSwitcherComponent
-                  hostId={hostId}
-                  current={{ kind: 'screen', id: screenId }}
-                />
-              }
             />
             {layoutId ? (
               <Alert
