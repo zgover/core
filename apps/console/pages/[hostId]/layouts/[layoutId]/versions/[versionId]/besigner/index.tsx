@@ -260,6 +260,12 @@ function LayoutBesignerPage(props) {
         title={'Besigner'}
         enableAppBarElevation
         besigner
+        centerPrefix={
+          <BesignerDocumentSwitcherComponent
+            hostId={hostId}
+            current={{ kind: 'layout', id: layoutId }}
+          />
+        }
         actionsPrefix={
           <BesignerVersionsComponent
             hostId={hostId}
@@ -363,12 +369,6 @@ function LayoutBesignerPage(props) {
               detailsUrl={listUrl}
               onSave={handleSave}
               saveAvailable={saveAvailable}
-              documentSwitcher={
-                <BesignerDocumentSwitcherComponent
-                  hostId={hostId}
-                  current={{ kind: 'layout', id: layoutId }}
-                />
-              }
             />
             <WorkspaceEditorComponent>
               <ViewportRootComponent>

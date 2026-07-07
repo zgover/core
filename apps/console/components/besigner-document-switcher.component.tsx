@@ -19,6 +19,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import {
+  Box,
   Chip,
   ListSubheader,
   MenuItem,
@@ -29,7 +30,7 @@ import {
 import { collection, doc, limit, query } from 'firebase/firestore'
 import { useRouter } from 'next/router'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useMemo } from 'react'
+import { type UIEvent, useCallback, useMemo, useState } from 'react'
 import {
   useFirestore,
   useFirestoreCollectionData,
@@ -45,11 +46,17 @@ export interface BesignerDocumentSwitcherProps {
 
 const keyOf = (kind: 'screen' | 'layout', id: string) => `${kind}:${id}`
 
+/** Documents fetched per page; the menu loads another page on scroll. */
+const PAGE_SIZE = 5
+const MENU_HEIGHT = 320
+
 /**
  * App-bar control that shows which screen/layout the besigner is editing and
- * switches to another document from the same host. Navigating with unsaved
- * canvas changes asks for confirmation first; the besigner pages' existing
- * reset-on-param-change effect clears the canvas for the next document.
+ * switches to another document from the same host (AGL-50, iterated in
+ * AGL-55). Documents load PAGE_SIZE at a time and the menu fetches more as
+ * it scrolls, so hosts with many screens don't pay for a full collection
+ * read; the current document is read directly so the trigger always renders.
+ * Navigating with unsaved canvas changes asks for confirmation first.
  */
 export const BesignerDocumentSwitcherComponent = observer(
   function BesignerDocumentSwitcherComponent(
@@ -59,13 +66,25 @@ export const BesignerDocumentSwitcherComponent = observer(
     const firestore = useFirestore()
     const router = useRouter()
     const { confirm } = useConfirmationContext()
+    const [pageCount, setPageCount] = useState(1)
+    const fetchLimit = pageCount * PAGE_SIZE
 
     const { data: screenDocs } = useFirestoreCollectionData<any>(
-      query(collection(firestore, 'hosts', hostId, 'screens'), limit(200)),
+      query(collection(firestore, 'hosts', hostId, 'screens'), limit(fetchLimit)),
       { idField: '$id' },
     )
     const { data: layoutDocs } = useFirestoreCollectionData<any>(
-      query(collection(firestore, 'hosts', hostId, 'layouts'), limit(100)),
+      query(collection(firestore, 'hosts', hostId, 'layouts'), limit(fetchLimit)),
+      { idField: '$id' },
+    )
+    const { data: currentDoc } = useFirestoreDocData<any>(
+      doc(
+        firestore,
+        'hosts',
+        hostId,
+        current.kind === 'screen' ? 'screens' : 'layouts',
+        current.id,
+      ),
       { idField: '$id' },
     )
     const { data: hostData } = useFirestoreDocData<any>(
@@ -74,24 +93,39 @@ export const BesignerDocumentSwitcherComponent = observer(
     )
     const routingMap = hostData?.screens as Record<string, string> | undefined
 
-    const screens = useMemo(
-      () =>
-        (screenDocs ?? [])
-          .filter((screen: any) => !screen.deletedAt)
-          .sort((a: any, b: any) =>
-            (a.displayName ?? a.$id).localeCompare(b.displayName ?? b.$id),
-          ),
-      [screenDocs],
-    )
-    const layouts = useMemo(
-      () =>
-        (layoutDocs ?? [])
-          .filter((layout: any) => !layout.deletedAt)
-          .sort((a: any, b: any) =>
-            (a.displayName ?? a.$id).localeCompare(b.displayName ?? b.$id),
-          ),
-      [layoutDocs],
-    )
+    // The paged window may not include the open document yet — merge it in
+    // so the Select always has a matching option for its value.
+    const screens = useMemo(() => {
+      const docs = (screenDocs ?? []).filter((screen: any) => !screen.deletedAt)
+      if (
+        current.kind === 'screen' &&
+        currentDoc?.$id &&
+        !docs.some((screen: any) => screen.$id === currentDoc.$id)
+      ) {
+        docs.push(currentDoc)
+      }
+      return docs.sort((a: any, b: any) =>
+        (a.displayName ?? a.$id).localeCompare(b.displayName ?? b.$id),
+      )
+    }, [screenDocs, current.kind, currentDoc])
+    const layouts = useMemo(() => {
+      const docs = (layoutDocs ?? []).filter((layout: any) => !layout.deletedAt)
+      if (
+        current.kind === 'layout' &&
+        currentDoc?.$id &&
+        !docs.some((layout: any) => layout.$id === currentDoc.$id)
+      ) {
+        docs.push(currentDoc)
+      }
+      return docs.sort((a: any, b: any) =>
+        (a.displayName ?? a.$id).localeCompare(b.displayName ?? b.$id),
+      )
+    }, [layoutDocs, current.kind, currentDoc])
+
+    // Either collection filling its window means there may be more to load.
+    const mayHaveMore =
+      (screenDocs?.length ?? 0) >= fetchLimit ||
+      (layoutDocs?.length ?? 0) >= fetchLimit
 
     const currentKey = keyOf(current.kind, current.id)
     const optionsLoaded =
@@ -105,6 +139,17 @@ export const BesignerDocumentSwitcherComponent = observer(
         return path ? Aglyn.screenRoutePathToUrl(path) : 'not published'
       },
       [routingMap],
+    )
+
+    const handleMenuScroll = useCallback(
+      (event: UIEvent<HTMLElement>) => {
+        const el = event.currentTarget
+        if (!mayHaveMore) return
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 48) {
+          setPageCount((count) => count + 1)
+        }
+      },
+      [mayHaveMore],
     )
 
     const handleChange = useCallback(
@@ -152,6 +197,36 @@ export const BesignerDocumentSwitcherComponent = observer(
       [currentKey, screens, layouts, confirm, router, hostId],
     )
 
+    // Two-line label: name on top, path (or Layout chip) on its own
+    // ellipsized line beneath (AGL-55).
+    const renderDocLabel = useCallback(
+      (kind: string, id: string, name: string) => (
+        <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <Typography variant="body2" component="span" noWrap>
+            <strong>{name}</strong>
+          </Typography>
+          {kind === 'screen' ? (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              component="span"
+              noWrap
+            >
+              {pathLabel(id)}
+            </Typography>
+          ) : (
+            <Chip
+              label="Layout"
+              size="small"
+              variant="outlined"
+              sx={{ alignSelf: 'flex-start', height: 16, fontSize: '0.65rem' }}
+            />
+          )}
+        </Box>
+      ),
+      [pathLabel],
+    )
+
     return (
       <Select
         size="small"
@@ -165,56 +240,57 @@ export const BesignerDocumentSwitcherComponent = observer(
           const [kind, id] = String(value).split(':')
           const docs = kind === 'screen' ? screens : layouts
           const selected = docs.find((item: any) => item.$id === id)
-          const name = selected?.displayName ?? id
-          return (
-            <Typography
-              variant="body2"
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}
-              component="span"
-              noWrap
-            >
-              <strong>{name}</strong>
-              {kind === 'screen' ? (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  component="span"
-                >
-                  {pathLabel(id)}
-                </Typography>
-              ) : (
-                <Chip label="Layout" size="small" variant="outlined" />
-              )}
-            </Typography>
-          )
+          return renderDocLabel(kind, id, selected?.displayName ?? id)
         }}
-        sx={{ minWidth: 180, maxWidth: 320, mx: 1 }}
-        MenuProps={{ slotProps: { paper: { sx: { maxHeight: 420 } } } }}
+        sx={{
+          minWidth: 180,
+          maxWidth: 320,
+          mx: 1,
+          borderRadius: 1,
+          px: 1,
+          py: 0.25,
+          '&:hover': { backgroundColor: 'action.hover' },
+          '& .MuiSelect-select': { display: 'flex', alignItems: 'center' },
+        }}
+        MenuProps={{
+          slotProps: {
+            paper: {
+              elevation: 0,
+              onScroll: handleMenuScroll,
+              sx: {
+                // Fixed height with internal scroll; scrolling near the
+                // bottom pages in more documents (AGL-55).
+                height: MENU_HEIGHT,
+                width: '34ch',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                backgroundColor: 'surface.main',
+                marginTop: 0.5,
+              },
+            },
+            list: { dense: true },
+          },
+        }}
         aria-label="Switch edited document"
       >
         <ListSubheader>{'Screens'}</ListSubheader>
         {screens.map((screen: any) => (
           <MenuItem key={screen.$id} value={keyOf('screen', screen.$id)}>
-            <Typography variant="body2" component="span" noWrap>
-              {screen.displayName ?? screen.$id}{' '}
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                component="span"
-              >
-                {pathLabel(screen.$id)}
-              </Typography>
-            </Typography>
+            {renderDocLabel('screen', screen.$id, screen.displayName ?? screen.$id)}
           </MenuItem>
         ))}
         <ListSubheader>{'Layouts'}</ListSubheader>
         {layouts.map((layout: any) => (
           <MenuItem key={layout.$id} value={keyOf('layout', layout.$id)}>
-            <Typography variant="body2" component="span" noWrap>
-              {layout.displayName ?? layout.$id}
-            </Typography>
+            {renderDocLabel('layout', layout.$id, layout.displayName ?? layout.$id)}
           </MenuItem>
         ))}
+        {mayHaveMore ? (
+          <MenuItem disabled dense>
+            <Typography variant="caption" color="text.secondary">
+              {'Scroll to load more…'}
+            </Typography>
+          </MenuItem>
+        ) : null}
         <MenuItem value="view-all" divider>
           <Typography variant="body2" color="secondary">
             {'View all screens…'}
