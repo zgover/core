@@ -126,6 +126,59 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
           entrySlug: segments[1],
         })
         if (content.collection && (segments.length === 1 || content.entry)) {
+          // Entry-template screens (AGL-105): a collection can designate a
+          // besigner-built screen that renders each entry with {{entry.*}}
+          // tokens; fall through to the built-in article otherwise.
+          const templateScreenId = content.collection.templateScreenId
+          if (content.entry && templateScreenId) {
+            const templateRes = await getScreen({
+              hostId,
+              screenId: templateScreenId,
+            })
+            if (templateRes.screen) {
+              const entry = content.entry
+              const templateNodes = await composeScreenNodes({
+                hostId,
+                screenId: templateScreenId,
+                screen: templateRes.screen,
+                tokens: {
+                  'entry.title': entry.title ?? '',
+                  'entry.excerpt': entry.excerpt ?? '',
+                  'entry.body': entry.body ?? '',
+                  'entry.coverImage': (entry as any).coverImage ?? '',
+                  'entry.date': entry.publishedAt
+                    ? new Date(
+                        entry.publishedAt.seconds * 1000,
+                      ).toLocaleDateString()
+                    : '',
+                },
+              })
+              if (templateNodes) {
+                return {
+                  props: JSON.parse(
+                    JSON.stringify({
+                      data: {
+                        host: hostRes.host,
+                        screen: {
+                          data: {
+                            ...templateRes.screen,
+                            // Entry metadata drives the head (AGL-117 merge).
+                            seo: {
+                              ...((templateRes.screen as any).seo ?? {}),
+                              title: entry.title,
+                              description: entry.excerpt || undefined,
+                            },
+                          },
+                        },
+                      },
+                      nodes: templateNodes,
+                    }),
+                  ),
+                  revalidate: 60,
+                }
+              }
+            }
+          }
           return {
             props: JSON.parse(
               JSON.stringify({

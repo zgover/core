@@ -52,7 +52,13 @@ function flipDueEntry(
 }
 
 export interface CollectionContent {
-  collection: { $id: string; displayName: string; slug: string } | null
+  collection: {
+    $id: string
+    displayName: string
+    slug: string
+    /** Entry-template screen (AGL-105); entries render through it. */
+    templateScreenId?: string
+  } | null
   entries: CollectionEntrySummary[]
   entry: CollectionEntrySummary | null
   error: unknown
@@ -91,6 +97,7 @@ export async function getCollectionContent(options: {
       $id: collectionDoc.id,
       displayName: collectionDoc.get('displayName') ?? collectionSlug,
       slug: collectionSlug,
+      templateScreenId: collectionDoc.get('templateScreenId') ?? undefined,
     }
 
     const entriesRef = collectionDoc.ref.collection('entries')

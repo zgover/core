@@ -96,6 +96,40 @@ const HostContent: NextPageWithLayout = () => {
     doc(firestore, 'hosts', hostId),
     { idField: '$id' },
   )
+  // Entry-template screens (AGL-105): assignable per collection.
+  const { data: screenDocs } = useFirestoreCollectionData<any>(
+    query(collection(firestore, 'hosts', hostId, 'screens'), limit(200)),
+    { idField: '$id' },
+  )
+  const screenOptions = useMemo(
+    () =>
+      [...(screenDocs ?? [])]
+        .filter((screen: any) => !screen.deletedAt)
+        .sort((a: any, b: any) =>
+          String(a.displayName ?? '').localeCompare(
+            String(b.displayName ?? ''),
+          ),
+        ),
+    [screenDocs],
+  )
+  const handleTemplateChange = useCallback(
+    (collectionId: string) =>
+      async (event: { target: { value: string } }) => {
+        await updateDoc(
+          doc(firestore, 'hosts', hostId, 'collections', collectionId),
+          event.target.value
+            ? { templateScreenId: event.target.value }
+            : { templateScreenId: deleteField() },
+        )
+        enqueueSnackbar(
+          event.target.value
+            ? 'Entry template assigned — entries render through that screen'
+            : 'Entry template cleared — entries use the built-in article',
+          { variant: 'success', persist: false },
+        )
+      },
+    [firestore, hostId, enqueueSnackbar],
+  )
   // Live-entry links (AGL-123): custom domain first, subdomain fallback.
   const siteBase = hostDoc?.cname
     ? `https://${hostDoc.cname}`
@@ -372,6 +406,22 @@ const HostContent: NextPageWithLayout = () => {
                   {collections.map((item) => (
                     <MenuItem key={item.$id} value={item.$id}>
                       {`${item.displayName} (/${item.slug})`}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  select
+                  size="small"
+                  label="Entry template"
+                  value={selected?.templateScreenId ?? ''}
+                  onChange={handleTemplateChange(selected?.$id ?? '')}
+                  sx={{ minWidth: 200 }}
+                  helperText="Screen with {{entry.title}} etc."
+                >
+                  <MenuItem value="">{'Built-in article'}</MenuItem>
+                  {screenOptions.map((screen: any) => (
+                    <MenuItem key={screen.$id} value={screen.$id}>
+                      {screen.displayName ?? screen.$id}
                     </MenuItem>
                   ))}
                 </TextField>

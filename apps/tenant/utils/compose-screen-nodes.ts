@@ -33,6 +33,8 @@ export async function composeScreenNodes(options: {
   hostId: string
   screenId: string
   screen: Aglyn.AglynScreen
+  /** Entry-template tokens (AGL-105) substituted before denormalize. */
+  tokens?: Record<string, string>
 }): Promise<Record<string, any> | null> {
   const { hostId, screenId, screen } = options
 
@@ -78,7 +80,9 @@ export async function composeScreenNodes(options: {
   const bound = Aglyn.resolveNodesBindings(repeated as any, variables, functions)
   // Function widgets run client-side: embed their definitions (AGL-93).
   const nodes = Aglyn.attachFunctionDefinitions(bound, functions)
-  return Aglyn.canvas.processNodesToDenormalized(nodes as any)
+  // Entry-template tokens (AGL-105): {{entry.*}} from the rendered entry.
+  const finalNodes = Aglyn.resolveNamedTokens(nodes as any, options.tokens)
+  return Aglyn.canvas.processNodesToDenormalized(finalNodes as any)
 }
 
 export default composeScreenNodes
