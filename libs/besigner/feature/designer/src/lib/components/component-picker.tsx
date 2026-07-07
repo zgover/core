@@ -43,7 +43,7 @@ import {
 } from '@mui/material'
 import type { TransitionProps } from '@mui/material/transitions'
 import { Observer, observer } from 'mobx-react-lite'
-import { forwardRef, SyntheticEvent, useCallback, useState } from 'react'
+import { forwardRef, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import useVisibleComponentCategories from '../hooks/use-visible-component-categories'
 import AccordionListComponent from './accordion-list.component'
 import EmptyResults from './empty-results'
@@ -72,6 +72,18 @@ export const ComponentPicker = observer(
     const [filterOpen, setFilterOpen] = useState(false)
     const [filter, setFilter] = useState('')
     const [items, setItems] = useState(allItems)
+
+    // Presets can register after mount (per-host reusable components load
+    // from Firestore) — refresh the unfiltered list when the registry
+    // changes. `allItems` is a fresh array every render, so key on a stable
+    // signature to avoid a setState loop.
+    const registrySignature = allItems
+      .map((category) => `${category.$id}:${category.items?.length ?? 0}`)
+      .join('|')
+    useEffect(() => {
+      if (!filter) setItems(allItems)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [registrySignature, filter])
     const [selected, setSelected] = useState<PickerOption>(null)
 
     const clearSelected = useCallback(() => setSelected(null), [])

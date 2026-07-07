@@ -53,6 +53,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
 import BesignerDocumentSwitcherComponent from '../../../../../../../components/besigner-document-switcher.component'
 import BesignerVersionsComponent from '../../../../../../../components/besigner-versions.component'
+import ReusableComponentsProvider from '../../../../../../../components/reusable-components-provider.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import '../../../../../../../constants/app-setup'
@@ -243,6 +244,7 @@ function LayoutBesignerPage(props) {
   return (
     <HostThemeDocumentContext.Provider value={hostTheme}>
     <Aglyn.ScreenLinkContext.Provider value={screenLinks}>
+    <ReusableComponentsProvider hostId={hostId}>
       {hostFontsHref ? (
         <Head>
           <link
@@ -383,6 +385,7 @@ function LayoutBesignerPage(props) {
           defaultValue={Aglyn.canvas.nestedNodes as any}
         />
       )}
+    </ReusableComponentsProvider>
     </Aglyn.ScreenLinkContext.Provider>
     </HostThemeDocumentContext.Provider>
   )

@@ -24,6 +24,7 @@ import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
 import { useEffect, useMemo } from 'react'
 import { useFirestore, useFirestoreDocData } from 'reactfire'
+import getComponents from '../../../utils/get-components'
 import getHost from '../../../utils/get-host'
 import getPublishedLayoutVersion from '../../../utils/get-layout-version'
 import getScreen from '../../../utils/get-screen'
@@ -160,11 +161,18 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
      *
      *=========================================*/
 
-    const nodes = Aglyn.composeLayoutAndScreenNodes(
+    const composedNodes = Aglyn.composeLayoutAndScreenNodes(
       layoutRes?.version?.nodes,
       versionRes.version.nodes,
     )
-    const denormalized = Aglyn.canvas.processNodesToDenormalized(nodes)
+    // Reusable components: graft each instance node's definition subtree
+    // (fail-open — a missing/broken definition leaves an empty wrapper).
+    const componentsRes = await getComponents({ hostId })
+    const nodes = Aglyn.composeReusableComponentNodes(
+      composedNodes as any,
+      componentsRes.definitions as any,
+    )
+    const denormalized = Aglyn.canvas.processNodesToDenormalized(nodes as any)
 
     const props = {
       data: JSON.parse(

@@ -36,7 +36,9 @@ import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import { Grid } from '@mui/material'
 import { observer } from 'mobx-react-lite'
+import * as Besigner from '@aglyn/besigner'
 import { forwardRef, memo, type SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef } from 'react'
+import { ComponentPromotionContext } from '../contexts/component-promotion-context'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 // Subscribes to form value changes via FormSpy and auto-submits when dirty.
@@ -161,6 +163,13 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
       [rawAttributes, screens, labels],
     )
 
+    // Reusable-component flows (AGL-35): actions appear only when the host
+    // app provides callbacks; locked nodes (layout chrome) never promote.
+    const { onPromote, onDemote } = useContext(ComponentPromotionContext)
+    const isInstance =
+      node?.componentId === Aglyn.REUSABLE_INSTANCE_COMPONENT_ID
+    const unlocked = Besigner.dnd.canDragNode(node)
+
     const handleFormCancel = useCallback((e: SyntheticEvent, reason?: string) => {}, [])
     const handleElementSave = useCallback(
       (values: Record<string, unknown>) => {
@@ -188,6 +197,30 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                   {...rest}
                 />
 
+                {onPromote && !isInstance && unlocked ? (
+                  <FormControl margin="none" fullWidth>
+                    <Button
+                      color="secondary"
+                      onClick={() => onPromote(node)}
+                      sx={{ mt: 2 }}
+                      fullWidth
+                    >
+                      Save as reusable component
+                    </Button>
+                  </FormControl>
+                ) : null}
+                {onDemote && isInstance && unlocked ? (
+                  <FormControl margin="none" fullWidth>
+                    <Button
+                      color="secondary"
+                      onClick={() => onDemote(node)}
+                      sx={{ mt: 2 }}
+                      fullWidth
+                    >
+                      Detach from component
+                    </Button>
+                  </FormControl>
+                ) : null}
                 <FormControl margin="none" fullWidth>
                   <Button
                     onClick={() => deleteElementCallback(node)}
