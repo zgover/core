@@ -148,28 +148,15 @@ export function ReusableComponentsProvider(
         createdAt: timestamp,
         updatedAt: timestamp,
       })
-      // Replace the subtree with an instance node (undoable via applyNodes).
-      const next: Record<string, any> = {}
-      for (const [id, value] of Object.entries(all)) {
-        if (id !== node.$id && subtreeIds.includes(id)) continue
-        next[id] =
-          id === node.$id
-            ? {
-                $id: node.$id,
-                componentId: Aglyn.REUSABLE_INSTANCE_COMPONENT_ID,
-                pluginId: 'mui',
-                ...(value.parentId != null && { parentId: value.parentId }),
-                props: { refId },
-                nodes: [],
-              }
-            : value
-      }
-      Aglyn.canvas.applyNodes(next as any)
+      // The source element stays as-is on the canvas (AGL-64): the editor
+      // renders instances as empty placeholders (definitions graft on the
+      // tenant only), so swapping the subtree for an instance here would
+      // visually empty the element the user just promoted.
       setPromoteNode(null)
-      enqueueSnackbar(`Saved "${name}" — insert it from Your components`, {
-        variant: 'success',
-        persist: false,
-      })
+      enqueueSnackbar(
+        `Saved "${name}" — insert it anywhere from Your components`,
+        { variant: 'success', persist: false },
+      )
     } catch (error) {
       console.error(error)
       enqueueSnackbar('An error has occurred', {
