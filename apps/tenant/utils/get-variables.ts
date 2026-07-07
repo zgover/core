@@ -47,4 +47,33 @@ export async function getVariables(options: {
   return variables
 }
 
+/**
+ * Fetches the host's function definitions keyed by name for
+ * `{{fn:name(...)}}` bindings (AGL-93). Fail-open like variables.
+ */
+export async function getFunctions(options: {
+  hostId: string
+}): Promise<Record<string, Aglyn.HostFunction>> {
+  const functions: Record<string, Aglyn.HostFunction> = {}
+  try {
+    const snapshot = await firebaseAdmin
+      .app()
+      .firestore()
+      .collection('hosts')
+      .doc(options.hostId)
+      .collection('functions')
+      .limit(100)
+      .get()
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data() as Aglyn.HostFunction
+      if (data?.name && !(data as any).deletedAt) {
+        functions[data.name] = data
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  return functions
+}
+
 export default getVariables

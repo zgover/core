@@ -46,6 +46,41 @@ describe('resolveBindings', () => {
     )
   })
 
+  it('resolves {{fn:name(args)}} through the evaluator (AGL-93)', () => {
+    const functions = {
+      Sum: {
+        name: 'Sum',
+        parameters: [
+          { name: 'P1', type: 'number', required: true },
+          { name: 'P2', type: 'number', required: true },
+        ],
+        variables: [{ name: 'P3', type: 'number' }],
+        operations: [
+          {
+            if: { left: 'P1', comparator: '<=', right: 'P2' },
+            then: [{ set: 'P3', expression: 'P1 + P2' }],
+            otherwise: [{ set: 'P3', expression: 'P1 - P2' }],
+          },
+        ],
+        returnValue: 'P3',
+      },
+    } as const
+    expect(
+      resolveBindings('Total: {{fn:Sum(3, 7)}}', variables as any, functions as any),
+    ).toBe('Total: 10')
+    // Variable names work as arguments (42 > 8 → otherwise branch).
+    expect(
+      resolveBindings('{{fn:Sum(count, 8)}}', variables as any, functions as any),
+    ).toBe('34')
+    // Unknown function or failing run keeps the token literal.
+    expect(
+      resolveBindings('{{fn:Nope(1)}}', variables as any, functions as any),
+    ).toBe('{{fn:Nope(1)}}')
+    expect(
+      resolveBindings('{{fn:Sum()}}', variables as any, functions as any),
+    ).toBe('{{fn:Sum()}}')
+  })
+
   it('formats invalid numbers/dates defensively', () => {
     expect(
       formatVariableValue({ name: 'n', type: 'number', value: 'zzz' }),
