@@ -113,6 +113,8 @@ if (webhookUrl) {
     'enabled_events[]': 'customer.subscription.created',
     'enabled_events[1]': 'customer.subscription.updated',
     'enabled_events[2]': 'customer.subscription.deleted',
+    // Marketplace purchases (AGL-46).
+    'enabled_events[3]': 'checkout.session.completed',
   })
   env['STRIPE_WEBHOOK_SECRET'] = endpoint.secret
   console.log(`+ webhook endpoint ${endpoint.id} → ${webhookUrl}`)

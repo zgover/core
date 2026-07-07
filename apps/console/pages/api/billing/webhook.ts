@@ -132,6 +132,32 @@ export default async function handler(
           )
       }
     }
+
+    // Marketplace purchases (AGL-46): keyed by session id (idempotent on
+    // Stripe redelivery). Install gating and the seller ledger read these.
+    if (
+      type === 'checkout.session.completed' &&
+      object?.metadata?.type === 'community-purchase' &&
+      object?.payment_status === 'paid'
+    ) {
+      const { listingId, buyerUid, sellerUid, feeCents } =
+        object.metadata ?? {}
+      if (listingId && buyerUid && sellerUid) {
+        await firebaseAdmin
+          .app()
+          .firestore()
+          .collection('communityPurchases')
+          .doc(String(object.id))
+          .set({
+            listingId,
+            buyerUid,
+            sellerUid,
+            amountCents: Number(object?.amount_total ?? 0),
+            feeCents: Number(feeCents ?? 0),
+            createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+          })
+      }
+    }
     return res.status(200).json({ received: true })
   } catch (error) {
     console.error(error)

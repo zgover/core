@@ -65,6 +65,65 @@ const CommunitySettings: NextPageWithLayout = () => {
     ),
     { idField: '$id' },
   )
+  // Seller ledger (AGL-46): purchase records written by the Stripe webhook.
+  const { data: sales } = useFirestoreCollectionData<any>(
+    query(
+      collection(firestore, 'communityPurchases'),
+      where('sellerUid', '==', uid ?? '-anonymous-'),
+    ),
+    { idField: '$id' },
+  )
+  const grossCents = (sales ?? []).reduce(
+    (sum: number, sale: any) => sum + (sale.amountCents ?? 0),
+    0,
+  )
+  const feeCents = (sales ?? []).reduce(
+    (sum: number, sale: any) => sum + (sale.feeCents ?? 0),
+    0,
+  )
+
+  const [payoutsBusy, setPayoutsBusy] = useState(false)
+  const handlePayouts = useCallback(async () => {
+    setPayoutsBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/community/connect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+      })
+      const payload = await response.json()
+      if (response.status === 501) {
+        return void enqueueSnackbar(
+          'Payouts are not configured on this deployment',
+          { variant: 'info', persist: false },
+        )
+      }
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Payout setup failed', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      }
+      if (payload.chargesEnabled) {
+        return void enqueueSnackbar('Payouts are enabled', {
+          variant: 'success',
+          persist: false,
+        })
+      }
+      if (payload.url) window.location.assign(payload.url)
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('An error has occurred', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } finally {
+      setPayoutsBusy(false)
+    }
+  }, [user, enqueueSnackbar])
 
   const [handle, setHandle] = useState('')
   const [displayName, setDisplayName] = useState('')
@@ -248,6 +307,9 @@ const CommunitySettings: NextPageWithLayout = () => {
                                 color="text.secondary"
                               >
                                 {`v${listing.latestVersion}` +
+                                  (Number(listing.priceUsd ?? 0) > 0
+                                    ? ` · $${listing.priceUsd}`
+                                    : ' · free') +
                                   (listing.deletedAt ? ' · unpublished' : '')}
                               </Typography>
                             </Stack>
@@ -260,6 +322,70 @@ const CommunitySettings: NextPageWithLayout = () => {
                             </Button>
                           </Stack>
                         ))}
+                      </Stack>
+                    )}
+                  </CardDisplay>
+                ),
+              },
+              {
+                size: { xs: 12, md: 6 },
+                children: (
+                  <CardDisplay
+                    header={'Payouts'}
+                    contentGutterX
+                    contentGutterY
+                  >
+                    <Stack spacing={2}>
+                      <Typography variant="body2" color="text.secondary">
+                        {profile?.stripeChargesEnabled
+                          ? 'Payouts are enabled — paid listings transfer to ' +
+                            'your Stripe account automatically (platform ' +
+                            'fee 20%, 30% on the Free plan).'
+                          : 'Connect a Stripe account to sell components. ' +
+                            'The platform fee is 20% per sale (30% on the ' +
+                            'Free plan).'}
+                      </Typography>
+                      <Button
+                        variant={
+                          profile?.stripeChargesEnabled
+                            ? 'outlined'
+                            : 'contained'
+                        }
+                        color="secondary"
+                        disabled={payoutsBusy}
+                        onClick={handlePayouts}
+                      >
+                        {profile?.stripeChargesEnabled
+                          ? 'Payouts enabled — recheck status'
+                          : payoutsBusy
+                            ? 'Opening Stripe…'
+                            : 'Set up payouts'}
+                      </Button>
+                    </Stack>
+                  </CardDisplay>
+                ),
+              },
+              {
+                size: { xs: 12, md: 6 },
+                children: (
+                  <CardDisplay header={'Sales'} contentGutterX contentGutterY>
+                    {(sales ?? []).length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {'No sales yet. Paid listings appear here with ' +
+                          'gross, platform fee, and your net.'}
+                      </Typography>
+                    ) : (
+                      <Stack spacing={0.5}>
+                        <Typography variant="body2">
+                          {`${(sales ?? []).length} sale${
+                            (sales ?? []).length === 1 ? '' : 's'
+                          }`}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {`Gross $${(grossCents / 100).toFixed(2)} · ` +
+                            `platform fee $${(feeCents / 100).toFixed(2)} · ` +
+                            `net $${((grossCents - feeCents) / 100).toFixed(2)}`}
+                        </Typography>
                       </Stack>
                     )}
                   </CardDisplay>

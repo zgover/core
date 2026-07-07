@@ -16,23 +16,16 @@
  */
 'use client'
 
-import { createResourceUid } from '@aglyn/aglyn'
 import { CardDisplay, useLoading } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { Button, Chip, Grid, Stack, Typography } from '@mui/material'
-import {
-  collection,
-  doc,
-  getDoc,
-  limit,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-} from 'firebase/firestore'
+import { collection, doc, getDoc, limit, query, where } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useUser,
+} from 'reactfire'
 
 export interface CommunityBrowseProps {
   hostId: string
@@ -49,6 +42,7 @@ export interface CommunityBrowseProps {
 export function CommunityBrowse(props: CommunityBrowseProps) {
   const { hostId } = props
   const firestore = useFirestore()
+  const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const [handles, setHandles] = useState<Record<string, string>>({})
@@ -65,6 +59,22 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
     query(collection(firestore, 'hosts', hostId, 'components'), limit(100)),
     { idField: '$id' },
   )
+
+  // Paid-listing gating (AGL-46): the buyer's purchase records, written by
+  // the Stripe webhook.
+  const { data: purchaseDocs } = useFirestoreCollectionData<any>(
+    query(
+      collection(firestore, 'communityPurchases'),
+      where('buyerUid', '==', user?.uid ?? '-anonymous-'),
+      limit(200),
+    ),
+    { idField: '$id' },
+  )
+  const purchased = useMemo(() => {
+    const map: Record<string, boolean> = {}
+    for (const purchase of purchaseDocs ?? []) map[purchase.listingId] = true
+    return map
+  }, [purchaseDocs])
 
   // listingId → installed component doc (deleted installs don't count).
   const installed = useMemo(() => {
@@ -102,57 +112,31 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
     }
   }, [listings, handles, firestore])
 
+  // Server-side install (AGL-46): version snapshots aren't client-readable
+  // (paid content), so the API verifies access and copies the definition.
   const handleInstall = useCallback(
     (listing: any) => async () => {
       const dequeue = queueLoading()
       try {
-        const versionSnapshot = await getDoc(
-          doc(
-            firestore,
-            'communityListings',
-            listing.$id,
-            'versions',
-            String(listing.latestVersion),
-          ),
-        )
-        const version = versionSnapshot.data() as any
-        if (!version?.nodes || !version?.rootId) {
-          throw new Error('Listing version missing')
-        }
-        const existing = installed[listing.$id]
-        const timestamp = Timestamp.now()
-        const payload = {
-          displayName: listing.displayName,
-          ...(listing.description && { description: listing.description }),
-          rootId: version.rootId,
-          nodes: version.nodes,
-          community: {
-            listingId: listing.$id,
-            profileId: listing.profileId,
-            version: listing.latestVersion,
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch('/api/community/install', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
           },
-          updatedAt: timestamp,
-        }
-        if (existing) {
-          await updateDoc(
-            doc(firestore, 'hosts', hostId, 'components', existing.$id),
-            payload as any,
-          )
-        } else {
-          await setDoc(
-            doc(
-              firestore,
-              'hosts',
-              hostId,
-              'components',
-              createResourceUid(),
-            ),
-            { ...payload, createdAt: timestamp },
-          )
+          body: JSON.stringify({ listingId: listing.$id, hostId }),
+        })
+        const payload = await response.json()
+        if (!response.ok) {
+          return void enqueueSnackbar(payload?.error ?? 'Install failed', {
+            variant: response.status === 402 ? 'warning' : 'error',
+            allowDuplicate: true,
+          })
         }
         enqueueSnackbar(
-          existing
-            ? `Updated "${listing.displayName}" to v${listing.latestVersion}`
+          payload.updated
+            ? `Updated "${listing.displayName}" to v${payload.version}`
             : `Installed "${listing.displayName}" — find it under Your components`,
           { variant: 'success', persist: false },
         )
@@ -166,7 +150,47 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         dequeue()
       }
     },
-    [firestore, hostId, installed, queueLoading, enqueueSnackbar],
+    [user, hostId, queueLoading, enqueueSnackbar],
+  )
+
+  const handleBuy = useCallback(
+    (listing: any) => async () => {
+      const dequeue = queueLoading()
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch('/api/community/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+          body: JSON.stringify({ listingId: listing.$id, hostId }),
+        })
+        const payload = await response.json()
+        if (response.status === 501) {
+          return void enqueueSnackbar(
+            'Purchases are not configured on this deployment',
+            { variant: 'info', persist: false },
+          )
+        }
+        if (!response.ok || !payload?.url) {
+          return void enqueueSnackbar(payload?.error ?? 'Checkout failed', {
+            variant: 'error',
+            allowDuplicate: true,
+          })
+        }
+        window.location.assign(payload.url)
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar('An error has occurred', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      } finally {
+        dequeue()
+      }
+    },
+    [user, hostId, queueLoading, enqueueSnackbar],
   )
 
   const items = listings ?? []
@@ -184,6 +208,12 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
             const installedVersion = install?.community?.version
             const upToDate =
               install && installedVersion >= listing.latestVersion
+            const priceUsd = Number(listing.priceUsd ?? 0)
+            const mustBuy =
+              priceUsd > 0 &&
+              !purchased[listing.$id] &&
+              listing.profileId !== user?.uid &&
+              !install
             return (
               <Grid key={listing.$id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Stack
@@ -206,6 +236,13 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     </Typography>
                     {listing.category ? (
                       <Chip size="small" label={listing.category} />
+                    ) : null}
+                    {priceUsd > 0 ? (
+                      <Chip
+                        size="small"
+                        color="secondary"
+                        label={`$${priceUsd}`}
+                      />
                     ) : null}
                   </Stack>
                   <Typography variant="caption" color="text.secondary">
@@ -230,13 +267,17 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     variant={install ? 'outlined' : 'contained'}
                     color="secondary"
                     disabled={Boolean(upToDate)}
-                    onClick={handleInstall(listing)}
+                    onClick={
+                      mustBuy ? handleBuy(listing) : handleInstall(listing)
+                    }
                   >
                     {upToDate
                       ? `Installed (v${installedVersion})`
                       : install
                         ? `Update to v${listing.latestVersion}`
-                        : 'Add to this site'}
+                        : mustBuy
+                          ? `Buy for $${priceUsd}`
+                          : 'Add to this site'}
                   </Button>
                 </Stack>
               </Grid>

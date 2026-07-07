@@ -74,6 +74,7 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     name: string
     description: string
     category: string
+    price: string
     busy?: boolean
   } | null>(null)
 
@@ -94,6 +95,7 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
           displayName: publisher.name.trim(),
           description: publisher.description.trim(),
           category: publisher.category.trim(),
+          priceUsd: Number(publisher.price) || 0,
         }),
       })
       const payload = await response.json()
@@ -205,6 +207,7 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
                     name: definition.displayName ?? '',
                     description: definition.description ?? '',
                     category: '',
+                    price: '',
                   })
                 }
               >
@@ -313,6 +316,23 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
             onChange={(event) =>
               setPublisher((prev) =>
                 prev ? { ...prev, category: event.target.value } : prev,
+              )
+            }
+            size="small"
+          />
+          <TextField
+            label="Price (USD)"
+            placeholder="0 = free"
+            helperText="Paid listings need payouts set up on your community profile"
+            value={publisher?.price ?? ''}
+            onChange={(event) =>
+              setPublisher((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      price: event.target.value.replace(/[^0-9]/g, ''),
+                    }
+                  : prev,
               )
             }
             size="small"

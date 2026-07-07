@@ -17,6 +17,7 @@
 
 import {
   checkEntitlement,
+  COMMUNITY_MAX_PRICE_USD,
   createResourceUid,
   sanitizeCommunityDefinition,
 } from '@aglyn/aglyn'
@@ -43,6 +44,16 @@ export default async function handler(
   const displayName = String(req.body?.displayName ?? '').slice(0, 80)
   const description = String(req.body?.description ?? '').slice(0, 500)
   const category = String(req.body?.category ?? '').slice(0, 40)
+  const priceUsd = Math.round(Number(req.body?.priceUsd ?? 0)) || 0
+  if (
+    priceUsd < 0 ||
+    priceUsd > COMMUNITY_MAX_PRICE_USD ||
+    !Number.isFinite(priceUsd)
+  ) {
+    return res
+      .status(400)
+      .json({ error: `Price must be 0–${COMMUNITY_MAX_PRICE_USD} USD` })
+  }
   if (!hostId || !componentId || !displayName.trim()) {
     return res
       .status(400)
@@ -89,6 +100,14 @@ export default async function handler(
           'Create your community profile first (Manage → Community profile)',
       })
     }
+    // Paid listings require completed Stripe Connect onboarding (AGL-46).
+    if (priceUsd > 0 && !profileSnapshot.get('stripeChargesEnabled')) {
+      return res.status(412).json({
+        error:
+          'Set up payouts first (Manage → Community profile) to sell ' +
+          'components',
+      })
+    }
 
     const definitionSnapshot = await firestore
       .collection('hosts')
@@ -130,6 +149,7 @@ export default async function handler(
         displayName: displayName.trim(),
         ...(description.trim() && { description: description.trim() }),
         ...(category.trim() && { category: category.trim() }),
+        priceUsd,
         latestVersion: version,
         deletedAt: null,
         ...(existing.empty && { createdAt: now }),

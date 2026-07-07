@@ -63,10 +63,22 @@ service cloud.firestore {
       allow create: if false;
       allow update, delete: if isStaff() ||
         (isSignedIn() && resource.data.profileId == request.auth.uid);
+      // Version snapshots hold the actual (possibly paid) content — no
+      // client reads; installs go through /api/community/install, which
+      // checks the purchase record server-side (AGL-46).
       match /versions/{version} {
-        allow read: if true;
-        allow write: if false;
+        allow read, write: if isStaff();
       }
+    }
+
+    // Marketplace purchase records (AGL-46): written only by the Stripe
+    // webhook (Admin SDK). Buyers read their own purchases (install
+    // gating); sellers read sales of their listings (revenue ledger).
+    match /communityPurchases/{purchaseId} {
+      allow read: if isStaff() || (isSignedIn() &&
+        (resource.data.buyerUid == request.auth.uid ||
+         resource.data.sellerUid == request.auth.uid));
+      allow write: if false;
     }
 
     // Staff-only, append-only audit log of admin actions

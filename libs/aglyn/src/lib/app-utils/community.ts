@@ -41,8 +41,17 @@ export interface CommunityListing {
   description?: string
   category?: string
   latestVersion: number
+  /** One-time price in whole USD; 0/absent = free (AGL-46). */
+  priceUsd?: number
   deletedAt?: unknown
 }
+
+/** Platform revenue share on paid listings (AGL-46). */
+export const COMMUNITY_PLATFORM_FEE_PERCENT = 20
+/** Free-plan publishers pay a higher share. */
+export const COMMUNITY_PLATFORM_FEE_PERCENT_FREE_PLAN = 30
+/** One-time listing price ceiling (whole USD). */
+export const COMMUNITY_MAX_PRICE_USD = 1000
 
 /**
  * Component ids publishable to the community. Mirrors the persisted ids in
