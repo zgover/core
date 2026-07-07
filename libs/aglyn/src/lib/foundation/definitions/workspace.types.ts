@@ -84,6 +84,45 @@ export interface AglynUser extends AglynDocument {
 export type TenantUid = string
 
 /** Hosted in master catalog */
+/** SaaS subscription tiers (Tenant Billing & SaaS Plans, AGL-38..41). */
+export type TenantPlan = 'free' | 'starter' | 'pro' | 'business'
+
+/** Boolean feature gates per plan; quotas live beside them as numbers. */
+export interface TenantFeatureFlags {
+  versioning?: boolean
+  reusableComponents?: boolean
+  customDomain?: boolean
+  removeBranding?: boolean
+}
+
+/**
+ * Effective limits/gates for a tenant. Plan defaults come from
+ * `PLAN_ENTITLEMENTS` (versioned with the app); per-tenant overrides can be
+ * stored on the tenant doc and win over the plan defaults.
+ */
+export interface TenantEntitlements {
+  hostLimit?: number
+  screensPerHost?: number
+  sharedLayoutsPerHost?: number
+  storagePerHostMb?: number
+  totalSiteSizeMb?: number
+  membersPerHost?: number
+  bandwidthGb?: number
+  features?: TenantFeatureFlags
+}
+
+export interface TenantSubscription {
+  status?:
+    | 'active'
+    | 'trialing'
+    | 'past_due'
+    | 'canceled'
+    | 'incomplete'
+    | 'unpaid'
+  priceId?: string
+  currentPeriodEnd?: ITimestamp
+}
+
 export interface AglynTenant extends AglynDocument {
   $id: TenantUid
   ownerId?: UserUid
@@ -91,6 +130,12 @@ export interface AglynTenant extends AglynDocument {
   description?: string
   hosts?: Record<HostUid, true>
   users?: Record<UserUid, true>
+  /** Subscription tier; missing/unknown plans resolve as `free`. */
+  plan?: TenantPlan
+  /** Per-tenant entitlement overrides (admin console); win over plan defaults. */
+  entitlements?: TenantEntitlements
+  stripeCustomerId?: string
+  subscription?: TenantSubscription
 }
 
 export type ProjectUid = string
