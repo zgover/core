@@ -26,6 +26,7 @@ import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
 import HostAnalyticsCard from '../../components/analytics/host-analytics-card.component'
+import HostComponentsCard from '../../components/host-components-card.component'
 import HostDisplayNameComponent from '../../components/host-display-name.component'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
@@ -144,6 +145,13 @@ const Index: NextPageWithLayout = (props) => {
                 md: 6,
               },
               children: <HostAnalyticsCard hostId={hostId} />,
+            },
+            {
+              size: {
+                xs: 12,
+                md: 6,
+              },
+              children: <HostComponentsCard hostId={hostId} />,
             },
           ]}
         />
