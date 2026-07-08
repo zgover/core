@@ -100,6 +100,13 @@ export default async function handler(
     const fileName = String(req.body?.fileName ?? 'upload').slice(0, 200)
     const contentType = String(req.body?.contentType ?? '')
     const data = String(req.body?.data ?? '')
+    // Destination folder (AGL-172): uploads land in the library's open
+    // folder. Id only — existence is the client's concern; a stale id
+    // just files the asset at root in the UI.
+    const folderId =
+      typeof req.body?.folderId === 'string' && req.body.folderId
+        ? String(req.body.folderId).slice(0, 64)
+        : null
     // Media-type allowlist (AGL-162): images for everyone; video and PDF
     // by tier (videoMedia flag; dark-launch tenants uncapped as usual).
     const isImage = contentType.startsWith('image/')
@@ -166,6 +173,7 @@ export default async function handler(
       contentType,
       sizeBytes: buffer.length,
       url,
+      folderId,
       createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
     })
     await hostRef

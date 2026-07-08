@@ -124,6 +124,10 @@ export default async function handler(
     // PATCH — finalize after the client's direct PUT.
     const mediaId = String(req.body?.mediaId ?? '')
     const fileName = String(req.body?.fileName ?? 'video').slice(0, 200)
+    const folderId =
+      typeof req.body?.folderId === 'string' && req.body.folderId
+        ? String(req.body.folderId).slice(0, 64)
+        : null
     if (!mediaId) return res.status(400).json({ error: 'Missing mediaId' })
     const file = bucket.file(`hosts/${hostId}/media/${mediaId}`)
     const [exists] = await file.exists()
@@ -163,6 +167,7 @@ export default async function handler(
       contentType,
       sizeBytes: actualBytes,
       url,
+      folderId,
       createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
     })
     await counterRef.set(
