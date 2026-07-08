@@ -56,6 +56,7 @@ export const PLAN_ENTITLEMENTS: Record<
     workflowsPerHost: 0,
     workflowRunsPerMonth: 0,
     servicesPerHost: 0,
+    redirectsPerHost: 0,
     emailSendsPerMonth: 0,
     actionRunsPerMonth: 0,
     datasetsPerHost: 0,
@@ -78,6 +79,7 @@ export const PLAN_ENTITLEMENTS: Record<
       siteExport: false,
       multilingual: false,
       eventCalendar: false,
+      redirects: false,
     },
   },
   starter: {
@@ -97,6 +99,7 @@ export const PLAN_ENTITLEMENTS: Record<
     workflowsPerHost: 3,
     workflowRunsPerMonth: 500,
     servicesPerHost: 1,
+    redirectsPerHost: 25,
     emailSendsPerMonth: 500,
     actionRunsPerMonth: 0,
     datasetsPerHost: 1,
@@ -119,6 +122,7 @@ export const PLAN_ENTITLEMENTS: Record<
       siteExport: false,
       multilingual: false,
       eventCalendar: false,
+      redirects: true,
     },
   },
   pro: {
@@ -138,6 +142,7 @@ export const PLAN_ENTITLEMENTS: Record<
     workflowsPerHost: 25,
     workflowRunsPerMonth: 5000,
     servicesPerHost: UNLIMITED,
+    redirectsPerHost: 100,
     emailSendsPerMonth: 5000,
     actionRunsPerMonth: 5000,
     datasetsPerHost: 10,
@@ -160,6 +165,7 @@ export const PLAN_ENTITLEMENTS: Record<
       siteExport: true,
       multilingual: false,
       eventCalendar: false,
+      redirects: true,
     },
   },
   business: {
@@ -179,6 +185,7 @@ export const PLAN_ENTITLEMENTS: Record<
     workflowsPerHost: 100,
     workflowRunsPerMonth: 50000,
     servicesPerHost: UNLIMITED,
+    redirectsPerHost: UNLIMITED,
     emailSendsPerMonth: 50000,
     actionRunsPerMonth: 50000,
     datasetsPerHost: 50,
@@ -201,6 +208,7 @@ export const PLAN_ENTITLEMENTS: Record<
       siteExport: true,
       multilingual: true,
       eventCalendar: false,
+      redirects: true,
     },
   },
 }

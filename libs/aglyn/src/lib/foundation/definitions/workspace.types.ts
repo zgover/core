@@ -117,6 +117,8 @@ export interface TenantFeatureFlags {
   multilingual?: boolean
   /** Event Calendar add-on (AGL-145); paid, not part of any base tier. */
   eventCalendar?: boolean
+  /** URL redirects manager (AGL-154). */
+  redirects?: boolean
 }
 
 /**
@@ -149,6 +151,8 @@ export interface TenantEntitlements {
   workflowRunsPerMonth?: number
   /** Bookable services per host (AGL-159). */
   servicesPerHost?: number
+  /** Redirect rules per host (AGL-154). */
+  redirectsPerHost?: number
   /** Campaign emails sendable per calendar month (AGL-161). */
   emailSendsPerMonth?: number
   /** Action runs per calendar month (AGL-148). */

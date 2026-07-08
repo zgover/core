@@ -70,6 +70,16 @@ const FEATURE_ROWS: Array<{
   { key: 'customDomain', label: 'Custom domain' },
   { key: 'removeBranding', label: 'Remove Aglyn branding' },
   { key: 'marketplaceSelling', label: 'Sell on the marketplace' },
+  { key: 'aiAssist', label: 'AI assist' },
+  { key: 'workflows', label: 'Workflows & automations' },
+  { key: 'dataStore', label: 'Datasets & dynamic data' },
+  { key: 'bookings', label: 'Appointment bookings' },
+  { key: 'videoMedia', label: 'Video & file uploads' },
+  { key: 'actions', label: 'Actions builder' },
+  { key: 'siteExport', label: 'Site backup & restore' },
+  { key: 'redirects', label: 'URL redirects' },
+  { key: 'webhooks', label: 'Webhooks' },
+  { key: 'multilingual', label: 'Multilingual sites' },
 ]
 
 export interface BillingPlanCardsProps {
