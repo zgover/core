@@ -51,11 +51,13 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   limit,
   query,
   setDoc,
+  writeBatch,
 } from 'firebase/firestore'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import {
   checkTenantQuota,
@@ -175,6 +177,42 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     })
   }, [creator, creatorFields, firestore, hostId, enqueueSnackbar, logActivity])
 
+  // Join collection template (AGL-180): extrinsic many-to-many as a
+  // visible, editable collection of FKey pairs — no magic.
+  const [joiner, setJoiner] = useState<{ a: string; b: string } | null>(null)
+  const handleCreateJoin = useCallback(async () => {
+    if (!joiner?.a || !joiner?.b || joiner.a === joiner.b) return
+    const a = datasets.find((item) => item.$id === joiner.a)
+    const b = datasets.find((item) => item.$id === joiner.b)
+    if (!a || !b) return
+    const id = createResourceUid()
+    const fieldFor = (target: any, fieldId: string) => ({
+      name: String(target.displayName ?? fieldId),
+      type: 'reference' as const,
+      required: true,
+      reference: {
+        datasetId: target.$id as string,
+        displayFieldId: effectiveDatasetModel(target).order[0],
+        onDelete: 'setNull' as const,
+      },
+    })
+    await setDoc(doc(firestore, 'hosts', hostId, 'datasets', id), {
+      displayName: `${a.displayName} ↔ ${b.displayName}`,
+      fields: ['aRef', 'bRef'],
+      model: {
+        order: ['aRef', 'bRef'],
+        fields: { aRef: fieldFor(a, 'aRef'), bRef: fieldFor(b, 'bRef') },
+      },
+      createdAt: Timestamp.now(),
+    })
+    setJoiner(null)
+    setSelectedId(id)
+    enqueueSnackbar('Join collection created', {
+      variant: 'success',
+      persist: false,
+    })
+  }, [joiner, datasets, firestore, hostId, enqueueSnackbar])
+
   const handleDeleteDataset = useCallback(async () => {
     if (!selected) return
     const confirmed = await confirm({
@@ -209,6 +247,76 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     enqueueSnackbar,
     logActivity,
   ])
+
+  // Reference pickers (AGL-180): load target-collection rows for every
+  // reference field in the model (id -> display label).
+  const [refOptions, setRefOptions] = useState<
+    Record<string, Array<{ id: string; label: string }>>
+  >({})
+  useEffect(() => {
+    let active = true
+    const referenceFields = model.order.filter(
+      (fieldId) =>
+        model.fields[fieldId]?.type === 'reference' &&
+        model.fields[fieldId]?.reference?.datasetId,
+    )
+    if (!referenceFields.length) {
+      setRefOptions({})
+      return
+    }
+    void Promise.all(
+      referenceFields.map(async (fieldId) => {
+        const reference = model.fields[fieldId].reference as {
+          datasetId: string
+          displayFieldId?: string
+        }
+        const target = datasets.find(
+          (item) => item.$id === reference.datasetId,
+        )
+        const displayFieldId =
+          reference.displayFieldId ??
+          effectiveDatasetModel(target ?? {}).order[0]
+        const snapshot = await getDocs(
+          query(
+            collection(
+              firestore,
+              'hosts',
+              hostId,
+              'datasets',
+              reference.datasetId,
+              'records',
+            ),
+            limit(200),
+          ),
+        ).catch(() => null)
+        const options = (snapshot?.docs ?? []).map((docSnapshot) => ({
+          id: docSnapshot.id,
+          label: String(
+            docSnapshot.get('values')?.[displayFieldId ?? ''] ??
+              docSnapshot.id,
+          ),
+        }))
+        return [fieldId, options] as const
+      }),
+    ).then((entries) => {
+      if (active) setRefOptions(Object.fromEntries(entries))
+    })
+    return () => {
+      active = false
+    }
+  }, [model, datasets, firestore, hostId])
+  const referenceLabel = useCallback(
+    (fieldId: string, value: unknown): string => {
+      const options = refOptions[fieldId] ?? []
+      const ids = Array.isArray(value) ? value : value != null ? [value] : []
+      return ids
+        .map(
+          (id) => options.find((option) => option.id === id)?.label ?? String(id),
+        )
+        .join(', ')
+    },
+    [refOptions],
+  )
 
   // --- Document editor (null id = new; AGL-179 typed inputs) --------------
   const [editor, setEditor] = useState<{
@@ -309,6 +417,65 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   const handleDeleteRecord = useCallback(
     (record: any) => async () => {
       if (!selected) return
+      // Delete integrity (AGL-180): scan collections whose models
+      // reference this one; `restrict` blocks, `setNull` strips the FKey.
+      for (const other of datasets) {
+        const otherModel = effectiveDatasetModel(other)
+        const referencing = otherModel.order.filter(
+          (fieldId) =>
+            otherModel.fields[fieldId]?.type === 'reference' &&
+            otherModel.fields[fieldId]?.reference?.datasetId === selected.$id,
+        )
+        if (!referencing.length) continue
+        const snapshot = await getDocs(
+          query(
+            collection(
+              firestore,
+              'hosts',
+              hostId,
+              'datasets',
+              other.$id,
+              'records',
+            ),
+            limit(500),
+          ),
+        ).catch(() => null)
+        if (!snapshot) continue
+        const hits = snapshot.docs.filter((docSnapshot) =>
+          referencing.some((fieldId) => {
+            const stored = docSnapshot.get('values')?.[fieldId]
+            return Array.isArray(stored)
+              ? stored.includes(record.$id)
+              : stored === record.$id
+          }),
+        )
+        if (!hits.length) continue
+        const restricted = referencing.some(
+          (fieldId) =>
+            otherModel.fields[fieldId]?.reference?.onDelete === 'restrict',
+        )
+        if (restricted) {
+          return void enqueueSnackbar(
+            `Cannot delete: referenced by ${hits.length} document` +
+              `${hits.length === 1 ? '' : 's'} in "${other.displayName}"`,
+            { variant: 'warning', persist: false },
+          )
+        }
+        const batch = writeBatch(firestore)
+        for (const hit of hits) {
+          const values = { ...(hit.get('values') ?? {}) }
+          for (const fieldId of referencing) {
+            const stored = values[fieldId]
+            if (Array.isArray(stored)) {
+              values[fieldId] = stored.filter((id: string) => id !== record.$id)
+            } else if (stored === record.$id) {
+              delete values[fieldId]
+            }
+          }
+          batch.update(hit.ref, { values })
+        }
+        await batch.commit()
+      }
       await deleteDoc(
         doc(
           firestore,
@@ -322,7 +489,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
       )
       enqueueSnackbar('Record deleted', { variant: 'success', persist: false })
     },
-    [selected, firestore, hostId, enqueueSnackbar],
+    [selected, datasets, firestore, hostId, enqueueSnackbar],
   )
 
   return (
@@ -386,12 +553,15 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
                 <TableRow key={record.$id} hover>
                   {fields.map((fieldId) => (
                     <TableCell key={fieldId}>
-                      {model.fields[fieldId]
-                        ? formatDatasetValue(
-                            model.fields[fieldId],
-                            record.values?.[fieldId],
-                          ) || '--'
-                        : '--'}
+                      {model.fields[fieldId]?.type === 'reference'
+                        ? referenceLabel(fieldId, record.values?.[fieldId]) ||
+                          '--'
+                        : model.fields[fieldId]
+                          ? formatDatasetValue(
+                              model.fields[fieldId],
+                              record.values?.[fieldId],
+                            ) || '--'
+                          : '--'}
                     </TableCell>
                   ))}
                   <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
@@ -415,15 +585,21 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
             {'No records yet.'}
           </Typography>
         ) : null}
-        <Button
-          size="small"
-          variant="outlined"
-          color="secondary"
-          onClick={handleOpenCreator}
-          sx={{ alignSelf: 'flex-start' }}
-        >
-          {'Add dataset'}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            size="small"
+            variant="outlined"
+            color="secondary"
+            onClick={handleOpenCreator}
+          >
+            {'Add dataset'}
+          </Button>
+          {datasets.length >= 2 ? (
+            <Button size="small" onClick={() => setJoiner({ a: '', b: '' })}>
+              {'Add join collection'}
+            </Button>
+          ) : null}
+        </Stack>
       </Stack>
       <Dialog
         open={Boolean(creator)}
@@ -535,6 +711,40 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
                 </TextField>
               )
             }
+            if (field.type === 'reference') {
+              const options = refOptions[fieldId] ?? []
+              const multiple = Boolean(field.reference?.multiple)
+              const selectedIds = value
+                .split(',')
+                .map((part) => part.trim())
+                .filter(Boolean)
+              return (
+                <TextField
+                  key={fieldId}
+                  {...common}
+                  select
+                  value={multiple ? selectedIds : value}
+                  slotProps={{
+                    select: multiple
+                      ? {
+                          multiple: true,
+                          onChange: (event: any) =>
+                            setValue(
+                              (event.target.value as string[]).join(', '),
+                            ),
+                        }
+                      : undefined,
+                  }}
+                >
+                  {multiple ? null : <MenuItem value="">{'—'}</MenuItem>}
+                  {options.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )
+            }
             if (
               field.type === 'int32' ||
               field.type === 'int64' ||
@@ -586,9 +796,57 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={Boolean(joiner)}
+        onClose={() => setJoiner(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{'New join collection'}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        >
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {'Links two collections many-to-many; each row pairs one ' +
+              'document from each side.'}
+          </Typography>
+          {(['a', 'b'] as const).map((side) => (
+            <TextField
+              key={side}
+              select
+              size="small"
+              label={side === 'a' ? 'First collection' : 'Second collection'}
+              value={joiner?.[side] ?? ''}
+              onChange={(event) =>
+                setJoiner((prev) =>
+                  prev ? { ...prev, [side]: event.target.value } : prev,
+                )
+              }
+            >
+              {datasets.map((item) => (
+                <MenuItem key={item.$id} value={item.$id}>
+                  {item.displayName}
+                </MenuItem>
+              ))}
+            </TextField>
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setJoiner(null)}>{'Cancel'}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!joiner?.a || !joiner?.b || joiner.a === joiner.b}
+            onClick={handleCreateJoin}
+          >
+            {'Create'}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <DatasetSchemaDialog
         hostId={hostId}
         dataset={schemaOpen && selected ? selected : null}
+        datasets={datasets}
         recordCount={records.length}
         onClose={() => setSchemaOpen(false)}
       />

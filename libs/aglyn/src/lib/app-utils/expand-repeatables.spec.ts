@@ -48,6 +48,64 @@ const team = {
   ],
 }
 
+describe('expandRepeatables reference hops (AGL-180)', () => {
+  it('resolves {{item.ref.field}} through the target dataset', () => {
+    const nodes = baseNodes()
+    nodes['label'].props.children = '{{item.name}} by {{item.author.name}}'
+    const posts = {
+      records: [{ $id: 'p1', name: 'Hello', author: 'a1' }],
+      model: {
+        order: ['name', 'author'],
+        fields: {
+          name: { name: 'Name', type: 'text' },
+          author: {
+            name: 'Author',
+            type: 'reference',
+            reference: { datasetId: 'authors' },
+          },
+        },
+      },
+    } as any
+    const authors = {
+      records: [{ $id: 'a1', name: 'Ada' }],
+    } as any
+    const result = expandRepeatables(nodes, { Team: posts, authors })
+    const list = result['list'] as any
+    const label = (result[(result[list.nodes[0]] as any).$id] as any).nodes[0]
+    expect((result[label] as any).props.children).toBe('Hello by Ada')
+  })
+
+  it('resolves multi-reference arrays and leaves unknown hops as tokens', () => {
+    const nodes = baseNodes()
+    nodes['label'].props.children = '{{item.tags.name}} / {{item.ghost.name}}'
+    const posts = {
+      records: [{ $id: 'p1', tags: ['t1', 't2'] }],
+      model: {
+        order: ['tags'],
+        fields: {
+          tags: {
+            name: 'Tags',
+            type: 'reference',
+            reference: { datasetId: 'tags', multiple: true },
+          },
+        },
+      },
+    } as any
+    const tags = {
+      records: [
+        { $id: 't1', name: 'red' },
+        { $id: 't2', name: 'blue' },
+      ],
+    } as any
+    const result = expandRepeatables(nodes, { Team: posts, tags })
+    const list = result['list'] as any
+    const label = (result[list.nodes[0]] as any).nodes[0]
+    expect((result[label] as any).props.children).toBe(
+      'red, blue / {{item.ghost.name}}',
+    )
+  })
+})
+
 describe('expandRepeatables', () => {
   it('clones the template per record with item tokens substituted', () => {
     const result = expandRepeatables(baseNodes(), { Team: team })

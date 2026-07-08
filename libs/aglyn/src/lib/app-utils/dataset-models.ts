@@ -99,8 +99,18 @@ export interface DatasetFieldDefinition {
   /** Default applied by editors when creating documents; never coerced. */
   default?: unknown
   validation?: DatasetFieldValidation
-  /** Reference fields (AGL-180): target collection + display field id. */
-  reference?: { datasetId: string; displayFieldId?: string }
+  /**
+   * Reference fields (AGL-180): target collection + display field id.
+   * `multiple` stores a `sorted` array of FKeys (small-cardinality
+   * many-to-many per the dod.ts guidance); `onDelete` is the referenced-
+   * document delete policy (default `setNull` — never cascade in v2).
+   */
+  reference?: {
+    datasetId: string
+    displayFieldId?: string
+    multiple?: boolean
+    onDelete?: 'restrict' | 'setNull'
+  }
 }
 
 export interface DatasetModel {
@@ -242,7 +252,14 @@ export function validateDocument(
         }
         break
       case 'reference':
-        if (typeof value !== 'string' || !value) {
+        if (field.reference?.multiple) {
+          if (
+            !Array.isArray(value) ||
+            value.some((entry) => typeof entry !== 'string' || !entry)
+          ) {
+            errors[fieldId] = `${field.name} must reference documents`
+          }
+        } else if (typeof value !== 'string' || !value) {
           errors[fieldId] = `${field.name} must reference a document`
         }
         break
@@ -369,6 +386,14 @@ export function coerceDocumentValues(
         } catch {
           values[fieldId] = raw
         }
+        break
+      case 'reference':
+        values[fieldId] = field.reference?.multiple
+          ? raw
+              .split(',')
+              .map((part) => part.trim())
+              .filter(Boolean)
+          : raw
         break
       default:
         values[fieldId] = raw

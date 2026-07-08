@@ -48,8 +48,15 @@ export async function getDatasets(options: {
             $id: recordSnapshot.id,
             ...(recordSnapshot.data() as Aglyn.HostDatasetRecord),
           })),
-        ).map((record) => record.values ?? {})
-        const dataset: Aglyn.RepeatableDataset = { records }
+          // `$id` rides inside the value map so incoming reference hops
+          // (AGL-180) can resolve rows; the model carries field configs.
+        ).map((record) => ({ ...(record.values ?? {}), $id: record.$id }))
+        const dataset: Aglyn.RepeatableDataset = {
+          records,
+          model: Aglyn.effectiveDatasetModel(
+            docSnapshot.data() as Aglyn.HostDataset,
+          ),
+        }
         datasets[docSnapshot.id] = dataset
         const displayName = docSnapshot.get('displayName')
         if (typeof displayName === 'string' && displayName.trim()) {

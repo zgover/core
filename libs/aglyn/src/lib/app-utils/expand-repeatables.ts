@@ -20,33 +20,85 @@ import type { AglynNodeSchema, NodeId } from '../foundation'
 /** Namespaces cloned template ids per container/record. */
 export const REPEAT_NODE_ID_PREFIX = 'rep__'
 
-/** `{{item.field}}` token in a repeated template's string props. */
-const ITEM_TOKEN_PATTERN = /\{\{\s*item\.([A-Za-z][A-Za-z0-9_]*)\s*\}\}/g
+/**
+ * `{{item.field}}` token, plus an optional single reference hop
+ * (`{{item.author.name}}`, AGL-180). One hop only — the pattern itself is
+ * the depth guard, so cycles can't recurse.
+ */
+const ITEM_TOKEN_PATTERN =
+  /\{\{\s*item\.([A-Za-z][A-Za-z0-9_]*)(?:\.([A-Za-z][A-Za-z0-9_]*))?\s*\}\}/g
 
 /** Hard bound on rows a single repeatable renders, before `repeatLimit`. */
 export const REPEAT_MAX_RECORDS = 100
 
 export interface RepeatableDataset {
-  /** Row value maps, in display order. */
-  records: Array<Record<string, string>>
+  /**
+   * Row value maps, in display order. Rows carry `$id` (needed to resolve
+   * incoming references); values may be typed (AGL-177), stringified at
+   * substitution.
+   */
+  records: Array<Record<string, unknown>>
+  /** Typed model (AGL-177); required for reference-hop bindings. */
+  model?: import('./dataset-models').DatasetModel
+}
+
+interface SubstituteContext {
+  record: Record<string, unknown>
+  /** Model of the repeated dataset (reference hops need field configs). */
+  model?: import('./dataset-models').DatasetModel
+  /** All host datasets keyed by id (and name) for hop resolution. */
+  datasetsByKey?: Record<string, RepeatableDataset | undefined>
+}
+
+const displayValue = (value: unknown): string =>
+  Array.isArray(value) ? value.join(', ') : String(value)
+
+/** Resolves `{{item.ref.field}}`: FKey(s) → target document field value. */
+function resolveReferenceHop(
+  context: SubstituteContext,
+  fieldId: string,
+  targetFieldId: string,
+): string | null {
+  const field = context.model?.fields?.[fieldId]
+  if (field?.type !== 'reference' || !field.reference?.datasetId) return null
+  const target = context.datasetsByKey?.[field.reference.datasetId]
+  if (!target) return null
+  const keys = context.record[fieldId]
+  const ids = Array.isArray(keys) ? keys : keys != null ? [keys] : []
+  const resolved = ids
+    .map((id) => {
+      const match = target.records.find((row) => row['$id'] === id)
+      const value = match?.[targetFieldId]
+      return value != null ? displayValue(value) : null
+    })
+    .filter((value): value is string => value != null)
+  return resolved.length ? resolved.join(', ') : null
 }
 
 function substituteValue(
   value: unknown,
-  record: Record<string, string>,
+  context: SubstituteContext,
 ): unknown {
+  const { record } = context
   if (typeof value === 'string') {
-    return value.replace(ITEM_TOKEN_PATTERN, (token, field) =>
-      record[field] != null ? record[field] : token,
+    return value.replace(
+      ITEM_TOKEN_PATTERN,
+      (token, field: string, hop?: string) => {
+        if (hop) {
+          const resolved = resolveReferenceHop(context, field, hop)
+          return resolved != null ? resolved : token
+        }
+        return record[field] != null ? displayValue(record[field]) : token
+      },
     )
   }
   if (Array.isArray(value)) {
-    return value.map((entry) => substituteValue(entry, record))
+    return value.map((entry) => substituteValue(entry, context))
   }
   if (value && typeof value === 'object') {
     const next: Record<string, unknown> = {}
     for (const [key, entry] of Object.entries(value)) {
-      next[key] = substituteValue(entry, record)
+      next[key] = substituteValue(entry, context)
     }
     return next
   }
@@ -109,7 +161,11 @@ export function expandRepeatables<N extends AglynNodeSchema = AglynNodeSchema>(
           ...node,
           $id: prefixId(id),
           parentId,
-          props: substituteValue(node.props ?? {}, record) as any,
+          props: substituteValue(node.props ?? {}, {
+            record,
+            model: dataset?.model,
+            datasetsByKey,
+          }) as any,
           ...(clonedChildren && {
             nodes: clonedChildren.map((childId) => prefixId(childId)),
           }),

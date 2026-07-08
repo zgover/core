@@ -55,6 +55,7 @@ const AUTHORABLE_TYPES: DatasetFieldType[] = [
   'timestamp',
   'coordinates',
   'sorted',
+  'reference',
 ]
 
 /** Display name → stable fieldId (slug); never changes after creation. */
@@ -82,6 +83,13 @@ export interface DatasetSchemaDialogProps {
     model?: DatasetModel
     names?: { singular?: string; plural?: string }
   } | null
+  /** All host collections, for reference-field target pickers (AGL-180). */
+  datasets?: Array<{
+    $id: string
+    displayName?: string
+    fields?: string[]
+    model?: DatasetModel
+  }>
   recordCount: number
   onClose: () => void
 }
@@ -97,7 +105,7 @@ export interface DatasetSchemaDialogProps {
  * names rename.
  */
 export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
-  const { hostId, dataset, recordCount, onClose } = props
+  const { hostId, dataset, datasets, recordCount, onClose } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -447,6 +455,128 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
               </MenuItem>
             ))}
           </TextField>
+          {editorDefinition?.type === 'reference' ? (
+            <>
+              <TextField
+                select
+                size="small"
+                label="Target collection"
+                value={editorDefinition?.reference?.datasetId ?? ''}
+                onChange={(event) =>
+                  setFieldEditor((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          definition: {
+                            ...prev.definition,
+                            reference: {
+                              ...(prev.definition.reference ?? {
+                                datasetId: '',
+                              }),
+                              datasetId: event.target.value,
+                            },
+                          },
+                        }
+                      : prev,
+                  )
+                }
+              >
+                {(datasets ?? [])
+                  .filter((target) => target.$id !== dataset?.$id)
+                  .map((target) => (
+                    <MenuItem key={target.$id} value={target.$id}>
+                      {target.displayName ?? target.$id}
+                    </MenuItem>
+                  ))}
+              </TextField>
+              <TextField
+                select
+                size="small"
+                label="Display field"
+                value={editorDefinition?.reference?.displayFieldId ?? ''}
+                onChange={(event) =>
+                  setFieldEditor((prev) =>
+                    prev?.definition.reference
+                      ? {
+                          ...prev,
+                          definition: {
+                            ...prev.definition,
+                            reference: {
+                              ...prev.definition.reference,
+                              displayFieldId: event.target.value,
+                            },
+                          },
+                        }
+                      : prev,
+                  )
+                }
+                helperText="Shown in pickers and grid cells"
+              >
+                {effectiveDatasetModel(
+                  (datasets ?? []).find(
+                    (target) =>
+                      target.$id === editorDefinition?.reference?.datasetId,
+                  ) ?? {},
+                ).order.map((targetFieldId) => (
+                  <MenuItem key={targetFieldId} value={targetFieldId}>
+                    {targetFieldId}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                size="small"
+                label="When a referenced document is deleted"
+                value={editorDefinition?.reference?.onDelete ?? 'setNull'}
+                onChange={(event) =>
+                  setFieldEditor((prev) =>
+                    prev?.definition.reference
+                      ? {
+                          ...prev,
+                          definition: {
+                            ...prev.definition,
+                            reference: {
+                              ...prev.definition.reference,
+                              onDelete: event.target.value as
+                                | 'restrict'
+                                | 'setNull',
+                            },
+                          },
+                        }
+                      : prev,
+                  )
+                }
+              >
+                <MenuItem value="setNull">{'Clear the reference'}</MenuItem>
+                <MenuItem value="restrict">{'Block the delete'}</MenuItem>
+              </TextField>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={Boolean(editorDefinition?.reference?.multiple)}
+                    onChange={(event) =>
+                      setFieldEditor((prev) =>
+                        prev?.definition.reference
+                          ? {
+                              ...prev,
+                              definition: {
+                                ...prev.definition,
+                                reference: {
+                                  ...prev.definition.reference,
+                                  multiple: event.target.checked,
+                                },
+                              },
+                            }
+                          : prev,
+                      )
+                    }
+                  />
+                }
+                label="Allow multiple (many-to-many)"
+              />
+            </>
+          ) : null}
           <FormControlLabel
             control={
               <Checkbox
