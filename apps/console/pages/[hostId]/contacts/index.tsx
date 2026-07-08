@@ -23,7 +23,11 @@ import {
   contactMatchesSegment,
   type HostContact,
 } from '@aglyn/aglyn'
-import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
+import {
+  CardDisplay,
+  Container,
+  useConfirmationContext,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -84,6 +88,7 @@ const HostContacts: NextPageWithLayout = () => {
   const hostId = useHostId()
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
+  const { confirm } = useConfirmationContext()
   const { tenant } = useCurrentTenant()
 
   const { data: contactDocs } = useFirestoreCollectionData<any>(
@@ -182,6 +187,40 @@ const HostContacts: NextPageWithLayout = () => {
     setTagsDraft((contact.tags ?? []).join(', '))
     setNotesDraft(contact.notes ?? '')
   }, [])
+  // Right-to-erasure (AGL-209): hard-deletes the contact doc. Source
+  // records (inbox, orders, bookings, members) live in their own managers.
+  const handleDeleteContact = useCallback(async () => {
+    if (!selectedId) return
+    const contact = contacts.find((item) => item.$id === selectedId)
+    const confirmed = await confirm({
+      title: 'Delete this contact?',
+      description:
+        `"${contact?.email ?? selectedId}" is permanently removed from ` +
+        'Contacts. Their form submissions, orders, bookings, and ' +
+        'membership records are separate — delete those from their own ' +
+        'pages if the request covers them.',
+      confirmationText: 'Delete contact',
+      confirmationButtonProps: { color: 'error' },
+    })
+      .then(() => true)
+      .catch(() => false)
+    if (!confirmed) return
+    try {
+      await deleteDoc(doc(firestore, 'hosts', hostId, 'contacts', selectedId))
+      setSelectedId(null)
+      enqueueSnackbar('Contact deleted', {
+        variant: 'success',
+        persist: false,
+      })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('An error has occurred', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    }
+  }, [selectedId, contacts, confirm, firestore, hostId, enqueueSnackbar])
+
   const handleProfileSave = useCallback(async () => {
     if (!selectedId) return
     const tags = [
@@ -446,14 +485,18 @@ const HostContacts: NextPageWithLayout = () => {
               multiline
               minRows={3}
             />
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleProfileSave}
-              sx={{ alignSelf: 'flex-start' }}
-            >
-              {'Save'}
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleProfileSave}
+              >
+                {'Save'}
+              </Button>
+              <Button color="error" onClick={handleDeleteContact}>
+                {'Delete contact'}
+              </Button>
+            </Stack>
             <Typography variant="subtitle2">{'Activity'}</Typography>
             <Stack spacing={1}>
               {(selected.interactions ?? []).map((interaction, index) => (
