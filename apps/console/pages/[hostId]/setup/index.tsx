@@ -43,6 +43,7 @@ import MainLayout from '../../../components/layouts/main.layout'
 import CustomDomainCard from '../../../components/custom-domain-card.component'
 import FaviconCard from '../../../components/favicon-card.component'
 import ErrorScreensCard from '../../../components/error-screens-card.component'
+import SiteBackupCard from '../../../components/site-backup-card.component'
 import ThemeEditor from '../../../components/theme-editor/theme-editor.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../constants/route-links'
@@ -469,9 +470,14 @@ const HostSetup: NextPageWithLayout = (props) => {
                           />
 
                           {schema.id === 'hostDetails' ? (
-                            <div style={{ marginTop: 24 }}>
-                              <ErrorScreensCard hostId={hostId} />
-                            </div>
+                            <>
+                              <div style={{ marginTop: 24 }}>
+                                <ErrorScreensCard hostId={hostId} />
+                              </div>
+                              <div style={{ marginTop: 24 }}>
+                                <SiteBackupCard hostId={hostId} />
+                              </div>
+                            </>
                           ) : null}
                           {schema.id === 'hostSeo' ? (
                             <div style={{ marginTop: 24 }}>

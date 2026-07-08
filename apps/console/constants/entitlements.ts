@@ -39,6 +39,7 @@ export type Entitlement =
   | 'bookings'
   | 'actions'
   | 'webhooks'
+  | 'site-export'
 
 const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   versioning: 'versioning',
@@ -53,6 +54,7 @@ const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   bookings: 'bookings',
   actions: 'actions',
   webhooks: 'webhooks',
+  'site-export': 'siteExport',
 }
 
 /**

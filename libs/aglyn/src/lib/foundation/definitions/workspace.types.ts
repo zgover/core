@@ -111,6 +111,8 @@ export interface TenantFeatureFlags {
   actions?: boolean
   /** Outbound/inbound webhooks (AGL-149). */
   webhooks?: boolean
+  /** Whole-site export/backup + restore (AGL-163). */
+  siteExport?: boolean
 }
 
 /**
