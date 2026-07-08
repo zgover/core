@@ -198,6 +198,8 @@ export interface TenantEntitlements {
   servicesPerHost?: number
   /** Redirect rules per host (AGL-154). */
   redirectsPerHost?: number
+  /** Contacts CRM cap (AGL-197): unified people records per host. */
+  contactsPerHost?: number
   /** Campaign emails sendable per calendar month (AGL-161). */
   emailSendsPerMonth?: number
   /** Action runs per calendar month (AGL-148). */

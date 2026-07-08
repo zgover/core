@@ -17,6 +17,8 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { extractEmailFromFields } from '@aglyn/aglyn'
+import { upsertHostContact } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { emitHostEvent } from '../../../utils/emit-host-event'
@@ -114,13 +116,28 @@ export default async function handler(
     for (const [key, value] of Object.entries(fields)) {
       sanitizedFields[String(key).slice(0, 64)] = String(value).slice(0, 2000)
     }
-    await hostRef.collection('formSubmissions').add({
+    const submissionRef = await hostRef.collection('formSubmissions').add({
       formName: String(formName ?? 'Form').slice(0, 100),
       path: String(path ?? '').slice(0, 500),
       fields: sanitizedFields,
       read: false,
       createdAt: FieldValue.serverTimestamp(),
     })
+    // Contacts ingestion (AGL-197): forms don't guarantee an email field —
+    // best-effort extraction; never blocks the submission.
+    const contactEmail = extractEmailFromFields(sanitizedFields)
+    if (contactEmail) {
+      void upsertHostContact({
+        hostId,
+        email: contactEmail,
+        name: sanitizedFields['name'] ?? sanitizedFields['fullName'],
+        source: 'form',
+        interaction: {
+          refId: submissionRef.id,
+          summary: `Submitted "${String(formName ?? 'Form').slice(0, 60)}"`,
+        },
+      })
+    }
     // Dataset binding (AGL-141): append a record mapped by field name into
     // the named dataset. Best-effort — a missing dataset or a full record
     // quota never fails the submission (the inbox copy above is canonical).

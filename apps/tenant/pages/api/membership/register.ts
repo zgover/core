@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { firebaseAdmin, upsertHostContact } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { emitHostEvent } from '../../../utils/emit-host-event'
 import {
@@ -85,6 +85,14 @@ export default async function handler(
         createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
       })
       .catch((error) => console.error(error))
+    // Contacts ingestion (AGL-197).
+    void upsertHostContact({
+      hostId,
+      email,
+      name: displayName || undefined,
+      source: 'member',
+      interaction: { refId: memberRef.id, summary: 'Joined as a member' },
+    })
     // Event triggers (AGL-128/148): sign-ups double as leads here too.
     await emitHostEvent(hostId, 'memberSignUp', { email })
     await emitHostEvent(hostId, 'lead', { email, source: 'signup' })

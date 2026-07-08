@@ -21,7 +21,7 @@ import {
   type HostBookingService,
   isSlotOpen,
 } from '@aglyn/aglyn'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { firebaseAdmin, upsertHostContact } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { emitHostEvent } from '../../../utils/emit-host-event'
@@ -169,6 +169,18 @@ export default async function handler(
         createdAt: FieldValue.serverTimestamp(),
       })
       return bookingRef.id
+    })
+
+    // Contacts ingestion (AGL-197) — booking requests identify a person.
+    void upsertHostContact({
+      hostId,
+      email,
+      name: name || undefined,
+      source: 'booking',
+      interaction: {
+        refId: bookingId,
+        summary: `Booked "${String(service.name ?? 'a service').slice(0, 60)}"`,
+      },
     })
 
     if (paid) {
