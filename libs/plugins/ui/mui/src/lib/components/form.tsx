@@ -32,6 +32,11 @@ export const FORM_FIELD_ID: Aglyn.ComponentId = 'formField'
 export interface FormProps {
   /** Identifies the form in the submissions inbox. */
   formName?: string
+  /**
+   * Dataset (by name) submissions also append into, mapped by field name
+   * (AGL-141); the inbox copy is always written.
+   */
+  datasetName?: string
   submitLabel?: string
   successMessage?: string
   children?: React.ReactNode
@@ -45,7 +50,14 @@ export interface FormProps {
  * honeypot input for naive bots.
  */
 const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
-  const { formName, submitLabel, successMessage, children, ...rest } = props
+  const {
+    formName,
+    datasetName,
+    submitLabel,
+    successMessage,
+    children,
+    ...rest
+  } = props
   const { hostId } = Aglyn.useSite()
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>(
     'idle',
@@ -71,6 +83,7 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
           body: JSON.stringify({
             hostId,
             formName: formName || 'Form',
+            ...(datasetName ? { dataset: datasetName } : {}),
             path: window.location.pathname,
             fields,
             website,
@@ -81,7 +94,7 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
         setStatus('error')
       }
     },
-    [hostId, status, formName],
+    [hostId, status, formName, datasetName],
   )
 
   if (status === 'sent') {
@@ -168,6 +181,14 @@ export const formSchema: Aglyn.ComponentSchema<FormProps> = {
       description: 'Identifies this form in the submissions inbox.',
       component: Aglyn.FieldComponentType.TEXT_FIELD,
       label: 'Form name',
+    },
+    {
+      name: 'datasetName',
+      description:
+        'Optional dataset (by name, from the Data page) submissions are ' +
+        'appended to — fields map by name. The inbox always gets a copy.',
+      component: Aglyn.FieldComponentType.TEXT_FIELD,
+      label: 'Write to dataset',
     },
     {
       name: 'submitLabel',

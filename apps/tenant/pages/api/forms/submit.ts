@@ -54,7 +54,7 @@ export default async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
-  const { hostId, formName, path, fields, website } = req.body ?? {}
+  const { hostId, formName, dataset, path, fields, website } = req.body ?? {}
 
   // Honeypot filled → pretend success so bots learn nothing.
   if (typeof website === 'string' && website.trim()) {
@@ -121,6 +121,61 @@ export default async function handler(
       read: false,
       createdAt: FieldValue.serverTimestamp(),
     })
+    // Dataset binding (AGL-141): append a record mapped by field name into
+    // the named dataset. Best-effort — a missing dataset or a full record
+    // quota never fails the submission (the inbox copy above is canonical).
+    const datasetName = String(dataset ?? '')
+      .trim()
+      .slice(0, 60)
+    if (datasetName) {
+      try {
+        const datasetsSnapshot = await hostRef
+          .collection('datasets')
+          .where('name', '==', datasetName)
+          .limit(1)
+          .get()
+        const datasetDoc = datasetsSnapshot.docs[0]
+        if (datasetDoc && !datasetDoc.get('deletedAt')) {
+          const declaredFields: string[] = Array.isArray(
+            datasetDoc.get('fields'),
+          )
+            ? datasetDoc.get('fields')
+            : []
+          const values = Aglyn.sanitizeRecordValues(
+            declaredFields,
+            sanitizedFields,
+          )
+          let allowed = Object.keys(values).length > 0
+          if (allowed && tenantId) {
+            const tenantSnapshot = await firestore
+              .collection('tenants')
+              .doc(tenantId)
+              .get()
+            const tenant = tenantSnapshot.exists
+              ? tenantSnapshot.data()
+              : undefined
+            if (tenant?.['plan']) {
+              const recordCount = (
+                await datasetDoc.ref.collection('records').count().get()
+              ).data().count
+              allowed = Aglyn.checkQuota(
+                tenant as any,
+                'recordsPerDataset',
+                recordCount,
+              ).allowed
+            }
+          }
+          if (allowed) {
+            await datasetDoc.ref.collection('records').add({
+              values,
+              createdAt: FieldValue.serverTimestamp(),
+            })
+          }
+        }
+      } catch (error) {
+        console.error('form dataset append failed', error)
+      }
+    }
     await counterRef.set(
       { [monthKey]: FieldValue.increment(1) },
       { merge: true },
