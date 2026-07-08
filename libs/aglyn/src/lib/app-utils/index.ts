@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+export * from './binding-tokens'
 export * from './community'
 export * from './compose-layout-nodes'
 export * from './functions'

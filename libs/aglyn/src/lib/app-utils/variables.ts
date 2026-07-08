@@ -15,6 +15,14 @@
  * limitations under the License.
  */
 
+// Token grammar shared with the picker/besigner (AGL-185):
+// NAME_TOKEN_PATTERN is the legacy `{{name}}` form; the id forms resolve
+// through the same maps, which are double-keyed by id and name.
+import {
+  FUNCTION_TOKEN_PATTERN,
+  NAME_TOKEN_PATTERN,
+  VARIABLE_ID_TOKEN_PATTERN,
+} from './binding-tokens'
 import {
   evaluateExpression,
   evaluateHostFunction,
@@ -110,9 +118,6 @@ export function formatVariableValue(variable: HostVariable): string {
   }
 }
 
-const BINDING_PATTERN = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]{0,39})\s*\}\}/g
-const FUNCTION_BINDING_PATTERN =
-  /\{\{\s*fn:([a-zA-Z_][a-zA-Z0-9_ ]{0,59}?)\s*\(([^)]*)\)\s*\}\}/g
 
 /** A function definition lookup keyed by function name (AGL-93). */
 export type HostFunctionLookup = Record<string, HostFunction>
@@ -131,19 +136,29 @@ function variableScope(
 }
 
 /**
- * Replaces `{{name}}` tokens with variable values and
- * `{{fn:name(arg, ...)}}` tokens with function results (AGL-91/93).
- * Function args are expressions over literals and variable names. Unknown
- * names and failed runs keep the literal token so problems stay visible
- * instead of vanishing silently.
+ * Replaces binding tokens with values (AGL-91/93/185): id forms
+ * `{{var:id}}` / `{{fn:id(args)}}` and legacy `{{name}}` /
+ * `{{fn:name(args)}}` resolve through the same lookup maps — suppliers
+ * double-key them by doc id and name (see `keyByIdAndName`), so a rename
+ * only changes which *legacy* tokens still match. Function args are
+ * expressions over literals and variable names. Unknown refs and failed
+ * runs keep the literal token so problems stay visible instead of
+ * vanishing silently.
  */
 export function resolveBindings(
   text: string,
   variables: Record<string, HostVariable>,
   functions: HostFunctionLookup = {},
 ): string {
-  const withFunctions = text.replace(
-    FUNCTION_BINDING_PATTERN,
+  const withVariableIds = text.replace(
+    VARIABLE_ID_TOKEN_PATTERN,
+    (token, id) => {
+      const variable = variables[String(id)]
+      return variable ? formatVariableValue(variable) : token
+    },
+  )
+  const withFunctions = withVariableIds.replace(
+    FUNCTION_TOKEN_PATTERN,
     (token, rawName, rawArgs) => {
       const definition = functions[String(rawName).trim()]
       if (!definition) return token
@@ -165,7 +180,7 @@ export function resolveBindings(
       }
     },
   )
-  return withFunctions.replace(BINDING_PATTERN, (token, name) => {
+  return withFunctions.replace(NAME_TOKEN_PATTERN, (token, name) => {
     const variable = variables[name]
     return variable ? formatVariableValue(variable) : token
   })

@@ -155,11 +155,14 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
 
   const [draft, setDraft] = useState<VariableDraft | null>(null)
   const validName = VARIABLE_NAME_PATTERN.test(draft?.name ?? '')
+  // Case-insensitive (AGL-185): names must stay unambiguous for legacy
+  // {{name}} token resolution and picker display.
   const nameTaken = Boolean(
     draft &&
       variables.some(
         (variable: any) =>
-          variable.name === draft.name && variable.$id !== draft.id,
+          String(variable.name ?? '').toLowerCase() ===
+            draft.name.trim().toLowerCase() && variable.$id !== draft.id,
       ),
   )
 

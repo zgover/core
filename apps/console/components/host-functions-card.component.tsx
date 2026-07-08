@@ -129,6 +129,17 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
     ...(draft?.variables ?? []).map((variable) => variable.name),
   ].filter((name) => VARIABLE_NAME_PATTERN.test(name))
 
+  // Case-insensitive uniqueness (AGL-185): function names must stay
+  // unambiguous for legacy {{fn:name(...)}} token resolution.
+  const nameTaken = Boolean(
+    draft &&
+      functions.some(
+        (definition: any) =>
+          String(definition.name ?? '').toLowerCase() ===
+            draft.name.trim().toLowerCase() && definition.$id !== draft.id,
+      ),
+  )
+
   const handleTestRun = useCallback(() => {
     if (!draft) return
     const result = evaluateHostFunction(draft, testArgs)
@@ -140,7 +151,7 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
   }, [draft, testArgs])
 
   const handleSave = useCallback(async () => {
-    if (!draft || !draft.name.trim()) return
+    if (!draft || !draft.name.trim() || nameTaken) return
     try {
       const id = draft.id ?? createResourceUid()
       const { id: _ignored, ...definition } = draft
@@ -164,7 +175,7 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
         allowDuplicate: true,
       })
     }
-  }, [draft, firestore, hostId, enqueueSnackbar])
+  }, [draft, nameTaken, firestore, hostId, enqueueSnackbar])
 
   const handleDelete = useCallback(
     (definition: any) => async () => {
@@ -392,7 +403,12 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
         >
           <TextField
             label="Name"
-            helperText="Used to identify the function"
+            helperText={
+              nameTaken
+                ? 'A function with this name already exists'
+                : 'Used to identify the function'
+            }
+            error={nameTaken}
             value={draft?.name ?? ''}
             onChange={(event) =>
               patch((previous) => ({ ...previous, name: event.target.value }))
@@ -762,7 +778,7 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
           <Button
             variant="contained"
             color="secondary"
-            disabled={!draft?.name.trim()}
+            disabled={!draft?.name.trim() || nameTaken}
             onClick={handleSave}
           >
             {'Done'}

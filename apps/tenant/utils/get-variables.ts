@@ -19,8 +19,11 @@ import type * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 /**
- * Fetches the host's variables keyed by binding name (AGL-91). Fail-open:
- * on error an empty map is returned and `{{name}}` tokens render literally.
+ * Fetches the host's variables keyed by binding name AND doc id (AGL-91,
+ * AGL-185): legacy `{{name}}` tokens hit the name key, rename-safe
+ * `{{var:id}}` tokens hit the id key. Id entries are written last so an
+ * id match wins on collision. Fail-open: on error an empty map is
+ * returned and tokens render literally.
  */
 export async function getVariables(options: {
   hostId: string
@@ -39,6 +42,12 @@ export async function getVariables(options: {
       const data = docSnapshot.data() as Aglyn.HostVariable
       if (data?.name && !((data as any).deletedAt)) {
         variables[data.name] = data
+      }
+    }
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data() as Aglyn.HostVariable
+      if (data?.name && !((data as any).deletedAt)) {
+        variables[docSnapshot.id] = data
       }
     }
   } catch (error) {
@@ -69,13 +78,16 @@ export async function getFunctions(options: {
       if (data?.name && !(data as any).deletedAt) {
         // Plain evaluator fields only: doc timestamps aren't
         // JSON-serializable and definitions embed into page props.
-        functions[data.name] = {
+        const definition = {
           name: data.name,
           parameters: data.parameters ?? [],
           variables: data.variables ?? [],
           operations: data.operations ?? [],
           ...(data.returnValue && { returnValue: data.returnValue }),
         }
+        // Keyed by name (legacy tokens) and doc id ({{fn:id(...)}}, AGL-185).
+        functions[data.name] = definition
+        functions[docSnapshot.id] = definition
       }
     }
   } catch (error) {

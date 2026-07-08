@@ -105,6 +105,17 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
   const [draft, setDraft] = useState<WorkflowDraft | null>(null)
   const [testResult, setTestResult] = useState<string | null>(null)
 
+  // Case-insensitive uniqueness (AGL-185): workflow names must stay
+  // unambiguous for computed-variable lookups keyed by name.
+  const nameTaken = Boolean(
+    draft &&
+      workflows.some(
+        (definition: any) =>
+          String(definition.name ?? '').toLowerCase() ===
+            draft.name.trim().toLowerCase() && definition.$id !== draft.id,
+      ),
+  )
+
   const patch = useCallback(
     (updater: (previous: WorkflowDraft) => WorkflowDraft) =>
       setDraft((previous) => (previous ? updater(previous) : previous)),
@@ -153,7 +164,7 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
   }, [draft, functions, variables])
 
   const handleSave = useCallback(async () => {
-    if (!draft || !draft.name.trim()) return
+    if (!draft || !draft.name.trim() || nameTaken) return
     try {
       const id = draft.id ?? createResourceUid()
       const { id: _ignored, ...definition } = draft
@@ -176,7 +187,7 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
         allowDuplicate: true,
       })
     }
-  }, [draft, firestore, hostId, enqueueSnackbar])
+  }, [draft, nameTaken, firestore, hostId, enqueueSnackbar])
 
   const handleDelete = useCallback(
     (workflow: any) => async () => {
@@ -282,7 +293,12 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
         >
           <TextField
             label="Name"
-            helperText="Used to identify the workflow"
+            helperText={
+              nameTaken
+                ? 'A workflow with this name already exists'
+                : 'Used to identify the workflow'
+            }
+            error={nameTaken}
             value={draft?.name ?? ''}
             onChange={(event) =>
               patch((previous) => ({ ...previous, name: event.target.value }))
@@ -501,7 +517,7 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
           <Button
             variant="contained"
             color="secondary"
-            disabled={!draft?.name.trim()}
+            disabled={!draft?.name.trim() || nameTaken}
             onClick={handleSave}
           >
             {'Done'}

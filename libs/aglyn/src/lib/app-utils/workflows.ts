@@ -209,6 +209,9 @@ export function resolveComputedVariables(
   workflows: Record<string, HostWorkflow>,
 ): Record<string, HostVariable> {
   const resolved: Record<string, HostVariable> = {}
+  // Lookup maps are double-keyed by id and name (AGL-185), so the same doc
+  // can appear under two keys — evaluate each workflow once per doc.
+  const memo = new Map<HostVariable, HostVariable>()
   for (const [name, variable] of Object.entries(variables)) {
     const workflowName = variable.workflowName?.trim()
     const workflow = workflowName ? workflows[workflowName] : undefined
@@ -216,11 +219,18 @@ export function resolveComputedVariables(
       resolved[name] = variable
       continue
     }
+    const cached = memo.get(variable)
+    if (cached) {
+      resolved[name] = cached
+      continue
+    }
     const run = runWorkflow(workflow, functions, variables, {}, { workflows })
-    resolved[name] =
+    const next =
       run.ok === false
         ? variable
         : { ...variable, value: String(run.value) }
+    memo.set(variable, next)
+    resolved[name] = next
   }
   return resolved
 }
