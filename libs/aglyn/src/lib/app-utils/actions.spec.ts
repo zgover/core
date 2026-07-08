@@ -78,6 +78,7 @@ describe('isCustomEventName', () => {
     expect(isCustomEventName('formSubmission')).toBe(false)
     expect(isCustomEventName('x')).toBe(false)
   })
+})
 
 describe('WEBHOOK_URL_PATTERN', () => {
   it('allows public https and blocks local/private targets (AGL-149)', () => {
