@@ -146,4 +146,57 @@ export const presets: Aglyn.PresetSchema[] = [
   },
 ]
 
+/** The besigner drawer category installed plugins register under (AGL-190). */
+export const PLUGIN_DRAWER_CATEGORY = 'Community'
+
+export interface PluginInstallLike {
+  listingId?: string
+  $id?: string
+  displayName?: string
+  pluginId?: string
+  manifest?: {
+    name?: string
+    restrictParent?: string[]
+    restrictChildren?: string[]
+  }
+}
+
+/**
+ * Builds a besigner preset for an installed plugin (AGL-190): a named,
+ * draggable drawer entry that drops a `communityPlugin` node with the
+ * listing id pre-pinned, so editors never hand-type ids. Reuses the single
+ * `communityPlugin` renderer — no per-plugin component registration. The
+ * manifest's lineal rules ride on the node data for later enforcement.
+ * Returns null for an install without a resolvable listing id.
+ */
+export function pluginInstallToPreset(
+  install: PluginInstallLike,
+): Aglyn.PresetSchema | null {
+  const listingId = install.listingId ?? install.$id
+  if (!listingId) return null
+  const name =
+    install.displayName || install.manifest?.name || 'Community plugin'
+  return {
+    $id: `plugin__${listingId}`,
+    type: Aglyn.NodeType.PRESET,
+    displayName: name,
+    pluginId: BUNDLE_ID,
+    description: 'Installed community plugin',
+    category: PLUGIN_DRAWER_CATEGORY,
+    icon: { path: mdiPuzzle.path, sx: { color: '#5e35b1' } },
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: { listingId },
+      ...(install.manifest?.restrictParent
+        ? { restrictParent: install.manifest.restrictParent }
+        : {}),
+      ...(install.manifest?.restrictChildren
+        ? { restrictChildren: install.manifest.restrictChildren }
+        : {}),
+    } as any,
+  }
+}
+
 export default CommunityPlugin

@@ -72,6 +72,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import AiAssistProvider from '../../../../../../../components/ai-assist-provider.component'
 import BesignerFunctionsButton from '../../../../../../../components/besigner-functions-button.component'
 import BindingPickerProvider from '../../../../../../../components/binding-picker-provider.component'
+import usePluginDrawerRegistration from '../../../../../../../hooks/use-plugin-drawer-registration'
 import BesignerMediaPickerProvider from '../../../../../../../components/besigner-media-picker-provider.component'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
 import BesignerDocumentSwitcherComponent from '../../../../../../../components/besigner-document-switcher.component'
@@ -134,6 +135,8 @@ function BesignerPage(props) {
   // Screen password protection (AGL-87); null = untouched.
   const [protectPassword, setProtectPassword] = useState<string | null>(null)
   const handleAddElementClick = useAddElementDrawerCallback()
+  // Installed plugins appear as named drawer entries (AGL-190).
+  usePluginDrawerRegistration(hostId)
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, {
     hostId: hostId as string,
     screenId: screenId as string,
