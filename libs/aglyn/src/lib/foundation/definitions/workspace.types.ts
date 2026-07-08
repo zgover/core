@@ -107,6 +107,8 @@ export interface TenantFeatureFlags {
   videoMedia?: boolean
   /** Appointment bookings (AGL-159). */
   bookings?: boolean
+  /** Event → action automation builder (AGL-148). */
+  actions?: boolean
 }
 
 /**
@@ -141,6 +143,8 @@ export interface TenantEntitlements {
   servicesPerHost?: number
   /** Campaign emails sendable per calendar month (AGL-161). */
   emailSendsPerMonth?: number
+  /** Action runs per calendar month (AGL-148). */
+  actionRunsPerMonth?: number
   /** Dynamic data caps (AGL-99/102). */
   datasetsPerHost?: number
   /** Hard dataset cap incl. addons (AGL-132); beyond it, upgrade. */

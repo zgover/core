@@ -37,6 +37,7 @@ export type Entitlement =
   | 'workflows'
   | 'data-store'
   | 'bookings'
+  | 'actions'
 
 const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   versioning: 'versioning',
@@ -49,6 +50,7 @@ const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   workflows: 'workflows',
   'data-store': 'dataStore',
   bookings: 'bookings',
+  actions: 'actions',
 }
 
 /**

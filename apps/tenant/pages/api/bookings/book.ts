@@ -24,7 +24,7 @@ import {
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { runEventWorkflows } from '../../../utils/run-event-workflows'
+import { emitHostEvent } from '../../../utils/emit-host-event'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -160,8 +160,8 @@ export default async function handler(
       })
       .catch(() => undefined)
 
-    // Event trigger (AGL-128/159).
-    await runEventWorkflows(hostId, 'booking', {
+    // Event trigger (AGL-128/148/159).
+    const { alerts } = await emitHostEvent(hostId, 'booking', {
       serviceName: service.name ?? '',
       email,
       startsAtMs,
@@ -195,7 +195,7 @@ export default async function handler(
       }).catch((error) => console.error('booking email failed', error))
     }
 
-    return res.status(200).json({ bookingId, startsAtMs, endsAtMs })
+    return res.status(200).json({ bookingId, startsAtMs, endsAtMs, alerts })
   } catch (error: any) {
     if (error?.code === 409) {
       return res
