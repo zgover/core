@@ -41,9 +41,10 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import { useFirestore } from 'reactfire'
 import { hasEntitlement } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
 
 interface EventDraft {
   id: string | null
@@ -82,8 +83,9 @@ export function HostEventsCard(props: { hostId: string }) {
   const { tenant } = useCurrentTenant()
   const entitled = hasEntitlement('event-calendar', tenant)
 
-  const { data: eventDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'events'), limit(200)),
+  const { data: eventDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'events'), limit(200)),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const events = [...(eventDocs ?? [])]

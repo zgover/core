@@ -44,7 +44,7 @@ import {
 } from '@mui/material'
 import { collection, doc, limit, query, setDoc, updateDoc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire'
+import { useFirestore, useUser } from 'reactfire'
 import { checkTenantQuota } from '../constants/entitlements'
 import WhereUsedDialog from './where-used-dialog.component'
 import {
@@ -53,6 +53,7 @@ import {
   type WhereUsedResult,
 } from '../utils/fetch-where-used'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
 
 export interface HostFunctionsCardProps {
   hostId: string
@@ -111,8 +112,9 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const { tenant } = useCurrentTenant()
-  const { data: functionDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'functions'), limit(100)),
+  const { data: functionDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'functions'), limit(100)),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const functions = [...(functionDocs ?? [])]

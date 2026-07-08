@@ -28,9 +28,10 @@ import {
 } from '@mui/material'
 import { deleteField, doc, updateDoc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore, useFirestoreDocData, useUser } from 'reactfire'
+import { useFirestore, useUser } from 'reactfire'
 import { hasEntitlement } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import useFirestoreDoc from '../hooks/use-firestore-doc'
 
 const CNAME_TARGET =
   process.env['NEXT_PUBLIC_AGLYN_TENANT_HOST_CNAME'] ?? 'sites.aglyn.app'
@@ -52,8 +53,9 @@ export function CustomDomainCard(props: CustomDomainCardProps) {
   const { tenant } = useCurrentTenant()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
-  const { data: host } = useFirestoreDocData<any>(
-    doc(firestore, 'hosts', hostId),
+  const { data: host } = useFirestoreDoc<any>(
+    () => doc(firestore, 'hosts', hostId),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const connected = host?.cname as string | undefined

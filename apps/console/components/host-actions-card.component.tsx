@@ -51,9 +51,10 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import { useFirestore } from 'reactfire'
 import { hasEntitlement } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
 
 const CUSTOM_EVENT_VALUE = '__custom__'
 
@@ -91,20 +92,24 @@ export function HostActionsCard(props: { hostId: string }) {
   const { confirm } = useConfirmationContext()
   const { tenant } = useCurrentTenant()
 
-  const { data: actionDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'actions'), limit(100)),
+  const { data: actionDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'actions'), limit(100)),
+    [firestore, hostId],
     { idField: '$id' },
   )
-  const { data: workflowDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'workflows'), limit(100)),
+  const { data: workflowDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'workflows'), limit(100)),
+    [firestore, hostId],
     { idField: '$id' },
   )
-  const { data: datasetDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'datasets'), limit(100)),
+  const { data: datasetDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'datasets'), limit(100)),
+    [firestore, hostId],
     { idField: '$id' },
   )
-  const { data: webhookDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'webhooks'), limit(20)),
+  const { data: webhookDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'webhooks'), limit(20)),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const actions = [...(actionDocs ?? [])]

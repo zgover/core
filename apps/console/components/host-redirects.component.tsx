@@ -50,13 +50,11 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { useCallback, useEffect, useState } from 'react'
-import {
-  useFirestore,
-  useFirestoreCollectionData,
-  useFirestoreDocData,
-} from 'reactfire'
+import { useFirestore } from 'reactfire'
 import { checkTenantQuota, hasEntitlement } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
+import useFirestoreDoc from '../hooks/use-firestore-doc'
 
 interface RedirectDraft {
   id: string | null
@@ -80,8 +78,9 @@ export function HostRedirects(props: { hostId: string }) {
   const { tenant } = useCurrentTenant()
   const entitled = hasEntitlement('redirects', tenant)
 
-  const { data: redirectDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'redirects'), limit(200)),
+  const { data: redirectDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'redirects'), limit(200)),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const redirects = [...(redirectDocs ?? [])]
@@ -93,8 +92,9 @@ export function HostRedirects(props: { hostId: string }) {
   const [draft, setDraft] = useState<RedirectDraft | null>(null)
 
   // Host routing map for the screen-collision warning (AGL-156 spec).
-  const { data: host } = useFirestoreDocData<any>(
-    doc(firestore, 'hosts', hostId),
+  const { data: host } = useFirestoreDoc<any>(
+    () => doc(firestore, 'hosts', hostId),
+    [firestore, hostId],
     { idField: '$id' },
   )
 

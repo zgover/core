@@ -41,9 +41,10 @@ import {
 } from '@mui/material'
 import { collection, doc, limit, query, setDoc, updateDoc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire'
+import { useFirestore, useUser } from 'reactfire'
 import { checkTenantQuota } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
 import WhereUsedDialog from './where-used-dialog.component'
 import {
   fetchWhereUsed,
@@ -156,8 +157,9 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
     result: WhereUsedResult
   } | null>(null)
   const [usageLoading, setUsageLoading] = useState<string | null>(null)
-  const { data: variableDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'variables'), limit(100)),
+  const { data: variableDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'variables'), limit(100)),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const variables = [...(variableDocs ?? [])]

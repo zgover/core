@@ -65,12 +65,13 @@ import {
   writeBatch,
 } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import { useFirestore } from 'reactfire'
 import {
   checkTenantQuota,
   hasEntitlement,
 } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
 import useHostActivityLogger from '../hooks/use-host-activity-logger'
 import { DatasetSchemaDialog } from './dataset-schema-dialog.component'
 
@@ -92,8 +93,9 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   const { tenant } = useCurrentTenant()
   const logActivity = useHostActivityLogger(hostId)
 
-  const { data: datasetDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'datasets'), limit(100)),
+  const { data: datasetDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'datasets'), limit(100)),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const datasets = useMemo(
@@ -115,18 +117,20 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   )
   const fields: string[] = useMemo(() => model.order, [model])
 
-  const { data: recordDocs } = useFirestoreCollectionData<any>(
-    query(
-      collection(
-        firestore,
-        'hosts',
-        hostId,
-        'datasets',
-        selected?.$id ?? '-none-',
-        'records',
+  const { data: recordDocs } = useFirestoreCollection<any>(
+    () =>
+      query(
+        collection(
+          firestore,
+          'hosts',
+          hostId,
+          'datasets',
+          selected?.$id ?? '-none-',
+          'records',
+        ),
+        limit(500),
       ),
-      limit(500),
-    ),
+    [firestore, hostId, selected?.$id],
     { idField: '$id' },
   )
   const records = useMemo(
