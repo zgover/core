@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+import {
+  COMMUNITY_COMPONENT_ID_ALLOWLIST,
+  sanitizeCommunityDefinition,
+} from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -49,7 +53,12 @@ export default async function handler(
   const instruction = String(req.body?.instruction ?? '').slice(0, 500)
   // Modes (AGL-130): 'element' rewrites short copy; 'blog' writes or
   // improves markdown-lite entry bodies with title/excerpt context.
-  const mode = req.body?.mode === 'blog' ? 'blog' : 'element'
+  const mode =
+    req.body?.mode === 'blog'
+      ? 'blog'
+      : req.body?.mode === 'section'
+        ? 'section'
+        : 'element'
   const title = String(req.body?.title ?? '').slice(0, 200)
   const excerpt = String(req.body?.excerpt ?? '').slice(0, 500)
   if (!instruction) {
@@ -58,6 +67,71 @@ export default async function handler(
 
   try {
     await firebaseAdmin.app().auth().verifyIdToken(idToken)
+
+    // Generate section (AGL-169): a constrained-JSON node subtree over the
+    // community component allowlist; the response passes the same
+    // sanitizer as community installs before it ever reaches a canvas.
+    if (mode === 'section') {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 3000,
+          system:
+            'You design one website section inside a site builder. Reply ' +
+            'with ONLY a JSON object, no prose or code fences: ' +
+            '{"rootId":"n1","nodes":{"n1":{"$id":"n1","componentId":"muiStack","parentId":null,"props":{},"nodes":["n2"]},...}}. ' +
+            'Every node needs $id, componentId, parentId (null for the ' +
+            'root), and children listed in "nodes" (child ids). Allowed ' +
+            `componentIds: ${COMMUNITY_COMPONENT_ID_ALLOWLIST.join(', ')}. ` +
+            'Useful props — muiStack: {direction:"row"|"column", spacing, ' +
+            'justifyContent, alignItems}; muiTypography: {children, ' +
+            'variant:"h1".."h6"|"body1"|"subtitle1"}; muiButton: ' +
+            '{children, variant:"contained"|"outlined", color}; image: ' +
+            '{src, alt}; muiContainer: {maxWidth:"sm"|"md"|"lg"}. Keep it ' +
+            'small: 4-12 nodes, one root container. Leave image src empty. ' +
+            'Write real copy, not lorem ipsum.',
+          messages: [
+            { role: 'user', content: `Section to design: ${instruction}` },
+          ],
+        }),
+      })
+      const payload = await response.json()
+      if (!response.ok) {
+        console.error(payload)
+        return res
+          .status(502)
+          .json({ error: payload?.error?.message ?? 'AI request failed' })
+      }
+      const raw = (payload?.content ?? [])
+        .filter((block: any) => block?.type === 'text')
+        .map((block: any) => block.text)
+        .join('')
+        .trim()
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```$/, '')
+      let parsed: any
+      try {
+        parsed = JSON.parse(raw)
+      } catch {
+        return res.status(502).json({ error: 'AI returned invalid JSON' })
+      }
+      const sanitized = sanitizeCommunityDefinition({
+        rootId: String(parsed?.rootId ?? ''),
+        nodes: parsed?.nodes ?? {},
+      })
+      if (sanitized.ok === false) {
+        return res.status(422).json({ error: sanitized.error })
+      }
+      return res
+        .status(200)
+        .json({ section: { rootId: sanitized.rootId, nodes: sanitized.nodes } })
+    }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

@@ -26,6 +26,12 @@ import { createContext } from 'react'
  */
 export interface AiAssistContextValue {
   onRewrite?: (node: Aglyn.NodeSchema<any>) => void
+  /**
+   * Generate section (AGL-169): opens the host app's prompt dialog and
+   * grafts the AI-proposed subtree into the canvas root. The toolbar
+   * button renders only when the callback exists.
+   */
+  onGenerateSection?: () => void
 }
 
 export const AiAssistContext = createContext<AiAssistContextValue>({})

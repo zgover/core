@@ -57,6 +57,9 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
   // any text attribute the element's schema declares (alt text, labels…).
   const [targetProp, setTargetProp] = useState('children')
   const [busy, setBusy] = useState(false)
+  // Generate section (AGL-169).
+  const [sectionOpen, setSectionOpen] = useState(false)
+  const [sectionPrompt, setSectionPrompt] = useState('')
 
   const textTargets = useMemo(() => {
     const schema = node?.componentSchema
@@ -155,9 +158,93 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
     }
   }, [node, instruction, busy, user, effectiveTarget, enqueueSnackbar])
 
-  const contextValue = useMemo(() => ({ onRewrite: handleRewrite }), [
-    handleRewrite,
-  ])
+  const handleGenerateSection = useCallback(() => {
+    if (!hasEntitlement('ai-assist', tenant)) {
+      return void enqueueSnackbar(
+        'AI assist requires a Pro plan — see Billing to upgrade',
+        { variant: 'warning', persist: false },
+      )
+    }
+    setSectionPrompt('')
+    setSectionOpen(true)
+  }, [tenant, enqueueSnackbar])
+
+  const handleSectionConfirm = useCallback(async () => {
+    if (!sectionPrompt.trim() || busy) return
+    setBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/ai/assist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          mode: 'section',
+          instruction: sectionPrompt.trim(),
+        }),
+      })
+      const payload = await response.json()
+      if (response.status === 501) {
+        return void enqueueSnackbar(
+          'AI assist is not configured on this deployment',
+          { variant: 'info', persist: false },
+        )
+      }
+      if (!response.ok || !payload?.section?.rootId) {
+        return void enqueueSnackbar(payload?.error ?? 'AI request failed', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      }
+      const nested = Aglyn.communityDefinitionToNested(
+        payload.section.rootId,
+        payload.section.nodes,
+      )
+      if (!nested) {
+        return void enqueueSnackbar('AI returned an empty section', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      }
+      // Graft through the preset path: ids regenerate, history is saved,
+      // and the subtree lands at the end of the canvas root.
+      const stamped = (function stamp(node: any): any {
+        const schema = Aglyn.components.getSchema(node.componentId)
+        return {
+          ...node,
+          ...(schema?.pluginId ? { pluginId: schema.pluginId } : {}),
+          nodes: (node.nodes ?? []).map(stamp),
+        }
+      })(nested)
+      Aglyn.canvas.addNodeFromPreset(
+        { type: Aglyn.NodeType.PRESET, data: stamped } as any,
+        Aglyn.canvas.rootNode as any,
+      )
+      setSectionOpen(false)
+      enqueueSnackbar('Section added — undo removes it', {
+        variant: 'success',
+        persist: false,
+      })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('An error has occurred', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } finally {
+      setBusy(false)
+    }
+  }, [sectionPrompt, busy, user, enqueueSnackbar])
+
+  const contextValue = useMemo(
+    () => ({
+      onRewrite: handleRewrite,
+      onGenerateSection: handleGenerateSection,
+    }),
+    [handleRewrite, handleGenerateSection],
+  )
 
   return (
     <AiAssistContext.Provider value={contextValue}>
@@ -221,6 +308,52 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
             onClick={handleConfirm}
           >
             {busy ? 'Rewriting…' : 'Rewrite'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={sectionOpen}
+        onClose={() => (busy ? null : setSectionOpen(false))}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{'Generate a section with AI'}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            {'Describe the section — e.g. "hero with headline, subtext, ' +
+              'and a call-to-action button" or "three-column feature grid".'}
+          </Typography>
+          <TextField
+            label="Section"
+            value={sectionPrompt}
+            onChange={(event) => setSectionPrompt(event.target.value)}
+            size="small"
+            autoFocus
+            multiline
+            minRows={2}
+            disabled={busy}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault()
+                handleSectionConfirm()
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={busy} onClick={() => setSectionOpen(false)}>
+            {'Cancel'}
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!sectionPrompt.trim() || busy}
+            startIcon={busy ? <CircularProgress size={16} /> : undefined}
+            onClick={handleSectionConfirm}
+          >
+            {busy ? 'Generating…' : 'Generate'}
           </Button>
         </DialogActions>
       </Dialog>

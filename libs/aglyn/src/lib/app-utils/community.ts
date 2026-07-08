@@ -165,3 +165,30 @@ export function sanitizeCommunityDefinition(definition: {
   }
   return { ok: true, rootId, nodes: sanitized }
 }
+
+/**
+ * Converts a sanitized community/AI definition (normalized map) into the
+ * nested node shape `canvas.addNodeFromPreset` grafts — ids regenerate on
+ * insert, so collisions with existing canvas nodes are impossible
+ * (AGL-169). A seen-set guards malformed self-referencing trees.
+ */
+export function communityDefinitionToNested(
+  rootId: string,
+  nodes: CommunityDefinitionNodes,
+): Record<string, unknown> | null {
+  const seen = new Set<string>()
+  const build = (id: string): Record<string, unknown> | null => {
+    const node = nodes[id]
+    if (!node || seen.has(id)) return null
+    seen.add(id)
+    return {
+      componentId: node.componentId,
+      ...(node.pluginId ? { pluginId: node.pluginId } : {}),
+      ...(node.props ? { props: node.props } : {}),
+      nodes: (node.nodes ?? [])
+        .map(build)
+        .filter((child): child is Record<string, unknown> => Boolean(child)),
+    }
+  }
+  return build(rootId)
+}

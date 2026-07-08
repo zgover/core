@@ -27,6 +27,7 @@ import AddControlsComponent from './add-controls.component'
 import DevicePreviewControlsComponent from './device-preview-controls.component'
 import HistoryControlsComponent from './history-controls.component'
 import PanelControlsComponent from './panel-controls.component'
+import AiSectionControlsComponent from './ai-section-controls.component'
 import BindingPreviewControlsComponent from './binding-preview-controls.component'
 import SchemePreviewControlsComponent from './scheme-preview-controls.component'
 
@@ -74,6 +75,7 @@ export const AppBarSecondaryComponent = forwardRef<
           }}>
           <AddControlsComponent />
           <HistoryControlsComponent sx={{ flexGrow: 1 }} />
+          <AiSectionControlsComponent />
           <BindingPreviewControlsComponent />
           <SchemePreviewControlsComponent />
           <DevicePreviewControlsComponent />
