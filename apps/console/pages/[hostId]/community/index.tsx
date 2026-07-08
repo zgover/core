@@ -19,6 +19,7 @@ import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import CommunityBrowse from '../../../components/community/community-browse.component'
+import HostPluginsCard from '../../../components/community/host-plugins-card.component'
 import { useHostId } from '../../../components/host-id-provider'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -52,6 +53,7 @@ const HostCommunity: NextPageWithLayout = () => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <HostPluginsCard hostId={hostId} />
           <CommunityBrowse hostId={hostId} />
         </Container>
       </DashboardLayout>

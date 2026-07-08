@@ -19,6 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import applyDuePublishSchedule from './apply-publish-schedule'
 import getComponents from './get-components'
 import getDatasets from './get-datasets'
+import getPluginInstalls from './get-plugin-installs'
 import getVariables, { getFunctions, getWorkflows } from './get-variables'
 import getPublishedLayoutVersion from './get-layout-version'
 import getScreenVersion from './get-screen-version'
@@ -68,12 +69,14 @@ export async function composeScreenNodes(options: {
   // Host variable + function bindings (AGL-91/93): {{name}} and
   // {{fn:name(args)}} in string props resolve to values; unknown tokens
   // and failed runs stay literal.
-  const [rawVariables, functions, datasets, workflows] = await Promise.all([
-    getVariables({ hostId }),
-    getFunctions({ hostId }),
-    getDatasets({ hostId }),
-    getWorkflows({ hostId }),
-  ])
+  const [rawVariables, functions, datasets, workflows, pluginInstalls] =
+    await Promise.all([
+      getVariables({ hostId }),
+      getFunctions({ hostId }),
+      getDatasets({ hostId }),
+      getWorkflows({ hostId }),
+      getPluginInstalls({ hostId }),
+    ])
   // Computed variables (AGL-129): workflow-backed values resolve once per
   // compose; failures keep each variable's stored fallback.
   const variables = Aglyn.resolveComputedVariables(
@@ -87,7 +90,10 @@ export async function composeScreenNodes(options: {
   const repeated = Aglyn.expandRepeatables(grafted as any, datasets)
   const bound = Aglyn.resolveNodesBindings(repeated as any, variables, functions)
   // Function widgets run client-side: embed their definitions (AGL-93).
-  const nodes = Aglyn.attachFunctionDefinitions(bound, functions)
+  const withFunctions = Aglyn.attachFunctionDefinitions(bound, functions)
+  // Community plugins (AGL-45): stamp each communityPlugin node with its
+  // pinned install (version/sha256/capabilities) + kill-switch state.
+  const nodes = Aglyn.attachPluginInstalls(withFunctions, pluginInstalls)
   // Entry-template tokens (AGL-105): {{entry.*}} from the rendered entry.
   const finalNodes = Aglyn.resolveNamedTokens(nodes as any, options.tokens)
   return Aglyn.canvas.processNodesToDenormalized(finalNodes as any)
