@@ -49,6 +49,40 @@ import { BUNDLE_ID } from './constants/bundle-common'
 export function registerLegacyMuiPlugin(): void {
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
 
+  // Single bundle manifest (AGL-140): one entry per component keeps
+  // register/unregister symmetric — the old hand-maintained lists had
+  // drifted (several components were never unregistered on destroy).
+  const MUI_BUNDLE: Array<{
+    component: any
+    schema: Aglyn.ComponentSchema<any>
+    presets?: Aglyn.PresetSchema[]
+  }> = [
+    { component: AppBar.default, schema: AppBar.schema, presets: AppBar.presets },
+    { component: Toolbar.default, schema: Toolbar.schema, presets: Toolbar.presets },
+    { component: Typography.default, schema: Typography.schema, presets: Typography.presets },
+    { component: Button.default, schema: Button.schema, presets: Button.presets },
+    { component: Container.default, schema: Container.schema, presets: Container.presets },
+    { component: LayoutSlot.default, schema: LayoutSlot.schema, presets: LayoutSlot.presets },
+    { component: List.default, schema: List.schema, presets: List.presets },
+    { component: ListItem.default, schema: ListItem.schema, presets: ListItem.presets },
+    { component: ListItemText.default, schema: ListItemText.schema, presets: ListItemText.presets },
+    { component: FormComponents.Form, schema: FormComponents.formSchema, presets: FormComponents.formPresets },
+    { component: FormComponents.FormField, schema: FormComponents.formFieldSchema },
+    { component: Blocks.VideoEmbed, schema: Blocks.videoEmbedSchema, presets: Blocks.blockPresets },
+    { component: Blocks.SocialLinks, schema: Blocks.socialLinksSchema },
+    { component: Image.default, schema: Image.schema, presets: Image.presets },
+    { component: Video.default, schema: Video.schema, presets: Video.presets },
+    { component: Icon.default, schema: Icon.schema, presets: Icon.presets },
+    { component: Booking.default, schema: Booking.schema, presets: Booking.presets },
+    { component: LanguageSwitcher.default, schema: LanguageSwitcher.schema, presets: LanguageSwitcher.presets },
+    { component: ReusableInstance.default, schema: ReusableInstance.schema, presets: ReusableInstance.presets },
+    { component: ScreenLink.default, schema: ScreenLink.schema, presets: ScreenLink.presets },
+    { component: FunctionWidget.default, schema: FunctionWidget.schema, presets: FunctionWidget.presets },
+    { component: Product.default, schema: Product.schema, presets: Product.presets },
+    { component: SearchBox.default, schema: SearchBox.schema, presets: SearchBox.presets },
+    { component: Stack.default, schema: Stack.schema, presets: Stack.presets },
+  ]
+
   Aglyn.plugins.addDependency({
     $id: BUNDLE_ID,
     displayName: 'Material UI',
@@ -56,125 +90,26 @@ export function registerLegacyMuiPlugin(): void {
     title: 'Material UI',
     dependencies: {},
     load(): void {
-      Aglyn.components.registerComponent(AppBar.default, AppBar.schema)
-      Aglyn.components.registerComponent(Toolbar.default, Toolbar.schema)
-      Aglyn.components.registerComponent(Typography.default, Typography.schema)
-      Aglyn.components.registerComponent(Button.default, Button.schema)
-      Aglyn.components.registerComponent(Container.default, Container.schema)
-      Aglyn.components.registerComponent(LayoutSlot.default, LayoutSlot.schema)
-      Aglyn.components.registerComponent(List.default, List.schema)
-      Aglyn.components.registerComponent(ListItem.default, ListItem.schema)
-      Aglyn.components.registerComponent(
-        ListItemText.default,
-        ListItemText.schema,
-      )
-      Aglyn.components.registerComponent(
-        FormComponents.Form,
-        FormComponents.formSchema,
-      )
-      Aglyn.components.registerComponent(
-        FormComponents.FormField,
-        FormComponents.formFieldSchema,
-      )
-      Aglyn.components.registerComponent(
-        Blocks.VideoEmbed,
-        Blocks.videoEmbedSchema,
-      )
-      Aglyn.components.registerComponent(
-        Blocks.SocialLinks,
-        Blocks.socialLinksSchema,
-      )
-      Aglyn.components.registerComponent(Image.default, Image.schema)
-      Aglyn.components.registerComponent(Video.default, Video.schema)
-      Aglyn.components.registerComponent(Icon.default, Icon.schema)
-      Aglyn.components.registerComponent(Booking.default, Booking.schema)
-      Aglyn.components.registerComponent(LanguageSwitcher.default, LanguageSwitcher.schema)
-      Aglyn.components.registerComponent(
-        ReusableInstance.default,
-        ReusableInstance.schema,
-      )
-      Aglyn.components.registerComponent(
-        ScreenLink.default,
-        ScreenLink.schema,
-      )
-      Aglyn.components.registerComponent(
-        FunctionWidget.default,
-        FunctionWidget.schema,
-      )
-      Aglyn.components.registerComponent(Product.default, Product.schema)
-      Aglyn.components.registerComponent(SearchBox.default, SearchBox.schema)
-      Aglyn.components.registerComponent(Stack.default, Stack.schema)
-
-      Aglyn.components.registerPreset(AppBar.presets)
-      Aglyn.components.registerPreset(Toolbar.presets)
-      Aglyn.components.registerPreset(Typography.presets)
-      Aglyn.components.registerPreset(Button.presets)
-      Aglyn.components.registerPreset(Container.presets)
-      Aglyn.components.registerPreset(LayoutSlot.presets)
-      Aglyn.components.registerPreset(List.presets)
-      Aglyn.components.registerPreset(ListItem.presets)
-      Aglyn.components.registerPreset(ListItemText.presets)
-      Aglyn.components.registerPreset(Blocks.blockPresets)
-      Aglyn.components.registerPreset(FormComponents.formPresets)
-      Aglyn.components.registerPreset(Image.presets)
-      Aglyn.components.registerPreset(Video.presets)
-      Aglyn.components.registerPreset(Icon.presets)
-      Aglyn.components.registerPreset(Booking.presets)
-      Aglyn.components.registerPreset(LanguageSwitcher.presets)
-      Aglyn.components.registerPreset(ReusableInstance.presets)
-      Aglyn.components.registerPreset(ScreenLink.presets)
-      Aglyn.components.registerPreset(FunctionWidget.presets)
-      Aglyn.components.registerPreset(Product.presets)
-      Aglyn.components.registerPreset(SearchBox.presets)
-      Aglyn.components.registerPreset(Stack.presets)
+      for (const entry of MUI_BUNDLE) {
+        Aglyn.components.registerComponent(entry.component, entry.schema)
+      }
+      for (const entry of MUI_BUNDLE) {
+        if (entry.presets?.length) {
+          Aglyn.components.registerPreset(entry.presets)
+        }
+      }
     },
     destroy(): void {
-      Aglyn.components.unregisterPreset(
-        FunctionWidget.presets.map((i) => i.$id),
-      )
-      Aglyn.components.unregisterPreset(AppBar.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Toolbar.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Typography.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Button.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Container.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(LayoutSlot.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(List.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(ListItem.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(ListItemText.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Blocks.blockPresets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(
-        FormComponents.formPresets.map((i) => i.$id),
-      )
-      Aglyn.components.unregisterPreset(Image.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Video.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Icon.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Booking.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(LanguageSwitcher.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(ReusableInstance.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(ScreenLink.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Product.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(SearchBox.presets.map((i) => i.$id))
-      Aglyn.components.unregisterPreset(Stack.presets.map((i) => i.$id))
-
-      Aglyn.components.unregisterComponent(Product.ID)
-      Aglyn.components.unregisterComponent(SearchBox.ID)
-      Aglyn.components.unregisterComponent(Blocks.VIDEO_EMBED_ID)
-      Aglyn.components.unregisterComponent(Blocks.SOCIAL_LINKS_ID)
-      Aglyn.components.unregisterComponent(FormComponents.FORM_ID)
-      Aglyn.components.unregisterComponent(FormComponents.FORM_FIELD_ID)
-      Aglyn.components.unregisterComponent(Image.ID)
-      Aglyn.components.unregisterComponent(AppBar.ID)
-      Aglyn.components.unregisterComponent(Toolbar.ID)
-      Aglyn.components.unregisterComponent(Typography.ID)
-      Aglyn.components.unregisterComponent(Button.ID)
-      Aglyn.components.unregisterComponent(Container.ID)
-      Aglyn.components.unregisterComponent(LayoutSlot.ID)
-      Aglyn.components.unregisterComponent(List.ID)
-      Aglyn.components.unregisterComponent(ListItem.ID)
-      Aglyn.components.unregisterComponent(ListItemText.ID)
-      Aglyn.components.unregisterComponent(ReusableInstance.ID)
-      Aglyn.components.unregisterComponent(ScreenLink.ID)
-      Aglyn.components.unregisterComponent(Stack.ID)
+      for (const entry of MUI_BUNDLE) {
+        if (entry.presets?.length) {
+          Aglyn.components.unregisterPreset(
+            entry.presets.map((preset) => preset.$id),
+          )
+        }
+      }
+      for (const entry of MUI_BUNDLE) {
+        Aglyn.components.unregisterComponent(entry.schema.$id)
+      }
     },
   })
 }

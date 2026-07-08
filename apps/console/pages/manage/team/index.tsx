@@ -67,7 +67,7 @@ const PERMISSIONS: Array<{ key: string; label: string }> = [
   { key: 'editHosts', label: 'Edit hosts' },
   { key: 'editBilling', label: 'Edit billing' },
   { key: 'publishToCommunity', label: 'Publish to community' },
-  { key: 'installPlugins', label: 'Install plugins' },
+  { key: 'installPlugins', label: 'Install add-ons' },
   { key: 'manageMembers', label: 'Manage members' },
 ]
 
