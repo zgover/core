@@ -17,14 +17,38 @@
 
 export enum Route {
   MANAGE_ACCOUNT_SETTINGS = '/manage/account',
+  ADMIN_TENANTS = '/admin/tenants',
+  ADMIN_TENANT_DETAIL = '/admin/tenants/[tenantId]',
+  ADMIN_OVERVIEW = '/admin/overview',
+  ADMIN_AUDIT = '/admin/audit',
+  ADMIN_USERS = '/admin/users',
+  MANAGE_BILLING = '/manage/billing',
   MANAGE_USER_SETTINGS = '/manage/user',
   AUTH_SIGN_IN = '/signin',
   AUTH_SIGN_OUT = '/signout',
   AUTH_SIGN_UP = '/signup',
   AUTH_VERIFY_EMAIL = '/verify-email',
   HOST_LIST = '/hosts',
+  HOST_COMMUNITY = '/[hostId]/community',
+  HOST_COMMUNITY_LISTING = '/[hostId]/community/[listingId]',
+  HOST_COMMUNITY_PUBLISHER = '/[hostId]/community/publisher/[profileId]',
+  HOST_CONTENT = '/[hostId]/content',
+  MANAGE_COMMUNITY_PROFILE = '/manage/community',
+  MANAGE_TEAM = '/manage/team',
+  MANAGE_SUPPORT = '/manage/support',
   HOST_DASHBOARD = '/[hostId]',
+  HOST_INBOX = '/[hostId]/inbox',
+  HOST_CONTACTS = '/[hostId]/contacts',
+  HOST_MEDIA = '/[hostId]/media',
   HOST_SETUP = '/[hostId]/setup',
+  HOST_THEME = '/[hostId]/theme',
+  HOST_WORKFLOWS = '/[hostId]/workflows',
+  HOST_DATA = '/[hostId]/data',
+  HOST_BOOKINGS = '/[hostId]/bookings',
+  HOST_EVENTS = '/[hostId]/events',
+  HOST_REDIRECTS = '/[hostId]/redirects',
+  LAYOUT_BESIGNER = '/[hostId]/layouts/[layoutId]/versions/[versionId]/besigner',
+  LAYOUT_LIST = '/[hostId]/layouts/list',
   SCREEN_BESIGNER = '/[hostId]/screens/[screenId]/versions/[versionId]/besigner',
   SCREEN_DETAILS = '/[hostId]/screens/[screenId]/versions/[versionId]/view',
   SCREEN_PREVIEW = '/[hostId]/screens/[screenId]/versions/[versionId]/preview',
@@ -42,6 +66,32 @@ export interface RoutePayload extends Record<keyof any, any> {
     versionId: string
   }
   [Route.HOST_DASHBOARD]: { hostId: string }
+  [Route.ADMIN_TENANTS]: undefined
+  [Route.ADMIN_TENANT_DETAIL]: { tenantId: string }
+  [Route.ADMIN_OVERVIEW]: undefined
+  [Route.ADMIN_AUDIT]: undefined
+  [Route.ADMIN_USERS]: undefined
+  [Route.HOST_COMMUNITY]: { hostId: string }
+  [Route.HOST_COMMUNITY_LISTING]: { hostId: string; listingId: string }
+  [Route.HOST_COMMUNITY_PUBLISHER]: { hostId: string; profileId: string }
+  [Route.HOST_CONTENT]: { hostId: string }
+  [Route.MANAGE_COMMUNITY_PROFILE]: undefined
+  [Route.MANAGE_TEAM]: undefined
+  [Route.MANAGE_SUPPORT]: undefined
+  [Route.HOST_INBOX]: { hostId: string }
+  [Route.HOST_MEDIA]: { hostId: string }
+  [Route.HOST_THEME]: { hostId: string }
+  [Route.HOST_WORKFLOWS]: { hostId: string }
+  [Route.HOST_DATA]: { hostId: string }
+  [Route.HOST_BOOKINGS]: { hostId: string }
+  [Route.HOST_EVENTS]: { hostId: string }
+  [Route.HOST_REDIRECTS]: { hostId: string }
+  [Route.LAYOUT_BESIGNER]: {
+    hostId: string
+    layoutId: string
+    versionId: string
+  }
+  [Route.LAYOUT_LIST]: { hostId: string }
   [Route.SCREEN_DETAILS]: {
     hostId: string
     screenId: string

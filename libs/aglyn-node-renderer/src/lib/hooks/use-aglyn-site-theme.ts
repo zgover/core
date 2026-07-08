@@ -15,24 +15,30 @@
  * limitations under the License.
  */
 
-import { createTheme } from '@aglyn/shared-ui-theme'
+import type { HostTheme, HostThemeScheme } from '@aglyn/shared-data-types'
+import { createTheme, hostThemeToThemeOptions } from '@aglyn/shared-ui-theme'
 import { useMemo } from 'react'
 
 export type UseAglynSiteThemeOptions = {
   // Node covers ShadowRoot containers, which MUI accepts at runtime but
   // types as Element only.
   container?: Element | Node
+  /** Persisted host theme customization; omitted → default light theme (legacy behavior). */
+  theme?: HostTheme
+  scheme?: HostThemeScheme
 }
 
 export function useAglynSiteTheme(options: UseAglynSiteThemeOptions = {}) {
   const container = options.container as Element | undefined
+  const hostTheme = options.theme
+  const scheme = options.scheme ?? 'light'
 
   return useMemo(() => {
+    const themeOptions = hostThemeToThemeOptions(hostTheme, scheme)
     return createTheme({
-      palette: {
-        mode: 'light',
-      },
+      ...themeOptions,
       components: {
+        ...themeOptions.components,
         MuiPopover: {
           defaultProps: {
             container: container,
@@ -50,6 +56,6 @@ export function useAglynSiteTheme(options: UseAglynSiteThemeOptions = {}) {
         },
       },
     })
-  }, [container])
+  }, [container, hostTheme, scheme])
 }
 export default useAglynSiteTheme

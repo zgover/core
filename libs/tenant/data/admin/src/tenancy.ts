@@ -19,4 +19,7 @@ export { appCheck, firebaseApp } from '@aglyn/shared-util-fbclient'
 export * from './lib/client/tenant.utils'
 
 export * from './lib/server/firebase-admin'
+export * from './lib/server/serve-media-cdn'
+export * from './lib/server/serve-plugin-fetch'
 export * from './lib/server/tenant.utils'
+export * from './lib/server/upsert-contact'

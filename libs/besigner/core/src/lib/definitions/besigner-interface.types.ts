@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
+import type { HostViewType } from '@aglyn/aglyn'
 import type { IBesignerAppController } from './besigner-app.types'
+import type { HostThemeScheme } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import type { LogLevelString } from '@aglyn/shared-util-logger'
 import type { BehaviorSubject } from 'rxjs'
@@ -39,6 +41,15 @@ export type BesignerContext = {
     interactMode: InteractionModeFlag
     activeView?: BesignerPanelViewFlag
     devicePreview?: BesignerDeviceFlag
+    /** Color scheme the canvas previews the host theme in; console UI is unaffected. */
+    canvasScheme?: HostThemeScheme
+    /** What kind of host view the canvas is editing (screen or shared layout). */
+    viewType?: HostViewType
+    /**
+     * WYSIWYG bindings (AGL-97): when not false, the canvas resolves
+     * variable/function binding tokens live; toggle off for raw tokens.
+     */
+    resolveBindings?: boolean
   }
   panels: {
     panelLeft?: BesignerPanelItem

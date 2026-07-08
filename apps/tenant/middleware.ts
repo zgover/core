@@ -55,6 +55,10 @@ export const config = {
     // '/(\\?\\!_next|_static|api)/:path*',
     // '/_sites/:path*',
     '/((?!api|_next|_static|fonts|examples|[\\w-]+\\.\\w+).*)',
+    // Per-host SEO files, rewritten to the api routes with the resolved
+    // tenant host (SEO Toolkit).
+    '/sitemap.xml',
+    '/robots.txt',
   ],
 }
 
@@ -157,7 +161,18 @@ export const middleware: NextMiddleware = (req, event) => {
       )
       tenantHost = reqHost.replace(`.localhost:4500`, '') || 'demo'
       break
-    default:
+    default: {
+      // Custom domains (AGL-166): any other hostname is a customer domain
+      // CNAMEd at Vercel. The edge runtime can't query Firestore, so the
+      // hostname travels as a `cname--` sentinel and getStaticProps
+      // resolves it via host.cname (unknown domains 404 there). Only
+      // host-shaped names proceed; garbage still bounces to the console.
+      const hostname = reqHost.split(':')[0].toLowerCase()
+      if (IS_VERCEL && /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(hostname)) {
+        console.debug('Tenant Host Switch=', 'cname', 'hostname=', hostname)
+        tenantHost = `cname--${hostname}`
+        break
+      }
       console.debug(
         'Tenant Host Switch=',
         'Redirecting',
@@ -167,6 +182,7 @@ export const middleware: NextMiddleware = (req, event) => {
         'https://console.aglyn.io',
       )
       return NextResponse.redirect('https://console.aglyn.io')
+    }
   }
 
   if (
@@ -185,9 +201,28 @@ export const middleware: NextMiddleware = (req, event) => {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
+  // Per-host SEO files resolve through api routes (SEO Toolkit). Clone the
+  // request URL so the host query survives the rewrite.
+  if (
+    req.nextUrl.pathname === '/sitemap.xml' ||
+    req.nextUrl.pathname === '/robots.txt'
+  ) {
+    const seoUrl = req.nextUrl.clone()
+    seoUrl.pathname =
+      req.nextUrl.pathname === '/sitemap.xml' ? '/api/sitemap' : '/api/robots'
+    seoUrl.searchParams.set('host', tenantHost)
+    // The query can be dropped across dev rewrites, so the resolved tenant
+    // host also travels as a request header the api routes prefer.
+    const seoHeaders = new Headers(req.headers)
+    seoHeaders.set('x-aglyn-tenant-host', tenantHost)
+    return NextResponse.rewrite(seoUrl, { request: { headers: seoHeaders } })
+  }
+
   // rewrite to the current hostname under the pages/_sites folder
   // the main logic component will happen in pages/_sites/[host]/[...path].tsx
-  const rewrite = `/_sites/${tenantHost}${req.nextUrl.pathname}`
+  // Preserve the query string (search pages, tenantHost overrides) — the
+  // path-only rewrite silently dropped it.
+  const rewrite = `/_sites/${tenantHost}${req.nextUrl.pathname}${req.nextUrl.search}`
   console.debug(
     'Tenant Host Switch=',
     'Rewriting',

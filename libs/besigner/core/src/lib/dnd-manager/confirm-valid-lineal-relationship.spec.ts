@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import confirmValidLinealRelationship from './confirm-valid-lineal-relationship'
+import confirmValidLinealRelationship, { describeInvalidLinealRelationship } from './confirm-valid-lineal-relationship'
 
 describe('confirm-valid-lineal-relationship', () => {
   it('is valid if no restrictions exist', () => {
@@ -117,5 +117,39 @@ describe('confirm-valid-lineal-relationship', () => {
       ] as Aglyn.ComponentsLinealOrder,
     }
     expect(confirmValidLinealRelationship(item, parent)[0]).toEqual(false)
+  })
+})
+
+describe('describeInvalidLinealRelationship', () => {
+  it('names the parents an item is limited to', () => {
+    const item = {
+      componentId: 'muiToolbar',
+      restrictParent: [
+        Aglyn.LinealDirectiveFlag.LIMIT_TO,
+        { components: ['muiAppBar'] },
+      ] as Aglyn.ComponentsLinealOrder,
+    }
+    const parent = { componentId: 'div' }
+    const [valid, reason] = confirmValidLinealRelationship(item, parent)
+    expect(valid).toBe(false)
+    expect(describeInvalidLinealRelationship(item, parent, reason)).toMatch(
+      /must be placed inside/,
+    )
+  })
+
+  it('explains parents that accept nothing', () => {
+    const item = { componentId: 'muiAppBar' }
+    const parent = {
+      componentId: 'layoutSlot',
+      restrictChildren: [
+        Aglyn.LinealDirectiveFlag.LIMIT_TO,
+        { components: [] },
+      ] as Aglyn.ComponentsLinealOrder,
+    }
+    const [valid, reason] = confirmValidLinealRelationship(item, parent)
+    expect(valid).toBe(false)
+    expect(describeInvalidLinealRelationship(item, parent, reason)).toMatch(
+      /doesn't accept/,
+    )
   })
 })

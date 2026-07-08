@@ -167,7 +167,7 @@ const ElementInfo = function ElementInfo({
           },
           {
             key: 'plugin-id',
-            label: 'Plugin ID',
+            label: 'Add-on ID',
             value: node?.pluginId,
             ValueTypographyProps: {},
           },

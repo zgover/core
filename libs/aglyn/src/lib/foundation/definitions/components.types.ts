@@ -139,6 +139,16 @@ export interface AglynComponentSchema<P = any> {
      * Describe nodes of this component type to be self-closing
      */
     selfClosing?: FEATURE_FLAG
+    /**
+     * Component renders its `children` prop as text content the editor may
+     * edit directly (Attributes "Text" field, inline canvas editing).
+     */
+    textEditable?: FEATURE_FLAG
+    /**
+     * Component also accepts basic rich text (AGL-54): sanitized HTML in the
+     * `html` prop with `children` as the plain-text fallback.
+     */
+    richTextEditable?: FEATURE_FLAG
   }
 
   /**
@@ -176,6 +186,11 @@ export enum FieldComponentType {
   INPUT_ADDON_GROUP = 'input-addon-group',
   PLAIN_TEXT = 'plain-text',
   RADIO = 'radio',
+  /**
+   * Select listing the host's screens; the editor resolves the options from
+   * the host routing map at render time and writes the chosen screen id.
+   */
+  SCREEN_SELECT = 'screen-select',
   SELECT = 'select',
   SLIDER = 'slider',
   SUB_FORM = 'sub-form',

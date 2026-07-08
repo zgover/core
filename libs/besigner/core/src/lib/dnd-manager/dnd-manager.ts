@@ -16,8 +16,15 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { confirmValidLinealRelationship } from './confirm-valid-lineal-relationship'
+import {
+  confirmValidLinealRelationship,
+  type ConfirmValidLinealRelationshipResponse,
+  describeInvalidLinealRelationship,
+  type InvalidLinealRelationFlag,
+  type LinealItem,
+} from './confirm-valid-lineal-relationship'
 import { makeAutoObservable } from 'mobx'
+import { getSelected, isNodeSelected } from '../focus-manager/focus-manager'
 
 export enum DragType {
   CANVAS = 'canvas',
@@ -85,10 +92,50 @@ export class DndManager {
       this.computedDrop?.breadcrumbPath?.some((i) => i === this.drag?.$id),
     )
   }
-  public get isValidLinealRelationship(): boolean {
-    if (!this.hasDragTarget) return false
-    if (!this.hasDropTarget) return false
-    const parent = {
+  /**
+   * Multi-drag (AGL-13): when the dragged node is part of the current
+   * multi-selection, every draggable selected node moves; otherwise just
+   * the dragged node. Presets never join a selection.
+   */
+  public get dragNodes(): DraggableNode[] {
+    if (
+      this.drag &&
+      this.drag.type === Aglyn.NodeType.NODE &&
+      isNodeSelected(this.drag as Aglyn.NodeSchema<any>)
+    ) {
+      const selected = getSelected().filter((node) => this.canDragNode(node))
+      if (selected.length > 1) {
+        // Document order (not selection order) so relative positions
+        // survive the move: compare breadcrumb paths by sibling index.
+        const orderKey = (node: Aglyn.NodeSchema<any>): number[] =>
+          (node.breadcrumbPath ?? []).map((id) => {
+            try {
+              return Aglyn.canvas.getNodeIndex(Aglyn.canvas.getNode(id))
+            } catch {
+              return 0
+            }
+          })
+        return [...selected].sort((a, b) => {
+          const left = orderKey(a)
+          const right = orderKey(b)
+          for (let i = 0; i < Math.max(left.length, right.length); i += 1) {
+            const diff = (left[i] ?? -1) - (right[i] ?? -1)
+            if (diff !== 0) return diff
+          }
+          return 0
+        })
+      }
+      if (selected.length === 1) return selected
+    }
+    return this.drag ? [this.drag] : []
+  }
+  /** Item/parent descriptors for the pending drop, or null without targets. */
+  private get dropRelationshipActors(): {
+    item: LinealItem
+    parent: LinealItem
+  } | null {
+    if (!this.hasDragTarget || !this.hasDropTarget) return null
+    const parent: LinealItem = {
       pluginId: this.computedDrop?.pluginId,
       componentId: this.computedDrop?.componentId,
       restrictChildren: this.computedDrop?.componentSchema?.restrictChildren,
@@ -99,25 +146,54 @@ export class DndManager {
       const preset = this.drag as Aglyn.PresetSchema<any>
       const itemNode = preset.data
       const itemSchema = Aglyn.components.getSchema(itemNode?.componentId)
-      return confirmValidLinealRelationship(
-        {
+      return {
+        item: {
           pluginId: preset.data?.pluginId,
           componentId: itemNode?.componentId,
           restrictChildren: itemSchema?.restrictChildren,
           restrictParent: itemSchema?.restrictParent,
         },
         parent,
-      )[0]
+      }
     }
-    return confirmValidLinealRelationship(
-      {
+    return {
+      item: {
         pluginId: this.drag?.pluginId,
         componentId: this.drag?.componentId,
         restrictChildren: this.drag?.componentSchema?.restrictChildren,
         restrictParent: this.drag?.componentSchema?.restrictParent,
       },
       parent,
-    )[0]
+    }
+  }
+
+  public get linealValidation(): ConfirmValidLinealRelationshipResponse {
+    const actors = this.dropRelationshipActors
+    if (!actors) return [false, 0 as InvalidLinealRelationFlag]
+    return confirmValidLinealRelationship(actors.item, actors.parent)
+  }
+
+  public get isValidLinealRelationship(): boolean {
+    return this.linealValidation[0]
+  }
+
+  /**
+   * Human-readable reason the pending drop would be rejected, or null when
+   * the drop is valid (or there is nothing to validate). Read this before
+   * onDragEnd — completing the drag clears the dnd state.
+   */
+  public describeDropRejection(): string | null {
+    const actors = this.dropRelationshipActors
+    if (!actors) return null
+    if (this.dropIsInsideDrag) {
+      return "An element can't be moved inside itself"
+    }
+    const [valid, reason] = confirmValidLinealRelationship(
+      actors.item,
+      actors.parent,
+    )
+    if (valid) return null
+    return describeInvalidLinealRelationship(actors.item, actors.parent, reason)
   }
 
   constructor() {
@@ -197,7 +273,39 @@ export class DndManager {
       Aglyn.canvas.addNodeFromPreset(dragNode as Aglyn.PresetSchema<any>, parent, position)
       // Besigner.focus.setSelectedNode(newNode)
     } else {
-      Aglyn.canvas.reparentNode(dragNode, parent, position)
+      // Multi-drag (AGL-13): move the whole selection when the dragged
+      // node is selected. Per-node guards mirror the single-node checks —
+      // nodes that contain the drop target or fail the lineal rules are
+      // skipped rather than failing the whole move. Sequential inserts
+      // with an advancing position preserve document order (CANVAS and
+      // TREE drags both land here).
+      const parentSchema = Aglyn.components.getSchema(parent?.componentId)
+      for (const node of this.dragNodes) {
+        if (node.type !== Aglyn.NodeType.NODE) continue
+        const containsDrop = Boolean(
+          this.computedDrop?.breadcrumbPath?.some((id) => id === node.$id),
+        )
+        if (containsDrop) continue
+        const [valid] = confirmValidLinealRelationship(
+          {
+            pluginId: node.pluginId,
+            componentId: node.componentId,
+            restrictChildren: (node as Aglyn.NodeSchema<any>)
+              ?.componentSchema?.restrictChildren,
+            restrictParent: (node as Aglyn.NodeSchema<any>)?.componentSchema
+              ?.restrictParent,
+          },
+          {
+            pluginId: parent?.pluginId,
+            componentId: parent?.componentId,
+            restrictChildren: parentSchema?.restrictChildren,
+            restrictParent: parentSchema?.restrictParent,
+          },
+        )
+        if (!valid) continue
+        Aglyn.canvas.reparentNode(node, parent, position)
+        if (!Number.isNaN(position)) position += 1
+      }
     }
 
     this.clearDndStatus()

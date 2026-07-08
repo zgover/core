@@ -31,17 +31,27 @@ import { useHost } from '@aglyn/tenant-feature-instance'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { InputAdornment, Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
-import { doc } from 'firebase/firestore'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
-import { useAnalytics, useFirestore } from 'reactfire'
+import { useAnalytics, useUser } from 'reactfire'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import CardDisplayFormTemplate from '../../../components/card-display-form-template'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
+import CustomDomainCard from '../../../components/custom-domain-card.component'
+import FaviconCard from '../../../components/favicon-card.component'
+import ErrorScreensCard from '../../../components/error-screens-card.component'
+import LanguagesCard from '../../../components/languages-card.component'
+import SiteBackupCard from '../../../components/site-backup-card.component'
+import SiteTemplateCard from '../../../components/site-template-card.component'
+import ThemeEditor from '../../../components/theme-editor/theme-editor.component'
+import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../constants/route-links'
+import hostNavTabItems from '../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
+import useHostActivityLogger from '../../../hooks/use-host-activity-logger'
 
 const basicSchema: FormSchema = {
   id: 'hostDetails',
@@ -96,6 +106,19 @@ const seoSchema: FormSchema = {
   id: 'hostSeo',
   title: 'SEO',
   fields: [
+    {
+      component: FieldComponentType.TEXT_FIELD,
+      name: 'analytics.gaMeasurementId',
+      label: 'Google Analytics measurement ID',
+      helperText: 'Optional — e.g. G-XXXXXXXXXX; injects gtag on your site',
+      type: 'text',
+      FormFieldGridProps: {
+        size: {
+          xs: 12,
+          sm: 6,
+        },
+      },
+    },
     {
       component: FieldComponentType.TEXT_FIELD,
       name: 'seo.title',
@@ -223,29 +246,117 @@ const seoSchema: FormSchema = {
   ],
 }
 
-const useHostRef = (id: Aglyn.HostUid) => {
-  const firestore = useFirestore()
-  return doc(firestore, 'hosts', id)
-}
+/** Theme tab id (AGL-114); `/setup?tab=theme` deep links land here. */
+const THEME_TAB_ID = 'theme'
+/** Custom domain tab id (AGL-122); `/setup?tab=domain` deep links. */
+const DOMAIN_TAB_ID = 'domain'
 
 const HostSetup: NextPageWithLayout = (props) => {
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
 
-  const [tab, setTab] = useState(basicSchema.id)
+  const searchParams = useSearchParams()
+  const requestedTab = searchParams?.get('tab')
+  const [tab, setTab] = useState(
+    requestedTab === THEME_TAB_ID ||
+      requestedTab === DOMAIN_TAB_ID ||
+      requestedTab === seoSchema.id
+      ? requestedTab
+      : basicSchema.id,
+  )
   const analytics = useAnalytics()
+  const { data: user } = useUser()
   const hostId = useHostId()
   const {
-    doc: { data },
+    doc: { data, status },
     setDoc,
   } = useHost({ hostId })
+  const [themeSaving, setThemeSaving] = useState(false)
+  const logActivity = useHostActivityLogger(hostId)
+
+  const handleThemeSave = useCallback(
+    async (theme: Aglyn.AglynHostTheme) => {
+      setThemeSaving(true)
+      const dequeueLoading = queueLoading()
+      // mergeFields replaces the theme atomically, so cleared colors do not
+      // linger from a deep merge with the previous document.
+      await setDoc({ theme }, { mergeFields: ['theme'] })
+        .then(() => {
+          enqueueSnackbar('Theme saved!', { variant: 'success' })
+          logActivity('Updated theme', { type: 'theme' })
+        })
+        .catch((e) => {
+          enqueueSnackbar(`Error: ${JSON.stringify(e)}`, { variant: 'error' })
+        })
+        .finally(() => {
+          dequeueLoading()
+          setThemeSaving(false)
+        })
+    },
+    [enqueueSnackbar, queueLoading, setDoc, logActivity],
+  )
 
   const handleBasicSave = useCallback(
     async (fields: any) => {
       const dequeueLoading = queueLoading()
+      // Rename guards (AGL-147): the create API validates new hosts, but
+      // this save path could silently rename onto a taken or blocked
+      // subdomain — run the same server checks first.
+      const subdomainChanged =
+        typeof fields.subdomain === 'string' &&
+        fields.subdomain !== data?.subdomain
+      const displayNameChanged =
+        typeof fields.displayName === 'string' &&
+        fields.displayName !== data?.displayName
+      if (subdomainChanged || displayNameChanged) {
+        try {
+          const idToken = await (user as any)?.getIdToken?.()
+          const response = await fetch('/api/hosts/validate-name', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+            },
+            body: JSON.stringify({
+              hostId,
+              ...(subdomainChanged && { subdomain: fields.subdomain }),
+              ...(displayNameChanged && { displayName: fields.displayName }),
+            }),
+          })
+          const validation = response.ok ? await response.json() : null
+          if (validation) {
+            if (
+              !validation.subdomainValid ||
+              validation.subdomainBlocked ||
+              validation.subdomainTaken
+            ) {
+              dequeueLoading()
+              const hint = validation.suggestions?.length
+                ? ` Try: ${validation.suggestions.join(', ')}`
+                : ''
+              return void enqueueSnackbar(
+                (validation.subdomainTaken
+                  ? 'That subdomain is taken.'
+                  : 'That subdomain is not available.') + hint,
+                { variant: 'warning', persist: false },
+              )
+            }
+            if (validation.displayNameCollision) {
+              enqueueSnackbar(
+                'Another of your sites already uses this name — saved ' +
+                  'anyway, but consider renaming one.',
+                { variant: 'info', persist: false },
+              )
+            }
+          }
+        } catch {
+          // Validation is advisory on network failure; the save proceeds.
+        }
+      }
       await setDoc(fields, { merge: true })
         .then(() => {
           enqueueSnackbar('Saved!', { variant: 'success' })
+          logActivity('Updated host settings', { type: 'host', id: hostId })
         })
         .catch((e) => {
           enqueueSnackbar(`Error: ${JSON.stringify(e)}`, { variant: 'error' })
@@ -254,7 +365,7 @@ const HostSetup: NextPageWithLayout = (props) => {
           dequeueLoading()
         })
     },
-    [enqueueSnackbar, queueLoading, setDoc],
+    [enqueueSnackbar, queueLoading, setDoc, hostId, logActivity, data, user],
   )
 
   const forms = [
@@ -275,7 +386,7 @@ const HostSetup: NextPageWithLayout = (props) => {
       setTab(value)
       const form = forms.find(({ schema }) => schema.id === value)
       logEvent(analytics, 'screen_view', {
-        firebase_screen: form.schema.title as string,
+        firebase_screen: (form?.schema.title as string) ?? 'Theme',
         firebase_screen_class: HostSetup.displayName,
       })
     },
@@ -286,26 +397,10 @@ const HostSetup: NextPageWithLayout = (props) => {
     <>
       <NextPageTitle screen={'Host Setup'} />
       <DashboardLayout
-        navTabItems={[
-          {
-            id: 'nav-tab-dashboard',
-            label: 'Dashboard',
-            href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
-          },
-          {
-            id: 'nav-tab-screens',
-            label: 'Screens',
-            href: buildRoute(Route.SCREEN_LIST, { hostId }),
-          },
-          {
-            id: 'nav-tab-setup',
-            label: 'Setup',
-            href: buildRoute(Route.HOST_SETUP, { hostId }),
-          },
-        ]}
+        navTabItems={hostNavTabItems(hostId)}
         breadcrumbItems={[
           {
-            children: hostId,
+            children: <HostDisplayNameComponent hostId={hostId} />,
             href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
           },
           {
@@ -349,6 +444,8 @@ const HostSetup: NextPageWithLayout = (props) => {
                             label={schema.title}
                           />
                         ))}
+                        <Tab value={THEME_TAB_ID} label={'Theme'} />
+                        <Tab value={DOMAIN_TAB_ID} label={'Custom Domain'} />
                       </TabList>
                     </CardDisplay>
                   ),
@@ -374,9 +471,41 @@ const HostSetup: NextPageWithLayout = (props) => {
                             initialValues={initialValues}
                           />
 
-                          <CardDisplay></CardDisplay>
+                          {schema.id === 'hostDetails' ? (
+                            <>
+                              <div style={{ marginTop: 24 }}>
+                                <ErrorScreensCard hostId={hostId} />
+                              </div>
+                              <div style={{ marginTop: 24 }}>
+                                <LanguagesCard hostId={hostId} />
+                              </div>
+                              <div style={{ marginTop: 24 }}>
+                                <SiteBackupCard hostId={hostId} />
+                              </div>
+                              <div style={{ marginTop: 24 }}>
+                                <SiteTemplateCard hostId={hostId} />
+                              </div>
+                            </>
+                          ) : null}
+                          {schema.id === 'hostSeo' ? (
+                            <div style={{ marginTop: 24 }}>
+                              <FaviconCard hostId={hostId} />
+                            </div>
+                          ) : null}
                         </TabPanel>
                       ))}
+                      <TabPanel value={THEME_TAB_ID} sx={{ padding: 'unset' }}>
+                        {status === 'success' ? (
+                          <ThemeEditor
+                            theme={data?.theme}
+                            saving={themeSaving}
+                            onSave={handleThemeSave}
+                          />
+                        ) : null}
+                      </TabPanel>
+                      <TabPanel value={DOMAIN_TAB_ID} sx={{ padding: 'unset' }}>
+                        <CustomDomainCard hostId={hostId} />
+                      </TabPanel>
                     </>
                   ),
                 },

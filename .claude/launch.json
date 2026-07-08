@@ -4,8 +4,22 @@
     {
       "name": "console",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "console", "--prod"],
+      "runtimeArgs": [
+        "nx",
+        "serve",
+        "console"
+      ],
       "port": 4200
+    },
+    {
+      "name": "tenant",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nx",
+        "serve",
+        "tenant"
+      ],
+      "port": 4500
     }
   ]
 }

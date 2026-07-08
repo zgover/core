@@ -1,8 +1,155 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    function isSignedIn() { return request.auth != null; }
+    // Staff access is a Firebase custom claim set via
+    // tools/scripts/set-staff-claim.mjs (Aglyn Admin Console, AGL-42).
+    function isStaff() { return isSignedIn() && request.auth.token.staff == true; }
+    // Staff RBAC (AGL-206): roles ride a second claim; a missing role
+    // means 'super' so pre-RBAC staff keep full access (migration path).
+    // support = read-only surfaces; billing = plan/entitlement writes;
+    // super = everything including suspension and user management.
+    function staffRole() {
+      return request.auth.token.get('staffRole', 'super');
+    }
+    function isBillingStaff() {
+      return isStaff() && (staffRole() == 'super' || staffRole() == 'billing');
+    }
+    function isSuperStaff() { return isStaff() && staffRole() == 'super'; }
+
+    // Hosts and everything under them are scoped to the host's admins map
+    // (content-hardening review, 2026-07-07): the previous any-authed access
+    // let any signed-up account write other tenants' screens — a stored-XSS
+    // and defacement vector once rich text landed. Tenant sites read through
+    // the Admin SDK (bypasses rules), so no public read is needed here.
+    function isHostAdmin(hostId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/hosts/$(hostId))
+          .data.admins[request.auth.uid] == true;
+    }
+    // Suspension write-block (AGL-210): staff-suspended tenants keep read
+    // access but cannot mutate content. Fail-open when the tenant doc is
+    // missing (pre-billing hosts) so legacy data never locks up; the
+    // identical host-doc get() is deduped with isHostAdmin's by rules.
+    function tenantSuspendedById(tenantId) {
+      return tenantId != null &&
+        exists(/databases/$(database)/documents/tenants/$(tenantId)) &&
+        get(/databases/$(database)/documents/tenants/$(tenantId))
+          .data.get('suspendedAt', null) != null;
+    }
+    function hostTenantSuspended(hostId) {
+      return tenantSuspendedById(
+        get(/databases/$(database)/documents/hosts/$(hostId))
+          .data.get('tenantId', null));
+    }
+    match /hosts/{hostId} {
+      // Queries must be admin-constrained (the console filters on
+      // admins.{uid} == true), which this rule admits.
+      allow read: if isStaff() || (isSignedIn() &&
+        resource.data.admins[request.auth.uid] == true);
+      allow create: if isSignedIn() &&
+        request.resource.data.admins[request.auth.uid] == true &&
+        !tenantSuspendedById(request.resource.data.get('tenantId', null));
+      allow update, delete: if isStaff() ||
+        (isSignedIn() && resource.data.admins[request.auth.uid] == true &&
+          !hostTenantSuspended(hostId));
+      match /{document=**} {
+        allow read: if isStaff() || isHostAdmin(hostId);
+        allow write: if isStaff() ||
+          (isHostAdmin(hostId) && !hostTenantSuspended(hostId));
+      }
+    }
+
+    // User profile docs (AGL-158): the console account page reads/writes
+    // users/{uid}; the AGL-42 hardening dropped the blanket rule without
+    // adding this match, which default-denied the collection.
+    match /users/{userId} {
+      allow read, write: if isStaff() ||
+        (isSignedIn() && request.auth.uid == userId);
+    }
+
+    // Tenant docs (billing v1: keyed by the owner's uid). Owners read their
+    // own doc; clients never write plan/subscription — the Stripe webhook
+    // and admin tooling write via the Admin SDK (which bypasses rules), and
+    // staff may write from the admin console.
+    match /tenants/{tenantId} {
+      // Team members (AGL-127) read the owner tenant they belong to — the
+      // console resolves plan/entitlements from the OWNER doc, keyed by the
+      // member's uid in the owner's members subcollection.
+      allow read: if isStaff() || (isSignedIn() &&
+        (request.auth.uid == tenantId ||
+          exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid))));
+      // Plan/entitlement writes: billing or super. Suspension and erasure
+      // flags are super-only (AGL-206) — checked by key diff so a billing
+      // override save can't smuggle a suspension in.
+      allow write: if isSuperStaff() ||
+        (isBillingStaff() &&
+          !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['suspendedAt', 'suspendedReason', 'erasureRequestedAt']));
+    }
+
+    // Community marketplace (AGL-44). Profiles are public publisher pages;
+    // the owner (tenants are keyed by uid) or staff may write. Handle and
+    // names are length-capped here since any owner writes client-side.
+    match /profiles/{tenantId} {
+      allow read: if true;
+      allow write: if (isStaff() ||
+          (isSignedIn() && request.auth.uid == tenantId)) &&
+        request.resource.data.handle is string &&
+        request.resource.data.handle.size() >= 3 &&
+        request.resource.data.handle.size() <= 30 &&
+        request.resource.data.handle.matches('[a-z0-9][a-z0-9-]*') &&
+        request.resource.data.displayName is string &&
+        request.resource.data.displayName.size() <= 80;
+    }
+
+    // Listings are public reads. Creates and version snapshots happen ONLY
+    // through the publish API (Admin SDK, server-side sanitization) — no
+    // client create. Owners may update/delete their own listing metadata
+    // (unpublish via deletedAt); staff may moderate anything.
+    match /communityListings/{listingId} {
+      allow read: if true;
+      allow create: if false;
+      allow update, delete: if isStaff() ||
+        (isSignedIn() && resource.data.profileId == request.auth.uid);
+      // Version snapshots hold the actual (possibly paid) content — no
+      // client reads; installs go through /api/community/install, which
+      // checks the purchase record server-side (AGL-46).
+      match /versions/{version} {
+        allow read, write: if isStaff();
+      }
+      // Plugin version records hold the artifact sha256 + manifest (AGL-45).
+      // Server-only, same as component versions: installs go through
+      // /api/community/install-plugin, which checks entitlement + kill
+      // switch and copies the pin into the host's installs.
+      match /pluginVersions/{version} {
+        allow read, write: if isStaff();
+      }
+    }
+
+    // Plugin kill switch (AGL-45): loaders check this before executing a
+    // pinned plugin, so it is a PUBLIC read; only staff (or the Admin SDK)
+    // may write a revocation.
+    match /revocations/{listingId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // Marketplace purchase records (AGL-46): written only by the Stripe
+    // webhook (Admin SDK). Buyers read their own purchases (install
+    // gating); sellers read sales of their listings (revenue ledger).
+    match /communityPurchases/{purchaseId} {
+      allow read: if isStaff() || (isSignedIn() &&
+        (resource.data.buyerUid == request.auth.uid ||
+         resource.data.sellerUid == request.auth.uid));
+      allow write: if false;
+    }
+
+    // Staff-only, append-only audit log of admin actions
+    // ({ actorUid, action, target, before, after, at }).
+    match /adminAudit/{entryId} {
+      allow read, create: if isStaff();
+      allow update, delete: if false;
     }
   }
 }

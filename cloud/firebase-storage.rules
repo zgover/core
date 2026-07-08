@@ -1,8 +1,13 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Media files are public site assets (tenant pages embed the URLs).
+    // Writes are denied entirely (AGL-85): uploads and deletes go through
+    // the console's /api/media/upload route (Admin SDK bypasses rules),
+    // which enforces auth, host-admin membership, and the storage quota.
     match /{allPaths=**} {
-      allow read, write: if request.auth!=null;
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

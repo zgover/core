@@ -15,4 +15,11 @@
  * limitations under the License.
  */
 
+export * from './lib/constants/bundle-common'
 export * from './lib/legacy-plugin'
+export * from './lib/components/plugin-frame'
+export {
+  PLUGIN_DRAWER_CATEGORY,
+  type PluginInstallLike,
+  pluginInstallToPreset,
+} from './lib/components/plugin'

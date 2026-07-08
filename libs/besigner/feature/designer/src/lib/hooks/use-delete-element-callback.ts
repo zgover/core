@@ -48,4 +48,46 @@ export function useDeleteElementCallback(): (
   )
 }
 
+/**
+ * Bulk variant for multi-selection (AGL-10/11): one confirm dialog, then
+ * deletes every given node (the root node is skipped defensively).
+ */
+export function useDeleteElementsCallback(): (
+  nodes: Aglyn.NodeSchema[],
+) => Promise<void> {
+  const { confirm } = useConfirmationContext()
+
+  return useCallback(
+    (nodes: Aglyn.NodeSchema[]) => {
+      const deletable = nodes.filter(
+        (node) => node && !Aglyn.canvas.isRootNode(node),
+      )
+      if (!deletable.length) return Promise.resolve()
+
+      function handleDelete() {
+        Besigner.focus.clearFocusStatus()
+        for (const node of deletable) {
+          // A node may have been removed already as part of an ancestor.
+          if (Aglyn.canvas.getNode(node.$id)) Aglyn.canvas.deleteNode(node)
+        }
+      }
+
+      return confirm({
+        title: 'Are you sure?',
+        description:
+          `You are about to delete ${deletable.length} elements and all of ` +
+          "their child elements from the canvas. Press 'Delete' to confirm " +
+          "or 'Cancel' to void the operation.",
+        confirmationText: 'Delete',
+        confirmationButtonProps: {
+          color: 'error',
+        },
+      })
+        .then(handleDelete)
+        .catch(() => {})
+    },
+    [confirm],
+  )
+}
+
 export default useDeleteElementCallback

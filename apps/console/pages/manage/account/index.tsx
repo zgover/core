@@ -23,6 +23,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
+import settingsNavTabItems from '../../../constants/settings-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
 const Settings: NextPageWithLayout = (props) => {
@@ -30,18 +31,7 @@ const Settings: NextPageWithLayout = (props) => {
     <>
       <NextPageTitle screen={'Settings'} />
       <DashboardLayout
-        navTabItems={[
-          {
-            id: 'nav-tab-settings-user',
-            label: 'User',
-            href: buildRoute(Route.MANAGE_USER_SETTINGS),
-          },
-          {
-            id: 'nav-tab-settings-account',
-            label: 'Account',
-            href: buildRoute(Route.MANAGE_ACCOUNT_SETTINGS),
-          },
-        ]}
+        navTabItems={settingsNavTabItems()}
         breadcrumbItems={[
           {
             children: 'Settings',

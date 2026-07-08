@@ -153,6 +153,28 @@ describe('Aglyn: Screen Manager', () => {
     expect(normal2).toEqual(nodes)
   })
 
+  describe('setNodes id coercion', () => {
+    it('trusts the map key for missing ids and pins the root to the canonical id', () => {
+      const canvas = new CanvasManager(undefined as any)
+      canvas.setNodes({
+        [NODE_ROOT_ID]: { nodes: ['child'] },
+        child: { parentId: NODE_ROOT_ID },
+        stale: { $id: 'stale', parentId: NODE_ROOT_ID },
+      } as any)
+      expect(canvas.getNode(NODE_ROOT_ID)?.$id).toBe(NODE_ROOT_ID)
+      expect(canvas.getNode('child')?.$id).toBe('child')
+      expect(canvas.getNode('stale')?.$id).toBe('stale')
+    })
+
+    it('pins a root whose persisted id drifted from the key', () => {
+      const canvas = new CanvasManager(undefined as any)
+      canvas.setNodes({
+        [NODE_ROOT_ID]: { $id: 'ke5jYbh8mw', nodes: [] },
+      } as any)
+      expect(canvas.getNode(NODE_ROOT_ID)?.$id).toBe(NODE_ROOT_ID)
+    })
+  })
+
   describe('initial-state tracking', () => {
     const makeCanvas = () => {
       const canvas = new CanvasManager(undefined as any)

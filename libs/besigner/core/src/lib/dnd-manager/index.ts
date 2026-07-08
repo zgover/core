@@ -18,4 +18,5 @@
 export { default } from './dnd-manager'
 export * from './dnd-manager'
 
+export * from './confirm-valid-lineal-relationship'
 export * from './droppable-region-utils'

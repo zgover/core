@@ -16,95 +16,53 @@
  */
 
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import {
-  createHttpRefCode,
-  HttpRefCodeSimple,
-  HttpRefCodeSubject,
-  HttpRefCodeTopic,
-  HttpRequestMethod,
-  HttpResponseStatus,
-  HttpStatusCode,
-} from '@aglyn/shared-data-enums'
-import {
-  csrfApiMiddleware,
-  httpRequestMethodMiddleware,
-  nextHandleJsonResponse,
-} from '@aglyn/shared-util-rest-api'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { use as withMiddleware } from 'next-api-middleware'
 
-const getAllUsers = async (nextPageToken?: string) => {
-  const data: { users: object[]; nextPageToken: string; error: Error | null } = { users: [], nextPageToken: '', error: null }
+/**
+ * Staff user listing (AGL-204). Replaces the pre-AGL-42 handler that
+ * listed every account WITHOUT a staff check — this one requires the
+ * `staff` claim like the other admin APIs and returns trimmed records
+ * only (no provider tokens, no raw claim payloads).
+ */
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+  const authorization = req.headers.authorization ?? ''
+  const idToken = authorization.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : undefined
+  if (!idToken) return res.status(401).json({ error: 'Unauthenticated' })
 
-  // List batch of users, 1000 at a time.
-  await firebaseAdmin
-    .app()
-    .auth()
-    .listUsers(1000, nextPageToken)
-    .then((listUsersResult) => {
-      listUsersResult.users.forEach((userRecord) => {
-        data.users.push(userRecord.toJSON())
-      })
-      if (listUsersResult.pageToken) {
-        data.nextPageToken = listUsersResult.pageToken
-      }
-    })
-    .catch((error) => {
-      console.error('Error listing users:', error)
-      data.error = error
-    })
-
-  return data
-}
-
-async function users(request: NextApiRequest, response: NextApiResponse) {
-  const {
-    query: { nextPageToken },
-  } = request
-  let data = null
-  let error = null
-
-  // Start listing users from the beginning, 1000 at a time.
   try {
-    data = await getAllUsers(
-      Array.isArray(nextPageToken) ? nextPageToken[0] : nextPageToken,
-    )
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err)
-    error = err
+    const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded['staff']) {
+      return res.status(403).json({ error: 'Staff only' })
+    }
+    const pageToken =
+      typeof req.query.nextPageToken === 'string'
+        ? req.query.nextPageToken
+        : undefined
+    const page = await firebaseAdmin.app().auth().listUsers(200, pageToken)
+    return res.status(200).json({
+      users: page.users.map((record) => ({
+        uid: record.uid,
+        email: record.email ?? null,
+        displayName: record.displayName ?? null,
+        disabled: record.disabled,
+        staff: Boolean(record.customClaims?.['staff']),
+        staffRole: record.customClaims?.['staffRole'] ?? null,
+        createdAt: record.metadata.creationTime ?? null,
+        lastSignInAt: record.metadata.lastSignInTime ?? null,
+        providers: record.providerData.map((provider) => provider.providerId),
+      })),
+      nextPageToken: page.pageToken ?? null,
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Listing failed' })
   }
-
-  if (error || data.error) {
-    const err = error || data.error
-    return nextHandleJsonResponse(
-      response,
-      err?.['code'] ||
-        err?.['statusCode'] ||
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-      {
-        status: HttpResponseStatus.ERROR,
-        statusMessage:
-          err?.['message'] ||
-          err?.['statusMessage'] ||
-          HttpRefCodeSimple.INVALID_REQUEST,
-        error: err,
-        errorCode: createHttpRefCode(
-          HttpRefCodeSimple.INVALID_REQUEST,
-          HttpRefCodeSubject.INVALID_REQUEST,
-          HttpRefCodeTopic.FAIL_CSRF_TOKEN_CHECK,
-        ),
-      },
-    )
-  }
-
-  return nextHandleJsonResponse(response, HttpStatusCode.OK, {
-    status: HttpResponseStatus.SUCCESS,
-    data,
-  })
 }
-
-export default withMiddleware(
-  csrfApiMiddleware,
-  httpRequestMethodMiddleware(HttpRequestMethod.GET),
-)(users)

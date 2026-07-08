@@ -16,6 +16,7 @@
  */
 
 import type { HttpStatusCode } from '@aglyn/shared-data-enums'
+import type { HostTheme } from '@aglyn/shared-data-types'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type { AglynNodeSchema, NodeId } from './components.types'
 
@@ -83,6 +84,162 @@ export interface AglynUser extends AglynDocument {
 export type TenantUid = string
 
 /** Hosted in master catalog */
+/** SaaS subscription tiers (Tenant Billing & SaaS Plans, AGL-38..41). */
+export type TenantPlan = 'free' | 'starter' | 'pro' | 'business'
+
+/** Boolean feature gates per plan; quotas live beside them as numbers. */
+export interface TenantFeatureFlags {
+  versioning?: boolean
+  reusableComponents?: boolean
+  customDomain?: boolean
+  removeBranding?: boolean
+  /** Schedule a version to publish at a date/time (tier above versioning). */
+  scheduledPublishing?: boolean
+  /** Sell listings on the community marketplace (AGL-46). */
+  marketplaceSelling?: boolean
+  /** AI copy assist in the besigner (AGL-89). */
+  aiAssist?: boolean
+  /** No-code workflow builder (AGL-101). */
+  workflows?: boolean
+  /** Datasets + repeatable components (AGL-102/103). */
+  dataStore?: boolean
+  /** Video/file uploads in the media manager (AGL-162). */
+  videoMedia?: boolean
+  /** Appointment bookings (AGL-159). */
+  bookings?: boolean
+  /** Event → action automation builder (AGL-148). */
+  actions?: boolean
+  /** Outbound/inbound webhooks (AGL-149). */
+  webhooks?: boolean
+  /** Whole-site export/backup + restore (AGL-163). */
+  siteExport?: boolean
+  /** Multilingual sites (AGL-164): locale variants + switcher. */
+  multilingual?: boolean
+  /** Event Calendar add-on (AGL-145); paid, not part of any base tier. */
+  eventCalendar?: boolean
+  /** URL redirects manager (AGL-154). */
+  redirects?: boolean
+  /** Per-screen traffic analytics (AGL-150). */
+  screenAnalytics?: boolean
+  /** CDN delivery + responsive image variants for media (AGL-175). */
+  mediaCdn?: boolean
+  /** Announcement bar + promotional popups (AGL-195/196). */
+  marketingOverlays?: boolean
+}
+
+/**
+ * Site-wide announcement bar config on the host doc (AGL-195). Text may
+ * contain binding tokens; the tenant render resolves them server-side.
+ */
+export interface HostAnnouncementBar {
+  enabled?: boolean
+  text?: string
+  /** Optional link the whole bar navigates to. */
+  href?: string
+  backgroundColor?: string
+  textColor?: string
+  /** Visitors may hide the bar; hidden state re-arms when text changes. */
+  dismissible?: boolean
+}
+
+/**
+ * Promotional popup config on the host doc (AGL-196); one per host,
+ * marketingOverlays-gated. Body text may contain binding tokens; the
+ * tenant render resolves them server-side.
+ */
+export interface HostPopup {
+  enabled?: boolean
+  headline?: string
+  body?: string
+  /** Media-library image URL shown above the copy. */
+  imageUrl?: string
+  ctaLabel?: string
+  ctaHref?: string
+  /** Render an email-capture field posting into the forms pipeline. */
+  collectEmail?: boolean
+  /** How the popup opens. */
+  trigger?: 'delay' | 'scroll' | 'exit'
+  /** Seconds (delay trigger) or percent 0-100 (scroll trigger). */
+  triggerValue?: number
+  /** Re-show after this many days once dismissed (localStorage). */
+  frequencyDays?: number
+  /** Optional showing window (epoch millis; simple to serialize). */
+  startAtMs?: number
+  endAtMs?: number
+}
+
+/**
+ * Effective limits/gates for a tenant. Plan defaults come from
+ * `PLAN_ENTITLEMENTS` (versioned with the app); per-tenant overrides can be
+ * stored on the tenant doc and win over the plan defaults.
+ */
+export interface TenantEntitlements {
+  hostLimit?: number
+  screensPerHost?: number
+  sharedLayoutsPerHost?: number
+  storagePerHostMb?: number
+  totalSiteSizeMb?: number
+  membersPerHost?: number
+  /** Seat model (AGL-112): included tenant-manager seats. */
+  managersPerTenant?: number
+  /** Hard seat caps incl. purchased addons; beyond these, upgrade the plan. */
+  maxManagersPerTenant?: number
+  maxMembersPerHost?: number
+  bandwidthGb?: number
+  /** Form submissions accepted per calendar month (Forms & Lead Capture). */
+  formSubmissionsPerMonth?: number
+  /** Component-builder caps (AGL-99): host variables. */
+  variablesPerHost?: number
+  /** Component-builder caps (AGL-99): host functions. */
+  functionsPerHost?: number
+  /** Workflow builder cap (AGL-99/101). */
+  workflowsPerHost?: number
+  /** Event-triggered workflow runs per calendar month (AGL-165). */
+  workflowRunsPerMonth?: number
+  /** Bookable services per host (AGL-159). */
+  servicesPerHost?: number
+  /** Redirect rules per host (AGL-154). */
+  redirectsPerHost?: number
+  /** Contacts CRM cap (AGL-197): unified people records per host. */
+  contactsPerHost?: number
+  /** Campaign emails sendable per calendar month (AGL-161). */
+  emailSendsPerMonth?: number
+  /** Action runs per calendar month (AGL-148). */
+  actionRunsPerMonth?: number
+  /** Dynamic data caps (AGL-99/102). */
+  datasetsPerHost?: number
+  /** Hard dataset cap incl. addons (AGL-132); beyond it, upgrade. */
+  maxDatasetsPerHost?: number
+  recordsPerDataset?: number
+  features?: TenantFeatureFlags
+}
+
+/**
+ * Paid addon seats (AGL-112) purchased on top of the plan's included seats.
+ * The effective seat limit is `included + purchased`, clamped to the plan's
+ * hard max — beyond the max the tenant must upgrade.
+ */
+export interface TenantSeatAddons {
+  /** Extra tenant-manager seats. */
+  managers?: number
+  /** Extra host-member seats (applies per host). */
+  members?: number
+  /** Extra datasets per host (AGL-132); billed monthly per dataset. */
+  datasets?: number
+}
+
+export interface TenantSubscription {
+  status?:
+    | 'active'
+    | 'trialing'
+    | 'past_due'
+    | 'canceled'
+    | 'incomplete'
+    | 'unpaid'
+  priceId?: string
+  currentPeriodEnd?: ITimestamp
+}
+
 export interface AglynTenant extends AglynDocument {
   $id: TenantUid
   ownerId?: UserUid
@@ -90,6 +247,22 @@ export interface AglynTenant extends AglynDocument {
   description?: string
   hosts?: Record<HostUid, true>
   users?: Record<UserUid, true>
+  /** Subscription tier; missing/unknown plans resolve as `free`. */
+  plan?: TenantPlan
+  /** Per-tenant entitlement overrides (admin console); win over plan defaults. */
+  entitlements?: TenantEntitlements
+  /** Purchased addon seats (AGL-112); billed monthly per seat. */
+  seatAddons?: TenantSeatAddons
+  stripeCustomerId?: string
+  subscription?: TenantSubscription
+  /** Staff suspension (AGL-202): set = all the tenant's sites serve 503. */
+  suspendedAt?: ITimestamp | null
+  suspendedReason?: string
+  /**
+   * GDPR erasure request (AGL-206): hard deletion happens ONLY via
+   * tools/scripts/erase-tenant.mjs after a 7-day hold from this stamp.
+   */
+  erasureRequestedAt?: ITimestamp | null
 }
 
 export type ProjectUid = string
@@ -99,12 +272,23 @@ export type HostUid = string
 export type HostPath = string
 export type HostMediaUid = string
 
+/**
+ * Persisted MUI theme customization for a host's published site.
+ * Canonical shape lives in `@aglyn/shared-data-types` so UI-scope libs can
+ * consume it without depending on this framework lib.
+ */
+export type AglynHostTheme = HostTheme
+
 /** Hosted in tenants' host project */
 export interface AglynHost extends AglynDocument {
   $id: HostUid
   tenantId?: TenantUid
   subdomain?: string
   cname?: string
+  /** Site-wide announcement bar (AGL-195); marketingOverlays-gated. */
+  announcementBar?: HostAnnouncementBar
+  /** Promotional popup (AGL-196); marketingOverlays-gated. */
+  popup?: HostPopup
   displayName?: string
   seo?: {
     title?: string
@@ -119,6 +303,22 @@ export interface AglynHost extends AglynDocument {
     }
   }
   screens?: Record<ScreenUid, ScreenSlug>
+  /** Screen rendered (noindex) for unmatched paths (AGL-87). */
+  notFoundScreenId?: ScreenUid
+  /**
+   * Designable error screens by status (AGL-131). `notFound` supersedes
+   * `notFoundScreenId` (kept in sync for back-compat).
+   */
+  errorScreens?: HostErrorScreens
+  /** Maintenance mode (AGL-131): every path renders the 503 screen. */
+  maintenance?: boolean
+  /** Site languages (AGL-164), e.g. ['en', 'es']; first is the default
+   * unless `defaultLocale` says otherwise. */
+  locales?: string[]
+  defaultLocale?: string
+  /** Directory of shared layouts by display name (mirrors `screens`). */
+  layouts?: Record<LayoutUid, string>
+  theme?: AglynHostTheme
 
   // CONCEPT: Redirect screens
   redirects?: Record<RedirectUid, true>
@@ -126,6 +326,14 @@ export interface AglynHost extends AglynDocument {
   // CONCEPT: Enterprise - Siloed projects
   projectId?: ProjectUid
   projectNumber?: ProjectNumber
+}
+
+/** Error-screen bindings by HTTP-ish status (AGL-131). */
+export interface HostErrorScreens {
+  notFound?: ScreenUid
+  unauthorized?: ScreenUid
+  forbidden?: ScreenUid
+  unavailable?: ScreenUid
 }
 
 export type RoleUid = string
@@ -157,6 +365,76 @@ export type ScreenSlug = string
 export type VersionUid = string
 export type LayoutUid = string
 
+/**
+ * Uploaded media metadata (AGL-72): the binary lives in Firebase Storage at
+ * `hosts/{hostId}/media/{mediaId}`; this doc mirrors it in Firestore at the
+ * same logical path so the library can list without Storage list calls.
+ */
+export interface AglynHostMedia {
+  $id: HostMediaUid
+  fileName?: string
+  contentType?: string
+  sizeBytes?: number
+  /** Download URL captured at upload time; nodes reference this directly. */
+  url?: string
+  /**
+   * Folder doc id in `hosts/{hostId}/mediaFolders` (AGL-171); null/absent
+   * = root. Replaces the legacy free-text `folder` string below.
+   */
+  folderId?: string | null
+  /** Legacy AGL-124 free-text folder; read as fallback until migrated. */
+  folder?: string
+  tags?: string[]
+  alt?: string
+  description?: string
+  /** Auto-captured at upload (AGL-173); best-effort for images only. */
+  width?: number
+  height?: number
+  uploadedBy?: string
+  /**
+   * CDN delivery (AGL-175): content-hashed immutable path
+   * (`/api/media/cdn/{hostId}/{mediaId}/{hash}`) served by both apps,
+   * plus the WebP variant widths generated at upload.
+   */
+  cdnPath?: string
+  contentHash?: string
+  variants?: number[]
+  createdAt?: ITimestamp
+  deletedAt?: ITimestamp
+}
+
+/**
+ * Media folder doc (AGL-171): `hosts/{hostId}/mediaFolders/{folderId}`.
+ * Hierarchy/validation helpers live in `app-utils/media-folders`.
+ */
+export interface AglynHostMediaFolder {
+  $id: string
+  name: string
+  /** Parent folder id; null = root. Depth capped at 5 (see app-utils). */
+  parentId?: string | null
+  order?: number
+  createdAt?: ITimestamp
+}
+
+/**
+ * Pending scheduled publication (AGL-61): when `publishAt` passes, the
+ * parent doc's `versionId` pointer moves to `versionId`. Applied lazily by
+ * the tenant's ISR revalidation (no dedicated cron needed).
+ */
+export interface PublishSchedule {
+  /** Version to make live; unused for `action: 'unpublish'` (AGL-113). */
+  versionId?: VersionUid
+  /**
+   * What happens at `publishAt` (AGL-113): `publish` (default) flips the
+   * live version pointer; `unpublish` removes the screen's routing-map
+   * entry so its path 404s after the next revalidate.
+   */
+  action?: 'publish' | 'unpublish'
+  publishAt: ITimestamp
+  status: 'pending' | 'applied' | 'canceled'
+  createdAt?: ITimestamp
+}
+
 /** Hosted in tenants' host project */
 export interface AglynScreen extends AglynDocument {
   $id: ScreenUid
@@ -164,7 +442,16 @@ export interface AglynScreen extends AglynDocument {
   hostId?: HostUid
   parentId?: ScreenUid
   slug?: ScreenSlug
+  /** Position among siblings (screens sharing `parentId`) in the screens list. */
+  order?: number
   versionId?: VersionUid
+  publishSchedule?: PublishSchedule
+  /** Password protection (AGL-87): sha256 hex of the visitor password. */
+  protection?: { passwordHash?: string }
+  /** Language this screen is written in (AGL-164), e.g. 'en'. */
+  locale?: string
+  /** Translations of this screen: locale → screen id (AGL-164). */
+  localeVariants?: Record<string, ScreenUid>
   status?: HostScreenStatus
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
@@ -195,7 +482,7 @@ export interface AglynScreen extends AglynDocument {
     [P in string & UserUid]: true
   }
 
-  // CONCEPT: Shared layouts
+  /** Shared layout this screen renders inside (see {@link AglynLayout}). */
   layoutId?: LayoutUid
 }
 
@@ -215,13 +502,43 @@ export interface AglynScreenVersion<N = AglynNodeSchema>
   nodes?: Record<NodeId, N>
 }
 
-/** CONCEPT: Shared layouts. Hosted in tenants' host project */
-export interface AglynLayout {
+/** Unique id of a host-level reusable component definition. */
+export type ComponentDefUid = string
+
+/**
+ * Reusable component definition: a node subtree promoted from a screen,
+ * inserted anywhere as an instance node (`componentId: 'reusableInstance'`,
+ * `props.refId`) and grafted at render time (see
+ * `composeReusableComponentNodes`). Hosted in tenants' host project at
+ * `hosts/{hostId}/components/{componentId}`.
+ */
+export interface AglynHostComponent<N = AglynNodeSchema>
+  extends AglynDocument {
+  $id: ComponentDefUid
+  tenantId?: TenantUid
+  hostId?: HostUid
+  displayName?: string
+  description?: string
+  /** Definition tree root id within {@link AglynHostComponent.nodes}. */
+  rootId?: NodeId
+  nodes?: Record<NodeId, N>
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
+  deletedAt?: ITimestamp
+}
+
+/**
+ * Shared layout: canvas chrome (appbar, footer, nav) designed once and
+ * rendered around every bound screen. Hosted in tenants' host project at
+ * `hosts/{hostId}/layouts/{layoutId}`.
+ */
+export interface AglynLayout extends AglynDocument {
   $id: LayoutUid
   tenantId?: TenantUid
   hostId?: HostUid
-  layoutId?: LayoutUid
+  /** Published version pointer; bound screens render this version. */
   versionId?: VersionUid
+  publishSchedule?: PublishSchedule
   versions?: Array<VersionUid>
   displayName?: string
   description?: string
@@ -230,10 +547,14 @@ export interface AglynLayout {
   updatedAt?: ITimestamp
 }
 
-/** CONCEPT: Shared layouts. Hosted in tenants' host project */
+/**
+ * Shared layout version. Node map has the same shape as a screen version
+ * (including compression at rest) plus a LayoutSlot node marking where the
+ * bound screen's content is grafted. Hosted at
+ * `hosts/{hostId}/layouts/{layoutId}/versions/{versionId}`.
+ */
 export interface AglynLayoutVersion<N = AglynNodeSchema>
   extends AglynScreenVersion<N> {
-  $id: LayoutUid
   layoutId?: LayoutUid
   hostId?: HostUid
 }

@@ -17,7 +17,17 @@
 'use client'
 
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/aglyn'
-import { createResourceUid } from '@aglyn/aglyn'
+import {
+  buildScreenRouteEntries,
+  composeScreenRoutePath,
+  createResourceUid,
+  findScreenIdByRoutePath,
+  normalizeScreenSlug,
+  screenRoutePathToUrl,
+  wouldCreateScreenCycle,
+  type ScreenRouteNode,
+  type ScreenUid,
+} from '@aglyn/aglyn'
 import {
   ICON_VARIANT_CLOSE,
   ICON_VARIANT_MODIFY_DELETE,
@@ -38,31 +48,60 @@ import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { Button, IconButton, Typography } from '@mui/material'
-import { GridActionsCellItem, type GridColDef } from '@mui/x-data-grid'
+import { mdiTranslate } from '@aglyn/shared-data-mdi'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import {
   collection,
+  deleteField,
   doc,
+  getDoc,
   limit,
   query,
   setDoc,
   updateDoc,
+  writeBatch,
 } from 'firebase/firestore'
 import { useParams } from 'next/navigation'
-import { forwardRef, useCallback, useEffect, useState } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
+import { useFirestore } from 'reactfire'
 import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../../components/auth-form-template.component'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
-import { DataTableComponent } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
-import { buildRoute, Route } from '../../../../constants/route-links'
+import HostDisplayNameComponent from '../../../../components/host-display-name.component'
+import TemplateGalleryDialog from '../../../../components/templates/template-gallery-dialog.component'
 import {
-  CONTENT_MAX_WIDTH,
-  TABLE_ROW_HEIGHT,
-} from '../../../../constants/shared'
+  compareScreenSiblings,
+  ScreensHierarchyTableComponent,
+  type ScreenHierarchyRow,
+  type ScreenMoveRequest,
+} from '../../../../components/screens-hierarchy-table.component'
+import { checkTenantQuota } from '../../../../constants/entitlements'
+import { buildRoute, Route } from '../../../../constants/route-links'
+import hostNavTabItems from '../../../../constants/host-nav-tabs'
+import {
+  publishScreenRoute,
+  syncScreenRouteEntries,
+  unpublishScreenRoute,
+} from '../../../../constants/screen-publishing'
+import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
+import useCurrentTenant from '../../../../hooks/use-current-tenant'
+import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
+import useFirestoreDoc from '../../../../hooks/use-firestore-doc'
+import useHostActivityLogger from '../../../../hooks/use-host-activity-logger'
 
 const CellItemLinkComponent = forwardRef<any, AppLinkNakedLinkProps>(
   (props, ref) => {
@@ -83,15 +122,36 @@ function Screens(props) {
   const handleFormClose = useCallback(() => {
     setQuickDrawerOpen(false)
   }, [])
-  const [pageSize, setPageSize] = useState<number>(5)
   const firestore = useFirestore()
-  const screensCollection = collection(firestore, 'hosts', hostId, 'screens')
-  const screensQuery = query(screensCollection, limit(pageSize))
-  const { status, data } = useFirestoreCollectionData<any>(screensQuery, {
-    idField: '$id',
-  })
-  const screens = data || []
+  // The hierarchy table renders the whole tree, so no page-sized query: a
+  // paginated slice could orphan children whose parent fell off the page.
+  const { status, data } = useFirestoreCollection<any>(
+    () =>
+      query(collection(firestore, 'hosts', hostId, 'screens'), limit(200)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const [templatesOpen, setTemplatesOpen] = useState(false)
+  const screens: ScreenHierarchyRow[] = useMemo(
+    () => (data ?? []).filter((screen: any) => !screen.deletedAt),
+    [data],
+  )
+  const { data: hostData } = useFirestoreDoc<any>(
+    () => doc(firestore, 'hosts', hostId),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const routingMap = hostData?.screens as Record<ScreenUid, string> | undefined
+  const screensById = useMemo(() => {
+    const map: Record<ScreenUid, ScreenRouteNode> = {}
+    for (const screen of screens) {
+      map[screen.$id] = { slug: screen.slug, parentId: screen.parentId }
+    }
+    return map
+  }, [screens])
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+  const { tenant } = useCurrentTenant()
+  const logActivity = useHostActivityLogger(hostId)
 
   const [error, setError] = useState(null)
 
@@ -108,12 +168,39 @@ function Screens(props) {
     async (values) => {
       if (loading) return
       if (error) setError(null)
+      // Plan quota (AGL-39): enforced once the tenant has an explicit plan.
+      const quota = checkTenantQuota(tenant, 'screensPerHost', screens.length)
+      if (!quota.allowed) {
+        return enqueueSnackbar(
+          `Screen limit reached (${quota.limit}) — see Billing to upgrade`,
+          { variant: 'warning', persist: false },
+        )
+      }
       const dequeueLoading = queueLoading()
       const newId = createResourceUid()
       const newVersionId = createResourceUid()
       const timestamp = Timestamp.now()
+      const { slug: slugInput, ...fields } = values
+
+      // Publishing is what makes the screen reachable: the tenant matches
+      // request paths against the host's `screens` routing map, so the slug
+      // must both live on the screen doc and be registered in that map.
+      const path = normalizeScreenSlug(slugInput)
+      if (path) {
+        const hostSnapshot = await getDoc(doc(firestore, 'hosts', hostId))
+        const owner = findScreenIdByRoutePath(hostSnapshot.get('screens'), path)
+        if (owner) {
+          dequeueLoading()
+          return enqueueSnackbar(
+            `Another screen is already published at ${screenRoutePathToUrl(path)}`,
+            { variant: 'warning', persist: false },
+          )
+        }
+      }
+
       const newValues = {
-        ...values,
+        ...fields,
+        ...(path && { slug: path }),
         versionId: newVersionId,
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -122,7 +209,13 @@ function Screens(props) {
         screenId: newId,
         createdAt: timestamp,
         updatedAt: timestamp,
-        nodes: { [CANVAS_ROOT_ELEMENT_ID]: { nodes: [] } },
+        nodes: {
+          [CANVAS_ROOT_ELEMENT_ID]: {
+            $id: CANVAS_ROOT_ELEMENT_ID,
+            componentId: 'div',
+            nodes: [],
+          },
+        },
       }
       await Promise.all([
         setDoc(doc(firestore, 'hosts', hostId, 'screens', newId), newValues),
@@ -139,6 +232,18 @@ function Screens(props) {
           newVersionValue,
         ),
       ])
+        .then(() =>
+          path
+            ? publishScreenRoute(firestore, { hostId, screenId: newId }, path)
+            : undefined,
+        )
+        .then(() =>
+          logActivity('Created screen', {
+            type: 'screen',
+            id: newId,
+            name: newValues.displayName,
+          }),
+        )
         .catch((error) => {
           console.error(error)
           setError({ ...error })
@@ -160,6 +265,9 @@ function Screens(props) {
       hostId,
       handleFormClose,
       enqueueSnackbar,
+      tenant,
+      screens.length,
+      logActivity,
     ],
   )
 
@@ -177,82 +285,215 @@ function Screens(props) {
           dequeueLoading = queueLoading()
         })
         .then(() =>
-          updateDoc(doc(firestore, 'hosts', hostId, 'screens', id), {
-            deletedAt: Timestamp.now(),
-          }),
+          Promise.all([
+            updateDoc(doc(firestore, 'hosts', hostId, 'screens', id), {
+              deletedAt: Timestamp.now(),
+            }),
+            // A deleted screen must leave the routing map or its path keeps
+            // resolving (then 404s deep in the tenant render).
+            unpublishScreenRoute(firestore, { hostId, screenId: id }),
+          ]),
         )
+        .then(() => logActivity('Deleted screen', { type: 'screen', id }))
         .catch(() => {})
         .finally(() => {
           dequeueLoading && dequeueLoading()
         })
     },
-    [confirm, firestore, queueLoading],
+    [confirm, firestore, hostId, queueLoading, logActivity],
   )
 
-  const columns: GridColDef[] = [
-    {
-      field: 'actions',
-      type: 'actions',
-      width: 100,
-      getActions: ({ id, row }) => {
-        const screenId = id as string
-        const versionId = row.versionId as string
-        return [
-          <GridActionsCellItem
-            key="action-detail"
-            icon={<MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} />}
-            label="detail"
-            LinkComponent={CellItemLinkComponent}
-            {...({
-              href: buildRoute(Route.SCREEN_DETAILS, {
-                hostId,
-                screenId,
-                versionId,
-              }),
-            } as any)}
-          />,
-          <GridActionsCellItem
-            key="action-delete"
-            icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} color="error" />}
-            label="Delete"
-            onClick={handleDeleteScreen(screenId, versionId)}
-          />,
-        ]
-      },
+  // Drop handler for the hierarchy table: re-parents/reorders the screen,
+  // rewrites sibling `order` values, then cascades routing-map paths for the
+  // moved screen and its descendants (parent `company` + own `about` →
+  // /company/about, same rules as the besigner Publishing section).
+  const handleMoveScreen = useCallback(
+    async ({ screenId, nextParentId, beforeId }: ScreenMoveRequest) => {
+      if (loading) return
+      if (wouldCreateScreenCycle(screenId, nextParentId, screensById)) {
+        enqueueSnackbar(
+          "A screen can't be nested inside itself or its own children",
+          { variant: 'warning', persist: false },
+        )
+        return
+      }
+      const nextById = {
+        ...screensById,
+        [screenId]: { ...screensById[screenId], parentId: nextParentId },
+      }
+      const nextSelfPath = composeScreenRoutePath(screenId, nextById)
+      const owner = nextSelfPath
+        ? findScreenIdByRoutePath(routingMap, nextSelfPath)
+        : undefined
+      if (owner && owner !== screenId) {
+        enqueueSnackbar(
+          `Another screen is already published at ${screenRoutePathToUrl(nextSelfPath as string)}`,
+          { variant: 'warning', persist: false },
+        )
+        return
+      }
+      const dequeueLoading = queueLoading()
+      try {
+        const rowById = new Map(screens.map((screen) => [screen.$id, screen]))
+        const orderedIds = screens
+          .filter(
+            (screen) =>
+              screen.$id !== screenId &&
+              (screen.parentId && screensById[screen.parentId]
+                ? screen.parentId
+                : undefined) === nextParentId,
+          )
+          .sort(compareScreenSiblings)
+          .map((screen) => screen.$id)
+        const insertAt = beforeId ? orderedIds.indexOf(beforeId) : -1
+        orderedIds.splice(
+          insertAt === -1 ? orderedIds.length : insertAt,
+          0,
+          screenId,
+        )
+        const batch = writeBatch(firestore)
+        orderedIds.forEach((id, index) => {
+          const screenRef = doc(firestore, 'hosts', hostId, 'screens', id)
+          if (id === screenId) {
+            batch.update(screenRef, {
+              parentId: nextParentId ?? deleteField(),
+              order: index,
+              updatedAt: Timestamp.now(),
+            })
+          } else if (rowById.get(id)?.order !== index) {
+            batch.update(screenRef, { order: index })
+          }
+        })
+        await batch.commit()
+        const parentChanged =
+          (screensById[screenId]?.parentId ?? undefined) !==
+          (nextParentId ?? undefined)
+        if (parentChanged) {
+          await syncScreenRouteEntries(
+            firestore,
+            hostId,
+            buildScreenRouteEntries(screenId, nextById, routingMap),
+          )
+        }
+        enqueueSnackbar(
+          parentChanged && nextSelfPath
+            ? `Screen moved — now served at ${screenRoutePathToUrl(nextSelfPath)}`
+            : 'Screen moved',
+          { variant: 'success', persist: false },
+        )
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar('An error has occurred', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      } finally {
+        dequeueLoading()
+      }
     },
-    { field: '$id', headerName: 'ID', type: 'string', minWidth: 150 },
-    {
-      field: 'displayName',
-      headerName: 'Display name',
-      minWidth: 220,
-      type: 'string',
-    },
-    {
-      field: 'description',
-      headerName: 'Description',
-      flex: 1,
-      minWidth: 275,
-      type: 'string',
-    },
-    {
-      field: 'updatedAt',
-      headerName: 'Updated',
-      flex: 1,
-      minWidth: 150,
-      type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
-    },
-    {
-      field: 'createdAt',
-      headerName: 'Created',
-      flex: 1,
-      minWidth: 150,
-      type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
-    },
-  ]
+    [
+      loading,
+      screens,
+      screensById,
+      routingMap,
+      firestore,
+      hostId,
+      queueLoading,
+      enqueueSnackbar,
+    ],
+  )
+
+  // Translations (AGL-164): per-locale variant screen mapping.
+  const hostLocales: string[] = Array.isArray(hostData?.locales)
+    ? hostData.locales
+    : []
+  const [translationsFor, setTranslationsFor] = useState<{
+    screenId: string
+    locale: string
+    variants: Record<string, string>
+  } | null>(null)
+  const handleSaveTranslations = useCallback(async () => {
+    if (!translationsFor) return
+    const variants: Record<string, string> = {}
+    for (const [locale, screenId] of Object.entries(
+      translationsFor.variants,
+    )) {
+      if (screenId) variants[locale] = screenId
+    }
+    try {
+      await updateDoc(
+        doc(firestore, 'hosts', hostId, 'screens', translationsFor.screenId),
+        {
+          locale: translationsFor.locale || deleteField(),
+          localeVariants: Object.keys(variants).length
+            ? variants
+            : deleteField(),
+        },
+      )
+      setTranslationsFor(null)
+      enqueueSnackbar('Translations saved', {
+        variant: 'success',
+        persist: false,
+      })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('An error has occurred', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    }
+  }, [translationsFor, firestore, hostId, enqueueSnackbar])
+
+  const renderRowActions = useCallback(
+    (row: ScreenHierarchyRow) => (
+      <>
+        <IconButton
+          size="small"
+          aria-label="detail"
+          component={CellItemLinkComponent as any}
+          {...({
+            href: buildRoute(Route.SCREEN_DETAILS, {
+              hostId,
+              screenId: row.$id,
+              versionId: row.versionId as string,
+            }),
+          } as any)}
+        >
+          <MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} size={0.8} />
+        </IconButton>
+        {hostLocales.length ? (
+          <IconButton
+            size="small"
+            aria-label="Translations"
+            onClick={() => {
+              const current = screens.find(
+                (screen: any) => screen.$id === row.$id,
+              ) as any
+              setTranslationsFor({
+                screenId: row.$id,
+                locale: current?.locale ?? '',
+                variants: { ...(current?.localeVariants ?? {}) },
+              })
+            }}
+          >
+            <MdiIcon path={mdiTranslate.path} size={0.8} />
+          </IconButton>
+        ) : null}
+        <IconButton
+          size="small"
+          aria-label="Delete"
+          onClick={handleDeleteScreen(row.$id, row.versionId as string)}
+        >
+          <MdiIcon
+            path={ICON_VARIANT_MODIFY_DELETE.path}
+            color="error"
+            size={0.8}
+          />
+        </IconButton>
+      </>
+    ),
+    [hostId, handleDeleteScreen, hostLocales.length, screens],
+  )
 
   // console.log('Screens props', props, data, status, screens)
 
@@ -260,27 +501,11 @@ function Screens(props) {
     <>
       <NextPageTitle screen={'Screens'} />
       <DashboardLayout
-        navTabItems={[
-          {
-            id: 'nav-tab-dashboard',
-            label: 'Dashboard',
-            href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
-          },
-          {
-            id: 'nav-tab-screens',
-            label: 'Screens',
-            href: buildRoute(Route.SCREEN_LIST, { hostId }),
-          },
-          {
-            id: 'nav-tab-setup',
-            label: 'Setup',
-            href: buildRoute(Route.HOST_SETUP, { hostId }),
-          },
-        ]}
+        navTabItems={hostNavTabItems(hostId)}
         activeTab={buildRoute(Route.SCREEN_LIST, { hostId })}
         breadcrumbItems={[
           {
-            children: hostId,
+            children: <HostDisplayNameComponent hostId={hostId} />,
             href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
           },
           {
@@ -293,9 +518,18 @@ function Screens(props) {
           icon: { path: ICON_VARIANT_PAGES.path },
         }}
         headerRight={
-          <Button size="small" variant="contained" onClick={handleFormOpen}>
-            {'Create New Screen'}
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setTemplatesOpen(true)}
+            >
+              {'Templates'}
+            </Button>
+            <Button size="small" variant="contained" onClick={handleFormOpen}>
+              {'Create New Screen'}
+            </Button>
+          </Stack>
         }
         aside={
           <NavigationDrawerComponent
@@ -357,21 +591,120 @@ function Screens(props) {
             {/*  SummaryContentComponent={SummaryContentComponent as any}*/}
             {/*  getItemId={(item) => item.$id}*/}
             {/*/>*/}
-            <DataTableComponent
-              rowHeight={TABLE_ROW_HEIGHT}
-              getRowId={(row) => row.$id}
-              columns={columns}
-              noRowsLabel="No screens"
-              rows={screens}
+            <ScreensHierarchyTableComponent
+              screens={screens}
+              routingMap={routingMap}
               loading={status === 'loading'}
-              initialState={{ pagination: { paginationModel: { pageSize } } }}
-              onPaginationModelChange={(model) => setPageSize(model.pageSize)}
-              pageSizeOptions={[5, 10, 15]}
-              pagination
+              onMoveScreen={handleMoveScreen}
+              renderRowActions={renderRowActions}
+              emptyAction={
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleFormOpen}
+                  >
+                    {'Create your first screen'}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setTemplatesOpen(true)}
+                  >
+                    {'Browse templates'}
+                  </Button>
+                </Stack>
+              }
             />
           </CardDisplay>
         </Container>
       </DashboardLayout>
+      <TemplateGalleryDialog
+        hostId={hostId}
+        open={templatesOpen}
+        onClose={() => setTemplatesOpen(false)}
+        existingSlugs={Object.values(routingMap ?? {})}
+        screenCount={screens.length}
+      />
+
+      <Dialog
+        open={Boolean(translationsFor)}
+        onClose={() => setTranslationsFor(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{'Screen translations'}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 1 }}
+        >
+          <TextField
+            select
+            label="This screen's language"
+            value={translationsFor?.locale ?? ''}
+            onChange={(event) =>
+              setTranslationsFor((prev) =>
+                prev ? { ...prev, locale: event.target.value } : prev,
+              )
+            }
+            size="small"
+            sx={{ mt: 1 }}
+          >
+            <MenuItem value="">{'Unset'}</MenuItem>
+            {hostLocales.map((locale) => (
+              <MenuItem key={locale} value={locale}>
+                {locale}
+              </MenuItem>
+            ))}
+          </TextField>
+          {hostLocales
+            .filter((locale) => locale !== translationsFor?.locale)
+            .map((locale) => (
+              <TextField
+                key={locale}
+                select
+                label={`${locale} version`}
+                value={translationsFor?.variants[locale] ?? ''}
+                onChange={(event) =>
+                  setTranslationsFor((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          variants: {
+                            ...prev.variants,
+                            [locale]: event.target.value,
+                          },
+                        }
+                      : prev,
+                  )
+                }
+                size="small"
+              >
+                <MenuItem value="">{'None'}</MenuItem>
+                {screens
+                  .filter(
+                    (screen: any) =>
+                      screen.$id !== translationsFor?.screenId,
+                  )
+                  .map((screen: any) => (
+                    <MenuItem key={screen.$id} value={screen.$id}>
+                      {screen.displayName ?? screen.$id}
+                    </MenuItem>
+                  ))}
+              </TextField>
+            ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTranslationsFor(null)}>{'Cancel'}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleSaveTranslations}
+          >
+            {'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
@@ -403,6 +736,21 @@ const formSchema = {
           type: 'max-length',
           threshold: 80,
           message: 'Must not exceed 80 characters',
+        },
+      ],
+    },
+    {
+      component: 'text-field',
+      name: 'slug',
+      type: 'text',
+      label: 'Slug',
+      helperText:
+        'Path the screen is served at on your site ("/" for the home page). Leave empty to keep it unpublished.',
+      validate: [
+        {
+          type: 'max-length',
+          threshold: 60,
+          message: 'Must not exceed 60 characters',
         },
       ],
     },
