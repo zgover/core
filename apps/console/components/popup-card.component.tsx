@@ -32,6 +32,8 @@ import { doc, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useFirestore, useFirestoreDocData } from 'reactfire'
 import { hasEntitlement } from '../constants/entitlements'
+import MediaPickerDialog from './media/media-picker-dialog.component'
+import OverlayStatsRow from './overlay-stats-row.component'
 import useCurrentTenant from '../hooks/use-current-tenant'
 import useHostActivityLogger from '../hooks/use-host-activity-logger'
 
@@ -79,6 +81,7 @@ export function PopupCard(props: PopupCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedKey])
 
+  const [pickerOpen, setPickerOpen] = useState(false)
   const dirty = JSON.stringify(draft) !== savedKey
   const patch = (partial: Partial<HostPopup>) =>
     setDraft((previous) => ({ ...previous, ...partial }))
@@ -94,6 +97,7 @@ export function PopupCard(props: PopupCardProps) {
           imageUrl: (draft.imageUrl ?? '').trim(),
           ctaLabel: (draft.ctaLabel ?? '').slice(0, 60),
           ctaHref: (draft.ctaHref ?? '').trim(),
+          collectEmail: Boolean(draft.collectEmail),
           trigger: draft.trigger ?? 'delay',
           triggerValue: Math.max(0, Number(draft.triggerValue ?? 3)),
           frequencyDays: Math.max(1, Number(draft.frequencyDays ?? 7)),
@@ -153,11 +157,25 @@ export function PopupCard(props: PopupCardProps) {
             <TextField
               label="Image URL (optional)"
               size="small"
-              placeholder="Copy URL from the media library"
+              placeholder="Pick from the media library"
               value={draft.imageUrl ?? ''}
               onChange={(event) => patch({ imageUrl: event.target.value })}
               sx={{ flex: 1, minWidth: 220 }}
             />
+            <Button size="small" onClick={() => setPickerOpen(true)}>
+              {'Browse media'}
+            </Button>
+          </Stack>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Switch
+              checked={Boolean(draft.collectEmail)}
+              onChange={(event) =>
+                patch({ collectEmail: event.target.checked })
+              }
+            />
+            <Typography variant="body2">
+              {'Collect emails (submissions land in your Inbox and Contacts)'}
+            </Typography>
           </Stack>
           <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
             <TextField
@@ -249,6 +267,21 @@ export function PopupCard(props: PopupCardProps) {
           >
             {'Save'}
           </Button>
+          <OverlayStatsRow
+            hostId={hostId}
+            impressionKey="popupImpression"
+            actionKey="popupClick"
+            actionLabel="clicks"
+          />
+          <MediaPickerDialog
+            hostId={hostId}
+            open={pickerOpen}
+            onClose={() => setPickerOpen(false)}
+            onPick={(media) => {
+              patch({ imageUrl: media.url ?? '' })
+              setPickerOpen(false)
+            }}
+          />
         </Stack>
       )}
     </CardDisplay>

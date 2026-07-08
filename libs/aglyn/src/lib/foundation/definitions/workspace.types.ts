@@ -155,6 +155,8 @@ export interface HostPopup {
   imageUrl?: string
   ctaLabel?: string
   ctaHref?: string
+  /** Render an email-capture field posting into the forms pipeline. */
+  collectEmail?: boolean
   /** How the popup opens. */
   trigger?: 'delay' | 'scroll' | 'exit'
   /** Seconds (delay trigger) or percent 0-100 (scroll trigger). */
