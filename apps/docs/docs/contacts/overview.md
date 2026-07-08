@@ -10,6 +10,8 @@ The **Contacts CRM** is a single list of the people who interact with your site.
 builds it automatically from everything they do, so you always have an up-to-date view of
 your audience.
 
+![The Contacts page in the Aglyn console, with search, Source and Tags filters, and an Export CSV action](/img/contacts/contacts-page.png)
+
 ```mermaid
 flowchart LR
   F[Form submissions] --> C[(Unified contact)]

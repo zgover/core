@@ -9,6 +9,8 @@ description: Offer services with availability, let visitors book, take payment, 
 **Bookings** turn your site into a scheduling tool: define services, publish your
 availability, and let visitors book time — with optional payment and automatic reminders.
 
+![The Bookings page in the Aglyn console, with a Services card for defining bookable services and an Upcoming bookings card](/img/bookings/bookings-page.png)
+
 ```mermaid
 sequenceDiagram
   participant V as Visitor
