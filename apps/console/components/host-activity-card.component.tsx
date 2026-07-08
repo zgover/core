@@ -25,7 +25,8 @@ import {
 } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { useMemo } from 'react'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import { useFirestore } from 'reactfire'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
 
 export interface HostActivityCardProps {
   hostId: string
@@ -44,8 +45,9 @@ export interface HostActivityCardProps {
 export function HostActivityCard(props: HostActivityCardProps) {
   const { hostId, targetId, max = 20, header = 'Recent Activity' } = props
   const firestore = useFirestore()
-  const { data: entries } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'activity'), limit(200)),
+  const { data: entries } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'activity'), limit(200)),
+    [firestore, hostId],
     { idField: '$id' },
   )
   const items = useMemo(
