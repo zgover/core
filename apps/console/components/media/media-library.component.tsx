@@ -933,8 +933,12 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
 
   const handleCopyUrl = useCallback(
     (media: Aglyn.AglynHostMedia) => () => {
-      if (!media.url) return
-      void navigator.clipboard.writeText(media.url)
+      // Prefer the immutable CDN path (AGL-175) — resolves on tenant
+      // sites and in the editor alike and rides the edge cache. Older
+      // assets without one fall back to the raw storage URL.
+      const value = media.cdnPath ?? media.url
+      if (!value) return
+      void navigator.clipboard.writeText(value)
       enqueueSnackbar('URL copied — paste it into an Image or Video element', {
         variant: 'success',
         persist: false,

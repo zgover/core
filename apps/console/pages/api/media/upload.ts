@@ -21,8 +21,11 @@ import {
   createResourceUid,
   readImageDimensions,
 } from '@aglyn/aglyn'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import { randomUUID } from 'crypto'
+import {
+  firebaseAdmin,
+  MEDIA_CDN_VARIANT_WIDTHS,
+} from '@aglyn/tenant-data-admin'
+import { createHash, randomUUID } from 'crypto'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 // Base64 JSON payloads: ~25MB of media encodes to ~34MB of body.
@@ -85,6 +88,16 @@ export default async function handler(
         .file(`hosts/${hostId}/media/${mediaId}`)
         .delete()
         .catch(() => undefined)
+      // CDN variants (AGL-175) ride along.
+      const variantWidths: number[] = mediaSnapshot.get('variants') ?? []
+      await Promise.all(
+        variantWidths.map((width) =>
+          bucket
+            .file(`hosts/${hostId}/media/${mediaId}__w${width}.webp`)
+            .delete()
+            .catch(() => undefined),
+        ),
+      )
       if (mediaSnapshot.exists) {
         const sizeBytes = Number(mediaSnapshot.get('sizeBytes') ?? 0)
         await mediaRef.delete()
@@ -166,7 +179,12 @@ export default async function handler(
     const file = bucket.file(`hosts/${hostId}/media/${mediaId}`)
     await file.save(buffer, {
       contentType,
-      metadata: { metadata: { firebaseStorageDownloadTokens: token } },
+      metadata: {
+        // Immutable is safe: the CDN path embeds the content hash, and
+        // raw download URLs embed the token — both change with content.
+        cacheControl: 'public, max-age=31536000, immutable',
+        metadata: { firebaseStorageDownloadTokens: token },
+      },
     })
     const url =
       `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/` +
@@ -178,6 +196,41 @@ export default async function handler(
     const dimensions = isImage
       ? readImageDimensions(new Uint8Array(buffer))
       : null
+
+    // CDN delivery (AGL-175): content-hashed immutable path plus WebP
+    // variants for images. Variant bytes are deliberately EXCLUDED from
+    // the storage counter — they're derived artifacts the platform can
+    // regenerate, so hosts aren't billed for them.
+    const contentHash = createHash('sha256')
+      .update(new Uint8Array(buffer))
+      .digest('hex')
+      .slice(0, 16)
+    const variants: number[] = []
+    if (isImage && contentType !== 'image/svg+xml') {
+      try {
+        const sharp = (await import('sharp')).default
+        for (const width of MEDIA_CDN_VARIANT_WIDTHS) {
+          if (dimensions?.width && dimensions.width <= width) continue
+          const webp = await sharp(buffer)
+            .resize({ width, withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toBuffer()
+          await bucket
+            .file(`hosts/${hostId}/media/${mediaId}__w${width}.webp`)
+            .save(webp, {
+              contentType: 'image/webp',
+              metadata: {
+                cacheControl: 'public, max-age=31536000, immutable',
+              },
+            })
+          variants.push(width)
+        }
+      } catch (error) {
+        // Variants are an optimization — never fail the upload for them.
+        console.error('media variant generation failed', mediaId, error)
+      }
+    }
+
     await hostRef.collection('media').doc(mediaId).set({
       fileName,
       contentType,
@@ -186,6 +239,9 @@ export default async function handler(
       folderId,
       ...(dimensions ?? {}),
       uploadedBy: decoded.uid,
+      contentHash,
+      variants,
+      cdnPath: `/api/media/cdn/${hostId}/${mediaId}/${contentHash}`,
       createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
     })
     await hostRef

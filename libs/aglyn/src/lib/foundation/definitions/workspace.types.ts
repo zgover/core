@@ -332,6 +332,14 @@ export interface AglynHostMedia {
   width?: number
   height?: number
   uploadedBy?: string
+  /**
+   * CDN delivery (AGL-175): content-hashed immutable path
+   * (`/api/media/cdn/{hostId}/{mediaId}/{hash}`) served by both apps,
+   * plus the WebP variant widths generated at upload.
+   */
+  cdnPath?: string
+  contentHash?: string
+  variants?: number[]
   createdAt?: ITimestamp
   deletedAt?: ITimestamp
 }

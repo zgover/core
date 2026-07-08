@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-export { appCheck, firebaseApp } from '@aglyn/shared-util-fbclient'
-export * from './lib/client/tenant.utils'
+import { serveMediaCdn } from '@aglyn/tenant-data-admin'
 
-export * from './lib/server/firebase-admin'
-export * from './lib/server/serve-media-cdn'
-export * from './lib/server/tenant.utils'
+/**
+ * CDN media delivery on tenant sites (AGL-175): immutable hashed URLs
+ * ride Vercel's edge cache. See `serveMediaCdn` for the contract.
+ */
+export default serveMediaCdn

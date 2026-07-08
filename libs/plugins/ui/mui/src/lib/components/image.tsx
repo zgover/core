@@ -68,11 +68,24 @@ const Image = forwardRef<HTMLElement, ImageProps>((props, ref) => {
       </Box>
     )
   }
+  // CDN URLs (AGL-175) carry WebP variants selected by `?w=`; widths
+  // without a variant fall back to the original server-side, so a static
+  // srcSet is safe for any CDN-form URL.
+  const isCdnUrl = src.includes('/api/media/cdn/')
   return (
     <Box
       ref={ref}
       component="img"
       src={src}
+      srcSet={
+        isCdnUrl
+          ? [320, 640, 1280]
+              .map((variant) => `${src}?w=${variant} ${variant}w`)
+              .concat(`${src} 1920w`)
+              .join(', ')
+          : undefined
+      }
+      sizes={isCdnUrl ? '100vw' : undefined}
       alt={alt ?? ''}
       loading="lazy"
       {...rest}
