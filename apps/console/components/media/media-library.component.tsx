@@ -54,6 +54,7 @@ import {
   collection,
   doc,
   getCountFromServer,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -798,6 +799,64 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     }
   }, [selected, confirm, user, hostId, enqueueSnackbar, logActivity, refresh])
 
+  // Per-asset usage (AGL-176), loaded when the drawer opens: on-demand
+  // reference scan plus 30 days of origin-serve counters from the
+  // analytics day-docs (edge cache hits aren't counted — labeled as such).
+  const [usage, setUsage] = useState<{
+    references: Array<{ kind: string; id: string; name: string }> | null
+    serves: number
+    bytes: number
+  } | null>(null)
+  const editorId = editor?.id
+  useEffect(() => {
+    if (!editorId) {
+      setUsage(null)
+      return
+    }
+    let active = true
+    void (async () => {
+      const idToken = await (user as any)?.getIdToken?.()
+      const referencesPromise = fetch('/api/media/references', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({ hostId, mediaId: editorId }),
+      })
+        .then((response) => (response.ok ? response.json() : { references: null }))
+        .catch(() => ({ references: null }))
+      const dayIds = Array.from({ length: 30 }, (_, index) => {
+        const date = new Date()
+        date.setDate(date.getDate() - index)
+        return date.toISOString().slice(0, 10)
+      })
+      const statsPromise = Promise.all(
+        dayIds.map((day) =>
+          getDoc(doc(firestore, 'hosts', hostId, 'analytics', day))
+            .then((snapshot) => {
+              const media = snapshot.get('media') ?? {}
+              return media[editorId] ?? { serves: 0, bytes: 0 }
+            })
+            .catch(() => ({ serves: 0, bytes: 0 })),
+        ),
+      )
+      const [referencesResult, stats] = await Promise.all([
+        referencesPromise,
+        statsPromise,
+      ])
+      if (!active) return
+      setUsage({
+        references: referencesResult?.references ?? null,
+        serves: stats.reduce((sum, stat) => sum + Number(stat.serves ?? 0), 0),
+        bytes: stats.reduce((sum, stat) => sum + Number(stat.bytes ?? 0), 0),
+      })
+    })()
+    return () => {
+      active = false
+    }
+  }, [editorId, user, hostId, firestore])
+
   const handleUpload = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
@@ -949,11 +1008,38 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
 
   const handleDelete = useCallback(
     (media: Aglyn.AglynHostMedia) => async () => {
+      // Reference-aware warning (AGL-176): best-effort scan before the
+      // confirm so a used asset gets a real warning, not a generic one.
+      let referenceNote = ''
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch('/api/media/references', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+          body: JSON.stringify({ hostId, mediaId: media.$id }),
+        })
+        const payload = response.ok ? await response.json() : null
+        const references: Array<{ name: string }> =
+          payload?.references ?? []
+        if (references.length) {
+          referenceNote =
+            ` WARNING: it is used on ${references.length} published ` +
+            `screen/layout${references.length === 1 ? '' : 's'} (${references
+              .map((reference) => reference.name)
+              .join(', ')}).`
+        }
+      } catch {
+        // Scan is advisory; deletion stays possible without it.
+      }
       const confirmed = await confirm({
         title: 'Delete this file?',
         description:
           `"${media.fileName ?? media.$id}" will be removed from storage. ` +
-          'Elements using its URL will stop rendering it.',
+          'Elements using its URL will stop rendering it.' +
+          referenceNote,
         confirmationText: 'Delete',
         confirmationButtonProps: { color: 'error' },
       })
@@ -1392,6 +1478,20 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
               {'Copy URL'}
             </Button>
           ) : null}
+          <Typography variant="caption" color="text.secondary" component="div">
+            {usage === null
+              ? 'Checking usage…'
+              : usage.references === null
+                ? 'Usage check unavailable'
+                : usage.references.length
+                  ? `Used on ${usage.references.length}: ${usage.references
+                      .map((reference) => reference.name)
+                      .join(', ')}`
+                  : 'Not referenced by any published screen or layout'}
+            {usage && (usage.serves || usage.bytes)
+              ? ` · ${usage.serves.toLocaleString()} origin serves / ${formatBytes(usage.bytes)} (30d, cache misses only)`
+              : ''}
+          </Typography>
           <TextField
             select
             size="small"

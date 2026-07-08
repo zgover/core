@@ -101,6 +101,33 @@ export async function serveMediaCdn(
     )
     if (metadata.size) res.setHeader('Content-Length', String(metadata.size))
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+
+    // Delivery volume (AGL-176): per-asset serves/bytes on the AGL-82
+    // analytics day-doc, fire-and-forget. Only cache MISSES reach this
+    // code — edge-cached responses aren't counted, so these are origin
+    // serves, not user-facing totals (billing accuracy is AGL-41's job).
+    // Hot-doc note: a single day-doc caps at ~1 write/sec sustained;
+    // acceptable at current traffic, shard or sample if an asset gets hot.
+    const day = new Date().toISOString().slice(0, 10)
+    void firestore
+      .collection('hosts')
+      .doc(hostId)
+      .collection('analytics')
+      .doc(day)
+      .set(
+        {
+          media: {
+            [mediaId]: {
+              serves: firebaseAdmin.firestore.FieldValue.increment(1),
+              bytes: firebaseAdmin.firestore.FieldValue.increment(
+                Number(metadata.size ?? 0),
+              ),
+            },
+          },
+        },
+        { merge: true },
+      )
+      .catch(() => undefined)
     if (req.method === 'HEAD') {
       res.status(200).end()
       return
