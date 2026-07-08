@@ -17,7 +17,7 @@
 
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { runEventWorkflows } from '../../../utils/run-event-workflows'
+import { emitHostEvent } from '../../../utils/emit-host-event'
 import {
   hashMemberPassword,
   mintMemberSession,
@@ -85,9 +85,9 @@ export default async function handler(
         createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
       })
       .catch((error) => console.error(error))
-    // Event triggers (AGL-128): sign-ups double as leads here too.
-    await runEventWorkflows(hostId, 'memberSignUp', { email })
-    await runEventWorkflows(hostId, 'lead', { email, source: 'signup' })
+    // Event triggers (AGL-128/148): sign-ups double as leads here too.
+    await emitHostEvent(hostId, 'memberSignUp', { email })
+    await emitHostEvent(hostId, 'lead', { email, source: 'signup' })
     setMemberCookie(res, hostId, mintMemberSession(hostId, memberRef.id))
     return res.status(200).json({ ok: true })
   } catch (error) {

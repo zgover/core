@@ -62,6 +62,9 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>(
     'idle',
   )
+  const [alerts, setAlerts] = useState<
+    Array<{ message: string; severity?: string }>
+  >([])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -89,6 +92,11 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
             website,
           }),
         })
+        if (response.ok) {
+          // Site alerts from the actions builder (AGL-148).
+          const payload = await response.json().catch(() => ({}))
+          if (Array.isArray(payload?.alerts)) setAlerts(payload.alerts)
+        }
         setStatus(response.ok ? 'sent' : 'error')
       } catch {
         setStatus('error')
@@ -128,6 +136,11 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
           {'Something went wrong — please try again.'}
         </Alert>
       ) : null}
+      {alerts.map((alert, index) => (
+        <Alert key={index} severity={(alert.severity as any) || 'info'}>
+          {alert.message}
+        </Alert>
+      ))}
       <Button
         type="submit"
         variant="contained"

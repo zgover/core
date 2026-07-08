@@ -18,6 +18,7 @@
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import HostActionsCard from '../../../components/host-actions-card.component'
 import HostWorkflowsCard from '../../../components/host-workflows-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { useHostId } from '../../../components/host-id-provider'
@@ -58,6 +59,10 @@ const HostWorkflows: NextPageWithLayout = () => {
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <HostWorkflowsCard hostId={hostId} />
+          {/* Actions builder (AGL-148). */}
+          <div style={{ marginTop: 24 }}>
+            <HostActionsCard hostId={hostId} />
+          </div>
         </Container>
       </DashboardLayout>
     </>

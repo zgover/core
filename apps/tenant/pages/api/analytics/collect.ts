@@ -18,7 +18,7 @@
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { runEventWorkflows } from '../../../utils/run-event-workflows'
+import { emitHostEvent } from '../../../utils/emit-host-event'
 
 /** Firestore map keys can't be parsed as field paths on read anyway, but
  * keep them tame: strip characters that complicate querying/exporting. */
@@ -87,8 +87,9 @@ export default async function handler(
         },
         { merge: true },
       )
-    // Event trigger (AGL-128): fire-and-forget — never delays the beacon.
-    void runEventWorkflows(hostId, 'pageView', { path })
+    // Event trigger (AGL-128/148): fire-and-forget — never delays the
+    // beacon; alerts have no response channel here and are dropped.
+    void emitHostEvent(hostId, 'pageView', { path })
   } catch (error) {
     console.error(error)
   }
