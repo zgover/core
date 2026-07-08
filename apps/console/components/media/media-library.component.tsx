@@ -53,10 +53,18 @@ import {
 import {
   collection,
   doc,
+  getCountFromServer,
+  getDocs,
   limit,
+  orderBy,
   query,
+  type QueryConstraint,
+  type QueryDocumentSnapshot,
   serverTimestamp,
+  startAfter,
+  Timestamp,
   updateDoc,
+  where,
   writeBatch,
 } from 'firebase/firestore'
 import {
@@ -70,6 +78,7 @@ import {
 import {
   useFirestore,
   useFirestoreCollectionData,
+  useFirestoreDocData,
   useUser,
 } from 'reactfire'
 import { checkTenantQuota } from '../../constants/entitlements'
@@ -82,6 +91,9 @@ export interface MediaLibraryComponentProps {
   /** When set, clicking an item selects it instead of exposing row actions. */
   onSelect?: (media: Aglyn.AglynHostMedia) => void
 }
+
+/** Page size for cursor pagination (AGL-174). */
+const MEDIA_PAGE_SIZE = 60
 
 const formatBytes = (bytes: number) =>
   bytes >= 1024 * 1024
@@ -147,20 +159,27 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
 
-  const { data: mediaDocs } = useFirestoreCollectionData<any>(
-    query(collection(firestore, 'hosts', hostId, 'media'), limit(500)),
-    { idField: '$id' },
+  // Paged media loading (AGL-174): cursor pagination over query-side
+  // filters replaces the old limit(500)+client-filter read. The fetch
+  // effect lives below the filter state it depends on.
+  const [pages, setPages] = useState<any[][]>([])
+  const [pageCursor, setPageCursor] =
+    useState<QueryDocumentSnapshot | null>(null)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMedia, setLoadingMedia] = useState(true)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const refresh = useCallback(() => setRefreshKey((key) => key + 1), [])
+  const mediaDocs = useMemo(() => pages.flat(), [pages])
+  const items: Aglyn.AglynHostMedia[] = useMemo(
+    () => (mediaDocs as any[]).filter((item: any) => !item.deletedAt),
+    [mediaDocs],
   )
-  const items: Aglyn.AglynHostMedia[] = [...(mediaDocs ?? [])]
-    .filter((item: any) => !item.deletedAt)
-    .sort(
-      (a: any, b: any) =>
-        (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
-    )
-  const usedBytes = items.reduce(
-    (sum, item) => sum + (item.sizeBytes ?? 0),
-    0,
+  // Usage + total from the counter doc — accurate past pagination.
+  const { data: mediaCounter } = useFirestoreDocData<any>(
+    doc(firestore, 'hosts', hostId, 'counters', 'media'),
   )
+  const usedBytes = Number(mediaCounter?.['bytes'] ?? 0)
+  const totalCount = Number(mediaCounter?.['count'] ?? 0)
 
   // Folder hierarchy (AGL-171): first-class docs replace the AGL-124
   // free-text `folder` string. Legacy strings migrate lazily below.
@@ -214,7 +233,10 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         folderId,
       })
     }
-    batch.commit().catch((error) => console.error('media migration', error))
+    batch
+      .commit()
+      .then(() => setRefreshKey((key) => key + 1))
+      .catch((error) => console.error('media migration', error))
   }, [mediaDocs, folderDocs, firestore, hostId])
 
   // Organization (AGL-124): search + folder/tag filters over doc metadata.
@@ -231,6 +253,112 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const [typeFilter, setTypeFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   const [sizeFilter, setSizeFilter] = useState('')
+
+  // Query construction (AGL-174). Query-side: folder scoping, single-tag
+  // array-contains, type facet, date range, and sort. Two deliberate
+  // downgrades keep the composite-index set small (documented in
+  // cloud/firebase-firestore.indexes.json): the type facet goes
+  // client-side when a tag filter is active or the sort isn't by date,
+  // and the date range goes client-side whenever the type facet is
+  // query-side (Firestore allows one range field). The client-side
+  // filter pass below still applies everything within loaded pages, so
+  // downgrades only affect which docs get fetched, never correctness of
+  // what's shown.
+  const buildConstraints = useCallback(
+    (cursor: QueryDocumentSnapshot | null): QueryConstraint[] => {
+      const constraints: QueryConstraint[] = []
+      const dateSort = sortBy === 'newest' || sortBy === 'oldest'
+      if (typeof currentFolder === 'string' && currentFolder !== 'all') {
+        constraints.push(where('folderId', '==', currentFolder))
+      }
+      if (tagFilter) constraints.push(where('tags', 'array-contains', tagFilter))
+      const typeQuerySide = Boolean(typeFilter) && !tagFilter && dateSort
+      if (typeQuerySide) {
+        if (typeFilter === 'pdf') {
+          constraints.push(where('contentType', '==', 'application/pdf'))
+        } else {
+          const prefix = typeFilter === 'video' ? 'video/' : 'image/'
+          constraints.push(
+            where('contentType', '>=', prefix),
+            where('contentType', '<', `${prefix}`),
+            orderBy('contentType'),
+          )
+        }
+      }
+      if (dateFilter && dateSort && (!typeQuerySide || typeFilter === 'pdf')) {
+        const days = dateFilter === '7d' ? 7 : 30
+        if (!typeQuerySide) {
+          constraints.push(
+            where(
+              'createdAt',
+              '>=',
+              Timestamp.fromMillis(Date.now() - days * 86400 * 1000),
+            ),
+          )
+        }
+      }
+      if (sortBy === 'name') constraints.push(orderBy('fileName'))
+      else if (sortBy === 'size') constraints.push(orderBy('sizeBytes', 'desc'))
+      else constraints.push(orderBy('createdAt', sortBy === 'oldest' ? 'asc' : 'desc'))
+      if (cursor) constraints.push(startAfter(cursor))
+      constraints.push(limit(MEDIA_PAGE_SIZE))
+      return constraints
+    },
+    [currentFolder, tagFilter, typeFilter, dateFilter, sortBy],
+  )
+  const fetchPage = useCallback(
+    async (cursor: QueryDocumentSnapshot | null) => {
+      const snapshot = await getDocs(
+        query(
+          collection(firestore, 'hosts', hostId, 'media'),
+          ...buildConstraints(cursor),
+        ),
+      )
+      return {
+        docs: snapshot.docs.map((docSnap) => ({
+          $id: docSnap.id,
+          ...docSnap.data(),
+        })),
+        last: snapshot.docs[snapshot.docs.length - 1] ?? null,
+        more: snapshot.docs.length === MEDIA_PAGE_SIZE,
+      }
+    },
+    [firestore, hostId, buildConstraints],
+  )
+  useEffect(() => {
+    let active = true
+    setLoadingMedia(true)
+    void fetchPage(null)
+      .then((page) => {
+        if (!active) return
+        setPages([page.docs])
+        setPageCursor(page.last)
+        setHasMore(page.more)
+      })
+      .catch((error) => console.error('media query', error))
+      .then(() => {
+        if (active) setLoadingMedia(false)
+      })
+    return () => {
+      active = false
+    }
+    // refreshKey re-runs after any mutation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchPage, refreshKey])
+  const handleLoadMore = useCallback(async () => {
+    if (!pageCursor) return
+    setLoadingMedia(true)
+    try {
+      const page = await fetchPage(pageCursor)
+      setPages((prev) => [...prev, page.docs])
+      setPageCursor(page.last)
+      setHasMore(page.more)
+    } catch (error) {
+      console.error('media query', error)
+    } finally {
+      setLoadingMedia(false)
+    }
+  }, [fetchPage, pageCursor])
   const tags = useMemo(
     () =>
       [...new Set(items.flatMap((item: any) => item.tags ?? []))].sort(),
@@ -307,15 +435,33 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     sortBy,
   ])
 
-  // Rail counts: per-folder asset totals plus a `root` bucket.
-  const folderCounts = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const item of items as any[]) {
-      const key = item.folderId ?? 'root'
-      counts[key] = (counts[key] ?? 0) + 1
+  // Rail counts via server-side count() so they stay accurate past the
+  // paginated window; `root` = total minus foldered.
+  const [folderCounts, setFolderCounts] = useState<Record<string, number>>({})
+  useEffect(() => {
+    let active = true
+    void Promise.all(
+      folderList.map((folder) =>
+        getCountFromServer(
+          query(
+            collection(firestore, 'hosts', hostId, 'media'),
+            where('folderId', '==', folder.$id),
+          ),
+        )
+          .then((snapshot) => [folder.$id, snapshot.data().count] as const)
+          .catch(() => [folder.$id, 0] as const),
+      ),
+    ).then((entries) => {
+      if (!active) return
+      const counts = Object.fromEntries(entries)
+      const foldered = entries.reduce((sum, [, count]) => sum + count, 0)
+      counts['root'] = Math.max(0, totalCount - foldered)
+      setFolderCounts(counts)
+    })
+    return () => {
+      active = false
     }
-    return counts
-  }, [items])
+  }, [folderList, firestore, hostId, totalCount, refreshKey])
 
   // Breadcrumb chain for the open folder.
   const breadcrumb = useMemo(() => {
@@ -429,6 +575,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       batch.delete(doc(firestore, 'hosts', hostId, 'mediaFolders', folder.$id))
       await batch.commit()
       if (currentFolder === folder.$id) setCurrentFolder(parentId ?? 'all')
+      refresh()
       logActivity('Deleted media folder', { type: 'media', name: folder.name })
     },
     [
@@ -439,6 +586,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       items,
       currentFolder,
       logActivity,
+      refresh,
     ],
   )
 
@@ -458,12 +606,13 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       }
       await batch.commit()
       setSelected(new Set())
+      refresh()
       enqueueSnackbar(
         `Moved ${mediaIds.length} file${mediaIds.length === 1 ? '' : 's'}`,
         { variant: 'success', persist: false },
       )
     },
-    [firestore, hostId, folderNameById, enqueueSnackbar],
+    [firestore, hostId, folderNameById, enqueueSnackbar, refresh],
   )
 
   const sensors = useSensors(
@@ -567,11 +716,12 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           name: editor.media?.fileName ?? editor.id,
         })
         setEditor(null)
+        refresh()
       })
       .catch(() =>
         enqueueSnackbar('An error has occurred', { variant: 'error' }),
       )
-  }, [editor, folderNameById, firestore, hostId, enqueueSnackbar, logActivity])
+  }, [editor, folderNameById, firestore, hostId, enqueueSnackbar, logActivity, refresh])
 
   // Bulk tag/delete (AGL-173) on the current selection.
   const [bulkTag, setBulkTag] = useState<{
@@ -596,11 +746,12 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     }
     await batch.commit()
     setBulkTag(null)
+    refresh()
     enqueueSnackbar(
       `${bulkTag.mode === 'add' ? 'Tagged' : 'Untagged'} ${selected.size} file${selected.size === 1 ? '' : 's'}`,
       { variant: 'success', persist: false },
     )
-  }, [bulkTag, items, selected, firestore, hostId, enqueueSnackbar])
+  }, [bulkTag, items, selected, firestore, hostId, enqueueSnackbar, refresh])
   const handleBulkDelete = useCallback(async () => {
     const count = selected.size
     if (!count) return
@@ -630,6 +781,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         if (!response.ok) throw new Error(`Delete failed (${response.status})`)
       }
       setSelected(new Set())
+      refresh()
       enqueueSnackbar(`Deleted ${count} file${count === 1 ? '' : 's'}`, {
         variant: 'success',
         persist: false,
@@ -644,7 +796,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     } finally {
       setBusy(false)
     }
-  }, [selected, confirm, user, hostId, enqueueSnackbar, logActivity])
+  }, [selected, confirm, user, hostId, enqueueSnackbar, logActivity, refresh])
 
   const handleUpload = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -736,6 +888,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
             persist: false,
           })
           logActivity('Uploaded media', { type: 'media', name: file.name })
+          refresh()
           return
         }
         const response = await fetch('/api/media/upload', {
@@ -764,6 +917,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           persist: false,
         })
         logActivity('Uploaded media', { type: 'media', name: file.name })
+        refresh()
       } catch (error) {
         console.error(error)
         enqueueSnackbar('Upload failed', {
@@ -774,7 +928,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         setBusy(false)
       }
     },
-    [user, hostId, tenant, usedBytes, currentFolder, enqueueSnackbar, logActivity],
+    [user, hostId, tenant, usedBytes, currentFolder, enqueueSnackbar, logActivity, refresh],
   )
 
   const handleCopyUrl = useCallback(
@@ -814,6 +968,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         })
         if (!response.ok) throw new Error(`Delete failed (${response.status})`)
         enqueueSnackbar('File deleted', { variant: 'success', persist: false })
+        refresh()
         logActivity('Deleted media', {
           type: 'media',
           id: media.$id,
@@ -827,7 +982,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         })
       }
     },
-    [confirm, user, hostId, enqueueSnackbar, logActivity],
+    [confirm, user, hostId, enqueueSnackbar, logActivity, refresh],
   )
 
   return (
@@ -854,7 +1009,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           {'Upload media'}
         </Button>
         <Typography variant="body2" color="text.secondary">
-          {`${items.length} file${items.length === 1 ? '' : 's'} · ${formatBytes(usedBytes)} used`}
+          {`${items.length}${totalCount > items.length ? ` of ${totalCount}` : ''} file${totalCount === 1 ? '' : 's'} · ${formatBytes(usedBytes)} used`}
         </Typography>
         <Box
           component="input"
@@ -876,6 +1031,9 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           sx={{ minWidth: 200 }}
+          helperText={
+            hasMore ? 'Searches loaded files — Load more to widen' : undefined
+          }
         />
         <TextField
           select
@@ -1030,10 +1188,12 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           </Menu>
         </Stack>
       ) : null}
-      {busy ? <LinearProgress /> : null}
+      {busy || loadingMedia ? <LinearProgress /> : null}
       {items.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
-          {'No media yet — upload images, video, or PDFs to use on your site.'}
+          {loadingMedia
+            ? 'Loading media…'
+            : 'No media here — upload images, video, or PDFs to use on your site.'}
         </Typography>
       ) : (
         <Grid container spacing={2}>
@@ -1162,6 +1322,16 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           ))}
         </Grid>
       )}
+      {hasMore ? (
+        <Button
+          size="small"
+          disabled={loadingMedia}
+          onClick={handleLoadMore}
+          sx={{ alignSelf: 'flex-start' }}
+        >
+          {'Load more'}
+        </Button>
+      ) : null}
       <Drawer
         anchor="right"
         open={Boolean(editor)}
