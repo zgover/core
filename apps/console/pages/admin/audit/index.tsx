@@ -103,6 +103,11 @@ const AdminAudit: NextPageWithLayout = () => {
             href: buildRoute(Route.ADMIN_TENANTS),
           },
           {
+            id: 'nav-tab-admin-users',
+            label: 'Users',
+            href: buildRoute(Route.ADMIN_USERS),
+          },
+          {
             id: 'nav-tab-admin-audit',
             label: 'Audit log',
             href: buildRoute(Route.ADMIN_AUDIT),
