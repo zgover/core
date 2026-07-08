@@ -9,6 +9,8 @@ description: Manage URL redirects with validation, loop detection, and hit metri
 The **redirect manager** sends old or alternate URLs to the right place — essential when you
 rename screens or migrate a site.
 
+![The Redirects page in the Aglyn console, with an "Add redirect" action for exact-path rules](/img/redirects/redirects-page.png)
+
 :::info Plan availability
 **Paid**. The redirect manager is a paid feature.
 :::

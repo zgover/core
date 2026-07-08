@@ -38,6 +38,14 @@ You can manage a screen (rename, schedule, view raw JSON) from its **detail page
 without opening the editor. When you want to design it, open the
 **[Besigner](../besigner/overview.md)**.
 
+## A host's dashboard
+
+Opening a host lands you on its dashboard — the primary navigation tabs across the top,
+account/role management, and quick controls for surfaces like the announcement bar and
+promotional popup.
+
+![The Aglyn console host dashboard, showing the primary navigation tabs (Dashboard, Screens, Layouts, Media, Content, Inbox, Contacts, Bookings, Events, Data, Redirects, Workflows, Community), the Users card with the account owner listed, and Announcement bar / Promotional popup quick-edit cards](/img/getting-started/console-dashboard.png)
+
 ## Next
 
 - [Publish your first screen](publish-your-first-screen.md)

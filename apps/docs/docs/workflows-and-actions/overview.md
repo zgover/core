@@ -10,6 +10,8 @@ Automate what happens on your site. **Workflows** run multi-step logic when some
 happens; the **actions builder** maps an event to an action; **webhooks** connect Aglyn to
 outside systems.
 
+![The Workflows page in the Aglyn console, with Workflows, Actions, and Webhooks cards](/img/workflows-and-actions/workflows-page.png)
+
 ```mermaid
 flowchart LR
   E["Host event<br/>(form submit, order, member)"] --> W["Workflow<br/>(ordered steps)"]
