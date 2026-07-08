@@ -19,6 +19,7 @@
 import {
   checkDatasetQuota,
   createResourceUid,
+  deriveModelFromFields,
   parseDatasetFields,
   sanitizeRecordValues,
   sortDatasetRecords,
@@ -58,6 +59,7 @@ import {
 } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
 import useHostActivityLogger from '../hooks/use-host-activity-logger'
+import { DatasetSchemaDialog } from './dataset-schema-dialog.component'
 
 export interface HostDatasetsCardProps {
   hostId: string
@@ -89,6 +91,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     [datasetDocs],
   )
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [schemaOpen, setSchemaOpen] = useState(false)
   const selected =
     datasets.find((item) => item.$id === selectedId) ?? datasets[0]
   const fields: string[] = selected?.fields ?? []
@@ -145,6 +148,8 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     await setDoc(doc(firestore, 'hosts', hostId, 'datasets', id), {
       displayName: creator.name.trim(),
       fields: creatorFields,
+      // Typed model from day one (AGL-178); refine it in the Schema dialog.
+      model: deriveModelFromFields(creatorFields),
       createdAt: Timestamp.now(),
     })
     setCreator(null)
@@ -163,10 +168,14 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   const handleDeleteDataset = useCallback(async () => {
     if (!selected) return
     const confirmed = await confirm({
-      title: 'Delete this dataset?',
+      title: 'Delete this collection?',
       description:
-        `"${selected.displayName}" and its records stop resolving in ` +
-        'repeatable components.',
+        `"${selected.displayName}"` +
+        (records.length
+          ? ` and its ${records.length} document${records.length === 1 ? '' : 's'}`
+          : '') +
+        ' stop resolving in repeatable components and bindings that ' +
+        'reference it.',
       confirmationText: 'Delete',
       confirmationButtonProps: { color: 'error' },
     })
@@ -181,7 +190,15 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
       id: selected.$id,
       name: selected.displayName,
     })
-  }, [selected, confirm, firestore, hostId, enqueueSnackbar, logActivity])
+  }, [
+    selected,
+    records.length,
+    confirm,
+    firestore,
+    hostId,
+    enqueueSnackbar,
+    logActivity,
+  ])
 
   // --- Record editor (null id = new row) ----------------------------------
   const [editor, setEditor] = useState<{
@@ -296,6 +313,9 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
               onClick={handleOpenRecord()}
             >
               {'Add record'}
+            </Button>
+            <Button size="small" onClick={() => setSchemaOpen(true)}>
+              {'Schema'}
             </Button>
             <Button size="small" color="error" onClick={handleDeleteDataset}>
               {'Delete'}
@@ -444,6 +464,12 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
           </Button>
         </DialogActions>
       </Dialog>
+      <DatasetSchemaDialog
+        hostId={hostId}
+        dataset={schemaOpen && selected ? selected : null}
+        recordCount={records.length}
+        onClose={() => setSchemaOpen(false)}
+      />
     </CardDisplay>
   )
 }

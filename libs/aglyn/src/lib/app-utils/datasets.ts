@@ -31,6 +31,8 @@ export interface HostDataset {
   fields?: string[]
   /** Typed model (AGL-177); when absent, derive from `fields`. */
   model?: import('./dataset-models').DatasetModel
+  /** dod.ts Schema.Name shape (AGL-178). */
+  names?: { singular?: string; plural?: string }
 }
 
 export interface HostDatasetRecord {
