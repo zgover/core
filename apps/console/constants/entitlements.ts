@@ -41,6 +41,7 @@ export type Entitlement =
   | 'webhooks'
   | 'site-export'
   | 'multilingual'
+  | 'event-calendar'
 
 const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   versioning: 'versioning',
@@ -57,6 +58,7 @@ const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   webhooks: 'webhooks',
   'site-export': 'siteExport',
   multilingual: 'multilingual',
+  'event-calendar': 'eventCalendar',
 }
 
 /**

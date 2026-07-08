@@ -77,6 +77,7 @@ export const PLAN_ENTITLEMENTS: Record<
       webhooks: false,
       siteExport: false,
       multilingual: false,
+      eventCalendar: false,
     },
   },
   starter: {
@@ -117,6 +118,7 @@ export const PLAN_ENTITLEMENTS: Record<
       webhooks: false,
       siteExport: false,
       multilingual: false,
+      eventCalendar: false,
     },
   },
   pro: {
@@ -157,6 +159,7 @@ export const PLAN_ENTITLEMENTS: Record<
       webhooks: false,
       siteExport: true,
       multilingual: false,
+      eventCalendar: false,
     },
   },
   business: {
@@ -197,9 +200,17 @@ export const PLAN_ENTITLEMENTS: Record<
       webhooks: true,
       siteExport: true,
       multilingual: true,
+      eventCalendar: false,
     },
   },
 }
+
+/**
+ * Event Calendar add-on (AGL-145): first-party, Aglyn-supported, $9/mo
+ * per host — cost×1.3 floor honored (mostly Firestore reads). Enabled via
+ * the `eventCalendar` entitlement override at purchase.
+ */
+export const EVENT_CALENDAR_ADDON_MONTHLY_USD = 9
 
 export interface PlanPricing {
   /** Flat monthly base price in USD. */

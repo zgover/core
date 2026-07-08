@@ -61,6 +61,11 @@ export function hostNavTabItems(hostId: string) {
       href: buildRoute(Route.HOST_BOOKINGS, { hostId }),
     },
     {
+      id: 'nav-tab-events',
+      label: 'Events',
+      href: buildRoute(Route.HOST_EVENTS, { hostId }),
+    },
+    {
       id: 'nav-tab-data',
       label: 'Data',
       href: buildRoute(Route.HOST_DATA, { hostId }),

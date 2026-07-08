@@ -115,6 +115,8 @@ export interface TenantFeatureFlags {
   siteExport?: boolean
   /** Multilingual sites (AGL-164): locale variants + switcher. */
   multilingual?: boolean
+  /** Event Calendar add-on (AGL-145); paid, not part of any base tier. */
+  eventCalendar?: boolean
 }
 
 /**
