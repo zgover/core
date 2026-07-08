@@ -161,10 +161,12 @@ export function hostThemeToThemeOptions(
 
   const { typography } = sanitized
   if (typography?.fontFamily || typography?.variants) {
+    // HostThemeTypographyVariant is a sanitized subset of MUI's
+    // TypographyStyleOptions; the missing index signature is by design.
     options.typography = {
       ...(typography.fontFamily && { fontFamily: typography.fontFamily }),
       ...typography.variants,
-    }
+    } as ThemeOptions['typography']
   }
 
   if (typeof sanitized.shape?.borderRadius === 'number') {

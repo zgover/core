@@ -133,7 +133,9 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
     if (!draft) return
     const result = evaluateHostFunction(draft, testArgs)
     setTestResult(
-      result.ok ? `Result: ${String(result.value)}` : `Error: ${result.error}`,
+      result.ok === false
+        ? `Error: ${result.error}`
+        : `Result: ${String(result.value)}`,
     )
   }, [draft, testArgs])
 

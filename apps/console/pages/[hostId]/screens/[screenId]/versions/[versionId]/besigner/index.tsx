@@ -525,7 +525,7 @@ function BesignerPage(props) {
       layoutId ? (layoutVersionResult?.data?.nodes as any) : undefined,
       Aglyn.canvas.toJSON().nodes as any,
     )
-    writePreviewState(ids, composed, hostTheme)
+    writePreviewState(ids, composed as any, hostTheme)
     window.open(buildRoute(Route.SCREEN_PREVIEW, ids), previewWindowName(ids))
   }, [
     hostId,

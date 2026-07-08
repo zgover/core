@@ -338,7 +338,7 @@ export function ThemeEditor(props: ThemeEditorProps) {
                 label="Spacing unit (px)"
                 value={draft.spacing ?? 8}
                 onChange={handleSpacingChange}
-                inputProps={{ min: 2, max: 16 }}
+                slotProps={{ htmlInput: { min: 2, max: 16 } }}
               />
             </Stack>
           </CardDisplay>

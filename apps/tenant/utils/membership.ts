@@ -53,7 +53,7 @@ export function verifyMemberPassword(
   const expected = Buffer.from(hash, 'hex')
   return (
     candidate.length === expected.length &&
-    timingSafeEqual(candidate, expected)
+    timingSafeEqual(new Uint8Array(candidate), new Uint8Array(expected))
   )
 }
 
@@ -80,7 +80,8 @@ export function verifyMemberSession(
   const expected = sign(payload)
   const a = Buffer.from(signature)
   const b = Buffer.from(expected)
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return null
+  if (a.length !== b.length) return null
+  if (!timingSafeEqual(new Uint8Array(a), new Uint8Array(b))) return null
   return memberId
 }
 

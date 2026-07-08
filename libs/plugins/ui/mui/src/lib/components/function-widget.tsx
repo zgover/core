@@ -67,9 +67,9 @@ const FunctionWidget = forwardRef<HTMLDivElement, FunctionWidgetProps>(
       if (!definition) return
       const run = Aglyn.evaluateHostFunction(definition, args)
       setResult(
-        run.ok
-          ? `${resultLabel || 'Result'}: ${String(run.value)}`
-          : `Error: ${run.error}`,
+        run.ok === false
+          ? `Error: ${run.error}`
+          : `${resultLabel || 'Result'}: ${String(run.value)}`,
       )
     }, [definition, args, resultLabel])
 

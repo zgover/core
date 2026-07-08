@@ -57,7 +57,7 @@ export async function composeScreenNodes(options: {
     : undefined
 
   const composedNodes = Aglyn.composeLayoutAndScreenNodes(
-    layoutRes?.version?.nodes,
+    layoutRes?.version?.nodes as any,
     versionRes.version.nodes,
   )
   const componentsRes = await getComponents({ hostId })

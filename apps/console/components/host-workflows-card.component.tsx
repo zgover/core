@@ -144,11 +144,11 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
     if (!draft) return
     const run = runWorkflow(draft, functions, variables)
     setTestResult(
-      run.ok
-        ? `Result: ${String(run.value)} (${Object.entries(run.results)
+      run.ok === false
+        ? `Error: ${run.error}`
+        : `Result: ${String(run.value)} (${Object.entries(run.results)
             .map(([key, value]) => `${key}=${value}`)
-            .join(', ')})`
-        : `Error: ${run.error}`,
+            .join(', ')})`,
     )
   }, [draft, functions, variables])
 
