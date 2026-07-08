@@ -268,3 +268,54 @@ export function isPluginRevoked(
     Array.isArray(revocation.versions) && revocation.versions.includes(version)
   )
 }
+
+/** Component id of the sandboxed plugin canvas element (plugins-ui-mui). */
+export const PLUGIN_COMPONENT_ID = 'communityPlugin'
+
+/** Resolved install data injected into a plugin node's props at compose. */
+export interface ResolvedPluginInstall {
+  listingId: string
+  version: string
+  sha256: string
+  capabilities?: PluginCapabilities
+  revoked?: boolean
+}
+
+/**
+ * Compose-time injection (AGL-45), mirroring `attachFunctionDefinitions`:
+ * a `communityPlugin` node carries only a `listingId` in the saved screen;
+ * the tenant compose pass resolves that to the host's pinned install
+ * (version/sha256/capabilities) and the kill-switch state, and stamps them
+ * onto the node's props so `PluginFrame` renders without a client read.
+ * Unknown/uninstalled listings leave the node untouched (it shows a safe
+ * "not installed" placeholder rather than taking the screen down).
+ */
+export function attachPluginInstalls<T extends Record<string, any>>(
+  nodes: T,
+  installsByListingId: Record<string, ResolvedPluginInstall | undefined>,
+): T {
+  if (!Object.keys(installsByListingId).length) return nodes
+  const next: Record<string, any> = {}
+  for (const [id, node] of Object.entries(nodes)) {
+    const listingId =
+      node?.componentId === PLUGIN_COMPONENT_ID
+        ? node?.props?.listingId
+        : undefined
+    const install = listingId
+      ? installsByListingId[String(listingId)]
+      : undefined
+    next[id] = install
+      ? {
+          ...node,
+          props: {
+            ...node.props,
+            version: install.version,
+            sha256: install.sha256,
+            capabilities: install.capabilities,
+            revoked: Boolean(install.revoked),
+          },
+        }
+      : node
+  }
+  return next as T
+}

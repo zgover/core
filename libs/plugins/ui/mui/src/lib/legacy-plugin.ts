@@ -33,6 +33,7 @@ import * as EventList from './components/event-list'
 import * as Icon from './components/icon'
 import * as LanguageSwitcher from './components/language-switcher'
 import * as Video from './components/video'
+import * as CommunityPlugin from './components/plugin'
 import * as ReusableInstance from './components/reusable-instance'
 import * as SearchBox from './components/search-box'
 import * as ScreenLink from './components/screen-link'
@@ -81,6 +82,7 @@ export function registerLegacyMuiPlugin(): void {
     { component: ScreenLink.default, schema: ScreenLink.schema, presets: ScreenLink.presets },
     { component: FunctionWidget.default, schema: FunctionWidget.schema, presets: FunctionWidget.presets },
     { component: Product.default, schema: Product.schema, presets: Product.presets },
+    { component: CommunityPlugin.default, schema: CommunityPlugin.schema, presets: CommunityPlugin.presets },
     { component: SearchBox.default, schema: SearchBox.schema, presets: SearchBox.presets },
     { component: Stack.default, schema: Stack.schema, presets: Stack.presets },
   ]

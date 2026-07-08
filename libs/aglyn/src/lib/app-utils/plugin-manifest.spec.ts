@@ -16,7 +16,9 @@
  */
 
 import {
+  attachPluginInstalls,
   isPluginRevoked,
+  PLUGIN_COMPONENT_ID,
   type PluginManifest,
   pluginArtifactPath,
   pluginContentSecurityPolicy,
@@ -124,6 +126,43 @@ describe('pluginContentSecurityPolicy', () => {
     const csp = pluginContentSecurityPolicy(manifest.manifest, [])
     expect(csp).toContain('connect-src https://api.example.com')
     expect(csp).toContain("frame-ancestors 'none'")
+  })
+})
+
+describe('attachPluginInstalls', () => {
+  const nodes = {
+    root: { componentId: 'muiStack', props: {}, nodes: ['p1', 'p2', 'other'] },
+    p1: { componentId: PLUGIN_COMPONENT_ID, props: { listingId: 'L1' } },
+    p2: { componentId: PLUGIN_COMPONENT_ID, props: { listingId: 'gone' } },
+    other: { componentId: 'muiTypography', props: { children: 'hi' } },
+  }
+
+  it('stamps install data onto matching plugin nodes', () => {
+    const result = attachPluginInstalls(nodes, {
+      L1: {
+        listingId: 'L1',
+        version: '1.0.0',
+        sha256: 'abc',
+        capabilities: { events: ['refresh'] },
+        revoked: false,
+      },
+    })
+    expect(result.p1.props).toMatchObject({
+      listingId: 'L1',
+      version: '1.0.0',
+      sha256: 'abc',
+      revoked: false,
+    })
+    // Uninstalled + non-plugin nodes untouched.
+    expect(result.p2).toBe(nodes.p2)
+    expect(result.other).toBe(nodes.other)
+  })
+
+  it('propagates the revoked kill switch', () => {
+    const result = attachPluginInstalls(nodes, {
+      L1: { listingId: 'L1', version: '1.0.0', sha256: 'abc', revoked: true },
+    })
+    expect(result.p1.props.revoked).toBe(true)
   })
 })
 
