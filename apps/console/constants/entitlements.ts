@@ -42,6 +42,7 @@ export type Entitlement =
   | 'site-export'
   | 'multilingual'
   | 'event-calendar'
+  | 'redirects'
 
 const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   versioning: 'versioning',
@@ -59,6 +60,7 @@ const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   'site-export': 'siteExport',
   multilingual: 'multilingual',
   'event-calendar': 'eventCalendar',
+  redirects: 'redirects',
 }
 
 /**
