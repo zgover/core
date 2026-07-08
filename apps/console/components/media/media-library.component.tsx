@@ -268,6 +268,65 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       setBusy(true)
       try {
         const idToken = await (user as any)?.getIdToken?.()
+        // Large video goes direct-to-storage via signed URLs (AGL-167) —
+        // base64 JSON bodies cap out around 25MB.
+        if (file.type.startsWith('video/') && file.size > 20 * 1024 * 1024) {
+          const mint = await fetch('/api/media/upload-url', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+            },
+            body: JSON.stringify({
+              hostId,
+              contentType: file.type,
+              sizeBytes: file.size,
+            }),
+          })
+          const minted = await mint.json().catch(() => ({}))
+          if (!mint.ok || !minted?.uploadUrl) {
+            return void enqueueSnackbar(minted?.error ?? 'Upload failed', {
+              variant: 'error',
+              allowDuplicate: true,
+            })
+          }
+          const put = await fetch(minted.uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file,
+          })
+          if (!put.ok) {
+            return void enqueueSnackbar('Upload failed — try again', {
+              variant: 'error',
+              allowDuplicate: true,
+            })
+          }
+          const finalize = await fetch('/api/media/upload-url', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+            },
+            body: JSON.stringify({
+              hostId,
+              mediaId: minted.mediaId,
+              fileName: file.name,
+            }),
+          })
+          const finalized = await finalize.json().catch(() => ({}))
+          if (!finalize.ok) {
+            return void enqueueSnackbar(
+              finalized?.error ?? 'Upload failed',
+              { variant: 'error', allowDuplicate: true },
+            )
+          }
+          enqueueSnackbar(`Uploaded "${file.name}"`, {
+            variant: 'success',
+            persist: false,
+          })
+          logActivity('Uploaded media', { type: 'media', name: file.name })
+          return
+        }
         const response = await fetch('/api/media/upload', {
           method: 'POST',
           headers: {
