@@ -205,8 +205,11 @@ export default async function handler(
       .update(new Uint8Array(buffer))
       .digest('hex')
       .slice(0, 16)
+    // Paid gate (AGL-175 pricing): free tenants serve raw storage URLs;
+    // dark-launch tenants (no explicit plan) pass as usual.
+    const cdnAllowed = !tenant['plan'] || checkEntitlement(tenant, 'mediaCdn')
     const variants: number[] = []
-    if (isImage && contentType !== 'image/svg+xml') {
+    if (cdnAllowed && isImage && contentType !== 'image/svg+xml') {
       try {
         const sharp = (await import('sharp')).default
         for (const width of MEDIA_CDN_VARIANT_WIDTHS) {
@@ -241,7 +244,9 @@ export default async function handler(
       uploadedBy: decoded.uid,
       contentHash,
       variants,
-      cdnPath: `/api/media/cdn/${hostId}/${mediaId}/${contentHash}`,
+      ...(cdnAllowed
+        ? { cdnPath: `/api/media/cdn/${hostId}/${mediaId}/${contentHash}` }
+        : {}),
       createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
     })
     await hostRef

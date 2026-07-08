@@ -98,6 +98,10 @@ describe('plan entitlements', () => {
     expect(PLAN_ENTITLEMENTS.starter.features.dataStore).toBe(true)
     expect(PLAN_ENTITLEMENTS.pro.functionsPerHost).toBe(50)
     expect(PLAN_ENTITLEMENTS.business.recordsPerDataset).toBe(100000)
+    // CDN media delivery (AGL-175): paid tiers only; free serves raw URLs.
+    expect(PLAN_ENTITLEMENTS.free.features.mediaCdn).toBe(false)
+    expect(PLAN_ENTITLEMENTS.starter.features.mediaCdn).toBe(true)
+    expect(PLAN_ENTITLEMENTS.business.features.mediaCdn).toBe(true)
   })
 
   it('treats UNLIMITED quotas as always allowed', () => {

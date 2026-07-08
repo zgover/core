@@ -44,6 +44,7 @@ export type Entitlement =
   | 'event-calendar'
   | 'redirects'
   | 'screen-analytics'
+  | 'media-cdn'
 
 const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   versioning: 'versioning',
@@ -63,6 +64,7 @@ const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
   'event-calendar': 'eventCalendar',
   redirects: 'redirects',
   'screen-analytics': 'screenAnalytics',
+  'media-cdn': 'mediaCdn',
 }
 
 /**

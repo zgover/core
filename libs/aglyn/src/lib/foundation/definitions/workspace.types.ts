@@ -121,6 +121,8 @@ export interface TenantFeatureFlags {
   redirects?: boolean
   /** Per-screen traffic analytics (AGL-150). */
   screenAnalytics?: boolean
+  /** CDN delivery + responsive image variants for media (AGL-175). */
+  mediaCdn?: boolean
 }
 
 /**
