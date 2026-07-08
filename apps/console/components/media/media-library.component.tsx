@@ -42,11 +42,14 @@ import {
   doc,
   limit,
   query,
+  serverTimestamp,
   updateDoc,
+  writeBatch,
 } from 'firebase/firestore'
 import {
   type ChangeEvent,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -119,6 +122,61 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     0,
   )
 
+  // Folder hierarchy (AGL-171): first-class docs replace the AGL-124
+  // free-text `folder` string. Legacy strings migrate lazily below.
+  const { data: folderDocs } = useFirestoreCollectionData<any>(
+    query(collection(firestore, 'hosts', hostId, 'mediaFolders'), limit(500)),
+    { idField: '$id' },
+  )
+  const folderList: Array<Aglyn.AglynHostMediaFolder> = useMemo(
+    () =>
+      [...((folderDocs as any[]) ?? [])].sort(
+        (a, b) =>
+          (a.order ?? 0) - (b.order ?? 0) ||
+          String(a.name).localeCompare(String(b.name)),
+      ),
+    [folderDocs],
+  )
+  const folderNameById = useMemo(
+    () =>
+      Object.fromEntries(folderList.map((folder) => [folder.$id, folder.name])),
+    [folderList],
+  )
+
+  // One-shot legacy migration: create a root folder per distinct legacy
+  // string and stamp `folderId` on its assets. Client-side under the
+  // host-admin rules; ref-guarded so a mount runs it at most once.
+  const migratedRef = useRef(false)
+  useEffect(() => {
+    if (migratedRef.current || !mediaDocs || !folderDocs) return
+    const plan = Aglyn.planLegacyFolderMigration(
+      mediaDocs as any[],
+      folderDocs as any[],
+    )
+    if (!plan.assignments.length && !plan.foldersToCreate.length) return
+    migratedRef.current = true
+    const batch = writeBatch(firestore)
+    const idByName: Record<string, string> = {}
+    for (const folder of folderDocs as any[]) {
+      if ((folder.parentId ?? null) === null) {
+        idByName[String(folder.name).trim().toLowerCase()] = folder.$id
+      }
+    }
+    for (const name of plan.foldersToCreate) {
+      const ref = doc(collection(firestore, 'hosts', hostId, 'mediaFolders'))
+      idByName[name.toLowerCase()] = ref.id
+      batch.set(ref, { name, parentId: null, createdAt: serverTimestamp() })
+    }
+    for (const assignment of plan.assignments) {
+      const folderId = idByName[assignment.folderName.toLowerCase()]
+      if (!folderId) continue
+      batch.update(doc(firestore, 'hosts', hostId, 'media', assignment.mediaId), {
+        folderId,
+      })
+    }
+    batch.commit().catch((error) => console.error('media migration', error))
+  }, [mediaDocs, folderDocs, firestore, hostId])
+
   // Organization (AGL-124): search + folder/tag filters over doc metadata.
   const [search, setSearch] = useState('')
   const [folderFilter, setFolderFilter] = useState('')
@@ -130,10 +188,9 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const [typeFilter, setTypeFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   const [sizeFilter, setSizeFilter] = useState('')
-  const folders = useMemo(
-    () =>
-      [...new Set(items.map((item: any) => item.folder).filter(Boolean))].sort(),
-    [items],
+  const folderNames = useMemo(
+    () => folderList.map((folder) => folder.name),
+    [folderList],
   )
   const tags = useMemo(
     () =>
@@ -144,7 +201,14 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     const term = search.trim().toLowerCase()
     const now = Date.now() / 1000
     const filtered = items.filter((item: any) => {
-      if (folderFilter && item.folder !== folderFilter) return false
+      if (
+        folderFilter &&
+        item.folderId !== folderFilter &&
+        // Legacy fallback: unmigrated docs match by folder name.
+        item.folder !== folderNameById[folderFilter]
+      ) {
+        return false
+      }
       if (tagFilter && !(item.tags ?? []).includes(tagFilter)) return false
       const contentType = String(item.contentType ?? '')
       if (typeFilter === 'image' && !contentType.startsWith('image/')) {
@@ -168,6 +232,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       const haystack = [
         item.fileName,
         item.folder,
+        item.folderId ? folderNameById[item.folderId] : undefined,
         item.alt,
         item.description,
         ...(item.tags ?? []),
@@ -191,6 +256,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     items,
     search,
     folderFilter,
+    folderNameById,
     tagFilter,
     typeFilter,
     dateFilter,
@@ -218,8 +284,34 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           .filter(Boolean),
       ),
     ]
+    // Resolve the typed folder name to a folder doc (AGL-171): reuse a
+    // root folder case-insensitively or create one; empty name = root.
+    const folderName = Aglyn.normalizeFolderName(editor.folder)
+    let folderId: string | null = null
+    if (folderName) {
+      const existing = folderList.find(
+        (folder) =>
+          (folder.parentId ?? null) === null &&
+          folder.name.trim().toLowerCase() === folderName.toLowerCase(),
+      )
+      if (existing) {
+        folderId = existing.$id
+      } else {
+        const ref = doc(collection(firestore, 'hosts', hostId, 'mediaFolders'))
+        const batch = writeBatch(firestore)
+        batch.set(ref, {
+          name: folderName,
+          parentId: null,
+          createdAt: serverTimestamp(),
+        })
+        await batch.commit()
+        folderId = ref.id
+      }
+    }
     await updateDoc(doc(firestore, 'hosts', hostId, 'media', editor.id), {
-      folder: editor.folder.trim(),
+      folderId,
+      // Legacy string kept in sync until every reader is on folderId.
+      folder: folderName ?? '',
       tags: tagList,
       alt: editor.alt.trim(),
       description: editor.description.trim(),
@@ -239,7 +331,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       .catch(() =>
         enqueueSnackbar('An error has occurred', { variant: 'error' }),
       )
-  }, [editor, firestore, hostId, enqueueSnackbar, logActivity])
+  }, [editor, folderList, firestore, hostId, enqueueSnackbar, logActivity])
 
   const handleUpload = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -462,9 +554,9 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           sx={{ minWidth: 140 }}
         >
           <MenuItem value="">{'All folders'}</MenuItem>
-          {folders.map((folder) => (
-            <MenuItem key={folder} value={folder}>
-              {folder}
+          {folderList.map((folder) => (
+            <MenuItem key={folder.$id} value={folder.$id}>
+              {folder.name}
             </MenuItem>
           ))}
         </TextField>
@@ -658,7 +750,9 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
             }
             sx={{ mt: 1 }}
             helperText={
-              folders.length ? `Existing: ${folders.join(', ')}` : undefined
+              folderNames.length
+                ? `Existing: ${folderNames.join(', ')}`
+                : undefined
             }
           />
           <TextField

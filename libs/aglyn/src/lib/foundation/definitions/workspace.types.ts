@@ -318,8 +318,31 @@ export interface AglynHostMedia {
   sizeBytes?: number
   /** Download URL captured at upload time; nodes reference this directly. */
   url?: string
+  /**
+   * Folder doc id in `hosts/{hostId}/mediaFolders` (AGL-171); null/absent
+   * = root. Replaces the legacy free-text `folder` string below.
+   */
+  folderId?: string | null
+  /** Legacy AGL-124 free-text folder; read as fallback until migrated. */
+  folder?: string
+  tags?: string[]
+  alt?: string
+  description?: string
   createdAt?: ITimestamp
   deletedAt?: ITimestamp
+}
+
+/**
+ * Media folder doc (AGL-171): `hosts/{hostId}/mediaFolders/{folderId}`.
+ * Hierarchy/validation helpers live in `app-utils/media-folders`.
+ */
+export interface AglynHostMediaFolder {
+  $id: string
+  name: string
+  /** Parent folder id; null = root. Depth capped at 5 (see app-utils). */
+  parentId?: string | null
+  order?: number
+  createdAt?: ITimestamp
 }
 
 /**

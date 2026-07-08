@@ -42,6 +42,7 @@ export type {
   AglynHost,
   AglynHostComponent,
   AglynHostMedia,
+  AglynHostMediaFolder,
   AglynHostTheme,
   AglynLayout,
   AglynRedirect,
