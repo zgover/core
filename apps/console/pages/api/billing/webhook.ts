@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { firebaseAdmin, upsertHostContact } from '@aglyn/tenant-data-admin'
 import { createHmac, timingSafeEqual } from 'crypto'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -236,6 +236,17 @@ export default async function handler(
             ...(couponCode ? { couponCode } : {}),
             createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
           })
+        // Contacts ingestion (AGL-197): buyers become contacts.
+        void upsertHostContact({
+          hostId: String(hostId),
+          email: object?.customer_details?.email,
+          name: object?.customer_details?.name ?? undefined,
+          source: 'order',
+          interaction: {
+            refId: String(object.id),
+            summary: `Placed an order ($${(Number(object?.amount_total ?? 0) / 100).toFixed(2)})`,
+          },
+        })
         const productRef = hostRef.collection('products').doc(String(productId))
         const productSnapshot = await productRef.get()
         // Inventory decrement (AGL-96): only tracked products; the

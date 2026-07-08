@@ -17,6 +17,7 @@
 
 export * from './binding-tokens'
 export * from './community'
+export * from './contacts'
 export * from './compose-layout-nodes'
 export * from './functions'
 export * from './compose-reusable-components'
