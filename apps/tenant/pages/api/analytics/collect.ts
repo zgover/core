@@ -46,6 +46,35 @@ export default async function handler(
     const screenId = String(body.screenId ?? '')
     if (!hostId || hostId.length > 64) return res.status(204).end()
 
+    // Overlay events (AGL-200): impressions/dismissals/clicks for the
+    // announcement bar and popup count into the same day doc under an
+    // `overlays` map — they are NOT pageviews, so return early.
+    const overlay = String(body.overlay ?? '')
+    if (overlay) {
+      const OVERLAY_EVENTS = [
+        'popupImpression',
+        'popupDismiss',
+        'popupClick',
+        'barClick',
+        'barDismiss',
+      ]
+      if (OVERLAY_EVENTS.includes(overlay)) {
+        const day = new Date().toISOString().slice(0, 10)
+        await firebaseAdmin
+          .app()
+          .firestore()
+          .collection('hosts')
+          .doc(hostId)
+          .collection('analytics')
+          .doc(day)
+          .set(
+            { overlays: { [overlay]: FieldValue.increment(1) } },
+            { merge: true },
+          )
+      }
+      return res.status(204).end()
+    }
+
     // Referrer host (AGL-138): external sources only — same-host and
     // unparsable referrers are dropped.
     let referrerHost = ''

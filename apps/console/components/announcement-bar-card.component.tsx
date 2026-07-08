@@ -34,6 +34,7 @@ import { useFirestore, useFirestoreDocData } from 'reactfire'
 import { hasEntitlement } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
 import useHostActivityLogger from '../hooks/use-host-activity-logger'
+import OverlayStatsRow from './overlay-stats-row.component'
 
 export interface AnnouncementBarCardProps {
   hostId: string
@@ -193,6 +194,11 @@ export function AnnouncementBarCard(props: AnnouncementBarCardProps) {
           >
             {'Save'}
           </Button>
+          <OverlayStatsRow
+            hostId={hostId}
+            actionKey="barClick"
+            actionLabel="clicks"
+          />
         </Stack>
       )}
     </CardDisplay>

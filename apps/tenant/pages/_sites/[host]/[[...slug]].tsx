@@ -81,6 +81,7 @@ interface Props {
     trigger: 'delay' | 'scroll' | 'exit'
     triggerValue: number
     frequencyDays: number
+    collectEmail?: boolean
     startAtMs?: number
     endAtMs?: number
     contentHash: string
@@ -524,6 +525,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
         trigger: popupConfig.trigger ?? 'delay',
         triggerValue: Number(popupConfig.triggerValue ?? 3),
         frequencyDays: Math.max(1, Number(popupConfig.frequencyDays ?? 7)),
+        ...(popupConfig.collectEmail ? { collectEmail: true } : {}),
         ...(popupConfig.startAtMs ? { startAtMs: popupConfig.startAtMs } : {}),
         ...(popupConfig.endAtMs ? { endAtMs: popupConfig.endAtMs } : {}),
         contentHash: contentHash(`${headline ?? ''}|${body}`),
@@ -561,6 +563,19 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
   }
 }
 
+/** Overlay metrics beacon (AGL-200): fire-and-forget, never blocks UX. */
+function sendOverlayBeacon(hostId: string | undefined, overlay: string) {
+  if (!hostId) return
+  try {
+    navigator.sendBeacon(
+      '/api/analytics/collect',
+      JSON.stringify({ hostId, overlay }),
+    )
+  } catch {
+    // Beacons are best-effort.
+  }
+}
+
 /**
  * Site-wide announcement bar (AGL-195). Dismissal is per content-hash in
  * localStorage (no cookies): editing the text re-shows the bar for
@@ -568,8 +583,9 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
  */
 function AnnouncementBar(props: {
   bar: NonNullable<Props['announcementBar']>
+  hostId?: string
 }) {
-  const { bar } = props
+  const { bar, hostId } = props
   const storageKey = `aglyn-abar-${bar.contentHash}`
   const [hidden, setHidden] = useState(true)
   useEffect(() => {
@@ -597,6 +613,7 @@ function AnnouncementBar(props: {
   const text = bar.href ? (
     <a
       href={bar.href}
+      onClick={() => sendOverlayBeacon(hostId, 'barClick')}
       style={{ color: 'inherit', textDecoration: 'underline' }}
     >
       {bar.text}
@@ -617,6 +634,7 @@ function AnnouncementBar(props: {
             } catch {
               // Storage may be unavailable (private mode); hide anyway.
             }
+            sendOverlayBeacon(hostId, 'barDismiss')
             setHidden(true)
           }}
           style={{
@@ -646,10 +664,21 @@ function AnnouncementBar(props: {
  * capping via a per-content-hash localStorage stamp (no cookies). ESC and
  * backdrop close; reduced-motion preferences skip the entrance ease.
  */
-function PopupOverlay(props: { popup: NonNullable<Props['popup']> }) {
-  const { popup } = props
+function PopupOverlay(props: {
+  popup: NonNullable<Props['popup']>
+  hostId?: string
+}) {
+  const { popup, hostId } = props
   const storageKey = `aglyn-popup-${popup.contentHash}`
   const [open, setOpen] = useState(false)
+  // Email capture (AGL-200): submits into the forms pipeline (inbox +
+  // contacts); success suppresses the popup for ~10 years.
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    if (open) sendOverlayBeacon(hostId, 'popupImpression')
+  }, [open, hostId])
 
   useEffect(() => {
     const now = Date.now()
@@ -689,13 +718,44 @@ function PopupOverlay(props: { popup: NonNullable<Props['popup']> }) {
     return cleanup
   }, [popup, storageKey])
 
-  const close = () => {
+  const close = (kind: 'popupDismiss' | 'popupClick' = 'popupDismiss') => {
     try {
       window.localStorage.setItem(storageKey, String(Date.now()))
     } catch {
       // Private mode etc. — closing still works for this pageview.
     }
+    sendOverlayBeacon(hostId, kind)
     setOpen(false)
+  }
+
+  const handleEmailSubmit = async () => {
+    const value = email.trim()
+    if (!value || submitted) return
+    try {
+      await fetch('/api/forms/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hostId,
+          formName: 'Popup',
+          fields: { email: value },
+          path: window.location.pathname,
+          website: '',
+        }),
+      })
+    } catch {
+      // Best-effort — still thank the visitor.
+    }
+    setSubmitted(true)
+    try {
+      // Far-future stamp: a successful capture never re-prompts.
+      window.localStorage.setItem(
+        storageKey,
+        String(Date.now() + 315360000000),
+      )
+    } catch {
+      // Ignore.
+    }
   }
 
   useEffect(() => {
@@ -711,7 +771,7 @@ function PopupOverlay(props: { popup: NonNullable<Props['popup']> }) {
   if (!open) return null
   return (
     <div
-      onClick={close}
+      onClick={() => close()}
       style={{
         position: 'fixed',
         inset: 0,
@@ -743,7 +803,7 @@ function PopupOverlay(props: { popup: NonNullable<Props['popup']> }) {
         <button
           type="button"
           aria-label="Close"
-          onClick={close}
+          onClick={() => close()}
           style={{
             position: 'absolute',
             top: 8,
@@ -782,10 +842,57 @@ function PopupOverlay(props: { popup: NonNullable<Props['popup']> }) {
           <p style={{ margin: 0, fontSize: 14, whiteSpace: 'pre-wrap' }}>
             {popup.body}
           </p>
+          {popup.collectEmail ? (
+            <div style={{ marginTop: 16 }}>
+              {submitted ? (
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                  {'Thanks — you are on the list!'}
+                </p>
+              ) : (
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void handleEmailSubmit()
+                  }}
+                  style={{ display: 'flex', gap: 8, justifyContent: 'center' }}
+                >
+                  <input
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    style={{
+                      flex: 1,
+                      maxWidth: 240,
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      border: '1px solid #d1d5db',
+                      fontSize: 14,
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: '#111827',
+                      color: '#fff',
+                      fontSize: 14,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {'Sign up'}
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : null}
           {popup.ctaHref && popup.ctaLabel ? (
             <a
               href={popup.ctaHref}
-              onClick={close}
+              onClick={() => close('popupClick')}
               style={{
                 display: 'inline-block',
                 marginTop: 16,
@@ -1482,9 +1589,14 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
         ) : null}
       </Head>
       {props.announcementBar ? (
-        <AnnouncementBar bar={props.announcementBar} />
+        <AnnouncementBar
+          bar={props.announcementBar}
+          hostId={props.data?.host?.$id}
+        />
       ) : null}
-      {props.popup ? <PopupOverlay popup={props.popup} /> : null}
+      {props.popup ? (
+        <PopupOverlay popup={props.popup} hostId={props.data?.host?.$id} />
+      ) : null}
       <AglynNodeRenderer node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)} />
       {props.showBranding ? (
         <a
