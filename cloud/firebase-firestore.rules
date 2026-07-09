@@ -138,7 +138,11 @@ service cloud.firestore {
         ((resource.data.get('admins', {}).get(request.auth.uid, false) == true ||
           hostMemberRole(hostId) == 'admin') &&
          !hostTenantSuspended(hostId));
-      match /{document=**} {
+      // The extra {subcollection} segment matters: a bare {document=**}
+      // matches ZERO or more segments in rules v2, i.e. the host doc
+      // itself too — which would let editors delete the host through
+      // this write rule (caught by rules-tests, AGL-235).
+      match /{subcollection}/{document=**} {
         allow read: if isStaff() || isHostAdmin(hostId);
         allow write: if isStaff() ||
           (canWriteHostContent(hostId) && !hostTenantSuspended(hostId));
