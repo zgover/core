@@ -99,20 +99,34 @@ export default async function handler(
     const hosts = await firestore.collection('hosts').limit(1000).get()
 
     // Group hosts by owning tenant (host.tenantId; fall back to the first
-    // admin uid for hosts created before the field existed).
+    // admin uid for hosts created before the field existed) and by org
+    // (AGL-238) — orgs get their own attribution rollup while Stripe
+    // metering stays tenant-keyed until the legacy path retires.
     const byTenant: Record<string, FirebaseFirestore.DocumentReference[]> = {}
+    const byOrg: Record<string, FirebaseFirestore.DocumentReference[]> = {}
     for (const host of hosts.docs) {
       const tenantId =
         host.get('tenantId') ?? Object.keys(host.get('admins') ?? {})[0]
-      if (!tenantId) continue
-      ;(byTenant[tenantId] ??= []).push(host.ref)
+      if (tenantId) (byTenant[tenantId] ??= []).push(host.ref)
+      const orgId = host.get('orgId')
+      if (orgId) (byOrg[orgId] ??= []).push(host.ref)
+    }
+
+    // Each host's usage is read once even when it appears in both
+    // groupings.
+    const usageCache = new Map<string, Promise<HostUsageSnapshot>>()
+    const usageFor = (hostRef: FirebaseFirestore.DocumentReference) => {
+      let pending = usageCache.get(hostRef.path)
+      if (!pending) {
+        pending = hostUsage(hostRef, month)
+        usageCache.set(hostRef.path, pending)
+      }
+      return pending
     }
 
     const results: Record<string, any> = {}
     for (const [tenantId, hostRefs] of Object.entries(byTenant)) {
-      const usage = await Promise.all(
-        hostRefs.map((hostRef) => hostUsage(hostRef, month)),
-      )
+      const usage = await Promise.all(hostRefs.map(usageFor))
       const estimate = estimateMonthlyUsageCost(usage)
       const rollupRef = firestore
         .collection('tenants')
@@ -172,7 +186,35 @@ export default async function handler(
       )
       results[tenantId] = { billedCents: estimate.billedCents, reported }
     }
-    return res.status(200).json({ month, tenants: results })
+
+    // Per-org attribution rollups (AGL-238): same estimate model written
+    // to orgs/{orgId}/usage/{month} so pass-through pricing and freemium
+    // caps can key on the org once billing re-keys (AGL-237).
+    const orgResults: Record<string, any> = {}
+    for (const [orgId, hostRefs] of Object.entries(byOrg)) {
+      const usage = await Promise.all(hostRefs.map(usageFor))
+      const estimate = estimateMonthlyUsageCost(usage)
+      await firestore
+        .collection('orgs')
+        .doc(orgId)
+        .collection('usage')
+        .doc(month)
+        .set(
+          {
+            month,
+            hostCount: hostRefs.length,
+            storageGb: estimate.storageGb,
+            pageViews: estimate.pageViews,
+            formSubmissions: estimate.formSubmissions,
+            costUsd: estimate.costUsd,
+            billedCents: estimate.billedCents,
+            computedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true },
+        )
+      orgResults[orgId] = { billedCents: estimate.billedCents }
+    }
+    return res.status(200).json({ month, tenants: results, orgs: orgResults })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: 'Rollup failed' })
