@@ -227,12 +227,23 @@ function memberRolesFor(org, hostId) {
 
 for (const org of orgs.values()) {
   if (org.alreadyExists) {
-    // Ensure host wiring even for previously-created orgs.
+    // Ensure host wiring even for previously-created orgs (e.g. auto-created
+    // by ensureOrgForUser when a host was made through the new API): orgId,
+    // hostIndex, the org's hosts directory AND the memberRoles projection —
+    // computed from the live member docs, since the plan didn't load them.
+    const memberDocs = await db
+      .collection('orgs').doc(org.orgId).collection('members').get()
+    for (const member of memberDocs.docs) {
+      org.members.set(member.id, member.data())
+    }
     for (const { hostId, subdomain } of org.hosts) {
       await db.collection('hostIndex').doc(hostId)
         .set({ orgId: org.orgId, ...(subdomain ? { subdomain } : {}) })
       await db.collection('hosts').doc(hostId)
-        .set({ orgId: org.orgId }, { merge: true })
+        .set(
+          { orgId: org.orgId, memberRoles: memberRolesFor(org, hostId) },
+          { merge: true },
+        )
       await db.collection('orgs').doc(org.orgId)
         .set({ hosts: { [hostId]: true } }, { merge: true })
     }
