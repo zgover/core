@@ -119,3 +119,25 @@
   text-transform: none;
   box-shadow: var(--ifm-global-shadow-lw);
 }
+
+/* Mermaid sequence diagrams draw message arrows, message labels, and the
+   stick-figure actor's name directly on the page canvas (no shape behind them).
+   themeConfig.mermaid paints them white to suit the dark node fills, which
+   vanishes on the light page — bind them to the page's text color instead. */
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] text.messageText,
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] text.actor-man tspan {
+  fill: var(--ifm-font-color-base) !important;
+}
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] [class^='messageLine'] {
+  stroke: var(--ifm-font-color-base) !important;
+}
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] defs marker[id$='arrowhead'] path,
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] defs marker[id$='crosshead'] path,
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] defs marker[id$='filled-head'] path,
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] defs marker[id*='solid'] path {
+  fill: var(--ifm-font-color-base) !important;
+  stroke: var(--ifm-font-color-base) !important;
+}
+.docusaurus-mermaid-container svg[aria-roledescription='sequence'] defs marker[id$='sequencenumber'] circle {
+  fill: var(--ifm-font-color-base) !important;
+}
