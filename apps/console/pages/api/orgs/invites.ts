@@ -155,6 +155,33 @@ export default async function handler(
         createdAt: FieldValue.serverTimestamp(),
         acceptedAt: null,
       })
+      // Best-effort notification via Resend (same provider as AGL-137's
+      // usage emails); the invite works without it — the console banner
+      // surfaces it after sign-in either way.
+      const resendKey = process.env.RESEND_API_KEY
+      const from = process.env.USAGE_EMAIL_FROM
+      if (resendKey && from) {
+        const orgName =
+          (await firestore.collection('orgs').doc(orgId).get()).get('name') ??
+          'an organization'
+        const origin = req.headers.origin ?? `https://${req.headers.host}`
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from,
+            to: email,
+            subject: `You've been invited to ${orgName} on Aglyn`,
+            text:
+              `You've been invited to join ${orgName} as ${role}.\n\n` +
+              `Sign in at ${origin} with this email address and accept ` +
+              'the invite from your dashboard.',
+          }),
+        }).catch((error) => console.error('invite email failed', error))
+      }
       return res.status(200).json({ ok: true, inviteId })
     }
 
