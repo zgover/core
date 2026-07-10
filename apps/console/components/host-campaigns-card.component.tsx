@@ -20,12 +20,13 @@ import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Button,
+  Chip,
   MenuItem,
   Stack,
   TextField,
   Typography,
 } from '@mui/material'
-import { collection, limit, orderBy, query } from 'firebase/firestore'
+import { collection, limit, query } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
@@ -49,15 +50,18 @@ export function HostCampaignsCard(props: { hostId: string }) {
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
 
+  // No orderBy: scheduled campaigns have no sentAt yet (AGL-272), and an
+  // orderBy on a missing field would drop them from the history.
   const { data: campaignDocs } = useFirestoreCollection<any>(
     () =>
-      query(
-        collection(firestore, 'hosts', hostId, 'campaigns'),
-        orderBy('sentAt', 'desc'),
-        limit(20),
-      ),
+      query(collection(firestore, 'hosts', hostId, 'campaigns'), limit(30)),
     [firestore, hostId, hostOrgId],
     { idField: '$id' },
+  )
+  const campaigns = [...(campaignDocs ?? [])].sort(
+    (a: any, b: any) =>
+      (b.sentAt?.seconds ?? (b.sendAtMs ?? 0) / 1000) -
+      (a.sentAt?.seconds ?? (a.sendAtMs ?? 0) / 1000),
   )
 
   // Contact segments (AGL-199) join the built-in audiences.
@@ -109,23 +113,36 @@ export function HostCampaignsCard(props: { hostId: string }) {
   const [body, setBody] = useState('')
   const [audience, setAudience] = useState<string>('leads')
   const [experimentId, setExperimentId] = useState('')
+  // Scheduling (AGL-272): a future timestamp turns Send into Schedule.
+  const [sendAt, setSendAt] = useState('')
   const [busy, setBusy] = useState(false)
 
   const handleSend = useCallback(async () => {
     if (!subject.trim() || !body.trim() || busy) return
+    const sendAtMs = sendAt ? new Date(sendAt).getTime() : 0
+    const scheduling = Boolean(sendAtMs)
+    if (scheduling && sendAtMs <= Date.now()) {
+      return void enqueueSnackbar('Pick a future send time', {
+        variant: 'warning',
+        persist: false,
+      })
+    }
+    const audienceLabel =
+      audience === 'leads'
+        ? 'lead'
+        : audience === 'members'
+          ? 'site member'
+          : audience.startsWith('list:')
+            ? 'list subscriber'
+            : 'contact in the segment'
     const confirmed = await confirm({
-      title: 'Send this campaign?',
-      description:
-        `"${subject.trim()}" goes to every ${
-          audience === 'leads'
-            ? 'lead'
-            : audience === 'members'
-              ? 'site member'
-              : audience.startsWith('list:')
-                ? 'list subscriber'
-                : 'contact in the segment'
-        } who hasn't unsubscribed.`,
-      confirmationText: 'Send',
+      title: scheduling ? 'Schedule this campaign?' : 'Send this campaign?',
+      description: scheduling
+        ? `"${subject.trim()}" goes to every ${audienceLabel} who hasn't ` +
+          `unsubscribed on ${new Date(sendAtMs).toLocaleString()}.`
+        : `"${subject.trim()}" goes to every ${audienceLabel} who hasn't ` +
+          'unsubscribed.',
+      confirmationText: scheduling ? 'Schedule' : 'Send',
     })
       .then(() => true)
       .catch(() => false)
@@ -141,6 +158,7 @@ export function HostCampaignsCard(props: { hostId: string }) {
         },
         body: JSON.stringify({
           hostId,
+          ...(scheduling ? { action: 'schedule', sendAtMs } : {}),
           subject: subject.trim(),
           body: body.trim(),
           audience: audience.startsWith('segment:')
@@ -171,11 +189,14 @@ export function HostCampaignsCard(props: { hostId: string }) {
         })
       }
       enqueueSnackbar(
-        `Sent to ${payload.sent} of ${payload.recipients} recipients`,
+        scheduling
+          ? `Scheduled for ${new Date(sendAtMs).toLocaleString()}`
+          : `Sent to ${payload.sent} of ${payload.recipients} recipients`,
         { variant: 'success', persist: false },
       )
       setSubject('')
       setBody('')
+      setSendAt('')
     } catch (error) {
       console.error(error)
       enqueueSnackbar('An error has occurred', {
@@ -185,7 +206,39 @@ export function HostCampaignsCard(props: { hostId: string }) {
     } finally {
       setBusy(false)
     }
-  }, [subject, body, audience, experimentId, busy, user, hostId, confirm, enqueueSnackbar])
+  }, [subject, body, audience, experimentId, sendAt, busy, user, hostId, confirm, enqueueSnackbar])
+
+  // Cancel a scheduled campaign before the processor picks it up.
+  const handleCancelSchedule = useCallback(
+    async (campaignId: string) => {
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch('/api/campaigns/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+          body: JSON.stringify({ hostId, action: 'cancel', campaignId }),
+        })
+        const payload = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          return void enqueueSnackbar(payload?.error ?? 'Cancel failed', {
+            variant: 'warning',
+            allowDuplicate: true,
+          })
+        }
+        enqueueSnackbar('Schedule canceled', {
+          variant: 'success',
+          persist: false,
+        })
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar('An error has occurred', { variant: 'error' })
+      }
+    },
+    [user, hostId, enqueueSnackbar],
+  )
 
   return (
     <CardDisplay header={'Email campaigns'} contentGutterX contentGutterY>
@@ -252,42 +305,98 @@ export function HostCampaignsCard(props: { hostId: string }) {
           size="small"
           multiline
           minRows={4}
+          helperText={
+            'Personalize with {{firstName|there}}, {{name}}, or {{email}} ' +
+            '— resolved per recipient at send time.'
+          }
         />
-        <Button
-          variant="contained"
-          color="secondary"
-          disabled={busy || !subject.trim() || !body.trim()}
-          onClick={handleSend}
-          sx={{ alignSelf: 'flex-start' }}
-        >
-          {busy ? 'Sending…' : 'Send campaign'}
-        </Button>
-        {(campaignDocs ?? []).length ? (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={busy || !subject.trim() || !body.trim()}
+            onClick={handleSend}
+          >
+            {busy
+              ? 'Working…'
+              : sendAt
+                ? 'Schedule campaign'
+                : 'Send campaign'}
+          </Button>
+          <TextField
+            size="small"
+            type="datetime-local"
+            label="Send at (optional)"
+            slotProps={{ inputLabel: { shrink: true } }}
+            value={sendAt}
+            onChange={(event) => setSendAt(event.target.value)}
+          />
+        </Stack>
+        {campaigns.length ? (
           <Stack spacing={0.5}>
             <Typography variant="subtitle2">{'History'}</Typography>
-            {(campaignDocs ?? []).map((campaign: any) => (
+            {campaigns.map((campaign: any) => (
               <Stack
                 key={campaign.$id}
                 direction="row"
-                sx={{ justifyContent: 'space-between' }}
+                spacing={1}
+                sx={{ justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Typography variant="body2" noWrap sx={{ maxWidth: '70%' }}>
+                <Typography variant="body2" noWrap sx={{ maxWidth: '60%' }}>
                   {campaign.subject}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {`${campaign.stats?.sent ?? 0}/${
-                    campaign.stats?.recipients ?? 0
-                  } sent` +
-                    // Opens/clicks arrive via the Resend webhook (AGL-268).
-                    (campaign.stats?.opens
-                      ? ` · ${campaign.stats.opens} opens`
-                      : '') +
-                    (campaign.stats?.clicks
-                      ? ` · ${campaign.stats.clicks} clicks`
-                      : '') +
-                    ` · ${campaign.audience}` +
-                    (campaign.experimentId ? ' · A/B' : '')}
-                </Typography>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: 'center' }}
+                >
+                  {campaign.status === 'scheduled' ? (
+                    <>
+                      <Chip
+                        size="small"
+                        color="info"
+                        label={`Scheduled · ${
+                          campaign.sendAtMs
+                            ? new Date(campaign.sendAtMs).toLocaleString()
+                            : ''
+                        }`}
+                      />
+                      <Button
+                        size="small"
+                        color="inherit"
+                        onClick={() =>
+                          void handleCancelSchedule(campaign.$id)
+                        }
+                      >
+                        {'Cancel'}
+                      </Button>
+                    </>
+                  ) : campaign.status === 'canceled' ? (
+                    <Chip size="small" label="Canceled" />
+                  ) : campaign.status === 'failed' ? (
+                    <Chip
+                      size="small"
+                      color="error"
+                      label={`Failed${campaign.error ? ` · ${campaign.error}` : ''}`}
+                    />
+                  ) : (
+                    <Typography variant="caption" color="text.secondary">
+                      {`${campaign.stats?.sent ?? 0}/${
+                        campaign.stats?.recipients ?? 0
+                      } sent` +
+                        // Opens/clicks arrive via the Resend webhook
+                        // (AGL-268).
+                        (campaign.stats?.opens
+                          ? ` · ${campaign.stats.opens} opens`
+                          : '') +
+                        (campaign.stats?.clicks
+                          ? ` · ${campaign.stats.clicks} clicks`
+                          : '') +
+                        ` · ${campaign.audience}` +
+                        (campaign.experimentId ? ' · A/B' : '')}
+                    </Typography>
+                  )}
+                </Stack>
               </Stack>
             ))}
           </Stack>
