@@ -59,6 +59,10 @@ export interface InteractionsContextValue {
   }) => void
   /** Creates a draft section experiment targeting the node. */
   onCreateSectionExperiment?: (options: { nodeId: string }) => void
+  /** Enables/disables an element automation in place (wave v7). */
+  onToggleInteraction?: (options: { id: string; enabled: boolean }) => void
+  /** Soft-deletes an element automation (wave v7). */
+  onDeleteInteraction?: (options: { id: string }) => void
 }
 
 export const InteractionsContext = createContext<InteractionsContextValue>({})

@@ -32,7 +32,15 @@ import {
 import {
   MdiIcon,
 } from '@aglyn/shared-ui-jsx'
-import { Alert, NoSsr, Stack, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  IconButton,
+  NoSsr,
+  Stack,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
@@ -485,8 +493,44 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {automation.event}
-                          {automation.enabled === false ? ' · off' : ''}
                         </Typography>
+                        {/* Manage in place (wave v7): toggle + remove
+                            without leaving the canvas. */}
+                        {interactions.onToggleInteraction ? (
+                          <Switch
+                            size="small"
+                            checked={automation.enabled !== false}
+                            onChange={(event) =>
+                              interactions.onToggleInteraction?.({
+                                id: automation.id,
+                                enabled: event.target.checked,
+                              })
+                            }
+                            slotProps={{
+                              input: { 'aria-label': 'Interaction enabled' },
+                            }}
+                          />
+                        ) : automation.enabled === false ? (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                          >
+                            {'off'}
+                          </Typography>
+                        ) : null}
+                        {interactions.onDeleteInteraction ? (
+                          <IconButton
+                            size="small"
+                            aria-label="Remove interaction"
+                            onClick={() =>
+                              interactions.onDeleteInteraction?.({
+                                id: automation.id,
+                              })
+                            }
+                          >
+                            {'✕'}
+                          </IconButton>
+                        ) : null}
                       </Stack>
                     ))}
                     <TextField

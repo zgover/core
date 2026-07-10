@@ -92,6 +92,40 @@ export function InteractionsProvider(props: InteractionsProviderProps) {
     return {
       automations,
       sectionExperiments,
+      // Manage in place (wave v7): flip or retire an element automation
+      // without leaving the canvas.
+      onToggleInteraction: ({ id, enabled }) => {
+        void setDoc(
+          doc(firestore, 'hosts', hostId, 'actions', id),
+          { enabled, updatedAt: Timestamp.now() },
+          { merge: true },
+        ).catch((error) => {
+          console.error(error)
+          enqueueSnackbar('Could not update the interaction', {
+            variant: 'error',
+          })
+        })
+      },
+      onDeleteInteraction: ({ id }) => {
+        // Soft delete — matches the actions card's deletedAt convention.
+        void setDoc(
+          doc(firestore, 'hosts', hostId, 'actions', id),
+          { deletedAt: Timestamp.now(), enabled: false },
+          { merge: true },
+        )
+          .then(() =>
+            enqueueSnackbar('Interaction removed', {
+              variant: 'success',
+              persist: false,
+            }),
+          )
+          .catch((error) => {
+            console.error(error)
+            enqueueSnackbar('Could not remove the interaction', {
+              variant: 'error',
+            })
+          })
+      },
       onCreateInteraction: ({ nodeId, event }) => {
         const id = createResourceUid()
         void setDoc(doc(firestore, 'hosts', hostId, 'actions', id), {
