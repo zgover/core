@@ -39,12 +39,19 @@ service cloud.firestore {
       }
 
       allow read: if isStaff() || isOrgMember();
-      // Org creation/deletion and every billing/suspension/slug key are
-      // Admin-SDK-only (org APIs, Stripe webhook, staff tooling). Members
-      // with the admin role may rename the org; nothing else is
-      // client-writable.
+      // Org creation/deletion and the slug/owner/billing keys are
+      // Admin-SDK-only (org APIs, Stripe webhook, staff tooling), with
+      // two staff exceptions mirroring the retired tenants rules
+      // (AGL-206/238): super staff writes anything; billing staff writes
+      // plan/entitlements but the key diff keeps suspension, erasure and
+      // identity keys out of reach. Members with the admin role may
+      // rename the org; nothing else is client-writable.
       allow create, delete: if false;
       allow update: if isSuperStaff() ||
+        (isBillingStaff() &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(
+            ['slug', 'ownerUid', 'hosts',
+             'suspendedAt', 'suspendedReason', 'erasureRequestedAt'])) ||
         (canManageOrg() && orgNotSuspended() &&
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(
             ['slug', 'ownerUid', 'hosts', 'plan', 'entitlements',
@@ -125,58 +132,48 @@ service cloud.firestore {
 
     // Hosts and everything under them (content-hardening review,
     // 2026-07-07: tenant sites read through the Admin SDK, so no public
-    // read). Access now resolves through the org membership projection
+    // read). Access resolves through the org membership projection
     // `memberRoles` stamped on the host doc by the org APIs (AGL-233) —
-    // one get, role-aware (admin/editor write, viewer read) — with the
-    // legacy `admins` uid-map honored until every host is backfilled.
+    // one get, role-aware (admin/editor write, viewer read). The legacy
+    // `admins` uid-map retired with the tenants collection (AGL-238).
     function hostMemberRole(hostId) {
       return get(/databases/$(database)/documents/hosts/$(hostId))
         .data.get('memberRoles', {}).get(request.auth.uid, null);
     }
     function isHostAdmin(hostId) {
-      return isSignedIn() &&
-        (get(/databases/$(database)/documents/hosts/$(hostId))
-          .data.get('admins', {}).get(request.auth.uid, false) == true ||
-         hostMemberRole(hostId) != null);
+      return isSignedIn() && hostMemberRole(hostId) != null;
     }
     function canWriteHostContent(hostId) {
-      return isSignedIn() &&
-        (get(/databases/$(database)/documents/hosts/$(hostId))
-          .data.get('admins', {}).get(request.auth.uid, false) == true ||
-         hostMemberRole(hostId) in ['admin', 'editor']);
+      return isSignedIn() && hostMemberRole(hostId) in ['admin', 'editor'];
     }
-    // Suspension write-block (AGL-210): staff-suspended tenants keep read
-    // access but cannot mutate content. Fail-open when the tenant doc is
-    // missing (pre-billing hosts) so legacy data never locks up; billing
-    // stays keyed to tenants/{uid} until AGL-237 re-keys it to orgs.
-    function tenantSuspendedById(tenantId) {
-      return tenantId != null &&
-        exists(/databases/$(database)/documents/tenants/$(tenantId)) &&
-        get(/databases/$(database)/documents/tenants/$(tenantId))
+    // Suspension write-block (AGL-210/238): a staff-suspended org keeps
+    // read access but cannot mutate content. Fail-open when the org doc
+    // is missing (pre-org hosts) so legacy data never locks up.
+    function orgSuspendedById(orgId) {
+      return orgId != null &&
+        exists(/databases/$(database)/documents/orgs/$(orgId)) &&
+        get(/databases/$(database)/documents/orgs/$(orgId))
           .data.get('suspendedAt', null) != null;
     }
-    function hostTenantSuspended(hostId) {
-      return tenantSuspendedById(
+    function hostOrgSuspended(hostId) {
+      return orgSuspendedById(
         get(/databases/$(database)/documents/hosts/$(hostId))
-          .data.get('tenantId', null));
+          .data.get('orgId', null));
     }
     match /hosts/{hostId} {
       // Queries must be membership-constrained (the console filters on
-      // admins.{uid} or memberRoles.{uid}), which these rules admit.
+      // memberRoles.{uid}), which these rules admit.
       allow read: if isStaff() || (isSignedIn() &&
-        (resource.data.get('admins', {}).get(request.auth.uid, false) == true ||
-         resource.data.get('memberRoles', {}).get(request.auth.uid, null) != null));
+        resource.data.get('memberRoles', {}).get(request.auth.uid, null) != null);
       // Creation moved fully server-side (AGL-233): /api/hosts/create
       // checks org role + quota + subdomain uniqueness with the Admin SDK.
       allow create: if false;
       // The host doc carries live directories (screens, layouts), so
       // editors update it too; deletion is admin-only.
       allow update: if isStaff() ||
-        (canWriteHostContent(hostId) && !hostTenantSuspended(hostId));
+        (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
       allow delete: if isStaff() ||
-        ((resource.data.get('admins', {}).get(request.auth.uid, false) == true ||
-          hostMemberRole(hostId) == 'admin') &&
-         !hostTenantSuspended(hostId));
+        (hostMemberRole(hostId) == 'admin' && !hostOrgSuspended(hostId));
       // The extra {subcollection} segment matters: a bare {document=**}
       // matches ZERO or more segments in rules v2, i.e. the host doc
       // itself too — which would let editors delete the host through
@@ -184,7 +181,7 @@ service cloud.firestore {
       match /{subcollection}/{document=**} {
         allow read: if isStaff() || isHostAdmin(hostId);
         allow write: if isStaff() ||
-          (canWriteHostContent(hostId) && !hostTenantSuspended(hostId));
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
       }
     }
 
@@ -204,30 +201,9 @@ service cloud.firestore {
       }
     }
 
-    // Tenant docs (billing v1: keyed by the owner's uid). Owners read their
-    // own doc; clients never write plan/subscription — the Stripe webhook
-    // and admin tooling write via the Admin SDK (which bypasses rules), and
-    // staff may write from the admin console. Billing re-keys to orgs with
-    // AGL-237; until then this collection stays authoritative for plans.
-    match /tenants/{tenantId} {
-      // Team members (AGL-127) read the owner tenant they belong to — the
-      // console resolves plan/entitlements from the OWNER doc, keyed by the
-      // member's uid in the owner's members subcollection.
-      allow read: if isStaff() || (isSignedIn() &&
-        (request.auth.uid == tenantId ||
-          exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid))));
-      // Plan/entitlement writes: billing or super. Suspension and erasure
-      // flags are super-only (AGL-206) — checked by key diff so a billing
-      // override save can't smuggle a suspension in.
-      allow write: if isSuperStaff() ||
-        (isBillingStaff() &&
-          !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['suspendedAt', 'suspendedReason', 'erasureRequestedAt']));
-    }
-
-    // Community marketplace (AGL-44). Profiles are public publisher pages;
-    // the owner (tenants are keyed by uid) or staff may write. Handle and
-    // names are length-capped here since any owner writes client-side.
+    // Community marketplace (AGL-44). Profiles are public publisher pages
+    // keyed by the publisher's uid; the owner or staff may write. Handle
+    // and names are length-capped here since any owner writes client-side.
     match /profiles/{tenantId} {
       allow read: if true;
       allow write: if (isStaff() ||

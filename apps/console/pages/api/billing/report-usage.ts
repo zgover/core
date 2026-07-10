@@ -99,20 +99,14 @@ export default async function handler(
     const firestore = firebaseAdmin.app().firestore()
     const hosts = await firestore.collection('hosts').limit(1000).get()
 
-    // Group hosts by legacy tenant (audit rollups only) and by org — the
-    // org grouping is the billing subject since the AGL-238 cutover.
-    const byTenant: Record<string, FirebaseFirestore.DocumentReference[]> = {}
+    // Group hosts by org — the sole billing subject (AGL-238; the legacy
+    // per-tenant rollups retired with the tenants collection).
     const byOrg: Record<string, FirebaseFirestore.DocumentReference[]> = {}
     for (const host of hosts.docs) {
-      const tenantId =
-        host.get('tenantId') ?? Object.keys(host.get('admins') ?? {})[0]
-      if (tenantId) (byTenant[tenantId] ??= []).push(host.ref)
       const orgId = host.get('orgId')
       if (orgId) (byOrg[orgId] ??= []).push(host.ref)
     }
 
-    // Each host's usage is read once even when it appears in both
-    // groupings.
     const usageCache = new Map<string, Promise<HostUsageSnapshot>>()
     const usageFor = (hostRef: FirebaseFirestore.DocumentReference) => {
       let pending = usageCache.get(hostRef.path)
@@ -121,38 +115,6 @@ export default async function handler(
         usageCache.set(hostRef.path, pending)
       }
       return pending
-    }
-
-    const results: Record<string, any> = {}
-    for (const [tenantId, hostRefs] of Object.entries(byTenant)) {
-      const usage = await Promise.all(hostRefs.map(usageFor))
-      const estimate = estimateMonthlyUsageCost(usage)
-      const rollupRef = firestore
-        .collection('tenants')
-        .doc(tenantId)
-        .collection('usageRollups')
-        .doc(month)
-      const existing = await rollupRef.get()
-      if (existing.get('reportedAt')) {
-        results[tenantId] = { billedCents: estimate.billedCents, skipped: true }
-        continue
-      }
-
-      // Metering re-keyed to orgs (AGL-238 cutover): the tenant rollup is
-      // audit-only now; meter events are sent from the org loop below.
-      await rollupRef.set(
-        {
-          month,
-          storageGb: estimate.storageGb,
-          pageViews: estimate.pageViews,
-          formSubmissions: estimate.formSubmissions,
-          costUsd: estimate.costUsd,
-          billedCents: estimate.billedCents,
-          computedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true },
-      )
-      results[tenantId] = { billedCents: estimate.billedCents }
     }
 
     // Org rollups + metering (AGL-238 cutover): orgs are the billing
@@ -218,7 +180,7 @@ export default async function handler(
       )
       orgResults[orgId] = { billedCents: estimate.billedCents, reported }
     }
-    return res.status(200).json({ month, tenants: results, orgs: orgResults })
+    return res.status(200).json({ month, orgs: orgResults })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: 'Rollup failed' })

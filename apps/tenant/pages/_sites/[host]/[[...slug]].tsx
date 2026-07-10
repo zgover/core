@@ -140,10 +140,10 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     const hostId = hostRes.host.$id
     const pathsByScreenId = hostRes.host.screens || {}
 
-    // Tenant suspension (AGL-202): staff-suspended tenants stop serving
+    // Org suspension (AGL-202/238): staff-suspended orgs stop serving
     // every path immediately (short revalidate bounds the lag). Loaded
     // once here and reused by the branding/overlay branches below.
-    const tenantRes = await getTenant({ tenantId: hostRes.host.tenantId })
+    const tenantRes = await getTenant({ hostId })
     if ((tenantRes.tenant as any)?.suspendedAt) {
       return {
         props: JSON.parse(

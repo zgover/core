@@ -17,6 +17,7 @@
 
 import {
   firebaseAdmin,
+  getOrgForHost,
   resolveOrgMembership,
   upsertHostContact,
 } from '@aglyn/tenant-data-admin'
@@ -110,6 +111,8 @@ export default async function handler(
     ) {
       const tenantId = object?.metadata?.tenantId
       if (tenantId) {
+        // tenantId in legacy metadata is the owner uid; new checkouts also
+        // carry orgId. Orgs are the only billing target (AGL-238).
         const canceled = type === 'customer.subscription.deleted'
         const priceId = object?.items?.data?.[0]?.price?.id
         const plan = canceled
@@ -126,16 +129,6 @@ export default async function handler(
               : null,
           },
         }
-        await firebaseAdmin
-          .app()
-          .firestore()
-          .collection('tenants')
-          .doc(tenantId)
-          .set(billing, { merge: true })
-        // Org mirror (AGL-237): orgs are becoming the entitlement source.
-        // New checkouts carry orgId in metadata; older subscriptions
-        // resolve through the owner's membership. The tenants write above
-        // stays until the legacy path is removed (AGL-238).
         const orgId =
           object?.metadata?.orgId ??
           (await resolveOrgMembership(tenantId))?.orgId ??
@@ -319,7 +312,8 @@ export default async function handler(
             )
           }
           const hostSnapshot = await hostRef.get()
-          const sellerUid = Object.keys(hostSnapshot.get('admins') ?? {})[0]
+          const sellerUid = (await getOrgForHost(String(hostId)))?.org
+            ?.ownerUid
           if (sellerUid) {
             const seller = await firebaseAdmin
               .app()

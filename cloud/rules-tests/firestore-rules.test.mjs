@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-// Firestore rules matrix for the org tenancy model (AGL-235). Runs inside
-// the emulator via `npm run test:rules` (firebase emulators:exec sets
-// FIRESTORE_EMULATOR_HOST). Covers the member/non-member/wrong-org/
-// viewer/editor/suspended/staff axes for orgs and hosts.
+// Firestore rules matrix for the org tenancy model (AGL-235/238). Runs
+// inside the emulator via `npm run test:rules` (firebase emulators:exec
+// sets FIRESTORE_EMULATOR_HOST). Covers the member/non-member/wrong-org/
+// viewer/editor/suspended/staff axes for orgs and hosts, plus the staff
+// RBAC key-diff guards that moved here from the retired tenants rules.
 
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -39,13 +40,14 @@ let env
 
 const ORG = 'org-acme'
 const OTHER_ORG = 'org-other'
+const SUSPENDED_ORG = 'org-suspended'
 const HOST = 'host-a'
 const SUSPENDED_HOST = 'host-suspended'
 
 const OWNER = 'uid-owner'
 const EDITOR = 'uid-editor' // hostAccess: HOST=editor
 const VIEWER = 'uid-viewer' // allHosts viewer
-const LEGACY = 'uid-legacy' // only in the host admins map
+const LEGACY = 'uid-legacy' // only in the retired host admins map
 const OUTSIDER = 'uid-outsider'
 const STAFF = 'uid-staff'
 
@@ -97,14 +99,17 @@ beforeEach(async () => {
     })
     await setDoc(doc(db, 'hosts', HOST), {
       displayName: 'Site A', orgId: ORG,
-      admins: { [LEGACY]: true },
+      admins: { [LEGACY]: true }, // retired map — must NOT authorize
       memberRoles: { [OWNER]: 'admin', [EDITOR]: 'editor', [VIEWER]: 'viewer' },
     })
     await setDoc(doc(db, 'hosts', HOST, 'screens', 'screen-1'), { name: 'Home' })
-    // Suspension write-block: host owned by a suspended tenant.
-    await setDoc(doc(db, 'tenants', OWNER), { plan: 'pro', suspendedAt: new Date() })
+    // Suspension write-block (AGL-238): host owned by a suspended org.
+    await setDoc(doc(db, 'orgs', SUSPENDED_ORG), {
+      name: 'Frozen', slug: 'frozen', ownerUid: OWNER,
+      plan: 'pro', suspendedAt: new Date(),
+    })
     await setDoc(doc(db, 'hosts', SUSPENDED_HOST), {
-      displayName: 'Suspended', orgId: ORG, tenantId: OWNER,
+      displayName: 'Suspended', orgId: SUSPENDED_ORG,
       memberRoles: { [OWNER]: 'admin', [EDITOR]: 'editor' },
     })
     await setDoc(doc(db, 'hosts', SUSPENDED_HOST, 'screens', 's1'), { name: 'X' })
@@ -200,9 +205,9 @@ describe('hosts', () => {
     await assertSucceeds(deleteDoc(doc(authed(OWNER), 'hosts', HOST)))
   })
 
-  it('legacy admins map still authorizes; outsiders and anon never do', async () => {
-    await assertSucceeds(getDoc(doc(authed(LEGACY), 'hosts', HOST)))
-    await assertSucceeds(
+  it('the retired admins map no longer authorizes; outsiders and anon never do', async () => {
+    await assertFails(getDoc(doc(authed(LEGACY), 'hosts', HOST)))
+    await assertFails(
       setDoc(doc(authed(LEGACY), 'hosts', HOST, 'screens', 'legacy'), { name: 'L' }),
     )
     await assertFails(getDoc(doc(authed(OUTSIDER), 'hosts', HOST)))
@@ -221,7 +226,7 @@ describe('hosts', () => {
     await assertSucceeds(getDoc(doc(authed(STAFF, { staff: true }), 'hosts', HOST)))
   })
 
-  it('suspended tenants keep reads but lose writes', async () => {
+  it('suspended orgs keep reads but lose writes', async () => {
     await assertSucceeds(getDoc(doc(authed(EDITOR), 'hosts', SUSPENDED_HOST)))
     await assertFails(
       setDoc(doc(authed(EDITOR), 'hosts', SUSPENDED_HOST, 'screens', 's2'), { x: 1 }),
@@ -269,28 +274,31 @@ describe('org-shared data (AGL-237)', () => {
   })
 })
 
-describe('tenants (billing v1 fallback)', () => {
-  it('owner reads own doc; others denied; client writes denied', async () => {
-    await assertSucceeds(getDoc(doc(authed(OWNER), 'tenants', OWNER)))
-    await assertFails(getDoc(doc(authed(EDITOR), 'tenants', OWNER)))
-    await assertFails(
-      updateDoc(doc(authed(OWNER), 'tenants', OWNER), { plan: 'business' }),
-    )
-  })
-
-  it('billing staff writes plans but cannot smuggle a suspension', async () => {
+describe('staff RBAC on org billing keys (AGL-206/238)', () => {
+  it('billing staff writes plans but cannot smuggle a suspension or slug', async () => {
     const billingStaffDb = authed(STAFF, { staff: true, staffRole: 'billing' })
     await assertSucceeds(
-      updateDoc(doc(billingStaffDb, 'tenants', OWNER), { plan: 'business' }),
+      updateDoc(doc(billingStaffDb, 'orgs', ORG), { plan: 'business' }),
     )
     await assertFails(
-      updateDoc(doc(billingStaffDb, 'tenants', OWNER), {
+      updateDoc(doc(billingStaffDb, 'orgs', ORG), {
         suspendedAt: new Date(),
       }),
     )
+    await assertFails(
+      updateDoc(doc(billingStaffDb, 'orgs', ORG), { slug: 'stolen' }),
+    )
     const superStaffDb = authed(STAFF, { staff: true, staffRole: 'super' })
     await assertSucceeds(
-      updateDoc(doc(superStaffDb, 'tenants', OWNER), { suspendedAt: new Date() }),
+      updateDoc(doc(superStaffDb, 'orgs', ORG), { suspendedAt: new Date() }),
+    )
+  })
+
+  it('support staff reads orgs but cannot write billing keys', async () => {
+    const supportStaffDb = authed(STAFF, { staff: true, staffRole: 'support' })
+    await assertSucceeds(getDoc(doc(supportStaffDb, 'orgs', ORG)))
+    await assertFails(
+      updateDoc(doc(supportStaffDb, 'orgs', ORG), { plan: 'business' }),
     )
   })
 })

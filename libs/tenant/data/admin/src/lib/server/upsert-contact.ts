@@ -24,7 +24,7 @@ import {
 } from '@aglyn/aglyn'
 import { FieldValue } from 'firebase-admin/firestore'
 import { firebaseAdmin } from './firebase-admin'
-import { orgDataCollectionForHost } from './organizations'
+import { getOrgForHost, orgDataCollectionForHost } from './organizations'
 
 /**
  * Contacts ingestion (AGL-197): upserts an org-scoped contact doc (AGL-237)
@@ -93,14 +93,10 @@ export async function upsertHostContact(options: {
     }
 
     // New contact: enforce the plan quota via the aggregate count (cheap;
-    // no doc reads) against the owning tenant's entitlements.
-    const hostSnapshot = await hostRef.get()
-    const tenantId = hostSnapshot.get('tenantId')
-    const tenantSnapshot = tenantId
-      ? await firestore.collection('tenants').doc(String(tenantId)).get()
-      : null
+    // no doc reads) against the owning org's entitlements (AGL-238).
+    const orgBilling = await getOrgForHost(options.hostId)
     const limit = resolveTenantEntitlements(
-      tenantSnapshot?.exists ? (tenantSnapshot.data() as any) : null,
+      (orgBilling?.org as any) ?? null,
     ).contactsPerHost
     const count = (await contactsRef.count().get()).data().count
     if (count >= limit) {

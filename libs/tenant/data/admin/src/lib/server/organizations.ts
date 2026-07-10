@@ -235,6 +235,57 @@ export async function resolveOrgIdForHost(
 }
 
 /**
+ * The org doc itself — billing, plan, entitlements and suspension (the
+ * shape the legacy tenants/{uid} doc carried; orgs are the only billing
+ * source since AGL-238). Null when the doc is missing.
+ */
+export async function getOrgDoc(
+  orgId: string,
+): Promise<Partial<AglynOrganization> | null> {
+  const snapshot = await firestore().collection('orgs').doc(orgId).get()
+  return snapshot.exists
+    ? ({ $id: snapshot.id, ...snapshot.data() } as Partial<AglynOrganization>)
+    : null
+}
+
+/**
+ * Billing/entitlement source for a host (AGL-238): the owning org's doc
+ * via the hostIndex mirror. Null for unindexed hosts — callers treat that
+ * as the pre-billing fail-open (every feature on), the same contract the
+ * legacy tenants/{uid} read had.
+ */
+export async function getOrgForHost(hostId: string): Promise<{
+  orgId: string
+  org: Partial<AglynOrganization>
+} | null> {
+  const orgId = await resolveOrgIdForHost(hostId)
+  if (!orgId) return null
+  const org = await getOrgDoc(orgId)
+  return org ? { orgId, org } : null
+}
+
+/**
+ * Billing/entitlement source for a user without host context (account-
+ * level APIs): the explicit workspace org when given, else the first org
+ * from the reverse index. Null for accounts with no org yet.
+ */
+export async function getOrgForUser(
+  uid: string,
+  orgId?: string | null,
+): Promise<{
+  orgId: string
+  org: Partial<AglynOrganization>
+  member: AglynOrgMember
+} | null> {
+  const membership = await resolveOrgMembership(uid, orgId)
+  if (!membership) return null
+  const org = await getOrgDoc(membership.orgId)
+  return org
+    ? { orgId: membership.orgId, org, member: membership.member }
+    : null
+}
+
+/**
  * Org-scoped data collection for a host (AGL-237): datasets, contacts and
  * contactSegments live on the org so every host shares them. Falls back
  * to the host's own subcollection for hosts not yet org-wired (pre-
@@ -350,6 +401,78 @@ export async function upsertOrgMember(
       { role, orgName: org.name ?? null, slug: org.slug ?? null },
     )
   })
+  await syncHostMemberRoles(orgId)
+}
+
+/**
+ * Grants (or updates) per-host access for a uid without disturbing an
+ * existing membership's org role or allHosts flag (AGL-238: the host user
+ * manager rides org membership). Creates a viewer membership scoped to
+ * just this host when the uid is not on the roster yet.
+ */
+export async function grantHostAccess(options: {
+  orgId: string
+  uid: string
+  hostId: string
+  role: 'viewer' | 'editor' | 'admin'
+  email?: string | null
+  displayName?: string | null
+  invitedBy?: string
+}): Promise<void> {
+  const { orgId, uid, hostId, role, email, displayName, invitedBy } = options
+  const db = firestore()
+  await db.runTransaction(async (tx) => {
+    const orgRef = db.collection('orgs').doc(orgId)
+    const orgSnapshot = await tx.get(orgRef)
+    if (!orgSnapshot.exists) throw new Error(`Unknown org: ${orgId}`)
+    const org = orgSnapshot.data() as AglynOrganization
+    const memberRef = orgRef.collection('members').doc(uid)
+    const existing = await tx.get(memberRef)
+    tx.set(
+      memberRef,
+      {
+        ...(existing.exists
+          ? {}
+          : {
+              role: 'viewer' as OrgRole,
+              allHosts: false,
+              joinedAt: FieldValue.serverTimestamp(),
+            }),
+        hostAccess: { [hostId]: role },
+        ...(email !== undefined ? { email } : {}),
+        ...(displayName !== undefined ? { displayName } : {}),
+        ...(invitedBy ? { invitedBy } : {}),
+      },
+      // merge deep-merges the hostAccess map, so other host grants and
+      // the existing role/allHosts stay untouched.
+      { merge: true },
+    )
+    if (!existing.exists) {
+      tx.set(db.collection('users').doc(uid).collection('orgs').doc(orgId), {
+        role: 'viewer',
+        orgName: org.name ?? null,
+        slug: org.slug ?? null,
+      })
+    }
+  })
+  await syncHostMemberRoles(orgId)
+}
+
+/** Drops one host from a member's hostAccess map, then re-projects. */
+export async function revokeHostAccess(
+  orgId: string,
+  uid: string,
+  hostId: string,
+): Promise<void> {
+  await firestore()
+    .collection('orgs')
+    .doc(orgId)
+    .collection('members')
+    .doc(uid)
+    .set(
+      { hostAccess: { [hostId]: FieldValue.delete() } },
+      { merge: true },
+    )
   await syncHostMemberRoles(orgId)
 }
 

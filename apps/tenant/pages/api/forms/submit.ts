@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import {
-  orgDataCollectionForHost, firebaseAdmin } from '@aglyn/tenant-data-admin'
+  orgDataCollectionForHost, firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { extractEmailFromFields } from '@aglyn/aglyn'
 import { upsertHostContact } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
@@ -92,15 +92,12 @@ export default async function handler(
 
     // Monthly quota by the owning tenant's plan (dark-launch: tenants
     // without a plan are uncapped, matching every other gate).
-    const tenantId = hostSnapshot.get('tenantId') as string | undefined
+    // Plan/quota gates ride the owning org's doc (AGL-238).
+    const orgBilling = (await getOrgForHost(hostId))?.org
     const monthKey = new Date().toISOString().slice(0, 7)
     const counterRef = hostRef.collection('counters').doc('formSubmissions')
-    if (tenantId) {
-      const tenantSnapshot = await firestore
-        .collection('tenants')
-        .doc(tenantId)
-        .get()
-      const tenant = tenantSnapshot.exists ? tenantSnapshot.data() : undefined
+    {
+      const tenant = orgBilling
       if (tenant?.['plan']) {
         const limit = Aglyn.resolveTenantEntitlements(
           tenant as any,
@@ -167,14 +164,8 @@ export default async function handler(
             sanitizedFields,
           )
           let allowed = Object.keys(values).length > 0
-          if (allowed && tenantId) {
-            const tenantSnapshot = await firestore
-              .collection('tenants')
-              .doc(tenantId)
-              .get()
-            const tenant = tenantSnapshot.exists
-              ? tenantSnapshot.data()
-              : undefined
+          if (allowed && orgBilling) {
+            const tenant = orgBilling
             if (tenant?.['plan']) {
               const recordCount = (
                 await datasetDoc.ref.collection('records').count().get()
