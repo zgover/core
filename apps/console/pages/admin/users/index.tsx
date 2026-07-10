@@ -90,11 +90,14 @@ const AdminUsers: NextPageWithLayout = () => {
   }, [user])
 
   const loadPage = useCallback(
-    async (pageToken?: string | null) => {
+    async (pageToken?: string | null, email?: string) => {
       const idToken = await (user as any)?.getIdToken?.()
-      const params = pageToken
-        ? `?nextPageToken=${encodeURIComponent(pageToken)}`
-        : ''
+      // Exact-email lookup (AGL-270) replaces the page with the match.
+      const params = email
+        ? `?email=${encodeURIComponent(email)}`
+        : pageToken
+          ? `?nextPageToken=${encodeURIComponent(pageToken)}`
+          : ''
       const response = await fetch(`/api/admin/users${params}`, {
         headers: idToken ? { Authorization: `Bearer ${idToken}` } : {},
       })
@@ -238,13 +241,35 @@ const AdminUsers: NextPageWithLayout = () => {
           ) : (
             <CardDisplay header={'Accounts'} contentGutterX contentGutterY>
               <Stack spacing={2}>
-                <TextField
-                  size="small"
-                  label="Search (email, name, uid)"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  sx={{ maxWidth: 360 }}
-                />
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: 'center' }}
+                >
+                  <TextField
+                    size="small"
+                    label="Search (email, name, uid)"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    sx={{ maxWidth: 360, flexGrow: 1 }}
+                  />
+                  {/* Exact-email lookup (AGL-270): reaches accounts beyond
+                      the loaded pages. */}
+                  <Button
+                    size="small"
+                    disabled={!search.includes('@')}
+                    onClick={() =>
+                      void loadPage(null, search.trim()).catch(() =>
+                        enqueueSnackbar('Lookup failed', { variant: 'error' }),
+                      )
+                    }
+                  >
+                    {'Find exact email'}
+                  </Button>
+                  <Button size="small" onClick={() => void loadPage()}>
+                    {'Reset'}
+                  </Button>
+                </Stack>
                 <Table size="small">
                   <TableHead>
                     <TableRow>

@@ -18,6 +18,9 @@
 
 import {
   canManageOrg,
+  ORG_PERMISSIONS,
+  resolveOrgPermissions,
+  type AglynOrgCustomRole,
   type AglynOrgMember,
   type HostAccessRole,
   type OrgRole,
@@ -86,6 +89,10 @@ export function OrgMembersCard() {
   const [allHosts, setAllHosts] = useState(true)
   const [busy, setBusy] = useState(false)
   const [accessDraft, setAccessDraft] = useState<AccessDraft | null>(null)
+  // Effective-permissions viewer (AGL-270).
+  const [permissionsFor, setPermissionsFor] = useState<AglynOrgMember | null>(
+    null,
+  )
   const orgId = currentOrg?.$id
   const canManage = canManageOrg(currentOrg?.role)
   // An org admin sees every org host via the memberRoles projection, so
@@ -338,6 +345,12 @@ export function OrgMembersCard() {
                   )}
                 </TableCell>
                 <TableCell align="right">
+                  <Button
+                    size="small"
+                    onClick={() => setPermissionsFor(member)}
+                  >
+                    {'Permissions'}
+                  </Button>
                   {canManage && member.role !== 'owner' ? (
                     <Button
                       size="small"
@@ -485,6 +498,72 @@ export function OrgMembersCard() {
           >
             {busy ? 'Saving…' : 'Save access'}
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={Boolean(permissionsFor)}
+        onClose={() => setPermissionsFor(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {`Effective permissions — ${
+            permissionsFor?.displayName ??
+            permissionsFor?.email ??
+            permissionsFor?.$id ??
+            ''
+          }`}
+        </DialogTitle>
+        <DialogContent>
+          {permissionsFor
+            ? (() => {
+                // Role defaults → custom role → member overrides (AGL-243),
+                // resolved with the roles list this card already loads.
+                const customRole =
+                  ((permissionsFor as any).roleId
+                    ? (roles.find(
+                        (candidate) =>
+                          candidate.$id === (permissionsFor as any).roleId,
+                      ) as AglynOrgCustomRole | undefined)
+                    : undefined) ?? null
+                const granted = resolveOrgPermissions(
+                  permissionsFor as any,
+                  customRole,
+                )
+                return (
+                  <Stack spacing={0.75} sx={{ pt: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {`Org role: ${permissionsFor.role ?? 'viewer'}` +
+                        (customRole?.name
+                          ? ` · custom role: ${customRole.name}`
+                          : '')}
+                    </Typography>
+                    {ORG_PERMISSIONS.map((definition) => (
+                      <Stack
+                        key={definition.key}
+                        direction="row"
+                        spacing={1}
+                        sx={{ alignItems: 'center' }}
+                      >
+                        <Chip
+                          size="small"
+                          color={granted[definition.key] ? 'success' : 'default'}
+                          variant={granted[definition.key] ? 'filled' : 'outlined'}
+                          label={granted[definition.key] ? 'yes' : 'no'}
+                          sx={{ width: 48 }}
+                        />
+                        <Typography variant="body2">
+                          {definition.label}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                )
+              })()
+            : null}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPermissionsFor(null)}>{'Close'}</Button>
         </DialogActions>
       </Dialog>
     </CardDisplay>

@@ -21,13 +21,19 @@ import {
   overlayActiveAt,
   type HostOverlay,
 } from '@aglyn/aglyn'
-import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { mdiChevronDown, mdiChevronUp } from '@aglyn/shared-data-mdi'
+import {
+  CardDisplay,
+  MdiIcon,
+  useConfirmationContext,
+} from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
   Alert,
   Button,
   Chip,
+  IconButton,
   Dialog,
   DialogActions,
   DialogContent,
@@ -198,6 +204,28 @@ export function HostOverlaysCard(props: HostOverlaysCardProps) {
     })
   }
 
+  // Ordering (AGL-270): the first active overlay per kind wins, so the
+  // list order is meaningful — swap `order` with the neighbor.
+  const handleMove = async (index: number, direction: -1 | 1) => {
+    const neighbor = overlays[index + direction]
+    const current = overlays[index]
+    if (!neighbor?.$id || !current?.$id) return
+    const currentOrder = current.order ?? index
+    const neighborOrder = neighbor.order ?? index + direction
+    await Promise.all([
+      setDoc(
+        doc(firestore, 'hosts', hostId, 'overlays', current.$id),
+        { order: neighborOrder === currentOrder ? neighborOrder + direction : neighborOrder },
+        { merge: true },
+      ),
+      setDoc(
+        doc(firestore, 'hosts', hostId, 'overlays', neighbor.$id),
+        { order: currentOrder },
+        { merge: true },
+      ),
+    ]).catch(console.error)
+  }
+
   const handleToggle = async (overlay: OverlayDraft) => {
     if (!overlay.$id) return
     await setDoc(
@@ -304,6 +332,31 @@ export function HostOverlaysCard(props: HostOverlaysCardProps) {
                         : 'All pages'}
                     </TableCell>
                     <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        aria-label="move up"
+                        disabled={overlays.indexOf(overlay) === 0}
+                        onClick={() =>
+                          void handleMove(overlays.indexOf(overlay), -1)
+                        }
+                      >
+                        <MdiIcon path={mdiChevronUp.path} sx={{ fontSize: '1rem' }} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        aria-label="move down"
+                        disabled={
+                          overlays.indexOf(overlay) === overlays.length - 1
+                        }
+                        onClick={() =>
+                          void handleMove(overlays.indexOf(overlay), 1)
+                        }
+                      >
+                        <MdiIcon
+                          path={mdiChevronDown.path}
+                          sx={{ fontSize: '1rem' }}
+                        />
+                      </IconButton>
                       <Switch
                         size="small"
                         checked={overlay.enabled !== false}

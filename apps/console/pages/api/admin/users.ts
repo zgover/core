@@ -42,11 +42,39 @@ export default async function handler(
     if (!decoded['staff']) {
       return res.status(403).json({ error: 'Staff only' })
     }
+    const auth = firebaseAdmin.app().auth()
+    // Exact-email lookup (AGL-270): listUsers can't search, this can.
+    const email = typeof req.query.email === 'string' ? req.query.email : ''
+    if (email) {
+      try {
+        const record = await auth.getUserByEmail(email.trim().toLowerCase())
+        return res.status(200).json({
+          users: [
+            {
+              uid: record.uid,
+              email: record.email ?? null,
+              displayName: record.displayName ?? null,
+              disabled: record.disabled,
+              staff: Boolean(record.customClaims?.['staff']),
+              staffRole: record.customClaims?.['staffRole'] ?? null,
+              createdAt: record.metadata.creationTime ?? null,
+              lastSignInAt: record.metadata.lastSignInTime ?? null,
+              providers: record.providerData.map(
+                (provider) => provider.providerId,
+              ),
+            },
+          ],
+          nextPageToken: null,
+        })
+      } catch {
+        return res.status(200).json({ users: [], nextPageToken: null })
+      }
+    }
     const pageToken =
       typeof req.query.nextPageToken === 'string'
         ? req.query.nextPageToken
         : undefined
-    const page = await firebaseAdmin.app().auth().listUsers(200, pageToken)
+    const page = await auth.listUsers(200, pageToken)
     return res.status(200).json({
       users: page.users.map((record) => ({
         uid: record.uid,
