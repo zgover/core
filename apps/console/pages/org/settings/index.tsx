@@ -16,9 +16,13 @@
  */
 'use client'
 
-import { canManageOrg } from '@aglyn/aglyn'
+import { canManageOrg, isValidOrgSlug } from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
-import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
+import {
+  CardDisplay,
+  Container,
+  useConfirmationContext,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
@@ -44,13 +48,66 @@ const OrgSettings: NextPageWithLayout = () => {
   const { currentOrg, loading } = useOrgWorkspace()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
+  const { confirm } = useConfirmationContext()
   const [name, setName] = useState('')
+  const [slug, setSlug] = useState('')
   const [busy, setBusy] = useState(false)
   const canManage = canManageOrg(currentOrg?.role)
+  const isOwner = currentOrg?.role === 'owner'
 
   useEffect(() => {
     setName(currentOrg?.orgName ?? '')
   }, [currentOrg?.orgName])
+  useEffect(() => {
+    setSlug(currentOrg?.slug ?? '')
+  }, [currentOrg?.slug])
+
+  const settingsRequest = async (body: Record<string, unknown>) => {
+    const idToken = await (user as any)?.getIdToken?.()
+    const response = await fetch('/api/orgs/settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+      },
+      body: JSON.stringify({ orgId: currentOrg?.$id, ...body }),
+    })
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}))
+      throw new Error(payload?.error ?? 'Request failed')
+    }
+    return response.json()
+  }
+
+  const handleSlugChange = async () => {
+    const next = slug.trim().toLowerCase()
+    if (!currentOrg || !next || next === currentOrg.slug || busy) return
+    const accepted = await confirm({
+      title: 'Change the workspace URL?',
+      description:
+        `Your workspace moves to ${next}.${WORKSPACE_DOMAIN} immediately. ` +
+        'The old URL keeps redirecting, but share the new one going forward.',
+      confirmationText: 'Change URL',
+    })
+      .then(() => true)
+      .catch(() => false)
+    if (!accepted) return
+    setBusy(true)
+    try {
+      await settingsRequest({ action: 'change-slug', slug: next })
+      enqueueSnackbar(`Workspace URL is now ${next}.${WORKSPACE_DOMAIN}`, {
+        variant: 'success',
+      })
+    } catch (error: any) {
+      console.error(error)
+      enqueueSnackbar(error?.message ?? 'Changing the URL failed', {
+        variant: 'error',
+      })
+      setSlug(currentOrg.slug ?? '')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const handleRename = async () => {
     if (!currentOrg || !name.trim() || busy) return
@@ -58,23 +115,7 @@ const OrgSettings: NextPageWithLayout = () => {
     try {
       // API-routed so the reverse-index orgName (switcher, breadcrumbs)
       // fans out with the rename.
-      const idToken = await (user as any)?.getIdToken?.()
-      const response = await fetch('/api/orgs/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
-        },
-        body: JSON.stringify({
-          orgId: currentOrg.$id,
-          action: 'rename',
-          name: name.trim(),
-        }),
-      })
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}))
-        throw new Error(payload?.error ?? 'Renaming failed')
-      }
+      await settingsRequest({ action: 'rename', name: name.trim() })
       enqueueSnackbar('Organization renamed', { variant: 'success' })
     } catch (error) {
       console.error(error)
@@ -117,19 +158,38 @@ const OrgSettings: NextPageWithLayout = () => {
                   disabled={!canManage}
                   onChange={(event) => setName(event.target.value)}
                 />
-                <TextField
-                  label="Workspace URL"
-                  value={
-                    currentOrg?.slug
-                      ? `${currentOrg.slug}.${WORKSPACE_DOMAIN}`
-                      : '—'
-                  }
-                  disabled
-                  helperText={
-                    'Workspace URLs are permanent for now — contact support ' +
-                    'to change one.'
-                  }
-                />
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
+                  <TextField
+                    label="Workspace URL"
+                    value={slug}
+                    disabled={!isOwner || busy}
+                    onChange={(event) =>
+                      setSlug(event.target.value.toLowerCase())
+                    }
+                    error={Boolean(slug) && !isValidOrgSlug(slug)}
+                    helperText={
+                      isOwner
+                        ? `Full address: ${slug || '…'}.${WORKSPACE_DOMAIN}. ` +
+                          'Old URLs keep redirecting after a change.'
+                        : 'Only the organization owner can change the URL.'
+                    }
+                    sx={{ flexGrow: 1 }}
+                  />
+                  {isOwner ? (
+                    <Button
+                      variant="outlined"
+                      disabled={
+                        busy ||
+                        !isValidOrgSlug(slug) ||
+                        slug === (currentOrg?.slug ?? '')
+                      }
+                      onClick={() => void handleSlugChange()}
+                      sx={{ mt: 1 }}
+                    >
+                      {'Change URL'}
+                    </Button>
+                  ) : null}
+                </Stack>
                 <Typography variant="body2" color="text.secondary">
                   {`Your role: ${currentOrg?.role ?? '—'}. Plan, billing and ` +
                     'suspension are managed under Manage → Billing.'}

@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-import { canManageOrg } from '@aglyn/aglyn'
+import { canManageOrg, isValidOrgSlug } from '@aglyn/aglyn'
 import {
+  changeOrgSlug,
   firebaseAdmin,
   listOrgMembers,
+  OrgSlugTakenError,
   resolveOrgMembership,
 } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -88,6 +90,38 @@ export default async function handler(
       }
       await batch.commit()
       return res.status(200).json({ ok: true, name })
+    }
+
+    // Workspace URL change (AGL-236): owner-only — the slug is the org's
+    // public identity. The old URL keeps resolving via a tombstone.
+    if (req.body?.action === 'change-slug') {
+      const isOwner = membership?.member.role === 'owner'
+      if (decoded['staff'] !== true && !isOwner) {
+        return res
+          .status(403)
+          .json({ error: 'Changing the workspace URL requires the owner' })
+      }
+      const slug = String(req.body?.slug ?? '')
+        .trim()
+        .toLowerCase()
+      if (!isValidOrgSlug(slug)) {
+        return res.status(400).json({
+          error:
+            'Workspace URL must be 3–30 lowercase letters, digits, or ' +
+            'dashes and not a reserved name',
+        })
+      }
+      try {
+        const { previousSlug } = await changeOrgSlug(orgId, slug)
+        return res.status(200).json({ ok: true, slug, previousSlug })
+      } catch (error) {
+        if (error instanceof OrgSlugTakenError) {
+          return res
+            .status(409)
+            .json({ error: 'That workspace URL is taken' })
+        }
+        throw error
+      }
     }
 
     return res.status(400).json({ error: 'Unknown action' })

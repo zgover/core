@@ -35,27 +35,39 @@ const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY
 
 const APEX_LABELS = new Set(['www', 'console', 'app'])
 const CACHE_TTL_MS = 60_000
-const slugCache = new Map<string, { known: boolean; at: number }>()
+type SlugVerdict = { known: boolean; movedTo: string | null; at: number }
+const slugCache = new Map<string, SlugVerdict>()
 
-async function isKnownOrgSlug(slug: string): Promise<boolean> {
+async function resolveOrgSlug(
+  slug: string,
+): Promise<Omit<SlugVerdict, 'at'>> {
   const cached = slugCache.get(slug)
-  if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.known
+  if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached
   try {
     const response = await fetch(
       `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}` +
         `/databases/(default)/documents/orgSlugs/${encodeURIComponent(slug)}` +
         `?key=${API_KEY}`,
     )
-    const known = response.ok
     // Only 200/404 are authoritative; other statuses (quota, outage)
     // fail open without poisoning the cache.
-    if (response.ok || response.status === 404) {
-      slugCache.set(slug, { known, at: Date.now() })
-      return known
+    if (response.ok) {
+      const payload = await response.json().catch(() => null)
+      // Renamed workspaces leave a tombstone (AGL-236) — redirect.
+      const movedTo =
+        payload?.fields?.movedTo?.stringValue ?? null
+      const verdict = { known: true, movedTo, at: Date.now() }
+      slugCache.set(slug, verdict)
+      return verdict
     }
-    return true
+    if (response.status === 404) {
+      const verdict = { known: false, movedTo: null, at: Date.now() }
+      slugCache.set(slug, verdict)
+      return verdict
+    }
+    return { known: true, movedTo: null }
   } catch {
-    return true
+    return { known: true, movedTo: null }
   }
 }
 
@@ -71,7 +83,13 @@ export async function middleware(request: NextRequest) {
   if (slug.includes('.') || APEX_LABELS.has(slug)) {
     return NextResponse.next()
   }
-  if (await isKnownOrgSlug(slug)) {
+  const verdict = await resolveOrgSlug(slug)
+  if (verdict.movedTo) {
+    const moved = request.nextUrl.clone()
+    moved.hostname = `${verdict.movedTo}.${WORKSPACE_DOMAIN}`
+    return NextResponse.redirect(moved, 308)
+  }
+  if (verdict.known) {
     return NextResponse.next()
   }
   const apex = request.nextUrl.clone()

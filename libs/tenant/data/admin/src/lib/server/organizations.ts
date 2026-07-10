@@ -172,6 +172,59 @@ export async function ensureOrgForUser(
   }
 }
 
+/**
+ * Changes an org's workspace slug (AGL-236): reserves the new slug and
+ * updates the org doc in one transaction, leaving the old reservation as
+ * a tombstone (`movedTo`) so existing workspace URLs keep resolving —
+ * the middleware redirects them. Reverse-index slugs fan out after.
+ * Throws `OrgSlugTakenError` when another org holds the new slug; slug
+ * validity/authorization are the API route's job.
+ */
+export async function changeOrgSlug(
+  orgId: string,
+  newSlug: string,
+): Promise<{ previousSlug: string | null }> {
+  const db = firestore()
+  let previousSlug: string | null = null
+  await db.runTransaction(async (tx) => {
+    const orgRef = db.collection('orgs').doc(orgId)
+    const orgSnapshot = await tx.get(orgRef)
+    if (!orgSnapshot.exists) throw new Error(`Unknown org: ${orgId}`)
+    previousSlug = (orgSnapshot.get('slug') as string | undefined) ?? null
+    if (previousSlug === newSlug) return
+    const reservation = await tx.get(db.collection('orgSlugs').doc(newSlug))
+    // A tombstone pointing back at this org may be re-claimed.
+    if (reservation.exists && reservation.get('orgId') !== orgId) {
+      throw new OrgSlugTakenError(newSlug)
+    }
+    tx.set(db.collection('orgSlugs').doc(newSlug), { orgId })
+    tx.set(
+      orgRef,
+      { slug: newSlug, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true },
+    )
+    if (previousSlug) {
+      tx.set(db.collection('orgSlugs').doc(previousSlug), {
+        orgId,
+        movedTo: newSlug,
+        renamedAt: FieldValue.serverTimestamp(),
+      })
+    }
+  })
+  // Reverse index carries the slug for the switcher display.
+  const members = await listOrgMembers(orgId)
+  const batch = db.batch()
+  for (const member of members) {
+    batch.set(
+      db.collection('users').doc(member.$id).collection('orgs').doc(orgId),
+      { slug: newSlug },
+      { merge: true },
+    )
+  }
+  await batch.commit()
+  return { previousSlug }
+}
+
 /** Host → org resolution via the server-written `hostIndex` mirror. */
 export async function resolveOrgIdForHost(
   hostId: string,
