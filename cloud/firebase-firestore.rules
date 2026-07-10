@@ -223,6 +223,14 @@ service cloud.firestore {
           (isSignedIn() && request.auth.uid == userId);
         allow write: if false;
       }
+
+      // In-app notifications (AGL-259): Admin-SDK-written fan-out; the
+      // owner reads, marks read (update), and clears them.
+      match /notifications/{notificationId} {
+        allow read, update, delete: if isSignedIn() &&
+          request.auth.uid == userId;
+        allow create: if false;
+      }
     }
 
     // Community marketplace (AGL-44). Profiles are public publisher pages

@@ -17,7 +17,9 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import {
-  orgDataCollectionForHost, firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
+  orgDataCollectionForHost, firebaseAdmin, getOrgForHost ,
+  notifyHostManagers,
+} from '@aglyn/tenant-data-admin'
 import { extractEmailFromFields } from '@aglyn/aglyn'
 import { upsertHostContact } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
@@ -190,6 +192,13 @@ export default async function handler(
     )
     // Event trigger (AGL-128/148): field values join the automation
     // scope; action-produced site alerts ride back to the visitor.
+    // In-app notification to the site's managers (AGL-259).
+    void notifyHostManagers(hostId, {
+      type: 'content.formSubmission',
+      title: `New form submission${formName ? ` — ${formName}` : ''}`,
+      ...(typeof path === 'string' && path ? { body: `Page: ${path}` } : {}),
+      link: `/${hostId}/inbox`,
+    })
     const { alerts } = await emitHostEvent(hostId, 'formSubmission', {
       formName: String(formName ?? 'Form').slice(0, 100),
       path: String(path ?? '').slice(0, 500),

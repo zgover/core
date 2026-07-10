@@ -27,6 +27,7 @@ export enum Route {
   ORG_SETTINGS = '/org/settings',
   MANAGE_BILLING = '/org/billing',
   MANAGE_USER_SETTINGS = '/manage/user',
+  MANAGE_NOTIFICATIONS = '/manage/notifications',
   AUTH_SIGN_IN = '/signin',
   AUTH_SIGN_OUT = '/signout',
   AUTH_SIGN_UP = '/signup',
@@ -81,6 +82,7 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.ADMIN_FLAGS]: undefined
   [Route.ORG_MEDIA]: undefined
   [Route.ORG_DATA]: undefined
+  [Route.MANAGE_NOTIFICATIONS]: undefined
   [Route.ORG_SETTINGS]: undefined
   [Route.HOST_COMMUNITY]: { hostId: string }
   [Route.HOST_COMMUNITY_LISTING]: { hostId: string; listingId: string }

@@ -21,6 +21,7 @@ import {
   listOrgMembers,
   logOrgActivity,
   memberHasOrgPermission,
+  notifyUsers,
   removeOrgMember,
   resolveOrgMembership,
   upsertOrgMember,
@@ -166,6 +167,24 @@ export default async function handler(
           : `Added ${targetName} as ${role}`,
         { type: 'member', id: targetUid, name: targetName },
       )
+      // In-app notification to the affected account (AGL-259).
+      const grantedHosts = Object.keys(
+        sanitizeHostAccess(req.body?.hostAccess),
+      )
+      void notifyUsers([targetUid], {
+        type:
+          !existedAlready || req.body?.allHosts === true
+            ? 'team.roleChanged'
+            : 'team.hostAccessGranted',
+        title: existedAlready
+          ? `Your organization role is now ${role}`
+          : `You were added to an organization as ${role}`,
+        ...(grantedHosts.length && req.body?.allHosts !== true
+          ? { body: `Access to ${grantedHosts.length} site(s)` }
+          : {}),
+        orgId,
+        link: '/hosts',
+      })
       return res.status(200).json({ ok: true, uid: targetUid })
     }
 

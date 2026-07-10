@@ -18,6 +18,7 @@
 import {
   firebaseAdmin,
   getOrgForHost,
+  notifyOrgAdmins,
   resolveOrgMembership,
   upsertHostContact,
 } from '@aglyn/tenant-data-admin'
@@ -140,6 +141,42 @@ export default async function handler(
             .collection('orgs')
             .doc(String(orgId))
             .set(billing, { merge: true })
+        }
+      }
+    }
+
+    // Billing notifications (AGL-259): invoice availability and failed
+    // payments reach the org's admins in-app. The org resolves from the
+    // Stripe customer mirrored on the org doc.
+    if (
+      type === 'invoice.finalized' ||
+      type === 'invoice.paid' ||
+      type === 'invoice.payment_failed'
+    ) {
+      const customerId = String(object?.customer ?? '')
+      if (customerId) {
+        const orgs = await firebaseAdmin
+          .app()
+          .firestore()
+          .collection('orgs')
+          .where('stripeCustomerId', '==', customerId)
+          .limit(1)
+          .get()
+        const orgId = orgs.docs[0]?.id
+        if (orgId) {
+          const amount = Number(object?.amount_due ?? object?.amount_paid ?? 0)
+          const dollars = (amount / 100).toFixed(2)
+          void notifyOrgAdmins(orgId, {
+            type:
+              type === 'invoice.payment_failed'
+                ? 'billing.paymentFailed'
+                : 'billing.invoice',
+            title:
+              type === 'invoice.payment_failed'
+                ? `Payment failed for your $${dollars} invoice`
+                : `Your $${dollars} invoice is available`,
+            link: '/org/billing',
+          })
         }
       }
     }

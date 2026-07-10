@@ -25,6 +25,7 @@ import {
   firebaseAdmin,
   getOrgForHost,
   upsertHostContact,
+  notifyHostManagers,
 } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -253,6 +254,13 @@ export default async function handler(
       .catch(() => undefined)
 
     // Event trigger (AGL-128/148/159).
+    // In-app notification to the site's managers (AGL-259).
+    void notifyHostManagers(hostId, {
+      type: 'content.booking',
+      title: 'New booking',
+      body: new Date(startsAtMs).toLocaleString(),
+      link: `/${hostId}/bookings`,
+    })
     const { alerts } = await emitHostEvent(hostId, 'booking', {
       serviceName: service.name ?? '',
       email,

@@ -64,6 +64,7 @@ import { useColorScheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
 import { Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
+import NotificationsMenu from '../notifications-menu.component'
 import OrgSwitcherNav from '../org-switcher-nav.component'
 
 // eslint-disable-next-line react/display-name
@@ -402,7 +403,6 @@ export function MainLayout(props: MainLayoutProps) {
           enableAppBarElevation={enableAppBarElevation}
           backButton={backButton}
           centerPrefix={centerPrefix}
-          actionsPrefix={actionsPrefix}
           centerNavigationItems={centerNavigationItems || []}
           customCenter={
             // Default center nav is the ORG switcher (AGL-236 — swapped
@@ -410,6 +410,14 @@ export function MainLayout(props: MainLayoutProps) {
             // bar); pages passing their own nav items or center keep them.
             customCenter ??
             (centerNavigationItems ? undefined : <OrgSwitcherNav />)
+          }
+          actionsPrefix={
+            // Notifications bell (AGL-260) rides beside any page-provided
+            // prefix actions.
+            <>
+              {actionsPrefix}
+              <NotificationsMenu />
+            </>
           }
           appBarSuffix={appBarSuffix}
           quickActions={[
