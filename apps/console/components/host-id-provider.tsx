@@ -21,6 +21,10 @@ import { useParams } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useEffect } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { useOrgWorkspace } from '../hooks/use-org-workspace'
+
+const WORKSPACE_DOMAIN =
+  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
 export const HostIdContext = createContext<string>(null)
 
@@ -34,26 +38,69 @@ export function HostIdProvider({ children }) {
   const router = useRouter()
   const firestore = useFirestore()
   const { data: user } = useUser()
+  const {
+    orgs,
+    currentOrg,
+    selectOrg,
+    workspaceSlug,
+    loading: orgsLoading,
+  } = useOrgWorkspace()
 
   // Host-route guard (AGL-236): the [hostId] catch-all otherwise treats
   // any unknown first segment (a typo, or a bare /org before its index
   // existed) as a host and renders a broken dashboard. Verify against
-  // hostIndex and bounce phantoms to the sites list. Lookup errors
-  // (signed-out, offline) don't redirect — only a definitive not-found.
+  // hostIndex and bounce phantoms to the sites list. The index also
+  // carries the owning org, which scopes the WORKSPACE: a site from a
+  // different org never renders inside this one — on the apex the
+  // workspace switches to the owning org (deep links keep working,
+  // Slack-style); on a workspace subdomain the visit moves to the
+  // owning org's subdomain; without membership it bounces to the sites
+  // list. Lookup errors (signed-out, offline) don't redirect — only a
+  // definitive answer does.
   useEffect(() => {
-    if (!hostId || !user) return
+    if (!hostId || !user || orgsLoading || !currentOrg) return
     let active = true
     void getDoc(doc(firestore, 'hostIndex', hostId))
       .then((snapshot) => {
-        if (active && !snapshot.exists()) {
+        if (!active) return
+        if (!snapshot.exists()) {
           void router.replace('/hosts')
+          return
         }
+        const hostOrgId = snapshot.get('orgId') as string | undefined
+        if (!hostOrgId || hostOrgId === currentOrg.$id) return
+        const membership = orgs.find((org) => org.$id === hostOrgId)
+        if (!membership) {
+          // Not this user's org — rules already deny the data; keep the
+          // UI from rendering an empty shell of someone else's site.
+          void router.replace('/hosts')
+          return
+        }
+        if (workspaceSlug && membership.slug) {
+          // Subdomains pin the workspace to the hostname — follow the
+          // site home instead (the session cookie signs it in).
+          window.location.assign(
+            `https://${membership.slug}.${WORKSPACE_DOMAIN}${router.asPath}`,
+          )
+          return
+        }
+        selectOrg(hostOrgId)
       })
       .catch(() => undefined)
     return () => {
       active = false
     }
-  }, [firestore, hostId, user, router])
+  }, [
+    firestore,
+    hostId,
+    user,
+    router,
+    orgs,
+    currentOrg,
+    selectOrg,
+    workspaceSlug,
+    orgsLoading,
+  ])
 
   return (
     <HostIdContext.Provider value={hostId}>{children}</HostIdContext.Provider>

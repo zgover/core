@@ -48,7 +48,7 @@ import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { mdiTranslate } from '@aglyn/shared-data-mdi'
+import { mdiOpenInNew, mdiTranslate } from '@aglyn/shared-data-mdi'
 import {
   Button,
   Dialog,
@@ -444,9 +444,29 @@ function Screens(props) {
     }
   }, [translationsFor, firestore, hostId, enqueueSnackbar])
 
+  // Published origin for the View action: custom domain when connected,
+  // else the site's aglyn.app subdomain.
+  const publicOrigin = hostData?.cname
+    ? `https://${hostData.cname}`
+    : hostData?.subdomain
+      ? `https://${hostData.subdomain}.aglyn.app`
+      : null
+
   const renderRowActions = useCallback(
     (row: ScreenHierarchyRow) => (
       <>
+        {publicOrigin && routingMap?.[row.$id] != null ? (
+          <IconButton
+            size="small"
+            aria-label="View live"
+            component="a"
+            href={`${publicOrigin}${routingMap[row.$id]}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <MdiIcon path={mdiOpenInNew.path} size={0.8} />
+          </IconButton>
+        ) : null}
         <IconButton
           size="small"
           aria-label="detail"
@@ -492,7 +512,14 @@ function Screens(props) {
         </IconButton>
       </>
     ),
-    [hostId, handleDeleteScreen, hostLocales.length, screens],
+    [
+      hostId,
+      handleDeleteScreen,
+      hostLocales.length,
+      screens,
+      publicOrigin,
+      routingMap,
+    ],
   )
 
   // console.log('Screens props', props, data, status, screens)

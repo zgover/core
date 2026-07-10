@@ -175,6 +175,12 @@ function ScreenDetails() {
   )
 
   const routingMap = hostData?.screens as Record<ScreenUid, string> | undefined
+  // Published origin for the View action (custom domain first).
+  const publicOrigin = hostData?.cname
+    ? `https://${hostData.cname}`
+    : hostData?.subdomain
+      ? `https://${hostData.subdomain}.aglyn.app`
+      : null
   const publishedPath = routingMap?.[screenId]
   const isRoutePublished = publishedPath != null
   const screensById = useMemo(() => {
@@ -609,6 +615,18 @@ function ScreenDetails() {
         }}
         headerRight={
           <Stack direction="row" spacing={1}>
+            {publicOrigin && routingMap?.[screenId] != null ? (
+              <Button
+                size="small"
+                variant="outlined"
+                component="a"
+                href={`${publicOrigin}${routingMap[screenId]}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {'View'}
+              </Button>
+            ) : null}
             <Button
               size="small"
               variant="outlined"
