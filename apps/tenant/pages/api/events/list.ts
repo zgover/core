@@ -46,10 +46,7 @@ export default async function handler(
     {
       // Plan/quota gates ride the owning org's doc (AGL-238).
       const tenant = (await getOrgForHost(hostId))?.org
-      if (
-        tenant?.['plan'] &&
-        !checkEntitlement(tenant as any, 'eventCalendar')
-      ) {
+      if (!checkEntitlement(tenant as any, 'eventCalendar')) {
         return res.status(200).json({ events: [] })
       }
     }

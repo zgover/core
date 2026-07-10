@@ -97,16 +97,15 @@ export default async function handler(
     const monthKey = new Date().toISOString().slice(0, 7)
     const counterRef = hostRef.collection('counters').doc('formSubmissions')
     {
+      // Plan-less orgs resolve as free (AGL-247) — the cap always runs.
       const tenant = orgBilling
-      if (tenant?.['plan']) {
-        const limit = Aglyn.resolveTenantEntitlements(
-          tenant as any,
-        ).formSubmissionsPerMonth
-        const counterSnapshot = await counterRef.get()
-        const used = Number(counterSnapshot.get(monthKey) ?? 0)
-        if (used >= limit) {
-          return res.status(429).json({ error: 'Submission limit reached' })
-        }
+      const limit = Aglyn.resolveTenantEntitlements(
+        tenant as any,
+      ).formSubmissionsPerMonth
+      const counterSnapshot = await counterRef.get()
+      const used = Number(counterSnapshot.get(monthKey) ?? 0)
+      if (used >= limit) {
+        return res.status(429).json({ error: 'Submission limit reached' })
       }
     }
 
@@ -164,18 +163,15 @@ export default async function handler(
             sanitizedFields,
           )
           let allowed = Object.keys(values).length > 0
-          if (allowed && orgBilling) {
-            const tenant = orgBilling
-            if (tenant?.['plan']) {
-              const recordCount = (
-                await datasetDoc.ref.collection('records').count().get()
-              ).data().count
-              allowed = Aglyn.checkQuota(
-                tenant as any,
-                'recordsPerDataset',
-                recordCount,
-              ).allowed
-            }
+          if (allowed) {
+            const recordCount = (
+              await datasetDoc.ref.collection('records').count().get()
+            ).data().count
+            allowed = Aglyn.checkQuota(
+              orgBilling as any,
+              'recordsPerDataset',
+              recordCount,
+            ).allowed
           }
           if (allowed) {
             await datasetDoc.ref.collection('records').add({

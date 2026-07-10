@@ -80,17 +80,16 @@ export async function runEventActions(
     // ride the owning org's doc (AGL-238).
     let webhooksAllowed = true
     {
+      // Plan-less orgs resolve as free (AGL-247) — gates always run.
       const tenant = (await getOrgForHost(hostId))?.org
-      if (tenant?.['plan']) {
-        if (!checkEntitlement(tenant as any, 'actions')) return alerts
-        webhooksAllowed = checkEntitlement(tenant as any, 'webhooks')
-        const limit = resolveTenantEntitlements(
-          tenant as any,
-        ).actionRunsPerMonth
-        const counterSnapshot = await runCounterRef.get()
-        const used = Number(counterSnapshot.get(monthKey) ?? 0)
-        if (used + actions.length > limit) return alerts
-      }
+      if (!checkEntitlement(tenant as any, 'actions')) return alerts
+      webhooksAllowed = checkEntitlement(tenant as any, 'webhooks')
+      const limit = resolveTenantEntitlements(
+        tenant as any,
+      ).actionRunsPerMonth
+      const counterSnapshot = await runCounterRef.get()
+      const used = Number(counterSnapshot.get(monthKey) ?? 0)
+      if (used + actions.length > limit) return alerts
     }
 
     // Workflow context loads lazily — most steps are alerts/appends.

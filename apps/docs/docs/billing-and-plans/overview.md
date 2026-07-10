@@ -19,6 +19,9 @@ Every site has a plan. **Free**, **Pro**, and **Business** unlock progressively 
 - Each tier maps to a set of **entitlements** and quota limits.
 - The runtime enforces them with `checkEntitlement` and `checkQuota`, so gated features are
   consistent across the console and the live site.
+- Entitlement follows the **subscription state**: organizations without a plan resolve as
+  Free, and a canceled or unpaid subscription downgrades enforcement to Free until payment
+  resumes (`past_due` keeps working as a grace period).
 - Feature pages in these docs note the tier they require in a **Plan availability** callout.
 
 ## Usage meters

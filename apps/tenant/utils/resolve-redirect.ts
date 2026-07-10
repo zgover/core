@@ -76,7 +76,7 @@ export async function resolveRedirect(
     // Paid gate — only paid orgs' rules fire (dark-launch orgs pass).
     {
       const tenant = (await getOrgForHost(host.$id))?.org
-      if (tenant?.['plan'] && !checkEntitlement(tenant as any, 'redirects')) {
+      if (!checkEntitlement(tenant as any, 'redirects')) {
         return null
       }
     }

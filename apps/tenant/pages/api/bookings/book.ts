@@ -106,7 +106,7 @@ export default async function handler(
     {
       // Plan/quota gates ride the owning org's doc (AGL-238).
       const tenant = (await getOrgForHost(hostId))?.org
-      if (tenant?.['plan'] && !checkEntitlement(tenant as any, 'bookings')) {
+      if (!checkEntitlement(tenant as any, 'bookings')) {
         return res
           .status(403)
           .json({ error: 'Bookings are not enabled on this site' })

@@ -25,7 +25,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
  * money goes to the host owner's Connect account (AGL-46 onboarding) with a
  * 2% platform fee, and the webhook records the order under the host.
  * Selling is gated on the owner's `marketplaceSelling` plan flag
- * (dark-launch: no plan = allowed). 501 without Stripe env.
+ * (plan-less orgs resolve as free, AGL-247). 501 without Stripe env.
  */
 export default async function handler(
   req: NextApiRequest,
@@ -86,10 +86,7 @@ export default async function handler(
       .collection('profiles')
       .doc(String(ownerId))
       .get()
-    if (
-      ownerOrg.org.plan &&
-      !Aglyn.checkEntitlement(ownerOrg.org as any, 'marketplaceSelling')
-    ) {
+    if (!Aglyn.checkEntitlement(ownerOrg.org as any, 'marketplaceSelling')) {
       return res.status(403).json({ error: 'Selling is not enabled' })
     }
     const accountId = ownerProfile.get('stripeAccountId')

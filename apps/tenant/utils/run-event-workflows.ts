@@ -75,14 +75,13 @@ export async function runEventWorkflows(
     // Run caps ride the owning org's doc (AGL-238).
     {
       const tenant = (await getOrgForHost(hostId))?.org
-      if (tenant?.['plan']) {
-        const limit = resolveTenantEntitlements(
-          tenant as any,
-        ).workflowRunsPerMonth
-        const counterSnapshot = await runCounterRef.get()
-        const used = Number(counterSnapshot.get(monthKey) ?? 0)
-        if (used + workflows.length > limit) return
-      }
+      // Plan-less orgs resolve as free (AGL-247) — the cap always runs.
+      const limit = resolveTenantEntitlements(
+        tenant as any,
+      ).workflowRunsPerMonth
+      const counterSnapshot = await runCounterRef.get()
+      const used = Number(counterSnapshot.get(monthKey) ?? 0)
+      if (used + workflows.length > limit) return
     }
 
     const [functionDocs, variableDocs] = await Promise.all([

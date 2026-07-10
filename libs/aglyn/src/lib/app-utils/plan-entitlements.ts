@@ -317,9 +317,32 @@ export const PLAN_PRICING: Record<TenantPlan, PlanPricing> = {
   },
 }
 
-function resolvePlan(tenant: Partial<AglynTenant> | null | undefined) {
+/**
+ * Subscription states that stop paying for the plan (AGL-247). `past_due`
+ * keeps working as a dunning grace period; these do not.
+ */
+const DEAD_SUBSCRIPTION_STATUSES = new Set(['canceled', 'unpaid', 'incomplete'])
+
+/**
+ * The plan the org actually gets (AGL-247): missing/unknown plans resolve
+ * as `free`, and a paid plan whose subscription is canceled/unpaid/
+ * incomplete downgrades to `free` until the webhook restores it — plan
+ * fields alone are not entitlement.
+ */
+export function resolveEffectivePlan(
+  tenant: Partial<AglynTenant> | null | undefined,
+): TenantPlan {
   const plan = tenant?.plan
-  return plan && plan in PLAN_ENTITLEMENTS ? plan : 'free'
+  if (!plan || !(plan in PLAN_ENTITLEMENTS)) return 'free'
+  const status = tenant?.subscription?.status
+  if (plan !== 'free' && status && DEAD_SUBSCRIPTION_STATUSES.has(status)) {
+    return 'free'
+  }
+  return plan
+}
+
+function resolvePlan(tenant: Partial<AglynTenant> | null | undefined) {
+  return resolveEffectivePlan(tenant)
 }
 
 /**

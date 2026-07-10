@@ -388,11 +388,9 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
             },
             nodes: null,
             protectedScreen: true,
-            showBranding: Boolean(
-              tenantRes.tenant?.plan &&
-                !Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
-                  .removeBranding,
-            ),
+            showBranding:
+              !Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
+                .removeBranding,
           }),
         ),
         revalidate: 60,
@@ -451,22 +449,16 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       }
     }
 
-    // Free-tier branding (AGL-69): shown only once the owning tenant has an
-    // explicit plan without the removeBranding feature; pre-billing tenants
-    // (no plan) and lookup failures render without the badge.
-    const showBranding = Boolean(
-      tenantRes.tenant?.plan &&
-        !Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
-          .removeBranding,
-    )
+    // Free-tier branding (AGL-69/247): plan-less orgs resolve as free and
+    // show the badge; only plans with removeBranding drop it.
+    const showBranding = !Aglyn.resolveTenantEntitlements(tenantRes.tenant)
+      .features.removeBranding
 
-    // Marketing overlays (AGL-195/196): marketingOverlays-gated
-    // (dark-launch for plan-less tenants like other AGL-99 gates); binding
-    // tokens resolve server-side so the client ships plain text.
-    const overlaysEntitled =
-      !tenantRes.tenant?.plan ||
-      Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
-        .marketingOverlays
+    // Marketing overlays (AGL-195/196/247): marketingOverlays-gated on the
+    // effective plan (plan-less = free = no overlays); binding tokens
+    // resolve server-side so the client ships plain text.
+    const overlaysEntitled = Aglyn.resolveTenantEntitlements(tenantRes.tenant)
+      .features.marketingOverlays
     const contentHash = (value: string) => {
       let hash = 0
       for (let index = 0; index < value.length; index += 1) {

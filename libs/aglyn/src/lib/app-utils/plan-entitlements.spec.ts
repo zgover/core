@@ -19,6 +19,7 @@ import {
   checkDataStorageQuota,
   checkDatasetQuota,
   checkEntitlement,
+  resolveEffectivePlan,
   checkQuota,
   checkSeatQuota,
   PLAN_ENTITLEMENTS,
@@ -26,6 +27,7 @@ import {
   resolveTenantEntitlements,
   UNLIMITED,
 } from './plan-entitlements'
+import type { TenantPlan } from '../foundation'
 
 describe('plan entitlements', () => {
   it('resolves missing/unknown plans as free', () => {
@@ -234,6 +236,55 @@ describe('plan entitlements', () => {
       entitlements: { datasetsPerHost: 7, datasetsPerOrg: 9 },
     } as any
     expect(resolveTenantEntitlements(both).datasetsPerOrg).toBe(9)
+  })
+
+  it('resolves the effective plan from subscription state (AGL-247)', () => {
+    expect(resolveEffectivePlan(null)).toBe('free')
+    expect(resolveEffectivePlan({} as any)).toBe('free')
+    expect(resolveEffectivePlan({ plan: 'nonsense' } as any)).toBe('free')
+    expect(resolveEffectivePlan({ plan: 'pro' } as any)).toBe('pro')
+    // Dunning grace: past_due keeps the plan.
+    expect(
+      resolveEffectivePlan({
+        plan: 'pro',
+        subscription: { status: 'past_due' },
+      } as any),
+    ).toBe('pro')
+    // Dead subscriptions downgrade paid plans to free.
+    for (const status of ['canceled', 'unpaid', 'incomplete']) {
+      expect(
+        resolveEffectivePlan({ plan: 'business', subscription: { status } } as any),
+      ).toBe('free')
+    }
+    // Entitlements follow: a canceled business org loses paid features.
+    const canceled = {
+      plan: 'business',
+      subscription: { status: 'canceled' },
+    } as any
+    expect(checkEntitlement(canceled, 'workflows')).toBe(false)
+    expect(checkQuota(canceled, 'screensPerHost', 5).allowed).toBe(false)
+  })
+
+  it('verifies plan × feature gating both directions (AGL-247)', () => {
+    // Free must NOT reach paid features; paid tiers MUST reach theirs.
+    const table: Array<[TenantPlan, keyof typeof PLAN_ENTITLEMENTS.free.features, boolean]> = [
+      ['free', 'workflows', false],
+      ['free', 'dataStore', false],
+      ['free', 'marketingOverlays', false],
+      ['free', 'customDomain', false],
+      ['starter', 'workflows', true],
+      ['starter', 'dataStore', true],
+      ['starter', 'marketingOverlays', true],
+      ['starter', 'versioning', false],
+      ['pro', 'versioning', true],
+      ['pro', 'aiAssist', true],
+      ['pro', 'webhooks', false],
+      ['business', 'webhooks', true],
+      ['business', 'multilingual', true],
+    ]
+    for (const [plan, feature, expected] of table) {
+      expect(checkEntitlement({ plan } as any, feature)).toBe(expected)
+    }
   })
 
   it('checkDataStorageQuota meters overage on paid plans, blocks on free (AGL-240)', () => {
