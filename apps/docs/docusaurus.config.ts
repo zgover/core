@@ -43,7 +43,11 @@ const config: Config = {
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           editUrl,
-          showLastUpdateTime: true,
+          // Last-updated stamps shell out to `git log` per doc, which
+          // hard-fails on Vercel: the project's root directory is
+          // apps/docs, so the build has no .git to read. Keep them for
+          // local/dev builds where the repo is present.
+          showLastUpdateTime: !process.env.VERCEL,
         },
         blog: false,
         theme: {
