@@ -124,21 +124,32 @@ export function HostActionsCard(props: { hostId: string }) {
     .sort((a: any, b: any) =>
       String(a.name ?? '').localeCompare(String(b.name ?? '')),
     )
-  const workflowNames = (workflowDocs ?? [])
+  // Options carry ids (AGL-261): selects store the doc id, keep the name
+  // as the display hint, and legacy name-only steps map back to their id.
+  const workflowOptions = (workflowDocs ?? [])
     .filter((workflow: any) => !workflow.deletedAt && workflow.name)
-    .map((workflow: any) => workflow.name as string)
-    .sort()
-  const datasetNames = (datasetDocs ?? [])
+    .map((workflow: any) => ({
+      id: workflow.$id as string,
+      name: workflow.name as string,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+  const datasetOptions = (datasetDocs ?? [])
     .filter((dataset: any) => !dataset.deletedAt && dataset.name)
-    .map((dataset: any) => dataset.name as string)
-    .sort()
-  const webhookNames = (webhookDocs ?? [])
+    .map((dataset: any) => ({
+      id: dataset.$id as string,
+      name: dataset.name as string,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+  const webhookOptions = (webhookDocs ?? [])
     .filter(
       (hook: any) =>
         !hook.deletedAt && hook.name && hook.direction === 'outbound',
     )
-    .map((hook: any) => hook.name as string)
-    .sort()
+    .map((hook: any) => ({
+      id: hook.$id as string,
+      name: hook.name as string,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   const [draft, setDraft] = useState<ActionDraft | null>(null)
   const patch = useCallback(
@@ -424,13 +435,27 @@ export function HostActionsCard(props: { hostId: string }) {
                 <TextField
                   select
                   label="Workflow"
-                  value={step.workflowName}
+                  value={
+                    (step as any).workflowId ??
+                    workflowOptions.find(
+                      (option) => option.name === step.workflowName,
+                    )?.id ??
+                    ''
+                  }
                   onChange={(event) =>
                     patch((previous) => ({
                       ...previous,
                       steps: previous.steps.map((s, index2) =>
                         index2 === index
-                          ? { ...s, workflowName: event.target.value }
+                          ? {
+                              ...s,
+                              workflowId: event.target.value,
+                              workflowName:
+                                workflowOptions.find(
+                                  (option) =>
+                                    option.id === event.target.value,
+                                )?.name ?? (s as any).workflowName,
+                            }
                           : s,
                       ),
                     }))
@@ -438,9 +463,9 @@ export function HostActionsCard(props: { hostId: string }) {
                   size="small"
                   sx={{ flex: 1 }}
                 >
-                  {workflowNames.map((name) => (
-                    <MenuItem key={name} value={name}>
-                      {name}
+                  {workflowOptions.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -507,13 +532,27 @@ export function HostActionsCard(props: { hostId: string }) {
                 <TextField
                   select
                   label="Webhook"
-                  value={step.webhookName}
+                  value={
+                    (step as any).webhookId ??
+                    webhookOptions.find(
+                      (option) => option.name === step.webhookName,
+                    )?.id ??
+                    ''
+                  }
                   onChange={(event) =>
                     patch((previous) => ({
                       ...previous,
                       steps: previous.steps.map((s, index2) =>
                         index2 === index
-                          ? { ...s, webhookName: event.target.value }
+                          ? {
+                              ...s,
+                              webhookId: event.target.value,
+                              webhookName:
+                                webhookOptions.find(
+                                  (option) =>
+                                    option.id === event.target.value,
+                                )?.name ?? (s as any).webhookName,
+                            }
                           : s,
                       ),
                     }))
@@ -521,9 +560,9 @@ export function HostActionsCard(props: { hostId: string }) {
                   size="small"
                   sx={{ flex: 1 }}
                 >
-                  {webhookNames.map((name) => (
-                    <MenuItem key={name} value={name}>
-                      {name}
+                  {webhookOptions.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -531,13 +570,27 @@ export function HostActionsCard(props: { hostId: string }) {
                 <TextField
                   select
                   label="Dataset"
-                  value={step.datasetName}
+                  value={
+                    (step as any).datasetId ??
+                    datasetOptions.find(
+                      (option) => option.name === step.datasetName,
+                    )?.id ??
+                    ''
+                  }
                   onChange={(event) =>
                     patch((previous) => ({
                       ...previous,
                       steps: previous.steps.map((s, index2) =>
                         index2 === index
-                          ? { ...s, datasetName: event.target.value }
+                          ? {
+                              ...s,
+                              datasetId: event.target.value,
+                              datasetName:
+                                datasetOptions.find(
+                                  (option) =>
+                                    option.id === event.target.value,
+                                )?.name ?? (s as any).datasetName,
+                            }
                           : s,
                       ),
                     }))
@@ -545,9 +598,9 @@ export function HostActionsCard(props: { hostId: string }) {
                   size="small"
                   sx={{ flex: 1 }}
                 >
-                  {datasetNames.map((name) => (
-                    <MenuItem key={name} value={name}>
-                      {name}
+                  {datasetOptions.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
                     </MenuItem>
                   ))}
                 </TextField>

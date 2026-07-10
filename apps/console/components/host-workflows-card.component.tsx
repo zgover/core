@@ -99,15 +99,28 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
     .sort((a: any, b: any) =>
       String(a.name ?? '').localeCompare(String(b.name ?? '')),
     )
+  // Double-keyed by doc id and name (AGL-261): id references are
+  // rename-safe; legacy name references keep resolving.
   const functions = useMemo(() => {
     const map: Record<string, HostFunction> = {}
     for (const definition of functionDocs ?? []) {
-      if (!definition.deletedAt && definition.name) {
-        map[definition.name] = definition
-      }
+      if (definition.deletedAt) continue
+      if (definition.$id) map[definition.$id] = definition
+      if (definition.name) map[definition.name] = definition
     }
     return map
   }, [functionDocs])
+  const functionOptions = useMemo(
+    () =>
+      (functionDocs ?? [])
+        .filter((definition: any) => !definition.deletedAt && definition.name)
+        .map((definition: any) => ({
+          id: definition.$id as string,
+          name: definition.name as string,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [functionDocs],
+  )
   const variables = useMemo(() => {
     const map: Record<string, HostVariable> = {}
     for (const variable of variableDocs ?? []) {
@@ -366,7 +379,9 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
             {'Steps'}
           </Typography>
           {(draft?.steps ?? []).map((step, index) => {
-            const definition = functions[step.functionName]
+            const definition =
+              functions[(step as any).functionId ?? ''] ??
+              functions[step.functionName]
             return (
               <Stack
                 key={index}
@@ -388,13 +403,27 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
                   </Typography>
                   <TextField
                     label="Function"
-                    value={step.functionName}
+                    // Stored by id (AGL-261); legacy steps carry only the
+                    // name and resolve through the double-keyed map.
+                    value={
+                      (step as any).functionId ??
+                      (functions[step.functionName] as any)?.$id ??
+                      ''
+                    }
                     onChange={(event) =>
                       patch((previous) => ({
                         ...previous,
                         steps: previous.steps.map((s, index2) =>
                           index2 === index
-                            ? { ...s, functionName: event.target.value }
+                            ? {
+                                ...s,
+                                functionId: event.target.value,
+                                functionName:
+                                  functionOptions.find(
+                                    (option) =>
+                                      option.id === event.target.value,
+                                  )?.name ?? s.functionName,
+                              }
                             : s,
                         ),
                       }))
@@ -403,9 +432,9 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
                     select
                     sx={{ minWidth: 160, flex: 1 }}
                   >
-                    {Object.keys(functions).map((name) => (
-                      <MenuItem key={name} value={name}>
-                        {name}
+                    {functionOptions.map((option) => (
+                      <MenuItem key={option.id} value={option.id}>
+                        {option.name}
                       </MenuItem>
                     ))}
                   </TextField>

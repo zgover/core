@@ -44,7 +44,13 @@ documents are migrated to id tokens.
 ## Insert bindings without typing
 
 Use the **insert-binding picker**: search by friendly name, pick a variable or function,
-and the correct id token is inserted for you.
+and the correct id token is inserted for you. Each variable option shows a **live value
+preview** so you can confirm what the binding resolves to before inserting it.
+
+Everywhere else the console references logic by entity, it uses **pickers that store
+ids**, never typed names: workflow steps pick their function, automations pick their
+workflow/dataset/webhook, and computed variables pick their workflow. Renaming an
+entity never breaks anything that references it — the display name is just a label.
 
 ## Typed variables
 

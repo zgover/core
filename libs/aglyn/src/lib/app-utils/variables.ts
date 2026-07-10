@@ -68,6 +68,8 @@ export interface HostVariable {
    * workflow is missing or fails.
    */
   workflowName?: string
+  /** Computed source by workflow doc id (AGL-261); wins over the name. */
+  workflowId?: string
 }
 
 export const VARIABLE_NAME_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]{0,39}$/

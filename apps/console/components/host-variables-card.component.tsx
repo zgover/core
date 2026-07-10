@@ -57,6 +57,8 @@ export interface HostVariablesCardProps {
 }
 
 interface VariableDraft {
+  /** Computed-source workflow doc id (AGL-261); name is the display hint. */
+  workflowId: string
   id: string | null
   name: string
   type: HostVariableType
@@ -162,6 +164,20 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
     [firestore, hostId],
     { idField: '$id' },
   )
+  // Workflow picker options (AGL-261): computed variables reference the
+  // workflow by doc id instead of a typed name.
+  const { data: workflowDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'workflows'), limit(100)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const workflowOptions = [...(workflowDocs ?? [])]
+    .filter((workflow: any) => !workflow.deletedAt && workflow.name)
+    .map((workflow: any) => ({
+      id: workflow.$id as string,
+      name: workflow.name as string,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
   const variables = [...(variableDocs ?? [])]
     .filter((variable: any) => !variable.deletedAt)
     .sort((a: any, b: any) =>
@@ -191,6 +207,7 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
           name: draft.name,
           type: draft.type,
           value: draft.value,
+          workflowId: draft.workflowId.trim(),
           workflowName: draft.workflowName.trim(),
           updatedAt: Timestamp.now(),
           ...(draft.id ? {} : { createdAt: Timestamp.now() }),
@@ -303,6 +320,7 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
                     name: variable.name ?? '',
                     type: variable.type ?? 'text',
                     value: variable.value ?? '',
+                    workflowId: variable.workflowId ?? '',
                     workflowName: variable.workflowName ?? '',
                   })
                 }
@@ -341,6 +359,7 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
               name: '',
               type: 'text',
               value: '',
+              workflowId: '',
               workflowName: '',
             })
           }}
@@ -420,20 +439,42 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
             />
           ) : null}
           <TextField
+            select
             label="Computed from workflow (optional)"
             helperText={
-              'A workflow name from the Workflows page — its result ' +
-              'becomes this variable\u2019s value at render; the value ' +
-              'above is the fallback (AGL-129)'
+              'Pick a workflow — its result becomes this variable\u2019s ' +
+              'value at render; the value above is the fallback (AGL-129)'
             }
-            value={draft?.workflowName ?? ''}
+            value={
+              draft?.workflowId ||
+              workflowOptions.find(
+                (option) => option.name === draft?.workflowName,
+              )?.id ||
+              ''
+            }
             onChange={(event) =>
               setDraft((prev) =>
-                prev ? { ...prev, workflowName: event.target.value } : prev,
+                prev
+                  ? {
+                      ...prev,
+                      workflowId: event.target.value,
+                      workflowName:
+                        workflowOptions.find(
+                          (option) => option.id === event.target.value,
+                        )?.name ?? '',
+                    }
+                  : prev,
               )
             }
             size="small"
-          />
+          >
+            <MenuItem value="">{'None'}</MenuItem>
+            {workflowOptions.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.name}
+              </MenuItem>
+            ))}
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDraft(null)}>{'Cancel'}</Button>

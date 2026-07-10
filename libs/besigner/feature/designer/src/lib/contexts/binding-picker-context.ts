@@ -30,6 +30,12 @@ export interface BindingOption {
   token: string
   /** Section header the option renders under (e.g. Variables). */
   group?: string
+  /**
+   * Live value preview shown as the option's secondary line (AGL-262),
+   * e.g. a variable's current value — picking a binding shouldn't
+   * require remembering what it holds.
+   */
+  preview?: string
 }
 
 export interface BindingPickerContextValue {

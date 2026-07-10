@@ -26,15 +26,18 @@ import { HOST_EVENT_TYPES } from './workflows'
  */
 
 export type HostActionStep =
-  | { type: 'runWorkflow'; workflowName: string }
+  // Entity references carry a doc id (AGL-261, rename-safe) with the name
+  // kept as a display hint; pre-AGL-261 docs have only the name and the
+  // executor resolves either.
+  | { type: 'runWorkflow'; workflowId?: string; workflowName?: string }
   | {
       type: 'siteAlert'
       message: string
       severity?: 'info' | 'success' | 'warning' | 'error'
     }
   | { type: 'customEvent'; eventName: string }
-  | { type: 'datasetAppend'; datasetName: string }
-  | { type: 'webhookPost'; webhookName: string }
+  | { type: 'datasetAppend'; datasetId?: string; datasetName?: string }
+  | { type: 'webhookPost'; webhookId?: string; webhookName?: string }
 
 export type HostActionStepType = HostActionStep['type']
 
@@ -91,7 +94,11 @@ export function validateHostAction(action: HostAction): string | null {
   }
   for (const [index, step] of steps.entries()) {
     const label = `Step ${index + 1}`
-    if (step.type === 'runWorkflow' && !step.workflowName?.trim()) {
+    if (
+      step.type === 'runWorkflow' &&
+      !step.workflowId?.trim() &&
+      !step.workflowName?.trim()
+    ) {
       return `${label}: pick a workflow`
     }
     if (step.type === 'siteAlert' && !step.message?.trim()) {
@@ -102,10 +109,18 @@ export function validateHostAction(action: HostAction): string | null {
         return `${label}: custom event names are 2–40 letters, digits, dashes`
       }
     }
-    if (step.type === 'datasetAppend' && !step.datasetName?.trim()) {
+    if (
+      step.type === 'datasetAppend' &&
+      !step.datasetId?.trim() &&
+      !step.datasetName?.trim()
+    ) {
       return `${label}: pick a dataset`
     }
-    if (step.type === 'webhookPost' && !step.webhookName?.trim()) {
+    if (
+      step.type === 'webhookPost' &&
+      !step.webhookId?.trim() &&
+      !step.webhookName?.trim()
+    ) {
       return `${label}: pick a webhook`
     }
   }

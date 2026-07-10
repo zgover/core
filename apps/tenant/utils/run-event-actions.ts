@@ -105,13 +105,17 @@ export async function runEventActions(
         hostRef.collection('variables').limit(100).get(),
         hostRef.collection('workflows').limit(100).get(),
       ])
+      // Double-keyed by doc id AND name (AGL-261): id references are
+      // rename-safe; legacy name references keep resolving.
       const byName = <T extends { name?: string; deletedAt?: unknown }>(
         docs: FirebaseFirestore.QueryDocumentSnapshot[],
       ) => {
         const map: Record<string, T> = {}
         for (const doc of docs) {
           const data = doc.data() as T
-          if (data?.name && !data.deletedAt) map[data.name] = data
+          if (data.deletedAt) continue
+          map[doc.id] = data
+          if (data?.name) map[data.name] = data
         }
         return map
       }
@@ -145,9 +149,13 @@ export async function runEventActions(
             })
           } else if (step.type === 'runWorkflow') {
             const context = await loadWorkflowContext()
-            const workflow = context.workflows[step.workflowName?.trim()]
+            const workflow =
+              context.workflows[step.workflowId?.trim() ?? ''] ??
+              context.workflows[step.workflowName?.trim() ?? '']
             if (!workflow) {
-              stepErrors.push(`unknown workflow "${step.workflowName}"`)
+              stepErrors.push(
+                `unknown workflow "${step.workflowName || step.workflowId}"`,
+              )
               continue
             }
             const run = runWorkflow(
@@ -171,21 +179,33 @@ export async function runEventActions(
               stepErrors.push('webhooks require a Business plan')
               continue
             }
-            const hooks = await hostRef
-              .collection('webhooks')
-              .where('name', '==', step.webhookName.trim())
-              .limit(1)
-              .get()
-            const hook = hooks.docs[0]?.data() as HostWebhook | undefined
+            // Id-first lookup (AGL-261); the name query is the legacy path.
+            const hookDoc = step.webhookId?.trim()
+              ? await hostRef
+                  .collection('webhooks')
+                  .doc(step.webhookId.trim())
+                  .get()
+              : (
+                  await hostRef
+                    .collection('webhooks')
+                    .where('name', '==', step.webhookName?.trim() ?? '')
+                    .limit(1)
+                    .get()
+                ).docs[0]
+            const hook = hookDoc?.exists
+              ? (hookDoc.data() as HostWebhook)
+              : undefined
             if (
               !hook ||
-              hooks.docs[0].get('deletedAt') ||
+              hookDoc.get('deletedAt') ||
               hook.enabled === false ||
               hook.direction !== 'outbound' ||
               !hook.url ||
               !WEBHOOK_URL_PATTERN.test(hook.url)
             ) {
-              stepErrors.push(`unknown webhook "${step.webhookName}"`)
+              stepErrors.push(
+                `unknown webhook "${step.webhookName || step.webhookId}"`,
+              )
               continue
             }
             const body = JSON.stringify({
@@ -221,18 +241,28 @@ export async function runEventActions(
               }
             }
             if (!delivered) {
-              stepErrors.push(`webhook "${step.webhookName}" delivery failed`)
+              stepErrors.push(
+                `webhook "${step.webhookName || step.webhookId}" delivery failed`,
+              )
             }
           } else if (step.type === 'datasetAppend') {
-            const datasets = await (
-              await orgDataCollectionForHost(hostId, 'datasets')
+            // Id-first lookup (AGL-261); the name query is the legacy path.
+            const datasetsRef = await orgDataCollectionForHost(
+              hostId,
+              'datasets',
             )
-              .where('name', '==', step.datasetName.trim())
-              .limit(1)
-              .get()
-            const datasetDoc = datasets.docs[0]
-            if (!datasetDoc || datasetDoc.get('deletedAt')) {
-              stepErrors.push(`unknown dataset "${step.datasetName}"`)
+            const datasetDoc = step.datasetId?.trim()
+              ? await datasetsRef.doc(step.datasetId.trim()).get()
+              : (
+                  await datasetsRef
+                    .where('name', '==', step.datasetName?.trim() ?? '')
+                    .limit(1)
+                    .get()
+                ).docs[0]
+            if (!datasetDoc?.exists || datasetDoc.get('deletedAt')) {
+              stepErrors.push(
+                `unknown dataset "${step.datasetName || step.datasetId}"`,
+              )
               continue
             }
             const declaredFields: string[] = Array.isArray(

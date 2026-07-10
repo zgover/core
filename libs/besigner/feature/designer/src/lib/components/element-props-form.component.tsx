@@ -32,7 +32,7 @@ import {
 import {
   MdiIcon,
 } from '@aglyn/shared-ui-jsx'
-import { Alert, NoSsr, TextField } from '@mui/material'
+import { Alert, NoSsr, Stack, TextField, Typography } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
@@ -415,7 +415,21 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                               handleInsertBinding(option.token)
                             }}
                           >
-                            {option.label}
+                            <Stack sx={{ minWidth: 0 }}>
+                              <Typography variant="body2" noWrap>
+                                {option.label}
+                              </Typography>
+                              {/* Live value preview (AGL-262). */}
+                              {option.preview ? (
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  noWrap
+                                >
+                                  {option.preview}
+                                </Typography>
+                              ) : null}
+                            </Stack>
                           </MuiMenuItem>,
                         ]
                       })}

@@ -61,10 +61,14 @@ export async function runEventWorkflows(
       .collection('workflows')
       .limit(100)
       .get()
+    // Double-keyed by doc id AND name (AGL-261): id references are
+    // rename-safe; legacy name references keep resolving.
     const workflowMap: Record<string, HostWorkflow> = {}
     for (const doc of allWorkflowDocs.docs) {
       const data = doc.data() as any
-      if (data?.name && !data.deletedAt) workflowMap[data.name] = data
+      if (data.deletedAt) continue
+      workflowMap[doc.id] = data
+      if (data?.name) workflowMap[data.name] = data
     }
 
     // Monthly run cap by the owning tenant's plan (AGL-165) — dark-launch
@@ -91,9 +95,9 @@ export async function runEventWorkflows(
     const functions: Record<string, HostFunction> = {}
     for (const doc of functionDocs.docs) {
       const definition = doc.data() as any
-      if (!definition.deletedAt && definition.name) {
-        functions[definition.name] = definition
-      }
+      if (definition.deletedAt) continue
+      functions[doc.id] = definition
+      if (definition.name) functions[definition.name] = definition
     }
     const variables: Record<string, HostVariable> = {}
     for (const doc of variableDocs.docs) {

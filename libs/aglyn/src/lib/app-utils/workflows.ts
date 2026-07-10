@@ -56,7 +56,12 @@ export interface HostWorkflowTrigger {
 }
 
 export interface HostWorkflowStep {
-  /** Host function to run (by name). */
+  /**
+   * Host function to run — by doc id (AGL-261), rename-safe. Steps saved
+   * before AGL-261 carry only `functionName`; executors resolve id first.
+   */
+  functionId?: string
+  /** Legacy name reference, kept as the display hint; `functionId` wins. */
   functionName: string
   /**
    * One expression per function parameter, evaluated over variables and
@@ -147,11 +152,14 @@ export function runWorkflow(
   const results: Record<string, number | string | boolean> = {}
 
   for (const [index, step] of steps.entries()) {
-    const definition = functions[step.functionName?.trim()]
+    // Id-first resolution (AGL-261): maps are double-keyed by id and name.
+    const definition =
+      functions[step.functionId?.trim() ?? ''] ??
+      functions[step.functionName?.trim() ?? '']
     if (!definition) {
       return {
         ok: false,
-        error: `Unknown function "${step.functionName}"`,
+        error: `Unknown function "${step.functionName || step.functionId}"`,
         step: index + 1,
       }
     }
@@ -213,8 +221,11 @@ export function resolveComputedVariables(
   // can appear under two keys — evaluate each workflow once per doc.
   const memo = new Map<HostVariable, HostVariable>()
   for (const [name, variable] of Object.entries(variables)) {
+    const workflowId = (variable as any).workflowId?.trim?.() ?? ''
     const workflowName = variable.workflowName?.trim()
-    const workflow = workflowName ? workflows[workflowName] : undefined
+    const workflow =
+      (workflowId ? workflows[workflowId] : undefined) ??
+      (workflowName ? workflows[workflowName] : undefined)
     if (!workflow) {
       resolved[name] = variable
       continue

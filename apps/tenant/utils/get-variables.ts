@@ -78,8 +78,11 @@ export async function getFunctions(options: {
           operations: data.operations ?? [],
           ...(data.returnValue && { returnValue: data.returnValue }),
         }
-        // Keyed by doc id only ({{fn:id(...)}}, AGL-185/194).
+        // Keyed by doc id ({{fn:id(...)}}, AGL-185/194) AND name so
+        // legacy workflow steps that stored functionName keep resolving
+        // (AGL-261).
         functions[docSnapshot.id] = definition
+        if (!functions[data.name]) functions[data.name] = definition
       }
     }
   } catch (error) {
@@ -109,9 +112,11 @@ export async function getWorkflows(options: {
       .get()
     for (const docSnapshot of snapshot.docs) {
       const data = docSnapshot.data() as Aglyn.HostWorkflow
-      if (data?.name && !(data as any).deletedAt) {
-        workflows[data.name] = data
-      }
+      if ((data as any).deletedAt) continue
+      // Double-keyed by doc id AND name (AGL-261): id references are
+      // rename-safe; legacy name references keep resolving.
+      workflows[docSnapshot.id] = data
+      if (data?.name) workflows[data.name] = data
     }
   } catch (error) {
     console.error(error)
