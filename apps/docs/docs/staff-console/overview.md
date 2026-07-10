@@ -25,6 +25,9 @@ The **staff console** is where Aglyn operators manage the platform and support c
   Config, with percentage rollout; staff preview everything.
 - **[Multi-tenant architecture](./architecture-multi-tenancy.md)** — how organizations,
   membership, security rules, subdomains, and billing attribution fit together.
+- **Audit archival** — a nightly cron moves audit entries past the 90-day retention
+  window into a Storage compliance trail (JSON lines, month-partitioned) and reminds
+  staff of GDPR erasure requests past their 7-day hold.
 - **Organization suspension** — a staff toggle that serves 503s on the org's sites and shows the
   owner a banner.
 - **Audit log viewer** — a record of staff actions.
