@@ -583,7 +583,12 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     [selected, records, model, download],
   )
 
-  const [importer, setImporter] = useState<{ text: string } | null>(null)
+  // keyField (wave v6): optional unique key — matching rows update the
+  // existing record instead of appending a duplicate.
+  const [importer, setImporter] = useState<{
+    text: string
+    keyField: string
+  } | null>(null)
   const importPreview = useMemo(() => {
     if (!importer) return null
     const rows = parseImportRows(importer.text)
@@ -610,50 +615,102 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   const handleImport = useCallback(async () => {
     if (!selected || !importPreview) return
     const validRows = importPreview.prepared.filter((row) => row.valid)
+
+    // Unique-key upsert (wave v6): with a key field picked, incoming rows
+    // that match an existing record's key update it in place, and
+    // duplicate keys within the import collapse to the last row.
+    const keyField = importer?.keyField ?? ''
+    const keyOf = (values: Record<string, unknown>) =>
+      String(values?.[keyField] ?? '').trim().toLowerCase()
+    let updates: Array<{ id: string; values: Record<string, unknown> }> = []
+    let creates = validRows
+    if (keyField) {
+      const existingByKey = new Map<string, string>()
+      for (const record of records as any[]) {
+        const key = keyOf(record.values ?? {})
+        if (key) existingByKey.set(key, record.$id)
+      }
+      const deduped = new Map<string, (typeof validRows)[number]>()
+      const keyless: typeof validRows = []
+      for (const row of validRows) {
+        const key = keyOf(row.values)
+        if (key) deduped.set(key, row)
+        else keyless.push(row)
+      }
+      updates = []
+      creates = [...keyless]
+      for (const [key, row] of deduped) {
+        const existingId = existingByKey.get(key)
+        if (existingId) updates.push({ id: existingId, values: row.values })
+        else creates.push(row)
+      }
+    }
+
     const quota = checkTenantQuota(
       tenant,
       'recordsPerDataset',
-      records.length + validRows.length - 1,
+      records.length + creates.length - 1,
     )
     const room = quota.allowed
-      ? validRows.length
+      ? creates.length
       : Math.max(0, Number(quota.limit ?? 0) - records.length)
-    const toWrite = validRows.slice(0, room)
-    if (!toWrite.length) {
+    const toWrite = creates.slice(0, room)
+    if (!toWrite.length && !updates.length) {
       return void enqueueSnackbar(
         `Record limit reached (${quota.limit}) — see Billing to upgrade`,
         { variant: 'warning', persist: false },
       )
     }
     // Chunked under Firestore's 500-writes/batch limit.
-    for (let start = 0; start < toWrite.length; start += 400) {
+    const writes = [
+      ...updates.map((update) => ({
+        id: update.id,
+        values: update.values,
+        isUpdate: true,
+      })),
+      ...toWrite.map((row) => ({
+        id: createResourceUid(),
+        values: row.values,
+        isUpdate: false,
+      })),
+    ]
+    let createdSoFar = 0
+    for (let start = 0; start < writes.length; start += 400) {
       const batch = writeBatch(firestore)
-      toWrite.slice(start, start + 400).forEach((row, index) => {
-        batch.set(
-          doc(
-            firestore,
-            dataScope[0],
-            dataScope[1],
-            'datasets',
-            selected.$id,
-            'records',
-            createResourceUid(),
-          ),
-          {
-            values: row.values,
-            order: records.length + start + index,
+      writes.slice(start, start + 400).forEach((write) => {
+        const ref = doc(
+          firestore,
+          dataScope[0],
+          dataScope[1],
+          'datasets',
+          selected.$id,
+          'records',
+          write.id,
+        )
+        if (write.isUpdate) {
+          batch.set(
+            ref,
+            { values: write.values, updatedAt: Timestamp.now() },
+            { merge: true },
+          )
+        } else {
+          batch.set(ref, {
+            values: write.values,
+            order: records.length + createdSoFar,
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
-          },
-        )
+          })
+          createdSoFar += 1
+        }
       })
       await batch.commit()
     }
     setImporter(null)
     const skippedInvalid = importPreview.prepared.length - validRows.length
-    const skippedQuota = validRows.length - toWrite.length
+    const skippedQuota = creates.length - toWrite.length
     enqueueSnackbar(
-      `Imported ${toWrite.length} row${toWrite.length === 1 ? '' : 's'}` +
+      `Imported ${toWrite.length} new` +
+        (updates.length ? `, updated ${updates.length}` : '') +
         (skippedInvalid ? `, ${skippedInvalid} invalid skipped` : '') +
         (skippedQuota ? `, ${skippedQuota} over the record limit` : ''),
       { variant: skippedInvalid || skippedQuota ? 'warning' : 'success' },
@@ -666,8 +723,9 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   }, [
     selected,
     importPreview,
+    importer?.keyField,
     tenant,
-    records.length,
+    records,
     firestore,
     hostId,
     orgId,
@@ -720,7 +778,10 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
             <Button size="small" onClick={() => setSchemaOpen(true)}>
               {'Schema'}
             </Button>
-            <Button size="small" onClick={() => setImporter({ text: '' })}>
+            <Button
+              size="small"
+              onClick={() => setImporter({ text: '', keyField: '' })}
+            >
               {'Import'}
             </Button>
             {records.length ? (
@@ -1042,6 +1103,29 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
             sx={{ mt: 1 }}
             helperText="Columns match by field id or display name"
           />
+          <TextField
+            select
+            size="small"
+            label="Match on field (upsert)"
+            value={importer?.keyField ?? ''}
+            onChange={(event) =>
+              setImporter((prev) =>
+                prev ? { ...prev, keyField: event.target.value } : prev,
+              )
+            }
+            helperText={
+              'Rows whose value matches an existing record update it ' +
+              'instead of appending a duplicate.'
+            }
+            sx={{ maxWidth: 280 }}
+          >
+            <MenuItem value="">{'None — always append'}</MenuItem>
+            {model.order.map((fieldId) => (
+              <MenuItem key={fieldId} value={fieldId}>
+                {model.fields[fieldId]?.name ?? fieldId}
+              </MenuItem>
+            ))}
+          </TextField>
           {importPreview ? (
             <Typography variant="body2" color="text.secondary">
               {`${importPreview.prepared.length} rows parsed · ` +
