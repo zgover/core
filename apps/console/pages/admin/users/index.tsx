@@ -222,7 +222,7 @@ const AdminUsers: NextPageWithLayout = () => {
         navTabItems={adminNavTabItems()}
         activeTab={buildRoute(Route.ADMIN_USERS)}
         breadcrumbItems={[
-          { children: 'Staff', href: buildRoute(Route.ADMIN_TENANTS) },
+          { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
           { children: 'Users', href: buildRoute(Route.ADMIN_USERS) },
         ]}
         header={{

@@ -56,16 +56,15 @@ import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../hooks/use-firestore-doc'
 
 /**
- * Read-only tenant detail for staff (AGL-207). This is the "view as
- * tenant" support surface WITHOUT session impersonation: staff read
- * privileges render the tenant's hosts, effective entitlements, and the
- * audit slice for this tenant — no minted tokens, no write surface, so
- * there is nothing to lock down. Mutations stay on the audited tenants
- * list page.
+ * Read-only organization detail for staff (AGL-207/238). Support surface
+ * WITHOUT session impersonation: staff read privileges render the org's
+ * sites, member roster, effective entitlements, and the audit slice for
+ * this org — no minted tokens, no write surface, so there is nothing to
+ * lock down. Mutations stay on the audited Organizations list page.
  */
-const AdminTenantDetail: NextPageWithLayout = () => {
-  const params = useParams<{ tenantId?: string }>()
-  const tenantId = params?.tenantId ?? ''
+const AdminOrgDetail: NextPageWithLayout = () => {
+  const params = useParams<{ orgId?: string }>()
+  const orgId = params?.orgId ?? ''
   const { data: user } = useUser()
   const firestore = useFirestore()
   const [isStaff, setIsStaff] = useState<boolean | null>(null)
@@ -85,19 +84,28 @@ const AdminTenantDetail: NextPageWithLayout = () => {
     }
   }, [user])
 
-  const { data: tenant } = useFirestoreDoc<any>(
-    () => doc(firestore, 'tenants', tenantId || 'missing'),
-    [firestore, tenantId],
+  const { data: org } = useFirestoreDoc<any>(
+    () => doc(firestore, 'orgs', orgId || 'missing'),
+    [firestore, orgId],
     { idField: '$id' },
   )
   const { data: hostDocs } = useFirestoreCollection<any>(
     () =>
       query(
         collection(firestore, 'hosts'),
-        where('tenantId', '==', tenantId || 'missing'),
+        where('orgId', '==', orgId || 'missing'),
         limit(50),
       ),
-    [firestore, tenantId],
+    [firestore, orgId],
+    { idField: '$id' },
+  )
+  const { data: memberDocs } = useFirestoreCollection<any>(
+    () =>
+      query(
+        collection(firestore, 'orgs', orgId || 'missing', 'members'),
+        limit(100),
+      ),
+    [firestore, orgId],
     { idField: '$id' },
   )
   const { data: auditDocs } = useFirestoreCollection<any>(
@@ -110,36 +118,34 @@ const AdminTenantDetail: NextPageWithLayout = () => {
     [firestore],
     { idField: '$id' },
   )
-  const tenantAudit = useMemo(
+  const orgAudit = useMemo(
     () =>
       (auditDocs ?? [])
-        .filter((entry: any) =>
-          String(entry.target ?? '').includes(tenantId),
-        )
+        .filter((entry: any) => String(entry.target ?? '').includes(orgId))
         .slice(0, 20),
-    [auditDocs, tenantId],
+    [auditDocs, orgId],
   )
 
-  const resolved = tenant ? resolveTenantEntitlements(tenant) : null
-  const planDefaults = tenant?.plan
-    ? PLAN_ENTITLEMENTS[tenant.plan as keyof typeof PLAN_ENTITLEMENTS]
+  const resolved = org ? resolveTenantEntitlements(org) : null
+  const planDefaults = org?.plan
+    ? PLAN_ENTITLEMENTS[org.plan as keyof typeof PLAN_ENTITLEMENTS]
     : null
   const formatLimit = (value: number) =>
     value === UNLIMITED ? '∞' : value.toLocaleString()
 
   return (
     <>
-      <NextPageTitle screen={'Tenant – Staff'} />
+      <NextPageTitle screen={'Organization – Staff'} />
       <DashboardLayout
         navTabItems={adminNavTabItems()}
-        activeTab={buildRoute(Route.ADMIN_TENANTS)}
+        activeTab={buildRoute(Route.ADMIN_ORGS)}
         breadcrumbItems={[
-          { children: 'Staff', href: buildRoute(Route.ADMIN_TENANTS) },
-          { children: 'Tenants', href: buildRoute(Route.ADMIN_TENANTS) },
-          { children: tenantId },
+          { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
+          { children: 'Organizations', href: buildRoute(Route.ADMIN_ORGS) },
+          { children: org?.name ?? orgId },
         ]}
         header={{
-          children: 'Tenant Detail',
+          children: 'Organization Detail',
           icon: { path: ICON_VARIANT_SYMBOL_SECURE.path },
         }}
       >
@@ -151,8 +157,8 @@ const AdminTenantDetail: NextPageWithLayout = () => {
           ) : (
             <>
               <Alert severity="info" sx={{ mb: 3 }}>
-                {'Read-only staff view — changes happen on the Tenants ' +
-                  'page where they are audited.'}
+                {'Read-only staff view — changes happen on the ' +
+                  'Organizations page where they are audited.'}
               </Alert>
               <GridItems
                 spacing={3}
@@ -168,41 +174,48 @@ const AdminTenantDetail: NextPageWithLayout = () => {
                         <Stack spacing={1}>
                           <Stack direction="row" spacing={1}>
                             <Chip
-                              label={tenant?.plan ?? 'no plan'}
+                              label={org?.plan ?? 'no plan'}
                               size="small"
-                              color={tenant?.plan ? 'secondary' : 'default'}
+                              color={org?.plan ? 'secondary' : 'default'}
                             />
-                            {tenant?.suspendedAt ? (
+                            {org?.suspendedAt ? (
                               <Chip
                                 label={`suspended${
-                                  tenant?.suspendedReason
-                                    ? `: ${tenant.suspendedReason}`
+                                  org?.suspendedReason
+                                    ? `: ${org.suspendedReason}`
                                     : ''
                                 }`}
                                 size="small"
                                 color="error"
                               />
                             ) : null}
-                            {tenant?.subscription?.status ? (
+                            {org?.subscription?.status ? (
                               <Chip
-                                label={tenant.subscription.status}
+                                label={org.subscription.status}
                                 size="small"
                                 variant="outlined"
                               />
                             ) : null}
                           </Stack>
                           <Typography variant="body2">
-                            {tenant?.displayName ?? '—'}
+                            {org?.name ?? '—'}
                           </Typography>
                           <Typography
                             variant="caption"
                             color="text.secondary"
                             sx={{ fontFamily: 'monospace' }}
                           >
-                            {tenantId}
+                            {`${orgId} · ${org?.slug ?? 'no slug'}`}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ fontFamily: 'monospace' }}
+                          >
+                            {`Owner: ${org?.ownerUid ?? '—'}`}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {`Stripe: ${tenant?.stripeCustomerId ?? '—'}`}
+                            {`Stripe: ${org?.stripeCustomerId ?? '—'}`}
                           </Typography>
                         </Stack>
                       </CardDisplay>
@@ -212,7 +225,7 @@ const AdminTenantDetail: NextPageWithLayout = () => {
                     size: { xs: 12, md: 6 },
                     children: (
                       <CardDisplay
-                        header={`Hosts (${(hostDocs ?? []).length})`}
+                        header={`Sites (${(hostDocs ?? []).length})`}
                         contentGutterX
                         contentGutterY
                       >
@@ -222,7 +235,7 @@ const AdminTenantDetail: NextPageWithLayout = () => {
                               variant="body2"
                               color="text.secondary"
                             >
-                              {'No hosts.'}
+                              {'No sites.'}
                             </Typography>
                           ) : (
                             (hostDocs ?? []).map((host: any) => (
@@ -244,6 +257,58 @@ const AdminTenantDetail: NextPageWithLayout = () => {
                                 >
                                   {host.$id}
                                 </Typography>
+                              </Stack>
+                            ))
+                          )}
+                        </Stack>
+                      </CardDisplay>
+                    ),
+                  },
+                  {
+                    size: { xs: 12, md: 6 },
+                    children: (
+                      <CardDisplay
+                        header={`Members (${(memberDocs ?? []).length})`}
+                        contentGutterX
+                        contentGutterY
+                      >
+                        <Stack spacing={1}>
+                          {(memberDocs ?? []).length === 0 ? (
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                            >
+                              {'No members.'}
+                            </Typography>
+                          ) : (
+                            (memberDocs ?? []).map((member: any) => (
+                              <Stack
+                                key={member.$id}
+                                direction="row"
+                                spacing={1}
+                                sx={{
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                }}
+                              >
+                                <Typography variant="body2" noWrap>
+                                  {member.email ??
+                                    member.displayName ??
+                                    member.$id}
+                                </Typography>
+                                <Stack direction="row" spacing={1}>
+                                  <Chip
+                                    label={member.role ?? 'viewer'}
+                                    size="small"
+                                    variant="outlined"
+                                  />
+                                  {member.allHosts ? (
+                                    <Chip
+                                      label="all sites"
+                                      size="small"
+                                    />
+                                  ) : null}
+                                </Stack>
                               </Stack>
                             ))
                           )}
@@ -284,7 +349,7 @@ const AdminTenantDetail: NextPageWithLayout = () => {
                                     key
                                   ]
                                   const overridden =
-                                    tenant?.entitlements?.[key] != null
+                                    org?.entitlements?.[key] != null
                                   return (
                                     <TableRow key={key}>
                                       <TableCell>
@@ -319,21 +384,21 @@ const AdminTenantDetail: NextPageWithLayout = () => {
                     size: { xs: 12, md: 6 },
                     children: (
                       <CardDisplay
-                        header={'Recent admin actions on this tenant'}
+                        header={'Recent admin actions on this organization'}
                         contentGutterX
                         contentGutterY
                       >
                         <Stack spacing={1}>
-                          {tenantAudit.length === 0 ? (
+                          {orgAudit.length === 0 ? (
                             <Typography
                               variant="body2"
                               color="text.secondary"
                             >
-                              {'No audit entries reference this tenant in ' +
-                                'the latest 200.'}
+                              {'No audit entries reference this ' +
+                                'organization in the latest 200.'}
                             </Typography>
                           ) : (
-                            tenantAudit.map((entry: any) => (
+                            orgAudit.map((entry: any) => (
                               <Stack
                                 key={entry.$id}
                                 direction="row"
@@ -369,10 +434,10 @@ const AdminTenantDetail: NextPageWithLayout = () => {
     </>
   )
 }
-AdminTenantDetail.displayName = 'Page:AdminTenantDetail'
-AdminTenantDetail.layouts = [
+AdminOrgDetail.displayName = 'Page:AdminOrgDetail'
+AdminOrgDetail.layouts = [
   { Component: AuthenticatedLayout },
-  { Component: MainLayout, props: { title: 'Tenant – Staff' } },
+  { Component: MainLayout, props: { title: 'Organization – Staff' } },
 ]
 
-export default AdminTenantDetail
+export default AdminOrgDetail

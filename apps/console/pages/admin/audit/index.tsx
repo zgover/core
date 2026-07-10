@@ -130,7 +130,7 @@ const AdminAudit: NextPageWithLayout = () => {
         navTabItems={adminNavTabItems()}
         activeTab={buildRoute(Route.ADMIN_AUDIT)}
         breadcrumbItems={[
-          { children: 'Staff', href: buildRoute(Route.ADMIN_TENANTS) },
+          { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
           { children: 'Audit log', href: buildRoute(Route.ADMIN_AUDIT) },
         ]}
         header={{

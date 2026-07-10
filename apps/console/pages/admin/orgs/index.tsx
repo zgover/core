@@ -74,14 +74,14 @@ const PLAN_OPTIONS: Array<{ value: string; label: string }> = [
 
 /** Every numeric entitlement staff may override (AGL-201). */
 const QUOTA_FIELDS: Array<{ key: string; label: string }> = [
-  { key: 'hostLimit', label: 'Hosts' },
-  { key: 'screensPerHost', label: 'Screens / host' },
-  { key: 'sharedLayoutsPerHost', label: 'Layouts / host' },
+  { key: 'hostLimit', label: 'Sites' },
+  { key: 'screensPerHost', label: 'Screens / site' },
+  { key: 'sharedLayoutsPerHost', label: 'Layouts / site' },
   { key: 'storagePerHostMb', label: 'Storage MB' },
   { key: 'totalSiteSizeMb', label: 'Site size MB' },
-  { key: 'membersPerHost', label: 'Members / host' },
-  { key: 'managersPerTenant', label: 'Manager seats' },
-  { key: 'maxManagersPerTenant', label: 'Max manager seats' },
+  { key: 'membersPerHost', label: 'Members / site' },
+  { key: 'managersPerTenant', label: 'Team seats' },
+  { key: 'maxManagersPerTenant', label: 'Max team seats' },
   { key: 'maxMembersPerHost', label: 'Max member seats' },
   { key: 'bandwidthGb', label: 'Bandwidth GB' },
   { key: 'formSubmissionsPerMonth', label: 'Form subs / mo' },
@@ -123,19 +123,21 @@ const FLAG_FIELDS: string[] = [
   'marketingOverlays',
 ]
 
-/** Count of explicit overrides on a tenant doc, for the row chip. */
-const overrideCount = (tenant: any): number =>
-  Object.keys(tenant?.entitlements ?? {}).filter((key) => key !== 'features')
-    .length + Object.keys(tenant?.entitlements?.features ?? {}).length
+/** Count of explicit overrides on an org doc, for the row chip. */
+const overrideCount = (org: any): number =>
+  Object.keys(org?.entitlements ?? {}).filter((key) => key !== 'features')
+    .length + Object.keys(org?.entitlements?.features ?? {}).length
 
 /**
- * Staff-only tenant management (AGL-42 follow-on): list tenants, override
- * plan and host-limit entitlement, and inspect billing state. Every change
- * writes an adminAudit entry. The page trusts the `staff` custom claim
- * (set via tools/scripts/set-staff-claim.mjs) and the Firestore rules
- * enforce the same claim server-side.
+ * Staff organization management (AGL-238, grown from the AGL-42 tenant
+ * page): list orgs, override plan and entitlements, inspect billing state,
+ * suspend, and flag GDPR erasure. Every change writes an adminAudit entry.
+ * The page trusts the `staff` custom claim (set via
+ * tools/scripts/set-staff-claim.mjs); the org rules admit super-staff
+ * writes on the billing/suspension keys and billing-staff writes on plan
+ * and entitlements, so the same claims gate server-side.
  */
-const AdminTenants: NextPageWithLayout = () => {
+const AdminOrgs: NextPageWithLayout = () => {
   const { data: user } = useUser()
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
@@ -157,20 +159,20 @@ const AdminTenants: NextPageWithLayout = () => {
     }
   }, [user])
 
-  const { data: tenantDocs } = useFirestoreCollection<any>(
-    () => query(collection(firestore, 'tenants'), limit(200)),
+  const { data: orgDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'orgs'), limit(200)),
     [firestore],
     { idField: '$id' },
   )
   // Search/sort (AGL-135) over the fetched page.
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<'id' | 'plan' | 'newest'>('id')
+  const [sortBy, setSortBy] = useState<'name' | 'plan' | 'newest'>('name')
   const needle = search.trim().toLowerCase()
-  const tenants = [...(tenantDocs ?? [])]
+  const orgs = [...(orgDocs ?? [])]
     .filter(
-      (tenant) =>
+      (org) =>
         !needle ||
-        [tenant.$id, tenant.displayName, tenant.plan]
+        [org.$id, org.name, org.slug, org.plan]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(needle)),
     )
@@ -183,7 +185,7 @@ const AdminTenants: NextPageWithLayout = () => {
           (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0)
         )
       }
-      return String(a.$id).localeCompare(String(b.$id))
+      return String(a.name ?? a.$id).localeCompare(String(b.name ?? b.$id))
     })
 
   const [editor, setEditor] = useState<{
@@ -194,9 +196,9 @@ const AdminTenants: NextPageWithLayout = () => {
     before: any
   } | null>(null)
 
-  // Usage drill-down (AGL-205): last 12 monthly rollups with deltas.
+  // Usage drill-down (AGL-205): last 12 monthly org rollups with deltas.
   const [usage, setUsage] = useState<{
-    tenantId: string
+    orgId: string
     months: Array<{
       month: string
       storageGb: number
@@ -208,17 +210,17 @@ const AdminTenants: NextPageWithLayout = () => {
   } | null>(null)
   const [usageLoading, setUsageLoading] = useState<string | null>(null)
   const handleShowUsage = useCallback(
-    (tenantId: string) => async () => {
-      setUsageLoading(tenantId)
+    (orgId: string) => async () => {
+      setUsageLoading(orgId)
       try {
         const idToken = await (user as any)?.getIdToken?.()
         const response = await fetch(
-          `/api/admin/tenant-usage?tenantId=${encodeURIComponent(tenantId)}`,
+          `/api/admin/org-usage?orgId=${encodeURIComponent(orgId)}`,
           { headers: idToken ? { Authorization: `Bearer ${idToken}` } : {} },
         )
         const payload = await response.json()
         if (!response.ok) throw new Error(payload?.error ?? 'Usage failed')
-        setUsage({ tenantId, months: payload.months ?? [] })
+        setUsage({ orgId, months: payload.months ?? [] })
       } catch (error) {
         console.error(error)
         enqueueSnackbar('Could not load usage', { variant: 'error' })
@@ -229,7 +231,8 @@ const AdminTenants: NextPageWithLayout = () => {
     [user, enqueueSnackbar],
   )
 
-  // Suspension (AGL-202): reversible flag; sites 503 within a minute.
+  // Suspension (AGL-202): reversible flag; the org's sites 503 within a
+  // minute and content writes are blocked by the rules.
   const [suspender, setSuspender] = useState<{
     id: string
     suspended: boolean
@@ -240,7 +243,7 @@ const AdminTenants: NextPageWithLayout = () => {
     try {
       const suspending = !suspender.suspended
       await setDoc(
-        doc(firestore, 'tenants', suspender.id),
+        doc(firestore, 'orgs', suspender.id),
         {
           suspendedAt: suspending ? Timestamp.now() : deleteField(),
           suspendedReason: suspending
@@ -252,8 +255,8 @@ const AdminTenants: NextPageWithLayout = () => {
       )
       await addDoc(collection(firestore, 'adminAudit'), {
         actorUid: (user as any)?.uid ?? 'unknown',
-        action: suspending ? 'tenant.suspend' : 'tenant.unsuspend',
-        target: `tenants/${suspender.id}`,
+        action: suspending ? 'org.suspend' : 'org.unsuspend',
+        target: `orgs/${suspender.id}`,
         before: { suspended: suspender.suspended },
         after: {
           suspended: suspending,
@@ -263,8 +266,8 @@ const AdminTenants: NextPageWithLayout = () => {
       })
       enqueueSnackbar(
         suspending
-          ? 'Tenant suspended — sites go offline within a minute (audited)'
-          : 'Tenant unsuspended (audited)',
+          ? 'Organization suspended — its sites go offline within a minute (audited)'
+          : 'Organization unsuspended (audited)',
         { variant: 'success', persist: false },
       )
       setSuspender(null)
@@ -280,17 +283,18 @@ const AdminTenants: NextPageWithLayout = () => {
   // GDPR erasure request (AGL-206): sets/clears the flag only — the hard
   // delete is a deliberate, separately-run script after a 7-day hold.
   const handleToggleErasure = useCallback(
-    (tenant: any) => async () => {
-      const requesting = !tenant.erasureRequestedAt
+    (org: any) => async () => {
+      const requesting = !org.erasureRequestedAt
       const confirmed = await confirm({
         title: requesting
-          ? 'Request erasure for this tenant?'
+          ? 'Request erasure for this organization?'
           : 'Cancel the erasure request?',
         description: requesting
-          ? 'Marks the tenant for GDPR deletion. Nothing is deleted now: ' +
-            'after a 7-day hold, staff run tools/scripts/erase-tenant.mjs ' +
-            'to export a final bundle and hard-delete all data. Audited.'
-          : 'The tenant is no longer marked for deletion. Audited.',
+          ? 'Marks the organization for GDPR deletion. Nothing is deleted ' +
+            'now: after a 7-day hold, staff run ' +
+            'tools/scripts/erase-tenant.mjs to export a final bundle and ' +
+            'hard-delete all data. Audited.'
+          : 'The organization is no longer marked for deletion. Audited.',
         confirmationText: requesting ? 'Request erasure' : 'Cancel request',
         confirmationButtonProps: { color: requesting ? 'error' : 'primary' },
       })
@@ -299,7 +303,7 @@ const AdminTenants: NextPageWithLayout = () => {
       if (!confirmed) return
       try {
         await setDoc(
-          doc(firestore, 'tenants', tenant.$id),
+          doc(firestore, 'orgs', org.$id),
           {
             erasureRequestedAt: requesting ? Timestamp.now() : deleteField(),
             updatedAt: Timestamp.now(),
@@ -309,9 +313,9 @@ const AdminTenants: NextPageWithLayout = () => {
         await addDoc(collection(firestore, 'adminAudit'), {
           actorUid: (user as any)?.uid ?? 'unknown',
           action: requesting
-            ? 'tenant.erasureRequested'
-            : 'tenant.erasureCanceled',
-          target: `tenants/${tenant.$id}`,
+            ? 'org.erasureRequested'
+            : 'org.erasureCanceled',
+          target: `orgs/${org.$id}`,
           before: { erasureRequested: !requesting },
           after: { erasureRequested: requesting },
           at: Timestamp.now(),
@@ -361,7 +365,7 @@ const AdminTenants: NextPageWithLayout = () => {
     }
     try {
       await setDoc(
-        doc(firestore, 'tenants', editor.id),
+        doc(firestore, 'orgs', editor.id),
         {
           plan: plan || deleteField(),
           entitlements: hasOverrides ? entitlements : deleteField(),
@@ -371,13 +375,13 @@ const AdminTenants: NextPageWithLayout = () => {
       )
       await addDoc(collection(firestore, 'adminAudit'), {
         actorUid: (user as any)?.uid ?? 'unknown',
-        action: 'tenant.override',
-        target: `tenants/${editor.id}`,
+        action: 'org.override',
+        target: `orgs/${editor.id}`,
         before: editor.before ?? null,
         after,
         at: Timestamp.now(),
       })
-      enqueueSnackbar('Tenant updated (audited)', {
+      enqueueSnackbar('Organization updated (audited)', {
         variant: 'success',
         persist: false,
       })
@@ -394,16 +398,16 @@ const AdminTenants: NextPageWithLayout = () => {
 
   return (
     <>
-      <NextPageTitle screen={'Tenants – Staff'} />
+      <NextPageTitle screen={'Organizations – Staff'} />
       <DashboardLayout
         navTabItems={adminNavTabItems()}
-        activeTab={buildRoute(Route.ADMIN_TENANTS)}
+        activeTab={buildRoute(Route.ADMIN_ORGS)}
         breadcrumbItems={[
-          { children: 'Staff', href: buildRoute(Route.ADMIN_TENANTS) },
-          { children: 'Tenants', href: buildRoute(Route.ADMIN_TENANTS) },
+          { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
+          { children: 'Organizations', href: buildRoute(Route.ADMIN_ORGS) },
         ]}
         header={{
-          children: 'Tenant Management',
+          children: 'Organization Management',
           icon: { path: ICON_VARIANT_SYMBOL_SECURE.path },
         }}
       >
@@ -417,9 +421,9 @@ const AdminTenants: NextPageWithLayout = () => {
           ) : (
             <Stack spacing={2}>
               <Typography variant="body2" color="text.secondary">
-                {'Overrides write to the tenant doc and are audited to ' +
-                  'adminAudit. Tenants without a plan keep every feature ' +
-                  '(dark launch).'}
+                {'Overrides write to the org doc and are audited to ' +
+                  'adminAudit. Organizations without a plan keep every ' +
+                  'feature (dark launch).'}
               </Typography>
               <Stack direction="row" spacing={1}>
                 <TextField
@@ -437,42 +441,53 @@ const AdminTenants: NextPageWithLayout = () => {
                   onChange={(event) => setSortBy(event.target.value as any)}
                   sx={{ minWidth: 120 }}
                 >
-                  <MenuItem value="id">{'Tenant id'}</MenuItem>
+                  <MenuItem value="name">{'Name'}</MenuItem>
                   <MenuItem value="plan">{'Plan'}</MenuItem>
                   <MenuItem value="newest">{'Newest'}</MenuItem>
                 </TextField>
               </Stack>
-              {tenants.length === 0 ? (
+              {orgs.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
-                  {'No tenant docs yet — they appear at first checkout or ' +
-                    'staff assignment.'}
+                  {'No organizations yet — they are created at signup or ' +
+                    'first site.'}
                 </Typography>
               ) : (
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>{'Tenant (uid)'}</TableCell>
+                      <TableCell>{'Organization'}</TableCell>
                       <TableCell>{'Plan'}</TableCell>
                       <TableCell>{'Subscription'}</TableCell>
-                      <TableCell>{'Host limit'}</TableCell>
+                      <TableCell>{'Site limit'}</TableCell>
                       <TableCell align="right">{'Actions'}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {tenants.map((tenant) => {
-                      const resolved = resolveTenantEntitlements(tenant)
+                    {orgs.map((org) => {
+                      const resolved = resolveTenantEntitlements(org)
                       return (
-                        <TableRow key={tenant.$id} hover>
-                          <TableCell sx={{ fontFamily: 'monospace' }}>
-                            {tenant.$id}
+                        <TableRow key={org.$id} hover>
+                          <TableCell>
+                            <Stack>
+                              <Typography variant="body2" noWrap>
+                                {org.name ?? org.$id}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ fontFamily: 'monospace' }}
+                              >
+                                {org.slug ?? org.$id}
+                              </Typography>
+                            </Stack>
                           </TableCell>
                           <TableCell>
                             <Chip
-                              label={tenant.plan ?? 'no plan'}
+                              label={org.plan ?? 'no plan'}
                               size="small"
-                              color={tenant.plan ? 'secondary' : 'default'}
+                              color={org.plan ? 'secondary' : 'default'}
                             />
-                            {tenant.suspendedAt ? (
+                            {org.suspendedAt ? (
                               <Chip
                                 label="suspended"
                                 size="small"
@@ -480,7 +495,7 @@ const AdminTenants: NextPageWithLayout = () => {
                                 sx={{ ml: 1 }}
                               />
                             ) : null}
-                            {tenant.erasureRequestedAt ? (
+                            {org.erasureRequestedAt ? (
                               <Chip
                                 label="erasure requested"
                                 size="small"
@@ -491,14 +506,14 @@ const AdminTenants: NextPageWithLayout = () => {
                             ) : null}
                           </TableCell>
                           <TableCell>
-                            {tenant.subscription?.status ?? '--'}
+                            {org.subscription?.status ?? '--'}
                           </TableCell>
                           <TableCell>
-                            {tenant.plan ? resolved.hostLimit : '∞ (no plan)'}
-                            {overrideCount(tenant) ? (
+                            {org.plan ? resolved.hostLimit : '∞ (no plan)'}
+                            {overrideCount(org) ? (
                               <Chip
-                                label={`${overrideCount(tenant)} override${
-                                  overrideCount(tenant) === 1 ? '' : 's'
+                                label={`${overrideCount(org)} override${
+                                  overrideCount(org) === 1 ? '' : 's'
                                 }`}
                                 size="small"
                                 variant="outlined"
@@ -509,18 +524,18 @@ const AdminTenants: NextPageWithLayout = () => {
                           <TableCell align="right">
                             <Button
                               size="small"
-                              href={buildRoute(Route.ADMIN_TENANT_DETAIL, {
-                                tenantId: tenant.$id,
+                              href={buildRoute(Route.ADMIN_ORG_DETAIL, {
+                                orgId: org.$id,
                               })}
                             >
                               {'Open'}
                             </Button>
                             <Button
                               size="small"
-                              disabled={usageLoading === tenant.$id}
-                              onClick={handleShowUsage(tenant.$id)}
+                              disabled={usageLoading === org.$id}
+                              onClick={handleShowUsage(org.$id)}
                             >
-                              {usageLoading === tenant.$id
+                              {usageLoading === org.$id
                                 ? 'Loading…'
                                 : 'Usage'}
                             </Button>
@@ -530,7 +545,7 @@ const AdminTenants: NextPageWithLayout = () => {
                                 const quotas: Record<string, string> = {}
                                 for (const field of QUOTA_FIELDS) {
                                   const value =
-                                    tenant.entitlements?.[field.key]
+                                    org.entitlements?.[field.key]
                                   if (typeof value === 'number') {
                                     quotas[field.key] = String(value)
                                   }
@@ -539,19 +554,19 @@ const AdminTenants: NextPageWithLayout = () => {
                                   {}
                                 for (const key of FLAG_FIELDS) {
                                   const value =
-                                    tenant.entitlements?.features?.[key]
+                                    org.entitlements?.features?.[key]
                                   if (value === true) flags[key] = 'on'
                                   if (value === false) flags[key] = 'off'
                                 }
                                 setEditor({
-                                  id: tenant.$id,
-                                  plan: tenant.plan ?? '',
+                                  id: org.$id,
+                                  plan: org.plan ?? '',
                                   quotas,
                                   flags,
                                   before: {
-                                    plan: tenant.plan ?? null,
+                                    plan: org.plan ?? null,
                                     entitlements:
-                                      tenant.entitlements ?? null,
+                                      org.entitlements ?? null,
                                   },
                                 })
                               }}
@@ -560,27 +575,27 @@ const AdminTenants: NextPageWithLayout = () => {
                             </Button>
                             <Button
                               size="small"
-                              color={tenant.suspendedAt ? 'success' : 'error'}
+                              color={org.suspendedAt ? 'success' : 'error'}
                               onClick={() =>
                                 setSuspender({
-                                  id: tenant.$id,
-                                  suspended: Boolean(tenant.suspendedAt),
-                                  reason: tenant.suspendedReason ?? '',
+                                  id: org.$id,
+                                  suspended: Boolean(org.suspendedAt),
+                                  reason: org.suspendedReason ?? '',
                                 })
                               }
                             >
-                              {tenant.suspendedAt ? 'Unsuspend' : 'Suspend'}
+                              {org.suspendedAt ? 'Unsuspend' : 'Suspend'}
                             </Button>
                             <Button
                               size="small"
                               color={
-                                tenant.erasureRequestedAt
+                                org.erasureRequestedAt
                                   ? 'primary'
                                   : 'error'
                               }
-                              onClick={handleToggleErasure(tenant)}
+                              onClick={handleToggleErasure(org)}
                             >
-                              {tenant.erasureRequestedAt
+                              {org.erasureRequestedAt
                                 ? 'Cancel erasure'
                                 : 'Erasure'}
                             </Button>
@@ -601,7 +616,7 @@ const AdminTenants: NextPageWithLayout = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>{'Override tenant'}</DialogTitle>
+        <DialogTitle>{'Override organization'}</DialogTitle>
         <DialogContent
           sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}
         >
@@ -628,7 +643,7 @@ const AdminTenants: NextPageWithLayout = () => {
           <Typography variant="subtitle2">{'Quota overrides'}</Typography>
           <Typography variant="caption" color="text.secondary">
             {'Empty = plan default. Only filled fields persist as ' +
-              'per-tenant overrides.'}
+              'per-organization overrides.'}
           </Typography>
           <Stack
             direction="row"
@@ -731,11 +746,11 @@ const AdminTenants: NextPageWithLayout = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>{`Usage — ${usage?.tenantId}`}</DialogTitle>
+        <DialogTitle>{`Usage — ${usage?.orgId}`}</DialogTitle>
         <DialogContent>
           {usage?.months.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
-              {'No usage rollups recorded for this tenant yet.'}
+              {'No usage rollups recorded for this organization yet.'}
             </Typography>
           ) : (
             <Table size="small">
@@ -813,7 +828,9 @@ const AdminTenants: NextPageWithLayout = () => {
         fullWidth
       >
         <DialogTitle>
-          {suspender?.suspended ? 'Unsuspend tenant?' : 'Suspend tenant?'}
+          {suspender?.suspended
+            ? 'Unsuspend organization?'
+            : 'Suspend organization?'}
         </DialogTitle>
         <DialogContent
           sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
@@ -821,9 +838,9 @@ const AdminTenants: NextPageWithLayout = () => {
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {suspender?.suspended
               ? 'Their published sites come back online within a minute.'
-              : 'Every published site of this tenant returns 503 within a ' +
-                'minute and the owner sees a suspension banner in the ' +
-                'console. No data is deleted; this is reversible.'}
+              : 'Every published site of this organization returns 503 ' +
+                'within a minute and its members see a suspension banner ' +
+                'in the console. No data is deleted; this is reversible.'}
           </Typography>
           {!suspender?.suspended ? (
             <TextField
@@ -854,8 +871,8 @@ const AdminTenants: NextPageWithLayout = () => {
     </>
   )
 }
-AdminTenants.displayName = 'Page:AdminTenants'
-AdminTenants.layouts = [
+AdminOrgs.displayName = 'Page:AdminOrgs'
+AdminOrgs.layouts = [
   {
     Component: AuthenticatedLayout,
   },
@@ -867,4 +884,4 @@ AdminTenants.layouts = [
   },
 ]
 
-export default AdminTenants
+export default AdminOrgs

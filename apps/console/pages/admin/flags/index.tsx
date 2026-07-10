@@ -179,7 +179,7 @@ const AdminFlags: NextPageWithLayout = () => {
         navTabItems={adminNavTabItems()}
         activeTab={buildRoute(Route.ADMIN_FLAGS)}
         breadcrumbItems={[
-          { children: 'Staff', href: buildRoute(Route.ADMIN_TENANTS) },
+          { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
           { children: 'Feature flags', href: buildRoute(Route.ADMIN_FLAGS) },
         ]}
         header={{

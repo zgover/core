@@ -19,9 +19,9 @@ import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 /**
- * Per-tenant usage drill-down (AGL-205): the last 12 monthly AGL-41
- * rollups for one tenant with month-over-month deltas, powering the
- * Usage dialog on the staff tenants page. Staff-gated, read-only.
+ * Per-organization usage drill-down (AGL-205/238): the last 12 monthly
+ * rollups for one org with month-over-month deltas, powering the Usage
+ * dialog on the staff Organizations page. Staff-gated, read-only.
  */
 export default async function handler(
   req: NextApiRequest,
@@ -35,8 +35,8 @@ export default async function handler(
     ? authorization.slice('Bearer '.length)
     : undefined
   if (!idToken) return res.status(401).json({ error: 'Unauthenticated' })
-  const tenantId = String(req.query.tenantId ?? '')
-  if (!tenantId) return res.status(400).json({ error: 'Missing tenantId' })
+  const orgId = String(req.query.orgId ?? '')
+  if (!orgId) return res.status(400).json({ error: 'Missing orgId' })
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
@@ -46,9 +46,9 @@ export default async function handler(
     const snapshot = await firebaseAdmin
       .app()
       .firestore()
-      .collection('tenants')
-      .doc(tenantId)
-      .collection('usageRollups')
+      .collection('orgs')
+      .doc(orgId)
+      .collection('usage')
       .orderBy('month', 'desc')
       .limit(12)
       .get()

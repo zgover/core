@@ -17,8 +17,8 @@
 
 export enum Route {
   MANAGE_ACCOUNT_SETTINGS = '/manage/account',
-  ADMIN_TENANTS = '/admin/tenants',
-  ADMIN_TENANT_DETAIL = '/admin/tenants/[tenantId]',
+  ADMIN_ORGS = '/admin/orgs',
+  ADMIN_ORG_DETAIL = '/admin/orgs/[orgId]',
   ADMIN_OVERVIEW = '/admin/overview',
   ADMIN_AUDIT = '/admin/audit',
   ADMIN_USERS = '/admin/users',
@@ -69,8 +69,8 @@ export interface RoutePayload extends Record<keyof any, any> {
     versionId: string
   }
   [Route.HOST_DASHBOARD]: { hostId: string }
-  [Route.ADMIN_TENANTS]: undefined
-  [Route.ADMIN_TENANT_DETAIL]: { tenantId: string }
+  [Route.ADMIN_ORGS]: undefined
+  [Route.ADMIN_ORG_DETAIL]: { orgId: string }
   [Route.ADMIN_OVERVIEW]: undefined
   [Route.ADMIN_AUDIT]: undefined
   [Route.ADMIN_USERS]: undefined

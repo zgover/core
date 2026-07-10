@@ -30,9 +30,9 @@ export function adminNavTabItems() {
       href: buildRoute(Route.ADMIN_OVERVIEW),
     },
     {
-      id: 'nav-tab-admin-tenants',
-      label: 'Tenants',
-      href: buildRoute(Route.ADMIN_TENANTS),
+      id: 'nav-tab-admin-orgs',
+      label: 'Organizations',
+      href: buildRoute(Route.ADMIN_ORGS),
     },
     {
       id: 'nav-tab-admin-users',

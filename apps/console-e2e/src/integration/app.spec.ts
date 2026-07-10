@@ -38,6 +38,8 @@ const PAGES = [
   '/manage/team', // legacy redirect
   '/admin/flags',
   '/admin/overview',
+  '/admin/orgs',
+  '/admin/tenants', // legacy redirect to /admin/orgs
   '/somehost/media',
   '/somehost/contacts',
   '/somehost/community',
@@ -52,7 +54,10 @@ const API_ROUTES: Array<[string, number]> = [
   ['/api/orgs/create', 405],
   ['/api/orgs/media', 405],
   ['/api/orgs/settings', 405],
+  ['/api/admin/org-usage?orgId=x', 401],
   ['/api/hosts/create', 405],
+  ['/api/hosts/members?hostId=x', 401],
+  ['/api/support/tickets', 401],
   ['/api/community/install-plugin', 405],
   ['/api/billing/checkout', 405],
 ]
