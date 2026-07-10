@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  resolveOrgIdForHost, firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
 
@@ -118,7 +119,21 @@ export default async function handler(
     }
 
     const now = firebaseAdmin.firestore.FieldValue.serverTimestamp()
-    const installRef = hostRef.collection('installs').doc(listingId)
+    // Install tier (AGL-237): org-extending plugins install once for every
+    // host in the org; host-only plugins stay pinned to the host.
+    const scope = req.body?.scope === 'org' ? 'org' : 'host'
+    let installRef = hostRef.collection('installs').doc(listingId)
+    if (scope === 'org') {
+      const orgId = await resolveOrgIdForHost(hostId)
+      if (!orgId) {
+        return res.status(409).json({ error: 'Host has no organization yet' })
+      }
+      installRef = firestore
+        .collection('orgs')
+        .doc(orgId)
+        .collection('installs')
+        .doc(listingId)
+    }
     const existing = await installRef.get()
     await installRef.set(
       {

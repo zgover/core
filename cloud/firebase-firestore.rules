@@ -101,7 +101,13 @@ service cloud.firestore {
         allow write: if false;
       }
 
-      // Org-tier plugin installs follow with the remaining AGL-237 move.
+      // Org-tier plugin installs (AGL-237): pins that apply to every host
+      // in the org; written only by the install API (entitlement + kill
+      // switch checks live there).
+      match /installs/{listingId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
     }
 
     // Workspace-subdomain resolution ({slug}.aglyn.com): public read so
