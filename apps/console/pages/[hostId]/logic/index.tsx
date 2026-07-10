@@ -21,6 +21,7 @@ import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import HostFunctionsCard from '../../../components/host-functions-card.component'
+import HostReferenceHealthCard from '../../../components/host-reference-health-card.component'
 import HostVariablesCard from '../../../components/host-variables-card.component'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -68,6 +69,11 @@ const HostLogic: NextPageWithLayout = () => {
               {
                 size: { xs: 12, md: 6 },
                 children: <HostFunctionsCard hostId={hostId} />,
+              },
+              {
+                // Broken-wiring audit (wave v7).
+                size: { xs: 12 },
+                children: <HostReferenceHealthCard hostId={hostId} />,
               },
             ]}
           />
