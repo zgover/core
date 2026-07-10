@@ -59,3 +59,38 @@ export const NOTIFICATION_TYPE_LABELS: Record<AglynNotificationType, string> =
     'content.booking': 'New booking',
     'system.announcement': 'Announcement',
   }
+
+/** Preference buckets (AGL-267): the prefix before the dot. */
+export type NotificationCategory = 'billing' | 'team' | 'content' | 'system'
+
+export const NOTIFICATION_CATEGORY_LABELS: Record<
+  NotificationCategory,
+  string
+> = {
+  billing: 'Billing',
+  team: 'Team & access',
+  content: 'Forms & bookings',
+  system: 'Product & system',
+}
+
+export function notificationCategory(
+  type: AglynNotificationType | string,
+): NotificationCategory {
+  const prefix = String(type).split('.')[0]
+  return (
+    ['billing', 'team', 'content', 'system'].includes(prefix)
+      ? prefix
+      : 'system'
+  ) as NotificationCategory
+}
+
+/**
+ * Per-user mute map stored at `users/{uid}.notificationPrefs`
+ * (`{ [category]: false }` mutes); absent categories stay on.
+ */
+export function notificationMuted(
+  prefs: Record<string, boolean> | null | undefined,
+  type: AglynNotificationType | string,
+): boolean {
+  return prefs?.[notificationCategory(type)] === false
+}

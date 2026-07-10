@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { AglynNotification } from '@aglyn/aglyn'
+import { notificationMuted, type AglynNotification } from '@aglyn/aglyn'
 import { FieldValue } from 'firebase-admin/firestore'
 import firebaseAdmin from './firebase-admin'
 import { listOrgMembers } from './organizations'
@@ -38,16 +38,28 @@ export async function notifyUsers(
 ): Promise<void> {
   try {
     const db = firestore()
+    const targets = [...new Set(uids)].filter(Boolean).slice(0, 400)
+    if (!targets.length) return
+    // Per-user category mutes (AGL-267): one getAll over the user docs.
+    const userDocs = await db.getAll(
+      ...targets.map((uid) => db.collection('users').doc(uid)),
+    )
     const batch = db.batch()
     let count = 0
-    for (const uid of new Set(uids)) {
-      if (!uid) continue
+    for (const userDoc of userDocs) {
+      const prefs = userDoc.get('notificationPrefs') as
+        | Record<string, boolean>
+        | undefined
+      if (notificationMuted(prefs, payload.type)) continue
       batch.set(
-        db.collection('users').doc(uid).collection('notifications').doc(),
+        db
+          .collection('users')
+          .doc(userDoc.id)
+          .collection('notifications')
+          .doc(),
         { ...payload, createdAt: FieldValue.serverTimestamp() },
       )
       count += 1
-      if (count >= 400) break // stay under the batch limit; enough fan-out
     }
     if (count > 0) await batch.commit()
   } catch (error) {

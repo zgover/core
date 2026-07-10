@@ -16,14 +16,20 @@
  */
 'use client'
 
-import { NOTIFICATION_TYPE_LABELS } from '@aglyn/aglyn'
+import {
+  NOTIFICATION_CATEGORY_LABELS,
+  NOTIFICATION_TYPE_LABELS,
+  type NotificationCategory,
+} from '@aglyn/aglyn'
 import { mdiBellOutline } from '@aglyn/shared-data-mdi'
 import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import {
   Button,
   Chip,
+  FormControlLabel,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -34,13 +40,16 @@ import {
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
   startAfter,
   updateDoc,
+  writeBatch,
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { useRouter } from 'next/router'
@@ -105,6 +114,69 @@ const ManageNotifications: NextPageWithLayout = () => {
     void loadPage(0)
   }, [loadPage])
 
+  // Preferences (AGL-267): category mutes on users/{uid}.notificationPrefs.
+  const [prefs, setPrefs] = useState<Record<string, boolean>>({})
+  useEffect(() => {
+    if (!uid) return
+    let active = true
+    void (async () => {
+      try {
+        const snapshot = await getDoc(doc(firestore, 'users', uid))
+        if (active) {
+          setPrefs(
+            (snapshot.get('notificationPrefs') as Record<string, boolean>) ??
+              {},
+          )
+        }
+      } catch {
+        // Defaults (everything on) when the doc is unreadable.
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [firestore, uid])
+  const togglePref = (category: NotificationCategory) => {
+    if (!uid) return
+    const next = { ...prefs, [category]: prefs[category] === false }
+    setPrefs(next)
+    void setDoc(
+      doc(firestore, 'users', uid),
+      { notificationPrefs: next },
+      { merge: true },
+    ).catch(console.error)
+  }
+
+  // Mark ALL unread read (AGL-267): the latest 200, batched.
+  const [markingAll, setMarkingAll] = useState(false)
+  const handleMarkAllRead = async () => {
+    if (!uid || markingAll) return
+    setMarkingAll(true)
+    try {
+      const snapshot = await getDocs(
+        query(
+          collection(firestore, 'users', uid, 'notifications'),
+          orderBy('createdAt', 'desc'),
+          limit(200),
+        ),
+      )
+      const batch = writeBatch(firestore)
+      let count = 0
+      snapshot.forEach((entry) => {
+        if (!entry.get('readAt')) {
+          batch.update(entry.ref, { readAt: serverTimestamp() })
+          count += 1
+        }
+      })
+      if (count > 0) await batch.commit()
+      await loadPage(page, cursors[page - 1])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setMarkingAll(false)
+    }
+  }
+
   const handleOpen = (notification: any) => {
     if (!uid) return
     if (!notification.readAt) {
@@ -139,6 +211,45 @@ const ManageNotifications: NextPageWithLayout = () => {
             contentBordered="all"
           >
             <Stack spacing={1.5}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ flexWrap: 'wrap', rowGap: 1, alignItems: 'center' }}
+              >
+                <Button
+                  size="small"
+                  color="secondary"
+                  disabled={markingAll}
+                  onClick={() => void handleMarkAllRead()}
+                >
+                  {markingAll ? 'Marking…' : 'Mark all read'}
+                </Button>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ ml: 'auto' }}
+                >
+                  {'Mute categories:'}
+                </Typography>
+                {(
+                  Object.entries(NOTIFICATION_CATEGORY_LABELS) as Array<
+                    [NotificationCategory, string]
+                  >
+                ).map(([category, label]) => (
+                  <FormControlLabel
+                    key={category}
+                    control={
+                      <Switch
+                        size="small"
+                        checked={prefs[category] !== false}
+                        onChange={() => togglePref(category)}
+                      />
+                    }
+                    label={label}
+                    slotProps={{ typography: { variant: 'caption' } }}
+                  />
+                ))}
+              </Stack>
               {rows.length === 0 && !loading ? (
                 <Typography variant="body2" color="text.secondary">
                   {"You're all caught up."}
