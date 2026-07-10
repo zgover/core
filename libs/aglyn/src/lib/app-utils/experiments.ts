@@ -145,3 +145,66 @@ export function summarizeVariantStats(stats: {
     rate: exposures > 0 ? conversions / exposures : 0,
   }
 }
+
+export interface VariantComparison {
+  /** Relative conversion-rate lift vs the control; null when unmeasurable. */
+  lift: number | null
+  /**
+   * One-sided confidence (0..1) that the challenger genuinely beats the
+   * control — a two-proportion z-test through the normal CDF. Null until
+   * both variants have exposures and at least one conversion exists.
+   */
+  confidence: number | null
+}
+
+/** Abramowitz–Stegun erf approximation (max error ~1.5e-7). */
+function erf(x: number): number {
+  const sign = x < 0 ? -1 : 1
+  const t = 1 / (1 + 0.3275911 * Math.abs(x))
+  const y =
+    1 -
+    (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t -
+      0.284496736) *
+      t +
+      0.254829592) *
+      t *
+      Math.exp(-x * x)
+  return sign * y
+}
+
+/** Standard normal CDF. */
+function normalCdf(z: number): number {
+  return 0.5 * (1 + erf(z / Math.SQRT2))
+}
+
+/**
+ * Compares a challenger variant against the control (AGL-265): lift =
+ * relative rate change; confidence = P(challenger > control) from a
+ * pooled two-proportion z-test. Small samples return null confidence
+ * rather than a misleading number.
+ */
+export function compareVariants(
+  control: { exposures?: number; conversions?: number },
+  challenger: { exposures?: number; conversions?: number },
+): VariantComparison {
+  const a = summarizeVariantStats(control)
+  const b = summarizeVariantStats(challenger)
+  const lift = a.rate > 0 ? (b.rate - a.rate) / a.rate : null
+  if (
+    a.exposures < 1 ||
+    b.exposures < 1 ||
+    a.conversions + b.conversions < 1
+  ) {
+    return { lift, confidence: null }
+  }
+  const pooled =
+    (a.conversions + b.conversions) / (a.exposures + b.exposures)
+  const standardError = Math.sqrt(
+    pooled * (1 - pooled) * (1 / a.exposures + 1 / b.exposures),
+  )
+  if (!Number.isFinite(standardError) || standardError === 0) {
+    return { lift, confidence: null }
+  }
+  const z = (b.rate - a.rate) / standardError
+  return { lift, confidence: normalCdf(z) }
+}

@@ -17,6 +17,7 @@
 
 import {
   assignExperimentVariant,
+  compareVariants,
   summarizeVariantStats,
   validateExperiment,
   type HostExperiment,
@@ -88,6 +89,42 @@ describe('experiments (AGL-252)', () => {
       validateExperiment({ ...running, target: 'section', nodeId: '' }),
     ).toMatch(/element id/)
     expect(validateExperiment({ ...running, name: ' ' })).toMatch(/Name/)
+  })
+
+  it('compares variants: lift + z-test confidence (AGL-265)', () => {
+    // Clear winner: 20% vs 10% on large samples → high confidence.
+    const strong = compareVariants(
+      { exposures: 1000, conversions: 100 },
+      { exposures: 1000, conversions: 200 },
+    )
+    expect(strong.lift).toBeCloseTo(1.0)
+    expect(strong.confidence).toBeGreaterThan(0.99)
+    // A worse challenger: confidence well below 0.5.
+    const worse = compareVariants(
+      { exposures: 1000, conversions: 200 },
+      { exposures: 1000, conversions: 100 },
+    )
+    expect(worse.confidence).toBeLessThan(0.01)
+    // Tiny samples stay honest: null confidence.
+    expect(
+      compareVariants(
+        { exposures: 0, conversions: 0 },
+        { exposures: 3, conversions: 1 },
+      ).confidence,
+    ).toBeNull()
+    expect(
+      compareVariants(
+        { exposures: 5, conversions: 0 },
+        { exposures: 5, conversions: 0 },
+      ).confidence,
+    ).toBeNull()
+    // Zero control rate → lift is null, not Infinity.
+    expect(
+      compareVariants(
+        { exposures: 100, conversions: 0 },
+        { exposures: 100, conversions: 10 },
+      ).lift,
+    ).toBeNull()
   })
 
   it('summarizes stats', () => {

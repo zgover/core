@@ -17,6 +17,7 @@
 'use client'
 
 import {
+  compareVariants,
   createResourceUid,
   HOST_EVENT_TYPES,
   SITE_EVENT_TYPES,
@@ -216,6 +217,23 @@ export function HostExperimentsCard(props: HostExperimentsCardProps) {
     winnerVariantId?: string,
   ) => {
     if (!experiment.$id) return
+    // One running experiment per screen (AGL-265): the page runner only
+    // serves the first, so a second would silently never split traffic.
+    if (status === 'running' && experiment.screenId) {
+      const clash = experiments.find(
+        (candidate) =>
+          candidate.$id !== experiment.$id &&
+          candidate.status === 'running' &&
+          candidate.screenId === experiment.screenId,
+      )
+      if (clash) {
+        return void enqueueSnackbar(
+          `"${clash.name}" is already running on that screen — pause or ` +
+            'finish it first',
+          { variant: 'warning', persist: false },
+        )
+      }
+    }
     await setDoc(
       doc(firestore, 'hosts', hostId, 'experiments', experiment.$id),
       {
@@ -542,26 +560,59 @@ export function HostExperimentsCard(props: HostExperimentsCardProps) {
                 <TableCell>{'Exposures'}</TableCell>
                 <TableCell>{'Conversions'}</TableCell>
                 <TableCell>{'Rate'}</TableCell>
+                <TableCell>{'vs control'}</TableCell>
                 <TableCell align="right" />
               </TableRow>
             </TableHead>
             <TableBody>
-              {(results?.experiment.variants ?? []).map((variant) => {
+              {(results?.experiment.variants ?? []).map((variant, index) => {
                 const summary = summarizeVariantStats(
                   results?.stats[variant.id] ?? {},
                 )
+                // Lift + z-test confidence vs the first variant (AGL-265).
+                const control = results?.experiment.variants[0]
+                const comparison =
+                  index > 0 && control
+                    ? compareVariants(
+                        results?.stats[control.id] ?? {},
+                        results?.stats[variant.id] ?? {},
+                      )
+                    : null
+                const leader =
+                  summary.exposures > 0 &&
+                  (results?.experiment.variants ?? []).every((other) => {
+                    const otherSummary = summarizeVariantStats(
+                      results?.stats[other.id] ?? {},
+                    )
+                    return summary.rate >= otherSummary.rate
+                  })
                 return (
-                  <TableRow key={variant.id}>
+                  <TableRow key={variant.id} selected={leader}>
                     <TableCell>
                       {variant.name ?? variant.id.toUpperCase()}
                       {results?.experiment.winnerVariantId === variant.id
                         ? ' 🏆'
-                        : ''}
+                        : leader
+                          ? ' ▲'
+                          : ''}
                     </TableCell>
                     <TableCell>{summary.exposures}</TableCell>
                     <TableCell>{summary.conversions}</TableCell>
                     <TableCell>
                       {`${(summary.rate * 100).toFixed(1)}%`}
+                    </TableCell>
+                    <TableCell>
+                      {comparison
+                        ? `${
+                            comparison.lift != null
+                              ? `${comparison.lift >= 0 ? '+' : ''}${(comparison.lift * 100).toFixed(0)}%`
+                              : '—'
+                          }${
+                            comparison.confidence != null
+                              ? ` · ${(comparison.confidence * 100).toFixed(0)}% conf.`
+                              : ' · needs data'
+                          }`
+                        : 'control'}
                     </TableCell>
                     <TableCell align="right">
                       {results?.experiment.status !== 'done' ? (
