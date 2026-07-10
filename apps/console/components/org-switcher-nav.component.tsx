@@ -17,9 +17,13 @@
 'use client'
 
 import { generateOrgSlug } from '@aglyn/aglyn'
-import { ICON_VARIANT_MENU_DOWN } from '@aglyn/shared-data-enums'
+import {
+  ICON_VARIANT_MENU_DOWN,
+  ICON_VARIANT_SYMBOL_SECURE,
+} from '@aglyn/shared-data-enums'
 import { AppLink, MdiIcon } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { useUser } from '@aglyn/tenant-feature-instance'
 import {
   Button,
   Dialog,
@@ -36,12 +40,10 @@ import {
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { useUser } from '@aglyn/tenant-feature-instance'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
 import { buildRoute, Route } from '../constants/route-links'
+import { useOrgWorkspace } from '../hooks/use-org-workspace'
 
-const WORKSPACE_DOMAIN =
-  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
 /**
  * Slack-style organization switcher (AGL-236), rendered in the secondary
@@ -101,11 +103,24 @@ export function OrgSwitcherNav() {
       <Tooltip title={`Workspace: ${currentOrg.orgName ?? currentOrg.$id}`}>
         <Button
           size="small"
-          variant="outlined"
-          color="inherit"
+          variant="contained"
+          color="primary"
           onClick={(event) => setAnchor(event.currentTarget)}
-          endIcon={<MdiIcon path={ICON_VARIANT_MENU_DOWN} fontSize="small" />}
-          sx={{ textTransform: 'none', maxWidth: 240 }}
+          startIcon={
+            <MdiIcon
+              path={ICON_VARIANT_SYMBOL_SECURE}
+              fontSize={'small'}
+            />
+          }
+          endIcon={
+            <MdiIcon path={ICON_VARIANT_MENU_DOWN} fontSize="small" />
+          }
+          sx={{
+            maxWidth: 240,
+            textTransform: 'none',
+            '& .MuiButton-endIcon': { marginLeft: 0 },
+            '& .MuiButton-endIcon>*:nth-of-type(1)': { fontSize: `1.7em` },
+          }}
         >
           <Typography variant="subtitle2" noWrap>
             {currentOrg.orgName ?? currentOrg.slug ?? currentOrg.$id}
@@ -131,7 +146,11 @@ export function OrgSwitcherNav() {
           >
             <ListItemText
               primary={org.orgName ?? org.$id}
-              secondary={org.slug ? `${org.slug}.${WORKSPACE_DOMAIN} · ${org.role}` : org.role}
+              secondary={
+                org.slug
+                  ? `${org.slug}.${WORKSPACE_DOMAIN} · ${org.role}`
+                  : org.role
+              }
             />
           </MenuItem>
         ))}
@@ -164,7 +183,7 @@ export function OrgSwitcherNav() {
           sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}
         >
           <Typography variant="body2" color="text.secondary">
-            {'Organizations own sites and share media, data, plugins and ' +
+            {'Organizations own hosts and share media, data, plugins and ' +
               'billing across them. You become the owner.'}
           </Typography>
           <TextField

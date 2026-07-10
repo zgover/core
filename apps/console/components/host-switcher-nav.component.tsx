@@ -22,6 +22,7 @@ import {
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
 import { AppLink, MdiIcon } from '@aglyn/shared-ui-jsx'
+import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import {
   Button,
   Divider,
@@ -33,7 +34,6 @@ import {
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { type MouseEvent, useCallback, useState } from 'react'
-import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { buildRoute, Route } from '../constants/route-links'
 import { useAdminHosts } from '../hooks/use-admin-hosts'
 
@@ -84,7 +84,9 @@ function HostSwitcherMenu(props: { uid: string }) {
     (nextHostId: string) => () => {
       setAnchorEl(null)
       if (nextHostId !== hostId) {
-        void router.push(buildRoute(Route.HOST_DASHBOARD, { hostId: nextHostId }))
+        void router.push(
+          buildRoute(Route.HOST_DASHBOARD, { hostId: nextHostId }),
+        )
       }
     },
     [hostId, router],
@@ -101,7 +103,7 @@ function HostSwitcherMenu(props: { uid: string }) {
     <>
       <Button
         id="center-nav-hosts"
-        variant="outlined"
+        variant="text"
         color="inherit"
         size="small"
         aria-haspopup="menu"

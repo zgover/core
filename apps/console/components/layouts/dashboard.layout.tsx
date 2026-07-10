@@ -26,13 +26,13 @@ import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { Box, Stack } from '@mui/material'
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
-import { useReleaseFlags } from '../../hooks/use-release-flags'
 import { buildRoute, Route } from '../../constants/route-links'
-import HostSwitcherNavComponent from '../host-switcher-nav.component'
+import { useReleaseFlags } from '../../hooks/use-release-flags'
 import DashboardHeaderComponent, {
   type DashboardHeaderProps,
 } from '../dashboard-header.component'
 import FooterComponent from '../footer.component'
+import HostSwitcherNavComponent from '../host-switcher-nav.component'
 import QuotaWarningsBanner from '../quota-warnings-banner.component'
 import SecondaryAppBarComponent, {
   type SecondaryAppBarProps,
@@ -43,14 +43,15 @@ const defaultTabBarTitle = (
     direction="row"
     spacing={{ sm: 0.15, md: 0.5 }}
     sx={{
-      alignItems: "center",
+      alignItems: 'center',
       typography: 'subtitle2',
       lineHeight: 'normal',
-      color: 'tertiary.main'
-    }}>
-    <HostSwitcherNavComponent />
-    <span>{'Secure'}</span>
+      color: 'tertiary.main',
+    }}
+  >
     <MdiIcon path={ICON_VARIANT_SYMBOL_SECURE.path} fontSize={'small'} />
+    <HostSwitcherNavComponent />
+    {/*<span>{'Secure'}</span>*/}
   </Stack>
 )
 
