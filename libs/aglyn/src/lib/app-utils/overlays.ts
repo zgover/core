@@ -50,6 +50,15 @@ export interface HostOverlay {
   excludePathPatterns?: string[]
   /** List order; lower renders first when several match. */
   order?: number
+  /**
+   * Aggregate engagement counters (AGL-271), incremented server-side by
+   * the tenant beacon — never written from the console.
+   */
+  stats?: {
+    impressions?: number
+    clicks?: number
+    dismissals?: number
+  }
 }
 
 /** Exact-or-prefix-glob path match: `/blog/*` matches `/blog/anything`. */

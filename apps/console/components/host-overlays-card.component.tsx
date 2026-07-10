@@ -235,6 +235,19 @@ export function HostOverlaysCard(props: HostOverlaysCardProps) {
     )
   }
 
+  // Engagement (AGL-271): lifetime counters the tenant beacon increments.
+  const statsLabel = (overlay: OverlayDraft) => {
+    const stats = overlay.stats ?? {}
+    const impressions = stats.impressions ?? 0
+    const clicks = stats.clicks ?? 0
+    const dismissals = stats.dismissals ?? 0
+    if (!impressions && !clicks && !dismissals) return '—'
+    const parts = [`${impressions.toLocaleString()} views`]
+    if (clicks) parts.push(`${clicks.toLocaleString()} clicks`)
+    if (dismissals) parts.push(`${dismissals.toLocaleString()} dismissed`)
+    return parts.join(' · ')
+  }
+
   const statusChip = (overlay: OverlayDraft) => {
     if (overlay.enabled === false) {
       return <Chip size="small" label="Off" />
@@ -296,6 +309,7 @@ export function HostOverlaysCard(props: HostOverlaysCardProps) {
                   <TableCell>{'Status'}</TableCell>
                   <TableCell>{'Window'}</TableCell>
                   <TableCell>{'Pages'}</TableCell>
+                  <TableCell>{'Engagement'}</TableCell>
                   <TableCell align="right">{'Actions'}</TableCell>
                 </TableRow>
               </TableHead>
@@ -330,6 +344,11 @@ export function HostOverlaysCard(props: HostOverlaysCardProps) {
                       {overlay.pathPatterns?.length
                         ? overlay.pathPatterns.join(', ')
                         : 'All pages'}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary">
+                        {statsLabel(overlay)}
+                      </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <IconButton

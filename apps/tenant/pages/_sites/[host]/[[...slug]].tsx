@@ -71,6 +71,8 @@ interface Props {
     textColor?: string
     dismissible?: boolean
     contentHash: string
+    /** Marketing-hub overlay doc id for per-overlay stats (AGL-271). */
+    overlayId?: string
   } | null
   /**
    * Promotional popup (AGL-196): copy binding-resolved server-side; the
@@ -90,6 +92,8 @@ interface Props {
     startAtMs?: number
     endAtMs?: number
     contentHash: string
+    /** Marketing-hub overlay doc id for per-overlay stats (AGL-271). */
+    overlayId?: string
   } | null
   /**
    * Screen/section A/B experiments for this screen (AGL-253): the client
@@ -530,6 +534,9 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
         ...(barConfig.textColor ? { textColor: barConfig.textColor } : {}),
         dismissible: barConfig.dismissible !== false,
         contentHash: contentHash(text),
+        ...(activeOverlays.bar?.$id
+          ? { overlayId: activeOverlays.bar.$id }
+          : {}),
       }
     }
     let popup: Props['popup'] = null
@@ -551,6 +558,9 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
         ...(popupConfig.startAtMs ? { startAtMs: popupConfig.startAtMs } : {}),
         ...(popupConfig.endAtMs ? { endAtMs: popupConfig.endAtMs } : {}),
         contentHash: contentHash(`${headline ?? ''}|${body}`),
+        ...(activeOverlays.popup?.$id
+          ? { overlayId: activeOverlays.popup.$id }
+          : {}),
       }
     }
 
@@ -633,13 +643,21 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
   }
 }
 
-/** Overlay metrics beacon (AGL-200): fire-and-forget, never blocks UX. */
-function sendOverlayBeacon(hostId: string | undefined, overlay: string) {
+/**
+ * Overlay metrics beacon (AGL-200): fire-and-forget, never blocks UX.
+ * With an `overlayId` (marketing-hub docs, AGL-271) the collector also
+ * increments that overlay's own stats counters.
+ */
+function sendOverlayBeacon(
+  hostId: string | undefined,
+  overlay: string,
+  overlayId?: string,
+) {
   if (!hostId) return
   try {
     navigator.sendBeacon(
       '/api/analytics/collect',
-      JSON.stringify({ hostId, overlay }),
+      JSON.stringify({ hostId, overlay, ...(overlayId ? { overlayId } : {}) }),
     )
   } catch {
     // Beacons are best-effort.
@@ -959,6 +977,11 @@ function AnnouncementBar(props: {
       setHidden(false)
     }
   }, [storageKey])
+  // Impression (AGL-271): once per pageview, only when actually shown.
+  useEffect(() => {
+    if (!hidden) sendOverlayBeacon(hostId, 'barImpression', bar.overlayId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hidden])
   if (hidden) return null
   const style: CSSProperties = {
     position: 'relative',
@@ -977,7 +1000,7 @@ function AnnouncementBar(props: {
   const text = bar.href ? (
     <a
       href={bar.href}
-      onClick={() => sendOverlayBeacon(hostId, 'barClick')}
+      onClick={() => sendOverlayBeacon(hostId, 'barClick', bar.overlayId)}
       style={{ color: 'inherit', textDecoration: 'underline' }}
     >
       {bar.text}
@@ -998,7 +1021,7 @@ function AnnouncementBar(props: {
             } catch {
               // Storage may be unavailable (private mode); hide anyway.
             }
-            sendOverlayBeacon(hostId, 'barDismiss')
+            sendOverlayBeacon(hostId, 'barDismiss', bar.overlayId)
             setHidden(true)
           }}
           style={{
@@ -1041,7 +1064,8 @@ function PopupOverlay(props: {
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
-    if (open) sendOverlayBeacon(hostId, 'popupImpression')
+    if (open) sendOverlayBeacon(hostId, 'popupImpression', popup.overlayId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, hostId])
 
   useEffect(() => {
@@ -1088,7 +1112,7 @@ function PopupOverlay(props: {
     } catch {
       // Private mode etc. — closing still works for this pageview.
     }
-    sendOverlayBeacon(hostId, kind)
+    sendOverlayBeacon(hostId, kind, popup.overlayId)
     setOpen(false)
   }
 

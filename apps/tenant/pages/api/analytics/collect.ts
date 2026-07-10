@@ -52,6 +52,7 @@ export default async function handler(
     const overlay = String(body.overlay ?? '')
     if (overlay) {
       const OVERLAY_EVENTS = [
+        'barImpression',
         'popupImpression',
         'popupDismiss',
         'popupClick',
@@ -71,6 +72,28 @@ export default async function handler(
             { overlays: { [overlay]: FieldValue.increment(1) } },
             { merge: true },
           )
+        // Per-overlay attribution (AGL-271): marketing-hub overlay docs
+        // carry their own lifetime counters so the console can show
+        // engagement per bar/popup, not just the host-wide totals.
+        const overlayId = String(body.overlayId ?? '')
+        if (overlayId && overlayId.length <= 64) {
+          const statKey = overlay.endsWith('Impression')
+            ? 'impressions'
+            : overlay.endsWith('Click')
+              ? 'clicks'
+              : 'dismissals'
+          // update(), not set(): beacons from stale cached pages must not
+          // resurrect a deleted overlay as a stats-only stray doc.
+          await firebaseAdmin
+            .app()
+            .firestore()
+            .collection('hosts')
+            .doc(hostId)
+            .collection('overlays')
+            .doc(overlayId)
+            .update({ [`stats.${statKey}`]: FieldValue.increment(1) })
+            .catch(() => undefined)
+        }
       }
       return res.status(204).end()
     }
