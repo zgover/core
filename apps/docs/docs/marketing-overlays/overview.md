@@ -7,7 +7,8 @@ description: Site-wide announcement bars and promotional popups with triggers, s
 # Marketing Overlays
 
 **Marketing overlays** are the announcement bars and popups that sit on top of your site to
-promote offers and capture emails — without touching your page designs.
+promote offers and capture emails — without touching your page designs. Manage them from
+your site's **Marketing** page.
 
 ```mermaid
 flowchart LR
@@ -44,6 +45,19 @@ The latest popup adds:
   and [campaigns](../email-campaigns/overview.md).
 - **Overlay metrics** — impressions and conversions for each overlay.
 - A **media picker** so popups can use images from your [media library](../media/overview.md).
+
+## Multiple overlays, scheduling & page targeting
+
+The **Marketing** page manages any number of bars and popups, each with:
+
+- A **schedule window** (show from / show until) — run a bar only during a sale.
+- **Page targeting** — comma-separated paths, with `/blog/*` matching a whole section,
+  plus a "never show on" exclude list.
+- An **enable switch** and a status chip (Live / Scheduled / Off).
+
+When several overlays match a page, the first bar and the first popup (by order) show.
+The single announcement bar and popup on the same page remain as your always-on default
+surfaces; configured overlays take priority over them.
 
 ## Related
 

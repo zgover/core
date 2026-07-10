@@ -92,6 +92,11 @@ export function hostNavTabItems(hostId: string) {
       href: buildRoute(Route.HOST_REDIRECTS, { hostId }),
     },
     {
+      id: 'nav-tab-marketing',
+      label: 'Marketing',
+      href: buildRoute(Route.HOST_MARKETING, { hostId }),
+    },
+    {
       id: 'nav-tab-logic',
       label: 'Logic',
       href: buildRoute(Route.HOST_LOGIC, { hostId }),

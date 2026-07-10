@@ -32,6 +32,7 @@ import getCollectionContent, {
 import getComponents from '../../../utils/get-components'
 import getTenant from '../../../utils/get-tenant'
 import getVariables from '../../../utils/get-variables'
+import getOverlays from '../../../utils/get-overlays'
 import getHost from '../../../utils/get-host'
 import getPublishedLayoutVersion from '../../../utils/get-layout-version'
 import getScreen from '../../../utils/get-screen'
@@ -473,11 +474,30 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       }
       return Math.abs(hash).toString(36)
     }
-    const barConfig = (hostRes.host as any)
-      ?.announcementBar as Aglyn.HostAnnouncementBar | undefined
-    const popupConfig = (hostRes.host as any)?.popup as
-      | Aglyn.HostPopup
-      | undefined
+    // Marketing hub overlays (AGL-251): scheduled/targeted overlay docs
+    // win over the legacy single announcementBar/popup host fields.
+    const overlayPath = `/${path.replace(/^\/+/, '')}`.replace(/\/{2,}/g, '/')
+    const overlayDocs = overlaysEntitled ? await getOverlays({ hostId }) : []
+    const activeOverlays = Aglyn.resolveActiveOverlays(overlayDocs, {
+      path: overlayPath,
+    })
+    const barConfig: Aglyn.HostAnnouncementBar | undefined = activeOverlays.bar
+      ? { enabled: true, ...activeOverlays.bar.bar }
+      : ((hostRes.host as any)?.announcementBar as
+          | Aglyn.HostAnnouncementBar
+          | undefined)
+    const popupConfig: Aglyn.HostPopup | undefined = activeOverlays.popup
+      ? {
+          enabled: true,
+          ...activeOverlays.popup.popup,
+          ...(activeOverlays.popup.startAtMs
+            ? { startAtMs: activeOverlays.popup.startAtMs }
+            : {}),
+          ...(activeOverlays.popup.endAtMs
+            ? { endAtMs: activeOverlays.popup.endAtMs }
+            : {}),
+        }
+      : ((hostRes.host as any)?.popup as Aglyn.HostPopup | undefined)
     const overlayVariables =
       overlaysEntitled &&
       ((barConfig?.enabled && barConfig.text) ||
