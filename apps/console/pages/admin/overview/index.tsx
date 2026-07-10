@@ -16,9 +16,22 @@
  */
 
 import { ICON_VARIANT_SYMBOL_SECURE } from '@aglyn/shared-data-enums'
-import { CardDisplay, Container, GridItems } from '@aglyn/shared-ui-jsx'
+import {
+  CardDisplay,
+  Container,
+  GridItems,
+  useConfirmationContext,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
-import { Alert, Stack, Typography } from '@mui/material'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import {
+  Alert,
+  Button,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -40,9 +53,69 @@ function formatDate(ms: number | null): string {
  */
 const AdminOverview: NextPageWithLayout = () => {
   const { data: user } = useUser()
+  const { enqueueSnackbar } = useSnackbar()
+  const { confirm } = useConfirmationContext()
   const [isStaff, setIsStaff] = useState<boolean | null>(null)
   const [data, setData] = useState<any | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Staff broadcast (wave v5): system.announcement to org admins.
+  const [broadcast, setBroadcast] = useState({
+    title: '',
+    body: '',
+    link: '',
+    plan: '',
+  })
+  const [broadcastBusy, setBroadcastBusy] = useState(false)
+
+  const handleBroadcast = async () => {
+    if (!broadcast.title.trim() || broadcastBusy) return
+    const accepted = await confirm({
+      title: 'Send this announcement?',
+      description:
+        `"${broadcast.title.trim()}" notifies every ` +
+        `${broadcast.plan || 'organization'} owner and admin — this is ` +
+        'audited.',
+      confirmationText: 'Broadcast',
+    })
+      .then(() => true)
+      .catch(() => false)
+    if (!accepted) return
+    setBroadcastBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/admin/broadcast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          title: broadcast.title.trim(),
+          ...(broadcast.body.trim() ? { body: broadcast.body.trim() } : {}),
+          ...(broadcast.link.trim() ? { link: broadcast.link.trim() } : {}),
+          ...(broadcast.plan ? { plan: broadcast.plan } : {}),
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        enqueueSnackbar(payload?.error ?? 'Broadcast failed', {
+          variant: 'warning',
+          allowDuplicate: true,
+        })
+      } else {
+        enqueueSnackbar(
+          `Announcement sent to admins of ${payload.orgs} organizations`,
+          { variant: 'success', persist: false },
+        )
+        setBroadcast({ title: '', body: '', link: '', plan: '' })
+      }
+    } catch (broadcastError) {
+      console.error(broadcastError)
+      enqueueSnackbar('An error has occurred', { variant: 'error' })
+    } finally {
+      setBroadcastBusy(false)
+    }
+  }
 
   useEffect(() => {
     let active = true
@@ -272,6 +345,96 @@ const AdminOverview: NextPageWithLayout = () => {
                           ))}
                         </Stack>
                       )}
+                    </CardDisplay>
+                  ),
+                },
+                {
+                  size: { xs: 12 },
+                  children: (
+                    <CardDisplay
+                      header={'Broadcast announcement'}
+                      contentGutterX
+                      contentGutterY
+                    >
+                      <Stack spacing={1.5}>
+                        <Typography variant="body2" color="text.secondary">
+                          {'Notifies every organization owner and admin ' +
+                            '(in-app, respects their mute preferences). ' +
+                            'Audited.'}
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                          <TextField
+                            size="small"
+                            label="Title"
+                            value={broadcast.title}
+                            onChange={(event) =>
+                              setBroadcast((previous) => ({
+                                ...previous,
+                                title: event.target.value,
+                              }))
+                            }
+                            sx={{ flex: 1 }}
+                          />
+                          <TextField
+                            select
+                            size="small"
+                            label="Audience"
+                            value={broadcast.plan}
+                            onChange={(event) =>
+                              setBroadcast((previous) => ({
+                                ...previous,
+                                plan: event.target.value,
+                              }))
+                            }
+                            sx={{ minWidth: 160 }}
+                          >
+                            <MenuItem value="">{'Every org'}</MenuItem>
+                            <MenuItem value="starter">{'Starter'}</MenuItem>
+                            <MenuItem value="pro">{'Pro'}</MenuItem>
+                            <MenuItem value="business">{'Business'}</MenuItem>
+                          </TextField>
+                        </Stack>
+                        <TextField
+                          size="small"
+                          label="Body (optional)"
+                          multiline
+                          minRows={2}
+                          value={broadcast.body}
+                          onChange={(event) =>
+                            setBroadcast((previous) => ({
+                              ...previous,
+                              body: event.target.value,
+                            }))
+                          }
+                        />
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ alignItems: 'center' }}
+                        >
+                          <TextField
+                            size="small"
+                            label="Link (optional)"
+                            placeholder="/manage/notifications or https://…"
+                            value={broadcast.link}
+                            onChange={(event) =>
+                              setBroadcast((previous) => ({
+                                ...previous,
+                                link: event.target.value,
+                              }))
+                            }
+                            sx={{ flex: 1 }}
+                          />
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            disabled={broadcastBusy || !broadcast.title.trim()}
+                            onClick={() => void handleBroadcast()}
+                          >
+                            {broadcastBusy ? 'Sending…' : 'Broadcast'}
+                          </Button>
+                        </Stack>
+                      </Stack>
                     </CardDisplay>
                   ),
                 },

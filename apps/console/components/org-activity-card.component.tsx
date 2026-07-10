@@ -21,10 +21,13 @@ import {
   List,
   ListItem,
   ListItemText,
+  MenuItem,
+  Stack,
+  TextField,
   Typography,
 } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 
@@ -47,15 +50,39 @@ export function OrgActivityCard(props: OrgActivityCardProps) {
     [firestore, orgId],
     { idField: '$id' },
   )
-  const items = useMemo(
+  // Filters (wave v5): free-text over action/actor plus a type select
+  // when the entries carry one.
+  const [filter, setFilter] = useState('')
+  const [typeFilter, setTypeFilter] = useState('')
+  const types = useMemo(
     () =>
-      [...(entries ?? [])]
-        .sort(
-          (a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
-        )
-        .slice(0, max),
-    [entries, max],
+      [
+        ...new Set(
+          (entries ?? [])
+            .map((entry: any) => String(entry.type ?? ''))
+            .filter(Boolean),
+        ),
+      ].sort(),
+    [entries],
   )
+  const items = useMemo(() => {
+    const term = filter.trim().toLowerCase()
+    return [...(entries ?? [])]
+      .filter(
+        (entry: any) =>
+          (!typeFilter || entry.type === typeFilter) &&
+          (!term ||
+            [entry.action, entry.actorEmail]
+              .filter(Boolean)
+              .join(' ')
+              .toLowerCase()
+              .includes(term)),
+      )
+      .sort(
+        (a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
+      )
+      .slice(0, max)
+  }, [entries, max, filter, typeFilter])
 
   return (
     <CardDisplay
@@ -64,9 +91,39 @@ export function OrgActivityCard(props: OrgActivityCardProps) {
       contentGutterY
       contentBordered="all"
     >
+      {(entries ?? []).length > 5 ? (
+        <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+          <TextField
+            size="small"
+            label="Filter"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            sx={{ maxWidth: 240, flexGrow: 1 }}
+          />
+          {types.length > 1 ? (
+            <TextField
+              select
+              size="small"
+              label="Type"
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value)}
+              sx={{ minWidth: 130 }}
+            >
+              <MenuItem value="">{'All'}</MenuItem>
+              {types.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+          ) : null}
+        </Stack>
+      ) : null}
       {items.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
-          {'No activity yet — changes made in the console appear here.'}
+          {(entries ?? []).length
+            ? 'Nothing matches the filter.'
+            : 'No activity yet — changes made in the console appear here.'}
         </Typography>
       ) : (
         <List dense disablePadding>

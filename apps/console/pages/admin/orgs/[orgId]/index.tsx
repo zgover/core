@@ -26,6 +26,7 @@ import { CardDisplay, Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import {
   Alert,
+  Button,
   Chip,
   Stack,
   Table,
@@ -33,6 +34,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from '@mui/material'
 import {
@@ -44,7 +46,7 @@ import {
   where,
 } from 'firebase/firestore'
 import { useParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
@@ -175,6 +177,54 @@ const AdminOrgDetail: NextPageWithLayout = () => {
       active = false
     }
   }, [isStaff, orgId, user])
+
+  // Staff notes (wave v5): support context that never reaches tenants.
+  const [notes, setNotes] = useState<
+    Array<{
+      $id: string
+      text: string
+      actorEmail: string | null
+      createdAt: number | null
+    }>
+  >([])
+  const [noteDraft, setNoteDraft] = useState('')
+  const [noteBusy, setNoteBusy] = useState(false)
+  const loadNotes = useCallback(async () => {
+    const idToken = await (user as any)?.getIdToken?.()
+    const response = await fetch(
+      `/api/admin/org-notes?orgId=${encodeURIComponent(orgId)}`,
+      { headers: idToken ? { Authorization: `Bearer ${idToken}` } : {} },
+    )
+    if (!response.ok) return
+    const payload = await response.json().catch(() => ({}))
+    setNotes(payload.notes ?? [])
+  }, [user, orgId])
+  useEffect(() => {
+    if (isStaff && orgId && user) void loadNotes().catch(() => undefined)
+  }, [isStaff, orgId, user, loadNotes])
+  const handleAddNote = async () => {
+    if (!noteDraft.trim() || noteBusy) return
+    setNoteBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/admin/org-notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({ orgId, text: noteDraft.trim() }),
+      })
+      if (response.ok) {
+        setNoteDraft('')
+        await loadNotes()
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setNoteBusy(false)
+    }
+  }
 
   const resolved = org ? resolveTenantEntitlements(org) : null
   const planDefaults = org?.plan
@@ -557,6 +607,80 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                                     entry.at?.seconds
                                       ? new Date(
                                           entry.at.seconds * 1000,
+                                        ).toLocaleString()
+                                      : '—'
+                                  }`}
+                                </Typography>
+                              </Stack>
+                            ))
+                          )}
+                        </Stack>
+                      </CardDisplay>
+                    ),
+                  },
+                  {
+                    size: { xs: 12, md: 6 },
+                    children: (
+                      <CardDisplay
+                        header={'Staff notes'}
+                        contentGutterX
+                        contentGutterY
+                      >
+                        <Stack spacing={1.5}>
+                          <Typography variant="body2" color="text.secondary">
+                            {'Visible to staff only — support and billing ' +
+                              'context that stays out of tenant data.'}
+                          </Typography>
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{ alignItems: 'flex-start' }}
+                          >
+                            <TextField
+                              size="small"
+                              label="Add a note"
+                              multiline
+                              maxRows={4}
+                              value={noteDraft}
+                              onChange={(event) =>
+                                setNoteDraft(event.target.value)
+                              }
+                              sx={{ flex: 1 }}
+                            />
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              size="small"
+                              disabled={noteBusy || !noteDraft.trim()}
+                              onClick={() => void handleAddNote()}
+                            >
+                              {'Save'}
+                            </Button>
+                          </Stack>
+                          {notes.length === 0 ? (
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                            >
+                              {'No notes yet.'}
+                            </Typography>
+                          ) : (
+                            notes.map((note) => (
+                              <Stack key={note.$id} spacing={0.25}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ whiteSpace: 'pre-wrap' }}
+                                >
+                                  {note.text}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {`${note.actorEmail ?? 'staff'} · ${
+                                    note.createdAt
+                                      ? new Date(
+                                          note.createdAt,
                                         ).toLocaleString()
                                       : '—'
                                   }`}
