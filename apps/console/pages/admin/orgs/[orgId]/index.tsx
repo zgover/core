@@ -126,6 +126,56 @@ const AdminOrgDetail: NextPageWithLayout = () => {
     [auditDocs, orgId],
   )
 
+  // Stripe billing detail (AGL-245): invoices + payment method.
+  const [billing, setBilling] = useState<{
+    invoices: Array<{
+      id: string
+      number: string | null
+      status: string | null
+      amountDueCents: number
+      currency: string
+      periodEnd: string | null
+      hostedInvoiceUrl: string | null
+    }>
+    paymentMethod: {
+      brand: string | null
+      last4: string | null
+      expMonth: number | null
+      expYear: number | null
+    } | null
+    delinquent?: boolean
+  } | null>(null)
+  const [billingError, setBillingError] = useState<string | null>(null)
+  useEffect(() => {
+    if (!isStaff || !orgId || !user) return
+    let active = true
+    void (async () => {
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch(
+          `/api/admin/org-billing?orgId=${encodeURIComponent(orgId)}`,
+          { headers: idToken ? { Authorization: `Bearer ${idToken}` } : {} },
+        )
+        const payload = await response.json()
+        if (!active) return
+        if (response.status === 501) {
+          setBillingError('Stripe is not configured on this deployment')
+          return
+        }
+        if (!response.ok) {
+          setBillingError(payload?.error ?? 'Billing lookup failed')
+          return
+        }
+        setBilling(payload)
+      } catch {
+        if (active) setBillingError('Billing lookup failed')
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [isStaff, orgId, user])
+
   const resolved = org ? resolveTenantEntitlements(org) : null
   const planDefaults = org?.plan
     ? PLAN_ENTITLEMENTS[org.plan as keyof typeof PLAN_ENTITLEMENTS]
@@ -377,6 +427,99 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                             </TableBody>
                           </Table>
                         ) : null}
+                      </CardDisplay>
+                    ),
+                  },
+                  {
+                    size: { xs: 12, md: 6 },
+                    children: (
+                      <CardDisplay
+                        header={'Billing history & payment method'}
+                        contentGutterX
+                        contentGutterY
+                      >
+                        {billingError ? (
+                          <Alert severity="info">{billingError}</Alert>
+                        ) : !billing ? (
+                          <Typography variant="body2" color="text.secondary">
+                            {'Loading…'}
+                          </Typography>
+                        ) : (
+                          <Stack spacing={1.5}>
+                            <Stack direction="row" spacing={1}>
+                              {billing.paymentMethod ? (
+                                <Chip
+                                  size="small"
+                                  label={`${billing.paymentMethod.brand ?? 'card'} •••• ${
+                                    billing.paymentMethod.last4 ?? '----'
+                                  } exp ${billing.paymentMethod.expMonth ?? '--'}/${
+                                    billing.paymentMethod.expYear ?? '--'
+                                  }`}
+                                />
+                              ) : (
+                                <Chip size="small" label="No payment method" />
+                              )}
+                              {billing.delinquent ? (
+                                <Chip
+                                  size="small"
+                                  color="error"
+                                  label="Delinquent"
+                                />
+                              ) : null}
+                            </Stack>
+                            {billing.invoices.length === 0 ? (
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {'No invoices yet.'}
+                              </Typography>
+                            ) : (
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>{'Invoice'}</TableCell>
+                                    <TableCell>{'Status'}</TableCell>
+                                    <TableCell>{'Amount'}</TableCell>
+                                    <TableCell>{'Period end'}</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {billing.invoices.map((invoice) => (
+                                    <TableRow key={invoice.id}>
+                                      <TableCell>
+                                        {invoice.hostedInvoiceUrl ? (
+                                          <a
+                                            href={invoice.hostedInvoiceUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                          >
+                                            {invoice.number ?? invoice.id}
+                                          </a>
+                                        ) : (
+                                          (invoice.number ?? invoice.id)
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {invoice.status ?? '—'}
+                                      </TableCell>
+                                      <TableCell>
+                                        {`$${(invoice.amountDueCents / 100).toFixed(2)} ${invoice.currency.toUpperCase()}`}
+                                      </TableCell>
+                                      <TableCell>
+                                        {invoice.periodEnd
+                                          ? new Date(
+                                              invoice.periodEnd,
+                                            ).toLocaleDateString()
+                                          : '—'}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            )}
+                          </Stack>
+                        )}
                       </CardDisplay>
                     ),
                   },

@@ -258,7 +258,19 @@ const AdminUsers: NextPageWithLayout = () => {
                     {visible.map((record) => (
                       <TableRow key={record.uid} hover>
                         <TableCell>
-                          <Typography variant="body2">
+                          {/* Detail page (AGL-244). */}
+                          <Typography
+                            variant="body2"
+                            component="a"
+                            href={buildRoute(Route.ADMIN_USER_DETAIL, {
+                              uid: record.uid,
+                            })}
+                            sx={{
+                              color: 'inherit',
+                              textDecoration: 'none',
+                              '&:hover': { textDecoration: 'underline' },
+                            }}
+                          >
                             {record.email ?? record.displayName ?? record.uid}
                           </Typography>
                           <Typography
