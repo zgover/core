@@ -37,6 +37,10 @@ and repeatable. You can:
 Save the workflow. When the trigger fires, the workflow runs and each run counts toward your
 tier's metered allowance.
 
+Each workflow row has a **Runs** log: every execution with its outcome (failed runs show
+in red with the error) and how long it took — so a misbehaving workflow is diagnosed
+from the console, not from visitor reports.
+
 ## Tips
 
 - Keep steps small and named — a workflow reads like a checklist.

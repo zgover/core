@@ -20,9 +20,15 @@ The **staff console** is where Aglyn operators manage the platform and support c
 - **Organization management** — audited plan and entitlement overrides, suspension,
   and GDPR-erasure flags, per organization.
 - **Entitlement editor** — full override editor for an organization's entitlements.
-- **Users admin** — staff-claim management and disabling users, with gated listing.
+- **Users admin** — staff-claim management and disabling users, with gated listing
+  and an **exact-email lookup** for accounts beyond the loaded pages.
   Each account opens a **detail page** showing identity/auth state, staff role, every
   organization membership with roles and per-site access, and its recent audit trail.
+- **Staff notes** — free-text support/billing context on each organization's detail
+  page, visible to staff only (never in tenant-readable data) and audited.
+- **Broadcast announcements** — push a product announcement or maintenance notice as
+  an in-app notification to every organization's owner/admins (optionally one plan
+  tier), respecting each recipient's mute preferences; audited.
 - **Billing insight** — every organization's Stripe **invoice history** and default
   **payment method** (with delinquency state) render on its detail page.
 - **Impersonation** — staff can open the console as a customer account (audited; a

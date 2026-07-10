@@ -59,6 +59,17 @@ When several overlays match a page, the first bar and the first popup (by order)
 The single announcement bar and popup on the same page remain as your always-on default
 surfaces; configured overlays take priority over them.
 
+## Engagement stats
+
+Each overlay tracks its own lifetime **views, clicks, and dismissals**, shown in the
+Engagement column of the overlays table — so you can tell whether a bar earns its
+screen space. Dismissals persist per visitor: a closed bar stays closed until you edit
+its text.
+
+With [Google Analytics](../analytics/overview.md) connected, the same events also land
+in your own GA property as `aglyn_overlay` events (with the overlay id and action), so
+you can segment sessions by overlay engagement.
+
 ## Related
 
 - [Email campaigns](../email-campaigns/overview.md)

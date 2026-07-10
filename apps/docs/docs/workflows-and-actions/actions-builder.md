@@ -35,9 +35,10 @@ can fire on **visitor behavior in the page**:
 - **Time on page** — a dwell-time threshold passes.
 - **Page visit** — the page loads.
 
-Page triggers can be limited to certain paths (`/pricing`, `/blog/*`). Each fires at most
-once per page view — or check **"Once per visitor"** to never re-fire for the same
-browser.
+Page triggers can be limited to certain paths (`/pricing`, `/blog/*`), and a
+**Frequency** setting controls re-fires: every matching pageview, **once per session**,
+**once per visitor**, or **with a cooldown** (a minimum number of minutes between fires
+for the same browser).
 
 Each automation row offers a **Runs** log (its recent executions) and, for page
 triggers, a **Test** button that exercises the server-side steps immediately.
@@ -54,16 +55,20 @@ Steps run in order and mix **in-page effects** with **server-side work**:
   campaign, fire a custom event to chain more actions.
 
 Every reference (workflow, dataset, webhook, overlay, list, campaign) is picked from a
-list and stored by id — renaming things never breaks an automation.
+list and stored by id — renaming things never breaks an automation. Deleting can,
+though, so the **Logic** page's **Reference health** card audits every automation,
+workflow, and computed-variable reference and lists any that point at something that no
+longer exists.
 
 ## Interactions from the Besigner
 
 Select any element in the Besigner and use the **Interactions** section of the
 attributes panel to attach a "when clicked" or "when scrolled into view" trigger to that
 exact element — no CSS selectors to write. The interaction is created disabled with a
-placeholder step; finish and enable it on the Workflows page. The same panel shows the
-element's existing interactions and offers **"A/B test this section"**, which creates a
-draft section experiment for the element.
+placeholder step; finish and enable it on the Workflows page. The same panel lists the
+element's existing interactions with an **enable switch and a remove button** — so you
+can pause or retire one without leaving the canvas — and offers **"A/B test this
+section"**, which creates a draft section experiment for the element.
 
 ## When to use which
 

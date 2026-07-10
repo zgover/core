@@ -29,6 +29,9 @@ Every site has a plan. **Free**, **Pro**, and **Business** unlock progressively 
 - The **billing page** shows meters for every quota — storage, bandwidth, datasets, seats,
   sends, and more — with redesigned plan cards.
 - A **usage-cap banner** appears site-wide at 80% and 100% of a quota, with an upgrade link.
+- Org admins also get an in-app **notification** when email sends, dataset count, or data
+  storage crosses 80% or 100% — once per threshold per month, so nobody has to be watching
+  the console to find out.
 - Usage is rolled up with a **cost-plus estimate** for metered features.
 
 ## Seats
@@ -57,6 +60,11 @@ same Stripe integration.
 - **Cancel any time** — the subscription runs to the end of the paid period; a warning
   chip shows the end date and you can resume before it hits.
 - **Invoice history** with **opens into Stripe-hosted invoices** from the billing page.
+- **Manage payment methods** opens the Stripe **Billing Portal** — update cards, view
+  receipts, and set tax details there. It works even after a subscription lapses.
+- If a payment fails, the console shows a **past-due banner** during Stripe's retry
+  window; access continues while you fix the card, and entitlements only downgrade if
+  the subscription dies.
 
 ## Related
 

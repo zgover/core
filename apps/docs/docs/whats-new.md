@@ -10,6 +10,30 @@ description: The features Aglyn shipped most recently, grouped by area with link
 A huge wave of features shipped over the last few days. Here's the tour, grouped by area.
 Each links into its section for the how-to.
 
+## Latest polish wave
+
+The newest round tightened every marketing, billing, and operations loop:
+
+- **[Overlays](marketing-overlays/overview.md)** now track per-overlay views, clicks,
+  and dismissals — mirrored into your GA property as `aglyn_overlay` events.
+- **[Campaigns](email-campaigns/overview.md)** gained `{{firstName|there}}`-style merge
+  tags and **scheduled sends** with cancelation.
+- **[Experiments](email-campaigns/overview.md#experiments)** can end on a date or
+  **auto-declare a winner** at your chosen confidence level, and exposures/conversions
+  mirror into GA as `aglyn_experiment` events.
+- **[Automations](workflows-and-actions/actions-builder.md)** picked up frequency
+  controls: once per session, once per visitor, or a cooldown window.
+- **[Workflows](workflows-and-actions/build-a-workflow.md)** log every run with outcome
+  and duration; the Logic page's **Reference health** card flags automations pointing at
+  deleted workflows, datasets, or functions.
+- **[Dataset imports](datasets/import-export.md)** can **upsert on a key field** instead
+  of appending duplicates.
+- **[Billing](billing-and-plans/overview.md)** added the Stripe **Billing Portal** for
+  payment methods, a past-due banner during retry windows, and usage-threshold
+  notifications to org admins.
+- The **Marketing hub** opens with an at-a-glance rollup of live overlays, email
+  engagement, and experiment states; commerce orders now notify site managers in-app.
+
 ## Build & design
 
 - **[The Besigner](besigner/overview.md)** — multi-select across hierarchy and canvas,
