@@ -25,7 +25,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * client-side (OrgWorkspaceProvider); this only stops dead subdomains
  * from rendering a broken console.
  *
- * Inert until ops sets NEXT_PUBLIC_WORKSPACE_DOMAIN (e.g. "aglyn.com")
+ * Inert until ops sets NEXT_PUBLIC_WORKSPACE_DOMAIN (e.g. "aglyn.io" — the console apex is app.aglyn.io)
  * on the console deployment alongside the wildcard domain — the tenant
  * sites' own subdomain space must not be claimed by accident.
  */
@@ -33,7 +33,7 @@ const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
 const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY
 
-const APEX_LABELS = new Set(['www', 'console'])
+const APEX_LABELS = new Set(['www', 'console', 'app'])
 const CACHE_TTL_MS = 60_000
 const slugCache = new Map<string, { known: boolean; at: number }>()
 
@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   const apex = request.nextUrl.clone()
-  apex.hostname = `console.${WORKSPACE_DOMAIN}`
+  apex.hostname = `app.${WORKSPACE_DOMAIN}`
   apex.pathname = '/'
   apex.search = `?unknown-workspace=${encodeURIComponent(slug)}`
   return NextResponse.redirect(apex)

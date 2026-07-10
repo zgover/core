@@ -40,9 +40,9 @@ const SELECTED_ORG_STORAGE_KEY = 'aglyn.selectedOrgId'
 
 /**
  * Console hostnames that are NOT org workspaces. Anything else with a
- * subdomain (e.g. business1.aglyn.com) resolves through orgSlugs.
+ * subdomain (e.g. business1.aglyn.io) resolves through orgSlugs.
  */
-const APEX_LABELS = new Set(['console', 'www', 'localhost', 'aglyn'])
+const APEX_LABELS = new Set(['console', 'www', 'app', 'localhost', 'aglyn'])
 
 function subdomainSlugFromLocation(): string | null {
   if (typeof window === 'undefined') return null

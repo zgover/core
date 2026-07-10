@@ -37,11 +37,14 @@ import { useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import { useOrgWorkspace } from '../hooks/use-org-workspace'
 
+const WORKSPACE_DOMAIN =
+  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+
 /**
  * Slack-style organization switcher (AGL-236), rendered in the secondary
  * app bar. Switching scopes the console to that org (persisted locally);
  * once wildcard workspace subdomains are live the menu will navigate to
- * {slug}.aglyn.com instead.
+ * {slug}.aglyn.io instead.
  */
 export function OrgSwitcherNav() {
   const { data: user } = useUser()
@@ -123,7 +126,7 @@ export function OrgSwitcherNav() {
           >
             <ListItemText
               primary={org.orgName ?? org.$id}
-              secondary={org.slug ? `${org.slug}.aglyn.com · ${org.role}` : org.role}
+              secondary={org.slug ? `${org.slug}.${WORKSPACE_DOMAIN} · ${org.role}` : org.role}
             />
           </MenuItem>
         ))}
@@ -170,7 +173,7 @@ export function OrgSwitcherNav() {
             slotProps={{
               input: {
                 endAdornment: (
-                  <InputAdornment position="end">{'.aglyn.com'}</InputAdornment>
+                  <InputAdornment position="end">{`.${WORKSPACE_DOMAIN}`}</InputAdornment>
                 ),
               },
             }}

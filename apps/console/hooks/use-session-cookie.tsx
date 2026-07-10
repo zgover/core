@@ -22,8 +22,8 @@ import { useEffect, useRef } from 'react'
 
 /**
  * Cross-subdomain session sync (AGL-236). Firebase client auth is
- * per-origin, so each {org}.aglyn.com workspace starts signed out even
- * when console.aglyn.com is authenticated. This hook keeps the parent-
+ * per-origin, so each {org}.aglyn.io workspace starts signed out even
+ * when app.aglyn.io is authenticated. This hook keeps the parent-
  * domain `__session` cookie in step with client auth:
  *
  * - signed in  → mint/refresh the cookie (idempotent POST);

@@ -20,11 +20,11 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 const SESSION_COOKIE = '__session'
 const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000
-const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
+const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
 /**
  * Cross-subdomain sessions (AGL-236): Firebase client auth persists
- * per-origin, so hopping between {org}.aglyn.com workspaces would force
+ * per-origin, so hopping between {org}.aglyn.io workspaces would force
  * re-login. POST mints a session cookie scoped to the parent domain from
  * a fresh ID token; GET exchanges the cookie for a custom token so a new
  * subdomain's client can sign in silently; DELETE clears it on sign-out.
