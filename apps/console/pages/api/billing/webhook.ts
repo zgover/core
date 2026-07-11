@@ -275,17 +275,69 @@ export default async function handler(
       if (hostId && productId) {
         const firestore = firebaseAdmin.app().firestore()
         const hostRef = firestore.collection('hosts').doc(String(hostId))
-        await hostRef
-          .collection('orders')
-          .doc(String(object.id))
-          .set({
+        // Orders v1 (AGL-283): line-item snapshot + totals + timeline with
+        // a per-host sequential number; legacy flat fields stay for old
+        // rows/readers. Transaction keeps numbers gapless per webhook
+        // delivery (replays reuse the same order doc id, so re-numbering
+        // is bounded to Stripe's at-least-once edge).
+        const orderRef = hostRef.collection('orders').doc(String(object.id))
+        const counterRef = hostRef.collection('counters').doc('orders')
+        const amountCents = Number(object?.amount_total ?? 0)
+        const productForSnapshot = await hostRef
+          .collection('products')
+          .doc(String(productId))
+          .get()
+        const snapshotName = String(
+          productForSnapshot.get('name') ?? 'Product',
+        )
+        await firestore.runTransaction(async (transaction) => {
+          const [existing, counter] = await Promise.all([
+            transaction.get(orderRef),
+            transaction.get(counterRef),
+          ])
+          if (existing.exists) return
+          const number = Number(counter.get('next') ?? 1)
+          transaction.set(counterRef, { next: number + 1 }, { merge: true })
+          transaction.set(orderRef, {
+            number,
+            status: 'paid',
+            channel: 'online',
+            lineItems: [
+              {
+                productId: String(productId),
+                ...(object.metadata?.variantId
+                  ? { variantId: String(object.metadata.variantId) }
+                  : {}),
+                name: snapshotName,
+                quantity: 1,
+                unitAmountCents: amountCents,
+              },
+            ],
+            totals: Aglyn.computeOrderTotals(
+              [
+                {
+                  productId: String(productId),
+                  name: snapshotName,
+                  quantity: 1,
+                  unitAmountCents: amountCents,
+                },
+              ],
+              { feeCents: Number(feeCents ?? 0) },
+            ),
+            timeline: [{ atMs: Date.now(), event: 'paid' }],
+            paymentIntentId: String(object?.payment_intent ?? '') || null,
+            checkoutSessionId: String(object.id),
+            customerName: object?.customer_details?.name ?? null,
+            createdAtMs: Date.now(),
+            // Legacy Commerce Starter fields (AGL-90).
             productId,
-            amountCents: Number(object?.amount_total ?? 0),
+            amountCents,
             feeCents: Number(feeCents ?? 0),
             customerEmail: object?.customer_details?.email ?? null,
             ...(couponCode ? { couponCode } : {}),
             createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
           })
+        })
         // In-app order notification (wave v6): host managers see sales
         // in the bell, not just the owner's email.
         void notifyHostManagers(String(hostId), {
