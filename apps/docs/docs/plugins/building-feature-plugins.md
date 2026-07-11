@@ -27,9 +27,18 @@ the Besigner canvas bundle.
 **Sharing app hooks.** A relocated console page can't import console-app
 hooks. Genuinely reusable ones move into a shared lib the plugin can import —
 e.g. `useFirestoreCollection`, `useFirestoreDoc`, and `useHostOrgId` now live
-in `@aglyn/tenant-feature-instance` (the app keeps thin re-export shims).
-Watch the dependency cascade: a hook or component that transitively needs the
-org/session context or the media browser is not a cheap promotion.
+in `@aglyn/tenant-feature-instance`, and `HubTabs` in `@aglyn/shared-ui-next`
+(the app keeps thin re-export shims).
+
+**Reaching app-only UI (media browser).** Some app UI can't move — the media
+library is coupled to the org/session context. Instead of importing it, a
+plugin consumes it through a context: `MediaPickerContext` /
+`useMediaPicker()` in `@aglyn/aglyn` exposes `pickMedia(): Promise<PickedMedia
+| null>`. The shell mounts the app's `ConsoleMediaPickerProvider` (which owns
+the real dialog) around every plugin page, so a plugin component just calls
+`pickMedia()` and gets the chosen asset — see the commerce product editor.
+This is the escape hatch for the dependency cascade a naive promotion would
+hit.
 
 ## The UI half
 
@@ -154,6 +163,7 @@ export default function EventsConsolePage({ hostId, entitled }: ConsolePluginPag
   campaigns composer, audience lists, and a dedicated email-screens list moved
   into the plugin and surface as the **Emails** page; the Besigner offers only
   email-safe blocks when editing an email document.
-- **Commerce** (`libs/plugins/commerce`) — nav registered through the registry
-  (AGL-395); the page body still lives in the app pending a plugin-consumable
-  media-picker context (the product editor's media browser needs it).
+- **Commerce** (`libs/plugins/commerce`) — full console relocation (AGL-395):
+  all Products management cards + the `CommerceConsolePage` live in the plugin;
+  the product editor reaches the console media browser through
+  `useMediaPicker()`.
