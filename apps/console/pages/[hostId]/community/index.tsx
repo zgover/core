@@ -17,6 +17,7 @@
 
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container } from '@aglyn/shared-ui-jsx'
+import { Stack } from '@mui/material'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import CommunityBrowse from '../../../components/community/community-browse.component'
 import HostPluginsCard from '../../../components/community/host-plugins-card.component'
@@ -55,8 +56,10 @@ const HostCommunity: NextPageWithLayout = () => {
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <FeatureGate flag="release_community">
-            <HostPluginsCard hostId={hostId} />
-            <CommunityBrowse hostId={hostId} />
+            <Stack spacing={3}>
+              <HostPluginsCard hostId={hostId} />
+              <CommunityBrowse hostId={hostId} />
+            </Stack>
           </FeatureGate>
         </Container>
       </DashboardLayout>

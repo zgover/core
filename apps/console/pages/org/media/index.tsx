@@ -17,7 +17,7 @@
 'use client'
 
 import { ICON_VARIANT_HOST_GROUP } from '@aglyn/shared-data-enums'
-import { Container } from '@aglyn/shared-ui-jsx'
+import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Alert } from '@mui/material'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -58,9 +58,17 @@ const OrgMedia: NextPageWithLayout = () => {
             </Alert>
           ) : (
             currentOrg?.$id ? (
-            // Full library (org DAM parity): same folders, uploads,
-            // editing, references and quota meter as a site's media page.
-            <MediaLibraryComponent orgId={currentOrg.$id} />
+            // Full library (org DAM parity): same card framing, folders,
+            // uploads, editing, references and quota meter as a site's
+            // media page (AGL-368).
+            <CardDisplay
+              header={'Library'}
+              contentGutterX
+              contentGutterY
+              contentBordered="all"
+            >
+              <MediaLibraryComponent orgId={currentOrg.$id} />
+            </CardDisplay>
           ) : null
           )}
         </Container>
