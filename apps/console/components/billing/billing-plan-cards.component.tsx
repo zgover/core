@@ -51,6 +51,7 @@ export const PLAN_LABELS: Record<TenantPlan, string> = {
   starter: 'Starter',
   pro: 'Pro',
   business: 'Business',
+  advanced: 'Advanced',
 }
 
 const PLAN_TAGLINES: Record<TenantPlan, string> = {
@@ -58,6 +59,7 @@ const PLAN_TAGLINES: Record<TenantPlan, string> = {
   starter: 'Everything a single production site needs.',
   pro: 'For growing teams shipping several sites.',
   business: 'Scale, scheduling, and priority limits.',
+  advanced: 'High-volume commerce with zero platform fees.',
 }
 
 const quotaLabel = (value: number, unit?: string) =>
