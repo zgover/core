@@ -1,0 +1,396 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as Aglyn from '@aglyn/aglyn'
+import { mdiTagOutline } from '@aglyn/shared-data-mdi'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import MenuItem from '@mui/material/MenuItem'
+import Skeleton from '@mui/material/Skeleton'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { BUNDLE_ID } from '../constants/bundle-common'
+import { generatePresetId } from '../utils/generate-preset-id'
+
+// Component ids are persisted in screen documents; never rename.
+export const ID: Aglyn.ComponentId = 'product-detail'
+
+export interface ProductDetailProps {
+  /** Product slug; blank resolves from /products/{slug} in the URL. */
+  slug?: string
+  buyLabel?: string
+  /** Hide the description block (design it separately with tokens). */
+  hideDescription?: boolean
+}
+
+interface DetailVariant {
+  id: string
+  options?: Record<string, string>
+  priceUsd: number
+  compareAtPriceUsd?: number
+  soldOut: boolean
+  imageUrl?: string
+}
+
+interface Detail {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  mediaUrls: string[]
+  options: Aglyn.ProductOption[]
+  variants: DetailVariant[]
+}
+
+const SAMPLE: Detail = {
+  id: 'sample',
+  name: 'Sample product',
+  slug: '#',
+  description: 'Drop this block on your product page template.',
+  mediaUrls: [],
+  options: [{ name: 'Size', values: ['S', 'M', 'L'] }],
+  variants: [
+    { id: 'a', options: { Size: 'S' }, priceUsd: 29, soldOut: false },
+    { id: 'b', options: { Size: 'M' }, priceUsd: 29, soldOut: false },
+    { id: 'c', options: { Size: 'L' }, priceUsd: 32, soldOut: true },
+  ],
+}
+
+function slugFromLocation(): string {
+  if (typeof window === 'undefined') return ''
+  const match = window.location.pathname.match(/\/products\/([^/?#]+)/)
+  return match ? decodeURIComponent(match[1]) : ''
+}
+
+/**
+ * Product detail block (AGL-292): gallery, option pickers that resolve
+ * the variant (price/media/stock follow), quantity, and a buy button
+ * that charges through the server-priced checkout with the selected
+ * variant. Resolves its product from the /products/{slug} URL unless a
+ * slug prop pins it; sample data on the inert canvas.
+ */
+const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
+  (props, ref) => {
+    const { slug: slugProp, buyLabel, hideDescription, ...rest } = props
+    const { hostId } = Aglyn.useSite()
+    const [detail, setDetail] = useState<Detail | null | 'missing'>(null)
+    const [selections, setSelections] = useState<Record<string, string>>({})
+    const [quantity, setQuantity] = useState(1)
+    const [activeImage, setActiveImage] = useState(0)
+    const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle')
+    const [message, setMessage] = useState('')
+
+    const slug = slugProp || slugFromLocation()
+
+    useEffect(() => {
+      if (!hostId || !slug) return
+      let active = true
+      void fetch(
+        `/api/commerce/product?hostId=${encodeURIComponent(hostId)}` +
+          `&slug=${encodeURIComponent(slug)}`,
+      )
+        .then((response) => (response.ok ? response.json() : null))
+        .then((payload) => {
+          if (!active) return
+          const product = payload?.product as Detail | undefined
+          setDetail(product ?? 'missing')
+          if (product) {
+            const first =
+              product.variants.find((variant) => !variant.soldOut) ??
+              product.variants[0]
+            setSelections(first?.options ?? {})
+          }
+        })
+        .catch(() => {
+          if (active) setDetail('missing')
+        })
+      return () => {
+        active = false
+      }
+    }, [hostId, slug])
+
+    const resolved: Detail | null = hostId
+      ? detail === 'missing'
+        ? null
+        : detail
+      : SAMPLE
+
+    const variant = useMemo(() => {
+      if (!resolved) return undefined
+      return (
+        Aglyn.findVariant(
+          { variants: resolved.variants as any },
+          selections,
+        ) as DetailVariant | undefined
+      ) ?? resolved.variants[0]
+    }, [resolved, selections])
+
+    const handleBuy = async () => {
+      if (!hostId || !resolved || !variant || status === 'sending') return
+      setStatus('sending')
+      setMessage('')
+      try {
+        const response = await fetch('/api/commerce/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            hostId,
+            productId: resolved.id,
+            variantId: variant.id,
+            quantity,
+          }),
+        })
+        const payload = await response.json().catch(() => ({}))
+        if (response.ok && payload?.url) {
+          window.location.assign(payload.url)
+          return
+        }
+        setMessage(String(payload?.error ?? ''))
+        setStatus('error')
+      } catch {
+        setStatus('error')
+      }
+    }
+
+    if (hostId && detail === null) {
+      return (
+        <Box ref={ref} {...rest} sx={{ display: 'flex', gap: 3 }}>
+          <Skeleton variant="rectangular" width={320} height={320} />
+          <Box sx={{ flex: 1 }}>
+            <Skeleton width="60%" height={36} />
+            <Skeleton width="25%" />
+            <Skeleton width="90%" />
+          </Box>
+        </Box>
+      )
+    }
+    if (!resolved) {
+      return (
+        <Box ref={ref} {...rest} sx={{ p: 3 }}>
+          <Typography variant="body2" color="text.secondary">
+            {'Product not found.'}
+          </Typography>
+        </Box>
+      )
+    }
+
+    const galleryImage =
+      variant?.imageUrl ?? resolved.mediaUrls[activeImage] ?? resolved.mediaUrls[0]
+
+    return (
+      <Box
+        ref={ref}
+        {...rest}
+        sx={{
+          display: 'flex',
+          gap: 3,
+          flexDirection: { xs: 'column', md: 'row' },
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          {galleryImage ? (
+            <Box
+              component="img"
+              src={galleryImage}
+              alt={resolved.name}
+              sx={{
+                width: '100%',
+                aspectRatio: '1 / 1',
+                objectFit: 'cover',
+                borderRadius: 1,
+              }}
+            />
+          ) : (
+            <Box
+              sx={{
+                width: '100%',
+                aspectRatio: '1 / 1',
+                bgcolor: 'action.hover',
+                borderRadius: 1,
+              }}
+            />
+          )}
+          {resolved.mediaUrls.length > 1 ? (
+            <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+              {resolved.mediaUrls.map((url, index) => (
+                <Box
+                  key={`${url}-${index}`}
+                  component="img"
+                  src={url}
+                  alt=""
+                  onClick={() => setActiveImage(index)}
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    objectFit: 'cover',
+                    borderRadius: 1,
+                    cursor: 'pointer',
+                    border: 2,
+                    borderColor:
+                      index === activeImage ? 'secondary.main' : 'transparent',
+                  }}
+                />
+              ))}
+            </Box>
+          ) : null}
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            {resolved.name}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">{`$${variant?.priceUsd ?? 0}`}</Typography>
+            {variant?.compareAtPriceUsd ? (
+              <>
+                <Typography
+                  variant="body1"
+                  color="text.disabled"
+                  sx={{ textDecoration: 'line-through' }}
+                >
+                  {`$${variant.compareAtPriceUsd}`}
+                </Typography>
+                <Chip label="Sale" size="small" color="secondary" />
+              </>
+            ) : null}
+            {variant?.soldOut ? (
+              <Chip label="Sold out" size="small" variant="outlined" />
+            ) : null}
+          </Box>
+          {resolved.options.map((option) => (
+            <TextField
+              key={option.name}
+              label={option.name}
+              value={selections[option.name] ?? ''}
+              onChange={(event) =>
+                setSelections((prev) => ({
+                  ...prev,
+                  [option.name]: event.target.value,
+                }))
+              }
+              size="small"
+              select
+              fullWidth
+              sx={{ mb: 1.5 }}
+            >
+              {option.values.map((value) => (
+                <MenuItem key={value} value={value}>
+                  {value}
+                </MenuItem>
+              ))}
+            </TextField>
+          ))}
+          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 2 }}>
+            <TextField
+              label="Qty"
+              value={quantity}
+              onChange={(event) =>
+                setQuantity(
+                  Math.max(
+                    1,
+                    Math.min(99, Math.round(Number(event.target.value)) || 1),
+                  ),
+                )
+              }
+              size="small"
+              sx={{ width: 80 }}
+              slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              disabled={!hostId || status === 'sending' || variant?.soldOut}
+              onClick={handleBuy}
+              sx={{ flex: 1 }}
+            >
+              {variant?.soldOut
+                ? 'Sold out'
+                : status === 'sending'
+                  ? 'Redirecting…'
+                  : buyLabel || 'Buy now'}
+            </Button>
+          </Box>
+          {status === 'error' ? (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {message || 'Checkout is unavailable right now.'}
+            </Alert>
+          ) : null}
+          {!hideDescription && resolved.description ? (
+            <Typography variant="body1" color="text.secondary">
+              {resolved.description}
+            </Typography>
+          ) : null}
+        </Box>
+      </Box>
+    )
+  },
+)
+ProductDetail.displayName = 'AglynProductDetail'
+
+export const schema: Aglyn.ComponentSchema<ProductDetailProps> = {
+  $id: ID,
+  pluginId: BUNDLE_ID,
+  displayName: 'Product detail',
+  category: Aglyn.ComponentCategory.DATA_DISPLAY,
+  icon: { path: mdiTagOutline.path, sx: { color: '#2e7d32' } },
+  flags: { selfClosing: Aglyn.FEATURE_FLAG.ENABLED },
+  attributes: [
+    {
+      name: 'slug',
+      label: 'Product slug',
+      description:
+        'Pin to one product; blank follows the /products/{slug} URL ' +
+        '(product page template).',
+      component: Aglyn.FieldComponentType.TEXT_FIELD,
+    },
+    {
+      name: 'buyLabel',
+      label: 'Buy button label',
+      description: 'Defaults to "Buy now".',
+      component: Aglyn.FieldComponentType.TEXT_FIELD,
+    },
+    {
+      name: 'hideDescription',
+      label: 'Hide description',
+      description: 'Design the description separately with tokens.',
+      component: Aglyn.FieldComponentType.CHECKBOX,
+    },
+  ],
+}
+
+export const presets: Aglyn.PresetSchema[] = [
+  {
+    $id: generatePresetId(ID),
+    type: Aglyn.NodeType.PRESET,
+    displayName: 'Product detail',
+    pluginId: BUNDLE_ID,
+    description: 'Gallery, variant picker, and buy button for one product',
+    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    icon: { path: mdiTagOutline.path, sx: { color: '#2e7d32' } },
+    data: {
+      $id: null,
+      componentId: ID,
+      pluginId: BUNDLE_ID,
+      props: {},
+    },
+  },
+]
+
+export default ProductDetail

@@ -43,6 +43,11 @@ export default async function handler(
     typeof req.body === 'string' ? JSON.parse(req.body) : (req.body ?? {})
   const hostId = String(body.hostId ?? '')
   const productId = String(body.productId ?? '')
+  const variantId = String(body.variantId ?? '')
+  const quantity = Math.max(
+    1,
+    Math.min(99, Math.round(Number(body.quantity ?? 1))),
+  )
   const couponCode = String(body.couponCode ?? '')
     .trim()
     .toUpperCase()
@@ -65,15 +70,21 @@ export default async function handler(
     if (!product || product.deletedAt) {
       return res.status(404).json({ error: 'Unknown product' })
     }
-    const priceUsd = Number(product.priceUsd ?? 0)
+    // Variant pricing (AGL-292): the buyer's selection maps to a variant;
+    // absent variantId keeps the legacy default-variant behavior.
+    const lifted = Aglyn.liftLegacyProduct(product)
+    const variant = variantId
+      ? lifted.variants.find((item) => item.id === variantId)
+      : lifted.variants[0]
+    if (!variant) return res.status(404).json({ error: 'Unknown variant' })
+    const priceUsd = Number(variant.priceUsd ?? 0)
     if (!(priceUsd > 0) || priceUsd > Aglyn.COMMERCE_MAX_PRICE_USD) {
       return res.status(400).json({ error: 'Product is not purchasable' })
     }
     // Inventory (AGL-281): variant-aware, honoring the product's oversell
     // policy (backorder products keep selling at zero). Enforced here (the
     // block's display is cosmetic) and decremented by the webhook.
-    const lifted = Aglyn.liftLegacyProduct(product)
-    if (!Aglyn.canPurchase(lifted, undefined, 1)) {
+    if (!Aglyn.canPurchase(lifted, variant.id, quantity)) {
       return res.status(409).json({ error: 'Sold out' })
     }
 
@@ -98,7 +109,7 @@ export default async function handler(
         .json({ error: 'This site has not enabled payments yet' })
     }
 
-    let amountCents = Math.round(priceUsd * 100)
+    let amountCents = Math.round(priceUsd * 100) * quantity
     // Coupons (AGL-96): host-defined percent-off codes; invalid codes are
     // a visible 400, never a silent full-price charge.
     let appliedCoupon = ''
@@ -164,9 +175,11 @@ export default async function handler(
 
     const params = new URLSearchParams({
       mode: 'payment',
-      'line_items[0][quantity]': '1',
+      'line_items[0][quantity]': String(quantity),
       'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][unit_amount]': String(amountCents),
+      'line_items[0][price_data][unit_amount]': String(
+        Math.round(amountCents / quantity),
+      ),
       'line_items[0][price_data][product_data][name]': String(
         product.name ?? 'Product',
       ).slice(0, 120),
@@ -192,6 +205,8 @@ export default async function handler(
       'metadata[type]': 'commerce-order',
       'metadata[hostId]': hostId,
       'metadata[productId]': productId,
+      ...(variantId ? { 'metadata[variantId]': variantId } : {}),
+      'metadata[quantity]': String(quantity),
       'metadata[feeCents]': String(feeCents),
       ...(appliedCoupon ? { 'metadata[couponCode]': appliedCoupon } : {}),
     })

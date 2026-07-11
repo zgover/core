@@ -17,6 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { mdiStorefrontOutline } from '@aglyn/shared-data-mdi'
+import * as ProductDetail from './components/product-detail'
 import * as ProductGrid from './components/product-grid'
 import { BUNDLE_ID } from './constants/bundle-common'
 
@@ -33,6 +34,11 @@ export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
     component: ProductGrid.default,
     schema: ProductGrid.schema,
     presets: ProductGrid.presets,
+  },
+  {
+    component: ProductDetail.default,
+    schema: ProductDetail.schema,
+    presets: ProductDetail.presets,
   },
 ]
 

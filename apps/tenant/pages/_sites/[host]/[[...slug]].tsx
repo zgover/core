@@ -264,6 +264,84 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     console.debug('screenEntry', screenEntry)
 
     if (!Array.isArray(screenEntry)) {
+      // Product detail routes (AGL-292): /products/{slug} renders the
+      // host's designated PDP template screen (settings/store
+      // `pdpScreenId`, AGL-295) with product tokens; the product-detail
+      // block hydrates variants client-side from the same slug. Same
+      // mechanism as entry-template screens below.
+      const pdpSegments = path.split('/').filter(Boolean)
+      if (pdpSegments.length === 2 && pdpSegments[0] === 'products') {
+        const { firebaseAdmin } = await import('@aglyn/tenant-data-admin')
+        const adminFirestore = firebaseAdmin.app().firestore()
+        const hostDocRef = adminFirestore.collection('hosts').doc(hostId)
+        const [storeSettings, productSnapshot] = await Promise.all([
+          hostDocRef.collection('settings').doc('store').get(),
+          hostDocRef
+            .collection('products')
+            .where('slug', '==', pdpSegments[1])
+            .limit(1)
+            .get(),
+        ])
+        const pdpScreenId = storeSettings.get('pdpScreenId')
+        const productRaw = productSnapshot.docs[0]?.data() as any
+        if (
+          pdpScreenId &&
+          productRaw &&
+          !productRaw.deletedAt &&
+          productRaw.status === 'active'
+        ) {
+          const product = Aglyn.liftLegacyProduct(productRaw)
+          const templateRes = await getScreen({
+            hostId,
+            screenId: pdpScreenId,
+          })
+          if (templateRes.screen) {
+            const [minPrice, maxPrice] = Aglyn.productPriceRange(product)
+            const templateNodes = await composeScreenNodes({
+              hostId,
+              screenId: pdpScreenId,
+              screen: templateRes.screen,
+              tokens: {
+                'product.name': product.name,
+                'product.description': product.description ?? '',
+                'product.price':
+                  minPrice === maxPrice
+                    ? `$${minPrice}`
+                    : `From $${minPrice}`,
+                'product.image':
+                  product.mediaUrls?.[0] ?? product.imageUrl ?? '',
+                'product.slug': product.slug,
+              },
+            })
+            if (templateNodes) {
+              return {
+                props: JSON.parse(
+                  JSON.stringify({
+                    data: {
+                      host: hostRes.host,
+                      screen: {
+                        data: {
+                          ...templateRes.screen,
+                          seo: {
+                            ...((templateRes.screen as any).seo ?? {}),
+                            title: product.seo?.title ?? product.name,
+                            description:
+                              product.seo?.description ??
+                              product.description ??
+                              undefined,
+                          },
+                        },
+                      },
+                    },
+                    nodes: templateNodes,
+                  }),
+                ),
+                revalidate: 60,
+              }
+            }
+          }
+        }
+      }
       // Content collections fallback (AGL-81): /{collection} and
       // /{collection}/{entry} paths that aren't screens render the themed
       // blog surfaces.
