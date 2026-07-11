@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import { type PluginApiHandler } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { CampaignSendError, performCampaignSend } from './send'
+import { CampaignSendError, performCampaignSend } from './campaign-send'
 
 /**
  * Scheduled-campaign processor (AGL-272): scheduler-invoked (Cloud
@@ -27,10 +27,10 @@ import { CampaignSendError, performCampaignSend } from './send'
  * so overlapping runs never double-send; failures mark the campaign
  * `failed` with the reason instead of retrying forever.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const campaignProcessScheduledHandler: PluginApiHandler = async (
+  req,
+  res,
+) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }

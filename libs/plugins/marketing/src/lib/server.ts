@@ -23,6 +23,8 @@ import {
 import { registerPluginApiRoute, type PluginApiHandler } from '@aglyn/aglyn'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
+import { campaignProcessScheduledHandler } from './server/campaign-process-scheduled'
+import { campaignSendHandler } from './server/campaign-send'
 
 /**
  * Experiment beacon (AGL-252): counts an exposure or conversion on
@@ -111,7 +113,16 @@ const trackHandler: PluginApiHandler = async (req, res) => {
   }
 }
 
-/** Registers the marketing plugin's public API routes (AGL-396). */
+/** Registers the marketing plugin's public (site-facing) API routes (AGL-396). */
 export function registerMarketingApi(): void {
   registerPluginApiRoute('experiments/track', trackHandler)
+}
+
+/** Registers the marketing plugin's console-side API routes (AGL-396). */
+export function registerMarketingConsoleApi(): void {
+  registerPluginApiRoute('campaigns/send', campaignSendHandler)
+  registerPluginApiRoute(
+    'campaigns/process-scheduled',
+    campaignProcessScheduledHandler,
+  )
 }

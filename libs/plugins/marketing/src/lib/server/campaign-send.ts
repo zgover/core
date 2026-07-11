@@ -26,10 +26,13 @@ import {
   type EmailRenderProduct,
   type HostExperiment,
 } from '@aglyn/aglyn'
+import { type PluginApiHandler } from '@aglyn/aglyn'
 import {
-  orgDataCollectionForHost, firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
+  orgDataCollectionForHost,
+  firebaseAdmin,
+  getOrgForHost,
+} from '@aglyn/tenant-data-admin'
 import { createHash, createHmac } from 'crypto'
-import type { NextApiRequest, NextApiResponse } from 'next'
 
 const MAX_RECIPIENTS_PER_SEND = 500
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -465,10 +468,7 @@ export async function performCampaignSend(
  * `sendAtMs` for the processor, `cancel` withdraws a scheduled campaign.
  * All three require a site admin/editor.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const campaignSendHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -493,7 +493,7 @@ export default async function handler(
     return res.status(400).json({ error: 'Unknown audience' })
   }
 
-  const authorization = req.headers.authorization ?? ''
+  const authorization = String(req.headers.authorization ?? '')
   const idToken = authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : undefined

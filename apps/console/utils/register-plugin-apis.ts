@@ -16,6 +16,7 @@
  */
 
 import { registerBookingsConsoleApi } from '@aglyn/plugins-bookings/server'
+import { registerMarketingConsoleApi } from '@aglyn/plugins-marketing/server'
 
 /**
  * Plugin API routes for the console (authoring) app (AGL-396). The console
@@ -28,6 +29,7 @@ import { registerBookingsConsoleApi } from '@aglyn/plugins-bookings/server'
  */
 export function registerConsolePluginApis(): void {
   registerBookingsConsoleApi()
+  registerMarketingConsoleApi()
 }
 
 // Run on import so the registry is ready before the dispatcher resolves.
