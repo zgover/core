@@ -721,6 +721,7 @@ export default async function handler(
           name: object?.customer_details?.name ?? undefined,
           source: 'order',
           ...(marketingOptIn ? { marketingConsent: true } : {}),
+          purchaseCents: Number(object?.amount_total ?? 0),
           interaction: {
             refId: String(object.id),
             summary: `Placed an order ($${(Number(object?.amount_total ?? 0) / 100).toFixed(2)})`,
@@ -1013,6 +1014,7 @@ export default async function handler(
           email: object?.customer_details?.email,
           name: object?.customer_details?.name ?? undefined,
           source: 'order',
+          purchaseCents: Number(object?.amount_total ?? 0),
           interaction: {
             refId: String(object.id),
             summary: `Placed an order ($${(Number(object?.amount_total ?? 0) / 100).toFixed(2)})`,
