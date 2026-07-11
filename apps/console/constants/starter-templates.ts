@@ -44,6 +44,8 @@ export interface StarterTemplate {
 type NodeSpec = {
   id: string
   componentId: string
+  /** Bundle owning the component; defaults to 'mui' (AGL-300). */
+  pluginId?: string
   props?: Record<string, unknown>
   children?: NodeSpec[]
 }
@@ -61,7 +63,7 @@ function buildNodes(children: NodeSpec[]): Record<string, any> {
     map[spec.id] = {
       $id: spec.id,
       componentId: spec.componentId,
-      pluginId: 'mui',
+      pluginId: spec.pluginId ?? 'mui',
       parentId,
       props: spec.props ?? {},
       nodes: (spec.children ?? []).map((child) => child.id),
@@ -141,6 +143,88 @@ const contactForm = (prefix: string): NodeSpec => ({
     },
   ],
 })
+
+
+const commerceBlock = (
+  id: string,
+  componentId: string,
+  props?: Record<string, unknown>,
+): NodeSpec => ({ id, componentId, pluginId: 'commerce', props })
+
+/** Shared screens for the shop starters (AGL-300). */
+function shopScreens(prefix: string, digital: boolean): StarterTemplateScreen[] {
+  return [
+    {
+      displayName: 'Home',
+      slug: '',
+      seo: {
+        title: digital ? 'Digital shop' : 'Shop',
+        description: 'Browse our products.',
+      },
+      nodes: buildNodes([
+        heroSection(
+          `${prefix}h_`,
+          digital ? 'Downloads that level you up' : 'Gear you can trust',
+          digital
+            ? 'Instant delivery. Lifetime updates.'
+            : 'Quality parts, shipped fast.',
+        ),
+        commerceBlock(`${prefix}h_grid`, 'product-grid', {
+          source: 'all',
+          sort: 'newest',
+          columns: 3,
+          maxItems: 6,
+        }),
+        commerceBlock(`${prefix}h_news`, 'newsletter-signup', {
+          heading: 'Get updates and offers',
+        }),
+      ]),
+    },
+    {
+      displayName: 'Shop',
+      slug: 'shop',
+      seo: { title: 'All products' },
+      nodes: buildNodes([
+        text(`${prefix}s_title`, 'h3', 'All products'),
+        commerceBlock(`${prefix}s_grid`, 'product-grid', {
+          source: 'all',
+          columns: 4,
+          showFilters: true,
+        }),
+      ]),
+    },
+    {
+      displayName: 'Product page',
+      slug: 'product',
+      seo: { title: 'Product' },
+      nodes: buildNodes([
+        commerceBlock(`${prefix}p_detail`, 'product-detail', {}),
+      ]),
+    },
+    {
+      displayName: 'Cart',
+      slug: 'cart',
+      seo: { title: 'Your cart' },
+      nodes: buildNodes([
+        text(`${prefix}c_title`, 'h3', 'Your cart'),
+        commerceBlock(`${prefix}c_cart`, 'cart', {
+          variant: 'inline',
+          showCoupon: true,
+        }),
+      ]),
+    },
+    {
+      displayName: 'Account',
+      slug: 'account',
+      seo: { title: 'Your account' },
+      nodes: buildNodes([
+        commerceBlock(`${prefix}a_account`, 'customer-account', {
+          signedOutHeading: 'Your account',
+        }),
+      ]),
+    },
+  ]
+}
 
 export const STARTER_TEMPLATES: StarterTemplate[] = [
   {
@@ -322,5 +406,25 @@ export const STARTER_TEMPLATES: StarterTemplate[] = [
         ]),
       },
     ],
+  },
+  {
+    id: 'physical-shop',
+    displayName: 'Shop (physical products)',
+    description:
+      'Storefront starter: home with featured products, filterable shop, ' +
+      'product page, cart, and customer accounts. After applying, set the ' +
+      'Product page as the product template in Store settings.',
+    category: 'Commerce',
+    screens: shopScreens('ps_', false),
+  },
+  {
+    id: 'digital-shop',
+    displayName: 'Shop (digital products)',
+    description:
+      'Digital storefront starter: downloads-focused home, shop, product ' +
+      'page, cart, and accounts with a newsletter capture. Set the Product ' +
+      'page as the product template in Store settings after applying.',
+    category: 'Commerce',
+    screens: shopScreens('ds_', true),
   },
 ]
