@@ -20,6 +20,7 @@ import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import CatalogOrganizationCard from '../../../components/commerce/catalog-organization-card.component'
+import CommerceAnalyticsCard from '../../../components/commerce/commerce-analytics-card.component'
 import DiscountsCard from '../../../components/commerce/discounts-card.component'
 import HostCouponsCard from '../../../components/commerce/host-coupons-card.component'
 import LocationsCard from '../../../components/commerce/locations-card.component'
@@ -73,6 +74,10 @@ const HostProducts: NextPageWithLayout = () => {
           <GridItems
             spacing={3}
             items={[
+              {
+                size: { xs: 12 },
+                children: <CommerceAnalyticsCard hostId={hostId} />,
+              },
               {
                 size: { xs: 12 },
                 children: <ProductsHubCard hostId={hostId} />,
