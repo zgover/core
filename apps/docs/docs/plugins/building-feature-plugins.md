@@ -181,6 +181,13 @@ export default function BookingsConsolePage({
   shared tooling — the where-used dialog and its fetch util, plus the
   variable/function cards — which the app's workflows surface and besigner
   ƒx button import from `@aglyn/plugins-logic`. Always-on (not release-flagged).
+- **Workflows** (`libs/plugins/workflows`) — console-only (AGL-395): the
+  workflow builder, actions builder, and webhooks tabs, plus the shared
+  `HostActivityCard` (exported for the app dashboard + screen-view). Each tab
+  gates on its own plan flag (workflows / actions / webhooks), so all three
+  read the passed `tenant` rather than a single `entitled`. Depends on
+  `@aglyn/plugins-logic` for the where-used tooling — the first plugin→plugin
+  dependency.
 - **Data** (`libs/plugins/data`) — console-only, and dual-surfaced (AGL-395):
   the datasets editor is served both as the host `/data` plugin page and,
   because datasets are org-scoped, imported directly by the org `/org/data`
