@@ -101,6 +101,14 @@ export interface HostProduct {
   oversellPolicy?: 'deny' | 'backorder'
   /** Never taxed regardless of tax settings (AGL-285). */
   taxExempt?: boolean
+  /**
+   * Digital delivery (AGL-302): downloadable files for `digital`
+   * products. Buyers always download the CURRENT list, so uploading a
+   * new version re-delivers to everyone.
+   */
+  digitalFiles?: Array<{ url: string; fileName: string; version?: string }>
+  /** Max download attempts per order line; absent = unlimited. */
+  downloadLimit?: number
   /** Tracked-total at/below this alerts host managers (AGL-281). */
   lowStockThreshold?: number
   createdAtMs?: number

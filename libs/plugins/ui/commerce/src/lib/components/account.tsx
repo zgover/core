@@ -43,6 +43,12 @@ interface AccountData {
     displayName: string
     addresses: Aglyn.OrderAddress[]
   }
+  downloads?: Array<{
+    orderId: string
+    productId: string
+    productName: string
+    url: string
+  }>
   orders: Array<{
     id: string
     number: string
@@ -273,6 +279,25 @@ const CustomerAccount = forwardRef<HTMLDivElement, CustomerAccountProps>(
             </Box>
           ))
         )}
+
+        {(account.downloads?.length ?? 0) > 0 ? (
+          <>
+            <Divider textAlign="left">{'Downloads'}</Divider>
+            {account.downloads!.map((download) => (
+              <Box
+                key={`${download.orderId}:${download.productId}`}
+                sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
+              >
+                <Typography variant="body2" sx={{ flex: 1 }} noWrap>
+                  {download.productName}
+                </Typography>
+                <Button size="small" href={download.url}>
+                  {'Download'}
+                </Button>
+              </Box>
+            ))}
+          </>
+        ) : null}
 
         <Divider textAlign="left">{'Addresses'}</Divider>
         {account.member.addresses.map((address, index) => (

@@ -18,6 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { mintDownloadToken } from '../commerce/download'
 import { readMemberSession } from '../../../utils/membership'
 
 export interface AccountOrderView {
@@ -115,6 +116,32 @@ export default async function handler(
       })
       .sort((a, b) => b.createdAtMs - a.createdAtMs)
 
+    // Digital downloads (AGL-302): tokened links for digital lines on
+    // paid orders; files resolve to the product's current list.
+    const downloads: Array<{
+      orderId: string
+      productId: string
+      productName: string
+      url: string
+    }> = []
+    for (const docSnapshot of ordersSnapshot.docs) {
+      const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
+      if (['pending', 'cancelled', 'refunded'].includes(order.status)) continue
+      for (const line of order.lineItems ?? []) {
+        if (line.productType !== 'digital') continue
+        downloads.push({
+          orderId: docSnapshot.id,
+          productId: line.productId,
+          productName: line.name,
+          url:
+            `/api/commerce/download?hostId=${encodeURIComponent(hostId)}` +
+            `&orderId=${encodeURIComponent(docSnapshot.id)}` +
+            `&productId=${encodeURIComponent(line.productId)}` +
+            `&token=${mintDownloadToken(hostId, docSnapshot.id)}`,
+        })
+      }
+    }
+
     return res.status(200).json({
       member: {
         email,
@@ -122,6 +149,7 @@ export default async function handler(
         addresses: memberSnapshot.get('addresses') ?? [],
       },
       orders,
+      downloads,
     })
   } catch (error) {
     console.error(error)

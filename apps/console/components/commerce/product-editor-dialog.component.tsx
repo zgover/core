@@ -100,7 +100,9 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
   )
   const [draft, setDraft] = useState<Aglyn.HostProduct | null>(null)
   const [slugTouched, setSlugTouched] = useState(false)
-  const [pickerFor, setPickerFor] = useState<'media' | 'seo' | null>(null)
+  const [pickerFor, setPickerFor] = useState<'media' | 'seo' | 'digital' | null>(
+    null,
+  )
   // Lazy-init per open; parent remounts via `key` on product change.
   const current: Aglyn.HostProduct =
     draft ??
@@ -585,6 +587,74 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
           />
         </Stack>
 
+        {current.type === 'digital' ? (
+          <>
+            <Divider textAlign="left">{'Digital delivery'}</Divider>
+            {(current.digitalFiles ?? []).map((file, index) => (
+              <Stack key={index} direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ flex: 1 }} noWrap>
+                  {file.fileName}
+                  {file.version ? ` · v${file.version}` : ''}
+                </Typography>
+                <TextField
+                  label="Version"
+                  value={file.version ?? ''}
+                  onChange={(event) => {
+                    const digitalFiles = [...(current.digitalFiles ?? [])]
+                    digitalFiles[index] = {
+                      ...file,
+                      version: event.target.value.slice(0, 20),
+                    }
+                    update({ digitalFiles })
+                  }}
+                  size="small"
+                  sx={{ width: 100 }}
+                />
+                <Button
+                  size="small"
+                  color="error"
+                  onClick={() =>
+                    update({
+                      digitalFiles: (current.digitalFiles ?? []).filter(
+                        (_item, itemIndex) => itemIndex !== index,
+                      ),
+                    })
+                  }
+                >
+                  {'✕'}
+                </Button>
+              </Stack>
+            ))}
+            <Stack direction="row" spacing={2}>
+              <Button size="small" onClick={() => setPickerFor('digital')}>
+                {'Add file (media library)'}
+              </Button>
+              <TextField
+                label="Download limit"
+                placeholder="Unlimited"
+                value={current.downloadLimit ?? ''}
+                onChange={(event) => {
+                  const raw = event.target.value.trim()
+                  update({
+                    downloadLimit:
+                      raw === ''
+                        ? undefined
+                        : Math.max(1, Math.round(Number(raw))),
+                  })
+                }}
+                size="small"
+                sx={{ width: 140 }}
+                slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+                helperText="Attempts per order"
+              />
+            </Stack>
+            <Typography variant="caption" color="text.secondary">
+              {'Buyers always download the current files — uploading a new ' +
+                'version re-delivers to everyone.'}
+            </Typography>
+          </>
+        ) : null}
+
         <Divider textAlign="left">{'Search engine listing'}</Divider>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
@@ -638,6 +708,16 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             update({ mediaUrls: [...(current.mediaUrls ?? []), media.url] })
           } else if (pickerFor === 'seo') {
             update({ seo: { ...current.seo, imageUrl: media.url } })
+          } else if (pickerFor === 'digital') {
+            update({
+              digitalFiles: [
+                ...(current.digitalFiles ?? []),
+                {
+                  url: media.url,
+                  fileName: (media as any).fileName ?? 'download',
+                },
+              ],
+            })
           }
           setPickerFor(null)
         }}

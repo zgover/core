@@ -405,6 +405,27 @@ export default async function handler(
                 } — $${((line.unitAmountCents * line.quantity) / 100).toFixed(2)}`,
             )
             .join('\n')
+          // Digital delivery links (AGL-302), same token recipe the
+          // tenant download endpoint verifies.
+          const downloadToken = createHmac(
+            'sha256',
+            process.env.STRIPE_SECRET_KEY ?? 'aglyn',
+          )
+            .update(`download:${hostId}:${object.id}`)
+            .digest('hex')
+            .slice(0, 32)
+          const tenantOrigin = String(
+            object?.success_url ?? '',
+          ).replace(/\/\?.*$|\?.*$/, '')
+          const downloadLines = lineItems
+            .filter((line) => line.productType === 'digital')
+            .map(
+              (line) =>
+                `Download ${line.name}: ${tenantOrigin}/api/commerce/download` +
+                `?hostId=${hostId}&orderId=${object.id}` +
+                `&productId=${line.productId}&token=${downloadToken}`,
+            )
+            .join('\n')
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -417,6 +438,7 @@ export default async function handler(
               subject: `Receipt for your order`,
               text:
                 `Thanks for your purchase!\n\n${linesText}\n\n` +
+                (downloadLines ? `${downloadLines}\n\n` : '') +
                 `Total: $${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}\n` +
                 `Order reference: ${object.id}` +
                 (receiptFooter ? `\n\n${receiptFooter}` : ''),
