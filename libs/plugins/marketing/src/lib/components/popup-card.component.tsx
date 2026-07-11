@@ -16,7 +16,12 @@
  */
 'use client'
 
-import type { HostPopup } from '@aglyn/aglyn'
+import {
+  type AglynTenant,
+  checkEntitlement,
+  type HostPopup,
+  useMediaPicker,
+} from '@aglyn/aglyn'
 import { CardDisplay, useLoading } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -30,16 +35,13 @@ import {
 } from '@mui/material'
 import { doc, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
-import { hasEntitlement } from '../constants/entitlements'
-import MediaPickerDialog from './media/media-picker-dialog.component'
+import { useFirestore, useFirestoreDoc, useHostActivityLogger } from '@aglyn/tenant-feature-instance'
 import OverlayStatsRow from './overlay-stats-row.component'
-import useCurrentTenant from '../hooks/use-current-tenant'
-import useFirestoreDoc from '../hooks/use-firestore-doc'
-import useHostActivityLogger from '../hooks/use-host-activity-logger'
 
 export interface PopupCardProps {
   hostId: string
+  /** Resolved entitlement source (AGL-395). */
+  tenant?: Partial<AglynTenant>
 }
 
 const TRIGGERS: Array<{ value: NonNullable<HostPopup['trigger']>; label: string }> = [
@@ -64,7 +66,7 @@ const fromLocalInput = (value: string) =>
 export function PopupCard(props: PopupCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
-  const { tenant } = useCurrentTenant()
+  const { tenant } = props
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const logActivity = useHostActivityLogger(hostId)
@@ -73,7 +75,7 @@ export function PopupCard(props: PopupCardProps) {
     [firestore, hostId],
     { idField: '$id' },
   )
-  const entitled = hasEntitlement('marketing-overlays', tenant)
+  const entitled = checkEntitlement(tenant, 'marketingOverlays')
 
   const saved = (host?.popup ?? {}) as HostPopup
   const [draft, setDraft] = useState<HostPopup>(saved)
@@ -83,7 +85,8 @@ export function PopupCard(props: PopupCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedKey])
 
-  const [pickerOpen, setPickerOpen] = useState(false)
+  // The console media browser is provided by the shell (AGL-395).
+  const { pickMedia } = useMediaPicker()
   const dirty = JSON.stringify(draft) !== savedKey
   const patch = (partial: Partial<HostPopup>) =>
     setDraft((previous) => ({ ...previous, ...partial }))
@@ -164,7 +167,15 @@ export function PopupCard(props: PopupCardProps) {
               onChange={(event) => patch({ imageUrl: event.target.value })}
               sx={{ flex: 1, minWidth: 220 }}
             />
-            <Button size="small" onClick={() => setPickerOpen(true)}>
+            <Button
+              size="small"
+              onClick={() =>
+                void (async () => {
+                  const media = await pickMedia?.()
+                  if (media) patch({ imageUrl: media.url })
+                })()
+              }
+            >
               {'Browse media'}
             </Button>
           </Stack>
@@ -274,15 +285,6 @@ export function PopupCard(props: PopupCardProps) {
             impressionKey="popupImpression"
             actionKey="popupClick"
             actionLabel="clicks"
-          />
-          <MediaPickerDialog
-            hostId={hostId}
-            open={pickerOpen}
-            onClose={() => setPickerOpen(false)}
-            onPick={(media) => {
-              patch({ imageUrl: media.url ?? '' })
-              setPickerOpen(false)
-            }}
           />
         </Stack>
       )}

@@ -17,6 +17,8 @@
 'use client'
 
 import {
+  type AglynTenant,
+  checkEntitlement,
   compareVariants,
   createResourceUid,
   HOST_EVENT_TYPES,
@@ -60,14 +62,12 @@ import {
   setDoc,
 } from 'firebase/firestore'
 import { useState } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
-import { hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
-import useFirestoreCollection from '../hooks/use-firestore-collection'
-import useHostActivityLogger from '../hooks/use-host-activity-logger'
+import { useFirestore, useFirestoreCollection, useHostActivityLogger } from '@aglyn/tenant-feature-instance'
 
 export interface HostExperimentsCardProps {
   hostId: string
+  /** Resolved entitlement source (AGL-395). */
+  tenant?: Partial<AglynTenant>
 }
 
 type ExperimentDraft = HostExperiment & { $id?: string }
@@ -89,11 +89,11 @@ const STATUS_COLORS: Record<string, 'default' | 'success' | 'info' | 'warning'> 
 export function HostExperimentsCard(props: HostExperimentsCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
-  const { tenant } = useCurrentTenant()
+  const { tenant } = props
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const logActivity = useHostActivityLogger(hostId)
-  const entitled = hasEntitlement('ab-testing', tenant)
+  const entitled = checkEntitlement(tenant, 'abTesting')
 
   const { data: experimentDocs } = useFirestoreCollection<any>(
     () =>

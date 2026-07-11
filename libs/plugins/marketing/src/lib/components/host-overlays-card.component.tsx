@@ -17,6 +17,8 @@
 'use client'
 
 import {
+  type AglynTenant,
+  checkEntitlement,
   createResourceUid,
   overlayActiveAt,
   type HostOverlay,
@@ -51,14 +53,12 @@ import {
 } from '@mui/material'
 import { collection, deleteDoc, doc, limit, query, setDoc } from 'firebase/firestore'
 import { useState } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
-import { hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
-import useFirestoreCollection from '../hooks/use-firestore-collection'
-import useHostActivityLogger from '../hooks/use-host-activity-logger'
+import { useFirestore, useFirestoreCollection, useHostActivityLogger } from '@aglyn/tenant-feature-instance'
 
 export interface HostOverlaysCardProps {
   hostId: string
+  /** Resolved entitlement source (AGL-395). */
+  tenant?: Partial<AglynTenant>
 }
 
 type OverlayDraft = HostOverlay & { $id?: string }
@@ -106,11 +106,11 @@ function parsePatterns(value: string): string[] {
 export function HostOverlaysCard(props: HostOverlaysCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
-  const { tenant } = useCurrentTenant()
+  const { tenant } = props
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const logActivity = useHostActivityLogger(hostId)
-  const entitled = hasEntitlement('marketing-overlays', tenant)
+  const entitled = checkEntitlement(tenant, 'marketingOverlays')
 
   const { data: overlayDocs } = useFirestoreCollection<any>(
     () =>

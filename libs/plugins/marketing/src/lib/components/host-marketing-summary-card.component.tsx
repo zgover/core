@@ -21,8 +21,10 @@ import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { useMemo } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
-import useFirestoreCollection from '../hooks/use-firestore-collection'
+import {
+  useFirestore,
+  useFirestoreCollection,
+} from '@aglyn/tenant-feature-instance'
 
 export interface HostMarketingSummaryCardProps {
   hostId: string
