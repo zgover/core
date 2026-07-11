@@ -16,32 +16,32 @@
  */
 
 import {
+  CANVAS_ROOT_ELEMENT_ID,
   checkEntitlement,
   COMMUNITY_MAX_PRICE_USD,
   createResourceUid,
   sanitizeCommunityDefinition,
 } from '@aglyn/aglyn'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { type PluginApiHandler } from '@aglyn/aglyn'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
+const MAX_TEMPLATE_SCREENS = 25
+
 /**
- * Publishes a host reusable component to the community (AGL-44). Runs
- * server-side so the sanitization pass (component-id allowlist, key strip,
- * size cap — see `sanitizeCommunityDefinition`) cannot be bypassed: clients
- * have no write access to `communityListings` creates. Requirements: host
- * admin, a community profile, and the `marketplaceSelling` plan flag.
- * Re-publishing the same component bumps the listing's version.
+ * Publishes a host as a site template (AGL-137): captures every published
+ * screen (nodes run through the same community sanitizer as component
+ * publishing — the id allowlist and size caps apply per screen) plus the
+ * theme into a `communityListings` doc with `kind: 'template'`. Same
+ * gates as component publishing: host admin, community profile,
+ * `marketplaceSelling` for plan-gated tenants, Stripe onboarding for paid
+ * listings. One template per source host; re-publishing bumps the version.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const publishTemplateHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
   const hostId = String(req.body?.hostId ?? '')
-  const componentId = String(req.body?.componentId ?? '')
   const displayName = String(req.body?.displayName ?? '').slice(0, 80)
   const description = String(req.body?.description ?? '').slice(0, 500)
   const category = String(req.body?.category ?? '').slice(0, 40)
@@ -55,13 +55,11 @@ export default async function handler(
       .status(400)
       .json({ error: `Price must be 0–${COMMUNITY_MAX_PRICE_USD} USD` })
   }
-  if (!hostId || !componentId || !displayName.trim()) {
-    return res
-      .status(400)
-      .json({ error: 'Missing hostId, componentId, or displayName' })
+  if (!hostId || !displayName.trim()) {
+    return res.status(400).json({ error: 'Missing hostId or displayName' })
   }
 
-  const authorization = req.headers.authorization ?? ''
+  const authorization = String(req.headers.authorization ?? '')
   const idToken = authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : undefined
@@ -69,7 +67,6 @@ export default async function handler(
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    // Org-role permission gate (AGL-238).
     const membership = await resolveOrgPermissions(decoded.uid, { hostId })
     if (!membership.permissions.publishToCommunity) {
       return res.status(403).json({
@@ -78,7 +75,8 @@ export default async function handler(
     }
     const firestore = firebaseAdmin.app().firestore()
 
-    const hostSnapshot = await firestore.collection('hosts').doc(hostId).get()
+    const hostRef = firestore.collection('hosts').doc(hostId)
+    const hostSnapshot = await hostRef.get()
     if (!hostSnapshot.exists) {
       return res.status(404).json({ error: 'Unknown site' })
     }
@@ -89,7 +87,10 @@ export default async function handler(
 
     // Plan gate rides the owning org's doc (AGL-238).
     const tenant = (await getOrgForHost(hostId))?.org ?? {}
-    if (tenant['plan'] && !checkEntitlement(tenant, 'marketplaceSelling')) {
+    if (
+      tenant['plan'] &&
+      !checkEntitlement(tenant as any, 'marketplaceSelling')
+    ) {
       return res.status(403).json({
         error: 'Publishing to the community requires a Pro plan',
       })
@@ -105,38 +106,70 @@ export default async function handler(
           'Create your community profile first (Manage → Community profile)',
       })
     }
-    // Paid listings require completed Stripe Connect onboarding (AGL-46).
     if (priceUsd > 0 && !profileSnapshot.get('stripeChargesEnabled')) {
       return res.status(412).json({
         error:
           'Set up payouts first (Manage → Community profile) to sell ' +
-          'components',
+          'templates',
       })
     }
 
-    const definitionSnapshot = await firestore
-      .collection('hosts')
-      .doc(hostId)
-      .collection('components')
-      .doc(componentId)
-      .get()
-    const definition = definitionSnapshot.data() as any
-    if (!definition || definition.deletedAt) {
-      return res.status(404).json({ error: 'Unknown component' })
+    // Capture: every screen in the routing map (published) with its
+    // published version, sanitized like any community definition.
+    const routingMap = (hostSnapshot.get('screens') ?? {}) as Record<
+      string,
+      string
+    >
+    const screenIds = Object.keys(routingMap).slice(0, MAX_TEMPLATE_SCREENS)
+    if (!screenIds.length) {
+      return res
+        .status(422)
+        .json({ error: 'Publish at least one screen before templating' })
     }
-    const sanitized = sanitizeCommunityDefinition({
-      rootId: definition.rootId,
-      nodes: definition.nodes ?? {},
-    })
-    if (sanitized.ok === false) {
-      return res.status(422).json({ error: sanitized.error })
+    const screens: any[] = []
+    for (const screenId of screenIds) {
+      const screenSnapshot = await hostRef
+        .collection('screens')
+        .doc(screenId)
+        .get()
+      const screen = screenSnapshot.data() as any
+      if (!screen || screen.deletedAt || !screen.versionId) continue
+      const versionSnapshot = await hostRef
+        .collection('screens')
+        .doc(screenId)
+        .collection('versions')
+        .doc(String(screen.versionId))
+        .get()
+      const nodes = versionSnapshot.get('nodes')
+      if (!nodes) continue
+      const sanitized = sanitizeCommunityDefinition({
+        rootId: CANVAS_ROOT_ELEMENT_ID,
+        nodes,
+      })
+      if (sanitized.ok === false) {
+        return res.status(422).json({
+          error: `Screen "${screen.displayName ?? screenId}": ${sanitized.error}`,
+        })
+      }
+      screens.push({
+        displayName: screen.displayName ?? 'Screen',
+        ...(screen.description && { description: screen.description }),
+        ...(screen.seo && { seo: screen.seo }),
+        slug: routingMap[screenId],
+        nodes: sanitized.nodes,
+      })
+    }
+    if (!screens.length) {
+      return res
+        .status(422)
+        .json({ error: 'No publishable screens with versions found' })
     }
 
-    // One listing per source component: re-publish bumps latestVersion.
+    // One template listing per source host; re-publish bumps the version.
     const existing = await firestore
       .collection('communityListings')
       .where('profileId', '==', decoded.uid)
-      .where('sourceComponentId', '==', componentId)
+      .where('sourceHostId', '==', hostId)
       .limit(1)
       .get()
     const listingRef = existing.empty
@@ -149,18 +182,18 @@ export default async function handler(
 
     await listingRef.set(
       {
+        kind: 'template',
         profileId: decoded.uid,
-        sourceComponentId: componentId,
+        sourceHostId: hostId,
         displayName: displayName.trim(),
         ...(description.trim() && { description: description.trim() }),
         ...(category.trim() && { category: category.trim() }),
         priceUsd,
+        screenCount: screens.length,
         latestVersion: version,
         deletedAt: null,
         ...(existing.empty && { createdAt: now }),
         updatedAt: now,
-        // Version metadata for the detail page (AGL-95) — snapshots
-        // themselves stay server-only, so history rides the listing doc.
         versionHistory: firebaseAdmin.firestore.FieldValue.arrayUnion({
           version,
           publishedAt: firebaseAdmin.firestore.Timestamp.now(),
@@ -169,16 +202,16 @@ export default async function handler(
       { merge: true },
     )
     await listingRef.collection('versions').doc(String(version)).set({
-      rootId: sanitized.rootId,
-      nodes: sanitized.nodes,
+      template: {
+        screens,
+        theme: hostSnapshot.get('theme') ?? null,
+      },
       publishedAt: now,
     })
 
-    return res
-      .status(200)
-      .json({ listingId: listingRef.id, version })
+    return res.status(200).json({ listingId: listingRef.id, version })
   } catch (error) {
     console.error(error)
-    return res.status(500).json({ error: 'Publish failed' })
+    return res.status(500).json({ error: 'Template publish failed' })
   }
 }

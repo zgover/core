@@ -17,7 +17,7 @@
 
 import { createResourceUid } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { type PluginApiHandler } from '@aglyn/aglyn'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
 /**
@@ -29,10 +29,7 @@ import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
  * latest version into `hosts/{hostId}/components` with `community` source
  * metadata; re-installing updates the same component doc in place.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const installHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -41,7 +38,7 @@ export default async function handler(
   if (!listingId || !hostId) {
     return res.status(400).json({ error: 'Missing listingId or hostId' })
   }
-  const authorization = req.headers.authorization ?? ''
+  const authorization = String(req.headers.authorization ?? '')
   const idToken = authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : undefined

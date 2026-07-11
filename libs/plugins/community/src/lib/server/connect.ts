@@ -16,7 +16,7 @@
  */
 
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { type PluginApiHandler } from '@aglyn/aglyn'
 
 async function stripe(path: string, params?: URLSearchParams) {
   const response = await fetch(`https://api.stripe.com/v1/${path}`, {
@@ -42,10 +42,7 @@ async function stripe(path: string, params?: URLSearchParams) {
  * refreshes `stripeChargesEnabled` on every call, and returns an
  * account-link URL while onboarding is incomplete. 501 without Stripe env.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const connectHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -54,7 +51,7 @@ export default async function handler(
       .status(501)
       .json({ error: 'Payouts are not configured (STRIPE_SECRET_KEY).' })
   }
-  const authorization = req.headers.authorization ?? ''
+  const authorization = String(req.headers.authorization ?? '')
   const idToken = authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : undefined

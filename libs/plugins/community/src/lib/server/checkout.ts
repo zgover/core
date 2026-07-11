@@ -20,7 +20,7 @@ import {
   COMMUNITY_PLATFORM_FEE_PERCENT_FREE_PLAN,
 } from '@aglyn/aglyn'
 import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { type PluginApiHandler } from '@aglyn/aglyn'
 
 /**
  * Checkout for a paid community listing (AGL-46): one-time destination
@@ -29,10 +29,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
  * purchase record on `checkout.session.completed`; install stays gated on
  * that record. 501 without Stripe env.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const checkoutHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -45,7 +42,7 @@ export default async function handler(
   const hostId = String(req.body?.hostId ?? '')
   if (!listingId) return res.status(400).json({ error: 'Missing listingId' })
 
-  const authorization = req.headers.authorization ?? ''
+  const authorization = String(req.headers.authorization ?? '')
   const idToken = authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : undefined
