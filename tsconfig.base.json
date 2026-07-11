@@ -34,8 +34,6 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@/admin/*": ["libs/apps/admin/*"],
-      "@/api/*": ["libs/apps/api/*"],
       "@/console/*": ["libs/apps/console/*"],
       "@/tenant/*": ["libs/apps/tenant/*"],
       "@/www/*": ["libs/apps/www/*"],

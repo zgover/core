@@ -35,6 +35,7 @@
  * the same shape (AGL-290).
  */
 
+import { runInAction } from 'mobx'
 import type { TenantFeatureFlags } from '../foundation'
 import type { Plugin, PluginId } from '../plugin-manager/plugin-manager'
 import type { ComponentSchema, MdiIconProps, PresetSchema } from '../types/nodes'
@@ -87,24 +88,30 @@ export function defineUiFeatureBundle(
     icon: options.icon,
     dependencies,
     load(): void {
-      for (const entry of options.components) {
-        registrar.registerComponent(entry.component, entry.schema)
-      }
-      for (const entry of options.components) {
-        if (entry.presets?.length) registrar.registerPreset(entry.presets)
-      }
+      // One mobx transaction per bundle (AGL-371): observers (component
+      // drawer, canvas) re-render once instead of once per registration.
+      runInAction(() => {
+        for (const entry of options.components) {
+          registrar.registerComponent(entry.component, entry.schema)
+        }
+        for (const entry of options.components) {
+          if (entry.presets?.length) registrar.registerPreset(entry.presets)
+        }
+      })
     },
     destroy(): void {
-      for (const entry of options.components) {
-        if (entry.presets?.length) {
-          registrar.unregisterPreset(
-            entry.presets.map((preset) => preset.$id),
-          )
+      runInAction(() => {
+        for (const entry of options.components) {
+          if (entry.presets?.length) {
+            registrar.unregisterPreset(
+              entry.presets.map((preset) => preset.$id),
+            )
+          }
         }
-      }
-      for (const entry of options.components) {
-        registrar.unregisterComponent(entry.schema.$id)
-      }
+        for (const entry of options.components) {
+          registrar.unregisterComponent(entry.schema.$id)
+        }
+      })
     },
   }
 }

@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import { runInAction } from 'mobx'
 import * as AppBar from './components/app-bar'
 import * as Button from './components/button'
 import * as Container from './components/container'
@@ -99,26 +100,32 @@ export function registerMuiPlugin(): void {
     title: 'Material UI',
     dependencies: {},
     load(): void {
-      for (const entry of MUI_BUNDLE) {
-        Aglyn.components.registerComponent(entry.component, entry.schema)
-      }
-      for (const entry of MUI_BUNDLE) {
-        if (entry.presets?.length) {
-          Aglyn.components.registerPreset(entry.presets)
+      // One mobx transaction (AGL-371): a single observer notification
+      // for the whole bundle instead of one per component/preset.
+      runInAction(() => {
+        for (const entry of MUI_BUNDLE) {
+          Aglyn.components.registerComponent(entry.component, entry.schema)
         }
-      }
+        for (const entry of MUI_BUNDLE) {
+          if (entry.presets?.length) {
+            Aglyn.components.registerPreset(entry.presets)
+          }
+        }
+      })
     },
     destroy(): void {
-      for (const entry of MUI_BUNDLE) {
-        if (entry.presets?.length) {
-          Aglyn.components.unregisterPreset(
-            entry.presets.map((preset) => preset.$id),
-          )
+      runInAction(() => {
+        for (const entry of MUI_BUNDLE) {
+          if (entry.presets?.length) {
+            Aglyn.components.unregisterPreset(
+              entry.presets.map((preset) => preset.$id),
+            )
+          }
         }
-      }
-      for (const entry of MUI_BUNDLE) {
-        Aglyn.components.unregisterComponent(entry.schema.$id)
-      }
+        for (const entry of MUI_BUNDLE) {
+          Aglyn.components.unregisterComponent(entry.schema.$id)
+        }
+      })
     },
   })
 }

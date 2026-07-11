@@ -19,6 +19,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { pluginInstallToPreset } from '@aglyn/plugins-ui-mui'
 import { collection, limit, query } from 'firebase/firestore'
+import { runInAction } from 'mobx'
 import { useEffect, useRef } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import useFirestoreCollection from './use-firestore-collection'
@@ -41,18 +42,23 @@ export function usePluginDrawerRegistration(hostId: string): void {
   const registeredIds = useRef<string[]>([])
 
   useEffect(() => {
-    // Clear the previous set before registering the current one.
-    if (registeredIds.current.length) {
-      Aglyn.components.unregisterPreset(registeredIds.current)
-      registeredIds.current = []
-    }
-    const presets = ((installDocs as any[]) ?? [])
-      .map((install) => pluginInstallToPreset(install))
-      .filter((preset): preset is NonNullable<typeof preset> => Boolean(preset))
-    if (presets.length) {
-      Aglyn.components.registerPreset(presets)
-      registeredIds.current = presets.map((preset) => preset.$id)
-    }
+    // Single mobx transaction (AGL-371): the drawer re-renders once per
+    // install sync, not once for the unregister and again per preset.
+    runInAction(() => {
+      if (registeredIds.current.length) {
+        Aglyn.components.unregisterPreset(registeredIds.current)
+        registeredIds.current = []
+      }
+      const presets = ((installDocs as any[]) ?? [])
+        .map((install) => pluginInstallToPreset(install))
+        .filter(
+          (preset): preset is NonNullable<typeof preset> => Boolean(preset),
+        )
+      if (presets.length) {
+        Aglyn.components.registerPreset(presets)
+        registeredIds.current = presets.map((preset) => preset.$id)
+      }
+    })
     return () => {
       if (registeredIds.current.length) {
         Aglyn.components.unregisterPreset(registeredIds.current)
