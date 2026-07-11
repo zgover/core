@@ -38,7 +38,13 @@ import {
   Typography,
 } from '@mui/material'
 
-export const PLAN_ORDER: TenantPlan[] = ['free', 'starter', 'pro', 'business']
+export const PLAN_ORDER: TenantPlan[] = [
+  'free',
+  'starter',
+  'pro',
+  'business',
+  'advanced',
+]
 
 export const PLAN_LABELS: Record<TenantPlan, string> = {
   free: 'Free',

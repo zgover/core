@@ -84,6 +84,7 @@ describe('plan entitlements', () => {
       starter: [1, 25, 3],
       pro: [3, 100, UNLIMITED],
       business: [10, UNLIMITED, UNLIMITED],
+      advanced: [25, UNLIMITED, UNLIMITED],
     })
     // Media storage exceeds the published-site cap by design (AGL-67).
     for (const plan of Object.values(PLAN_ENTITLEMENTS)) {
@@ -153,6 +154,15 @@ describe('plan entitlements', () => {
         extraDatasetMonthlyUsd: 1,
         extraDataGbMonthlyUsd: 0.25,
       },
+      advanced: {
+        basePriceMonthlyUsd: 399,
+        basePriceAnnualMonthlyUsd: 299,
+        extraHostMonthlyUsd: 4,
+        extraSeatMonthlyUsd: 2,
+        extraMemberMonthlyUsd: 1,
+        extraDatasetMonthlyUsd: 1,
+        extraDataGbMonthlyUsd: 0.25,
+      },
     })
   })
 
@@ -173,6 +183,7 @@ describe('plan entitlements', () => {
       free: [1, 1, 1, 1],
       starter: [2, 5, 3, 10],
       pro: [5, 20, 10, 25],
+      advanced: [50, 250, 100, 250],
       business: [15, 100, 50, 100],
     })
   })

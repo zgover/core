@@ -85,7 +85,12 @@ export type TenantUid = string
 
 /** Hosted in master catalog */
 /** SaaS subscription tiers (Tenant Billing & SaaS Plans, AGL-38..41). */
-export type TenantPlan = 'free' | 'starter' | 'pro' | 'business'
+export type TenantPlan =
+  | 'free'
+  | 'starter'
+  | 'pro'
+  | 'business'
+  | 'advanced'
 
 /** Boolean feature gates per plan; quotas live beside them as numbers. */
 export interface TenantFeatureFlags {

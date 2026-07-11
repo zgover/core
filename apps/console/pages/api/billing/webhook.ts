@@ -126,6 +126,7 @@ function planFromPriceId(priceId: string | undefined): string | undefined {
   if (priceId === process.env.STRIPE_PRICE_STARTER) return 'starter'
   if (priceId === process.env.STRIPE_PRICE_PRO) return 'pro'
   if (priceId === process.env.STRIPE_PRICE_BUSINESS) return 'business'
+  if (priceId === process.env.STRIPE_PRICE_ADVANCED) return 'advanced'
   return undefined
 }
 
