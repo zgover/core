@@ -422,45 +422,47 @@ const AdminOrgs: NextPageWithLayout = () => {
                 'in to refresh the claim.'}
             </Alert>
           ) : (
-            <Stack spacing={2}>
-              <Typography variant="body2" color="text.secondary">
-                {'Overrides write to the org doc and are audited to ' +
-                  'adminAudit. Organizations without a plan keep every ' +
-                  'feature (dark launch).'}
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <TextField
-                  size="small"
-                  label="Search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  sx={{ minWidth: 220 }}
-                />
-                <TextField
-                  select
-                  size="small"
-                  label="Sort"
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value as any)}
-                  sx={{ minWidth: 120 }}
-                >
-                  <MenuItem value="name">{'Name'}</MenuItem>
-                  <MenuItem value="plan">{'Plan'}</MenuItem>
-                  <MenuItem value="newest">{'Newest'}</MenuItem>
-                </TextField>
-              </Stack>
+            // Card-framed header + filters (AGL-385), consistent with the
+            // user-management page.
+            <CardDisplay
+              header={'Organizations'}
+              contentGutterX
+              contentGutterY
+            >
+              <Stack spacing={2}>
+                <Typography variant="body2" color="text.secondary">
+                  {'Overrides write to the org doc and are audited to ' +
+                    'adminAudit. Organizations without a plan keep every ' +
+                    'feature (dark launch).'}
+                </Typography>
+                <Stack direction="row" spacing={1}>
+                  <TextField
+                    size="small"
+                    label="Search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    sx={{ minWidth: 220 }}
+                  />
+                  <TextField
+                    select
+                    size="small"
+                    label="Sort"
+                    value={sortBy}
+                    onChange={(event) => setSortBy(event.target.value as any)}
+                    sx={{ minWidth: 120 }}
+                  >
+                    <MenuItem value="name">{'Name'}</MenuItem>
+                    <MenuItem value="plan">{'Plan'}</MenuItem>
+                    <MenuItem value="newest">{'Newest'}</MenuItem>
+                  </TextField>
+                </Stack>
               {orgs.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
                   {'No organizations yet — they are created at signup or ' +
                     'first site.'}
                 </Typography>
               ) : (
-                // Console card design (AGL-359).
-                <CardDisplay
-                  header={'Organizations'}
-                  contentGutterX
-                  contentGutterY
-                >
+                <>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
@@ -636,9 +638,10 @@ const AdminOrgs: NextPageWithLayout = () => {
                     {'Load more'}
                   </Button>
                 ) : null}
-                </CardDisplay>
+                </>
               )}
-            </Stack>
+              </Stack>
+            </CardDisplay>
           )}
         </Container>
       </DashboardLayout>

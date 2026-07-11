@@ -19,6 +19,7 @@
 import { AppLink, CardDisplay } from '@aglyn/shared-ui-jsx'
 import {
   Box,
+  Button,
   LinearProgress,
   MenuItem,
   Stack,
@@ -138,9 +139,15 @@ export function HostAnalyticsCard(props: {
         action: (
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           {viewAllHref ? (
-            <AppLink href={viewAllHref} componentVariant="naked">
+            <Button
+              component={AppLink as any}
+              {...({ componentVariant: 'naked' } as any)}
+              href={viewAllHref}
+              size="small"
+              color="secondary"
+            >
               {'View details'}
-            </AppLink>
+            </Button>
           ) : null}
           <TextField
             select

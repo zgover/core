@@ -18,7 +18,7 @@
 
 import { formatOrderNumber, isLowStock, liftLegacyProduct } from '@aglyn/aglyn'
 import { AppLink, CardDisplay } from '@aglyn/shared-ui-jsx'
-import { Chip, Divider, Stack, Typography } from '@mui/material'
+import { Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { useMemo } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
@@ -92,12 +92,15 @@ export function CommerceGlanceCard(props: { hostId: string }) {
       contentGutterY
       HeaderProps={{
         action: (
-          <AppLink
+          <Button
+            component={AppLink as any}
+            {...({ componentVariant: 'naked' } as any)}
             href={buildRoute(Route.HOST_PRODUCTS, { hostId })}
-            componentVariant="naked"
+            size="small"
+            color="secondary"
           >
             {'Open store'}
-          </AppLink>
+          </Button>
         ),
       }}
     >

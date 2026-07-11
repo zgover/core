@@ -17,7 +17,7 @@
 'use client'
 
 import { AppLink, CardDisplay } from '@aglyn/shared-ui-jsx'
-import { Stack, Typography } from '@mui/material'
+import { Button, Stack, Typography } from '@mui/material'
 import {
   collection,
   limit,
@@ -54,12 +54,15 @@ export function NewestSiteUsersCard(props: { hostId: string }) {
       contentGutterY
       HeaderProps={{
         action: (
-          <AppLink
+          <Button
+            component={AppLink as any}
+            {...({ componentVariant: 'naked' } as any)}
             href={buildRoute(Route.HOST_USERS, { hostId })}
-            componentVariant="naked"
+            size="small"
+            color="secondary"
           >
             {'View all'}
-          </AppLink>
+          </Button>
         ),
       }}
     >
