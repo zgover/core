@@ -342,6 +342,77 @@ export default async function handler(
         }
       }
     }
+    // Reservations (AGL-310): payment confirms the pending hold.
+    if (
+      type === 'checkout.session.completed' &&
+      object?.metadata?.type === 'commerce-reservation' &&
+      object?.payment_status === 'paid'
+    ) {
+      const { hostId, reservationId } = object.metadata ?? {}
+      if (hostId && reservationId) {
+        const firestore = firebaseAdmin.app().firestore()
+        const reservationRef = firestore
+          .collection('hosts')
+          .doc(String(hostId))
+          .collection('reservations')
+          .doc(String(reservationId))
+        const snapshot = await reservationRef.get()
+        if (snapshot.exists && snapshot.get('status') === 'pending') {
+          await reservationRef.set(
+            {
+              status: 'confirmed',
+              paidCents: Number(object?.amount_total ?? 0),
+              checkoutSessionId: String(object.id),
+              paymentIntentId: String(object?.payment_intent ?? '') || null,
+            },
+            { merge: true },
+          )
+          void notifyHostManagers(String(hostId), {
+            type: 'content.booking',
+            title: 'New reservation',
+            ...(object?.customer_details?.email
+              ? { body: object.customer_details.email }
+              : {}),
+            link: `/${hostId}/products`,
+          })
+          void upsertHostContact({
+            hostId: String(hostId),
+            email: object?.customer_details?.email,
+            name: object?.customer_details?.name ?? undefined,
+            source: 'booking',
+            interaction: {
+              refId: String(reservationId),
+              summary: 'Reserved a stay',
+            },
+          })
+          const reservationResendKey = process.env.RESEND_API_KEY
+          const reservationEmailFrom = process.env.USAGE_EMAIL_FROM
+          const guestEmail = object?.customer_details?.email
+          if (reservationResendKey && reservationEmailFrom && guestEmail) {
+            const checkIn = new Date(
+              Number(snapshot.get('checkInDayMs')),
+            ).toUTCString()
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${reservationResendKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                from: reservationEmailFrom,
+                to: [guestEmail],
+                subject: 'Reservation confirmed',
+                text:
+                  `Your stay is confirmed!\n\nCheck-in: ${checkIn.slice(0, 16)}\n` +
+                  `Nights: ${snapshot.get('nights')}\n` +
+                  `Paid today: $${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}\n` +
+                  `Reference: ${reservationId}`,
+              }),
+            }).catch(() => undefined)
+          }
+        }
+      }
+    }
     // Storefront subscriptions (AGL-303): record the sub under the host;
     // status then follows customer.subscription.* events below.
     if (

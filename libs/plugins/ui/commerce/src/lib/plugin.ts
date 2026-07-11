@@ -24,6 +24,7 @@ import * as GatedVideo from './components/gated-video'
 import * as MemberFeed from './components/member-feed'
 import * as NewsletterSignup from './components/newsletter-signup'
 import * as ProductDetail from './components/product-detail'
+import * as ReservationWidget from './components/reservation-widget'
 import * as ProductGrid from './components/product-grid'
 import * as Wishlist from './components/wishlist'
 import { BUNDLE_ID } from './constants/bundle-common'
@@ -81,6 +82,11 @@ export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
     component: MemberFeed.default,
     schema: MemberFeed.schema,
     presets: MemberFeed.presets,
+  },
+  {
+    component: ReservationWidget.default,
+    schema: ReservationWidget.schema,
+    presets: ReservationWidget.presets,
   },
 ]
 
