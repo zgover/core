@@ -228,6 +228,31 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
     const galleryImage =
       variant?.imageUrl ?? resolved.mediaUrls[activeImage] ?? resolved.mediaUrls[0]
 
+    // schema.org Product/Offer (AGL-299), same inline-script convention
+    // as the event-list block (AGL-143).
+    const structuredData =
+      hostId && resolvedId
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: resolved.name,
+            ...(resolved.description
+              ? { description: resolved.description }
+              : {}),
+            ...(resolved.mediaUrls.length
+              ? { image: resolved.mediaUrls }
+              : {}),
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'USD',
+              price: String(variant?.priceUsd ?? 0),
+              availability: variant?.soldOut
+                ? 'https://schema.org/OutOfStock'
+                : 'https://schema.org/InStock',
+            },
+          }
+        : null
+
     return (
       <Box
         ref={ref}
@@ -285,6 +310,12 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
             </Box>
           ) : null}
         </Box>
+        {structuredData ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          />
+        ) : null}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="h4" component="h1" gutterBottom>
             {resolved.name}

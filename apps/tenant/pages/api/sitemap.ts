@@ -49,6 +49,35 @@ export default async function handler(
     .map((path) => `${base}${Aglyn.screenRoutePathToUrl(path)}`)
     .sort()
 
+  // Commerce URLs (AGL-299): active product + collection pages join the
+  // sitemap when the host has the matching template configured.
+  try {
+    const { firebaseAdmin } = await import('@aglyn/tenant-data-admin')
+    const hostRef = firebaseAdmin
+      .app()
+      .firestore()
+      .collection('hosts')
+      .doc(hostRes.host.$id)
+    const storeSettings = await hostRef.collection('settings').doc('store').get()
+    if (storeSettings.get('pdpScreenId')) {
+      const products = await hostRef.collection('products').limit(500).get()
+      for (const docSnapshot of products.docs) {
+        const raw = docSnapshot.data() as any
+        if (raw.deletedAt || raw.status !== 'active' || !raw.slug) continue
+        urls.push(`${base}/products/${raw.slug}`)
+      }
+    }
+    if (storeSettings.get('collectionScreenId')) {
+      const collections = await hostRef.collection('collections').limit(250).get()
+      for (const docSnapshot of collections.docs) {
+        const raw = docSnapshot.data() as any
+        if (raw.slug) urls.push(`${base}/collections/${raw.slug}`)
+      }
+    }
+  } catch {
+    // Sitemap stays screens-only if commerce reads fail.
+  }
+
   const xml =
     '<?xml version="1.0" encoding="UTF-8"?>\n' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
