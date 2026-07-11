@@ -40,6 +40,7 @@ import useCurrentTenant from '../../../hooks/use-current-tenant'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
+import HubTabs from '../../../components/hub-tabs.component'
 import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
@@ -260,6 +261,12 @@ const OrgSettings: NextPageWithLayout = () => {
                 'organization — ask an organization admin for access.'}
             </Alert>
           ) : (
+            <HubTabs
+              tabs={[
+                {
+                  id: 'general',
+                  label: 'General',
+                  content: (
             <CardDisplay header={'General'} contentGutterX contentGutterY>
               <Stack spacing={2} sx={{ maxWidth: 480 }}>
                 <TextField
@@ -325,10 +332,14 @@ const OrgSettings: NextPageWithLayout = () => {
                 )}
               </Stack>
             </CardDisplay>
-          )}
-          {currentOrg && canManage ? (
-            // Org profile (AGL-363): logo + contact details, used on
-            // invoices, the community profile, and the staff console.
+                  ),
+                },
+                ...(currentOrg && canManage
+                  ? [
+                      {
+                        id: 'profile',
+                        label: 'Profile',
+                        content: (
             <CardDisplay
               header={'Organization profile'}
               contentGutterX
@@ -411,8 +422,16 @@ const OrgSettings: NextPageWithLayout = () => {
                 </Stack>
               </Stack>
             </CardDisplay>
-          ) : null}
-          {currentOrg && isOwner ? (
+                        ),
+                      },
+                    ]
+                  : []),
+                ...(currentOrg && isOwner
+                  ? [
+                      {
+                        id: 'ownership',
+                        label: 'Ownership',
+                        content: (
             <CardDisplay
               header={'Transfer ownership'}
               contentGutterX
@@ -465,7 +484,13 @@ const OrgSettings: NextPageWithLayout = () => {
                 </Stack>
               </Stack>
             </CardDisplay>
-          ) : null}
+                        ),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          )}
         </Container>
       </DashboardLayout>
     </>
