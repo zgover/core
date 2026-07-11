@@ -26,10 +26,12 @@
 
 import {
   checkEntitlement,
+  isSiteEventType,
   registerPluginApiRoute,
   type PluginApiHandler,
 } from '@aglyn/aglyn'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
+import { runSingleAction } from '@aglyn/tenant-runtime'
 
 /**
  * Public event listing (AGL-145): published events for the Event List canvas
@@ -98,6 +100,38 @@ const eventsListHandler: PluginApiHandler = async (req, res) => {
 }
 
 /** Registers the events-calendar plugin's API routes with the dispatcher. */
+/**
+ * Site-event dispatch (AGL-256): the page runtime evaluates client-side
+ * trigger conditions (scroll thresholds, selectors, dwell time) and posts
+ * the fired action here so its SERVER steps run. Only site-event actions
+ * dispatch this way — server events keep their own emitters. Payload
+ * fields are bounded strings; the run cap and `actions` entitlement gate
+ * inside the runner.
+ */
+const eventsDispatchHandler: PluginApiHandler = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+  const hostId = String(req.body?.hostId ?? '')
+  const actionId = String(req.body?.actionId ?? '')
+  const event = String(req.body?.event ?? '')
+  if (!hostId || !actionId || !isSiteEventType(event)) {
+    return res.status(400).json({ error: 'Bad dispatch' })
+  }
+  const raw = req.body?.payload
+  const payload: Record<string, string> = {}
+  if (raw && typeof raw === 'object') {
+    for (const [key, value] of Object.entries(raw).slice(0, 20)) {
+      if (/^[a-zA-Z][a-zA-Z0-9_]{0,39}$/.test(key)) {
+        payload[key] = String(value).slice(0, 500)
+      }
+    }
+  }
+  const alerts = await runSingleAction(hostId, actionId, event, payload)
+  return res.status(200).json({ ok: true, alerts })
+}
+
 export function registerEventsCalendarApi(): void {
   registerPluginApiRoute('events/list', eventsListHandler)
+  registerPluginApiRoute('events/dispatch', eventsDispatchHandler)
 }
