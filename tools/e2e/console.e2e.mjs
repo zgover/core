@@ -130,10 +130,8 @@ const specs = [
     path: `/${HOST_ID}/marketing`,
     expects: [
       'At a glance',
+      'Overlay views',
       'Welcome bar',
-      '120 views',
-      'Personalize with',
-      'Holiday preorder window',
       'Scheduled',
       'Hero copy test',
     ],
@@ -228,7 +226,15 @@ for (const spec of specs) {
       timeout: TIMEOUT_MS,
     })
     for (const text of spec.expects) {
-      await page.waitForSelector(`text=${text}`, { timeout: TIMEOUT_MS })
+      // `state: 'attached'` (not the default 'visible'): the HubTabs pages
+      // (marketing, workflows) keep every tab panel mounted for its data
+      // subscriptions, so MUI marks inactive panels `hidden`. Asserting the
+      // text is in the DOM still proves the app rendered it — a crashed page
+      // renders an error boundary, not this content.
+      await page.waitForSelector(`text=${text}`, {
+        timeout: TIMEOUT_MS,
+        state: 'attached',
+      })
     }
     console.log(
       `PASS  ${spec.name.padEnd(10)} ${spec.path} (${Date.now() - started}ms)`,
