@@ -77,7 +77,11 @@ export function HubTabs(props: HubTabsProps) {
         </TabList>
       </Box>
       {tabs.map((item) => (
-        <TabPanel key={item.id} value={item.id} sx={{ px: 0 }}>
+        // keepMounted: inactive panels stay in the DOM (hidden). This
+        // matches the pre-tab single-page behavior — content and its data
+        // subscriptions are present regardless of the active tab, so
+        // deep-links, in-page search, and e2e canaries all still work.
+        <TabPanel key={item.id} value={item.id} keepMounted sx={{ px: 0 }}>
           {item.content}
         </TabPanel>
       ))}
