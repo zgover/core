@@ -587,6 +587,53 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
           />
         </Stack>
 
+        <Stack direction="row" spacing={2}>
+          <TextField
+            label="Billing"
+            value={current.subscription ? current.subscription.interval : 'once'}
+            onChange={(event) => {
+              const value = event.target.value
+              update({
+                subscription:
+                  value === 'once'
+                    ? undefined
+                    : {
+                        ...(current.subscription ?? {}),
+                        interval: value as 'month' | 'year',
+                      },
+              })
+            }}
+            size="small"
+            select
+            sx={{ minWidth: 180 }}
+            helperText="Subscriptions bill until cancelled"
+          >
+            <MenuItem value="once">{'One-time purchase'}</MenuItem>
+            <MenuItem value="month">{'Monthly subscription'}</MenuItem>
+            <MenuItem value="year">{'Yearly subscription'}</MenuItem>
+          </TextField>
+          {current.subscription ? (
+            <TextField
+              label="Free trial (days)"
+              placeholder="None"
+              value={current.subscription.trialDays ?? ''}
+              onChange={(event) => {
+                const raw = event.target.value.trim()
+                update({
+                  subscription: {
+                    ...current.subscription!,
+                    ...(raw === ''
+                      ? { trialDays: undefined }
+                      : { trialDays: Math.max(1, Math.round(Number(raw))) }),
+                  },
+                })
+              }}
+              size="small"
+              sx={{ width: 140 }}
+              slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+            />
+          ) : null}
+        </Stack>
         {current.type === 'digital' ? (
           <>
             <Divider textAlign="left">{'Digital delivery'}</Divider>

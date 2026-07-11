@@ -109,6 +109,12 @@ export interface HostProduct {
   digitalFiles?: Array<{ url: string; fileName: string; version?: string }>
   /** Max download attempts per order line; absent = unlimited. */
   downloadLimit?: number
+  /**
+   * Recurring billing (AGL-303): buyers subscribe instead of buying
+   * once; an active subscription is the entitlement content gating
+   * checks (AGL-309).
+   */
+  subscription?: { interval: 'month' | 'year'; trialDays?: number }
   /** Tracked-total at/below this alerts host managers (AGL-281). */
   lowStockThreshold?: number
   createdAtMs?: number

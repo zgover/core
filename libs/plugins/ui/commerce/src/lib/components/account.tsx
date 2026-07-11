@@ -49,6 +49,12 @@ interface AccountData {
     productName: string
     url: string
   }>
+  subscriptions?: Array<{
+    id: string
+    productName: string
+    status: string
+    currentPeriodEndMs?: number | null
+  }>
   orders: Array<{
     id: string
     number: string
@@ -280,6 +286,46 @@ const CustomerAccount = forwardRef<HTMLDivElement, CustomerAccountProps>(
           ))
         )}
 
+        {(account.subscriptions?.length ?? 0) > 0 ? (
+          <>
+            <Divider textAlign="left">{'Subscriptions'}</Divider>
+            {account.subscriptions!.map((subscription) => (
+              <Box
+                key={subscription.id}
+                sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
+              >
+                <Typography variant="body2" sx={{ flex: 1 }} noWrap>
+                  {subscription.productName}
+                </Typography>
+                <Chip
+                  label={subscription.status}
+                  size="small"
+                  variant="outlined"
+                  color={
+                    subscription.status === 'active' ? 'success' : 'default'
+                  }
+                />
+                <Button
+                  size="small"
+                  onClick={async () => {
+                    const response = await fetch(
+                      '/api/commerce/subscription-portal',
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ hostId }),
+                      },
+                    ).catch(() => null)
+                    const payload = await response?.json().catch(() => ({}))
+                    if (payload?.url) window.location.assign(payload.url)
+                  }}
+                >
+                  {'Manage'}
+                </Button>
+              </Box>
+            ))}
+          </>
+        ) : null}
         {(account.downloads?.length ?? 0) > 0 ? (
           <>
             <Divider textAlign="left">{'Downloads'}</Divider>

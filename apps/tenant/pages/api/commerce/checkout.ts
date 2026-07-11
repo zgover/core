@@ -173,8 +173,11 @@ export default async function handler(
       }
     }
 
+    // Subscriptions (AGL-303): recurring prices bill on the platform with
+    // a destination transfer + percent fee; the webhook records the sub.
+    const isSubscription = Boolean(lifted.subscription)
     const params = new URLSearchParams({
-      mode: 'payment',
+      mode: isSubscription ? 'subscription' : 'payment',
       'line_items[0][quantity]': String(quantity),
       'line_items[0][price_data][currency]': 'usd',
       'line_items[0][price_data][unit_amount]': String(
@@ -183,6 +186,30 @@ export default async function handler(
       'line_items[0][price_data][product_data][name]': String(
         product.name ?? 'Product',
       ).slice(0, 120),
+      ...(isSubscription
+        ? {
+            'line_items[0][price_data][recurring][interval]':
+              lifted.subscription!.interval,
+            ...(lifted.subscription!.trialDays
+              ? {
+                  'subscription_data[trial_period_days]': String(
+                    lifted.subscription!.trialDays,
+                  ),
+                }
+              : {}),
+            'subscription_data[transfer_data][destination]':
+              String(accountId),
+            ...(feePct > 0
+              ? {
+                  'subscription_data[application_fee_percent]':
+                    String(feePct),
+                }
+              : {}),
+            'subscription_data[metadata][type]': 'commerce-subscription',
+            'subscription_data[metadata][hostId]': hostId,
+            'subscription_data[metadata][productId]': productId,
+          }
+        : {}),
       ...(taxCents > 0
         ? {
             'line_items[1][quantity]': '1',
@@ -196,13 +223,20 @@ export default async function handler(
         : {}),
       ...(useStripeTax ? { 'automatic_tax[enabled]': 'true' } : {}),
       // Stripe rejects a zero application fee — omit it on 0% plans.
-      ...(feeCents > 0
+      ...(!isSubscription && feeCents > 0
         ? { 'payment_intent_data[application_fee_amount]': String(feeCents) }
         : {}),
-      'payment_intent_data[transfer_data][destination]': String(accountId),
+      ...(!isSubscription
+        ? {
+            'payment_intent_data[transfer_data][destination]':
+              String(accountId),
+          }
+        : {}),
       success_url: `${backUrl}${separator}order=success`,
       cancel_url: `${backUrl}${separator}order=canceled`,
-      'metadata[type]': 'commerce-order',
+      'metadata[type]': isSubscription
+        ? 'commerce-subscription'
+        : 'commerce-order',
       'metadata[hostId]': hostId,
       'metadata[productId]': productId,
       ...(variantId ? { 'metadata[variantId]': variantId } : {}),

@@ -142,6 +142,27 @@ export default async function handler(
       }
     }
 
+    // Storefront subscriptions (AGL-303) with product names resolved.
+    const subscriptionsSnapshot = await hostRef
+      .collection('subscriptions')
+      .where('customerEmail', '==', email)
+      .limit(10)
+      .get()
+    const subscriptions = await Promise.all(
+      subscriptionsSnapshot.docs.map(async (docSnapshot) => {
+        const productSnapshot = await hostRef
+          .collection('products')
+          .doc(String(docSnapshot.get('productId') ?? ''))
+          .get()
+        return {
+          id: docSnapshot.id,
+          productName: String(productSnapshot.get('name') ?? 'Subscription'),
+          status: String(docSnapshot.get('status') ?? 'active'),
+          currentPeriodEndMs: docSnapshot.get('currentPeriodEndMs') ?? null,
+        }
+      }),
+    )
+
     return res.status(200).json({
       member: {
         email,
@@ -150,6 +171,7 @@ export default async function handler(
       },
       orders,
       downloads,
+      subscriptions,
     })
   } catch (error) {
     console.error(error)

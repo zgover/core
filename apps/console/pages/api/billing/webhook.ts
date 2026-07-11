@@ -112,6 +112,32 @@ export default async function handler(
       type === 'customer.subscription.updated' ||
       type === 'customer.subscription.deleted'
     ) {
+      // Storefront subscription status sync (AGL-303).
+      if (object?.metadata?.type === 'commerce-subscription') {
+        const subHostId = object?.metadata?.hostId
+        if (subHostId) {
+          await firebaseAdmin
+            .app()
+            .firestore()
+            .collection('hosts')
+            .doc(String(subHostId))
+            .collection('subscriptions')
+            .doc(String(object.id))
+            .set(
+              {
+                status:
+                  type === 'customer.subscription.deleted'
+                    ? 'canceled'
+                    : String(object?.status ?? 'active'),
+                currentPeriodEndMs: object?.current_period_end
+                  ? object.current_period_end * 1000
+                  : null,
+              },
+              { merge: true },
+            )
+            .catch(() => undefined)
+        }
+      }
       const tenantId = object?.metadata?.tenantId
       if (tenantId) {
         // tenantId in legacy metadata is the owner uid; new checkouts also
@@ -262,6 +288,51 @@ export default async function handler(
             }).catch(() => undefined)
           }
         }
+      }
+    }
+    // Storefront subscriptions (AGL-303): record the sub under the host;
+    // status then follows customer.subscription.* events below.
+    if (
+      type === 'checkout.session.completed' &&
+      object?.metadata?.type === 'commerce-subscription' &&
+      object?.subscription
+    ) {
+      const { hostId, productId } = object.metadata ?? {}
+      if (hostId && productId) {
+        const firestore = firebaseAdmin.app().firestore()
+        const hostRef = firestore.collection('hosts').doc(String(hostId))
+        await hostRef
+          .collection('subscriptions')
+          .doc(String(object.subscription))
+          .set(
+            {
+              productId: String(productId),
+              customerEmail: object?.customer_details?.email ?? null,
+              customerName: object?.customer_details?.name ?? null,
+              stripeCustomerId: String(object?.customer ?? '') || null,
+              status: 'active',
+              createdAtMs: Date.now(),
+            },
+            { merge: true },
+          )
+        void notifyHostManagers(String(hostId), {
+          type: 'content.order',
+          title: 'New subscriber',
+          ...(object?.customer_details?.email
+            ? { body: object.customer_details.email }
+            : {}),
+          link: `/${hostId}/products`,
+        })
+        void upsertHostContact({
+          hostId: String(hostId),
+          email: object?.customer_details?.email,
+          name: object?.customer_details?.name ?? undefined,
+          source: 'order',
+          interaction: {
+            refId: String(object.subscription),
+            summary: 'Started a subscription',
+          },
+        })
       }
     }
     // Cart orders (AGL-293): one multi-line order from the cart doc;
