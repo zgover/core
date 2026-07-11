@@ -342,6 +342,69 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
           }
         }
       }
+      // Commerce collection routes (AGL-298): /collections/{slug} renders
+      // the designated collection template with collection tokens; the
+      // product-grid block derives the same slug from the URL.
+      if (pdpSegments.length === 2 && pdpSegments[0] === 'collections') {
+        const { firebaseAdmin } = await import('@aglyn/tenant-data-admin')
+        const adminFirestore = firebaseAdmin.app().firestore()
+        const hostDocRef = adminFirestore.collection('hosts').doc(hostId)
+        const [storeSettings, collectionSnapshot] = await Promise.all([
+          hostDocRef.collection('settings').doc('store').get(),
+          hostDocRef
+            .collection('collections')
+            .where('slug', '==', pdpSegments[1])
+            .limit(1)
+            .get(),
+        ])
+        const collectionScreenId = storeSettings.get('collectionScreenId')
+        const shopCollection = collectionSnapshot.docs[0]?.data() as
+          | Aglyn.HostCollection
+          | undefined
+        if (collectionScreenId && shopCollection) {
+          const templateRes = await getScreen({
+            hostId,
+            screenId: collectionScreenId,
+          })
+          if (templateRes.screen) {
+            const templateNodes = await composeScreenNodes({
+              hostId,
+              screenId: collectionScreenId,
+              screen: templateRes.screen,
+              tokens: {
+                'collection.name': shopCollection.name,
+                'collection.description': shopCollection.description ?? '',
+                'collection.image': shopCollection.imageUrl ?? '',
+                'collection.slug': shopCollection.slug,
+              },
+            })
+            if (templateNodes) {
+              return {
+                props: JSON.parse(
+                  JSON.stringify({
+                    data: {
+                      host: hostRes.host,
+                      screen: {
+                        data: {
+                          ...templateRes.screen,
+                          seo: {
+                            ...((templateRes.screen as any).seo ?? {}),
+                            title: shopCollection.name,
+                            description:
+                              shopCollection.description ?? undefined,
+                          },
+                        },
+                      },
+                    },
+                    nodes: templateNodes,
+                  }),
+                ),
+                revalidate: 60,
+              }
+            }
+          }
+        }
+      }
       // Content collections fallback (AGL-81): /{collection} and
       // /{collection}/{entry} paths that aren't screens render the themed
       // blog surfaces.

@@ -39,6 +39,8 @@ export interface StoreSettingsCardProps {
 interface StoreSettings {
   /** Screen rendered for /products/{slug} with product tokens (AGL-292). */
   pdpScreenId?: string
+  /** Screen rendered for /collections/{slug} (AGL-298). */
+  collectionScreenId?: string
   currency?: string
   guestCheckout?: boolean
   termsUrl?: string
@@ -66,6 +68,7 @@ export function StoreSettingsCard(props: StoreSettingsCardProps) {
   const [draft, setDraft] = useState<StoreSettings | null>(null)
   const current: StoreSettings = draft ?? {
     pdpScreenId: store?.pdpScreenId ?? '',
+    collectionScreenId: store?.collectionScreenId ?? '',
     currency: store?.currency ?? 'USD',
     guestCheckout: store?.guestCheckout !== false,
     termsUrl: store?.termsUrl ?? '',
@@ -84,6 +87,7 @@ export function StoreSettingsCard(props: StoreSettingsCardProps) {
       doc(firestore, 'hosts', hostId, 'settings', 'store'),
       {
         pdpScreenId: current.pdpScreenId || null,
+        collectionScreenId: current.collectionScreenId || null,
         currency: current.currency ?? 'USD',
         guestCheckout: current.guestCheckout !== false,
         termsUrl: current.termsUrl || null,
@@ -113,6 +117,26 @@ export function StoreSettingsCard(props: StoreSettingsCardProps) {
           }
         >
           <MenuItem value="">{'None (product URLs 404)'}</MenuItem>
+          {screenEntries.map(([screenId, path]) => (
+            <MenuItem key={screenId} value={screenId}>
+              {`/${path === '/' ? '' : path}`}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Collection page template"
+          value={current.collectionScreenId ?? ''}
+          onChange={(event) =>
+            update({ collectionScreenId: event.target.value })
+          }
+          size="small"
+          select
+          helperText={
+            'Screen rendered at /collections/{slug} — drop a Product grid ' +
+            'with source "A collection" and {{collection.*}} tokens.'
+          }
+        >
+          <MenuItem value="">{'None (collection URLs 404)'}</MenuItem>
           {screenEntries.map(([screenId, path]) => (
             <MenuItem key={screenId} value={screenId}>
               {`/${path === '/' ? '' : path}`}

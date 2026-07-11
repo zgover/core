@@ -35,8 +35,11 @@ export const ID: Aglyn.ComponentId = 'product-grid'
 export interface ProductGridProps {
   /** Filter source; 'all' lists the whole active catalog. */
   source?: 'all' | 'collection' | 'category' | 'tag'
-  /** Collection slug when source = collection. */
+  /** Collection slug when source = collection; blank follows the
+   * /collections/{slug} URL (collection template screens, AGL-298). */
   collectionSlug?: string
+  /** Faceted controls above the grid: tags, availability, sort. */
+  showFilters?: boolean
   /** Category slug when source = category. */
   categorySlug?: string
   /** Tag when source = tag. */
@@ -58,6 +61,7 @@ interface CatalogItem {
   compareAtPriceUsd?: number
   imageUrl?: string
   soldOut: boolean
+  tags?: string[]
 }
 
 const SAMPLE_ITEMS: CatalogItem[] = [
@@ -65,6 +69,12 @@ const SAMPLE_ITEMS: CatalogItem[] = [
   { id: 's2', name: 'Another product', slug: '#', priceUsd: 49, maxPriceUsd: 59, compareAtPriceUsd: 79, soldOut: false },
   { id: 's3', name: 'Third product', slug: '#', priceUsd: 12, maxPriceUsd: 12, soldOut: true },
 ]
+
+function collectionSlugFromLocation(): string {
+  if (typeof window === 'undefined') return ''
+  const match = window.location.pathname.match(/\/collections\/([^/?#]+)/)
+  return match ? decodeURIComponent(match[1]) : ''
+}
 
 function priceLabel(item: CatalogItem): string {
   return item.priceUsd === item.maxPriceUsd
@@ -83,17 +93,25 @@ const ProductGrid = forwardRef<HTMLDivElement, ProductGridProps>(
   (props, ref) => {
     const {
       source,
-      collectionSlug,
+      collectionSlug: collectionSlugProp,
       categorySlug,
       tag,
-      sort,
+      sort: sortProp,
       columns,
       maxItems,
       emptyText,
+      showFilters,
       ...rest
     } = props
     const { hostId } = Aglyn.useSite()
     const [items, setItems] = useState<CatalogItem[] | null>(null)
+    const [sort, setSort] = useState(sortProp)
+    const [inStockOnly, setInStockOnly] = useState(false)
+    const [activeTag, setActiveTag] = useState('')
+    const collectionSlug =
+      source === 'collection'
+        ? collectionSlugProp || collectionSlugFromLocation()
+        : collectionSlugProp
 
     useEffect(() => {
       if (!hostId) return
@@ -131,7 +149,21 @@ const ProductGrid = forwardRef<HTMLDivElement, ProductGridProps>(
         md: `repeat(${desktopColumns}, 1fr)`,
       },
     }
-    const visible = hostId ? items : SAMPLE_ITEMS
+    let visible = hostId ? items : SAMPLE_ITEMS
+    if (visible && showFilters) {
+      if (inStockOnly) visible = visible.filter((item) => !item.soldOut)
+      if (activeTag) {
+        visible = visible.filter((item) =>
+          (item.tags ?? []).includes(activeTag),
+        )
+      }
+    }
+    const facetTags = showFilters
+      ? [...new Set((items ?? []).flatMap((item) => item.tags ?? []))].slice(
+          0,
+          12,
+        )
+      : []
 
     if (hostId && items === null) {
       return (
@@ -158,8 +190,8 @@ const ProductGrid = forwardRef<HTMLDivElement, ProductGridProps>(
       )
     }
 
-    return (
-      <Box ref={ref} {...rest} sx={gridSx}>
+    const grid = (
+      <Box sx={gridSx}>
         {(visible ?? []).map((item) => (
           <Card key={item.id} variant="outlined">
             <CardActionArea
@@ -201,6 +233,69 @@ const ProductGrid = forwardRef<HTMLDivElement, ProductGridProps>(
             </CardActionArea>
           </Card>
         ))}
+      </Box>
+    )
+
+    if (!showFilters) {
+      return (
+        <Box ref={ref} {...rest}>
+          {grid}
+        </Box>
+      )
+    }
+    return (
+      <Box ref={ref} {...rest}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            mb: 2,
+          }}
+        >
+          <Chip
+            label="In stock"
+            size="small"
+            variant={inStockOnly ? 'filled' : 'outlined'}
+            color={inStockOnly ? 'secondary' : 'default'}
+            onClick={() => setInStockOnly((prev) => !prev)}
+          />
+          {facetTags.map((facetTag) => (
+            <Chip
+              key={facetTag}
+              label={facetTag}
+              size="small"
+              variant={activeTag === facetTag ? 'filled' : 'outlined'}
+              color={activeTag === facetTag ? 'secondary' : 'default'}
+              onClick={() =>
+                setActiveTag((prev) => (prev === facetTag ? '' : facetTag))
+              }
+            />
+          ))}
+          <Box sx={{ flex: 1 }} />
+          <Chip
+            label={
+              sort === 'price-asc'
+                ? 'Price ↑'
+                : sort === 'price-desc'
+                  ? 'Price ↓'
+                  : 'A–Z'
+            }
+            size="small"
+            variant="outlined"
+            onClick={() =>
+              setSort((prev) =>
+                prev === 'price-asc'
+                  ? 'price-desc'
+                  : prev === 'price-desc'
+                    ? 'name'
+                    : 'price-asc',
+              )
+            }
+          />
+        </Box>
+        {grid}
       </Box>
     )
   },
@@ -274,6 +369,12 @@ export const schema: Aglyn.ComponentSchema<ProductGridProps> = {
       label: 'Empty text',
       description: 'Copy when nothing matches.',
       component: Aglyn.FieldComponentType.TEXT_FIELD,
+    },
+    {
+      name: 'showFilters',
+      label: 'Show filters',
+      description: 'Tag chips, in-stock toggle, and price sort above the grid.',
+      component: Aglyn.FieldComponentType.CHECKBOX,
     },
   ],
 }
