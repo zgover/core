@@ -252,6 +252,25 @@ const AdminUserDetail: NextPageWithLayout = () => {
                             <Chip size="small" label="Customer account" />
                           )}
                         </Stack>
+                        {/* Assignment summary (AGL-378): staff role +
+                            org roles at a glance. */}
+                        <Typography variant="caption" color="text.secondary">
+                          {[
+                            detail.user.staff
+                              ? `Staff (${detail.user.staffRole ?? 'super'})`
+                              : 'Not staff',
+                            detail.memberships.length
+                              ? detail.memberships
+                                  .map(
+                                    (m) =>
+                                      `${m.role ?? 'member'} in ${
+                                        m.orgName ?? m.orgId
+                                      }`,
+                                  )
+                                  .join(' · ')
+                              : 'no organizations',
+                          ].join(' · ')}
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {`Providers: ${detail.user.providers.join(', ') || '—'}`}
                         </Typography>
@@ -362,12 +381,37 @@ const AdminUserDetail: NextPageWithLayout = () => {
                                   {membership.roleId ? ' (custom)' : ''}
                                 </TableCell>
                                 <TableCell>
-                                  {membership.allHosts
-                                    ? 'All sites'
-                                    : `${
-                                        Object.keys(membership.hostAccess)
-                                          .length
-                                      } site(s)`}
+                                  {/* Per-host access roles (AGL-378):
+                                      show which sites and at what role,
+                                      not just a count. */}
+                                  {membership.allHosts ? (
+                                    <Chip size="small" label="All sites" />
+                                  ) : Object.keys(membership.hostAccess)
+                                      .length === 0 ? (
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                    >
+                                      {'—'}
+                                    </Typography>
+                                  ) : (
+                                    <Stack
+                                      direction="row"
+                                      spacing={0.5}
+                                      sx={{ flexWrap: 'wrap', gap: 0.5 }}
+                                    >
+                                      {Object.entries(
+                                        membership.hostAccess,
+                                      ).map(([hostId, role]) => (
+                                        <Chip
+                                          key={hostId}
+                                          size="small"
+                                          variant="outlined"
+                                          label={`${hostId}: ${role}`}
+                                        />
+                                      ))}
+                                    </Stack>
+                                  )}
                                 </TableCell>
                               </TableRow>
                             ))}

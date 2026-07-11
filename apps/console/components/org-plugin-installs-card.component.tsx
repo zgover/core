@@ -122,6 +122,36 @@ export function OrgPluginInstallsCard(props: OrgPluginInstallsCardProps) {
             'site. Browse and install from any site’s Community tab ' +
             'and choose "whole organization" at install time.'}
         </Typography>
+        {/* Core platform bundles (AGL-379): every org gets them; locked. */}
+        {[
+          ['Material UI components', 'The core component and theme library.'],
+          ['Commerce storefront', 'Product grids, PDPs, cart, checkout.'],
+          ['Events Calendar', 'Published events list with schema.org markup.'],
+          ['Email Designer', 'Email-safe blocks for campaign emails.'],
+        ].map(([name, description]) => (
+          <Stack
+            key={name}
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              p: 1.5,
+            }}
+          >
+            <Stack sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body2" noWrap>
+                {name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {description}
+              </Typography>
+            </Stack>
+            <Chip size="small" color="secondary" label="Core" />
+          </Stack>
+        ))}
         {installs.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
             {'No organization-wide installs yet.'}
