@@ -23,6 +23,7 @@ import HostWebhooksCard from '../../../components/host-webhooks-card.component'
 import HostWorkflowsCard from '../../../components/host-workflows-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import FeatureGate from '../../../components/feature-gate.component'
+import HubTabs from '../../../components/hub-tabs.component'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
@@ -61,15 +62,26 @@ const HostWorkflows: NextPageWithLayout = () => {
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <FeatureGate flag="release_workflows">
-            <HostWorkflowsCard hostId={hostId} />
-            {/* Actions builder (AGL-148). */}
-            <div style={{ marginTop: 24 }}>
-              <HostActionsCard hostId={hostId} />
-            </div>
-            {/* Webhooks (AGL-149). */}
-            <div style={{ marginTop: 24 }}>
-              <HostWebhooksCard hostId={hostId} />
-            </div>
+            {/* Host-setup tab pattern with ?tab= deep links (AGL-356). */}
+            <HubTabs
+              tabs={[
+                {
+                  id: 'workflows',
+                  label: 'Workflows',
+                  content: <HostWorkflowsCard hostId={hostId} />,
+                },
+                {
+                  id: 'actions',
+                  label: 'Actions',
+                  content: <HostActionsCard hostId={hostId} />,
+                },
+                {
+                  id: 'webhooks',
+                  label: 'Webhooks',
+                  content: <HostWebhooksCard hostId={hostId} />,
+                },
+              ]}
+            />
           </FeatureGate>
         </Container>
       </DashboardLayout>

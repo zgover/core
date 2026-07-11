@@ -35,6 +35,7 @@ import ProductsHubCard from '../../../components/commerce/products-hub-card.comp
 import ReservationsCard from '../../../components/commerce/reservations-card.component'
 import ReviewsModerationCard from '../../../components/commerce/reviews-moderation-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
+import HubTabs from '../../../components/hub-tabs.component'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
@@ -71,68 +72,104 @@ const HostProducts: NextPageWithLayout = () => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <GridItems
-            spacing={3}
-            items={[
+          {/* Host-setup tab pattern with ?tab= deep links (AGL-354). */}
+          <HubTabs
+            tabs={[
               {
-                size: { xs: 12 },
-                children: <CommerceAnalyticsCard hostId={hostId} />,
+                id: 'catalog',
+                label: 'Catalog',
+                content: (
+                  <GridItems
+                    spacing={3}
+                    items={[
+                      {
+                        size: { xs: 12 },
+                        children: <ProductsHubCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <CatalogOrganizationCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <MemberPostsCard hostId={hostId} />,
+                      },
+                    ]}
+                  />
+                ),
               },
               {
-                size: { xs: 12 },
-                children: <ProductsHubCard hostId={hostId} />,
+                id: 'orders',
+                label: 'Orders',
+                content: <HostOrdersCard hostId={hostId} />,
               },
               {
-                size: { xs: 12, md: 6 },
-                children: <CatalogOrganizationCard hostId={hostId} />,
+                id: 'promotions',
+                label: 'Promotions',
+                content: (
+                  <GridItems
+                    spacing={3}
+                    items={[
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <DiscountsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <HostCouponsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <ReviewsModerationCard hostId={hostId} />,
+                      },
+                    ]}
+                  />
+                ),
               },
               {
-                size: { xs: 12, md: 6 },
-                children: <DiscountsCard hostId={hostId} />,
+                id: 'reservations',
+                label: 'Reservations',
+                content: <ReservationsCard hostId={hostId} />,
               },
               {
-                size: { xs: 12, md: 6 },
-                children: <HostCouponsCard hostId={hostId} />,
+                id: 'settings',
+                label: 'Settings',
+                content: (
+                  <GridItems
+                    spacing={3}
+                    items={[
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <PaymentsSettingsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <StoreSettingsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <TaxSettingsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <LocationsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12 },
+                        children: <ShippingSettingsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12 },
+                        children: <SuppliersCard hostId={hostId} />,
+                      },
+                    ]}
+                  />
+                ),
               },
               {
-                size: { xs: 12, md: 6 },
-                children: <PaymentsSettingsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12, md: 6 },
-                children: <StoreSettingsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12, md: 6 },
-                children: <TaxSettingsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12 },
-                children: <ShippingSettingsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12, md: 6 },
-                children: <LocationsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12, md: 6 },
-                children: <SuppliersCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12, md: 6 },
-                children: <MemberPostsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12 },
-                children: <ReservationsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12, md: 6 },
-                children: <ReviewsModerationCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12 },
-                children: <HostOrdersCard hostId={hostId} />,
+                id: 'analytics',
+                label: 'Analytics',
+                content: <CommerceAnalyticsCard hostId={hostId} />,
               },
             ]}
           />

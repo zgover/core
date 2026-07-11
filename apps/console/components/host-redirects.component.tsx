@@ -19,8 +19,11 @@
 import {
   createResourceUid,
   isSelfRedirect,
+  matchRedirect,
   normalizeRedirectDestination,
   normalizeRedirectSource,
+  REDIRECT_DEFAULT_PRIORITY,
+  validateRedirectRule,
   REDIRECT_STATUS_CODES,
 } from '@aglyn/aglyn'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
@@ -61,6 +64,10 @@ interface RedirectDraft {
   source: string
   destination: string
   statusCode: number
+  /** Match mode (AGL-375): exact | prefix | regex. */
+  kind: string
+  /** Lower fires first. */
+  priority: number
 }
 
 /**
@@ -90,6 +97,7 @@ export function HostRedirects(props: { hostId: string }) {
     )
 
   const [draft, setDraft] = useState<RedirectDraft | null>(null)
+  const [testPath, setTestPath] = useState('')
 
   // Host routing map for the screen-collision warning (AGL-156 spec).
   const { data: host } = useFirestoreDoc<any>(
@@ -150,26 +158,40 @@ export function HostRedirects(props: { hostId: string }) {
         { variant: 'warning', persist: false },
       )
     }
-    setDraft({ id: null, source: '', destination: '', statusCode: 302 })
+    setDraft({
+      id: null,
+      source: '',
+      destination: '',
+      statusCode: 302,
+      kind: 'exact',
+      priority: REDIRECT_DEFAULT_PRIORITY,
+    })
   }, [entitled, tenant, redirects.length, enqueueSnackbar])
 
   const handleSave = useCallback(async () => {
     if (!draft) return
-    const source = normalizeRedirectSource(draft.source)
-    if (!source) {
-      return void enqueueSnackbar(
-        'Sources are site paths like /old-page — no full URLs',
-        { variant: 'warning', persist: false },
-      )
+    const kind = draft.kind || 'exact'
+    // Shared v2 validation (AGL-375): regex patterns must compile; path
+    // kinds keep the v1 normalization.
+    const problem = validateRedirectRule({
+      kind,
+      source: draft.source,
+      destination: draft.destination,
+    })
+    if (problem) {
+      return void enqueueSnackbar(problem, {
+        variant: 'warning',
+        persist: false,
+      })
     }
-    const destination = normalizeRedirectDestination(draft.destination)
-    if (!destination) {
-      return void enqueueSnackbar(
-        'Destinations are internal paths or https:// URLs',
-        { variant: 'warning', persist: false },
-      )
-    }
-    if (isSelfRedirect({ source, destination })) {
+    const source =
+      kind === 'regex'
+        ? draft.source.trim()
+        : (normalizeRedirectSource(draft.source) as string)
+    const destination = normalizeRedirectDestination(
+      draft.destination,
+    ) as string
+    if (kind !== 'regex' && isSelfRedirect({ source, destination })) {
       return void enqueueSnackbar('That would redirect the path to itself', {
         variant: 'warning',
         persist: false,
@@ -177,7 +199,9 @@ export function HostRedirects(props: { hostId: string }) {
     }
     const duplicate = redirects.find(
       (redirect: any) =>
-        redirect.source === source && redirect.$id !== draft.id,
+        redirect.source === source &&
+        (redirect.kind ?? 'exact') === kind &&
+        redirect.$id !== draft.id,
     )
     if (duplicate) {
       return void enqueueSnackbar(`A rule for ${source} already exists`, {
@@ -228,7 +252,10 @@ export function HostRedirects(props: { hostId: string }) {
           )
             ? draft.statusCode
             : 302,
-          kind: 'exact',
+          kind,
+          priority: Number.isFinite(Number(draft.priority))
+            ? Number(draft.priority)
+            : REDIRECT_DEFAULT_PRIORITY,
           enabled: true,
           updatedAt: Timestamp.now(),
           ...(draft.id ? {} : { createdAt: Timestamp.now() }),
@@ -312,6 +339,13 @@ export function HostRedirects(props: { hostId: string }) {
                 onChange={handleToggle(redirect)}
               />
               <Chip size="small" label={redirect.statusCode ?? 302} />
+              {(redirect.kind ?? 'exact') !== 'exact' ? (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={redirect.kind}
+                />
+              ) : null}
               <Stack sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="body2" noWrap>
                   {`${redirect.source} → ${redirect.destination}`}
@@ -341,6 +375,8 @@ export function HostRedirects(props: { hostId: string }) {
                     source: redirect.source ?? '',
                     destination: redirect.destination ?? '',
                     statusCode: redirect.statusCode ?? 302,
+                    kind: redirect.kind ?? 'exact',
+                    priority: redirect.priority ?? REDIRECT_DEFAULT_PRIORITY,
                   })
                 }
               >
@@ -363,6 +399,29 @@ export function HostRedirects(props: { hostId: string }) {
           >
             {'Add redirect'}
           </Button>
+          {/* Inline tester (AGL-375): same matcher as enforcement. */}
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <TextField
+              size="small"
+              label="Test a path"
+              placeholder="/old-page"
+              value={testPath}
+              onChange={(event) => setTestPath(event.target.value)}
+              sx={{ maxWidth: 260 }}
+            />
+            {testPath.trim() ? (
+              <Typography variant="caption" color="text.secondary">
+                {(() => {
+                  const normalized =
+                    normalizeRedirectSource(testPath) ?? testPath.trim()
+                  const result = matchRedirect(redirects as any, normalized)
+                  return result
+                    ? `→ ${result.destination} (${result.statusCode})`
+                    : 'No rule matches'
+                })()}
+              </Typography>
+            ) : null}
+          </Stack>
         </Stack>
       )}
 
@@ -377,8 +436,33 @@ export function HostRedirects(props: { hostId: string }) {
           sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 1 }}
         >
           <TextField
-            label="From path"
-            placeholder="/old-page"
+            select
+            label="Match mode"
+            value={draft?.kind ?? 'exact'}
+            onChange={(event) =>
+              setDraft((prev) =>
+                prev ? { ...prev, kind: event.target.value } : prev,
+              )
+            }
+            size="small"
+            sx={{ mt: 1 }}
+          >
+            <MenuItem value="exact">{'Exact path'}</MenuItem>
+            <MenuItem value="prefix">{'Path prefix'}</MenuItem>
+            <MenuItem value="regex">{'Regular expression'}</MenuItem>
+          </TextField>
+          <TextField
+            label={draft?.kind === 'regex' ? 'Pattern' : 'From path'}
+            placeholder={
+              draft?.kind === 'regex' ? '/product/(\\d+)' : '/old-page'
+            }
+            helperText={
+              draft?.kind === 'regex'
+                ? 'Anchored to the whole path; use $1, $2 in the destination'
+                : draft?.kind === 'prefix'
+                  ? 'Matches the path and everything under it'
+                  : undefined
+            }
             value={draft?.source ?? ''}
             onChange={(event) =>
               setDraft((prev) =>
@@ -387,7 +471,6 @@ export function HostRedirects(props: { hostId: string }) {
             }
             size="small"
             autoFocus
-            sx={{ mt: 1 }}
           />
           <TextField
             label="To"
@@ -418,6 +501,20 @@ export function HostRedirects(props: { hostId: string }) {
             <MenuItem value={307}>{'307 — temporary, keep method'}</MenuItem>
             <MenuItem value={308}>{'308 — permanent, keep method'}</MenuItem>
           </TextField>
+          <TextField
+            label="Priority"
+            type="number"
+            helperText="Lower fires first when several rules match"
+            value={draft?.priority ?? REDIRECT_DEFAULT_PRIORITY}
+            onChange={(event) =>
+              setDraft((prev) =>
+                prev
+                  ? { ...prev, priority: Number(event.target.value) }
+                  : prev,
+              )
+            }
+            size="small"
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDraft(null)}>{'Cancel'}</Button>

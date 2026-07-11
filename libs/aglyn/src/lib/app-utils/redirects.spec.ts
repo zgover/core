@@ -67,3 +67,96 @@ describe('isSelfRedirect', () => {
     ).toBe(false)
   })
 })
+
+describe('matchRedirect (v2, AGL-375)', () => {
+  const { matchRedirect, validateRedirectRule, compileRedirectRegex } =
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('./redirects')
+
+  it('matches exact, prefix (segment boundary), and regex with captures', () => {
+    const rules = [
+      { source: '/old', destination: '/new', statusCode: 301, kind: 'exact' },
+      {
+        source: '/blog',
+        destination: '/articles',
+        statusCode: 302,
+        kind: 'prefix',
+      },
+      {
+        source: '/product/(\\d+)',
+        destination: '/products/item-$1',
+        statusCode: 302,
+        kind: 'regex',
+      },
+    ]
+    expect(matchRedirect(rules, '/old')).toMatchObject({
+      destination: '/new',
+      statusCode: 301,
+    })
+    expect(matchRedirect(rules, '/blog/post-1')).toMatchObject({
+      destination: '/articles',
+    })
+    expect(matchRedirect(rules, '/blogging')).toBeNull()
+    expect(matchRedirect(rules, '/product/42')).toMatchObject({
+      destination: '/products/item-42',
+    })
+  })
+
+  it('honors priority order and skips disabled rules', () => {
+    const rules = [
+      {
+        source: '/a',
+        destination: '/low',
+        statusCode: 302,
+        kind: 'exact',
+        priority: 200,
+      },
+      {
+        source: '/a',
+        destination: '/high',
+        statusCode: 302,
+        kind: 'exact',
+        priority: 1,
+      },
+      {
+        source: '/a',
+        destination: '/off',
+        statusCode: 302,
+        kind: 'exact',
+        priority: 0,
+        enabled: false,
+      },
+    ]
+    expect(matchRedirect(rules, '/a')?.destination).toBe('/high')
+  })
+
+  it('never fires a rule that would redirect the path onto itself', () => {
+    const rules = [
+      {
+        source: '/loop(.*)',
+        destination: '/loop$1',
+        statusCode: 302,
+        kind: 'regex',
+      },
+    ]
+    expect(matchRedirect(rules, '/loop')).toBeNull()
+  })
+
+  it('validates rules per kind and rejects bad regexes', () => {
+    expect(
+      validateRedirectRule({
+        kind: 'regex',
+        source: '/ok/(\\d+)',
+        destination: '/n/$1',
+      }),
+    ).toBeNull()
+    expect(
+      validateRedirectRule({
+        kind: 'regex',
+        source: '(unclosed',
+        destination: '/n',
+      }),
+    ).toBeTruthy()
+    expect(compileRedirectRegex('(unclosed')).toBeNull()
+  })
+})

@@ -26,6 +26,7 @@ import HostDisplayNameComponent from '../../../components/host-display-name.comp
 import HostMarketingSummaryCard from '../../../components/host-marketing-summary-card.component'
 import HostOverlaysCard from '../../../components/host-overlays-card.component'
 import OrgListsCard from '../../../components/org-lists-card.component'
+import HubTabs from '../../../components/hub-tabs.component'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
@@ -65,39 +66,60 @@ const HostMarketing: NextPageWithLayout = () => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <GridItems
-            spacing={3}
-            items={[
-              // Channel rollup (wave v8).
+          {/* Host-setup tab pattern with ?tab= deep links (AGL-355). */}
+          <HubTabs
+            tabs={[
               {
-                size: { xs: 12 },
-                children: <HostMarketingSummaryCard hostId={hostId} />,
+                id: 'overview',
+                label: 'Overview',
+                content: <HostMarketingSummaryCard hostId={hostId} />,
               },
               {
-                size: { xs: 12 },
-                children: <HostOverlaysCard hostId={hostId} />,
+                id: 'email',
+                label: 'Email',
+                content: (
+                  <GridItems
+                    spacing={3}
+                    items={[
+                      {
+                        size: { xs: 12 },
+                        children: <HostCampaignsCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12 },
+                        children: <OrgListsCard hostId={hostId} />,
+                      },
+                    ]}
+                  />
+                ),
               },
               {
-                size: { xs: 12, md: 6 },
-                children: <AnnouncementBarCard hostId={hostId} />,
+                id: 'overlays',
+                label: 'Overlays',
+                content: (
+                  <GridItems
+                    spacing={3}
+                    items={[
+                      {
+                        size: { xs: 12 },
+                        children: <HostOverlaysCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <AnnouncementBarCard hostId={hostId} />,
+                      },
+                      {
+                        size: { xs: 12, md: 6 },
+                        children: <PopupCard hostId={hostId} />,
+                      },
+                    ]}
+                  />
+                ),
               },
               {
-                size: { xs: 12, md: 6 },
-                children: <PopupCard hostId={hostId} />,
-              },
-              // Email marketing (AGL-254): campaigns + org lists.
-              {
-                size: { xs: 12, md: 6 },
-                children: <HostCampaignsCard hostId={hostId} />,
-              },
-              {
-                size: { xs: 12, md: 6 },
-                children: <OrgListsCard hostId={hostId} />,
-              },
-              // A/B experiments (AGL-252).
-              {
-                size: { xs: 12 },
-                children: <HostExperimentsCard hostId={hostId} />,
+                id: 'experiments',
+                label: 'A/B testing',
+                content: <HostExperimentsCard hostId={hostId} />,
               },
             ]}
           />

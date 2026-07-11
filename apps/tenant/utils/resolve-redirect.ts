@@ -18,7 +18,7 @@
 import {
   checkEntitlement,
   type HostRedirect,
-  isSelfRedirect,
+  matchRedirect,
   normalizeRedirectSource,
 } from '@aglyn/aglyn'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
@@ -65,13 +65,14 @@ export async function resolveRedirect(
       .get()
     if (rules.empty) return null
 
-    const match = rules.docs.find(
-      (doc) =>
-        !doc.get('deletedAt') && (doc.data() as HostRedirect).source === source,
+    // v2 matcher (AGL-375): exact/prefix/regex in priority order, capture
+    // substitution, self-redirect floor.
+    const ruleList = rules.docs.map(
+      (doc) => ({ ...(doc.data() as HostRedirect) }),
     )
-    if (!match) return null
-    const rule = match.data() as HostRedirect
-    if (!rule.destination || isSelfRedirect(rule)) return null
+    const matched = matchRedirect(ruleList, source)
+    if (!matched) return null
+    const match = rules.docs[matched.index]
 
     // Paid gate — only paid orgs' rules fire (dark-launch orgs pass).
     {
@@ -96,12 +97,7 @@ export async function resolveRedirect(
       .set({ lastHitAt: FieldValue.serverTimestamp() }, { merge: true })
       .catch(() => undefined)
 
-    const statusCode = ([301, 302, 307, 308] as const).includes(
-      rule.statusCode as any,
-    )
-      ? rule.statusCode
-      : 302
-    return { destination: rule.destination, statusCode }
+    return { destination: matched.destination, statusCode: matched.statusCode }
   } catch (error) {
     console.error('resolveRedirect failed', host.$id, requestPath, error)
     return null
