@@ -29,6 +29,7 @@ import {
   Button,
   Chip,
   Link as MuiLink,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -42,6 +43,7 @@ import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import {
   collection,
   doc,
+  getCountFromServer,
   limit,
   orderBy,
   query,
@@ -229,6 +231,34 @@ const AdminOrgDetail: NextPageWithLayout = () => {
     }
   }
 
+  // Entitlement utilization (AGL-391): actual counts against the caps.
+  const [datasetCount, setDatasetCount] = useState<number | null>(null)
+  useEffect(() => {
+    if (!orgId) return
+    let active = true
+    void getCountFromServer(collection(firestore, 'orgs', orgId, 'datasets'))
+      .then((snap) => {
+        if (active) setDatasetCount(snap.data().count)
+      })
+      .catch(() => {
+        if (active) setDatasetCount(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [firestore, orgId])
+  const usageByKey = useMemo<Record<string, number>>(
+    () => ({
+      hostLimit: (hostDocs ?? []).length,
+      managersPerTenant: (memberDocs ?? []).length,
+      maxManagersPerTenant: (memberDocs ?? []).length,
+      ...(datasetCount != null
+        ? { datasetsPerOrg: datasetCount, maxDatasetsPerOrg: datasetCount }
+        : {}),
+    }),
+    [hostDocs, memberDocs, datasetCount],
+  )
+
   // Direct org editing (AGL-358): name/logo/contacts through the same
   // audited settings API org admins use (staff passes its guard).
   const [orgEdit, setOrgEdit] = useState({
@@ -289,6 +319,38 @@ const AdminOrgDetail: NextPageWithLayout = () => {
         const payload = await response.json().catch(() => ({}))
         throw new Error(payload?.error ?? 'Save failed')
       }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setOrgEditBusy(false)
+    }
+  }
+
+  // Ownership transfer (AGL-390): staff hands the org to another member
+  // via the audited settings API.
+  const [transferTarget, setTransferTarget] = useState('')
+  const handleTransferOwnership = async () => {
+    if (!transferTarget || orgEditBusy) return
+    setOrgEditBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/orgs/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          orgId,
+          action: 'transfer-ownership',
+          targetUid: transferTarget,
+        }),
+      })
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload?.error ?? 'Transfer failed')
+      }
+      setTransferTarget('')
     } catch (error) {
       console.error(error)
     } finally {
@@ -520,6 +582,42 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                           >
                             {orgEditBusy ? 'Saving…' : 'Save organization'}
                           </Button>
+                          {/* Ownership transfer (AGL-390): staff can hand
+                              the org to another member; audited. */}
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{ alignItems: 'flex-start', mt: 1 }}
+                          >
+                            <TextField
+                              select
+                              size="small"
+                              label="Transfer ownership to"
+                              value={transferTarget}
+                              onChange={(event) =>
+                                setTransferTarget(event.target.value)
+                              }
+                              sx={{ flex: 1 }}
+                            >
+                              <MenuItem value="">{'Select a member…'}</MenuItem>
+                              {(memberDocs ?? [])
+                                .filter((m: any) => m.$id !== org?.ownerUid)
+                                .map((m: any) => (
+                                  <MenuItem key={m.$id} value={m.$id}>
+                                    {m.displayName ?? m.email ?? m.$id}
+                                  </MenuItem>
+                                ))}
+                            </TextField>
+                            <Button
+                              size="small"
+                              color="error"
+                              disabled={orgEditBusy || !transferTarget}
+                              onClick={() => void handleTransferOwnership()}
+                              sx={{ mt: 0.5 }}
+                            >
+                              {'Transfer'}
+                            </Button>
+                          </Stack>
                         </Stack>
                       </CardDisplay>
                     ),
@@ -645,6 +743,7 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                             <TableHead>
                               <TableRow>
                                 <TableCell>{'Key'}</TableCell>
+                                <TableCell align="right">{'Used'}</TableCell>
                                 <TableCell align="right">
                                   {'Effective'}
                                 </TableCell>
@@ -678,6 +777,11 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                                             sx={{ ml: 1 }}
                                           />
                                         ) : null}
+                                      </TableCell>
+                                      <TableCell align="right">
+                                        {usageByKey[key] != null
+                                          ? usageByKey[key].toLocaleString()
+                                          : '—'}
                                       </TableCell>
                                       <TableCell align="right">
                                         {formatLimit(value as number)}
