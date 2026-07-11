@@ -628,7 +628,7 @@ export function checkSeatQuota(
 
 export function checkQuota(
   tenant: Partial<AglynTenant> | null | undefined,
-  quota: keyof Omit<TenantEntitlements, 'features'>,
+  quota: keyof Omit<ResolvedTenantEntitlements, 'features'>,
   currentUsage: number,
 ): { allowed: boolean; limit: number; remaining: number } {
   const limit = resolveTenantEntitlements(tenant)[quota]
