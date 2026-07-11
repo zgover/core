@@ -134,9 +134,52 @@ export default async function handler(
       )
     })
 
+    // Discounts engine (AGL-305): entered codes and automatic
+    // promotions from hosts/{id}/discounts; the AGL-96 coupons remain a
+    // fallback for unknown codes.
+    const discountsSnapshot = await hostRef
+      .collection('discounts')
+      .limit(100)
+      .get()
+    const resolvedDiscount = Aglyn.resolveDiscount(
+      discountsSnapshot.docs.map((docSnapshot) => ({
+        ...(docSnapshot.data() as Aglyn.HostDiscount),
+        $id: docSnapshot.id,
+      })),
+      {
+        ...(couponCode ? { code: couponCode } : {}),
+        subtotalCents: itemsCents,
+        productIds: cart.lines.map((line) => line.productId),
+      },
+    )
+    if (resolvedDiscount?.codeProblem) {
+      return res.status(400).json({ error: resolvedDiscount.codeProblem })
+    }
+    if (resolvedDiscount && resolvedDiscount.discountCents > 0) {
+      const stripeCoupon = await fetch('https://api.stripe.com/v1/coupons', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          amount_off: String(resolvedDiscount.discountCents),
+          currency: 'usd',
+          duration: 'once',
+        }).toString(),
+      }).then((response) => response.json())
+      if (stripeCoupon?.id) {
+        params.set('discounts[0][coupon]', stripeCoupon.id)
+        params.set('metadata[discountId]', resolvedDiscount.discountId)
+        feeCents = Math.round(
+          (feeCents * (itemsCents - resolvedDiscount.discountCents)) /
+            Math.max(1, itemsCents),
+        )
+      }
+    }
     // Coupons (AGL-96 semantics): percent off the items total, applied
     // as a Stripe coupon so line prices stay honest.
-    if (couponCode) {
+    if (couponCode && !resolvedDiscount) {
       const couponSnapshot = await hostRef
         .collection('coupons')
         .doc(couponCode)

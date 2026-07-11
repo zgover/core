@@ -738,6 +738,19 @@ export default async function handler(
             )
             .catch(() => undefined)
         }
+        // Discounts engine redemptions (AGL-305).
+        if (object.metadata?.discountId) {
+          await hostRef
+            .collection('discounts')
+            .doc(String(object.metadata.discountId))
+            .set(
+              {
+                redemptions: firebaseAdmin.firestore.FieldValue.increment(1),
+              },
+              { merge: true },
+            )
+            .catch(() => undefined)
+        }
       }
     }
     // Draft orders (AGL-287): the console pre-created the doc; completion
