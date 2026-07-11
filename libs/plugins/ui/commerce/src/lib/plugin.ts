@@ -17,6 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { mdiStorefrontOutline } from '@aglyn/shared-data-mdi'
+import * as ProductGrid from './components/product-grid'
 import { BUNDLE_ID } from './constants/bundle-common'
 
 /**
@@ -27,7 +28,13 @@ import { BUNDLE_ID } from './constants/bundle-common'
  * as they land (PLP AGL-291, PDP AGL-292, cart AGL-293, …); ids are
  * persisted in screen docs and never renamed.
  */
-export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = []
+export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
+  {
+    component: ProductGrid.default,
+    schema: ProductGrid.schema,
+    presets: ProductGrid.presets,
+  },
+]
 
 export function registerCommercePlugin(): void {
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
