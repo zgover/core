@@ -24,7 +24,7 @@ import {
 } from '@aglyn/aglyn'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolveOrgPermissions } from '../../../utils/server/org-permissions'
+import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
 const MAX_TEMPLATE_SCREENS = 25
 

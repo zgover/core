@@ -23,7 +23,7 @@ import {
   revokeHostAccess,
 } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolveOrgPermissions } from '../../../utils/server/org-permissions'
+import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
 const ROLES = new Set(['viewer', 'editor', 'admin'])
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

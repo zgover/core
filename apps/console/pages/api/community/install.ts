@@ -18,7 +18,7 @@
 import { createResourceUid } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolveOrgPermissions } from '../../../utils/server/org-permissions'
+import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
 /**
  * Installs (or updates) a community listing into a host (AGL-44/46).

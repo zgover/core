@@ -25,7 +25,7 @@ import {
 import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
 import { createHash } from 'crypto'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolveOrgPermissions } from '../../../utils/server/org-permissions'
+import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
 // Base64 bundle bodies: a small JS plugin bundle, capped generously.
 export const config = { api: { bodyParser: { sizeLimit: '8mb' } } }

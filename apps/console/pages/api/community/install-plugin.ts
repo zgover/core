@@ -18,7 +18,7 @@
 import {
   resolveOrgIdForHost, firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolveOrgPermissions } from '../../../utils/server/org-permissions'
+import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
 /**
  * Installs (or upgrades) a community plugin into a host (AGL-45), pinning a
