@@ -15,52 +15,52 @@
  * limitations under the License.
  */
 
-import type { GetServerSideProps } from 'next'
-import Head from 'next/head'
-import getHost from '../../../utils/get-host'
-import searchContent, {
-  type SearchResult,
-} from '../../../utils/search-content'
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import searchContent from '../../../../utils/search-content'
+import { getHostCached } from '../host-data'
 
-interface Props {
-  siteTitle: string
-  query: string
-  results: SearchResult[]
+// Reads ?q= per request, so it can never be statically cached.
+export const dynamic = 'force-dynamic'
+
+type SearchPageProps = {
+  params: Promise<{ host: string }>
+  searchParams: Promise<{ q?: string | string[] }>
 }
 
-/**
- * Tenant site search results (AGL-88). A real route beats the catch-all,
- * and SSR lets it read ?q= per request. Reserved path: a screen slugged
- * "search" would be shadowed — acceptable, documented reserved word.
- */
-export const getServerSideProps: GetServerSideProps<Props> = async (
-  context,
-) => {
-  const hostParam = String(context.params?.['host'] ?? '')
-  const query = String(context.query['q'] ?? '').slice(0, 100)
-  const hostRes = await getHost({ host: hostParam })
-  if (hostRes.error || !hostRes.host) return { notFound: true }
-  const results = query
-    ? await searchContent({ host: hostRes.host, query })
-    : []
+export async function generateMetadata({
+  params,
+}: SearchPageProps): Promise<Metadata> {
+  const { host } = await params
+  const hostRes = await getHostCached(host)
+  const siteTitle =
+    hostRes.host?.seo?.title ?? hostRes.host?.displayName ?? 'Search'
   return {
-    props: {
-      siteTitle:
-        hostRes.host.seo?.title ?? hostRes.host.displayName ?? 'Search',
-      query,
-      results,
-    },
+    title: `Search – ${siteTitle}`,
+    robots: { index: false, follow: true },
   }
 }
 
-export default function SearchPage(props: Props) {
-  const { siteTitle, query, results } = props
+/**
+ * Tenant site search results (AGL-88), migrated from a Pages Router
+ * `getServerSideProps` page to an async Server Component. A real route beats
+ * the catch-all, and reading `searchParams` keeps it per-request. Reserved
+ * path: a screen slugged "search" is shadowed — documented reserved word.
+ */
+export default async function SearchPage({
+  params,
+  searchParams,
+}: SearchPageProps) {
+  const { host } = await params
+  const sp = await searchParams
+  const query = String(sp?.q ?? '').slice(0, 100)
+  const hostRes = await getHostCached(host)
+  if (hostRes.error || !hostRes.host) notFound()
+  const results = query
+    ? await searchContent({ host: hostRes.host, query })
+    : []
   return (
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '48px 24px' }}>
-      <Head>
-        <title>{`Search – ${siteTitle}`}</title>
-        <meta key="robots" name="robots" content="noindex" />
-      </Head>
       <h1>{'Search'}</h1>
       <form action="/search" method="get" role="search">
         <input
