@@ -16,9 +16,13 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { mdiEmailEditOutline } from '@aglyn/shared-data-mdi'
+import { mdiEmailEditOutline, mdiEmailOutline } from '@aglyn/shared-data-mdi'
+import { lazy } from 'react'
 import * as Blocks from './components/email-blocks'
 import { BUNDLE_ID } from './constants/bundle-common'
+
+/** Code-split: the Emails console page only loads when opened. */
+const EmailsConsolePage = lazy(() => import('./components/emails-console-page'))
 
 /**
  * Email designer feature plugin (AGL-346): email-safe blocks designed in
@@ -43,7 +47,32 @@ export const EMAIL_BUNDLE: Aglyn.FeatureBundleEntry[] = [
   },
 ]
 
+/**
+ * Console half (AGL-395): registers the Emails nav item + page in the
+ * ConsoleExtension registry. Safe to call at console app load — the page is
+ * lazy, so no besigner/canvas code loads. The shell renders the Emails nav
+ * item and, via its generic plugin route, the page (campaigns composer,
+ * audience lists, and the dedicated email-screens list) — with no edit to
+ * the console's own nav or page files.
+ */
+export function registerEmailConsole(): void {
+  Aglyn.registerConsoleExtension({
+    pluginId: BUNDLE_ID,
+    displayName: 'Email',
+    navItems: [
+      {
+        label: 'Emails',
+        href: '/emails',
+        icon: { path: mdiEmailOutline.path },
+        header: { title: 'Emails', icon: { path: mdiEmailOutline.path } },
+        Component: EmailsConsolePage,
+      },
+    ],
+  })
+}
+
 export function registerEmailPlugin(): void {
+  registerEmailConsole()
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
   Aglyn.plugins.addDependency(
     Aglyn.defineUiFeatureBundle(

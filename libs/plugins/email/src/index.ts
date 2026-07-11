@@ -18,3 +18,7 @@
 export * from './lib/constants/bundle-common'
 export * from './lib/components/email-blocks'
 export * from './lib/plugin'
+// Console surfaces consumed directly by the app (e.g. inbox Campaigns tab).
+export { default as CampaignsCard } from './lib/components/campaigns-card'
+export { default as OrgListsCard } from './lib/components/lists-card'
+export { default as EmailScreensCard } from './lib/components/email-screens-card'

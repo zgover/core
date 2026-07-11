@@ -134,7 +134,12 @@ function Screens(props) {
   )
   const [templatesOpen, setTemplatesOpen] = useState(false)
   const screens: ScreenHierarchyRow[] = useMemo(
-    () => (data ?? []).filter((screen: any) => !screen.deletedAt),
+    // Email screens (kind 'email') have their own list on the Emails page
+    // (AGL-395), so keep them out of the site's page hierarchy here.
+    () =>
+      (data ?? []).filter(
+        (screen: any) => !screen.deletedAt && screen.kind !== 'email',
+      ),
     [data],
   )
   const { data: hostData } = useFirestoreDoc<any>(

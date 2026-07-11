@@ -20,12 +20,10 @@ import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import AnnouncementBarCard from '../../../components/announcement-bar-card.component'
-import HostCampaignsCard from '../../../components/host-campaigns-card.component'
 import HostExperimentsCard from '../../../components/host-experiments-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import HostMarketingSummaryCard from '../../../components/host-marketing-summary-card.component'
 import HostOverlaysCard from '../../../components/host-overlays-card.component'
-import OrgListsCard from '../../../components/org-lists-card.component'
 import HubTabs from '../../../components/hub-tabs.component'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -74,25 +72,8 @@ const HostMarketing: NextPageWithLayout = () => {
                 label: 'Overview',
                 content: <HostMarketingSummaryCard hostId={hostId} />,
               },
-              {
-                id: 'email',
-                label: 'Email',
-                content: (
-                  <GridItems
-                    spacing={3}
-                    items={[
-                      {
-                        size: { xs: 12 },
-                        children: <HostCampaignsCard hostId={hostId} />,
-                      },
-                      {
-                        size: { xs: 12 },
-                        children: <OrgListsCard hostId={hostId} />,
-                      },
-                    ]}
-                  />
-                ),
-              },
+              // Email campaigns + audience lists moved to their own Emails
+              // page, owned by the email plugin (AGL-395).
               {
                 id: 'overlays',
                 label: 'Overlays',

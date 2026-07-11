@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { registerEmailConsole } from '@aglyn/plugins-email'
 import { registerEventsCalendarConsole } from '@aglyn/plugins-events-calendar'
 
 /**
@@ -32,6 +33,7 @@ import { registerEventsCalendarConsole } from '@aglyn/plugins-events-calendar'
  */
 export function registerConsolePlugins(): void {
   registerEventsCalendarConsole()
+  registerEmailConsole()
 }
 
 // Run on import so the registry is ready by first render.

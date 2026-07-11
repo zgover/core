@@ -41,9 +41,11 @@ import {
   setDoc,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
-import useFirestoreCollection from '../hooks/use-firestore-collection'
-import useHostOrgId from '../hooks/use-host-org-id'
+import {
+  useFirestore,
+  useFirestoreCollection,
+  useHostOrgId,
+} from '@aglyn/tenant-feature-instance'
 
 export interface OrgListsCardProps {
   hostId: string

@@ -16,7 +16,6 @@
  */
 'use client'
 
-import { CANVAS_ROOT_ELEMENT_ID, createResourceUid } from '@aglyn/aglyn'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -27,13 +26,24 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { collection, doc, limit, query, setDoc, Timestamp } from 'firebase/firestore'
+import { collection, limit, query } from 'firebase/firestore'
+import { createEmailScreen } from '../utils/create-email-screen'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
-import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { buildRoute, Route } from '../constants/route-links'
-import useFirestoreCollection from '../hooks/use-firestore-collection'
-import useHostOrgId from '../hooks/use-host-org-id'
+import {
+  useFirestore,
+  useFirestoreCollection,
+  useHostOrgId,
+  useUser,
+} from '@aglyn/tenant-feature-instance'
+
+/**
+ * Besigner deep-link for an email screen. The route lives in the console
+ * app's route table; the pattern is stable, so the plugin builds it
+ * directly rather than importing app-only route constants.
+ */
+const besignerHref = (hostId: string, screenId: string, versionId: string) =>
+  `/${hostId}/screens/${screenId}/versions/${versionId}/besigner`
 
 /**
  * Email campaigns (AGL-161): compose + send to leads or site members via
@@ -139,64 +149,9 @@ export function HostCampaignsCard(props: { hostId: string }) {
   )
 
   const handleCreateTemplate = useCallback(async () => {
-    const screenId = createResourceUid()
-    const versionId = createResourceUid()
-    const timestamp = Timestamp.now()
-    const sectionId = createResourceUid()
-    const textId = createResourceUid()
     try {
-      await Promise.all([
-        setDoc(doc(firestore, 'hosts', hostId, 'screens', screenId), {
-          displayName: 'Untitled email',
-          kind: 'email',
-          versionId,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-        }),
-        setDoc(
-          doc(
-            firestore,
-            'hosts',
-            hostId,
-            'screens',
-            screenId,
-            'versions',
-            versionId,
-          ),
-          {
-            screenId,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            nodes: {
-              [CANVAS_ROOT_ELEMENT_ID]: {
-                $id: CANVAS_ROOT_ELEMENT_ID,
-                componentId: 'div',
-                nodes: [sectionId],
-              },
-              [sectionId]: {
-                $id: sectionId,
-                componentId: 'emailSection',
-                pluginId: 'email',
-                parentId: CANVAS_ROOT_ELEMENT_ID,
-                nodes: [textId],
-              },
-              [textId]: {
-                $id: textId,
-                componentId: 'emailText',
-                pluginId: 'email',
-                parentId: sectionId,
-                props: {
-                  children: 'Hello {{contact.firstName}},',
-                  variant: 'body',
-                },
-              },
-            },
-          },
-        ),
-      ])
-      void router.push(
-        buildRoute(Route.SCREEN_BESIGNER, { hostId, screenId, versionId }),
-      )
+      const { screenId, versionId } = await createEmailScreen(firestore, hostId)
+      void router.push(besignerHref(hostId, screenId, versionId))
     } catch (error) {
       console.error(error)
       enqueueSnackbar('Creating the email template failed', {
@@ -447,11 +402,11 @@ export function HostCampaignsCard(props: { hostId: string }) {
               size="small"
               onClick={() =>
                 void router.push(
-                  buildRoute(Route.SCREEN_BESIGNER, {
+                  besignerHref(
                     hostId,
-                    screenId: selectedTemplate.$id,
-                    versionId: selectedTemplate.versionId,
-                  }),
+                    selectedTemplate.$id,
+                    selectedTemplate.versionId,
+                  ),
                 )
               }
             >
