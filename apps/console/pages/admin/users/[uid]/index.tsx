@@ -26,6 +26,7 @@ import {
   Chip,
   Link,
   Stack,
+  TextField,
   Table,
   TableBody,
   TableCell,
@@ -113,6 +114,51 @@ const AdminUserDetail: NextPageWithLayout = () => {
       active = false
     }
   }, [uid, user])
+
+  // Identity editing (AGL-361): names, photo, email through the audited
+  // manage endpoint.
+  const [edit, setEdit] = useState({
+    displayName: '',
+    email: '',
+    photoUrl: '',
+  })
+  const [editBusy, setEditBusy] = useState(false)
+  useEffect(() => {
+    if (!detail) return
+    setEdit({
+      displayName: detail.user.displayName ?? '',
+      email: detail.user.email ?? '',
+      photoUrl: (detail.user as any).photoUrl ?? '',
+    })
+  }, [detail])
+  const handleIdentitySave = useCallback(async () => {
+    if (!uid || editBusy) return
+    setEditBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/admin/users/manage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({ action: 'updateProfile', uid, ...edit }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Update failed', {
+          variant: 'warning',
+          persist: false,
+        })
+      }
+      enqueueSnackbar('Identity updated', { variant: 'success', persist: false })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('Update failed', { variant: 'error' })
+    } finally {
+      setEditBusy(false)
+    }
+  }, [uid, edit, editBusy, user, enqueueSnackbar])
 
   const handleImpersonate = useCallback(async () => {
     if (!uid) return
@@ -225,6 +271,53 @@ const AdminUserDetail: NextPageWithLayout = () => {
                             {'Impersonate (replaces your session)'}
                           </Button>
                         ) : null}
+                        {/* Identity editing (AGL-361). */}
+                        <Stack spacing={1} sx={{ pt: 1 }}>
+                          <TextField
+                            size="small"
+                            label="Display name"
+                            value={edit.displayName}
+                            onChange={(event) =>
+                              setEdit((prev) => ({
+                                ...prev,
+                                displayName: event.target.value,
+                              }))
+                            }
+                          />
+                          <TextField
+                            size="small"
+                            label="Email"
+                            helperText="Changing the email marks it unverified"
+                            value={edit.email}
+                            onChange={(event) =>
+                              setEdit((prev) => ({
+                                ...prev,
+                                email: event.target.value,
+                              }))
+                            }
+                          />
+                          <TextField
+                            size="small"
+                            label="Photo URL"
+                            placeholder="https://…"
+                            value={edit.photoUrl}
+                            onChange={(event) =>
+                              setEdit((prev) => ({
+                                ...prev,
+                                photoUrl: event.target.value,
+                              }))
+                            }
+                          />
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            disabled={editBusy}
+                            sx={{ alignSelf: 'flex-start' }}
+                            onClick={() => void handleIdentitySave()}
+                          >
+                            {editBusy ? 'Saving…' : 'Save identity'}
+                          </Button>
+                        </Stack>
                       </Stack>
                     </CardDisplay>
                   ),

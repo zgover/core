@@ -37,6 +37,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { getAuth, signInWithCustomToken } from 'firebase/auth'
 import {
   collection,
   doc,
@@ -226,6 +227,96 @@ const AdminOrgDetail: NextPageWithLayout = () => {
     }
   }
 
+  // Direct org editing (AGL-358): name/logo/contacts through the same
+  // audited settings API org admins use (staff passes its guard).
+  const [orgEdit, setOrgEdit] = useState({
+    name: '',
+    logoUrl: '',
+    contactEmail: '',
+    contactPhone: '',
+    contactWebsite: '',
+    contactAddress: '',
+  })
+  const [orgEditBusy, setOrgEditBusy] = useState(false)
+  useEffect(() => {
+    if (!org) return
+    setOrgEdit({
+      name: String(org.name ?? ''),
+      logoUrl: String(org.logoUrl ?? ''),
+      contactEmail: String(org.contact?.email ?? ''),
+      contactPhone: String(org.contact?.phone ?? ''),
+      contactWebsite: String(org.contact?.website ?? ''),
+      contactAddress: String(org.contact?.address ?? ''),
+    })
+  }, [org])
+  const handleOrgEditSave = async () => {
+    if (orgEditBusy) return
+    setOrgEditBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+      }
+      if (orgEdit.name.trim() && orgEdit.name.trim() !== org?.name) {
+        const renamed = await fetch('/api/orgs/settings', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            orgId,
+            action: 'rename',
+            name: orgEdit.name.trim(),
+          }),
+        })
+        if (!renamed.ok) throw new Error('Rename failed')
+      }
+      const response = await fetch('/api/orgs/settings', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          orgId,
+          action: 'update-profile',
+          logoUrl: orgEdit.logoUrl,
+          contactEmail: orgEdit.contactEmail,
+          contactPhone: orgEdit.contactPhone,
+          contactWebsite: orgEdit.contactWebsite,
+          contactAddress: orgEdit.contactAddress,
+        }),
+      })
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload?.error ?? 'Save failed')
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setOrgEditBusy(false)
+    }
+  }
+
+  // Org impersonation (AGL-357): staff enters the workspace as its owner
+  // through the audited user-impersonation endpoint.
+  const handleImpersonateOwner = async () => {
+    if (!org?.ownerUid) return
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({ uid: org.ownerUid }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok || !payload.token) return
+      await signInWithCustomToken(getAuth(), payload.token)
+      window.location.assign('/')
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   const resolved = org ? resolveTenantEntitlements(org) : null
   const planDefaults = org?.plan
     ? PLAN_ENTITLEMENTS[org.plan as keyof typeof PLAN_ENTITLEMENTS]
@@ -257,8 +348,9 @@ const AdminOrgDetail: NextPageWithLayout = () => {
           ) : (
             <>
               <Alert severity="info" sx={{ mb: 3 }}>
-                {'Read-only staff view — changes happen on the ' +
-                  'Organizations page where they are audited.'}
+                {'Plan/entitlement overrides happen on the Organizations ' +
+                  'page; profile edits below are audited to the org ' +
+                  'activity log (AGL-358).'}
               </Alert>
               <GridItems
                 spacing={3}
@@ -317,6 +409,119 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                           <Typography variant="caption" color="text.secondary">
                             {`Stripe: ${org?.stripeCustomerId ?? '—'}`}
                           </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {`Created ${
+                              org?.createdAt?.seconds
+                                ? new Date(
+                                    org.createdAt.seconds * 1000,
+                                  ).toLocaleDateString()
+                                : '—'
+                            }`}
+                          </Typography>
+                          {org?.ownerUid ? (
+                            // Org impersonation (AGL-357).
+                            <Button
+                              size="small"
+                              color="warning"
+                              variant="outlined"
+                              sx={{ alignSelf: 'flex-start' }}
+                              onClick={() => void handleImpersonateOwner()}
+                            >
+                              {'Impersonate owner (replaces your session)'}
+                            </Button>
+                          ) : null}
+                        </Stack>
+                      </CardDisplay>
+                    ),
+                  },
+                  {
+                    size: { xs: 12, md: 6 },
+                    children: (
+                      // Direct editing (AGL-358).
+                      <CardDisplay
+                        header={'Edit organization'}
+                        contentGutterX
+                        contentGutterY
+                      >
+                        <Stack spacing={1.5}>
+                          <TextField
+                            size="small"
+                            label="Name"
+                            value={orgEdit.name}
+                            onChange={(event) =>
+                              setOrgEdit((prev) => ({
+                                ...prev,
+                                name: event.target.value,
+                              }))
+                            }
+                          />
+                          <TextField
+                            size="small"
+                            label="Logo URL"
+                            placeholder="https://…"
+                            value={orgEdit.logoUrl}
+                            onChange={(event) =>
+                              setOrgEdit((prev) => ({
+                                ...prev,
+                                logoUrl: event.target.value,
+                              }))
+                            }
+                          />
+                          <TextField
+                            size="small"
+                            label="Contact email"
+                            value={orgEdit.contactEmail}
+                            onChange={(event) =>
+                              setOrgEdit((prev) => ({
+                                ...prev,
+                                contactEmail: event.target.value,
+                              }))
+                            }
+                          />
+                          <TextField
+                            size="small"
+                            label="Phone"
+                            value={orgEdit.contactPhone}
+                            onChange={(event) =>
+                              setOrgEdit((prev) => ({
+                                ...prev,
+                                contactPhone: event.target.value,
+                              }))
+                            }
+                          />
+                          <TextField
+                            size="small"
+                            label="Website"
+                            value={orgEdit.contactWebsite}
+                            onChange={(event) =>
+                              setOrgEdit((prev) => ({
+                                ...prev,
+                                contactWebsite: event.target.value,
+                              }))
+                            }
+                          />
+                          <TextField
+                            size="small"
+                            label="Address"
+                            multiline
+                            minRows={2}
+                            value={orgEdit.contactAddress}
+                            onChange={(event) =>
+                              setOrgEdit((prev) => ({
+                                ...prev,
+                                contactAddress: event.target.value,
+                              }))
+                            }
+                          />
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            disabled={orgEditBusy}
+                            sx={{ alignSelf: 'flex-start' }}
+                            onClick={() => void handleOrgEditSave()}
+                          >
+                            {orgEditBusy ? 'Saving…' : 'Save organization'}
+                          </Button>
                         </Stack>
                       </CardDisplay>
                     ),

@@ -22,7 +22,7 @@ import {
   type TenantPlan,
 } from '@aglyn/aglyn'
 import { ICON_VARIANT_SYMBOL_SECURE } from '@aglyn/shared-data-enums'
-import { Container, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { CardDisplay, Container, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
@@ -160,9 +160,11 @@ const AdminOrgs: NextPageWithLayout = () => {
     }
   }, [user])
 
+  // Pagination (AGL-359): grow the page instead of one hard 200 cap.
+  const [pageLimit, setPageLimit] = useState(50)
   const { data: orgDocs } = useFirestoreCollection<any>(
-    () => query(collection(firestore, 'orgs'), limit(200)),
-    [firestore],
+    () => query(collection(firestore, 'orgs'), limit(pageLimit)),
+    [firestore, pageLimit],
     { idField: '$id' },
   )
   // Search/sort (AGL-135) over the fetched page.
@@ -453,6 +455,12 @@ const AdminOrgs: NextPageWithLayout = () => {
                     'first site.'}
                 </Typography>
               ) : (
+                // Console card design (AGL-359).
+                <CardDisplay
+                  header={'Organizations'}
+                  contentGutterX
+                  contentGutterY
+                >
                 <Table size="small">
                   <TableHead>
                     <TableRow>
@@ -460,6 +468,7 @@ const AdminOrgs: NextPageWithLayout = () => {
                       <TableCell>{'Plan'}</TableCell>
                       <TableCell>{'Subscription'}</TableCell>
                       <TableCell>{'Site limit'}</TableCell>
+                      <TableCell>{'Created'}</TableCell>
                       <TableCell align="right">{'Actions'}</TableCell>
                     </TableRow>
                   </TableHead>
@@ -521,6 +530,18 @@ const AdminOrgs: NextPageWithLayout = () => {
                                 sx={{ ml: 1 }}
                               />
                             ) : null}
+                          </TableCell>
+                          <TableCell>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {org.createdAt?.seconds
+                                ? new Date(
+                                    org.createdAt.seconds * 1000,
+                                  ).toLocaleDateString()
+                                : '—'}
+                            </Typography>
                           </TableCell>
                           <TableCell align="right">
                             <Button
@@ -606,6 +627,16 @@ const AdminOrgs: NextPageWithLayout = () => {
                     })}
                   </TableBody>
                 </Table>
+                {(orgDocs?.length ?? 0) >= pageLimit ? (
+                  <Button
+                    size="small"
+                    sx={{ mt: 1 }}
+                    onClick={() => setPageLimit((prev) => prev + 50)}
+                  >
+                    {'Load more'}
+                  </Button>
+                ) : null}
+                </CardDisplay>
               )}
             </Stack>
           )}

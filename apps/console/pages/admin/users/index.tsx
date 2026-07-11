@@ -275,6 +275,7 @@ const AdminUsers: NextPageWithLayout = () => {
                     <TableRow>
                       <TableCell>{'User'}</TableCell>
                       <TableCell>{'Status'}</TableCell>
+                      <TableCell>{'Created'}</TableCell>
                       <TableCell>{'Last sign-in'}</TableCell>
                       <TableCell align="right">{'Actions'}</TableCell>
                     </TableRow>
@@ -283,7 +284,8 @@ const AdminUsers: NextPageWithLayout = () => {
                     {visible.map((record) => (
                       <TableRow key={record.uid} hover>
                         <TableCell>
-                          {/* Detail page (AGL-244). */}
+                          {/* Detail page (AGL-244); ids stay off the email
+                              line — copy them from the chip (AGL-360). */}
                           <Typography
                             variant="body2"
                             component="a"
@@ -298,13 +300,17 @@ const AdminUsers: NextPageWithLayout = () => {
                           >
                             {record.email ?? record.displayName ?? record.uid}
                           </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ fontFamily: 'monospace' }}
-                          >
-                            {record.uid}
-                          </Typography>
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            label={`${record.uid.slice(0, 8)}…`}
+                            sx={{ ml: 1, fontFamily: 'monospace' }}
+                            onClick={() =>
+                              void navigator.clipboard
+                                ?.writeText(record.uid)
+                                .catch(() => undefined)
+                            }
+                          />
                         </TableCell>
                         <TableCell>
                           {record.staff ? (
@@ -334,12 +340,29 @@ const AdminUsers: NextPageWithLayout = () => {
                         </TableCell>
                         <TableCell>
                           <Typography variant="caption" color="text.secondary">
+                            {record.createdAt
+                              ? new Date(record.createdAt).toLocaleDateString()
+                              : '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="caption" color="text.secondary">
                             {record.lastSignInAt
                               ? new Date(record.lastSignInAt).toLocaleDateString()
                               : '—'}
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            href={buildRoute(Route.ADMIN_USER_DETAIL, {
+                              uid: record.uid,
+                            })}
+                            sx={{ mr: 0.5 }}
+                          >
+                            {'View'}
+                          </Button>
                           <Button
                             size="small"
                             disabled={busy}
