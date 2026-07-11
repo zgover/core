@@ -264,6 +264,76 @@ export default async function handler(
         }
       }
     }
+    // Draft orders (AGL-287): the console pre-created the doc; completion
+    // flips it to paid, stamps the intent, and decrements stock.
+    if (
+      type === 'checkout.session.completed' &&
+      object?.metadata?.type === 'commerce-draft' &&
+      object?.payment_status === 'paid'
+    ) {
+      const { hostId, orderId, productId } = object.metadata ?? {}
+      if (hostId && orderId) {
+        const firestore = firebaseAdmin.app().firestore()
+        const hostRef = firestore.collection('hosts').doc(String(hostId))
+        const orderRef = hostRef.collection('orders').doc(String(orderId))
+        const orderSnapshot = await orderRef.get()
+        const order = Aglyn.liftLegacyOrder(
+          (orderSnapshot.data() as any) ?? {},
+        )
+        if (orderSnapshot.exists && order.status === 'pending') {
+          await orderRef.set(
+            {
+              status: 'paid',
+              paymentIntentId: String(object?.payment_intent ?? '') || null,
+              customerEmail:
+                object?.customer_details?.email ?? order.customerEmail ?? null,
+              timeline: Aglyn.appendOrderEvent(order, 'paid'),
+            },
+            { merge: true },
+          )
+          void notifyHostManagers(String(hostId), {
+            type: 'content.order',
+            title: `Draft order paid — ${Aglyn.formatOrderNumber(order, String(orderId))}`,
+            link: `/${hostId}/products`,
+          })
+          if (productId) {
+            const productRef = hostRef
+              .collection('products')
+              .doc(String(productId))
+            const productSnapshot = await productRef.get()
+            const lifted = Aglyn.liftLegacyProduct(
+              (productSnapshot.data() as any) ?? { name: 'Product' },
+            )
+            const soldVariantId =
+              String(object.metadata?.variantId ?? '') ||
+              lifted.variants[0]?.id
+            const quantity = order.lineItems?.[0]?.quantity ?? 1
+            if (
+              soldVariantId &&
+              lifted.variants.some(
+                (variant) =>
+                  variant.id === soldVariantId && variant.inventory != null,
+              )
+            ) {
+              const variants = Aglyn.adjustVariantInventory(
+                lifted,
+                soldVariantId,
+                -quantity,
+              )
+              await productRef
+                .set(
+                  {
+                    variants,
+                    inventory: Aglyn.productInventory({ variants }),
+                  },
+                  { merge: true },
+                )
+                .catch(() => undefined)
+            }
+          }
+        }
+      }
+    }
     // Commerce Starter orders (AGL-90): recorded under the selling host.
     if (
       type === 'checkout.session.completed' &&

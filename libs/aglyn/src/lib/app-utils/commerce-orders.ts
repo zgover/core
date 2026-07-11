@@ -115,6 +115,8 @@ export interface HostOrder {
   /** Stripe references for refunds. */
   paymentIntentId?: string
   checkoutSessionId?: string
+  /** Draft orders (AGL-287): the link sent to the buyer. */
+  paymentLinkUrl?: string
   refundedCents?: number
   createdAtMs?: number
   // Legacy Commerce Starter fields (AGL-90) kept readable.
