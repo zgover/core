@@ -190,6 +190,28 @@ function BesignerPage(props) {
     }
   }, [hostId, screenId, versionId])
 
+  // Email documents (kind 'email', AGL-395) restrict the component drawer to
+  // the email plugin's email-safe blocks. Reset to SCREEN on leave so a
+  // normal screen editing session on the singleton canvas is unaffected.
+  const screenKind = screenResult?.data?.kind
+  useEffect(() => {
+    if (!Besigner.doesBesignerAppExist()) return undefined
+    const app = Besigner.getBesignerApp()
+    Besigner.setBesignerFlag(app, {
+      flag: 'viewType',
+      value: () =>
+        screenKind === 'email'
+          ? Aglyn.HostViewType.EMAIL
+          : Aglyn.HostViewType.SCREEN,
+    })
+    return () => {
+      Besigner.setBesignerFlag(app, {
+        flag: 'viewType',
+        value: () => Aglyn.HostViewType.SCREEN,
+      })
+    }
+  }, [screenKind])
+
   useEffect(() => {
     if (status === 'loading') {
       return queueLoading()

@@ -45,6 +45,8 @@ export enum HostScreenVisibility {
 export enum HostViewType {
   SCREEN = 0x1,
   LAYOUT = 0x2,
+  /** A besigner-designed email document (screen with kind 'email', AGL-395). */
+  EMAIL = 0x4,
 }
 
 export enum HostViewFormat {
