@@ -19,6 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import { mdiStorefrontOutline } from '@aglyn/shared-data-mdi'
 import * as Account from './components/account'
 import * as Cart from './components/cart'
+import * as Gate from './components/gate'
 import * as NewsletterSignup from './components/newsletter-signup'
 import * as ProductDetail from './components/product-detail'
 import * as ProductGrid from './components/product-grid'
@@ -63,6 +64,11 @@ export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
     component: NewsletterSignup.default,
     schema: NewsletterSignup.schema,
     presets: NewsletterSignup.presets,
+  },
+  {
+    component: Gate.default,
+    schema: Gate.schema,
+    presets: Gate.presets,
   },
 ]
 

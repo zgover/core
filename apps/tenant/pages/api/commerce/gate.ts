@@ -1,0 +1,97 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as Aglyn from '@aglyn/aglyn'
+import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { readMemberSession } from '../../../utils/membership'
+
+/** Subscription statuses that grant access (trialing pays later). */
+const LIVE_STATUSES = new Set(['active', 'trialing', 'past_due'])
+
+/**
+ * Entitlement check (AGL-309): is the signed-in member entitled to
+ * gated content? Entitled = a paid (non-refunded) order containing the
+ * product, or a live subscription to it ('any' matches any live
+ * subscription). Server-enforced — the gated media endpoints (video
+ * AGL-315, downloads AGL-302) call the same logic.
+ */
+export async function checkMemberEntitlement(
+  hostId: string,
+  memberEmail: string,
+  productId: string | 'any',
+): Promise<boolean> {
+  const firestore = firebaseAdmin.app().firestore()
+  const hostRef = firestore.collection('hosts').doc(hostId)
+  const subscriptions = await hostRef
+    .collection('subscriptions')
+    .where('customerEmail', '==', memberEmail)
+    .limit(10)
+    .get()
+  for (const docSnapshot of subscriptions.docs) {
+    if (!LIVE_STATUSES.has(String(docSnapshot.get('status')))) continue
+    if (productId === 'any' || docSnapshot.get('productId') === productId) {
+      return true
+    }
+  }
+  if (productId === 'any') return false
+  const orders = await hostRef
+    .collection('orders')
+    .where('customerEmail', '==', memberEmail)
+    .limit(50)
+    .get()
+  for (const docSnapshot of orders.docs) {
+    const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
+    if (['pending', 'cancelled', 'refunded'].includes(order.status)) continue
+    const owns =
+      (order.lineItems ?? []).some((line) => line.productId === productId) ||
+      order.productId === productId
+    if (owns) return true
+  }
+  return false
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  const hostId = String(req.query.hostId ?? '')
+  const productId = String(req.query.productId ?? 'any')
+  if (!hostId) return res.status(400).json({ error: 'Missing hostId' })
+  const memberId = readMemberSession(req, hostId)
+  if (!memberId) return res.status(200).json({ entitled: false, signedIn: false })
+  try {
+    const memberSnapshot = await firebaseAdmin
+      .app()
+      .firestore()
+      .collection('hosts')
+      .doc(hostId)
+      .collection('siteMembers')
+      .doc(memberId)
+      .get()
+    const email = String(memberSnapshot.get('email') ?? '')
+    if (!email) {
+      return res.status(200).json({ entitled: false, signedIn: false })
+    }
+    const entitled = await checkMemberEntitlement(hostId, email, productId)
+    res.setHeader('Cache-Control', 'private, no-store')
+    return res.status(200).json({ entitled, signedIn: true })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Check failed' })
+  }
+}
