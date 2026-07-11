@@ -176,6 +176,12 @@ export default function BookingsConsolePage({
   component, so it exports only `registerRedirectsConsole()` and ships no UI
   bundle — nothing to register in the tenant/besigner. The minimal shape when
   a feature has console surface but no site component.
+- **Data** (`libs/plugins/data`) — console-only, and dual-surfaced (AGL-395):
+  the datasets editor is served both as the host `/data` plugin page and,
+  because datasets are org-scoped, imported directly by the org `/org/data`
+  app route. The card takes the `tenant` doc as a prop so both callers drive
+  its entitlement/quota checks. `useHostActivityLogger` was promoted to
+  `@aglyn/tenant-feature-instance` for the move.
 - **Email** (`libs/plugins/email`) — full console relocation (AGL-395): the
   campaigns composer, audience lists, and a dedicated email-screens list moved
   into the plugin and surface as the **Emails** page; the Besigner offers only
