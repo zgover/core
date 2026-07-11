@@ -1,6 +1,7 @@
+/* eslint-disable */
 /**
  * @license
- * Copyright 2026 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +16,18 @@
  * limitations under the License.
  */
 
-/**
- * Moved to `@aglyn/tenant-feature-instance` (AGL-395) so the relocated data
- * plugin can share it; this shim keeps the app's import sites working.
- */
-export {
-  useHostActivityLogger,
-  useHostActivityLogger as default,
-} from '@aglyn/tenant-feature-instance'
-export type { HostActivityTarget } from '@aglyn/tenant-feature-instance'
+export default {
+  displayName: 'plugins-data',
+  preset: '../../../jest.preset.js',
+  testEnvironment: 'jsdom',
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      '@swc/jest',
+      // swcrc: false keeps the build-oriented .swcrc (which excludes spec
+      // files) from being applied to the jest transform.
+      { swcrc: false, jsc: { transform: { react: { runtime: 'automatic' } } } },
+    ],
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  coverageDirectory: '../../../coverage/libs/plugins/data',
+}

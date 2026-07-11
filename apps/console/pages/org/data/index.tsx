@@ -21,7 +21,7 @@ import { Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Alert } from '@mui/material'
 import FeatureGate from '../../../components/feature-gate.component'
-import HostDatasetsCard from '../../../components/host-datasets-card.component'
+import { HostDatasetsCard } from '@aglyn/plugins-data'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
@@ -29,6 +29,7 @@ import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
+import useCurrentTenant from '../../../hooks/use-current-tenant'
 
 /**
  * Organization Data page (AGL-239): datasets are org-owned (AGL-237 §11)
@@ -38,6 +39,7 @@ import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
 const OrgData: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgWorkspace()
+  const { tenant } = useCurrentTenant()
   return (
     <>
       <NextPageTitle screen={'Data – Organization'} />
@@ -60,7 +62,7 @@ const OrgData: NextPageWithLayout = () => {
             </Alert>
           ) : currentOrg?.$id ? (
             <FeatureGate flag="release_data_store">
-              <HostDatasetsCard orgId={currentOrg.$id} />
+              <HostDatasetsCard orgId={currentOrg.$id} tenant={tenant} />
             </FeatureGate>
           ) : null}
         </Container>

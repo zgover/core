@@ -15,12 +15,5 @@
  * limitations under the License.
  */
 
-/**
- * Moved to `@aglyn/tenant-feature-instance` (AGL-395) so the relocated data
- * plugin can share it; this shim keeps the app's import sites working.
- */
-export {
-  useHostActivityLogger,
-  useHostActivityLogger as default,
-} from '@aglyn/tenant-feature-instance'
-export type { HostActivityTarget } from '@aglyn/tenant-feature-instance'
+export * from './lib/constants/bundle-common'
+export * from './lib/plugin'

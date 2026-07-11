@@ -17,8 +17,11 @@
 'use client'
 
 import {
+  type AglynTenant,
   applyDatasetQuery,
   checkDatasetQuota,
+  checkEntitlement,
+  checkQuota,
   coerceDocumentValues,
   datasetRecordsToCsv,
   createResourceUid,
@@ -65,15 +68,12 @@ import {
   writeBatch,
 } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
 import {
-  checkTenantQuota,
-  hasEntitlement,
-} from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
-import useHostOrgId from '../hooks/use-host-org-id'
-import useFirestoreCollection from '../hooks/use-firestore-collection'
-import useHostActivityLogger from '../hooks/use-host-activity-logger'
+  useFirestore,
+  useFirestoreCollection,
+  useHostActivityLogger,
+  useHostOrgId,
+} from '@aglyn/tenant-feature-instance'
 import { DatasetSchemaDialog } from './dataset-schema-dialog.component'
 
 export interface HostDatasetsCardProps {
@@ -84,6 +84,13 @@ export interface HostDatasetsCardProps {
    * without any host context. Wins over `hostId` resolution when set.
    */
   orgId?: string
+  /**
+   * The resolved entitlement source (org billing doc). Passed in by both
+   * callers (the plugin Data page via the shell, the org Data page via its
+   * own resolver) so this relocated card runs entitlement/quota checks
+   * without console-app org/session hooks (AGL-395).
+   */
+  tenant?: Partial<AglynTenant>
 }
 
 /**
@@ -104,7 +111,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
+  const { tenant } = props
   const logActivity = useHostActivityLogger(hostId)
 
   const { data: datasetDocs } = useFirestoreCollection<any>(
@@ -176,7 +183,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     fields: string
   } | null>(null)
   const handleOpenCreator = useCallback(() => {
-    if (!hasEntitlement('data-store', tenant)) {
+    if (!checkEntitlement(tenant, 'dataStore')) {
       return enqueueSnackbar(
         'Datasets require a Starter plan or higher — see Billing',
         { variant: 'warning', persist: false },
@@ -371,7 +378,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   const handleOpenRecord = useCallback(
     (record?: any) => () => {
       if (!record) {
-        const quota = checkTenantQuota(
+        const quota = checkQuota(
           tenant,
           'recordsPerDataset',
           records.length,
@@ -646,7 +653,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
       }
     }
 
-    const quota = checkTenantQuota(
+    const quota = checkQuota(
       tenant,
       'recordsPerDataset',
       records.length + creates.length - 1,
