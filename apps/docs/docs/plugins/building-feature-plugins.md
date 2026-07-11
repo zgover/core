@@ -200,6 +200,26 @@ entry **only** from the dispatcher's registration module (server code); the
 client barrel must never pull it in, or firebase-admin leaks into the browser
 bundle. Reference: `libs/plugins/events-calendar/src/lib/server.ts`.
 
+### Shared server runtime (`@aglyn/tenant-runtime`)
+
+Some handlers need tenant runtime that no single plugin owns — the host-event
+fan-out (`emitHostEvent`, `runSingleAction`, `runEventWorkflows`) and the
+server-side screen-composition read-path (`getScreen`, `composeScreenNodes`,
+and the `get-*` loaders behind it). These live in `@aglyn/tenant-runtime`, a
+server lib tagged `scope:lib`+`scope:aglyn` so both the tenant app's own API
+routes and any plugin `server.ts` can import it (and it, unlike the
+`scope:data` `tenant-data-admin`, may import `@aglyn/aglyn`). The host-event
+functions come from the package root; the composition pipeline is reached via
+subpath, e.g. `@aglyn/tenant-runtime/compose-screen-nodes`:
+
+```ts
+import { emitHostEvent } from '@aglyn/tenant-runtime'
+import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
+```
+
+The bookings `book`, events `dispatch`, and commerce `membership/*` handlers
+are reference consumers.
+
 ## Project setup
 
 - Tag new plugin libs like the mui plugin: `["scope:lib", "scope:aglyn",
