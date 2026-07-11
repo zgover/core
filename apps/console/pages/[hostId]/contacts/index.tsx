@@ -72,6 +72,7 @@ const SOURCE_LABELS: Record<ContactSource, string> = {
   member: 'Member',
   order: 'Customer',
   booking: 'Booking',
+  newsletter: 'Newsletter',
 }
 
 type ContactDoc = HostContact & { $id: string; createdAt?: any; updatedAt?: any }

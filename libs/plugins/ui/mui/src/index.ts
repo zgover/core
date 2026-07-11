@@ -16,7 +16,7 @@
  */
 
 export * from './lib/constants/bundle-common'
-export * from './lib/legacy-plugin'
+export * from './lib/plugin'
 export * from './lib/components/plugin-frame'
 export {
   PLUGIN_DRAWER_CATEGORY,

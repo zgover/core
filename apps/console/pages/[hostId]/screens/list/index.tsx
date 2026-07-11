@@ -91,6 +91,7 @@ import {
 } from '../../../../components/screens-hierarchy-table.component'
 import { checkTenantQuota } from '../../../../constants/entitlements'
 import { buildRoute, Route } from '../../../../constants/route-links'
+import { buildScreenLiveUrl } from '../../../../constants/tenant-links'
 import hostNavTabItems from '../../../../constants/host-nav-tabs'
 import {
   publishScreenRoute,
@@ -444,23 +445,19 @@ function Screens(props) {
     }
   }, [translationsFor, firestore, hostId, enqueueSnackbar])
 
-  // Published origin for the View action: custom domain when connected,
-  // else the site's aglyn.app subdomain.
-  const publicOrigin = hostData?.cname
-    ? `https://${hostData.cname}`
-    : hostData?.subdomain
-      ? `https://${hostData.subdomain}.aglyn.app`
-      : null
-
   const renderRowActions = useCallback(
-    (row: ScreenHierarchyRow) => (
+    (row: ScreenHierarchyRow) => {
+      // AGL-374: buildScreenLiveUrl handles slug→path normalization,
+      // custom domains, and preview-console ?tenantHost= links.
+      const liveUrl = buildScreenLiveUrl(hostData, row.$id)
+      return (
       <>
-        {publicOrigin && routingMap?.[row.$id] != null ? (
+        {liveUrl ? (
           <IconButton
             size="small"
             aria-label="View live"
             component="a"
-            href={`${publicOrigin}${routingMap[row.$id]}`}
+            href={liveUrl}
             target="_blank"
             rel="noreferrer"
           >
@@ -511,13 +508,14 @@ function Screens(props) {
           />
         </IconButton>
       </>
-    ),
+      )
+    },
     [
       hostId,
       handleDeleteScreen,
       hostLocales.length,
       screens,
-      publicOrigin,
+      hostData,
       routingMap,
     ],
   )

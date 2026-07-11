@@ -483,7 +483,7 @@ export function MainLayout(props: MainLayoutProps) {
                 {
                   children: 'Staff console',
                   component: AppLink,
-                  href: Route.ADMIN_ORGS,
+                  href: Route.ADMIN_OVERVIEW,
                   icon: { path: ICON_VARIANT_USER_SETTINGS.path },
                 },
                 {

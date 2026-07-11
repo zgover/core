@@ -30,6 +30,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Typography,
 } from '@mui/material'
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/router'
@@ -125,7 +126,14 @@ function HostSwitcherMenu(props: { uid: string }) {
           '& .MuiButton-endIcon>*:nth-of-type(1)': { fontSize: `1.7em` },
         }}
       >
-        {label}
+        <Typography
+          variant="inherit"
+          noWrap
+          title={label}
+          sx={{ display: 'block', minWidth: 0 }}
+        >
+          {label}
+        </Typography>
       </Button>
       <Menu
         anchorEl={anchorEl}

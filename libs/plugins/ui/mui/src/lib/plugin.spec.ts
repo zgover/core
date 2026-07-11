@@ -24,7 +24,7 @@ import { schema as stack } from './components/stack'
 import { schema as toolbar } from './components/toolbar'
 import { schema as typography } from './components/typography'
 import { BUNDLE_ID } from './constants/bundle-common'
-import { registerLegacyMuiPlugin } from './legacy-plugin'
+import { registerMuiPlugin } from './plugin'
 
 // These ids are persisted in screen documents and must never change
 // without a document migration.
@@ -53,13 +53,13 @@ const PERSISTED_COMPONENT_IDS = [
 
 describe('plugins-ui-mui', () => {
   it('registers the mui plugin dependency with the legacy runtime', () => {
-    registerLegacyMuiPlugin()
+    registerMuiPlugin()
     expect(Aglyn.plugins.getDependency(BUNDLE_ID)).toBeTruthy()
   })
 
   it('is idempotent', () => {
-    registerLegacyMuiPlugin()
-    expect(() => registerLegacyMuiPlugin()).not.toThrow()
+    registerMuiPlugin()
+    expect(() => registerMuiPlugin()).not.toThrow()
   })
 
   it('keeps the persisted legacy component ids in the plugin', () => {

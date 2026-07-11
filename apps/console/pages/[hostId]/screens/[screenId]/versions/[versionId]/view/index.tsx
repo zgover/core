@@ -86,6 +86,7 @@ import HostDisplayNameComponent from '../../../../../../../components/host-displ
 import { hasEntitlement } from '../../../../../../../constants/entitlements'
 import hostNavTabItems from '../../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
+import { buildScreenLiveUrl } from '../../../../../../../constants/tenant-links'
 import {
   publishScreenRoute,
   unpublishScreenRoute,
@@ -175,12 +176,9 @@ function ScreenDetails() {
   )
 
   const routingMap = hostData?.screens as Record<ScreenUid, string> | undefined
-  // Published origin for the View action (custom domain first).
-  const publicOrigin = hostData?.cname
-    ? `https://${hostData.cname}`
-    : hostData?.subdomain
-      ? `https://${hostData.subdomain}.aglyn.app`
-      : null
+  // AGL-374: buildScreenLiveUrl normalizes the slug into a path and knows
+  // custom domains + preview consoles.
+  const liveUrl = buildScreenLiveUrl(hostData, screenId)
   const publishedPath = routingMap?.[screenId]
   const isRoutePublished = publishedPath != null
   const screensById = useMemo(() => {
@@ -615,12 +613,12 @@ function ScreenDetails() {
         }}
         headerRight={
           <Stack direction="row" spacing={1}>
-            {publicOrigin && routingMap?.[screenId] != null ? (
+            {liveUrl ? (
               <Button
                 size="small"
                 variant="outlined"
                 component="a"
-                href={`${publicOrigin}${routingMap[screenId]}`}
+                href={liveUrl}
                 target="_blank"
                 rel="noreferrer"
               >

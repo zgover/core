@@ -131,7 +131,11 @@ export function OrgSwitcherNav() {
             '& .MuiButton-endIcon>*:nth-of-type(1)': { fontSize: `1.7em` },
           }}
         >
-          <Typography variant="subtitle2" noWrap>
+          <Typography
+            variant="subtitle2"
+            noWrap
+            sx={{ display: 'block', minWidth: 0 }}
+          >
             {currentOrg.orgName ?? currentOrg.slug ?? currentOrg.$id}
           </Typography>
         </Button>

@@ -71,7 +71,7 @@ export const COMMERCE_MAX_PRICE_USD = 10000
 
 /**
  * Component ids publishable to the community. Mirrors the persisted ids in
- * plugins-ui-mui (legacy-plugin.spec.ts) minus `reusableInstance` — nested
+ * plugins-ui-mui (plugin.spec.ts) minus `reusableInstance` — nested
  * instances would smuggle references to another tenant's private
  * definitions — and minus `layoutSlot`, which is layout chrome. Keep sorted.
  */

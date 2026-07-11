@@ -43,12 +43,12 @@ import * as Typography from './components/typography'
 import { BUNDLE_ID } from './constants/bundle-common'
 
 /**
- * Registers the MUI components with the legacy `@aglyn/aglyn` global plugin
- * registry, for pages still running on the legacy runtime
- * (`AglynNodeRenderer`, `Aglyn.canvas`, ...). New code should register the
- * exported `bundle` with `registerBundle` from `@aglyn/aglyn` instead.
+ * Registers the core MUI component library with the `@aglyn/aglyn` global
+ * plugin registry (`AglynNodeRenderer`, `Aglyn.canvas`, ...). This is the
+ * platform's core component bundle; feature bundles (commerce,
+ * events-calendar, email) declare a dependency on it.
  */
-export function registerLegacyMuiPlugin(): void {
+export function registerMuiPlugin(): void {
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
 
   // Single bundle manifest (AGL-140): one entry per component keeps

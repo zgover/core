@@ -48,7 +48,7 @@ import {
 } from '@aglyn/shared-ui-theme'
 import { registerCommercePlugin } from '@aglyn/plugins-ui-commerce'
 import { registerEventsCalendarPlugin } from '@aglyn/plugins-ui-events-calendar'
-import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
+import { registerMuiPlugin } from '@aglyn/plugins-ui-mui'
 import {
   useHost,
   useLayout,
@@ -93,7 +93,7 @@ import { syncScreenRouteEntries } from '../../../../../../../constants/screen-pu
 import { buildScreenLiveUrl } from '../../../../../../../constants/tenant-links'
 import useFirestoreCollection from '../../../../../../../hooks/use-firestore-collection'
 
-registerLegacyMuiPlugin()
+registerMuiPlugin()
 registerCommercePlugin()
 registerEventsCalendarPlugin()
 
