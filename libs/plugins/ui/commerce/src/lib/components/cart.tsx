@@ -99,6 +99,10 @@ function CartLines(props: {
       })
       const payload = await response.json().catch(() => ({}))
       if (response.ok && payload?.url) {
+        ;(window as any).gtag?.('event', 'begin_checkout', {
+          value: (cart?.subtotalCents ?? 0) / 100,
+          currency: 'USD',
+        })
         window.location.assign(payload.url)
         return
       }

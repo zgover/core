@@ -100,6 +100,8 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
     const [message, setMessage] = useState('')
     const [added, setAdded] = useState(false)
     const [wishlisted, setWishlisted] = useState(false)
+    const [notifyEmail, setNotifyEmail] = useState('')
+    const [notifyState, setNotifyState] = useState<'idle' | 'done'>('idle')
 
     const slug = slugProp || slugFromLocation()
 
@@ -123,6 +125,10 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
           const product = payload?.product as Detail | undefined
           setDetail(product ?? 'missing')
           if (product) {
+            // GA4 ecommerce mirror (AGL-327) through the site's gtag.
+            ;(window as any).gtag?.('event', 'view_item', {
+              items: [{ item_id: product.id, item_name: product.name }],
+            })
             const first =
               product.variants.find((variant) => !variant.soldOut) ??
               product.variants[0]
@@ -172,6 +178,9 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
       }).catch(() => null)
       if (response?.ok) {
         setAdded(true)
+        ;(window as any).gtag?.('event', 'add_to_cart', {
+          items: [{ item_id: resolved.id, item_name: resolved.name }],
+        })
         window.dispatchEvent(new Event(CART_UPDATED_EVENT))
       }
     }
@@ -415,6 +424,46 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
             <Alert severity="error" sx={{ mb: 2 }}>
               {message || 'Checkout is unavailable right now.'}
             </Alert>
+          ) : null}
+          {variant?.soldOut && hostId ? (
+            notifyState === 'done' ? (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {'We will email you when it is back.'}
+              </Alert>
+            ) : (
+              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <TextField
+                  placeholder="you@example.com"
+                  type="email"
+                  value={notifyEmail}
+                  onChange={(event) => setNotifyEmail(event.target.value)}
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={!notifyEmail.trim()}
+                  onClick={async () => {
+                    const response = await fetch(
+                      '/api/commerce/notify-restock',
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          hostId,
+                          productId: resolved.id,
+                          email: notifyEmail,
+                        }),
+                      },
+                    ).catch(() => null)
+                    if (response?.ok) setNotifyState('done')
+                  }}
+                >
+                  {'Notify me'}
+                </Button>
+              </Box>
+            )
           ) : null}
           {!hideDescription && resolved.description ? (
             <Typography variant="body1" color="text.secondary">

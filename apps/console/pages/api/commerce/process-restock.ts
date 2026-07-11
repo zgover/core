@@ -1,0 +1,103 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as Aglyn from '@aglyn/aglyn'
+import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import type { NextApiRequest, NextApiResponse } from 'next'
+
+/**
+ * Back-in-stock processor (AGL-326): cron-invoked beside the abandoned-
+ * checkout pass; emails pending alerts whose products have stock again
+ * and stamps them notified.
+ */
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || req.headers['x-cron-secret'] !== cronSecret) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  const resendKey = process.env.RESEND_API_KEY
+  const emailFrom = process.env.USAGE_EMAIL_FROM
+  if (!resendKey || !emailFrom) {
+    return res.status(501).json({ error: 'Email is not configured.' })
+  }
+  try {
+    const firestore = firebaseAdmin.app().firestore()
+    const alerts = await firestore
+      .collectionGroup('restockAlerts')
+      .where('notifiedAtMs', '==', null)
+      .limit(200)
+      .get()
+    let sent = 0
+    const productCache = new Map<string, Aglyn.HostProduct | null>()
+    for (const docSnapshot of alerts.docs) {
+      const hostRef = docSnapshot.ref.parent.parent
+      if (!hostRef) continue
+      const data = docSnapshot.data() as any
+      const cacheKey = `${hostRef.id}:${data.productId}`
+      if (!productCache.has(cacheKey)) {
+        const productSnapshot = await hostRef
+          .collection('products')
+          .doc(String(data.productId))
+          .get()
+        productCache.set(
+          cacheKey,
+          productSnapshot.exists
+            ? Aglyn.liftLegacyProduct(productSnapshot.data() as any)
+            : null,
+        )
+      }
+      const product = productCache.get(cacheKey)
+      if (!product) {
+        await docSnapshot.ref
+          .set({ notifiedAtMs: Date.now(), skipped: true }, { merge: true })
+          .catch(() => undefined)
+        continue
+      }
+      const total = Aglyn.productInventory(product)
+      if (total != null && total <= 0) continue
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: emailFrom,
+          to: [String(data.email)],
+          subject: `Back in stock: ${product.name}`,
+          text:
+            `${product.name} is available again — grab it before it sells ` +
+            `out:\n\n/products/${product.slug}`,
+        }),
+      }).catch(() => undefined)
+      await docSnapshot.ref
+        .set({ notifiedAtMs: Date.now() }, { merge: true })
+        .catch(() => undefined)
+      sent += 1
+    }
+    return res.status(200).json({ scanned: alerts.size, sent })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Processing failed' })
+  }
+}
