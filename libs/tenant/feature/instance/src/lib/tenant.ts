@@ -24,6 +24,8 @@ export * from './hooks/helpers/use-doc'
 export * from './hooks/helpers/use-modify-doc-callback'
 
 export * from './hooks/use-firestore-collection'
+export * from './hooks/use-firestore-doc'
+export * from './hooks/use-host-activity-logger'
 export * from './hooks/use-host-org-id'
 export * from './hooks/use-host'
 export * from './hooks/use-layout'

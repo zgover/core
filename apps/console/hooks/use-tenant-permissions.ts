@@ -22,20 +22,14 @@ import {
   type AglynOrgMember,
   type OrgPermission,
   type OrgRole,
+  type TenantPermissions,
 } from '@aglyn/aglyn'
 import { doc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import useOrgWorkspace from './use-org-workspace'
 
-export interface TenantPermissions {
-  createHosts: boolean
-  editHosts: boolean
-  editBilling: boolean
-  publishToCommunity: boolean
-  installPlugins: boolean
-  manageMembers: boolean
-}
+export type { TenantPermissions }
 
 const ALL_TRUE: TenantPermissions = {
   createHosts: true,

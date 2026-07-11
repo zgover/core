@@ -17,6 +17,7 @@
 
 export * from './components/_app.component'
 export * from './components/_emotion-document.component'
+export * from './components/hub-tabs'
 export * from './components/image'
 export * from './components/page-decorated'
 

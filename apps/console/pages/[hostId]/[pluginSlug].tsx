@@ -28,6 +28,7 @@ import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Alert, Box, CircularProgress } from '@mui/material'
 import { useParams } from 'next/navigation'
 import { Suspense, useMemo } from 'react'
+import ConsoleMediaPickerProvider from '../../components/console-media-picker-provider.component'
 import FeatureGate from '../../components/feature-gate.component'
 import HostDisplayNameComponent from '../../components/host-display-name.component'
 import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
@@ -37,6 +38,7 @@ import hostNavTabItems from '../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
 import useCurrentTenant from '../../hooks/use-current-tenant'
+import useTenantPermissions from '../../hooks/use-tenant-permissions'
 
 /**
  * Generic host route for plugin-contributed pages (AGL-394). Any feature
@@ -54,6 +56,7 @@ const HostPluginPage: NextPageWithLayout = () => {
   const hostId = params?.hostId ?? ''
   const pluginSlug = params?.pluginSlug ?? ''
   const { tenant } = useCurrentTenant()
+  const { permissions } = useTenantPermissions()
 
   const resolved = useMemo(
     () => (pluginSlug ? resolveConsolePluginPage(`/${pluginSlug}`) : undefined),
@@ -89,7 +92,14 @@ const HostPluginPage: NextPageWithLayout = () => {
         </Box>
       }
     >
-      <PluginComponent hostId={hostId} entitled={entitled} />
+      <ConsoleMediaPickerProvider hostId={hostId}>
+        <PluginComponent
+          hostId={hostId}
+          entitled={entitled}
+          tenant={tenant}
+          permissions={permissions}
+        />
+      </ConsoleMediaPickerProvider>
     </Suspense>
   )
 

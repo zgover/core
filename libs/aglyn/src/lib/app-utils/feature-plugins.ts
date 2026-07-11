@@ -39,8 +39,9 @@
  */
 
 import { runInAction } from 'mobx'
-import type { TenantFeatureFlags } from '../foundation'
+import type { AglynTenant, TenantFeatureFlags } from '../foundation'
 import type { ComponentType } from 'react'
+import type { TenantPermissions } from './org-permissions'
 import type { Plugin, PluginId } from '../plugin-manager/plugin-manager'
 import type { ComponentSchema, MdiIconProps, PresetSchema } from '../types/nodes'
 
@@ -130,6 +131,19 @@ export interface ConsolePluginPageProps {
   hostId: string
   /** True when the tenant holds the extension's `featureFlag` entitlement. */
   entitled: boolean
+  /**
+   * The resolved entitlement source (org billing doc) the shell already
+   * loaded to compute `entitled`. Passed through so a plugin page can run
+   * its own `checkEntitlement`/`checkQuota` (e.g. per-plan service limits)
+   * without reaching for the console-app org/session hooks.
+   */
+  tenant?: Partial<AglynTenant>
+  /**
+   * The signed-in user's resolved org permissions (AGL-395), passed through
+   * so a plugin page can gate actions (e.g. install/publish) without the
+   * console-app session/permission hooks.
+   */
+  permissions?: Partial<TenantPermissions>
 }
 
 export type ConsolePluginPage = ComponentType<ConsolePluginPageProps>

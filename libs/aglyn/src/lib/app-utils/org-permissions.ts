@@ -39,6 +39,21 @@ export type OrgPermission =
   | 'community.publish'
   | 'plugins.install'
 
+/**
+ * Legacy boolean permission map derived from the granular `OrgPermission`
+ * set (AGL-243). Kept for the console surfaces that predate the granular
+ * model; lives here so relocated feature plugins can accept it as a prop
+ * (AGL-395).
+ */
+export interface TenantPermissions {
+  createHosts: boolean
+  editHosts: boolean
+  editBilling: boolean
+  publishToCommunity: boolean
+  installPlugins: boolean
+  manageMembers: boolean
+}
+
 export interface OrgPermissionDefinition {
   key: OrgPermission
   label: string
