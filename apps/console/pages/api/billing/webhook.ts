@@ -64,6 +64,58 @@ function verifyStripeSignature(
   }
 }
 
+
+/**
+ * Assigns unassigned license keys for a digital product (AGL-308):
+ * stamps order/email on the key docs, returns the key strings, and
+ * nudges managers when the pool runs low.
+ */
+async function assignLicenseKeys(
+  hostRef: FirebaseFirestore.DocumentReference,
+  hostId: string,
+  productId: string,
+  orderId: string,
+  email: string | null,
+  quantity: number,
+): Promise<string[]> {
+  try {
+    const pool = await hostRef
+      .collection('licenseKeys')
+      .where('productId', '==', productId)
+      .where('assignedAtMs', '==', null)
+      .limit(Math.max(1, quantity))
+      .get()
+    const keys: string[] = []
+    for (const docSnapshot of pool.docs) {
+      await docSnapshot.ref.set(
+        { orderId, email, assignedAtMs: Date.now() },
+        { merge: true },
+      )
+      keys.push(String(docSnapshot.get('key')))
+    }
+    if (keys.length) {
+      const remaining = await hostRef
+        .collection('licenseKeys')
+        .where('productId', '==', productId)
+        .where('assignedAtMs', '==', null)
+        .limit(6)
+        .get()
+      if (remaining.size < 5) {
+        void notifyHostManagers(hostId, {
+          type: 'content.lowStock',
+          title: 'License key pool running low',
+          body: `${remaining.size} keys left`,
+          link: `/${hostId}/products`,
+        })
+      }
+    }
+    return keys
+  } catch (error) {
+    console.error('license key assignment failed', error)
+    return []
+  }
+}
+
 /**
  * Maps a Stripe price id back to a plan via the STRIPE_PRICE_* env vars
  * (AGL-68) — fallback for subscriptions whose metadata lacks `plan`, e.g.
@@ -476,6 +528,35 @@ export default async function handler(
                 } — $${((line.unitAmountCents * line.quantity) / 100).toFixed(2)}`,
             )
             .join('\n')
+          // License keys (AGL-308) per digital line.
+          const licenseKeysByProduct: Record<string, string[]> = {}
+          for (const line of lineItems) {
+            if (line.productType !== 'digital') continue
+            const keys = await assignLicenseKeys(
+              hostRef,
+              String(hostId),
+              line.productId,
+              String(object.id),
+              object?.customer_details?.email ?? null,
+              line.quantity,
+            )
+            if (keys.length) licenseKeysByProduct[line.productId] = keys
+          }
+          if (Object.keys(licenseKeysByProduct).length) {
+            await orderRef
+              .set({ licenseKeys: licenseKeysByProduct }, { merge: true })
+              .catch(() => undefined)
+          }
+          const licenseText = Object.entries(licenseKeysByProduct)
+            .flatMap(([keyProductId, keys]) => {
+              const line = lineItems.find(
+                (item) => item.productId === keyProductId,
+              )
+              return keys.map(
+                (key) => `License key (${line?.name ?? 'product'}): ${key}`,
+              )
+            })
+            .join('\n')
           // Digital delivery links (AGL-302), same token recipe the
           // tenant download endpoint verifies.
           const downloadToken = createHmac(
@@ -509,6 +590,7 @@ export default async function handler(
               subject: `Receipt for your order`,
               text:
                 `Thanks for your purchase!\n\n${linesText}\n\n` +
+                (licenseText ? `${licenseText}\n\n` : '') +
                 (downloadLines ? `${downloadLines}\n\n` : '') +
                 `Total: $${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}\n` +
                 `Order reference: ${object.id}` +

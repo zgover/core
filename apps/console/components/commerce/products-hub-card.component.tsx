@@ -91,11 +91,25 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
     text: string
     parsed: Aglyn.ProductCsvImport | null
   } | null>(null)
+  const [keysFor, setKeysFor] = useState<ProductRow | null>(null)
+  const [keysText, setKeysText] = useState('')
 
   const { data: productDocs } = useFirestoreCollection<any>(
     () =>
       query(collection(firestore, 'hosts', hostId, 'products'), limit(500)),
     [firestore, hostId],
+    { idField: '$id' },
+  )
+  // License key pool (AGL-308) for the open dialog's product.
+  const { data: keyDocs } = useFirestoreCollection<any>(
+    () =>
+      keysFor
+        ? query(
+            collection(firestore, 'hosts', hostId, 'licenseKeys'),
+            limit(500),
+          )
+        : null,
+    [firestore, hostId, keysFor?.$id],
     { idField: '$id' },
   )
   // Locations (AGL-286): the stock dialog buckets deltas when they exist.
@@ -372,6 +386,11 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
                       <Button size="small" onClick={handleDuplicate(product)}>
                         {'Duplicate'}
                       </Button>
+                      {product.type === 'digital' ? (
+                        <Button size="small" onClick={() => setKeysFor(product)}>
+                          {'Keys'}
+                        </Button>
+                      ) : null}
                       {Aglyn.productInventory(product) != null ? (
                         <Button
                           size="small"
@@ -420,6 +439,97 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
           </Box>
         )}
       </Stack>
+      <Dialog
+        open={Boolean(keysFor)}
+        onClose={() => setKeysFor(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{`License keys — ${keysFor?.name ?? ''}`}</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {(() => {
+            const productKeys = (keyDocs ?? []).filter(
+              (key: any) => key.productId === keysFor?.$id,
+            )
+            const available = productKeys.filter(
+              (key: any) => !key.assignedAtMs,
+            )
+            return (
+              <>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  {`${available.length} available · ${productKeys.length - available.length} assigned. ` +
+                    'Keys deliver automatically on purchase (receipt + account).'}
+                </Typography>
+                {available.slice(0, 8).map((key: any) => (
+                  <Stack
+                    key={key.$id}
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: 'center' }}
+                  >
+                    <Typography variant="caption" sx={{ flex: 1, fontFamily: 'monospace' }} noWrap>
+                      {key.key}
+                    </Typography>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() =>
+                        updateDoc(
+                          doc(firestore, 'hosts', hostId, 'licenseKeys', key.$id),
+                          { revokedAtMs: Date.now(), assignedAtMs: Date.now() },
+                        )
+                      }
+                    >
+                      {'Revoke'}
+                    </Button>
+                  </Stack>
+                ))}
+                <TextField
+                  label="Add keys (one per line)"
+                  value={keysText}
+                  onChange={(event) => setKeysText(event.target.value)}
+                  size="small"
+                  multiline
+                  minRows={3}
+                />
+              </>
+            )
+          })()}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setKeysFor(null)}>{'Close'}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!keysText.trim()}
+            onClick={async () => {
+              const keys = keysText
+                .split('\n')
+                .map((key) => key.trim())
+                .filter(Boolean)
+                .slice(0, 200)
+              for (const key of keys) {
+                await addDoc(
+                  collection(firestore, 'hosts', hostId, 'licenseKeys'),
+                  {
+                    productId: keysFor!.$id,
+                    key,
+                    assignedAtMs: null,
+                    createdAtMs: Date.now(),
+                  },
+                )
+              }
+              setKeysText('')
+              enqueueSnackbar(`Added ${keys.length} keys`, {
+                variant: 'success',
+                persist: false,
+              })
+            }}
+          >
+            {'Add keys'}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
         open={Boolean(importing)}
         onClose={() => setImporting(null)}

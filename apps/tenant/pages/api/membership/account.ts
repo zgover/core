@@ -123,16 +123,24 @@ export default async function handler(
       productId: string
       productName: string
       url: string
+      licenseKeys?: string[]
     }> = []
     for (const docSnapshot of ordersSnapshot.docs) {
       const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
       if (['pending', 'cancelled', 'refunded'].includes(order.status)) continue
+      const orderKeys = (docSnapshot.get('licenseKeys') ?? {}) as Record<
+        string,
+        string[]
+      >
       for (const line of order.lineItems ?? []) {
         if (line.productType !== 'digital') continue
         downloads.push({
           orderId: docSnapshot.id,
           productId: line.productId,
           productName: line.name,
+          ...(orderKeys[line.productId]?.length
+            ? { licenseKeys: orderKeys[line.productId] }
+            : {}),
           url:
             `/api/commerce/download?hostId=${encodeURIComponent(hostId)}` +
             `&orderId=${encodeURIComponent(docSnapshot.id)}` +

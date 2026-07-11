@@ -48,6 +48,7 @@ interface AccountData {
     productId: string
     productName: string
     url: string
+    licenseKeys?: string[]
   }>
   subscriptions?: Array<{
     id: string
@@ -334,9 +335,20 @@ const CustomerAccount = forwardRef<HTMLDivElement, CustomerAccountProps>(
                 key={`${download.orderId}:${download.productId}`}
                 sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
               >
-                <Typography variant="body2" sx={{ flex: 1 }} noWrap>
-                  {download.productName}
-                </Typography>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" noWrap>
+                    {download.productName}
+                  </Typography>
+                  {download.licenseKeys?.map((key) => (
+                    <Typography
+                      key={key}
+                      variant="caption"
+                      sx={{ fontFamily: 'monospace', display: 'block' }}
+                    >
+                      {key}
+                    </Typography>
+                  ))}
+                </Box>
                 <Button size="small" href={download.url}>
                   {'Download'}
                 </Button>
