@@ -16,7 +16,8 @@
  */
 
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
-import { CardDisplay, Container, GridItems } from '@aglyn/shared-ui-jsx'
+import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
+import HubTabs from '../../../components/hub-tabs.component'
 import OrgPluginInstallsCard from '../../../components/org-plugin-installs-card.component'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -275,23 +276,24 @@ const CommunitySettings: NextPageWithLayout = () => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <GridItems
-            spacing={3}
-            items={[
+          <HubTabs
+            tabs={[
               // Org-tier plugin inventory (AGL-263).
               ...(currentOrg?.$id
                 ? [
                     {
-                      size: { xs: 12 },
-                      children: (
+                      id: 'plugins',
+                      label: 'Plugins',
+                      content: (
                         <OrgPluginInstallsCard orgId={currentOrg.$id} />
                       ),
                     },
                   ]
                 : []),
               {
-                size: { xs: 12, md: 6 },
-                children: (
+                id: 'profile',
+                label: 'Public profile',
+                content: (
                   <CardDisplay
                     header={'Public profile'}
                     contentGutterX
@@ -345,8 +347,9 @@ const CommunitySettings: NextPageWithLayout = () => {
                 ),
               },
               {
-                size: { xs: 12, md: 6 },
-                children: (
+                id: 'listings',
+                label: 'Your listings',
+                content: (
                   <CardDisplay
                     header={'Your listings'}
                     contentGutterX
@@ -413,8 +416,9 @@ const CommunitySettings: NextPageWithLayout = () => {
                 ),
               },
               {
-                size: { xs: 12, md: 6 },
-                children: (
+                id: 'payouts',
+                label: 'Payouts',
+                content: (
                   <CardDisplay
                     header={'Payouts'}
                     contentGutterX
@@ -451,8 +455,9 @@ const CommunitySettings: NextPageWithLayout = () => {
                 ),
               },
               {
-                size: { xs: 12, md: 6 },
-                children: (
+                id: 'sales',
+                label: 'Sales',
+                content: (
                   <CardDisplay header={'Sales'} contentGutterX contentGutterY>
                     {(sales ?? []).length === 0 ? (
                       <Typography variant="body2" color="text.secondary">
