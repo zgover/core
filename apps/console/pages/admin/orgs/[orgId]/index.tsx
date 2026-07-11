@@ -28,6 +28,7 @@ import {
   Alert,
   Button,
   Chip,
+  Link as MuiLink,
   Stack,
   Table,
   TableBody,
@@ -545,19 +546,32 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                                 key={host.$id}
                                 direction="row"
                                 spacing={1}
-                                sx={{ justifyContent: 'space-between' }}
+                                sx={{
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                }}
                               >
-                                <Typography variant="body2" noWrap>
+                                {/* Host detail page link (AGL-392). */}
+                                <MuiLink
+                                  href={buildRoute(
+                                    Route.ADMIN_ORG_HOST_DETAIL,
+                                    { orgId, hostId: host.$id },
+                                  )}
+                                  color="secondary"
+                                  underline="hover"
+                                  variant="body2"
+                                  noWrap
+                                >
                                   {host.displayName ??
                                     host.subdomain ??
                                     host.$id}
-                                </Typography>
+                                </MuiLink>
                                 <Typography
                                   variant="caption"
                                   color="text.secondary"
                                   sx={{ fontFamily: 'monospace' }}
                                 >
-                                  {host.$id}
+                                  {host.subdomain ?? host.$id}
                                 </Typography>
                               </Stack>
                             ))

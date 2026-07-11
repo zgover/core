@@ -18,6 +18,7 @@
 export enum Route {
   ADMIN_ORGS = '/admin/orgs',
   ADMIN_ORG_DETAIL = '/admin/orgs/[orgId]',
+  ADMIN_ORG_HOST_DETAIL = '/admin/orgs/[orgId]/host/[hostId]',
   ADMIN_OVERVIEW = '/admin/overview',
   ADMIN_AUDIT = '/admin/audit',
   ADMIN_USERS = '/admin/users',
@@ -81,6 +82,7 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.HOST_DASHBOARD]: { hostId: string }
   [Route.ADMIN_ORGS]: undefined
   [Route.ADMIN_ORG_DETAIL]: { orgId: string }
+  [Route.ADMIN_ORG_HOST_DETAIL]: { orgId: string; hostId: string }
   [Route.ADMIN_OVERVIEW]: undefined
   [Route.ADMIN_AUDIT]: undefined
   [Route.ADMIN_USERS]: undefined
