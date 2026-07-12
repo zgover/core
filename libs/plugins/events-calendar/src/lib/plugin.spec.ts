@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as PluginSdk from '@aglyn/plugins-sdk'
 import { BUNDLE_ID } from './constants/bundle-common'
 import {
   EVENTS_CALENDAR_BUNDLE,
@@ -33,8 +34,8 @@ describe('events-calendar plugin', () => {
   it('registers a mui-dependent bundle + console extension once', () => {
     registerEventsCalendarPlugin()
     const bundle = Aglyn.plugins.getDependency(BUNDLE_ID)
-    expect(bundle?.dependencies).toMatchObject({ [Aglyn.MUI_BUNDLE_ID]: true })
-    const extension = Aglyn.listConsoleExtensions().find(
+    expect(bundle?.dependencies).toMatchObject({ [PluginSdk.MUI_BUNDLE_ID]: true })
+    const extension = PluginSdk.listConsoleExtensions().find(
       (entry) => entry.pluginId === BUNDLE_ID,
     )
     expect(extension?.featureFlag).toBe('eventCalendar')

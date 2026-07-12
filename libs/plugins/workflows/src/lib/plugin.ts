@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as PluginSdk from '@aglyn/plugins-sdk'
 import { mdiSitemap } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
 import { BUNDLE_ID } from './constants/bundle-common'
@@ -35,7 +36,7 @@ const WorkflowsConsolePage = lazy(
  * shared where-used tooling.
  */
 export function registerWorkflowsConsole(): void {
-  Aglyn.registerConsoleExtension({
+  PluginSdk.registerConsoleExtension({
     pluginId: BUNDLE_ID,
     displayName: 'Workflows',
     featureFlag: 'workflows',

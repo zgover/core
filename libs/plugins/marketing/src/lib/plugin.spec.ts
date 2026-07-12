@@ -16,13 +16,14 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as PluginSdk from '@aglyn/plugins-sdk'
 import { BUNDLE_ID } from './constants/bundle-common'
 import { registerMarketingConsole } from './plugin'
 
 describe('marketing plugin', () => {
   it('registers a console-only, always-on Marketing page', () => {
     registerMarketingConsole()
-    const extension = Aglyn.listConsoleExtensions().find(
+    const extension = PluginSdk.listConsoleExtensions().find(
       (entry) => entry.pluginId === BUNDLE_ID,
     )
     expect(extension?.featureFlag).toBeUndefined()

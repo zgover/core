@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as PluginSdk from '@aglyn/plugins-sdk'
 import { mdiEmailEditOutline, mdiEmailOutline } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
 import * as Blocks from './components/email-blocks'
@@ -31,7 +32,7 @@ const EmailsConsolePage = lazy(() => import('./components/emails-console-page'))
  * tree to inline-styled table HTML + plain text at send time. Follows
  * the AGL-277 bundle pattern (depends on the mui core bundle).
  */
-export const EMAIL_BUNDLE: Aglyn.FeatureBundleEntry[] = [
+export const EMAIL_BUNDLE: PluginSdk.FeatureBundleEntry[] = [
   { component: Blocks.EmailSection, schema: Blocks.emailSectionSchema },
   { component: Blocks.EmailText, schema: Blocks.emailTextSchema },
   { component: Blocks.EmailRichtext, schema: Blocks.emailRichtextSchema },
@@ -56,7 +57,7 @@ export const EMAIL_BUNDLE: Aglyn.FeatureBundleEntry[] = [
  * the console's own nav or page files.
  */
 export function registerEmailConsole(): void {
-  Aglyn.registerConsoleExtension({
+  PluginSdk.registerConsoleExtension({
     pluginId: BUNDLE_ID,
     displayName: 'Email',
     navItems: [
@@ -75,7 +76,7 @@ export function registerEmailPlugin(): void {
   registerEmailConsole()
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
   Aglyn.plugins.addDependency(
-    Aglyn.defineUiFeatureBundle(
+    PluginSdk.defineUiFeatureBundle(
       {
         bundleId: BUNDLE_ID,
         displayName: 'Email Designer',

@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as PluginSdk from '@aglyn/plugins-sdk'
 import { mdiCalendarClock } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
 import * as Booking from './components/booking'
@@ -34,7 +35,7 @@ const BookingsConsolePage = lazy(
  * half declares the Bookings nav/page through the ConsoleExtension
  * registry, gated by the `bookings` entitlement.
  */
-export const BOOKINGS_BUNDLE: Aglyn.FeatureBundleEntry[] = [
+export const BOOKINGS_BUNDLE: PluginSdk.FeatureBundleEntry[] = [
   {
     component: Booking.default,
     schema: Booking.schema,
@@ -47,7 +48,7 @@ export const BOOKINGS_BUNDLE: Aglyn.FeatureBundleEntry[] = [
  * at console app load — the page is lazy (no besigner/canvas code).
  */
 export function registerBookingsConsole(): void {
-  Aglyn.registerConsoleExtension({
+  PluginSdk.registerConsoleExtension({
     pluginId: BUNDLE_ID,
     displayName: 'Bookings',
     featureFlag: 'bookings',
@@ -70,7 +71,7 @@ export function registerBookingsPlugin(): void {
   registerBookingsConsole()
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
   Aglyn.plugins.addDependency(
-    Aglyn.defineUiFeatureBundle(
+    PluginSdk.defineUiFeatureBundle(
       {
         bundleId: BUNDLE_ID,
         displayName: 'Bookings',

@@ -42,13 +42,15 @@ hit.
 
 ## The UI half
 
-Build a bundle with `defineUiFeatureBundle` from `@aglyn/aglyn` and register
+Build a bundle with `defineUiFeatureBundle` from `@aglyn/plugins-sdk` (the
+plugin SDK, AGL-414) and register
 it the same way the mui bundle registers itself. The bundle automatically
 declares a dependency on the `mui` bundle, so primitives and theming load
 first.
 
 ```ts
 import * as Aglyn from '@aglyn/aglyn'
+import { defineUiFeatureBundle } from '@aglyn/plugins-sdk'
 import * as EventList from './components/event-list'
 
 export const BUNDLE_ID = 'events-calendar'
@@ -56,7 +58,7 @@ export const BUNDLE_ID = 'events-calendar'
 export function registerEventsCalendarPlugin(): void {
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
   Aglyn.plugins.addDependency(
-    Aglyn.defineUiFeatureBundle(
+    defineUiFeatureBundle(
       {
         bundleId: BUNDLE_ID,
         displayName: 'Events Calendar',
@@ -89,12 +91,12 @@ bypass plans. A feature plugin adds a menu item to the host app bar **and a
 new page** without editing any core console file (AGL-394).
 
 A nav item that carries a `Component` becomes a full page: the shell's
-generic host route (`apps/console/pages/[hostId]/[pluginSlug].tsx`) mounts
+generic host route (`apps/console/app/(app)/[hostId]/[pluginSlug]/page.tsx`) mounts
 it under the active host, wires the breadcrumb/header, resolves the
 `featureFlag` entitlement, and passes it in as `entitled`.
 
 ```ts
-import { registerConsoleExtension } from '@aglyn/aglyn'
+import { registerConsoleExtension } from '@aglyn/plugins-sdk'
 import { lazy } from 'react'
 import { mdiCalendarMonthOutline } from '@aglyn/shared-data-mdi'
 
@@ -128,7 +130,8 @@ org billing doc the shell already loaded, so the page can run its own
 org/session hooks:
 
 ```tsx
-import { checkQuota, type ConsolePluginPageProps } from '@aglyn/aglyn'
+import { checkQuota } from '@aglyn/aglyn'
+import type { ConsolePluginPageProps } from '@aglyn/plugins-sdk'
 
 export default function BookingsConsolePage({
   hostId,

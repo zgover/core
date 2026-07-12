@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { listConsoleNavItems } from '@aglyn/aglyn'
+import { listConsoleNavItems } from '@aglyn/plugins-sdk'
 import { buildRoute, Route } from './route-links'
 
 /**

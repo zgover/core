@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as PluginSdk from '@aglyn/plugins-sdk'
 import { mdiStorefrontOutline } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
 import * as Account from './components/account'
@@ -43,7 +44,7 @@ const CommerceConsolePage = lazy(() => import('./components/commerce-console-pag
  * as they land (PLP AGL-291, PDP AGL-292, cart AGL-293, …); ids are
  * persisted in screen docs and never renamed.
  */
-export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
+export const COMMERCE_BUNDLE: PluginSdk.FeatureBundleEntry[] = [
   {
     component: ProductGrid.default,
     schema: ProductGrid.schema,
@@ -117,7 +118,7 @@ export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
  * nav renders the link and the existing named route serves the page.
  */
 export function registerCommerceConsole(): void {
-  Aglyn.registerConsoleExtension({
+  PluginSdk.registerConsoleExtension({
     pluginId: BUNDLE_ID,
     displayName: 'Commerce',
     navItems: [
@@ -136,7 +137,7 @@ export function registerCommercePlugin(): void {
   registerCommerceConsole()
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
   Aglyn.plugins.addDependency(
-    Aglyn.defineUiFeatureBundle(
+    PluginSdk.defineUiFeatureBundle(
       {
         bundleId: BUNDLE_ID,
         displayName: 'Commerce',

@@ -16,7 +16,8 @@
  */
 'use client'
 
-import { createResourceUid, type ConsolePluginPageProps } from '@aglyn/aglyn'
+import { createResourceUid } from '@aglyn/aglyn'
+import { type ConsolePluginPageProps } from '@aglyn/plugins-sdk'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'

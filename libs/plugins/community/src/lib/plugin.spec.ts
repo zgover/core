@@ -16,13 +16,14 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as PluginSdk from '@aglyn/plugins-sdk'
 import { BUNDLE_ID } from './constants/bundle-common'
 import { registerCommunityConsole } from './plugin'
 
 describe('community plugin', () => {
   it('registers a console-only Community hub page', () => {
     registerCommunityConsole()
-    const extension = Aglyn.listConsoleExtensions().find(
+    const extension = PluginSdk.listConsoleExtensions().find(
       (entry) => entry.pluginId === BUNDLE_ID,
     )
     expect(extension?.navItems?.[0]?.href).toBe('/community')
