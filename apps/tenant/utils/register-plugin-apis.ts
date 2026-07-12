@@ -27,7 +27,7 @@ import { registerWorkflowsApi } from '@aglyn/plugins-workflows/server'
  * exposes its handlers through a `/server` entry point that pulls in
  * firebase-admin; importing them ONLY here (from the API dispatcher, never
  * client code) keeps server deps out of the browser bundle. The catch-all
- * `pages/api/[...pluginApi]` route resolves requests against this registry,
+ * `app/api/[...pluginApi]` route resolves requests against this registry,
  * so a migrated feature keeps its original `/api/...` URL.
  */
 export function registerTenantPluginApis(): void {

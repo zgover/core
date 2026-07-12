@@ -25,7 +25,7 @@ import { registerMarketingConsoleApi } from '@aglyn/plugins-marketing/server'
  * counterpart to the tenant registration module: each feature plugin
  * exposes its console-side handlers through a `register*ConsoleApi()`
  * function on its `/server` entry point, imported ONLY here so firebase-admin
- * never reaches the browser bundle. The catch-all `pages/api/[...pluginApi]`
+ * never reaches the browser bundle. The catch-all `app/api/[...pluginApi]`
  * route resolves requests against this registry, preserving each migrated
  * route's original `/api/...` URL.
  */
