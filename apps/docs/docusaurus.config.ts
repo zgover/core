@@ -107,6 +107,11 @@ const config: Config = {
           label: 'Docs',
         },
         {
+          to: '/developers/plugins/overview',
+          label: 'Developers',
+          position: 'left',
+        },
+        {
           to: '/whats-new',
           label: "What's New",
           position: 'left',
@@ -131,9 +136,9 @@ const config: Config = {
         {
           title: 'Build',
           items: [
-            { label: 'The Besigner', to: '/besigner/overview' },
-            { label: 'Datasets', to: '/datasets/overview' },
-            { label: 'Plugins', to: '/plugins/overview' },
+            { label: 'The Besigner', to: '/building-sites/besigner/overview' },
+            { label: 'Datasets', to: '/content-and-data/datasets/overview' },
+            { label: 'Plugins', to: '/developers/plugins/overview' },
           ],
         },
         {

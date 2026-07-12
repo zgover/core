@@ -34,9 +34,9 @@ The **staff console** is where Aglyn operators manage the platform and support c
 - **Impersonation** — staff can open the console as a customer account (audited; a
   pinned warning banner with one-click exit shows for the entire session; staff
   accounts cannot be impersonated).
-- **[Feature flags](./feature-flags.md)** — release-gate console features via Remote
+- **[Feature flags](feature-flags.md)** — release-gate console features via Remote
   Config, with percentage rollout; staff preview everything.
-- **[Multi-tenant architecture](./architecture-multi-tenancy.md)** — how organizations,
+- **[Multi-tenant architecture](architecture-multi-tenancy.md)** — how organizations,
   membership, security rules, subdomains, and billing attribution fit together.
 - **Audit archival** — a nightly cron moves audit entries past the 90-day retention
   window into a Storage compliance trail (JSON lines, month-partitioned) and reminds
@@ -54,4 +54,4 @@ site.
 
 ## Related
 
-- [Billing & plans](../billing-and-plans/overview.md)
+- [Billing & plans](../workspace-and-billing/billing-and-plans/overview.md)

@@ -4,7 +4,7 @@ July 2026. Benchmarked against Strapi 5's plugin ecosystem (Plugin SDK,
 Admin Panel API, Server API, custom fields, Strapi Market) — the most
 mature comparable plugin platform in the CMS/site-builder space. Companion
 docs: `docs/PLUGIN_LOADING.md` (current architecture),
-`apps/docs/docs/plugins/*` (authoring guides). Tracked in Linear project
+`apps/docs/docs/developers/plugins/*` (authoring guides). Tracked in Linear project
 **"Plugin platform v2: DX, marketplace & docs"**.
 
 ## Where Aglyn is already ahead

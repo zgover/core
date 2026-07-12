@@ -1,0 +1,12 @@
+{
+  "label": "Developers",
+  "position": 9,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "slug": "/developers",
+    "title": "Developers",
+    "description": "Extend Aglyn without forking core: build, test, and publish plugins for the console, the canvas, published sites, and the server."
+  }
+}

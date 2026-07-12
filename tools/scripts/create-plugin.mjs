@@ -262,7 +262,7 @@ write(
   `# @aglyn/plugins-${id}
 
 ${label} feature plugin. Scaffolded by \`tools/scripts/create-plugin.mjs\`
-(AGL-425); see \`apps/docs/docs/plugins/building-feature-plugins.md\` for
+(AGL-425); see \`apps/docs/docs/developers/plugins/building-feature-plugins.md\` for
 every extension surface and the loading model.
 
 - Surfaces: ${surfaces.join(', ')}

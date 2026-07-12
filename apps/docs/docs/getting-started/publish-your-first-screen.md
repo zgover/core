@@ -18,11 +18,11 @@ This walks through the core loop: **create → design → publish**.
 
 ## 2. Design it in the Besigner
 
-1. Open the screen to launch the **[Besigner](../besigner/overview.md)**.
+1. Open the screen to launch the **[Besigner](../building-sites/besigner/overview.md)**.
 2. Drag components from the drawer onto the canvas. Rearrange them in the **hierarchy**
    panel or directly on the canvas.
 3. Double-click text to edit it inline. Set component attributes in the inspector.
-4. Bind a shared **[layout](../screens-and-layouts/overview.md#layouts)** if you want a
+4. Bind a shared **[layout](../building-sites/screens-and-layouts/overview.md#layouts)** if you want a
    common header/footer.
 
 ## 3. Preview and publish

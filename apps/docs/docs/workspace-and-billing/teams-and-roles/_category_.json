@@ -1,0 +1,10 @@
+{
+  "label": "Teams, Roles & Membership",
+  "position": 1,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "workspace-and-billing/teams-and-roles/overview"
+  }
+}

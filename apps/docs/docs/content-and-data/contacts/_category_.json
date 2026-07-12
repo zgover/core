@@ -1,0 +1,10 @@
+{
+  "label": "Contacts CRM",
+  "position": 4,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "content-and-data/contacts/overview"
+  }
+}

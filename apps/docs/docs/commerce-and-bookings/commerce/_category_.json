@@ -1,0 +1,10 @@
+{
+  "label": "Commerce",
+  "position": 1,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "commerce-and-bookings/commerce/overview"
+  }
+}

@@ -158,9 +158,9 @@ that caused it.
 
 ## Related
 
-- [Feature flags](./feature-flags.md) — the release-gating system the workspace UX
+- [Feature flags](feature-flags.md) — the release-gating system the workspace UX
   ships behind.
-- [Teams, Roles & Membership](../teams-and-roles/overview.md) — the customer-facing
+- [Teams, Roles & Membership](../workspace-and-billing/teams-and-roles/overview.md) — the customer-facing
   view of the same membership model.
 - `docs/MULTI_TENANT_FIRESTORE.md` (repo) — full design doc with the migration plan
   and open questions.

@@ -17,7 +17,7 @@ The **console** is where you manage a site. Here's what each part of the chrome 
 - **Screen switcher** — a paginated dropdown for hopping between screens without leaving
   the editor.
 - **Version dropdown** (right, near your avatar) — pick or schedule a
-  [version](../screens-and-layouts/overview.md#versions--scheduled-publishing) to view.
+  [version](../building-sites/screens-and-layouts/overview.md#versions--scheduled-publishing) to view.
 - **Notifications** — the bell shows an unread badge and drops down your 10 most recent
   notifications (form submissions, bookings, invoices, team changes); "View all" opens
   the full paginated feed.
@@ -43,7 +43,7 @@ The **console** is where you manage a site. Here's what each part of the chrome 
 
 You can manage a screen (rename, schedule, view raw JSON) from its **detail page**
 without opening the editor. When you want to design it, open the
-**[Besigner](../besigner/overview.md)**.
+**[Besigner](../building-sites/besigner/overview.md)**.
 
 ## A site's dashboard
 
