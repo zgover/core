@@ -93,7 +93,7 @@ import {
 } from '../../../../../../../../constants/screen-publishing'
 import PluginWidgetSlot from '../../../../../../../../components/plugin-widget-slot.component'
 import { CONTENT_MAX_WIDTH } from '../../../../../../../../constants/shared'
-import useCurrentTenant from '../../../../../../../../hooks/use-current-tenant'
+import useCurrentOrg from '../../../../../../../../hooks/use-current-org'
 import useFirestoreCollection from '../../../../../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../../../../../hooks/use-firestore-doc'
 import useHostActivityLogger from '../../../../../../../../hooks/use-host-activity-logger'
@@ -139,7 +139,7 @@ function ScreenDetails() {
   const { queueLoading, loading } = useLoading()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const logActivity = useHostActivityLogger(hostId)
 
   const screenRef = doc(firestore, 'hosts', hostId, 'screens', screenId)
@@ -386,7 +386,7 @@ function ScreenDetails() {
   } | null>(null)
   const openScheduler = useCallback(
     (action: 'publish' | 'unpublish', presetVersionId?: string) => () => {
-      if (!hasEntitlement('scheduled-publishing', tenant)) {
+      if (!hasEntitlement('scheduled-publishing', org)) {
         return enqueueSnackbar(
           'Scheduled publishing requires a Business plan — see Billing',
           { variant: 'warning', persist: false },
@@ -404,7 +404,7 @@ function ScreenDetails() {
           `${pad(initial.getDate())}T${pad(initial.getHours())}:${pad(initial.getMinutes())}`,
       })
     },
-    [tenant, enqueueSnackbar, screen, versions],
+    [org, enqueueSnackbar, screen, versions],
   )
   const handleScheduleConfirm = useCallback(async () => {
     if (!scheduler?.at) return
@@ -461,7 +461,7 @@ function ScreenDetails() {
     async (value: number) => {
       const update: Record<string, unknown> = { visibility: value }
       // Leaving password mode drops the stored hash so protection does not
-      // silently linger (tenant enforces on the hash, not the mode).
+      // silently linger (org enforces on the hash, not the mode).
       if (
         value !== HostScreenVisibility.PASSWORD &&
         screen?.protection?.passwordHash
@@ -515,7 +515,7 @@ function ScreenDetails() {
       )
   }, [password, screenRef, enqueueSnackbar])
 
-  // --- SEO (AGL-117): screen fields override host defaults on the tenant --
+  // --- SEO (AGL-117): screen fields override host defaults on the org --
   const [seoDraft, setSeoDraft] = useState<{
     title: string
     description: string

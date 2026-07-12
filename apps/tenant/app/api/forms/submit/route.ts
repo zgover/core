@@ -99,7 +99,7 @@ export async function POST(request: Request): Promise<Response> {
     {
       // Plan-less orgs resolve as free (AGL-247) — the cap always runs.
       const tenant = orgBilling
-      const limit = Aglyn.resolveTenantEntitlements(
+      const limit = Aglyn.resolveOrgEntitlements(
         tenant as any,
       ).formSubmissionsPerMonth
       const counterSnapshot = await counterRef.get()

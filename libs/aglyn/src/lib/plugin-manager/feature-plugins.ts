@@ -39,8 +39,8 @@
  */
 
 import { runInAction } from 'mobx'
-import type { TenantPermissions } from '../app-utils/org-permissions'
-import type { AglynTenant, TenantFeatureFlags } from '../foundation'
+import type { OrgPermissions } from '../app-utils/org-permissions'
+import type { AglynOrgBilling, OrgFeatureFlags } from '../foundation'
 import type {
   ComponentSchema,
   MdiIconProps,
@@ -137,18 +137,18 @@ export interface ConsolePluginPageProps {
   entitled: boolean
   /**
    * The ORG billing doc (`orgs/{orgId}`) the shell already loaded to
-   * compute `entitled` — the prop name is the historic "tenant" alias
-   * (AGL-443; see the glossary). Passed through so a plugin page can run
-   * its own `checkEntitlement`/`checkQuota` (e.g. per-plan service
-   * limits) without reaching for the console-app org/session hooks.
+   * compute `entitled` (prop renamed from `tenant` in AGL-444). Passed
+   * through so a plugin page can run its own `checkEntitlement`/
+   * `checkQuota` (e.g. per-plan service limits) without reaching for the
+   * console-app org/session hooks.
    */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
   /**
    * The signed-in user's resolved org permissions (AGL-395), passed through
    * so a plugin page can gate actions (e.g. install/publish) without the
    * console-app session/permission hooks.
    */
-  permissions?: Partial<TenantPermissions>
+  permissions?: Partial<OrgPermissions>
 }
 
 export type ConsolePluginPage = ComponentType<ConsolePluginPageProps>
@@ -243,7 +243,7 @@ export interface ConsoleExtension {
   pluginId: PluginId
   displayName: string
   /** Entitlement flag gating every surface this extension registers. */
-  featureFlag?: keyof TenantFeatureFlags
+  featureFlag?: keyof OrgFeatureFlags
   navItems?: ConsoleNavItem[]
   dashboardCards?: ConsoleDashboardCard[]
   settingsSections?: ConsoleSettingsSection[]
@@ -276,7 +276,7 @@ export function listConsoleExtensions(): ConsoleExtension[] {
 /** A nav item flattened with its owning extension's id + entitlement flag. */
 export interface ConsoleNavEntry extends ConsoleNavItem {
   pluginId: PluginId
-  featureFlag?: keyof TenantFeatureFlags
+  featureFlag?: keyof OrgFeatureFlags
 }
 
 /**

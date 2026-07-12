@@ -19,7 +19,7 @@
 import {
   PLAN_ENTITLEMENTS,
   PLAN_PRICING,
-  type TenantPlan,
+  type OrgPlan,
 } from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import {
@@ -61,17 +61,17 @@ import { buildRoute, Route } from '../../../../constants/route-links'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useAdminHosts } from '../../../../hooks/use-admin-hosts'
-import useCurrentTenant from '../../../../hooks/use-current-tenant'
-import useTenantPermissions from '../../../../hooks/use-tenant-permissions'
+import useCurrentOrg from '../../../../hooks/use-current-org'
+import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
 
 const BillingContent: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { tenant, orgId } = useCurrentTenant()
+  const { org, orgId } = useCurrentOrg()
   const { permissions, can, loaded: permissionsLoaded } =
-    useTenantPermissions()
+    useOrgPermissions()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const { confirm } = useConfirmationContext()
@@ -80,13 +80,13 @@ const BillingContent: NextPageWithLayout = () => {
 
   // Workspace-scoped (AGL-236): meters cover the selected org's sites.
   const { hosts } = useAdminHosts(firestore, user?.uid, orgId)
-  const plan = (tenant?.plan ?? 'free') as TenantPlan
-  const subscriptionStatus = tenant?.subscription?.status
+  const plan = (org?.plan ?? 'free') as OrgPlan
+  const subscriptionStatus = org?.subscription?.status
   const subscriptionActive = ['active', 'trialing', 'past_due'].includes(
     String(subscriptionStatus ?? ''),
   )
   const cancelAtPeriodEnd =
-    (tenant?.subscription as any)?.cancelAtPeriodEnd === true
+    (org?.subscription as any)?.cancelAtPeriodEnd === true
 
   const subscriptionRequest = useCallback(
     async (body: Record<string, unknown>) => {
@@ -155,12 +155,12 @@ const BillingContent: NextPageWithLayout = () => {
   }, [cancelAtPeriodEnd, subscriptionRequest, queueLoading, enqueueSnackbar])
 
   const handleUpgrade = useCallback(
-    (targetPlan: TenantPlan) => async () => {
+    (targetPlan: OrgPlan) => async () => {
       const dequeue = queueLoading()
       try {
         // Plan switches on a live subscription go through the proration
         // preview + subscription update, never a second Checkout (AGL-269).
-        if (subscriptionActive && tenant?.plan && targetPlan !== 'free') {
+        if (subscriptionActive && org?.plan && targetPlan !== 'free') {
           dequeue()
           const preview = await subscriptionRequest({
             action: 'preview',
@@ -228,7 +228,7 @@ const BillingContent: NextPageWithLayout = () => {
       orgId,
       interval,
       subscriptionActive,
-      tenant?.plan,
+      org?.plan,
       subscriptionRequest,
       confirm,
       queueLoading,
@@ -305,12 +305,12 @@ const BillingContent: NextPageWithLayout = () => {
                     >
                       <Typography variant="h5">{PLAN_LABELS[plan]}</Typography>
                       <Chip
-                        label={tenant?.subscription?.status ?? 'no subscription'}
+                        label={org?.subscription?.status ?? 'no subscription'}
                         size="small"
                         color={
-                          tenant?.subscription?.status === 'active'
+                          org?.subscription?.status === 'active'
                             ? 'success'
-                            : tenant?.subscription?.status === 'past_due'
+                            : org?.subscription?.status === 'past_due'
                               ? 'warning'
                               : 'default'
                         }
@@ -342,7 +342,7 @@ const BillingContent: NextPageWithLayout = () => {
                       ))}
                     </Stack>
                     <Typography variant="body2" color="text.secondary">
-                      {tenant?.plan
+                      {org?.plan
                         ? 'Usage and limits for your plan are shown beside.'
                         : 'No plan assigned yet — this organization resolves ' +
                           'to the Free limits.'}
@@ -356,17 +356,17 @@ const BillingContent: NextPageWithLayout = () => {
                       />
                     ) : null}
                     {/* Renewal + addons (AGL-248). */}
-                    {(tenant?.subscription as any)?.currentPeriodEnd ? (
+                    {(org?.subscription as any)?.currentPeriodEnd ? (
                       <Typography
                         variant="caption"
                         color="text.secondary"
                         sx={{ display: 'block', mt: 1 }}
                       >
                         {`Renews ${new Date(
-                          (tenant?.subscription as any).currentPeriodEnd
+                          (org?.subscription as any).currentPeriodEnd
                             ?.toDate?.()
                             ?.getTime?.() ??
-                            (tenant?.subscription as any).currentPeriodEnd,
+                            (org?.subscription as any).currentPeriodEnd,
                         ).toLocaleDateString()}`}
                       </Typography>
                     ) : null}
@@ -399,14 +399,14 @@ const BillingContent: NextPageWithLayout = () => {
                         ) : null}
                       </Stack>
                     ) : null}
-                    {tenant?.seatAddons &&
-                    Object.values(tenant.seatAddons).some(Boolean) ? (
+                    {org?.seatAddons &&
+                    Object.values(org.seatAddons).some(Boolean) ? (
                       <Typography
                         variant="caption"
                         color="text.secondary"
                         sx={{ display: 'block' }}
                       >
-                        {`Add-ons: ${Object.entries(tenant.seatAddons)
+                        {`Add-ons: ${Object.entries(org.seatAddons)
                           .filter(([, count]) => Number(count) > 0)
                           .map(([kind, count]) => `${count} ${kind}`)
                           .join(', ')}`}
@@ -420,7 +420,7 @@ const BillingContent: NextPageWithLayout = () => {
                 children: (
                   <CardDisplay header={'Usage'} contentGutterX contentGutterY>
                     <BillingUsageComponent
-                      tenant={tenant}
+                      org={org}
                       hosts={hosts ?? []}
                     />
                   </CardDisplay>
@@ -524,7 +524,7 @@ const BillingContent: NextPageWithLayout = () => {
                 size: { xs: 12 },
                 children: (
                   <BillingPlanCardsComponent
-                    plan={tenant?.plan as TenantPlan | undefined}
+                    plan={org?.plan as OrgPlan | undefined}
                     onSelect={(tier) =>
                       permissions.editBilling
                         ? void handleUpgrade(tier)()

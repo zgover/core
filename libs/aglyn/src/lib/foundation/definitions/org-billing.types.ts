@@ -18,16 +18,13 @@
 /**
  * The org's billing/entitlement vocabulary (AGL-443 naming cleanup).
  *
- * NAMING: these types are spelled `Tenant*` for historical reasons — they
- * predate the organizations migration (AGL-232..238). The retired
+ * HISTORY: these types were spelled `Tenant*` until AGL-444 — they
+ * predate the organizations migration (AGL-232..238); the retired
  * `tenants/{uid}` collection's billing shape was mirrored ONTO the org
- * doc so every plan/entitlement resolver kept working, and the type names
- * came along. Today they describe fields of `orgs/{orgId}`:
- *
- * - `AglynOrgBilling` is the canonical alias — use it in NEW code.
- * - `AglynTenant` is the same type under its historic name (deprecated).
- * - The `Tenant*` satellites (plan/flags/entitlements/seats/subscription)
- *   are ACTIVE vocabulary carried by the org doc, not legacy data.
+ * doc and the names came along. The alias is gone: everything here is
+ * `Org*` and describes fields of `orgs/{orgId}`. Persisted STRINGS keep
+ * their historic spellings (the `users.{uid}.tenants` map, Stripe
+ * `metadata[tenantId]`) — only TypeScript identifiers were renamed.
  *
  * Convention (see the docs-site glossary): "organization/org" is the
  * entity; "workspace" is the user-facing word for it; "tenant" is
@@ -36,13 +33,19 @@
  */
 
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
-import type { AglynDocument, HostUid, UserUid } from './platform.types'
+import type {
+  AglynDocument,
+  HostUid,
+  OrgUid,
+  UserUid,
+} from './platform.types'
 
-export type TenantUid = string
+export type { OrgUid } from './platform.types'
+
 
 /** Hosted in master catalog */
 /** SaaS subscription tiers (Tenant Billing & SaaS Plans, AGL-38..41). */
-export type TenantPlan =
+export type OrgPlan =
   | 'free'
   | 'starter'
   | 'pro'
@@ -50,7 +53,7 @@ export type TenantPlan =
   | 'advanced'
 
 /** Boolean feature gates per plan; quotas live beside them as numbers. */
-export interface TenantFeatureFlags {
+export interface OrgFeatureFlags {
   /** A/B experiments (AGL-252); Business tier. */
   abTesting?: boolean
   versioning?: boolean
@@ -114,7 +117,7 @@ export interface TenantFeatureFlags {
  * `PLAN_ENTITLEMENTS` (versioned with the app); per-tenant overrides can be
  * stored on the tenant doc and win over the plan defaults.
  */
-export interface TenantEntitlements {
+export interface OrgEntitlements {
   hostLimit?: number
   screensPerHost?: number
   sharedLayoutsPerHost?: number
@@ -157,10 +160,10 @@ export interface TenantEntitlements {
    * beyond it, metered overage per GB where the plan prices it. */
   dataStorageMbPerOrg?: number
   /** @deprecated Legacy host-keyed override (pre-AGL-240); resolved into
-   * `datasetsPerOrg` by `resolveTenantEntitlements`. */
+   * `datasetsPerOrg` by `resolveOrgEntitlements`. */
   datasetsPerHost?: number
   /** @deprecated Legacy host-keyed override (pre-AGL-240); resolved into
-   * `maxDatasetsPerOrg` by `resolveTenantEntitlements`. */
+   * `maxDatasetsPerOrg` by `resolveOrgEntitlements`. */
   maxDatasetsPerHost?: number
   /** Catalog products per host (AGL-278). */
   productsPerHost?: number
@@ -172,7 +175,7 @@ export interface TenantEntitlements {
   transactionFeePhysicalPct?: number
   /** Platform fee % on digital storefront sales (Connect app fee). */
   transactionFeeDigitalPct?: number
-  features?: TenantFeatureFlags
+  features?: OrgFeatureFlags
 }
 
 /**
@@ -180,7 +183,7 @@ export interface TenantEntitlements {
  * The effective seat limit is `included + purchased`, clamped to the plan's
  * hard max — beyond the max the tenant must upgrade.
  */
-export interface TenantSeatAddons {
+export interface OrgSeatAddons {
   /** Extra tenant-manager seats. */
   managers?: number
   /** Extra host-member seats (applies per host). */
@@ -189,7 +192,7 @@ export interface TenantSeatAddons {
   datasets?: number
 }
 
-export interface TenantSubscription {
+export interface OrgSubscription {
   status?:
     | 'active'
     | 'trialing'
@@ -202,29 +205,29 @@ export interface TenantSubscription {
 }
 
 /**
- * @deprecated Historic name — this IS the org billing doc
- * (`orgs/{orgId}`), not the retired `tenants/{uid}` shape it mirrors.
- * Use {@link AglynOrgBilling} in new code; existing sites are
- * grandfathered and renamed opportunistically.
+ * The org's billing/entitlement doc shape — the view of `orgs/{orgId}`
+ * that `useCurrentOrg()`, the plugin-page `org` prop, and the
+ * entitlement resolvers carry. (Formerly `AglynTenant`; the alias was
+ * removed in AGL-444.)
  */
-export interface AglynTenant extends AglynDocument {
-  $id: TenantUid
+export interface AglynOrgBilling extends AglynDocument {
+  $id: OrgUid
   ownerId?: UserUid
   displayName?: string
   description?: string
   hosts?: Record<HostUid, true>
   users?: Record<UserUid, true>
   /** Subscription tier; missing/unknown plans resolve as `free`. */
-  plan?: TenantPlan
-  /** Per-tenant entitlement overrides (admin console); win over plan defaults. */
-  entitlements?: TenantEntitlements
+  plan?: OrgPlan
+  /** Per-org entitlement overrides (admin console); win over plan defaults. */
+  entitlements?: OrgEntitlements
   /** Per-org plugin switchboard (AGL-416); see plugin-manager/enabled-plugins. */
   enabledPlugins?: string[]
   /** Purchased addon seats (AGL-112); billed monthly per seat. */
-  seatAddons?: TenantSeatAddons
+  seatAddons?: OrgSeatAddons
   stripeCustomerId?: string
-  subscription?: TenantSubscription
-  /** Staff suspension (AGL-202): set = all the tenant's sites serve 503. */
+  subscription?: OrgSubscription
+  /** Staff suspension (AGL-202): set = all the org's sites serve 503. */
   suspendedAt?: ITimestamp | null
   suspendedReason?: string
   /**
@@ -234,9 +237,3 @@ export interface AglynTenant extends AglynDocument {
   erasureRequestedAt?: ITimestamp | null
 }
 
-/**
- * The canonical name for the org's billing/entitlement doc shape — what
- * `useCurrentTenant()`, the plugin-page `tenant` prop, and the
- * entitlement resolvers actually carry. Prefer this in new code.
- */
-export type AglynOrgBilling = AglynTenant

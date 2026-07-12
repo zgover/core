@@ -93,8 +93,8 @@ const inboundHookHandler: PluginApiHandler = async (req, res) => {
     const hostSnapshot = await hostRef.get()
     {
       // Plan/quota gates ride the owning org's doc (AGL-238).
-      const tenant = (await getOrgForHost(hostId))?.org
-      if (!checkEntitlement(tenant as any, 'webhooks')) {
+      const org = (await getOrgForHost(hostId))?.org
+      if (!checkEntitlement(org as any, 'webhooks')) {
         return res
           .status(403)
           .json({ error: 'Webhooks are not enabled on this site' })

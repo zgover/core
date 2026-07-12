@@ -17,7 +17,7 @@
 
 /**
  * Usage metering (AGL-41): converts per-host counters into an estimated
- * monthly infra cost, billed to the tenant at cost × 1.30. Rates are OUR
+ * monthly infra cost, billed to the org at cost × 1.30. Rates are OUR
  * unit costs (operator-tuned; validate against a real Firebase + Vercel
  * invoice month before enabling live metered billing). Pure data module —
  * shared by the Billing page estimate and the report-usage rollup route.
@@ -56,7 +56,7 @@ export interface UsageCostEstimate {
   formSubmissions: number
   /** Raw infra cost estimate in USD. */
   costUsd: number
-  /** What the tenant is billed: cost × METERED_MARKUP, in whole cents. */
+  /** What the org is billed: cost × METERED_MARKUP, in whole cents. */
   billedCents: number
 }
 

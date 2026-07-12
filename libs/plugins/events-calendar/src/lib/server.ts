@@ -56,8 +56,8 @@ const eventsListHandler: PluginApiHandler = async (req, res) => {
     }
     {
       // Plan/quota gates ride the owning org's doc (AGL-238).
-      const tenant = (await getOrgForHost(hostId))?.org
-      if (!checkEntitlement(tenant as never, 'eventCalendar')) {
+      const org = (await getOrgForHost(hostId))?.org
+      if (!checkEntitlement(org as never, 'eventCalendar')) {
         return res.status(200).json({ events: [] })
       }
     }

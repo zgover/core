@@ -25,22 +25,22 @@ import HostVariablesCard from './host-variables-card.component'
 /**
  * Logic page (AGL-91/92 → AGL-395): variables + no-code functions and the
  * reference-integrity audit, owned by the logic plugin and rendered by the
- * shell's generic plugin route. The tenant doc (resolved by the shell)
+ * shell's generic plugin route. The org doc (resolved by the shell)
  * flows into the variable/function cards for their per-plan quota checks.
  */
 export function LogicConsolePage(props: ConsolePluginPageProps) {
-  const { hostId, tenant } = props
+  const { hostId, org } = props
   return (
     <GridItems
       spacing={3}
       items={[
         {
           size: { xs: 12, md: 6 },
-          children: <HostVariablesCard hostId={hostId} tenant={tenant} />,
+          children: <HostVariablesCard hostId={hostId} org={org} />,
         },
         {
           size: { xs: 12, md: 6 },
-          children: <HostFunctionsCard hostId={hostId} tenant={tenant} />,
+          children: <HostFunctionsCard hostId={hostId} org={org} />,
         },
         {
           // Broken-wiring audit (wave v7).

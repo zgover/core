@@ -24,11 +24,11 @@ import HostDatasetsCard from './host-datasets-card.component'
  * Data page (AGL-239 → AGL-395): the host-scoped view of the org's shared
  * datasets, owned by the data plugin and rendered by the shell's generic
  * plugin route. Datasets live at org scope, so the card links out to the
- * org Data page for the org-wide view. The tenant doc (resolved by the
+ * org Data page for the org-wide view. The org doc (resolved by the
  * shell) flows into the card for its entitlement/quota checks.
  */
 export function DataConsolePage(props: ConsolePluginPageProps) {
-  const { hostId, tenant } = props
+  const { hostId, org } = props
   return (
     <Stack spacing={2}>
       <Alert
@@ -43,7 +43,7 @@ export function DataConsolePage(props: ConsolePluginPageProps) {
         {'Datasets belong to your organization and are shared across every ' +
           'site — changes here apply to all of them.'}
       </Alert>
-      <HostDatasetsCard hostId={hostId} tenant={tenant} />
+      <HostDatasetsCard hostId={hostId} org={org} />
     </Stack>
   )
 }

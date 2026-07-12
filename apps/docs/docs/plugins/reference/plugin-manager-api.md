@@ -26,7 +26,7 @@ design: the surface is small and curated, and each entry needs semantics
 `ConsoleExtension` fields: `pluginId`, `displayName`, `featureFlag?`
 (plan-entitlement gate the shell applies — extensions cannot bypass plans),
 `navItems?` (a nav item with a `Component` becomes a full page and receives
-`ConsolePluginPageProps { hostId, entitled, tenant?, permissions? }`),
+`ConsolePluginPageProps { hostId, entitled, org?, permissions? }`),
 `dashboardCards?`, `settingsSections?`, `widgets?`, `providers?`.
 
 ## Loading — `plugin-loader`

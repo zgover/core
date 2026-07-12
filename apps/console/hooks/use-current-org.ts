@@ -16,7 +16,7 @@
  */
 'use client'
 
-import type { AglynTenant } from '@aglyn/aglyn'
+import type { AglynOrgBilling } from '@aglyn/aglyn'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
@@ -26,14 +26,10 @@ const RETRY_DELAY_MS = 400
 const MAX_RETRIES = 5
 
 /**
- * NAMING (AGL-443): despite the name, this returns the ORG billing doc
- * (`orgs/{orgId}` as {@link AglynOrgBilling}) — "tenant" here is the
- * historic alias, kept because the hook threads through every plugin.
- * See the docs-site glossary for the org/workspace/tenant convention.
- *
  * The org workspace's billing doc — the entitlement source the signed-in
- * user acts under (AGL-238). The name is historic: the returned shape is
- * the org doc, which mirrors the legacy tenant billing fields.
+ * user acts under (AGL-238). Formerly `useCurrentTenant` (the alias was
+ * removed in AGL-444); `tenantId` keeps its name because it feeds the
+ * legacy Stripe `metadata[tenantId]` wire key (uid-keyed).
  *
  * Subscribes with a raw `onSnapshot` (with its own retry) rather than
  * reactfire's `useFirestoreDocData` — that hook's cached Observable is a
@@ -42,8 +38,8 @@ const MAX_RETRIES = 5
  * `useUser()` reports a signed-in user a beat before Firestore's own
  * credential provider has attached that user's ID token (AGL-216).
  */
-export function useCurrentTenant(): {
-  tenant: Partial<AglynTenant> | undefined
+export function useCurrentOrg(): {
+  org: Partial<AglynOrgBilling> | undefined
   tenantId: string | undefined
   /** The org the billing data came from, once orgs carry it (AGL-237). */
   orgId: string | undefined
@@ -60,13 +56,13 @@ export function useCurrentTenant(): {
   const orgId = currentOrg?.$id
   const sourcePath =
     orgsLoading || !orgId ? null : (['orgs', orgId] as const)
-  const [tenant, setTenant] = useState<Partial<AglynTenant> | undefined>(
+  const [org, setOrg] = useState<Partial<AglynOrgBilling> | undefined>(
     undefined,
   )
 
   useEffect(() => {
     if (!sourcePath) {
-      setTenant(undefined)
+      setOrg(undefined)
       return
     }
     let cancelled = false
@@ -81,9 +77,9 @@ export function useCurrentTenant(): {
         (snapshot) => {
           if (cancelled) return
           attempt = 0
-          setTenant(
+          setOrg(
             snapshot.exists()
-              ? ({ $id: snapshot.id, ...snapshot.data() } as Partial<AglynTenant>)
+              ? ({ $id: snapshot.id, ...snapshot.data() } as Partial<AglynOrgBilling>)
               : undefined,
           )
         },
@@ -108,7 +104,7 @@ export function useCurrentTenant(): {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firestore, sourcePath?.[0], sourcePath?.[1]])
 
-  return { tenant, tenantId, orgId }
+  return { org, tenantId, orgId }
 }
 
-export default useCurrentTenant
+export default useCurrentOrg

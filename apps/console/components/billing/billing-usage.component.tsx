@@ -17,10 +17,10 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkDatasetQuota,
   checkSeatQuota,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   UNLIMITED,
 } from '@aglyn/aglyn'
 import { Link, LinearProgress, Stack, Typography } from '@mui/material'
@@ -29,7 +29,7 @@ import { useEffect, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 
 export interface BillingUsageProps {
-  tenant: Partial<AglynTenant> | null | undefined
+  org: Partial<AglynOrgBilling> | null | undefined
   hosts: any[]
 }
 
@@ -90,9 +90,9 @@ export function UsageMeter(props: {
 function HostUsageMeters(props: {
   host: any
   showName: boolean
-  tenant: Partial<AglynTenant> | null | undefined
+  org: Partial<AglynOrgBilling> | null | undefined
 }) {
-  const { host, showName, tenant } = props
+  const { host, showName, org } = props
   const firestore = useFirestore()
   const { data: user } = useUser()
   const [counts, setCounts] = useState<{
@@ -116,7 +116,7 @@ function HostUsageMeters(props: {
     siteSizeMb: number | null
     bandwidthGb: number | null
   }>({ siteSizeMb: null, bandwidthGb: null })
-  const entitlements = resolveTenantEntitlements(tenant)
+  const entitlements = resolveOrgEntitlements(org)
 
   // Aggregation counts instead of full collection reads — one billed read
   // per counter regardless of collection size.
@@ -203,7 +203,7 @@ function HostUsageMeters(props: {
   }, [user, host.$id])
 
   // Effective seat limit includes purchased addon seats (AGL-112).
-  const memberSeatLimit = checkSeatQuota(tenant, 'members', 0).limit
+  const memberSeatLimit = checkSeatQuota(org, 'members', 0).limit
 
   return (
     <>
@@ -266,17 +266,17 @@ function HostUsageMeters(props: {
 
 /**
  * Usage section of the billing page (AGL-70): the hosts meter plus per-host
- * screens/layouts/members/storage meters, and tenant-level site size and
+ * screens/layouts/members/storage meters, and org-level site size and
  * bandwidth rows.
  */
 export function BillingUsageComponent(props: BillingUsageProps) {
-  const { tenant, hosts } = props
-  const entitlements = resolveTenantEntitlements(tenant)
+  const { org, hosts } = props
+  const entitlements = resolveOrgEntitlements(org)
   // Team seats (AGL-119, org roster since AGL-238): every org member
   // occupies a seat; the roster is member-readable so the count is a
   // client aggregate query.
   const firestore = useFirestore()
-  const orgId = (tenant as any)?.$id as string | undefined
+  const orgId = (org as any)?.$id as string | undefined
   const [teamSeats, setTeamSeats] = useState<number | null>(null)
   // Org-level data meters (AGL-239/240): datasets and their storage are
   // org-scoped, so they meter once here instead of per host.
@@ -326,7 +326,7 @@ export function BillingUsageComponent(props: BillingUsageProps) {
       active = false
     }
   }, [firestore, orgId])
-  const teamSeatLimit = checkSeatQuota(tenant, 'managers', 0).limit
+  const teamSeatLimit = checkSeatQuota(org, 'managers', 0).limit
   return (
     <>
       <UsageMeter
@@ -342,7 +342,7 @@ export function BillingUsageComponent(props: BillingUsageProps) {
       <UsageMeter
         label="Datasets (organization)"
         used={orgDatasets}
-        limit={checkDatasetQuota(tenant, 0).limit}
+        limit={checkDatasetQuota(org, 0).limit}
       />
       <UsageMeter
         label="Data storage (organization)"
@@ -355,7 +355,7 @@ export function BillingUsageComponent(props: BillingUsageProps) {
           key={host.$id}
           host={host}
           showName={hosts.length > 1}
-          tenant={tenant}
+          org={org}
         />
       ))}
     </>

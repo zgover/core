@@ -37,8 +37,8 @@ import { useEffect, useState } from 'react'
 import { useReleaseFlags } from '../hooks/use-release-flags'
 
 export interface OrgPluginsCardProps {
-  /** The org doc (billing/tenant shape) carrying `enabledPlugins`. */
-  tenant: { enabledPlugins?: string[] } | undefined
+  /** The org doc (billing/org shape) carrying `enabledPlugins`. */
+  org: { enabledPlugins?: string[] } | undefined
   disabled?: boolean
   /** Persists the new list (the settings API `set-enabled-plugins` action). */
   onSave: (enabledPlugins: string[]) => Promise<void>
@@ -52,7 +52,7 @@ export interface OrgPluginsCardProps {
  * doesn't include shows its surfaces locked, exactly as before.
  */
 export default function OrgPluginsCard(props: OrgPluginsCardProps) {
-  const { tenant, disabled, onSave } = props
+  const { org, disabled, onSave } = props
   const [enabled, setEnabled] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const [dirty, setDirty] = useState(false)
@@ -62,10 +62,10 @@ export default function OrgPluginsCard(props: OrgPluginsCardProps) {
   const { flags, isStaff } = useReleaseFlags()
 
   useEffect(() => {
-    if (!dirty) setEnabled(resolveEnabledPlugins(tenant))
+    if (!dirty) setEnabled(resolveEnabledPlugins(org))
     // Reset from the live doc until the user starts editing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tenant?.enabledPlugins])
+  }, [org?.enabledPlugins])
 
   const toggle = (id: string) => {
     setDirty(true)

@@ -43,7 +43,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 import { useOrgWorkspace } from '../hooks/use-org-workspace'
 
 const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
@@ -58,8 +58,8 @@ export function OrgSwitcherNav() {
   const { data: user } = useUser()
   const { orgs, currentOrg, selectOrg, workspaceSlug } = useOrgWorkspace()
   // Org logo (AGL-363) — replaces the generic building icon when set.
-  const { tenant } = useCurrentTenant()
-  const logoUrl = (tenant as any)?.logoUrl as string | undefined
+  const { org } = useCurrentOrg()
+  const logoUrl = (org as any)?.logoUrl as string | undefined
   const router = useRouter()
   const { enqueueSnackbar } = useSnackbar()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)

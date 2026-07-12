@@ -18,8 +18,8 @@
 
 import {
   PLAN_ENTITLEMENTS,
-  resolveTenantEntitlements,
-  type TenantPlan,
+  resolveOrgEntitlements,
+  type OrgPlan,
 } from '@aglyn/aglyn'
 import { ICON_VARIANT_SYMBOL_SECURE } from '@aglyn/shared-data-enums'
 import { CardDisplay, Container, useConfirmationContext } from '@aglyn/shared-ui-jsx'
@@ -343,7 +343,7 @@ const AdminOrgs: NextPageWithLayout = () => {
 
   const handleSave = useCallback(async () => {
     if (!editor) return
-    const plan = editor.plan as TenantPlan | ''
+    const plan = editor.plan as OrgPlan | ''
     // Full override build (AGL-201): only explicit entries persist —
     // empty quota fields and 'inherit' flags fall back to plan defaults.
     const entitlements: Record<string, unknown> = {}
@@ -477,7 +477,7 @@ const AdminOrgs: NextPageWithLayout = () => {
                   </TableHead>
                   <TableBody>
                     {orgs.map((org) => {
-                      const resolved = resolveTenantEntitlements(org)
+                      const resolved = resolveOrgEntitlements(org)
                       return (
                         <TableRow key={org.$id} hover>
                           <TableCell>
@@ -686,7 +686,7 @@ const AdminOrgs: NextPageWithLayout = () => {
             sx={{ flexWrap: 'wrap', gap: 1 }}
           >
             {QUOTA_FIELDS.map((field) => {
-              const plan = editor?.plan as TenantPlan | ''
+              const plan = editor?.plan as OrgPlan | ''
               const fallback = plan
                 ? (PLAN_ENTITLEMENTS[plan] as any)?.[field.key]
                 : undefined
@@ -725,7 +725,7 @@ const AdminOrgs: NextPageWithLayout = () => {
           <Typography variant="subtitle2">{'Feature overrides'}</Typography>
           <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
             {FLAG_FIELDS.map((key) => {
-              const plan = editor?.plan as TenantPlan | ''
+              const plan = editor?.plan as OrgPlan | ''
               const fallback = plan
                 ? Boolean(
                     (PLAN_ENTITLEMENTS[plan]?.features as any)?.[key],

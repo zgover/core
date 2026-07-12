@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { type AglynTenant, applyDatasetQuery, checkDatasetQuota, checkEntitlement, checkQuota, coerceDocumentValues, createResourceUid, datasetValueToInput, deriveModelFromFields, effectiveDatasetModel, formatDatasetValue, parseDatasetFields, parseDatasetFilter, parseDatasetSort, sortDatasetRecords, validateDocument, getCustomFieldType } from '@aglyn/aglyn'
+import { type AglynOrgBilling, applyDatasetQuery, checkDatasetQuota, checkEntitlement, checkQuota, coerceDocumentValues, createResourceUid, datasetValueToInput, deriveModelFromFields, effectiveDatasetModel, formatDatasetValue, parseDatasetFields, parseDatasetFilter, parseDatasetSort, sortDatasetRecords, validateDocument, getCustomFieldType } from '@aglyn/aglyn'
 import { datasetRecordsToCsv, mapImportColumns, parseImportRows, serializeDatasetValue } from '../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -70,7 +70,7 @@ export interface HostDatasetsCardProps {
    * own resolver) so this relocated card runs entitlement/quota checks
    * without console-app org/session hooks (AGL-395).
    */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 /**
@@ -91,7 +91,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = props
+  const { org } = props
   const logActivity = useHostActivityLogger(hostId)
 
   const { data: datasetDocs } = useFirestoreCollection<any>(
@@ -163,7 +163,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     fields: string
   } | null>(null)
   const handleOpenCreator = useCallback(() => {
-    if (!checkEntitlement(tenant, 'dataStore')) {
+    if (!checkEntitlement(org, 'dataStore')) {
       return enqueueSnackbar(
         'Datasets require a Starter plan or higher — see Billing',
         { variant: 'warning', persist: false },
@@ -171,7 +171,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     }
     // Addon-aware quota (AGL-132): purchased extra datasets raise the
     // limit up to the plan's hard max; beyond that only an upgrade helps.
-    const quota = checkDatasetQuota(tenant as any, datasets.length)
+    const quota = checkDatasetQuota(org as any, datasets.length)
     if (!quota.allowed) {
       return enqueueSnackbar(
         quota.upgradeRequired
@@ -182,7 +182,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
       )
     }
     setCreator({ name: '', fields: '' })
-  }, [tenant, datasets.length, enqueueSnackbar])
+  }, [org, datasets.length, enqueueSnackbar])
   const creatorFields = parseDatasetFields(creator?.fields ?? '')
   const handleCreate = useCallback(async () => {
     if (!creator?.name.trim() || creatorFields.length === 0) return
@@ -359,7 +359,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     (record?: any) => () => {
       if (!record) {
         const quota = checkQuota(
-          tenant,
+          org,
           'recordsPerDataset',
           records.length,
         )
@@ -390,7 +390,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
         : {}
       setEditor({ id: record?.$id ?? null, values, errors })
     },
-    [tenant, records.length, model, enqueueSnackbar],
+    [org, records.length, model, enqueueSnackbar],
   )
   const handleSaveRecord = useCallback(async () => {
     if (!editor || !selected) return
@@ -634,7 +634,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     }
 
     const quota = checkQuota(
-      tenant,
+      org,
       'recordsPerDataset',
       records.length + creates.length - 1,
     )
@@ -711,7 +711,7 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     selected,
     importPreview,
     importer?.keyField,
-    tenant,
+    org,
     records,
     firestore,
     hostId,

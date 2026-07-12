@@ -37,11 +37,11 @@ import { useCallback, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { checkTenantSeatQuota } from '../constants/entitlements'
 import { buildRoute, Route } from '../constants/route-links'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 import useFirestoreDoc from '../hooks/use-firestore-doc'
 import useHostActivityLogger from '../hooks/use-host-activity-logger'
-import useTenantPermissions from '../hooks/use-tenant-permissions'
+import useOrgPermissions from '../hooks/use-org-permissions'
 
 const ROLE_OPTIONS = [
   { value: 'viewer', label: 'Viewer' },
@@ -66,9 +66,9 @@ export function HostMembersCard(props: HostMembersCardProps) {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const logActivity = useHostActivityLogger(hostId)
-  const { permissions } = useTenantPermissions()
+  const { permissions } = useOrgPermissions()
   const canManage = permissions.manageMembers
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('editor')
@@ -91,7 +91,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
       ),
     [memberDocs],
   )
-  const seatQuota = checkTenantSeatQuota(tenant, 'members', members.length)
+  const seatQuota = checkTenantSeatQuota(org, 'members', members.length)
 
   const request = useCallback(
     async (method: string, body: Record<string, unknown>) => {

@@ -41,13 +41,12 @@ export {
 // code).
 export type {
   AglynOrgBilling,
-  AglynTenant,
-  TenantEntitlements,
-  TenantFeatureFlags,
-  TenantPlan,
-  TenantSeatAddons,
-  TenantSubscription,
-  TenantUid,
+  OrgEntitlements,
+  OrgFeatureFlags,
+  OrgPlan,
+  OrgSeatAddons,
+  OrgSubscription,
+  OrgUid,
 } from './definitions/org-billing.types'
 export type {
   AglynAccessRule,

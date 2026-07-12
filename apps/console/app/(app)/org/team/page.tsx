@@ -29,7 +29,7 @@ import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
-import useTenantPermissions from '../../../../hooks/use-tenant-permissions'
+import useOrgPermissions from '../../../../hooks/use-org-permissions'
 import OrgRolesCard from '../../../../components/org-roles-card.component'
 
 /**
@@ -42,7 +42,7 @@ import OrgRolesCard from '../../../../components/org-roles-card.component'
 const ManageTeam: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg } = useOrgWorkspace()
-  const { can, loaded: permissionsLoaded } = useTenantPermissions()
+  const { can, loaded: permissionsLoaded } = useOrgPermissions()
   return (
     <>
       <NextPageTitle screen={'Team'} />

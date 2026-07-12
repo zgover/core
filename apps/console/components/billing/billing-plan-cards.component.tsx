@@ -19,7 +19,7 @@
 import {
   PLAN_ENTITLEMENTS,
   PLAN_PRICING,
-  type TenantPlan,
+  type OrgPlan,
   UNLIMITED,
 } from '@aglyn/aglyn'
 import {
@@ -38,7 +38,7 @@ import {
   Typography,
 } from '@mui/material'
 
-export const PLAN_ORDER: TenantPlan[] = [
+export const PLAN_ORDER: OrgPlan[] = [
   'free',
   'starter',
   'pro',
@@ -46,7 +46,7 @@ export const PLAN_ORDER: TenantPlan[] = [
   'advanced',
 ]
 
-export const PLAN_LABELS: Record<TenantPlan, string> = {
+export const PLAN_LABELS: Record<OrgPlan, string> = {
   free: 'Free',
   starter: 'Starter',
   pro: 'Pro',
@@ -54,7 +54,7 @@ export const PLAN_LABELS: Record<TenantPlan, string> = {
   advanced: 'Advanced',
 }
 
-const PLAN_TAGLINES: Record<TenantPlan, string> = {
+const PLAN_TAGLINES: Record<OrgPlan, string> = {
   free: 'Try Aglyn and publish your first site.',
   starter: 'Everything a single production site needs.',
   pro: 'For growing teams shipping several sites.',
@@ -95,8 +95,8 @@ const FEATURE_ROWS: Array<{
 
 export interface BillingPlanCardsProps {
   /** The tenant's current plan; undefined when no plan is assigned yet. */
-  plan: TenantPlan | undefined
-  onSelect: (plan: TenantPlan) => void
+  plan: OrgPlan | undefined
+  onSelect: (plan: OrgPlan) => void
 }
 
 /**

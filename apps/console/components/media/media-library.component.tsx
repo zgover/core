@@ -77,8 +77,8 @@ import {
   useState,
 } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { checkTenantQuota } from '../../constants/entitlements'
-import useCurrentTenant from '../../hooks/use-current-tenant'
+import { checkOrgQuota } from '../../constants/entitlements'
+import useCurrentOrg from '../../hooks/use-current-org'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../hooks/use-firestore-doc'
 import useHostActivityLogger from '../../hooks/use-host-activity-logger'
@@ -162,7 +162,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const logHostActivity = useHostActivityLogger(hostId ?? '')
   // Activity feeds are a host-dashboard feature; the org DAM skips them.
   const logActivity = hostId
@@ -993,7 +993,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         )
       }
       const usedMb = (usedBytes + file.size) / (1024 * 1024)
-      const quota = checkTenantQuota(tenant, 'storagePerHostMb', usedMb - 1)
+      const quota = checkOrgQuota(org, 'storagePerHostMb', usedMb - 1)
       if (!quota.allowed) {
         return void enqueueSnackbar(
           `Storage limit reached (${quota.limit} MB) — see Billing to upgrade`,
@@ -1109,12 +1109,12 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         setBusy(false)
       }
     },
-    [user, scopeId, tenant, usedBytes, currentFolder, enqueueSnackbar, logActivity, refresh],
+    [user, scopeId, org, usedBytes, currentFolder, enqueueSnackbar, logActivity, refresh],
   )
 
   const handleCopyUrl = useCallback(
     (media: Aglyn.AglynHostMedia) => () => {
-      // Prefer the immutable CDN path (AGL-175) — resolves on tenant
+      // Prefer the immutable CDN path (AGL-175) — resolves on org
       // sites and in the editor alike and rides the edge cache. Older
       // assets without one fall back to the raw storage URL.
       const value = media.cdnPath ?? media.url

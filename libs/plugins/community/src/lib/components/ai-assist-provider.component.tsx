@@ -38,7 +38,7 @@ import { useUser } from '@aglyn/tenant-feature-instance'
 
 export interface AiAssistProviderProps {
   /** Org billing doc for the entitlement gate (mounted by the shell). */
-  tenant?: unknown
+  org?: unknown
   children?: JSX.Children
 }
 
@@ -50,7 +50,7 @@ export interface AiAssistProviderProps {
  * object — and clears any stale rich-text `html` so the new text renders.
  */
 export function AiAssistProvider(props: AiAssistProviderProps) {
-  const tenant = props.tenant
+  const org = props.org
   const { children } = props
   const { enqueueSnackbar } = useSnackbar()
   const { data: user } = useUser()
@@ -87,7 +87,7 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
 
   const handleRewrite = useCallback(
     (target: Aglyn.NodeSchema<any>) => {
-      if (!checkEntitlement(tenant as never, 'aiAssist')) {
+      if (!checkEntitlement(org as never, 'aiAssist')) {
         return void enqueueSnackbar(
           'AI assist requires a Pro plan — see Billing to upgrade',
           { variant: 'warning', persist: false },
@@ -97,7 +97,7 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
       setTargetProp('children')
       setNode(target)
     },
-    [tenant, enqueueSnackbar],
+    [org, enqueueSnackbar],
   )
 
   // Keep the target valid for the selected element.
@@ -162,7 +162,7 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
   }, [node, instruction, busy, user, effectiveTarget, enqueueSnackbar])
 
   const handleGenerateSection = useCallback(() => {
-    if (!checkEntitlement(tenant as never, 'aiAssist')) {
+    if (!checkEntitlement(org as never, 'aiAssist')) {
       return void enqueueSnackbar(
         'AI assist requires a Pro plan — see Billing to upgrade',
         { variant: 'warning', persist: false },
@@ -170,7 +170,7 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
     }
     setSectionPrompt('')
     setSectionOpen(true)
-  }, [tenant, enqueueSnackbar])
+  }, [org, enqueueSnackbar])
 
   const handleSectionConfirm = useCallback(async () => {
     if (!sectionPrompt.trim() || busy) return

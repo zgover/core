@@ -16,7 +16,7 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { PLAN_PRICING, type TenantPlan } from '@aglyn/aglyn/server'
+import { PLAN_PRICING, type OrgPlan } from '@aglyn/aglyn/server'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 /** Previous calendar month as YYYY-MM (the rollup key). */
@@ -100,7 +100,7 @@ async function handler(request: Request): Promise<Response> {
     const newestOrgs: any[] = []
     for (const doc of orgsSnapshot.docs) {
       const data = doc.data()
-      const plan = (data['plan'] ?? '') as TenantPlan | ''
+      const plan = (data['plan'] ?? '') as OrgPlan | ''
       planCounts[plan || 'none'] = (planCounts[plan || 'none'] ?? 0) + 1
       if (plan && PLAN_PRICING[plan]) {
         const pricing = PLAN_PRICING[plan]

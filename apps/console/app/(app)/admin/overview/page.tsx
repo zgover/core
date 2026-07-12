@@ -52,7 +52,7 @@ function formatDate(ms: number | null): string {
  * Staff overview (AGL-135/238): headline metrics, newest organizations,
  * purchase feed, and top usage rollups — read-only over
  * /api/admin/overview (staff-claim gated); mutations stay on the audited
- * Tenants page.
+ * Organizations page.
  */
 const AdminOverview: NextPageWithLayout = () => {
   const { data: user } = useUser()

@@ -124,7 +124,7 @@ export function registerEventsCalendarConsole(): void {
 ```
 
 The page component receives `ConsolePluginPageProps` — `{ hostId, entitled,
-tenant }` — so it stays free of console-app hooks. `tenant` is the resolved
+org }` — so it stays free of console-app hooks. `org` is the resolved
 org billing doc the shell already loaded, so the page can run its own
 `checkEntitlement`/`checkQuota` (e.g. per-plan limits) without the app's
 org/session hooks:
@@ -136,9 +136,9 @@ import type { ConsolePluginPageProps } from '@aglyn/aglyn'
 export default function BookingsConsolePage({
   hostId,
   entitled,
-  tenant,
+  org,
 }: ConsolePluginPageProps) {
-  const quota = checkQuota(tenant, 'servicesPerHost', services.length)
+  const quota = checkQuota(org, 'servicesPerHost', services.length)
   // …authenticated Firestore reads/writes scoped to hostId
 }
 ```
@@ -392,7 +392,7 @@ Conventions the scaffold already applies:
 - **Bookings** (`libs/plugins/bookings`) — the second full extraction
   (AGL-395): the `booking` canvas component moved out of `plugins-mui` and the
   bookings manager out of the app; the page reads plan limits via the
-  `tenant` prop + `checkQuota`.
+  `org` prop + `checkQuota`.
 - **Redirects** (`libs/plugins/redirects`) — a **console-only** plugin
   (AGL-395): redirects enforce server-side (ISR), not through a canvas
   component, so it exports only `registerRedirectsConsole()` and ships no UI
@@ -406,7 +406,7 @@ Conventions the scaffold already applies:
 - **Contacts** (`libs/plugins/contacts`) — console-only (AGL-395): the unified
   contacts list, segments, and profile drawer. A whole self-contained page
   relocated with just the layout wrapper + inline `FeatureGate` stripped (the
-  shell supplies both); reads the `contactsPerHost` quota off the `tenant` prop.
+  shell supplies both); reads the `contactsPerHost` quota off the `org` prop.
 - **Inbox** (`libs/plugins/inbox`) — console-only (AGL-395): form-submissions
   reader, site members + leads, and the borrowed **Orders** and **Campaigns**
   tabs. Depends on `@aglyn/plugins-commerce` + `@aglyn/plugins-email` — a
@@ -426,13 +426,13 @@ Conventions the scaffold already applies:
   workflow builder, actions builder, and webhooks tabs, plus the shared
   `HostActivityCard` (exported for the app dashboard + screen-view). Each tab
   gates on its own plan flag (workflows / actions / webhooks), so all three
-  read the passed `tenant` rather than a single `entitled`. Depends on
+  read the passed `org` rather than a single `entitled`. Depends on
   `@aglyn/plugins-logic` for the where-used tooling — the first plugin→plugin
   dependency.
 - **Data** (`libs/plugins/data`) — console-only, and dual-surfaced (AGL-395):
   the datasets editor is served both as the host `/data` plugin page and,
   because datasets are org-scoped, imported directly by the org `/org/data`
-  app route. The card takes the `tenant` doc as a prop so both callers drive
+  app route. The card takes the org doc as a prop so both callers drive
   its entitlement/quota checks. `useHostActivityLogger` was promoted to
   `@aglyn/tenant-feature-instance` for the move.
 - **Email** (`libs/plugins/email`) — full console relocation (AGL-395): the

@@ -51,18 +51,19 @@ Two meanings — this is the word to be careful with:
    `@aglyn/tenant-*` libraries serve that side of the platform.
    "Multi-tenant" in architecture prose uses this sense: the org is the
    tenancy boundary.
-2. **A historic alias for the org's billing doc** (grandfathered): before
-   the organizations migration, billing lived at `tenants/{uid}`. That
-   collection is retired, but the org doc mirrors its shape, so the old
-   names survive — `AglynTenant`, `useCurrentTenant()`, the `tenant` prop
-   on plugin pages, `resolveTenantEntitlements`, `TenantPermissions`. All
-   of them carry an **org doc** today. The canonical type name for new
-   code is **`AglynOrgBilling`**; `AglynTenant` is `@deprecated` and kept
-   because renaming would churn every plugin for zero behavior change.
+2. **A historic alias for the org's billing doc** (now removed): before
+   the organizations migration, billing lived at `tenants/{uid}`. The
+   collection is retired and, as of AGL-444, so are the alias
+   *identifiers* — `AglynTenant` is now `AglynOrgBilling`,
+   `useCurrentTenant()` is `useCurrentOrg()` (returning `org`), the
+   plugin-page `tenant` prop is `org`, and the `Tenant*`
+   permission/entitlement types are `Org*`. Only persisted *strings* keep
+   the old spelling (the `users.{uid}.tenants` map, Stripe
+   `metadata[tenantId]`, the `profiles/{tenantId}` keying) — renaming
+   stored data needs a migration, renaming TypeScript doesn't.
 
-**Rule: "tenant" is reserved for the site runtime. Never introduce it
-for the org entity in new code — take `org` parameters and use
-`AglynOrgBilling`.**
+**Rule: "tenant" means the site runtime, full stop. Code that means the
+entity says `org` and types it `AglynOrgBilling`.**
 
 ## Tenant vs. host — not the same thing
 
@@ -89,5 +90,5 @@ A request to `bakery.example.com` is resolved to a **host**, whose
 | Organization / org | Data model, APIs, permissions | `orgs/{orgId}`, `AglynOrganization`, `resolveOrg*` | ✅ the entity |
 | Workspace | UX / docs | — (copy only) | ✅ user-facing copy |
 | Tenant (runtime) | Published-site side | `apps/tenant`, `@aglyn/tenant-*` | ✅ that side of the platform |
-| Tenant (billing alias) | Legacy | `AglynTenant`, `useCurrentTenant`, `tenant` props | ⚠️ grandfathered — prefer `AglynOrgBilling` / `org` |
+| Tenant (billing alias) | Removed (AGL-444) | only persisted strings remain (`users.tenants`, Stripe `metadata[tenantId]`) | ❌ don't reintroduce |
 | Host / site | One published site | `hosts/{hostId}`, `AglynHost` | ✅ `host` in code, "site" in copy |

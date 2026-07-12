@@ -20,7 +20,7 @@ import {
   type ContactSource,
   mergeContactInteraction,
   normalizeContactEmail,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
 } from '@aglyn/aglyn/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { firebaseAdmin } from './firebase-admin'
@@ -109,7 +109,7 @@ export async function upsertHostContact(options: {
     // New contact: enforce the plan quota via the aggregate count (cheap;
     // no doc reads) against the owning org's entitlements (AGL-238).
     const orgBilling = await getOrgForHost(options.hostId)
-    const limit = resolveTenantEntitlements(
+    const limit = resolveOrgEntitlements(
       (orgBilling?.org as any) ?? null,
     ).contactsPerHost
     const count = (await contactsRef.count().get()).data().count

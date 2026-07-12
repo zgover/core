@@ -39,7 +39,7 @@ import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useAdminHosts } from '../../../hooks/use-admin-hosts'
 import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
-import useTenantPermissions from '../../../hooks/use-tenant-permissions'
+import useOrgPermissions from '../../../hooks/use-org-permissions'
 
 function HostInfoItem({ label, value }) {
   return (
@@ -88,7 +88,7 @@ function HostsContent() {
     orgsLoading ? undefined : (currentOrg?.$id ?? null),
   )
   const [creating, setCreating] = useState(false)
-  const { permissions } = useTenantPermissions()
+  const { permissions } = useOrgPermissions()
   const orgNavTabs = useOrgNavTabItems()
 
   return (

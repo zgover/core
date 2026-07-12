@@ -71,7 +71,7 @@ interface RedirectDraft {
  * site within ~30 seconds (AGL-155 ISR window).
  */
 export function RedirectsConsolePage(props: ConsolePluginPageProps) {
-  const { hostId, entitled, tenant } = props
+  const { hostId, entitled, org } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -142,7 +142,7 @@ export function RedirectsConsolePage(props: ConsolePluginPageProps) {
         { variant: 'warning', persist: false },
       )
     }
-    const quota = checkQuota(tenant, 'redirectsPerHost', redirects.length)
+    const quota = checkQuota(org, 'redirectsPerHost', redirects.length)
     if (!quota.allowed) {
       return void enqueueSnackbar(
         `Redirect limit reached (${quota.limit}) — upgrade in Billing`,
@@ -157,7 +157,7 @@ export function RedirectsConsolePage(props: ConsolePluginPageProps) {
       kind: 'exact',
       priority: REDIRECT_DEFAULT_PRIORITY,
     })
-  }, [entitled, tenant, redirects.length, enqueueSnackbar])
+  }, [entitled, org, redirects.length, enqueueSnackbar])
 
   const handleSave = useCallback(async () => {
     if (!draft) return

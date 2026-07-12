@@ -28,7 +28,7 @@ import { cache } from 'react'
 import { serverPluginLoader } from '../../../utils/server-plugin-loader'
 import getCollectionContent from '../../../utils/get-collection-content'
 import getHost from '../../../utils/get-host'
-import getTenant from '../../../utils/get-tenant'
+import getOrgBilling from '../../../utils/get-org-billing'
 import type { LoadResult, Props } from './types'
 
 /**
@@ -78,8 +78,8 @@ export const loadPageData = cache(
     // Org suspension (AGL-202/238): staff-suspended orgs stop serving
     // every path immediately (short revalidate bounds the lag). Loaded
     // once here and reused by the branding/overlay branches below.
-    const tenantRes = await getTenant({ hostId })
-    if ((tenantRes.tenant as any)?.suspendedAt) {
+    const orgRes = await getOrgBilling({ hostId })
+    if ((orgRes.org as any)?.suspendedAt) {
       return {
         props: JSON.parse(
           JSON.stringify({
@@ -147,7 +147,7 @@ export const loadPageData = cache(
     const redirectRule = await Aglyn.resolveSiteRedirect({
       hostId,
       host: hostRes.host,
-      tenant: tenantRes.tenant,
+      tenant: orgRes.org,
       path,
       slugSegments: [...(slug ?? [])],
     })
@@ -186,7 +186,7 @@ export const loadPageData = cache(
       const resolved = await Aglyn.resolveSitePage({
         hostId,
         host: hostRes.host,
-        tenant: tenantRes.tenant,
+        tenant: orgRes.org,
         path,
         slugSegments: [...(slug ?? [])],
       })
@@ -345,7 +345,7 @@ export const loadPageData = cache(
             nodes: null,
             protectedScreen: true,
             showBranding:
-              !Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
+              !Aglyn.resolveOrgEntitlements(orgRes.org).features
                 .removeBranding,
           }),
         ),
@@ -407,7 +407,7 @@ export const loadPageData = cache(
 
     // Free-tier branding (AGL-69/247): plan-less orgs resolve as free and
     // show the badge; only plans with removeBranding drop it.
-    const showBranding = !Aglyn.resolveTenantEntitlements(tenantRes.tenant)
+    const showBranding = !Aglyn.resolveOrgEntitlements(orgRes.org)
       .features.removeBranding
 
     // Plugin page enrichers (AGL-418): marketing contributes overlays
@@ -416,7 +416,7 @@ export const loadPageData = cache(
     const enriched = await Aglyn.runSitePageEnrichers({
       hostId,
       host: hostRes.host,
-      tenant: tenantRes.tenant,
+      tenant: orgRes.org,
       path,
       slugSegments: [...(slug ?? [])],
       screenId,
@@ -439,8 +439,8 @@ export const loadPageData = cache(
     // rollout verdicts match the console's. Site visitors get no staff
     // bypass; fail-open inside falls back to registry defaults.
     const enabledPlugins = await filterEnabledPluginsByReleaseFlags(
-      Aglyn.resolveEnabledPlugins(tenantRes.tenant as never),
-      { subjectId: (tenantRes.tenant as { $id?: string })?.$id ?? hostId },
+      Aglyn.resolveEnabledPlugins(orgRes.org as never),
+      { subjectId: (orgRes.org as { $id?: string })?.$id ?? hostId },
     )
 
     const props = {

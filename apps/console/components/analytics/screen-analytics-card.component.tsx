@@ -31,7 +31,7 @@ import { useEffect, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { hasEntitlement } from '../../constants/entitlements'
 import { buildRoute, Route } from '../../constants/route-links'
-import useCurrentTenant from '../../hooks/use-current-tenant'
+import useCurrentOrg from '../../hooks/use-current-org'
 
 const DAYS = 14
 
@@ -54,8 +54,8 @@ export function ScreenAnalyticsCard(props: {
 }) {
   const { hostId, screenId } = props
   const firestore = useFirestore()
-  const { tenant } = useCurrentTenant()
-  const entitled = hasEntitlement('screen-analytics', tenant)
+  const { org } = useCurrentOrg()
+  const entitled = hasEntitlement('screen-analytics', org)
   const [days, setDays] = useState<DayStat[] | null>(null)
 
   useEffect(() => {

@@ -22,7 +22,7 @@ import { Button, Stack, Typography } from '@mui/material'
 import { type ChangeEvent, useCallback, useRef, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import { hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 
 /**
  * Site backup (AGL-163): one-click export of everything designable as a
@@ -35,18 +35,18 @@ export function SiteBackupCard(props: { hostId: string }) {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
 
   const gate = useCallback(() => {
-    if (hasEntitlement('site-export', tenant)) return true
+    if (hasEntitlement('site-export', org)) return true
     enqueueSnackbar(
       'Site backups require a Pro plan — see Billing to upgrade',
       { variant: 'warning', persist: false },
     )
     return false
-  }, [tenant, enqueueSnackbar])
+  }, [org, enqueueSnackbar])
 
   const handleExport = useCallback(async () => {
     if (!gate() || busy) return

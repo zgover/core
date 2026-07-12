@@ -15,12 +15,12 @@ The guaranteed zones are the exported `CONSOLE_WIDGET_SLOTS` catalog —
 | --- | --- | --- |
 | `hostActivity` | Host dashboard + screen-view activity column | `hostId`, `max?`, `viewAllHref?` |
 | `commerceGlance` | Host dashboard commerce summary | `hostId` |
-| `orgData` | Organization → Data page body | `orgId`, `tenant` |
+| `orgData` | Organization → Data page body | `orgId`, `org` |
 | `besignerFunctions` | Besigner ƒx panel | `hostId` |
 | `communityListing` | Marketplace listing detail body | `hostId`, `listingId`, `permissions` |
 | `orgAddons` | Plugins & add-ons hub, installs section | `hostId` (the acting site) |
 | `dashboardFooter` | Bottom of the host dashboard | `hostId` |
-| `orgSettings` | Organization → Settings, below the tabs | `orgId`, `tenant` |
+| `orgSettings` | Organization → Settings, below the tabs | `orgId`, `org` |
 | `hostSettings` | Host setup page, below the built-in cards | `hostId` |
 | `adminOrgDetail` | Staff admin org detail page (staff-only) | `orgId` |
 

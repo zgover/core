@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { resolveRolePermissions } from './tenant-roles'
+import { resolveRolePermissions } from './org-roles'
 
 describe('tenant roles', () => {
   it('resolves built-in role defaults', () => {

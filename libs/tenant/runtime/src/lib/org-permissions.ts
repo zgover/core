@@ -18,14 +18,14 @@
 import {
   type OrgRole,
   resolveRolePermissions,
-  type TenantPermissionSet,
+  type OrgPermissionSet,
 } from '@aglyn/aglyn/server'
 import {
   resolveOrgIdForHost,
   resolveOrgMembership,
 } from '@aglyn/tenant-data-admin'
 
-export type { TenantPermissionSet }
+export type { OrgPermissionSet }
 
 export interface ResolvedOrgPermissions {
   /** Org the permissions were resolved in (null before the first org). */
@@ -33,7 +33,7 @@ export interface ResolvedOrgPermissions {
   role: OrgRole | null
   /** Owner/admin of the org — full account-level control. */
   isOwner: boolean
-  permissions: TenantPermissionSet
+  permissions: OrgPermissionSet
 }
 
 /** Org roles map onto the built-in permission sets key-for-key. */
@@ -45,8 +45,8 @@ const ORG_ROLE_PERMISSION_BASE: Record<OrgRole, 'admin' | 'editor' | 'viewer'> =
     viewer: 'viewer',
   }
 
-const ALL_TRUE: TenantPermissionSet = resolveRolePermissions('admin')
-const NONE: TenantPermissionSet = resolveRolePermissions('viewer')
+const ALL_TRUE: OrgPermissionSet = resolveRolePermissions('admin')
+const NONE: OrgPermissionSet = resolveRolePermissions('viewer')
 
 /**
  * Org-role permission resolver (AGL-238, replacing the manager-seat

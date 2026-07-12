@@ -28,17 +28,17 @@ import { getOrgForHost } from '@aglyn/tenant-data-admin'
  * docs-site glossary) — distinct from "the tenant app", which is this
  * whole published-sites runtime.
  */
-export async function getTenant(options: { hostId?: string }) {
+export async function getOrgBilling(options: { hostId?: string }) {
   const { hostId } = options
   const data = {
-    tenant: null as Partial<Aglyn.AglynTenant> | null,
+    org: null as Partial<Aglyn.AglynOrgBilling> | null,
     error: null as unknown,
   }
   if (!hostId) return data
 
   try {
     const resolved = await getOrgForHost(hostId)
-    if (resolved) data.tenant = resolved.org as Partial<Aglyn.AglynTenant>
+    if (resolved) data.org = resolved.org as Partial<Aglyn.AglynOrgBilling>
   } catch (error) {
     console.error(error)
     data.error = error
@@ -47,4 +47,4 @@ export async function getTenant(options: { hostId?: string }) {
   return data
 }
 
-export default getTenant
+export default getOrgBilling

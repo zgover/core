@@ -31,7 +31,7 @@ import {
 } from '@mui/material'
 import { collection, doc, getDoc, limit, query, where } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
-import type { TenantPermissions } from '@aglyn/aglyn'
+import type { OrgPermissions } from '@aglyn/aglyn'
 import {
   useFirestore,
   useFirestoreCollection,
@@ -50,7 +50,7 @@ const publisherHref = (hostId: string, profileId: string) =>
 export interface CommunityBrowseProps {
   hostId: string
   /** Signed-in user's org permissions, supplied by the shell (AGL-395). */
-  permissions?: Partial<TenantPermissions>
+  permissions?: Partial<OrgPermissions>
 }
 
 /**

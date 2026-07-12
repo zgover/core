@@ -32,7 +32,7 @@ export const TENANT_PERMISSION_KEYS = [
   'manageMembers',
 ] as const
 
-export type TenantPermissionKey = (typeof TENANT_PERMISSION_KEYS)[number]
+export type OrgPermissionKey = (typeof TENANT_PERMISSION_KEYS)[number]
 
 /**
  * NAMING: "Tenant" in these role/permission types is the historic alias —
@@ -40,24 +40,24 @@ export type TenantPermissionKey = (typeof TENANT_PERMISSION_KEYS)[number]
  * glossary). Grandfathered because the keys are persisted in custom role
  * docs and threaded through every plugin.
  */
-export type TenantPermissionSet = Record<TenantPermissionKey, boolean>
+export type OrgPermissionSet = Record<OrgPermissionKey, boolean>
 
-export type TenantRoleId = 'admin' | 'editor' | 'viewer'
+export type OrgRoleTier = 'admin' | 'editor' | 'viewer'
 
 /** Owner-defined role at `tenants/{uid}/roles/{id}` (AGL-133). */
-export interface TenantCustomRole {
+export interface OrgCustomRole {
   name: string
-  permissions?: Partial<TenantPermissionSet>
+  permissions?: Partial<OrgPermissionSet>
 }
 
-export const TENANT_ROLE_LABELS: Record<TenantRoleId, string> = {
+export const ORG_ROLE_TIER_LABELS: Record<OrgRoleTier, string> = {
   admin: 'Admin',
   editor: 'Editor',
   viewer: 'Viewer',
 }
 
 /** Built-in role permission sets; overrides win key-by-key. */
-export const TENANT_ROLE_PERMISSIONS: Record<TenantRoleId, TenantPermissionSet> =
+export const ORG_ROLE_TIER_PERMISSIONS: Record<OrgRoleTier, OrgPermissionSet> =
   {
     admin: {
       createHosts: true,
@@ -92,26 +92,26 @@ export const TENANT_ROLE_PERMISSIONS: Record<TenantRoleId, TenantPermissionSet> 
  */
 export function resolveRolePermissions(
   role: string | null | undefined,
-  overrides?: Partial<Record<TenantPermissionKey, unknown>> | null,
+  overrides?: Partial<Record<OrgPermissionKey, unknown>> | null,
   /**
    * Custom roles (AGL-133), keyed by role id (`tenants/{uid}/roles`). A
    * non-built-in role id resolves against this map — viewer base with the
    * custom role's permissions applied; unknown ids stay plain viewer.
    */
-  customRoles?: Record<string, TenantCustomRole | undefined> | null,
-): TenantPermissionSet {
-  const builtIn = TENANT_ROLE_PERMISSIONS[(role ?? '') as TenantRoleId]
+  customRoles?: Record<string, OrgCustomRole | undefined> | null,
+): OrgPermissionSet {
+  const builtIn = ORG_ROLE_TIER_PERMISSIONS[(role ?? '') as OrgRoleTier]
   // Plugin-declared keys (AGL-435): tier defaults ride under the built-in
   // set; custom-role overrides below win key-by-key like any other key.
-  const tier: TenantRoleId = builtIn ? ((role ?? 'viewer') as TenantRoleId) : 'viewer'
+  const tier: OrgRoleTier = builtIn ? ((role ?? 'viewer') as OrgRoleTier) : 'viewer'
   let base = {
     ...pluginPermissionDefaults(tier),
-    ...(builtIn ?? TENANT_ROLE_PERMISSIONS.viewer),
+    ...(builtIn ?? ORG_ROLE_TIER_PERMISSIONS.viewer),
   }
   if (!builtIn) {
     const custom = customRoles?.[role ?? '']
     if (custom) {
-      base = { ...TENANT_ROLE_PERMISSIONS.viewer }
+      base = { ...ORG_ROLE_TIER_PERMISSIONS.viewer }
       for (const key of TENANT_PERMISSION_KEYS) {
         const value = custom.permissions?.[key]
         if (typeof value === 'boolean') base[key] = value
@@ -128,5 +128,5 @@ export function resolveRolePermissions(
 
 /** True for the fixed admin/editor/viewer ids. */
 export function isBuiltInRole(role: string | null | undefined): boolean {
-  return (role ?? '') in TENANT_ROLE_PERMISSIONS
+  return (role ?? '') in ORG_ROLE_TIER_PERMISSIONS
 }

@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { type AglynTenant, checkEntitlement, createResourceUid } from '@aglyn/aglyn'
+import { type AglynOrgBilling, checkEntitlement, createResourceUid } from '@aglyn/aglyn'
 import { overlayActiveAt, type HostOverlay } from '../model'
 import { mdiChevronDown, mdiChevronUp } from '@aglyn/shared-data-mdi'
 import {
@@ -53,7 +53,7 @@ import { useFirestore, useFirestoreCollection, useHostActivityLogger } from '@ag
 export interface HostOverlaysCardProps {
   hostId: string
   /** Resolved entitlement source (AGL-395). */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 type OverlayDraft = HostOverlay & { $id?: string }
@@ -101,11 +101,11 @@ function parsePatterns(value: string): string[] {
 export function HostOverlaysCard(props: HostOverlaysCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
-  const { tenant } = props
+  const { org } = props
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const logActivity = useHostActivityLogger(hostId)
-  const entitled = checkEntitlement(tenant, 'marketingOverlays')
+  const entitled = checkEntitlement(org, 'marketingOverlays')
 
   const { data: overlayDocs } = useFirestoreCollection<any>(
     () =>
@@ -230,7 +230,7 @@ export function HostOverlaysCard(props: HostOverlaysCardProps) {
     )
   }
 
-  // Engagement (AGL-271): lifetime counters the tenant beacon increments.
+  // Engagement (AGL-271): lifetime counters the org beacon increments.
   const statsLabel = (overlay: OverlayDraft) => {
     const stats = overlay.stats ?? {}
     const impressions = stats.impressions ?? 0

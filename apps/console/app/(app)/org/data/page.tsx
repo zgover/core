@@ -30,7 +30,7 @@ import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
-import useCurrentTenant from '../../../../hooks/use-current-tenant'
+import useCurrentOrg from '../../../../hooks/use-current-org'
 
 /**
  * Organization Data page (AGL-239): datasets are org-owned (AGL-237 §11)
@@ -40,7 +40,7 @@ import useCurrentTenant from '../../../../hooks/use-current-tenant'
 const OrgData: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgWorkspace()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   return (
     <>
       <NextPageTitle screen={'Data – Organization'} />
@@ -66,7 +66,7 @@ const OrgData: NextPageWithLayout = () => {
               <PluginWidgetSlot
                 slot="orgData"
                 orgId={currentOrg.$id}
-                tenant={tenant}
+                org={org}
               />
             </FeatureGate>
           ) : null}

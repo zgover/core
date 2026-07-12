@@ -24,16 +24,16 @@ import {
   checkSeatQuota,
   PLAN_ENTITLEMENTS,
   PLAN_PRICING,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   resolveTransactionFeePct,
   UNLIMITED,
 } from './plan-entitlements'
-import type { TenantPlan } from '../foundation'
+import type { OrgPlan } from '../foundation'
 
 describe('plan entitlements', () => {
   it('resolves missing/unknown plans as free', () => {
-    expect(resolveTenantEntitlements(undefined).hostLimit).toBe(1)
-    expect(resolveTenantEntitlements({ plan: 'nope' as any }).hostLimit).toBe(1)
+    expect(resolveOrgEntitlements(undefined).hostLimit).toBe(1)
+    expect(resolveOrgEntitlements({ plan: 'nope' as any }).hostLimit).toBe(1)
     expect(checkEntitlement(null, 'versioning')).toBe(false)
   })
 
@@ -52,7 +52,7 @@ describe('plan entitlements', () => {
       plan: 'free',
       entitlements: { hostLimit: 10, features: { versioning: true } },
     } as any
-    const resolved = resolveTenantEntitlements(tenant)
+    const resolved = resolveOrgEntitlements(tenant)
     expect(resolved.hostLimit).toBe(10)
     expect(resolved.features.versioning).toBe(true)
     // untouched defaults survive
@@ -243,7 +243,7 @@ describe('plan entitlements', () => {
       plan: 'starter',
       entitlements: { datasetsPerHost: 7, maxDatasetsPerHost: 12 },
     } as any
-    const resolved = resolveTenantEntitlements(legacy)
+    const resolved = resolveOrgEntitlements(legacy)
     expect(resolved.datasetsPerOrg).toBe(7)
     expect(resolved.maxDatasetsPerOrg).toBe(12)
     // Org-keyed overrides win over legacy keys.
@@ -251,7 +251,7 @@ describe('plan entitlements', () => {
       plan: 'starter',
       entitlements: { datasetsPerHost: 7, datasetsPerOrg: 9 },
     } as any
-    expect(resolveTenantEntitlements(both).datasetsPerOrg).toBe(9)
+    expect(resolveOrgEntitlements(both).datasetsPerOrg).toBe(9)
   })
 
   it('resolves the effective plan from subscription state (AGL-247)', () => {
@@ -283,7 +283,7 @@ describe('plan entitlements', () => {
 
   it('verifies plan × feature gating both directions (AGL-247)', () => {
     // Free must NOT reach paid features; paid tiers MUST reach theirs.
-    const table: Array<[TenantPlan, keyof typeof PLAN_ENTITLEMENTS.free.features, boolean]> = [
+    const table: Array<[OrgPlan, keyof typeof PLAN_ENTITLEMENTS.free.features, boolean]> = [
       ['free', 'workflows', false],
       ['free', 'dataStore', false],
       ['free', 'marketingOverlays', false],
@@ -321,7 +321,7 @@ describe('plan entitlements', () => {
   })
 
   it('gates commerce features per the AGL-278 matrix', () => {
-    const table: Array<[TenantPlan, any, boolean]> = [
+    const table: Array<[OrgPlan, any, boolean]> = [
       ['free', 'commerce', false],
       ['starter', 'commerce', true],
       ['starter', 'pos', false],

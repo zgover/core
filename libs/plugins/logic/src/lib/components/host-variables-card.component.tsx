@@ -17,7 +17,7 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkQuota,
   createResourceUid,
   formatVariableValue,
@@ -58,7 +58,7 @@ import {
 export interface HostVariablesCardProps {
   hostId: string
   /** Resolved entitlement source for quota checks (AGL-395). */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 interface VariableDraft {
@@ -147,7 +147,7 @@ function VariableValueField(props: {
 /**
  * Host variables (Component Builder, AGL-91): the mockup's Edit Variable
  * dialog — name + typed value — persisted to `hosts/{hostId}/variables`.
- * Any string prop can reference a variable with `{{name}}`; the tenant
+ * Any string prop can reference a variable with `{{name}}`; the org
  * compose pipeline resolves it at render. Soft delete keeps old tokens
  * rendering literally rather than breaking published pages.
  */
@@ -157,7 +157,7 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = props
+  const { org } = props
   // Where-used dependents dialog (AGL-187).
   const [usage, setUsage] = useState<{
     name: string
@@ -349,7 +349,7 @@ export function HostVariablesCard(props: HostVariablesCardProps) {
           onClick={() => {
             // Plan cap (AGL-99): dark-launch — plan-less tenants uncapped.
             const quota = checkQuota(
-              tenant,
+              org,
               'variablesPerHost',
               variables.length,
             )

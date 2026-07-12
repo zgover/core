@@ -16,7 +16,7 @@ Task-ordered recipes; the deep semantics live in
    with a `navItems` entry carrying a lazy `Component`.
 2. The shell serves it at `/[hostId]/<href>`, wires breadcrumbs/header,
    resolves the `featureFlag` entitlement, and passes
-   `ConsolePluginPageProps { hostId, entitled, tenant, permissions }`.
+   `ConsolePluginPageProps { hostId, entitled, org, permissions }`.
 3. Need data? Use `@aglyn/tenant-feature-instance` hooks
    (`useFirestoreCollection`, `usePluginConfig`, …) — never console-app
    hooks.

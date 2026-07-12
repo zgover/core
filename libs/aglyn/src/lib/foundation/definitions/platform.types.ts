@@ -19,11 +19,10 @@ import type { HttpStatusCode } from '@aglyn/shared-data-enums'
 import type { HostTheme } from '@aglyn/shared-data-types'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type { AglynNodeSchema, NodeId } from './components.types'
-import type { TenantUid } from './org-billing.types'
 
 /**
  * Platform-side definitions: documents, hosts, screens, media, users,
- * roles. The ORG BILLING family (the legacy `AglynTenant` shape and its
+ * roles. The ORG BILLING family (the legacy `AglynOrgBilling` shape and its
  * Tenant* plan/entitlement vocabulary) lives in `org-billing.types.ts` —
  * see the docs-site glossary for the org/workspace/tenant/host naming
  * convention. (This file was `workspace.types.ts`; renamed in AGL-443
@@ -82,6 +81,9 @@ export enum ActivityAccess {
   SUPER = READ_WRITE | (0x1 << 0x3),
 }
 
+/** Org document id (`orgs/{orgId}`). Formerly TenantUid (AGL-444). */
+export type OrgUid = string
+
 export type UserUid = string
 
 export interface AglynUser extends AglynDocument {
@@ -89,7 +91,7 @@ export interface AglynUser extends AglynDocument {
   roleId?: RoleUid
   admin?: boolean
   email?: string
-  tenants?: Record<TenantUid, true>
+  tenants?: Record<OrgUid, true>
 }
 
 /**
@@ -150,7 +152,7 @@ export type AglynHostTheme = HostTheme
 /** Hosted in tenants' host project */
 export interface AglynHost extends AglynDocument {
   $id: HostUid
-  tenantId?: TenantUid
+  tenantId?: OrgUid
   subdomain?: string
   cname?: string
   /** Site-wide announcement bar (AGL-195); marketingOverlays-gated. */
@@ -306,7 +308,7 @@ export interface PublishSchedule {
 /** Hosted in tenants' host project */
 export interface AglynScreen extends AglynDocument {
   $id: ScreenUid
-  tenantId?: TenantUid
+  tenantId?: OrgUid
   hostId?: HostUid
   parentId?: ScreenUid
   slug?: ScreenSlug
@@ -362,7 +364,7 @@ export interface AglynScreen extends AglynDocument {
 export interface AglynScreenVersion<N = AglynNodeSchema>
   extends AglynDocument {
   $id: VersionUid
-  tenantId?: TenantUid
+  tenantId?: OrgUid
   hostId?: HostUid
   screenId?: ScreenUid
   createdAt?: ITimestamp
@@ -383,7 +385,7 @@ export type ComponentDefUid = string
 export interface AglynHostComponent<N = AglynNodeSchema>
   extends AglynDocument {
   $id: ComponentDefUid
-  tenantId?: TenantUid
+  tenantId?: OrgUid
   hostId?: HostUid
   displayName?: string
   description?: string
@@ -402,7 +404,7 @@ export interface AglynHostComponent<N = AglynNodeSchema>
  */
 export interface AglynLayout extends AglynDocument {
   $id: LayoutUid
-  tenantId?: TenantUid
+  tenantId?: OrgUid
   hostId?: HostUid
   /** Published version pointer; bound screens render this version. */
   versionId?: VersionUid

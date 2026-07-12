@@ -52,8 +52,8 @@ const trackHandler: PluginApiHandler = async (req, res) => {
     return res.status(400).json({ error: 'Bad beacon' })
   }
   try {
-    const tenant = (await getOrgForHost(hostId))?.org
-    if (!checkEntitlement(tenant as any, 'abTesting')) {
+    const org = (await getOrgForHost(hostId))?.org
+    if (!checkEntitlement(org as any, 'abTesting')) {
       return res.status(200).json({ ok: true })
     }
     const experimentRef = firebaseAdmin

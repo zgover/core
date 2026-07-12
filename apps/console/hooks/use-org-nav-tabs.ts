@@ -19,7 +19,7 @@
 import type { OrgPermission } from '@aglyn/aglyn'
 import { useMemo } from 'react'
 import orgNavTabItems from '../constants/org-nav-tabs'
-import useTenantPermissions from './use-tenant-permissions'
+import useOrgPermissions from './use-org-permissions'
 
 /** Org tabs a permission gates (AGL-243); ungated tabs show for members. */
 const TAB_PERMISSIONS: Record<string, OrgPermission> = {
@@ -34,7 +34,7 @@ const TAB_PERMISSIONS: Record<string, OrgPermission> = {
  * strip doesn't flash narrower for admins.
  */
 export function useOrgNavTabItems() {
-  const { can, loaded } = useTenantPermissions()
+  const { can, loaded } = useOrgPermissions()
   return useMemo(
     () =>
       orgNavTabItems().filter((item) => {

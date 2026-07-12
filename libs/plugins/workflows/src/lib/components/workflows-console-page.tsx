@@ -28,27 +28,27 @@ import HostWorkflowsCard from './host-workflows-card.component'
  * workflows plugin and rendered by the shell's generic plugin route with
  * the host-setup vertical-tab pattern. Each card runs its own entitlement
  * check (workflows / actions / webhooks are distinct plan flags), so the
- * shell's resolved `tenant` doc flows into all three.
+ * shell's resolved `org` doc flows into all three.
  */
 export function WorkflowsConsolePage(props: ConsolePluginPageProps) {
-  const { hostId, tenant } = props
+  const { hostId, org } = props
   return (
     <HubTabs
       tabs={[
         {
           id: 'workflows',
           label: 'Workflows',
-          content: <HostWorkflowsCard hostId={hostId} tenant={tenant} />,
+          content: <HostWorkflowsCard hostId={hostId} org={org} />,
         },
         {
           id: 'actions',
           label: 'Actions',
-          content: <HostActionsCard hostId={hostId} tenant={tenant} />,
+          content: <HostActionsCard hostId={hostId} org={org} />,
         },
         {
           id: 'webhooks',
           label: 'Webhooks',
-          content: <HostWebhooksCard hostId={hostId} tenant={tenant} />,
+          content: <HostWebhooksCard hostId={hostId} org={org} />,
         },
       ]}
     />

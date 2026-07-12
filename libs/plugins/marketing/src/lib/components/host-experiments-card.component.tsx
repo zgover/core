@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { type AglynTenant, checkEntitlement, createResourceUid, HOST_EVENT_TYPES, SITE_EVENT_TYPES } from '@aglyn/aglyn'
+import { type AglynOrgBilling, checkEntitlement, createResourceUid, HOST_EVENT_TYPES, SITE_EVENT_TYPES } from '@aglyn/aglyn'
 import { compareVariants, summarizeVariantStats, validateExperiment, type ExperimentTarget, type ExperimentVariant, type HostExperiment } from '../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -56,7 +56,7 @@ import { useFirestore, useFirestoreCollection, useHostActivityLogger } from '@ag
 export interface HostExperimentsCardProps {
   hostId: string
   /** Resolved entitlement source (AGL-395). */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 type ExperimentDraft = HostExperiment & { $id?: string }
@@ -78,11 +78,11 @@ const STATUS_COLORS: Record<string, 'default' | 'success' | 'info' | 'warning'> 
 export function HostExperimentsCard(props: HostExperimentsCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
-  const { tenant } = props
+  const { org } = props
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const logActivity = useHostActivityLogger(hostId)
-  const entitled = checkEntitlement(tenant, 'abTesting')
+  const entitled = checkEntitlement(org, 'abTesting')
 
   const { data: experimentDocs } = useFirestoreCollection<any>(
     () =>

@@ -16,10 +16,10 @@
  */
 
 import type {
-  AglynTenant,
-  TenantEntitlements,
-  TenantFeatureFlags,
-  TenantPlan,
+  AglynOrgBilling,
+  OrgEntitlements,
+  OrgFeatureFlags,
+  OrgPlan,
 } from '../foundation'
 
 /** Sentinel for quotas a plan does not cap; `checkQuota` always allows. */
@@ -38,12 +38,12 @@ type LegacyEntitlementKeys = 'datasetsPerHost' | 'maxDatasetsPerHost'
 
 /** Fully-resolved entitlements: every quota present, features complete. */
 export type ResolvedTenantEntitlements = Required<
-  Omit<TenantEntitlements, 'features' | LegacyEntitlementKeys>
+  Omit<OrgEntitlements, 'features' | LegacyEntitlementKeys>
 > & {
-  features: Required<TenantFeatureFlags>
+  features: Required<OrgFeatureFlags>
 }
 
-export const PLAN_ENTITLEMENTS: Record<TenantPlan, ResolvedTenantEntitlements> = {
+export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedTenantEntitlements> = {
   free: {
     hostLimit: 1,
     screensPerHost: 5,
@@ -372,7 +372,7 @@ export const EVENT_CALENDAR_ADDON_MONTHLY_USD = 9
  * POS Pro register add-on (AGL-329): $89/mo per extra register/location
  * (Shopify POS Pro parity). Purchased add-ons land as a per-tenant
  * `posRegisters` entitlement override, which
- * `resolveTenantEntitlements` already applies over the plan default.
+ * `resolveOrgEntitlements` already applies over the plan default.
  */
 export const POS_REGISTER_ADDON_MONTHLY_USD = 89
 
@@ -418,7 +418,7 @@ export interface PlanPricing {
  * so price changes ride the same review path; Stripe price ids map to plans
  * via `STRIPE_PRICE_*` env vars on the billing API routes.
  */
-export const PLAN_PRICING: Record<TenantPlan, PlanPricing> = {
+export const PLAN_PRICING: Record<OrgPlan, PlanPricing> = {
   free: {
     basePriceMonthlyUsd: 0,
     basePriceAnnualMonthlyUsd: 0,
@@ -479,8 +479,8 @@ const DEAD_SUBSCRIPTION_STATUSES = new Set(['canceled', 'unpaid', 'incomplete'])
  * fields alone are not entitlement.
  */
 export function resolveEffectivePlan(
-  tenant: Partial<AglynTenant> | null | undefined,
-): TenantPlan {
+  tenant: Partial<AglynOrgBilling> | null | undefined,
+): OrgPlan {
   const plan = tenant?.plan
   if (!plan || !(plan in PLAN_ENTITLEMENTS)) return 'free'
   const status = tenant?.subscription?.status
@@ -490,7 +490,7 @@ export function resolveEffectivePlan(
   return plan
 }
 
-function resolvePlan(tenant: Partial<AglynTenant> | null | undefined) {
+function resolvePlan(tenant: Partial<AglynOrgBilling> | null | undefined) {
   return resolveEffectivePlan(tenant)
 }
 
@@ -502,8 +502,8 @@ function resolvePlan(tenant: Partial<AglynTenant> | null | undefined) {
  * per-key overrides applied (features merge key-by-key too). Missing or
  * unknown plans resolve as `free`.
  */
-export function resolveTenantEntitlements(
-  tenant: Partial<AglynTenant> | null | undefined,
+export function resolveOrgEntitlements(
+  tenant: Partial<AglynOrgBilling> | null | undefined,
 ): ResolvedTenantEntitlements {
   const defaults = PLAN_ENTITLEMENTS[resolvePlan(tenant)]
   const overrides = tenant?.entitlements
@@ -542,10 +542,10 @@ export function resolveTenantEntitlements(
  * the Stripe Connect `application_fee_amount` at charge time.
  */
 export function resolveTransactionFeePct(
-  tenant: Partial<AglynTenant> | null | undefined,
+  tenant: Partial<AglynOrgBilling> | null | undefined,
   productType: 'physical' | 'digital' | 'service',
 ): number {
-  const entitlements = resolveTenantEntitlements(tenant)
+  const entitlements = resolveOrgEntitlements(tenant)
   const pct =
     productType === 'physical'
       ? entitlements.transactionFeePhysicalPct
@@ -555,10 +555,10 @@ export function resolveTransactionFeePct(
 
 /** True when the tenant's plan (or overrides) enables the boolean feature. */
 export function checkEntitlement(
-  tenant: Partial<AglynTenant> | null | undefined,
-  feature: keyof TenantFeatureFlags,
+  tenant: Partial<AglynOrgBilling> | null | undefined,
+  feature: keyof OrgFeatureFlags,
 ): boolean {
-  return Boolean(resolveTenantEntitlements(tenant).features[feature])
+  return Boolean(resolveOrgEntitlements(tenant).features[feature])
 }
 
 /**
@@ -597,11 +597,11 @@ export interface SeatQuotaResult {
  * tenant-manager seats tenant-wide; `members` counts host members per host.
  */
 export function checkSeatQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+  tenant: Partial<AglynOrgBilling> | null | undefined,
   kind: SeatKind,
   currentUsage: number,
 ): SeatQuotaResult {
-  const entitlements = resolveTenantEntitlements(tenant)
+  const entitlements = resolveOrgEntitlements(tenant)
   const pricing = PLAN_PRICING[resolvePlan(tenant)]
   const included =
     kind === 'managers'
@@ -630,11 +630,11 @@ export function checkSeatQuota(
 }
 
 export function checkQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+  tenant: Partial<AglynOrgBilling> | null | undefined,
   quota: keyof Omit<ResolvedTenantEntitlements, 'features'>,
   currentUsage: number,
 ): { allowed: boolean; limit: number; remaining: number } {
-  const limit = resolveTenantEntitlements(tenant)[quota]
+  const limit = resolveOrgEntitlements(tenant)[quota]
   return {
     allowed: currentUsage < limit,
     limit,
@@ -663,10 +663,10 @@ export interface DatasetQuotaResult {
  * plan's hard max; beyond the max the only path is upgrading.
  */
 export function checkDatasetQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+  tenant: Partial<AglynOrgBilling> | null | undefined,
   currentUsage: number,
 ): DatasetQuotaResult {
-  const entitlements = resolveTenantEntitlements(tenant)
+  const entitlements = resolveOrgEntitlements(tenant)
   const pricing = PLAN_PRICING[resolvePlan(tenant)]
   const included = entitlements.datasetsPerOrg
   const maxDatasets = entitlements.maxDatasetsPerOrg
@@ -711,10 +711,10 @@ export interface DataStorageQuotaResult {
  * plans without one (free) hard-block at the included size.
  */
 export function checkDataStorageQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+  tenant: Partial<AglynOrgBilling> | null | undefined,
   usedMb: number,
 ): DataStorageQuotaResult {
-  const entitlements = resolveTenantEntitlements(tenant)
+  const entitlements = resolveOrgEntitlements(tenant)
   const pricing = PLAN_PRICING[resolvePlan(tenant)]
   const includedMb = entitlements.dataStorageMbPerOrg
   const overageRateUsd = pricing.extraDataGbMonthlyUsd

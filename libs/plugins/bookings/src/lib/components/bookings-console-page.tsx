@@ -88,11 +88,11 @@ interface ServiceDraft {
 /**
  * Bookings manager (AGL-159): bookable services with weekly availability
  * windows, and the upcoming-bookings list with cancel. Visitors book via
- * the tenant /api/bookings endpoints; confirmations email through the
+ * the org /api/bookings endpoints; confirmations email through the
  * env-gated Resend path. Plan-gated (`bookings` flag + `servicesPerHost`).
  */
 export function BookingsConsolePage(props: ConsolePluginPageProps) {
-  const { hostId, entitled, tenant } = props
+  const { hostId, entitled, org } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -131,7 +131,7 @@ export function BookingsConsolePage(props: ConsolePluginPageProps) {
         { variant: 'warning', persist: false },
       )
     }
-    const quota = checkQuota(tenant, 'servicesPerHost', services.length)
+    const quota = checkQuota(org, 'servicesPerHost', services.length)
     if (!quota.allowed) {
       return void enqueueSnackbar(
         `Service limit reached (${quota.limit}) — upgrade in Billing`,
@@ -149,7 +149,7 @@ export function BookingsConsolePage(props: ConsolePluginPageProps) {
         index >= 1 && index <= 5 ? '09:00-17:00' : '',
       ),
     })
-  }, [entitled, tenant, services.length, enqueueSnackbar])
+  }, [entitled, org, services.length, enqueueSnackbar])
 
   const handleSave = useCallback(async () => {
     if (!draft || !draft.name.trim()) return

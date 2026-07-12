@@ -17,7 +17,7 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkEntitlement,
   type HostPopup,
   useMediaPicker,
@@ -41,7 +41,7 @@ import OverlayStatsRow from './overlay-stats-row.component'
 export interface PopupCardProps {
   hostId: string
   /** Resolved entitlement source (AGL-395). */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 const TRIGGERS: Array<{ value: NonNullable<HostPopup['trigger']>; label: string }> = [
@@ -66,7 +66,7 @@ const fromLocalInput = (value: string) =>
 export function PopupCard(props: PopupCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
-  const { tenant } = props
+  const { org } = props
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const logActivity = useHostActivityLogger(hostId)
@@ -75,7 +75,7 @@ export function PopupCard(props: PopupCardProps) {
     [firestore, hostId],
     { idField: '$id' },
   )
-  const entitled = checkEntitlement(tenant, 'marketingOverlays')
+  const entitled = checkEntitlement(org, 'marketingOverlays')
 
   const saved = (host?.popup ?? {}) as HostPopup
   const [draft, setDraft] = useState<HostPopup>(saved)

@@ -27,7 +27,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import PluginWidgetSlot from './plugin-widget-slot.component'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 
 export interface BesignerFunctionsButtonProps {
   hostId: string
@@ -41,7 +41,7 @@ export interface BesignerFunctionsButtonProps {
 export function BesignerFunctionsButton(props: BesignerFunctionsButtonProps) {
   const { hostId } = props
   const [open, setOpen] = useState(false)
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   return (
     <>
       <Tooltip title="Variables & functions">
@@ -67,7 +67,7 @@ export function BesignerFunctionsButton(props: BesignerFunctionsButtonProps) {
           <PluginWidgetSlot
             slot="besignerFunctions"
             hostId={hostId}
-            tenant={tenant}
+            org={org}
           />
         </DialogContent>
         <DialogActions>

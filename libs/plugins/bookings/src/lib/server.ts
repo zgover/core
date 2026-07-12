@@ -180,7 +180,7 @@ const slotsHandler: PluginApiHandler = async (req, res) => {
  * Booking creation (AGL-159): validates the slot against the service's
  * windows AND stored bookings inside a transaction (double-booking safe),
  * stores the booking, records a lead, emits the `booking` host event, and
- * sends an env-gated Resend confirmation. Plan gate: the owning tenant
+ * sends an env-gated Resend confirmation. Plan gate: the owning org
  * needs the `bookings` flag (dark-launch tenants pass).
  */
 const bookHandler: PluginApiHandler = async (req, res) => {
@@ -231,8 +231,8 @@ const bookHandler: PluginApiHandler = async (req, res) => {
     // Plan gate (dark-launch rule preserved).
     {
       // Plan/quota gates ride the owning org's doc (AGL-238).
-      const tenant = (await getOrgForHost(hostId))?.org
-      if (!checkEntitlement(tenant as never, 'bookings')) {
+      const org = (await getOrgForHost(hostId))?.org
+      if (!checkEntitlement(org as never, 'bookings')) {
         return res
           .status(403)
           .json({ error: 'Bookings are not enabled on this site' })

@@ -43,13 +43,13 @@ import { useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import MediaUrlField from '../../../../components/media-url-field.component'
 import OrgPluginsCard from '../../../../components/org-plugins-card.component'
-import useCurrentTenant from '../../../../hooks/use-current-tenant'
+import useCurrentOrg from '../../../../hooks/use-current-org'
 import HubTabs from '../../../../components/hub-tabs.component'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
-import useTenantPermissions from '../../../../hooks/use-tenant-permissions'
+import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
 const WORKSPACE_DOMAIN =
   process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
@@ -70,7 +70,7 @@ const OrgSettings: NextPageWithLayout = () => {
   const [busy, setBusy] = useState(false)
   const canManage = canManageOrg(currentOrg?.role)
   const isOwner = currentOrg?.role === 'owner'
-  const { can, loaded: permissionsLoaded } = useTenantPermissions()
+  const { can, loaded: permissionsLoaded } = useOrgPermissions()
 
   useEffect(() => {
     setName(currentOrg?.orgName ?? '')
@@ -189,7 +189,7 @@ const OrgSettings: NextPageWithLayout = () => {
   }
 
   // Org profile fields (AGL-363), prefilled from the org doc.
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const [profile, setProfile] = useState({
     logoUrl: '',
     contactEmail: '',
@@ -199,13 +199,13 @@ const OrgSettings: NextPageWithLayout = () => {
   })
   useEffect(() => {
     setProfile({
-      logoUrl: String((tenant as any)?.logoUrl ?? ''),
-      contactEmail: String((tenant as any)?.contact?.email ?? ''),
-      contactPhone: String((tenant as any)?.contact?.phone ?? ''),
-      contactWebsite: String((tenant as any)?.contact?.website ?? ''),
-      contactAddress: String((tenant as any)?.contact?.address ?? ''),
+      logoUrl: String((org as any)?.logoUrl ?? ''),
+      contactEmail: String((org as any)?.contact?.email ?? ''),
+      contactPhone: String((org as any)?.contact?.phone ?? ''),
+      contactWebsite: String((org as any)?.contact?.website ?? ''),
+      contactAddress: String((org as any)?.contact?.address ?? ''),
     })
-  }, [tenant])
+  }, [org])
   const handleProfileSave = async () => {
     if (!currentOrg || busy) return
     setBusy(true)
@@ -430,7 +430,7 @@ const OrgSettings: NextPageWithLayout = () => {
                         content: (
                           <Stack spacing={1}>
                             <OrgPluginsCard
-                              tenant={tenant}
+                              org={org}
                               disabled={!canManage || busy}
                               onSave={async (enabledPlugins) => {
                                 await settingsRequest({
@@ -520,7 +520,7 @@ const OrgSettings: NextPageWithLayout = () => {
             />
           )}
           {/* Plugin zone (AGL-433): orgSettings widgets. */}
-          {currentOrg?.$id ? (<PluginWidgetSlot slot="orgSettings" orgId={currentOrg.$id} tenant={tenant} />) : null}
+          {currentOrg?.$id ? (<PluginWidgetSlot slot="orgSettings" orgId={currentOrg.$id} org={org} />) : null}
         </Container>
       </DashboardLayout>
     </>

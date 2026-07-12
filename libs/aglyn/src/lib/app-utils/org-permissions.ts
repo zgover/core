@@ -45,7 +45,7 @@ export type OrgPermission =
  * model; lives here so relocated feature plugins can accept it as a prop
  * (AGL-395).
  */
-export interface TenantPermissions {
+export interface OrgPermissions {
   createHosts: boolean
   editHosts: boolean
   editBilling: boolean

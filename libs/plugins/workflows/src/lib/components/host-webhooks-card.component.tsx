@@ -17,7 +17,7 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkEntitlement,
   createResourceUid,
   WEBHOOK_MAX_PER_HOST,
@@ -77,9 +77,9 @@ interface WebhookDraft {
  */
 export function HostWebhooksCard(props: {
   hostId: string
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }) {
-  const { hostId, tenant } = props
+  const { hostId, org } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -119,7 +119,7 @@ export function HostWebhooksCard(props: {
   const [draft, setDraft] = useState<WebhookDraft | null>(null)
 
   const handleAdd = useCallback(() => {
-    if (!checkEntitlement(tenant, 'webhooks')) {
+    if (!checkEntitlement(org, 'webhooks')) {
       return void enqueueSnackbar(
         'Webhooks require a Business plan — see Billing to upgrade',
         { variant: 'warning', persist: false },
@@ -139,7 +139,7 @@ export function HostWebhooksCard(props: {
       workflowName: '',
       secret: generateSecret(),
     })
-  }, [tenant, webhooks.length, enqueueSnackbar])
+  }, [org, webhooks.length, enqueueSnackbar])
 
   const handleSave = useCallback(async () => {
     if (!draft || !draft.name.trim()) return

@@ -16,16 +16,16 @@
  */
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkEntitlement,
   checkQuota,
   checkSeatQuota,
   type SeatKind,
   type SeatQuotaResult,
-  type TenantFeatureFlags,
+  type OrgFeatureFlags,
 } from '@aglyn/aglyn'
 
-/** Console-facing feature keys mapped onto the tenant feature flags. */
+/** Console-facing feature keys mapped onto the org feature flags. */
 export type Entitlement =
   | 'versioning'
   | 'reusable-components'
@@ -48,7 +48,7 @@ export type Entitlement =
   | 'media-cdn'
   | 'ab-testing'
 
-const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
+const FEATURE_KEYS: Record<Entitlement, keyof OrgFeatureFlags> = {
   versioning: 'versioning',
   'reusable-components': 'reusableComponents',
   'custom-domain': 'customDomain',
@@ -72,35 +72,35 @@ const FEATURE_KEYS: Record<Entitlement, keyof TenantFeatureFlags> = {
 }
 
 /**
- * Resolves through the plan/override model (`resolveTenantEntitlements`,
+ * Resolves through the plan/override model (`resolveOrgEntitlements`,
  * AGL-38/247). The old dark-launch rule ("no plan = every feature") let
  * plan-less orgs reach paid features while paid orgs were gated — orgs
  * without a plan now resolve as `free`, and a dead subscription
  * (canceled/unpaid/incomplete) downgrades a paid plan to `free` inside
- * `resolveEffectivePlan`. Loading states should pass the tenant doc only
- * once it has resolved (undefined tenant still checks as free).
+ * `resolveEffectivePlan`. Loading states should pass the org doc only
+ * once it has resolved (undefined org still checks as free).
  */
 export function hasEntitlement(
   feature: Entitlement,
-  tenant?: Partial<AglynTenant> | null,
+  org?: Partial<AglynOrgBilling> | null,
 ): boolean {
-  return checkEntitlement(tenant, FEATURE_KEYS[feature])
+  return checkEntitlement(org, FEATURE_KEYS[feature])
 }
 
 /** Quota gate on the same effective-plan resolution (AGL-247). */
-export function checkTenantQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+export function checkOrgQuota(
+  org: Partial<AglynOrgBilling> | null | undefined,
   quota: Parameters<typeof checkQuota>[1],
   currentUsage: number,
 ): ReturnType<typeof checkQuota> {
-  return checkQuota(tenant, quota, currentUsage)
+  return checkQuota(org, quota, currentUsage)
 }
 
 /** Seat quota (AGL-112) on the same effective-plan resolution. */
 export function checkTenantSeatQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+  org: Partial<AglynOrgBilling> | null | undefined,
   kind: SeatKind,
   currentUsage: number,
 ): SeatQuotaResult {
-  return checkSeatQuota(tenant, kind, currentUsage)
+  return checkSeatQuota(org, kind, currentUsage)
 }

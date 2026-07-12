@@ -39,7 +39,7 @@ import PluginWidgetSlot from '../../../../components/plugin-widget-slot.componen
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useAdminHosts } from '../../../../hooks/use-admin-hosts'
-import useCurrentTenant from '../../../../hooks/use-current-tenant'
+import useCurrentOrg from '../../../../hooks/use-current-org'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
 
@@ -55,7 +55,7 @@ import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
 const OrgPlugins: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgWorkspace()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const { data: user } = useUser()
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
@@ -119,7 +119,7 @@ const OrgPlugins: NextPageWithLayout = () => {
           ) : currentOrg?.$id ? (
             <Stack spacing={3}>
               <OrgPluginsCard
-                tenant={tenant}
+                org={org}
                 disabled={!canManage}
                 onSave={saveEnabledPlugins}
               />

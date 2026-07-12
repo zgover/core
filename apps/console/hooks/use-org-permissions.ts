@@ -22,16 +22,16 @@ import {
   type AglynOrgMember,
   type OrgPermission,
   type OrgRole,
-  type TenantPermissions,
+  type OrgPermissions,
 } from '@aglyn/aglyn'
 import { doc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import useOrgWorkspace from './use-org-workspace'
 
-export type { TenantPermissions }
+export type { OrgPermissions }
 
-const ALL_TRUE: TenantPermissions = {
+const ALL_TRUE: OrgPermissions = {
   createHosts: true,
   editHosts: true,
   editBilling: true,
@@ -46,7 +46,7 @@ const ALL_GRANTED = resolveOrgPermissions({ role: 'owner' })
 function toLegacyPermissions(
   granted: Record<OrgPermission, boolean>,
   role: OrgRole | undefined,
-): TenantPermissions {
+): OrgPermissions {
   return {
     createHosts: granted['hosts.create'],
     editHosts: role !== 'viewer',
@@ -65,8 +65,8 @@ function toLegacyPermissions(
  * while loading and on failure — the server APIs are the enforcement
  * point, this hook only hides/disables surfaces.
  */
-export function useTenantPermissions(): {
-  permissions: TenantPermissions
+export function useOrgPermissions(): {
+  permissions: OrgPermissions
   /** Granular permission check (AGL-243). */
   can: (permission: OrgPermission) => boolean
   /** The full resolved permission map. */
@@ -162,4 +162,4 @@ export function useTenantPermissions(): {
   }
 }
 
-export default useTenantPermissions
+export default useOrgPermissions

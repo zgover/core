@@ -23,7 +23,7 @@ import { deleteField, doc, updateDoc } from 'firebase/firestore'
 import { useCallback, useEffect, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 import useFirestoreDoc from '../hooks/use-firestore-doc'
 
 const LOCALE_PATTERN = /^[a-z]{2}(-[A-Za-z]{2,4})?$/
@@ -38,7 +38,7 @@ export function LanguagesCard(props: { hostId: string }) {
   const { hostId } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const { data: host } = useFirestoreDoc<any>(
     () => doc(firestore, 'hosts', hostId),
     [firestore, hostId],
@@ -61,7 +61,7 @@ export function LanguagesCard(props: { hostId: string }) {
   ]
 
   const handleSave = useCallback(async () => {
-    if (!hasEntitlement('multilingual', tenant)) {
+    if (!hasEntitlement('multilingual', org)) {
       return void enqueueSnackbar(
         'Multilingual sites require a Business plan — see Billing',
         { variant: 'warning', persist: false },
@@ -88,7 +88,7 @@ export function LanguagesCard(props: { hostId: string }) {
         allowDuplicate: true,
       })
     }
-  }, [tenant, firestore, hostId, parsed, defaultLocale, enqueueSnackbar])
+  }, [org, firestore, hostId, parsed, defaultLocale, enqueueSnackbar])
 
   return (
     <CardDisplay header={'Languages'} contentGutterX contentGutterY>

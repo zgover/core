@@ -21,7 +21,7 @@ import {
   type HostFunction,
   type HostVariable,
   type HostWorkflow,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   runWorkflow,
 } from '@aglyn/aglyn/server'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
@@ -80,7 +80,7 @@ export async function runEventWorkflows(
     {
       const tenant = (await getOrgForHost(hostId))?.org
       // Plan-less orgs resolve as free (AGL-247) — the cap always runs.
-      const limit = resolveTenantEntitlements(
+      const limit = resolveOrgEntitlements(
         tenant as any,
       ).workflowRunsPerMonth
       const counterSnapshot = await runCounterRef.get()

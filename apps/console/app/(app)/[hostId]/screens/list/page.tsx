@@ -89,7 +89,7 @@ import {
   type ScreenHierarchyRow,
   type ScreenMoveRequest,
 } from '../../../../../components/screens-hierarchy-table.component'
-import { checkTenantQuota } from '../../../../../constants/entitlements'
+import { checkOrgQuota } from '../../../../../constants/entitlements'
 import { buildRoute, Route } from '../../../../../constants/route-links'
 import { buildScreenLiveUrl } from '../../../../../constants/tenant-links'
 import hostNavTabItems from '../../../../../constants/host-nav-tabs'
@@ -99,7 +99,7 @@ import {
   unpublishScreenRoute,
 } from '../../../../../constants/screen-publishing'
 import { CONTENT_MAX_WIDTH } from '../../../../../constants/shared'
-import useCurrentTenant from '../../../../../hooks/use-current-tenant'
+import useCurrentOrg from '../../../../../hooks/use-current-org'
 import useFirestoreCollection from '../../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../../hooks/use-firestore-doc'
 import useHostActivityLogger from '../../../../../hooks/use-host-activity-logger'
@@ -156,7 +156,7 @@ function Screens(props) {
     return map
   }, [screens])
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const logActivity = useHostActivityLogger(hostId)
 
   const [error, setError] = useState(null)
@@ -174,8 +174,8 @@ function Screens(props) {
     async (values) => {
       if (loading) return
       if (error) setError(null)
-      // Plan quota (AGL-39): enforced once the tenant has an explicit plan.
-      const quota = checkTenantQuota(tenant, 'screensPerHost', screens.length)
+      // Plan quota (AGL-39): enforced once the org has an explicit plan.
+      const quota = checkOrgQuota(org, 'screensPerHost', screens.length)
       if (!quota.allowed) {
         return enqueueSnackbar(
           `Screen limit reached (${quota.limit}) — see Billing to upgrade`,
@@ -188,7 +188,7 @@ function Screens(props) {
       const timestamp = Timestamp.now()
       const { slug: slugInput, ...fields } = values
 
-      // Publishing is what makes the screen reachable: the tenant matches
+      // Publishing is what makes the screen reachable: the org matches
       // request paths against the host's `screens` routing map, so the slug
       // must both live on the screen doc and be registered in that map.
       const path = normalizeScreenSlug(slugInput)
@@ -271,7 +271,7 @@ function Screens(props) {
       hostId,
       handleFormClose,
       enqueueSnackbar,
-      tenant,
+      org,
       screens.length,
       logActivity,
     ],

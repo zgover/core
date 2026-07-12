@@ -31,11 +31,11 @@ import PopupCard from './popup-card.component'
  * owned by the marketing plugin and rendered by the shell's generic plugin
  * route with the host-setup vertical-tab pattern. Each gated card runs its
  * own entitlement check (overlays vs A/B are distinct plan flags) off the
- * shell's resolved `tenant`; the popup image picker uses the shell's media
+ * shell's resolved `org`; the popup image picker uses the shell's media
  * browser via `useMediaPicker`.
  */
 export function MarketingConsolePage(props: ConsolePluginPageProps) {
-  const { hostId, tenant } = props
+  const { hostId, org } = props
   return (
     <HubTabs
       tabs={[
@@ -53,17 +53,17 @@ export function MarketingConsolePage(props: ConsolePluginPageProps) {
               items={[
                 {
                   size: { xs: 12 },
-                  children: <HostOverlaysCard hostId={hostId} tenant={tenant} />,
+                  children: <HostOverlaysCard hostId={hostId} org={org} />,
                 },
                 {
                   size: { xs: 12, md: 6 },
                   children: (
-                    <AnnouncementBarCard hostId={hostId} tenant={tenant} />
+                    <AnnouncementBarCard hostId={hostId} org={org} />
                   ),
                 },
                 {
                   size: { xs: 12, md: 6 },
-                  children: <PopupCard hostId={hostId} tenant={tenant} />,
+                  children: <PopupCard hostId={hostId} org={org} />,
                 },
               ]}
             />
@@ -72,7 +72,7 @@ export function MarketingConsolePage(props: ConsolePluginPageProps) {
         {
           id: 'experiments',
           label: 'A/B testing',
-          content: <HostExperimentsCard hostId={hostId} tenant={tenant} />,
+          content: <HostExperimentsCard hostId={hostId} org={org} />,
         },
       ]}
     />

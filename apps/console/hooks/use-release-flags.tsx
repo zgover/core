@@ -33,7 +33,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import useTenantPermissions from './use-tenant-permissions'
+import useOrgPermissions from './use-org-permissions'
 
 export interface ReleaseFlagState {
   value: ReleaseFlagValue
@@ -81,7 +81,7 @@ export function ReleaseFlagsProvider(props: ReleaseFlagsProviderProps) {
   const { children } = props
   const remoteConfig = useRemoteConfig()
   const { data: user } = useUser()
-  const { orgId } = useTenantPermissions()
+  const { orgId } = useOrgPermissions()
   const subjectId = orgId ?? user?.uid ?? null
 
   const [activated, setActivated] = useState(false)

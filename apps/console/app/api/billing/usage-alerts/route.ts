@@ -16,7 +16,7 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { resolveTenantEntitlements, UNLIMITED } from '@aglyn/aglyn/server'
+import { resolveOrgEntitlements, UNLIMITED } from '@aglyn/aglyn/server'
 import { firebaseAdmin, notifyOrgAdmins } from '@aglyn/tenant-data-admin'
 
 /**
@@ -53,7 +53,7 @@ async function handler(request: Request): Promise<Response> {
       // Plan-less orgs resolve to Free with zero included quotas —
       // alerting them would just be noise; the console banner covers it.
       if (!orgData['plan']) continue
-      const entitlements = resolveTenantEntitlements(orgData as any)
+      const entitlements = resolveOrgEntitlements(orgData as any)
 
       // Monthly email sends: summed over the org's hosts' counters.
       const hosts = await firestore

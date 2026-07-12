@@ -18,7 +18,7 @@
 
 import {
   PLAN_ENTITLEMENTS,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   UNLIMITED,
 } from '@aglyn/aglyn'
 import { ICON_VARIANT_SYMBOL_SECURE } from '@aglyn/shared-data-enums'
@@ -383,7 +383,7 @@ const AdminOrgDetail: NextPageWithLayout = () => {
     }
   }
 
-  const resolved = org ? resolveTenantEntitlements(org) : null
+  const resolved = org ? resolveOrgEntitlements(org) : null
   const planDefaults = org?.plan
     ? PLAN_ENTITLEMENTS[org.plan as keyof typeof PLAN_ENTITLEMENTS]
     : null

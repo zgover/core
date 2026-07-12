@@ -25,7 +25,7 @@ import { useUser } from '@aglyn/tenant-feature-instance'
 import type React from 'react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { consolePluginLoader } from '../constants/console-plugin-loader'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 import { useReleaseFlags } from '../hooks/use-release-flags'
 import { loadOrgRealmPlugins } from '../utils/realm-plugins.client'
 
@@ -37,10 +37,10 @@ import { loadOrgRealmPlugins } from '../utils/realm-plugins.client'
  * flashes in on the registry defaults.
  */
 function useEffectiveEnabledPlugins(): { flagsReady: boolean; enabledKey: string } {
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const { ready, isStaff, flags } = useReleaseFlags()
   const enabledKey = filterPluginsByReleaseFlags(
-    resolveEnabledPlugins(tenant),
+    resolveEnabledPlugins(org),
     (flagKey) => flags[flagKey as keyof typeof flags]?.released ?? true,
     { staffBypass: isStaff },
   ).join(',')
@@ -60,7 +60,7 @@ export default function ConsolePluginsGate({
 }: {
   children?: ReactNode
 }) {
-  const { tenant, orgId } = useCurrentTenant()
+  const { org, orgId } = useCurrentOrg()
   const { data: user } = useUser()
   const [readyForOrg, setReadyForOrg] = useState<string | null>(null)
   const { flagsReady, enabledKey } = useEffectiveEnabledPlugins()
@@ -96,7 +96,7 @@ export default function ConsolePluginsGate({
   // registry is populated; each receives the org billing doc.
   return listConsoleProviders().reduce<ReactNode>(
     (inner, Provider, index) => (
-      <Provider key={index} tenant={tenant}>
+      <Provider key={index} org={org}>
         {inner}
       </Provider>
     ),
@@ -129,7 +129,7 @@ export function withSitePlugins<P extends object>(
 }
 
 export function useSitePluginsReady(): boolean {
-  const { orgId } = useCurrentTenant()
+  const { orgId } = useCurrentOrg()
   const [ready, setReady] = useState(false)
   const { flagsReady, enabledKey } = useEffectiveEnabledPlugins()
 

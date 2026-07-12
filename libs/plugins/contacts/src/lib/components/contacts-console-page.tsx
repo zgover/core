@@ -76,11 +76,11 @@ const csvEscape = (value: unknown) => {
  * Contacts CRM (AGL-109 → AGL-395): the unified contacts list, segments,
  * and profile drawer, owned by the contacts plugin and rendered by the
  * shell's generic plugin route. The shell applies the `release_contacts`
- * gate (via the nav tab) and passes the resolved `tenant` doc for the
+ * gate (via the nav tab) and passes the resolved `org` doc for the
  * `contactsPerHost` quota check.
  */
 export function ContactsConsolePage(props: ConsolePluginPageProps) {
-  const { hostId, tenant } = props
+  const { hostId, org } = props
   // Org-shared data root (AGL-237); the host path is the pre-migration
   // fallback for hosts not yet org-wired.
   const hostOrgId = useHostOrgId(hostId)
@@ -104,7 +104,7 @@ export function ContactsConsolePage(props: ConsolePluginPageProps) {
       ),
     [contactDocs],
   )
-  const quota = checkQuota(tenant, 'contactsPerHost', contacts.length)
+  const quota = checkQuota(org, 'contactsPerHost', contacts.length)
 
   // Saved segments (AGL-199): reusable audience filters.
   const { data: segmentDocs } = useFirestoreCollection<any>(

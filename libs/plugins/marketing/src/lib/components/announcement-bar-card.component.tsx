@@ -17,7 +17,7 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkEntitlement,
   type HostAnnouncementBar,
 } from '@aglyn/aglyn'
@@ -40,7 +40,7 @@ import OverlayStatsRow from './overlay-stats-row.component'
 export interface AnnouncementBarCardProps {
   hostId: string
   /** Resolved entitlement source (AGL-395). */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 /**
@@ -53,7 +53,7 @@ export interface AnnouncementBarCardProps {
 export function AnnouncementBarCard(props: AnnouncementBarCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
-  const { tenant } = props
+  const { org } = props
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const logActivity = useHostActivityLogger(hostId)
@@ -62,7 +62,7 @@ export function AnnouncementBarCard(props: AnnouncementBarCardProps) {
     [firestore, hostId],
     { idField: '$id' },
   )
-  const entitled = checkEntitlement(tenant, 'marketingOverlays')
+  const entitled = checkEntitlement(org, 'marketingOverlays')
 
   const saved = (host?.announcementBar ?? {}) as HostAnnouncementBar
   const [draft, setDraft] = useState<HostAnnouncementBar>(saved)

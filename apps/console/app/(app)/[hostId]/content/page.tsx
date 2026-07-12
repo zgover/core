@@ -65,7 +65,7 @@ import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { hasEntitlement } from '../../../../constants/entitlements'
-import useCurrentTenant from '../../../../hooks/use-current-tenant'
+import useCurrentOrg from '../../../../hooks/use-current-org'
 import hostNavTabItems from '../../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
@@ -82,7 +82,7 @@ const slugify = (value: string) =>
 
 /**
  * Content collections manager (AGL-81): collections (e.g. Blog) with
- * entries the tenant serves at /{collectionSlug} and
+ * entries the org serves at /{collectionSlug} and
  * /{collectionSlug}/{entrySlug}.
  */
 const HostContent: NextPageWithLayout = () => {
@@ -219,7 +219,7 @@ const HostContent: NextPageWithLayout = () => {
   const [previewOpen, setPreviewOpen] = useState(false)
   // AI assist (AGL-130): write or improve the markdown-lite body.
   const { data: aiUser } = useUser()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const [aiInstruction, setAiInstruction] = useState<string | null>(null)
   const [aiBusy, setAiBusy] = useState(false)
   const handleAiConfirm = useCallback(async () => {
@@ -777,7 +777,7 @@ const HostContent: NextPageWithLayout = () => {
               size="small"
               color="secondary"
               onClick={() => {
-                if (!hasEntitlement('ai-assist', tenant)) {
+                if (!hasEntitlement('ai-assist', org)) {
                   return void enqueueSnackbar(
                     'AI assist requires a Pro plan — see Billing to upgrade',
                     { variant: 'warning', persist: false },

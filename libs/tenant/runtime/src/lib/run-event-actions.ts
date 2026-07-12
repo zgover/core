@@ -28,7 +28,7 @@ import {
   type HostFunction,
   type HostVariable,
   type HostWorkflow,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   runWorkflow,
   sanitizeRecordValues,
 } from '@aglyn/aglyn/server'
@@ -454,7 +454,7 @@ export async function runEventActions(
       const tenant = (await getOrgForHost(hostId))?.org
       if (!checkEntitlement(tenant as any, 'actions')) return alerts
       webhooksAllowed = checkEntitlement(tenant as any, 'webhooks')
-      const limit = resolveTenantEntitlements(
+      const limit = resolveOrgEntitlements(
         tenant as any,
       ).actionRunsPerMonth
       const counterSnapshot = await runCounterRef.get()
@@ -529,7 +529,7 @@ export async function runSingleAction(
       const tenant = (await getOrgForHost(hostId))?.org
       if (!checkEntitlement(tenant as any, 'actions')) return alerts
       webhooksAllowed = checkEntitlement(tenant as any, 'webhooks')
-      const limit = resolveTenantEntitlements(
+      const limit = resolveOrgEntitlements(
         tenant as any,
       ).actionRunsPerMonth
       const counterSnapshot = await runCounterRef.get()

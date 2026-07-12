@@ -18,7 +18,7 @@
 
 import {
   ACTION_MAX_STEPS,
-  type AglynTenant,
+  type AglynOrgBilling,
   checkEntitlement,
   createResourceUid,
   HOST_ACTION_STEP_LABELS,
@@ -118,9 +118,9 @@ function defaultStep(type: HostActionStepType): HostActionStep {
  */
 export function HostActionsCard(props: {
   hostId: string
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }) {
-  const { hostId, tenant } = props
+  const { hostId, org } = props
   // Org-shared data root (AGL-237); the host path is the pre-migration
   // fallback for hosts not yet org-wired.
   const hostOrgId = useHostOrgId(hostId)
@@ -237,7 +237,7 @@ export function HostActionsCard(props: {
   )
 
   const handleAdd = useCallback(() => {
-    if (!checkEntitlement(tenant, 'actions')) {
+    if (!checkEntitlement(org, 'actions')) {
       return void enqueueSnackbar(
         'The actions builder requires a Pro plan — see Billing to upgrade',
         { variant: 'warning', persist: false },
@@ -251,7 +251,7 @@ export function HostActionsCard(props: {
       enabled: true,
       customEvent: '',
     })
-  }, [tenant, enqueueSnackbar])
+  }, [org, enqueueSnackbar])
 
   // Run log + test runs (AGL-266).
   const [runsFor, setRunsFor] = useState<any | null>(null)

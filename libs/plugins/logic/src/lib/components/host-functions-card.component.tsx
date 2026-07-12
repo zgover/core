@@ -17,7 +17,7 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkQuota,
   createResourceUid,
   evaluateHostFunction,
@@ -61,7 +61,7 @@ import {
 export interface HostFunctionsCardProps {
   hostId: string
   /** Resolved entitlement source for quota checks (AGL-395). */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 const VALUE_TYPES: { value: FunctionValueType; label: string }[] = [
@@ -116,7 +116,7 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = props
+  const { org } = props
   const { data: functionDocs } = useFirestoreCollection<any>(
     () => query(collection(firestore, 'hosts', hostId, 'functions'), limit(100)),
     [firestore, hostId],
@@ -425,7 +425,7 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
           onClick={() => {
             // Plan cap (AGL-99): dark-launch — plan-less tenants uncapped.
             const quota = checkQuota(
-              tenant,
+              org,
               'functionsPerHost',
               functions.length,
             )

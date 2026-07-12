@@ -25,7 +25,7 @@ import DashboardLayout from '../../../../../components/layouts/dashboard.layout'
 import PluginWidgetSlot from '../../../../../components/plugin-widget-slot.component'
 import hostNavTabItems from '../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../constants/route-links'
-import useTenantPermissions from '../../../../../hooks/use-tenant-permissions'
+import useOrgPermissions from '../../../../../hooks/use-org-permissions'
 
 /**
  * Community listing detail route (AGL-95/419): the app owns only the
@@ -36,7 +36,7 @@ const CommunityListingDetail: NextPageWithLayout = () => {
   const hostId = useHostId()
   const params = useParams<{ listingId: string }>()
   const listingId = String(params.listingId ?? '')
-  const { permissions } = useTenantPermissions()
+  const { permissions } = useOrgPermissions()
 
   return (
     <DashboardLayout

@@ -17,7 +17,7 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkEntitlement,
   checkQuota,
   createResourceUid,
@@ -61,7 +61,7 @@ import {
 export interface HostWorkflowsCardProps {
   hostId: string
   /** Resolved entitlement source for quota checks (AGL-395). */
-  tenant?: Partial<AglynTenant>
+  org?: Partial<AglynOrgBilling>
 }
 
 interface WorkflowDraft extends HostWorkflow {
@@ -81,7 +81,7 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = props
+  const { org } = props
 
   const { data: workflowDocs } = useFirestoreCollection<any>(
     () =>
@@ -167,14 +167,14 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
 
   const handleAdd = useCallback(() => {
     // Feature + cap gate (AGL-99); dark-launch for plan-less tenants.
-    if (!checkEntitlement(tenant, 'workflows')) {
+    if (!checkEntitlement(org, 'workflows')) {
       return void enqueueSnackbar(
         'Workflows require a Starter plan — see Billing to upgrade',
         { variant: 'warning', persist: false },
       )
     }
     const quota = checkQuota(
-      tenant,
+      org,
       'workflowsPerHost',
       workflows.length,
     )
@@ -192,7 +192,7 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
       returnValue: '',
       trigger: null,
     })
-  }, [tenant, workflows.length, enqueueSnackbar])
+  }, [org, workflows.length, enqueueSnackbar])
 
   const handleTestRun = useCallback(() => {
     if (!draft) return

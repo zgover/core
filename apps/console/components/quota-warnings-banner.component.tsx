@@ -18,7 +18,7 @@
 
 import {
   checkSeatQuota,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   UNLIMITED,
 } from '@aglyn/aglyn'
 import { Alert, Button } from '@mui/material'
@@ -27,7 +27,7 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { buildRoute, Route } from '../constants/route-links'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 
 const DISMISS_KEY = 'aglyn-quota-banner-dismissed'
 const SEATS_KEY = 'aglyn-quota-banner-team-seats'
@@ -55,7 +55,7 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
   const params = useParams<{ hostId?: string }>()
   const hostId = props.hostId ?? params?.hostId
   const firestore = useFirestore()
-  const { tenant, orgId } = useCurrentTenant()
+  const { org, orgId } = useCurrentOrg()
   const [quotas, setQuotas] = useState<QuotaState[]>([])
   const [dismissed, setDismissed] = useState(true)
 
@@ -63,13 +63,13 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
     setDismissed(sessionStorage.getItem(DISMISS_KEY) === '1')
   }, [])
 
-  const plan = tenant?.plan
+  const plan = org?.plan
 
   // Host-level quotas: screens, media storage, datasets.
   useEffect(() => {
     if (!plan || !hostId) return
     let active = true
-    const entitlements = resolveTenantEntitlements(tenant)
+    const entitlements = resolveOrgEntitlements(org)
     void Promise.all([
       getCountFromServer(
         collection(firestore, 'hosts', hostId, 'screens'),
@@ -119,7 +119,7 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
     let active = true
     const apply = (seats: number) => {
       if (!active) return
-      const seatQuota = checkSeatQuota(tenant, 'managers', 0)
+      const seatQuota = checkSeatQuota(org, 'managers', 0)
       setQuotas((previous) => [
         ...previous.filter((quota) => quota.label !== 'team seats'),
         { label: 'team seats', used: seats, limit: seatQuota.limit },
@@ -147,12 +147,12 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
 
   // Suspension (AGL-202) outranks everything — not dismissible, shown
   // regardless of plan so pre-billing tenants see it too.
-  if ((tenant as any)?.suspendedAt) {
+  if ((org as any)?.suspendedAt) {
     return (
       <Alert severity="error" sx={{ borderRadius: 0 }}>
         {'This account is suspended' +
-          ((tenant as any)?.suspendedReason
-            ? ` — ${(tenant as any).suspendedReason}`
+          ((org as any)?.suspendedReason
+            ? ` — ${(org as any).suspendedReason}`
             : '') +
           '. Your published sites are offline. Contact support to resolve.'}
       </Alert>
@@ -162,7 +162,7 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
   // Dunning (AGL-275): past_due is the grace window — entitlements keep
   // working, but the card needs fixing before the subscription dies.
   // Deliberately not dismissible; it clears when Stripe retries succeed.
-  if ((tenant?.subscription as any)?.status === 'past_due') {
+  if ((org?.subscription as any)?.status === 'past_due') {
     return (
       <Alert
         severity="warning"

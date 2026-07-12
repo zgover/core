@@ -34,8 +34,8 @@ import MainLayout from '../../../../components/layouts/main.layout'
 import hostNavTabItems from '../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
-import useCurrentTenant from '../../../../hooks/use-current-tenant'
-import useTenantPermissions from '../../../../hooks/use-tenant-permissions'
+import useCurrentOrg from '../../../../hooks/use-current-org'
+import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
 /**
  * Generic host route for plugin-contributed pages (AGL-394). Any feature
@@ -45,15 +45,15 @@ import useTenantPermissions from '../../../../hooks/use-tenant-permissions'
  * still win over this dynamic segment; only unclaimed host sub-paths reach
  * it, and an unregistered slug renders a not-found notice.
  *
- * The Events page is the reference tenant of this route: it comes entirely
+ * The Events page is the reference org of this route: it comes entirely
  * from the events-calendar plugin.
  */
 const HostPluginPage: NextPageWithLayout = () => {
   const params = useParams<{ hostId: string; pluginSlug: string }>()
   const hostId = params?.hostId ?? ''
   const pluginSlug = params?.pluginSlug ?? ''
-  const { tenant } = useCurrentTenant()
-  const { permissions } = useTenantPermissions()
+  const { org } = useCurrentOrg()
+  const { permissions } = useOrgPermissions()
 
   const resolved = useMemo(
     () => (pluginSlug ? resolveConsolePluginPage(`/${pluginSlug}`) : undefined),
@@ -69,7 +69,7 @@ const HostPluginPage: NextPageWithLayout = () => {
   }, [resolved])
 
   const entitled = resolved?.extension.featureFlag
-    ? checkEntitlement(tenant, resolved.extension.featureFlag)
+    ? checkEntitlement(org, resolved.extension.featureFlag)
     : true
 
   const header = resolved?.navItem.header
@@ -93,7 +93,7 @@ const HostPluginPage: NextPageWithLayout = () => {
         <PluginComponent
           hostId={hostId}
           entitled={entitled}
-          tenant={tenant}
+          org={org}
           permissions={permissions}
         />
       </ConsoleMediaPickerProvider>

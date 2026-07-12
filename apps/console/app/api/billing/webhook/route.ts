@@ -69,7 +69,7 @@ function planFromPriceId(priceId: string | undefined): string | undefined {
  * Stripe webhook: syncs subscription lifecycle onto the tenant doc
  * (`tenants/{tenantId}.plan/subscription/stripeCustomerId`). The tenant id
  * travels in the subscription metadata set at checkout. Entitlements resolve
- * from the plan at read time (`resolveTenantEntitlements`), so no
+ * from the plan at read time (`resolveOrgEntitlements`), so no
  * entitlement fan-out is needed here.
  */
 async function handler(request: Request): Promise<Response> {

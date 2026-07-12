@@ -19,7 +19,7 @@ import {
   PLAN_ENTITLEMENTS,
   PLAN_PRICING,
   UNLIMITED,
-  type TenantPlan,
+  type OrgPlan,
 } from '@aglyn/aglyn'
 import { APP_WWW, BRAND_NAMES } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
@@ -36,7 +36,7 @@ import { mainNavigation } from '../const'
 import MainLayout from '../layouts/MainLayout'
 import SiteFooterView from '../views/SiteFooterView'
 
-const PLAN_ORDER: TenantPlan[] = [
+const PLAN_ORDER: OrgPlan[] = [
   'free',
   'starter',
   'pro',
@@ -44,7 +44,7 @@ const PLAN_ORDER: TenantPlan[] = [
   'advanced',
 ]
 
-const PLAN_LABELS: Record<TenantPlan, string> = {
+const PLAN_LABELS: Record<OrgPlan, string> = {
   free: 'Free',
   starter: 'Starter',
   pro: 'Pro',
@@ -52,7 +52,7 @@ const PLAN_LABELS: Record<TenantPlan, string> = {
   advanced: 'Advanced',
 }
 
-const PLAN_TAGLINES: Record<TenantPlan, string> = {
+const PLAN_TAGLINES: Record<OrgPlan, string> = {
   free: 'Build and publish your first site.',
   starter: 'Start selling with one production site.',
   pro: 'Full commerce with POS and 0% physical fees.',
