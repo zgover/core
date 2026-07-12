@@ -1,11 +1,13 @@
 {
-  "$comment": "First-party plugin registry (AGL-417). THE single place that maps plugin ids to packages, register entry points, and API path prefixes. `tools/scripts/generate-plugin-manifests.mjs` turns this into the per-app generated loader manifests — the only files allowed to reference @aglyn/plugins-* outside libs/plugins. Ids must match FIRST_PARTY_PLUGINS in libs/aglyn plugin-manager/enabled-plugins.ts. register keys: site = canvas/site components (client barrel), console = ConsoleExtension (client barrel), tenantApi/consoleApi = API handlers (/server entry).",
+  "$comment": "First-party plugin registry (AGL-417). THE single place that maps plugin ids to packages, register entry points, and API path prefixes. `tools/scripts/generate-plugin-manifests.mjs` turns this into the per-app generated loader manifests \u2014 the only files allowed to reference @aglyn/plugins-* outside libs/plugins. Ids must match FIRST_PARTY_PLUGINS in libs/aglyn plugin-manager/enabled-plugins.ts. register keys: site = canvas/site components (client barrel), console = ConsoleExtension (client barrel), tenantApi/consoleApi = API handlers (/server entry).",
   "plugins": [
     {
       "id": "mui",
       "package": "@aglyn/plugins-mui",
       "alwaysOn": true,
-      "register": { "site": "registerMuiPlugin" }
+      "register": {
+        "site": "registerMuiPlugin"
+      }
     },
     {
       "id": "bookings",
@@ -16,7 +18,9 @@
         "tenantApi": "registerBookingsApi",
         "consoleApi": "registerBookingsConsoleApi"
       },
-      "apiPrefixes": ["bookings"]
+      "apiPrefixes": [
+        "bookings"
+      ]
     },
     {
       "id": "commerce",
@@ -27,7 +31,10 @@
         "tenantApi": "registerCommerceApi",
         "consoleApi": "registerCommerceConsoleApi"
       },
-      "apiPrefixes": ["commerce", "membership"]
+      "apiPrefixes": [
+        "commerce",
+        "membership"
+      ]
     },
     {
       "id": "community",
@@ -36,17 +43,23 @@
         "console": "registerCommunityConsole",
         "consoleApi": "registerCommunityConsoleApi"
       },
-      "apiPrefixes": ["community"]
+      "apiPrefixes": [
+        "community"
+      ]
     },
     {
       "id": "contacts",
       "package": "@aglyn/plugins-contacts",
-      "register": { "console": "registerContactsConsole" }
+      "register": {
+        "console": "registerContactsConsole"
+      }
     },
     {
       "id": "data",
       "package": "@aglyn/plugins-data",
-      "register": { "console": "registerDataConsole" }
+      "register": {
+        "console": "registerDataConsole"
+      }
     },
     {
       "id": "email",
@@ -56,7 +69,9 @@
         "console": "registerEmailConsole",
         "tenantApi": "registerEmailApi"
       },
-      "apiPrefixes": ["email"]
+      "apiPrefixes": [
+        "email"
+      ]
     },
     {
       "id": "events-calendar",
@@ -66,17 +81,23 @@
         "console": "registerEventsCalendarConsole",
         "tenantApi": "registerEventsCalendarApi"
       },
-      "apiPrefixes": ["events"]
+      "apiPrefixes": [
+        "events"
+      ]
     },
     {
       "id": "inbox",
       "package": "@aglyn/plugins-inbox",
-      "register": { "console": "registerInboxConsole" }
+      "register": {
+        "console": "registerInboxConsole"
+      }
     },
     {
       "id": "logic",
       "package": "@aglyn/plugins-logic",
-      "register": { "console": "registerLogicConsole" }
+      "register": {
+        "console": "registerLogicConsole"
+      }
     },
     {
       "id": "marketing",
@@ -86,12 +107,18 @@
         "tenantApi": "registerMarketingApi",
         "consoleApi": "registerMarketingConsoleApi"
       },
-      "apiPrefixes": ["campaigns", "experiments"]
+      "apiPrefixes": [
+        "campaigns",
+        "experiments"
+      ]
     },
     {
       "id": "redirects",
       "package": "@aglyn/plugins-redirects",
-      "register": { "console": "registerRedirectsConsole" }
+      "register": {
+        "console": "registerRedirectsConsole",
+        "tenantApi": "registerRedirectsApi"
+      }
     },
     {
       "id": "workflows",
@@ -100,7 +127,9 @@
         "console": "registerWorkflowsConsole",
         "tenantApi": "registerWorkflowsApi"
       },
-      "apiPrefixes": ["hooks"]
+      "apiPrefixes": [
+        "hooks"
+      ]
     }
   ]
 }

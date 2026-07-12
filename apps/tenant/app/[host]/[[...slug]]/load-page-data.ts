@@ -16,24 +16,15 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
-import * as MarketingModel from '@aglyn/plugins-marketing/model'
-import * as CommerceModel from '@aglyn/plugins-commerce/model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 import getScreen from '@aglyn/tenant-runtime/get-screen'
 import getVariables from '@aglyn/tenant-runtime/get-variables'
 import { cache } from 'react'
-import getClientAutomations, {
-  type ClientAutomation,
-} from '../../../utils/get-client-automations'
+import { serverPluginLoader } from '../../../utils/server-plugin-loader'
 import getCollectionContent from '../../../utils/get-collection-content'
 import getHost from '../../../utils/get-host'
-import getOverlays from '../../../utils/get-overlays'
-import getScreenExperiments, {
-  type ScreenExperiment,
-} from '../../../utils/get-screen-experiments'
 import getTenant from '../../../utils/get-tenant'
-import { resolveRedirect } from '../../../utils/resolve-redirect'
 import type { LoadResult, Props } from './types'
 
 /**
@@ -142,10 +133,20 @@ export const loadPageData = cache(
       }
     }
 
+    // Plugin site-page hooks (AGL-417/418) register through the tenant
+    // server manifest; ensure they're loaded before any hook runs.
+    await serverPluginLoader.ensureAll(['tenantApi'])
+
     // Redirect rules (AGL-155) fire before any route resolution, so a
-    // rule can move even a published screen. Option A per the issue:
-    // ISR-cached with a 30s revalidate; hit counts are sampled.
-    const redirectRule = await resolveRedirect(hostRes.host as any, path)
+    // rule can move even a published screen (plugins-redirects' resolver;
+    // ISR-cached with a 30s revalidate, hit counts sampled).
+    const redirectRule = await Aglyn.resolveSiteRedirect({
+      hostId,
+      host: hostRes.host,
+      tenant: tenantRes.tenant,
+      path,
+      slugSegments: [...(slug ?? [])],
+    })
     if (redirectRule) {
       return {
         redirect: {
@@ -175,145 +176,18 @@ export const loadPageData = cache(
     console.debug('screenEntry', screenEntry)
 
     if (!Array.isArray(screenEntry)) {
-      // Product detail routes (AGL-292): /products/{slug} renders the
-      // host's designated PDP template screen (settings/store
-      // `pdpScreenId`, AGL-295) with product tokens; the product-detail
-      // block hydrates variants client-side from the same slug. Same
-      // mechanism as entry-template screens below.
-      const pdpSegments = path.split('/').filter(Boolean)
-      if (pdpSegments.length === 2 && pdpSegments[0] === 'products') {
-        const adminFirestore = firebaseAdmin.app().firestore()
-        const hostDocRef = adminFirestore.collection('hosts').doc(hostId)
-        const [storeSettings, productSnapshot] = await Promise.all([
-          hostDocRef.collection('settings').doc('store').get(),
-          hostDocRef
-            .collection('products')
-            .where('slug', '==', pdpSegments[1])
-            .limit(1)
-            .get(),
-        ])
-        const pdpScreenId = storeSettings.get('pdpScreenId')
-        const productRaw = productSnapshot.docs[0]?.data() as any
-        if (
-          pdpScreenId &&
-          productRaw &&
-          !productRaw.deletedAt &&
-          productRaw.status === 'active'
-        ) {
-          const product = CommerceModel.liftLegacyProduct(productRaw)
-          const templateRes = await getScreen({
-            hostId,
-            screenId: pdpScreenId,
-          })
-          if (templateRes.screen) {
-            const [minPrice, maxPrice] = CommerceModel.productPriceRange(product)
-            const templateNodes = await composeScreenNodes({
-              hostId,
-              screenId: pdpScreenId,
-              screen: templateRes.screen,
-              tokens: {
-                'product.name': product.name,
-                'product.description': product.description ?? '',
-                'product.price':
-                  minPrice === maxPrice
-                    ? `$${minPrice}`
-                    : `From $${minPrice}`,
-                'product.image':
-                  product.mediaUrls?.[0] ?? product.imageUrl ?? '',
-                'product.slug': product.slug,
-              },
-            })
-            if (templateNodes) {
-              return {
-                props: JSON.parse(
-                  JSON.stringify({
-                    data: {
-                      host: hostRes.host,
-                      screen: {
-                        data: {
-                          ...templateRes.screen,
-                          seo: {
-                            ...((templateRes.screen as any).seo ?? {}),
-                            title: product.seo?.title ?? product.name,
-                            description:
-                              product.seo?.description ??
-                              product.description ??
-                              undefined,
-                          },
-                        },
-                      },
-                    },
-                    nodes: templateNodes,
-                  }),
-                ),
-                revalidate: 60,
-              }
-            }
-          }
-        }
-      }
-      // Commerce collection routes (AGL-298): /collections/{slug} renders
-      // the designated collection template with collection tokens; the
-      // product-grid block derives the same slug from the URL.
-      if (pdpSegments.length === 2 && pdpSegments[0] === 'collections') {
-        const adminFirestore = firebaseAdmin.app().firestore()
-        const hostDocRef = adminFirestore.collection('hosts').doc(hostId)
-        const [storeSettings, collectionSnapshot] = await Promise.all([
-          hostDocRef.collection('settings').doc('store').get(),
-          hostDocRef
-            .collection('collections')
-            .where('slug', '==', pdpSegments[1])
-            .limit(1)
-            .get(),
-        ])
-        const collectionScreenId = storeSettings.get('collectionScreenId')
-        const shopCollection = collectionSnapshot.docs[0]?.data() as
-          | CommerceModel.HostCollection
-          | undefined
-        if (collectionScreenId && shopCollection) {
-          const templateRes = await getScreen({
-            hostId,
-            screenId: collectionScreenId,
-          })
-          if (templateRes.screen) {
-            const templateNodes = await composeScreenNodes({
-              hostId,
-              screenId: collectionScreenId,
-              screen: templateRes.screen,
-              tokens: {
-                'collection.name': shopCollection.name,
-                'collection.description': shopCollection.description ?? '',
-                'collection.image': shopCollection.imageUrl ?? '',
-                'collection.slug': shopCollection.slug,
-              },
-            })
-            if (templateNodes) {
-              return {
-                props: JSON.parse(
-                  JSON.stringify({
-                    data: {
-                      host: hostRes.host,
-                      screen: {
-                        data: {
-                          ...templateRes.screen,
-                          seo: {
-                            ...((templateRes.screen as any).seo ?? {}),
-                            title: shopCollection.name,
-                            description:
-                              shopCollection.description ?? undefined,
-                          },
-                        },
-                      },
-                    },
-                    nodes: templateNodes,
-                  }),
-                ),
-                revalidate: 60,
-              }
-            }
-          }
-        }
-      }
+      // Plugin page resolvers (AGL-418): commerce composes PDP/PLP
+      // template pages for /products/* and /collections/* — first
+      // non-undefined answer is the page.
+      const resolved = await Aglyn.resolveSitePage({
+        hostId,
+        host: hostRes.host,
+        tenant: tenantRes.tenant,
+        path,
+        slugSegments: [...(slug ?? [])],
+      })
+      if (resolved) return resolved as never
+
       // Content collections fallback (AGL-81): /{collection} and
       // /{collection}/{entry} paths that aren't screens render the themed
       // blog surfaces.
@@ -532,132 +406,18 @@ export const loadPageData = cache(
     const showBranding = !Aglyn.resolveTenantEntitlements(tenantRes.tenant)
       .features.removeBranding
 
-    // Marketing overlays (AGL-195/196/247): marketingOverlays-gated on the
-    // effective plan (plan-less = free = no overlays); binding tokens
-    // resolve server-side so the client ships plain text.
-    const overlaysEntitled = Aglyn.resolveTenantEntitlements(tenantRes.tenant)
-      .features.marketingOverlays
-    const contentHash = (value: string) => {
-      let hash = 0
-      for (let index = 0; index < value.length; index += 1) {
-        hash = (hash * 31 + value.charCodeAt(index)) | 0
-      }
-      return Math.abs(hash).toString(36)
-    }
-    // Marketing hub overlays (AGL-251): scheduled/targeted overlay docs
-    // win over the legacy single announcementBar/popup host fields.
-    const overlayPath = `/${path.replace(/^\/+/, '')}`.replace(/\/{2,}/g, '/')
-    const overlayDocs = overlaysEntitled ? await getOverlays({ hostId }) : []
-    const activeOverlays = MarketingModel.resolveActiveOverlays(overlayDocs, {
-      path: overlayPath,
+    // Plugin page enrichers (AGL-418): marketing contributes overlays
+    // (announcement bar/popup), site-event automations, and experiments —
+    // all entitlement-gated inside the plugin, shapes unchanged.
+    const enriched = await Aglyn.runSitePageEnrichers({
+      hostId,
+      host: hostRes.host,
+      tenant: tenantRes.tenant,
+      path,
+      slugSegments: [...(slug ?? [])],
+      screenId,
+      screen: screenRes.screen,
     })
-    const barConfig: Aglyn.HostAnnouncementBar | undefined = activeOverlays.bar
-      ? { enabled: true, ...activeOverlays.bar.bar }
-      : ((hostRes.host as any)?.announcementBar as
-          | Aglyn.HostAnnouncementBar
-          | undefined)
-    const popupConfig: Aglyn.HostPopup | undefined = activeOverlays.popup
-      ? {
-          enabled: true,
-          ...activeOverlays.popup.popup,
-          ...(activeOverlays.popup.startAtMs
-            ? { startAtMs: activeOverlays.popup.startAtMs }
-            : {}),
-          ...(activeOverlays.popup.endAtMs
-            ? { endAtMs: activeOverlays.popup.endAtMs }
-            : {}),
-        }
-      : ((hostRes.host as any)?.popup as Aglyn.HostPopup | undefined)
-    const overlayVariables =
-      overlaysEntitled &&
-      ((barConfig?.enabled && barConfig.text) ||
-        (popupConfig?.enabled && popupConfig.body))
-        ? await getVariables({ hostId })
-        : {}
-    let announcementBar: Props['announcementBar'] = null
-    if (overlaysEntitled && barConfig?.enabled && barConfig.text) {
-      const text = Aglyn.resolveBindings(barConfig.text, overlayVariables)
-      announcementBar = {
-        text,
-        ...(barConfig.href ? { href: barConfig.href } : {}),
-        ...(barConfig.backgroundColor
-          ? { backgroundColor: barConfig.backgroundColor }
-          : {}),
-        ...(barConfig.textColor ? { textColor: barConfig.textColor } : {}),
-        dismissible: barConfig.dismissible !== false,
-        contentHash: contentHash(text),
-        ...(activeOverlays.bar?.$id
-          ? { overlayId: activeOverlays.bar.$id }
-          : {}),
-      }
-    }
-    let popup: Props['popup'] = null
-    if (overlaysEntitled && popupConfig?.enabled && popupConfig.body) {
-      const body = Aglyn.resolveBindings(popupConfig.body, overlayVariables)
-      const headline = popupConfig.headline
-        ? Aglyn.resolveBindings(popupConfig.headline, overlayVariables)
-        : undefined
-      popup = {
-        ...(headline ? { headline } : {}),
-        body,
-        ...(popupConfig.imageUrl ? { imageUrl: popupConfig.imageUrl } : {}),
-        ...(popupConfig.ctaLabel ? { ctaLabel: popupConfig.ctaLabel } : {}),
-        ...(popupConfig.ctaHref ? { ctaHref: popupConfig.ctaHref } : {}),
-        trigger: popupConfig.trigger ?? 'delay',
-        triggerValue: Number(popupConfig.triggerValue ?? 3),
-        frequencyDays: Math.max(1, Number(popupConfig.frequencyDays ?? 7)),
-        ...(popupConfig.collectEmail ? { collectEmail: true } : {}),
-        ...(popupConfig.startAtMs ? { startAtMs: popupConfig.startAtMs } : {}),
-        ...(popupConfig.endAtMs ? { endAtMs: popupConfig.endAtMs } : {}),
-        contentHash: contentHash(`${headline ?? ''}|${body}`),
-        ...(activeOverlays.popup?.$id
-          ? { overlayId: activeOverlays.popup.$id }
-          : {}),
-      }
-    }
-
-    // Site-event automations (AGL-256): actions-gated; runJs steps are
-    // business-gated (webhooks flag marks the tier).
-    const actionsEntitled = Aglyn.resolveTenantEntitlements(tenantRes.tenant)
-      .features.actions
-    const clientAutomations: ClientAutomation[] = actionsEntitled
-      ? await getClientAutomations({
-          hostId,
-          path: overlayPath,
-          allowJs: Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
-            .webhooks,
-        })
-      : []
-    // Screen/section experiments (AGL-253): Business-gated; composing a
-    // tree per divergent variant is bounded (≤4) and ISR-cached.
-    const experiments: ScreenExperiment[] = Aglyn.resolveTenantEntitlements(
-      tenantRes.tenant,
-    ).features.abTesting
-      ? await getScreenExperiments({
-          hostId,
-          screenId,
-          screen: screenRes.screen,
-        })
-      : []
-
-    // Overlay payloads showOverlay steps reference (AGL-257).
-    const automationOverlays: Record<string, any> = {}
-    for (const automation of clientAutomations) {
-      for (const step of automation.steps) {
-        if (step.type === 'showOverlay' && step.overlayId) {
-          const overlay = overlayDocs.find(
-            (candidate) => candidate.$id === step.overlayId,
-          )
-          if (overlay) {
-            automationOverlays[step.overlayId] = {
-              kind: overlay.kind,
-              ...(overlay.bar ? { bar: overlay.bar } : {}),
-              ...(overlay.popup ? { popup: overlay.popup } : {}),
-            }
-          }
-        }
-      }
-    }
 
     const props = {
       data: JSON.parse(
@@ -675,13 +435,7 @@ export const loadPageData = cache(
       // loads before rendering the canvas.
       enabledPlugins: Aglyn.resolveEnabledPlugins(tenantRes.tenant as never),
       showBranding,
-      announcementBar,
-      popup,
-      clientAutomations: JSON.parse(JSON.stringify(clientAutomations)),
-      experiments: JSON.parse(JSON.stringify(experiments)),
-      automationOverlays: Object.keys(automationOverlays).length
-        ? JSON.parse(JSON.stringify(automationOverlays))
-        : null,
+      ...enriched,
     }
 
     return {

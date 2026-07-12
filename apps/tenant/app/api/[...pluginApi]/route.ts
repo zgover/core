@@ -16,23 +16,15 @@
  */
 
 import {
-  createPluginLoader,
   pluginIdForRegisteredApiPath,
   resolveEnabledPlugins,
   resolvePluginApiRoute,
   runLegacyHandler,
 } from '@aglyn/aglyn/server'
 import { getOrgForHost } from '@aglyn/tenant-data-admin'
-import { TENANT_PLUGIN_SERVER_MANIFEST } from '../../../utils/plugins.server.generated'
+import { serverPluginLoader as loader } from '../../../utils/server-plugin-loader'
 
 export const dynamic = 'force-dynamic'
-
-// Dynamic activation (AGL-417): handlers register on first dispatch from the
-// GENERATED manifest — the app carries no static plugin imports. Loading is
-// lazy-load-all (a shared serverless process serves every org, so per-org
-// REGISTRATION would be cosmetic); per-org enforcement happens per request
-// below, plus each handler's own entitlement self-gating.
-const loader = createPluginLoader(TENANT_PLUGIN_SERVER_MANIFEST)
 
 /**
  * Tenant plugin API dispatcher (AGL-396/408/417). Named `app/api/*` routes

@@ -16,15 +16,45 @@
  */
 
 import type * as Aglyn from '@aglyn/aglyn/server'
-import type { ClientAutomation } from '../../../utils/get-client-automations'
 import type { CollectionContent } from '../../../utils/get-collection-content'
-import type { ScreenExperiment } from '../../../utils/get-screen-experiments'
 
 /**
  * Composed page payload the server route hands to the client renderer
  * (unchanged from the former `getStaticProps` `Props`, AGL-398). Shared by
  * `load-page-data`, `page`, and `catch-all-client`.
  */
+/**
+ * Wire-contract copies of the marketing plugin's page contributions
+ * (AGL-418): the enricher (plugins-marketing/server) produces these
+ * shapes; the page runtime consumes them. Kept structurally identical —
+ * the app may not import plugin types, so the contract is duplicated
+ * deliberately (AGL-419 replaces the client consumers with plugin-owned
+ * site runtimes and an opaque bag).
+ */
+export interface ClientAutomation {
+  id: string
+  event: string
+  selector?: string
+  threshold?: number
+  oncePerVisitor?: boolean
+  oncePerSession?: boolean
+  cooldownMinutes?: number
+  steps: Array<Record<string, any> & { type: string; overlayId?: string }>
+  hasServerSteps: boolean
+}
+
+export interface ScreenExperiment {
+  id: string
+  target: 'screen' | 'section'
+  status: string
+  nodeId?: string
+  winnerVariantId?: string
+  endAtMs?: number
+  goal?: { event: string; filter?: string }
+  variants: Array<{ id: string; weight?: number; versionId?: string }>
+  payloads: Record<string, Record<string, any> | null>
+}
+
 export interface Props {
   data: {
     host?: Aglyn.AglynHost

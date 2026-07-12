@@ -28,8 +28,10 @@
 import {
   registerBillingWebhookHandler,
   registerPluginApiRoute,
+  registerSitePageResolver,
 } from '@aglyn/aglyn/server'
 import { commerceBillingWebhookHandler } from './server/billing-webhook'
+import { commerceSitePageResolver } from './server/site-page-resolver'
 import { cartCheckoutHandler } from './server/cart-checkout'
 import { cartHandler } from './server/cart'
 import { catalogHandler } from './server/catalog'
@@ -64,6 +66,8 @@ import { supplierUpdateHandler } from './server/supplier-update'
 
 /** Registers the commerce plugin's storefront API routes. */
 export function registerCommerceApi(): void {
+  // PDP/PLP template pages (AGL-418): /products/* + /collections/*.
+  registerSitePageResolver(commerceSitePageResolver)
   registerPluginApiRoute('commerce/cart-checkout', cartCheckoutHandler)
   registerPluginApiRoute('commerce/cart', cartHandler)
   registerPluginApiRoute('commerce/catalog', catalogHandler)

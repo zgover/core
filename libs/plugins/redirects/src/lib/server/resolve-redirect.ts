@@ -16,7 +16,7 @@
  */
 
 import { checkEntitlement } from '@aglyn/aglyn/server'
-import { type HostRedirect, matchRedirect, normalizeRedirectSource } from '@aglyn/plugins-redirects/model'
+import { type HostRedirect, matchRedirect, normalizeRedirectSource } from '../model/redirects'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 

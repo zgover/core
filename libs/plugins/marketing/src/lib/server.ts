@@ -17,8 +17,13 @@
 
 import { checkEntitlement } from '@aglyn/aglyn/server'
 import { evaluateAutoWinner, type HostExperiment } from './model'
-import { registerPluginApiRoute, type PluginApiHandler } from '@aglyn/aglyn/server'
+import {
+  registerPluginApiRoute,
+  registerSitePageEnricher,
+  type PluginApiHandler,
+} from '@aglyn/aglyn/server'
 import { emailEventsHandler } from './server/email-events'
+import { marketingSitePageEnricher } from './server/site-page-enricher'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { campaignProcessScheduledHandler } from './server/campaign-process-scheduled'
@@ -114,6 +119,8 @@ const trackHandler: PluginApiHandler = async (req, res) => {
 /** Registers the marketing plugin's public (site-facing) API routes (AGL-396). */
 export function registerMarketingApi(): void {
   registerPluginApiRoute('experiments/track', trackHandler)
+  // Site-page contributions (AGL-418): overlays, automations, experiments.
+  registerSitePageEnricher(marketingSitePageEnricher)
 }
 
 /** Registers the marketing plugin's console-side API routes (AGL-396). */

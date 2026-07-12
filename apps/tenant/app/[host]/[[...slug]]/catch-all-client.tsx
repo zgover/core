@@ -33,9 +33,7 @@ import {
   useState,
 } from 'react'
 import { sitePluginLoader } from '../../../utils/site-plugin-loader'
-import type { ClientAutomation } from '../../../utils/get-client-automations'
-import type { ScreenExperiment } from '../../../utils/get-screen-experiments'
-import type { Props } from './types'
+import type { ClientAutomation, Props, ScreenExperiment } from './types'
 
 /**
  * Overlay metrics beacon (AGL-200): fire-and-forget, never blocks UX.
@@ -101,7 +99,8 @@ function ExperimentsRunner(props: {
       return undefined // No storage (privacy mode) — serve the default.
     }
     const variant = MarketingModel.assignExperimentVariant(
-      { status: experiment.status, variants: experiment.variants,
+      // Wire-typed props (AGL-418); the plugin narrows its own enum.
+      { status: experiment.status as never, variants: experiment.variants,
         ...(experiment.winnerVariantId
           ? { winnerVariantId: experiment.winnerVariantId }
           : {}),

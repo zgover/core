@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,15 @@
  * limitations under the License.
  */
 
-export { default } from './plugin-manager'
-export * from './plugin-manager'
-export * from './billing-webhook-hooks'
-export * from './enabled-plugins'
-export * from './plugin-loader'
-export * from './site-page-hooks'
-export * from './feature-plugins'
-export * from './plugin-bridge'
+import { createPluginLoader } from '@aglyn/aglyn/server'
+import { TENANT_PLUGIN_SERVER_MANIFEST } from './plugins.server.generated'
+
+/**
+ * The tenant's SERVER-side plugin loader (AGL-417/418): one shared
+ * instance so the API dispatcher and the page loader (redirect resolvers,
+ * page resolvers, enrichers) activate the same registrations once per
+ * process.
+ */
+export const serverPluginLoader = createPluginLoader(
+  TENANT_PLUGIN_SERVER_MANIFEST,
+)

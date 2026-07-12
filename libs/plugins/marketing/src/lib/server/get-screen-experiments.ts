@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
-import * as MarketingModel from '@aglyn/plugins-marketing/model'
+import * as MarketingModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 
