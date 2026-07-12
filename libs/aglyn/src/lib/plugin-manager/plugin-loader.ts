@@ -58,6 +58,7 @@ import { setRegisteringPluginId } from '../app-utils/api-plugins'
 export function createPluginLoader(manifest: PluginLoadManifest): PluginLoader {
   const loads = new Map<string, Promise<Record<string, unknown>>>()
   const registered = new Set<string>()
+  const bootstrapped = new Set<string>()
   const ensures = new Map<string, Promise<void>>()
   const prefixToId = new Map<string, string>()
   for (const entry of manifest) {
@@ -102,6 +103,44 @@ export function createPluginLoader(manifest: PluginLoadManifest): PluginLoader {
     }
   }
 
+  /**
+   * Bootstrap phase (AGL-429, Strapi register→bootstrap parity): after
+   * EVERY plugin in an ensure batch has registered a surface, each loaded
+   * module's optional `bootstrap<Surface>()` export runs (manifest order,
+   * once per plugin+surface) — the sanctioned place for cross-plugin
+   * wiring, because by then the other plugins' registrations are in the
+   * registries. Plugins loaded by a LATER ensure bootstrap in that batch;
+   * wiring must therefore tolerate registrations that arrive afterwards
+   * (prefer lazy list*() reads over captured snapshots).
+   */
+  const bootstrap = async (
+    targets: readonly PluginLoadEntry[],
+    surfaces: readonly string[],
+  ): Promise<void> => {
+    for (const entry of targets) {
+      const wanted = surfaces.filter((surface) => entry.register[surface])
+      if (!wanted.length) continue
+      const mod = await loadOnce(entry)
+      for (const surface of wanted) {
+        const key = `${entry.id}:${surface}`
+        if (bootstrapped.has(key)) continue
+        bootstrapped.add(key)
+        const fnName = `bootstrap${surface[0].toUpperCase()}${surface.slice(1)}`
+        const fn = mod[fnName]
+        if (typeof fn !== 'function') continue
+        setRegisteringPluginId(entry.id)
+        try {
+          ;(fn as () => void)()
+        } catch (error) {
+          // A broken bootstrap must not take the surface down.
+          console.error(`plugin ${entry.id}: ${fnName} failed`, error)
+        } finally {
+          setRegisteringPluginId(undefined)
+        }
+      }
+    }
+  }
+
   const ensure = (
     ids: readonly string[],
     surfaces: readonly string[],
@@ -114,6 +153,7 @@ export function createPluginLoader(manifest: PluginLoadManifest): PluginLoader {
       )
       const run = async (): Promise<void> => {
         await Promise.all(targets.map((entry) => activate(entry, surfaces)))
+        await bootstrap(targets, surfaces)
       }
       promise = run()
       ensures.set(key, promise)

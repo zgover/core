@@ -17,7 +17,11 @@
 
 import {
   resolveOrgIdForHost, firebaseAdmin } from '@aglyn/tenant-data-admin'
-import { type PluginApiHandler } from '@aglyn/aglyn/server'
+import {
+  isCompatibleHostAbi,
+  PLUGIN_HOST_ABI_VERSION,
+  type PluginApiHandler,
+} from '@aglyn/aglyn/server'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 
 /**
@@ -242,10 +246,23 @@ export const installPluginHandler: PluginApiHandler = async (req, res) => {
       'add',
     )
 
+    // ABI heads-up (AGL-429): the pin succeeds (explicit choice), but the
+    // loaders will refuse an incompatible bundle — tell the installer now.
+    const manifestHostAbi = Number(versionData.manifest?.hostAbi)
+    const hostAbiWarning =
+      Number.isInteger(manifestHostAbi) &&
+      manifestHostAbi > 0 &&
+      !isCompatibleHostAbi(manifestHostAbi)
+        ? `Built for host ABI ${manifestHostAbi}; this platform runs ` +
+          `${PLUGIN_HOST_ABI_VERSION}. The plugin will not load until the ` +
+          'publisher ships a compatible version.'
+        : undefined
+
     return res.status(200).json({
       installed: true,
       upgraded: existing.exists,
       version,
+      ...(hostAbiWarning ? { hostAbiWarning } : {}),
     })
   } catch (error) {
     console.error(error)

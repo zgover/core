@@ -53,6 +53,17 @@ export interface RealmPluginInstall {
   trust?: string
   /** Ed25519 signature (base64) over the sha256 hex string. */
   signature?: string
+  /** Host ABI the bundle targets (AGL-429); mismatches never load. */
+  hostAbi?: number
+}
+
+/**
+ * ABI gate (AGL-429): a declared `hostAbi` must equal the running host's
+ * generation; absent = pre-compat bundle, allowed (with a loader warning)
+ * so existing installs keep working across the introduction of the field.
+ */
+export function isCompatibleHostAbi(hostAbi: number | undefined): boolean {
+  return hostAbi === undefined || hostAbi === PLUGIN_HOST_ABI_VERSION
 }
 
 export interface LoadRealmPluginsOptions {
@@ -182,6 +193,16 @@ export async function loadRealmPlugins(
             )}`
             const response = await fetch(url)
             if (!response.ok) throw new Error(`fetch ${response.status}`)
+            if (!isCompatibleHostAbi(install.hostAbi)) {
+              throw new Error(
+                `built for host ABI ${install.hostAbi}, host is ${PLUGIN_HOST_ABI_VERSION}`,
+              )
+            }
+            if (install.hostAbi === undefined) {
+              console.warn(
+                `realm plugin ${key}: no hostAbi declared (pre-AGL-429 bundle)`,
+              )
+            }
             const bytes = await response.arrayBuffer()
             const verdict = await verifyRealmBundle(
               bytes,

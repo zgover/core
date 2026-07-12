@@ -192,6 +192,12 @@ template + the catalog entry).
 - **Billing webhook hooks** — `registerBillingWebhookHandler` receives the
   platform Stripe events (commerce orders, booking payments, marketplace
   purchases live in their plugins).
+- **Bootstrap phase** (AGL-429) — export `bootstrap<Surface>()`
+  (`bootstrapConsole`, `bootstrapSite`, …) next to your register fn and the
+  loader calls it after EVERY plugin in the batch has registered — the
+  sanctioned place for cross-plugin wiring. Registers always precede
+  bootstraps; a plugin bootstraps once per surface; late-loaded plugins
+  bootstrap in their own batch, so read registries lazily.
 - **Config schemas** (AGL-428) — declare settings once with
   `registerPluginConfigSchema` (pure-data schema module, registered from
   BOTH the client barrel and `/server` entry) and the platform provides

@@ -80,7 +80,12 @@ interface InstallPin {
 export async function resolveCommunityPluginVersion(
   listingId: string,
   version: string,
-): Promise<{ sha256: string; signature?: string; trust?: string } | null> {
+): Promise<{
+  sha256: string
+  signature?: string
+  trust?: string
+  hostAbi?: number
+} | null> {
   const snapshot = await firebaseAdmin
     .app()
     .firestore()
@@ -91,10 +96,12 @@ export async function resolveCommunityPluginVersion(
     .get()
   const data = snapshot.data()
   if (!data?.sha256) return null
+  const hostAbi = Number(data.manifest?.hostAbi)
   return {
     sha256: String(data.sha256),
     ...(data.signature ? { signature: String(data.signature) } : {}),
     ...(data.trust ? { trust: String(data.trust) } : {}),
+    ...(Number.isInteger(hostAbi) && hostAbi > 0 ? { hostAbi } : {}),
   }
 }
 
@@ -172,6 +179,7 @@ export async function getRealmPluginInstalls(options: {
         sha256: pinned.sha256,
         trust: 'realm',
         signature: pinned.signature,
+        ...(pinned.hostAbi !== undefined ? { hostAbi: pinned.hostAbi } : {}),
       }
     }),
   )

@@ -20,6 +20,8 @@ import {
   sha256Hex,
   verifyRealmBundle,
   verifyRealmSignature,
+  isCompatibleHostAbi,
+  PLUGIN_HOST_ABI_VERSION,
 } from './realm-plugins'
 
 /** Mirrors the staff signing flow: Ed25519 over the sha256 hex string. */
@@ -107,5 +109,17 @@ describe('realm bundle verification (AGL-420)', () => {
       publicKeyBase64,
     )
     expect(forged).toMatchObject({ ok: false, reason: 'invalid signature' })
+  })
+})
+
+describe('isCompatibleHostAbi (AGL-429)', () => {
+  it('accepts the running ABI and legacy undeclared bundles', () => {
+    expect(isCompatibleHostAbi(PLUGIN_HOST_ABI_VERSION)).toBe(true)
+    expect(isCompatibleHostAbi(undefined)).toBe(true)
+  })
+
+  it('refuses any other generation', () => {
+    expect(isCompatibleHostAbi(PLUGIN_HOST_ABI_VERSION + 1)).toBe(false)
+    expect(isCompatibleHostAbi(0)).toBe(false)
   })
 })

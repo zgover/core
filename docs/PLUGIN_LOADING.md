@@ -83,7 +83,13 @@ Every link must hold before a byte executes:
    without a key at all.
 3. **Kill switch** — `revocations/{listingId}` beats a still-present trust
    grant; revoked versions are dropped by the server-side join.
-4. **Host ABI, no imports** — bundles are built with
+4. **ABI compatibility** (AGL-429) — manifests declare `hostAbi`; the
+   loaders refuse a bundle whose generation differs from the host's
+   `PLUGIN_HOST_ABI_VERSION` (undeclared = legacy, loads with a warning),
+   and the install API warns at pin time. Bumping the ABI is a breaking
+   platform change: ship it with a migration window where publishers
+   rebuild against the new host object.
+5. **Host ABI, no imports** — bundles are built with
    `tools/plugin-loader/realm/rollup.config.mjs`: `react`,
    `react/jsx-runtime`, and `@aglyn/aglyn` compile to lookups on
    `globalThis.__AGLYN_PLUGIN_HOST__`, which each APP composes from its

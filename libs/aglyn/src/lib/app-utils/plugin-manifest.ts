@@ -49,6 +49,13 @@ export interface PluginManifest {
   version: string
   /** Bundle entry the loader imports on the plugin origin. */
   entry: string
+  /**
+   * Host ABI generation the bundle was built against (AGL-429). Realm and
+   * remote-server loaders refuse a bundle whose declared ABI differs from
+   * the running host's PLUGIN_HOST_ABI_VERSION; absent = pre-compat
+   * bundle, loaded with a warning. Bumping the ABI is a breaking change.
+   */
+  hostAbi?: number
   capabilities?: PluginCapabilities
   /** Besigner lineal rules the registered component honors (AGL-45 §4). */
   restrictParent?: string[]
@@ -203,6 +210,15 @@ export function validatePluginManifest(
     return ids.length ? [...new Set(ids)] : undefined
   }
 
+  const hostAbiRaw = raw['hostAbi']
+  let hostAbi: number | undefined
+  if (hostAbiRaw !== undefined) {
+    hostAbi = Number(hostAbiRaw)
+    if (!Number.isInteger(hostAbi) || hostAbi < 1 || hostAbi > 99) {
+      return { ok: false, error: 'hostAbi must be a small positive integer' }
+    }
+  }
+
   return {
     ok: true,
     manifest: {
@@ -210,6 +226,7 @@ export function validatePluginManifest(
       name,
       version,
       entry,
+      ...(hostAbi !== undefined ? { hostAbi } : {}),
       ...(Object.keys(capabilities).length ? { capabilities } : {}),
       ...(restrict(raw['restrictParent'])
         ? { restrictParent: restrict(raw['restrictParent']) }

@@ -21,6 +21,7 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { pluginArtifactPath } from '../app-utils/plugin-manifest'
 import {
+  isCompatibleHostAbi,
   type RealmPluginInstall,
   verifyRealmBundle,
 } from './realm-plugins'
@@ -51,7 +52,12 @@ export interface RemoteServerBundleSource {
   resolveVersion(
     listingId: string,
     version: string,
-  ): Promise<{ sha256: string; signature?: string; trust?: string } | null>
+  ): Promise<{
+    sha256: string
+    signature?: string
+    trust?: string
+    hostAbi?: number
+  } | null>
   /** Base URL of the content-addressed artifacts origin. */
   artifactsBase: string
 }
@@ -90,6 +96,9 @@ export async function loadRemoteServerBundles(
           const pinned = await source.resolveVersion(listingId, version)
           if (!pinned) throw new Error('unknown listing version')
           if (pinned.trust !== 'realm') throw new Error('not realm-trusted')
+          if (!isCompatibleHostAbi(pinned.hostAbi)) {
+            throw new Error(`built for host ABI ${pinned.hostAbi}`)
+          }
           const url = `${source.artifactsBase.replace(/\/+$/, '')}/${pluginArtifactPath(
             listingId,
             version,
