@@ -46,6 +46,8 @@ function AnalyticsGlobalEvents({ children }) {
   }, [pathname, analytics])
 
   useEffect(() => {
+    // tenantId here is Firebase Auth's own GCIP multi-tenancy field on the
+    // user object — unrelated to Aglyn's retired tenant naming (AGL-445).
     const { uid, emailVerified, providerId, tenantId } = user?.data || {}
     const setAnalyticsUserId = () => {
       setUserId(analytics, uid)

@@ -62,11 +62,7 @@ async function handler(request: Request): Promise<Response> {
         const ticketSnapshot = await ticketsRef.doc(ticketId).get()
         const ticket = ticketSnapshot.data()
         if (!ticket) return Response.json({ error: 'Unknown ticket' }, { status: 404 })
-        if (
-          !isStaff &&
-          ticket['orgId'] !== orgId &&
-          ticket['tenantId'] !== decoded.uid
-        ) {
+        if (!isStaff && ticket['orgId'] !== orgId) {
           return Response.json({ error: 'Not your ticket' }, { status: 403 })
         }
         const messages = await ticketsRef
@@ -139,11 +135,7 @@ async function handler(request: Request): Promise<Response> {
       const ticketSnapshot = await ticketsRef.doc(ticketId).get()
       const ticket = ticketSnapshot.data()
       if (!ticket) return Response.json({ error: 'Unknown ticket' }, { status: 404 })
-      if (
-        !isStaff &&
-        ticket['orgId'] !== orgId &&
-        ticket['tenantId'] !== decoded.uid
-      ) {
+      if (!isStaff && ticket['orgId'] !== orgId) {
         return Response.json({ error: 'Not your ticket' }, { status: 403 })
       }
       const now = firebaseAdmin.firestore.FieldValue.serverTimestamp()

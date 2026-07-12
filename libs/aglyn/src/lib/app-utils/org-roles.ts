@@ -44,7 +44,7 @@ export type OrgPermissionSet = Record<OrgPermissionKey, boolean>
 
 export type OrgRoleTier = 'admin' | 'editor' | 'viewer'
 
-/** Owner-defined role at `tenants/{uid}/roles/{id}` (AGL-133). */
+/** Owner-defined role at `orgs/{orgId}/roles/{id}` (AGL-133/243). */
 export interface OrgCustomRole {
   name: string
   permissions?: Partial<OrgPermissionSet>
@@ -94,7 +94,7 @@ export function resolveRolePermissions(
   role: string | null | undefined,
   overrides?: Partial<Record<OrgPermissionKey, unknown>> | null,
   /**
-   * Custom roles (AGL-133), keyed by role id (`tenants/{uid}/roles`). A
+   * Custom roles (AGL-133), keyed by role id (`orgs/{orgId}/roles`). A
    * non-built-in role id resolves against this map — viewer base with the
    * custom role's permissions applied; unknown ids stay plain viewer.
    */

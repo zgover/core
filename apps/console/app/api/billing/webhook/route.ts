@@ -16,11 +16,7 @@
  */
 
 import { runBillingWebhookHandlers } from '@aglyn/aglyn/server'
-import {
-  firebaseAdmin,
-  notifyOrgAdmins,
-  resolveOrgMembership,
-} from '@aglyn/tenant-data-admin'
+import { firebaseAdmin, notifyOrgAdmins } from '@aglyn/tenant-data-admin'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { serverPluginLoader } from '../../../../utils/server-plugin-loader'
 
@@ -66,11 +62,11 @@ function planFromPriceId(priceId: string | undefined): string | undefined {
 }
 
 /**
- * Stripe webhook: syncs subscription lifecycle onto the tenant doc
- * (`tenants/{tenantId}.plan/subscription/stripeCustomerId`). The tenant id
- * travels in the subscription metadata set at checkout. Entitlements resolve
- * from the plan at read time (`resolveOrgEntitlements`), so no
- * entitlement fan-out is needed here.
+ * Stripe webhook: syncs subscription lifecycle onto the org doc
+ * (`orgs/{orgId}.plan/subscription/stripeCustomerId`). The org id travels
+ * in the subscription metadata set at checkout (`metadata[orgId]`,
+ * AGL-445). Entitlements resolve from the plan at read time
+ * (`resolveOrgEntitlements`), so no entitlement fan-out is needed here.
  */
 async function handler(request: Request): Promise<Response> {
   // Stripe signs the RAW body: read the exact bytes off the Web request
@@ -104,10 +100,8 @@ async function handler(request: Request): Promise<Response> {
       type === 'customer.subscription.updated' ||
       type === 'customer.subscription.deleted'
     ) {
-      const tenantId = object?.metadata?.tenantId
-      if (tenantId) {
-        // tenantId in legacy metadata is the owner uid; new checkouts also
-        // carry orgId. Orgs are the only billing target (AGL-238).
+      const orgId = object?.metadata?.orgId
+      if (orgId) {
         const canceled = type === 'customer.subscription.deleted'
         const priceId = object?.items?.data?.[0]?.price?.id
         const plan = canceled
@@ -124,18 +118,12 @@ async function handler(request: Request): Promise<Response> {
               : null,
           },
         }
-        const orgId =
-          object?.metadata?.orgId ??
-          (await resolveOrgMembership(tenantId))?.orgId ??
-          null
-        if (orgId) {
-          await firebaseAdmin
-            .app()
-            .firestore()
-            .collection('orgs')
-            .doc(String(orgId))
-            .set(billing, { merge: true })
-        }
+        await firebaseAdmin
+          .app()
+          .firestore()
+          .collection('orgs')
+          .doc(String(orgId))
+          .set(billing, { merge: true })
       }
     }
 

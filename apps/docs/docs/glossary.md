@@ -57,10 +57,11 @@ Two meanings — this is the word to be careful with:
    *identifiers* — `AglynTenant` is now `AglynOrgBilling`,
    `useCurrentTenant()` is `useCurrentOrg()` (returning `org`), the
    plugin-page `tenant` prop is `org`, and the `Tenant*`
-   permission/entitlement types are `Org*`. Only persisted *strings* keep
-   the old spelling (the `users.{uid}.tenants` map, Stripe
-   `metadata[tenantId]`, the `profiles/{tenantId}` keying) — renaming
-   stored data needs a migration, renaming TypeScript doesn't.
+   permission/entitlement types are `Org*`. The persisted *strings* went
+   in AGL-445, while the platform was still pre-launch: Stripe billing
+   metadata is keyed `orgId`, host docs carry only `orgId`/`memberRoles`,
+   and the `users.{uid}.tenants` map is gone. No tenant-spelled data
+   remains to migrate.
 
 **Rule: "tenant" means the site runtime, full stop. Code that means the
 entity says `org` and types it `AglynOrgBilling`.**
@@ -90,5 +91,5 @@ A request to `bakery.example.com` is resolved to a **host**, whose
 | Organization / org | Data model, APIs, permissions | `orgs/{orgId}`, `AglynOrganization`, `resolveOrg*` | ✅ the entity |
 | Workspace | UX / docs | — (copy only) | ✅ user-facing copy |
 | Tenant (runtime) | Published-site side | `apps/tenant`, `@aglyn/tenant-*` | ✅ that side of the platform |
-| Tenant (billing alias) | Removed (AGL-444) | only persisted strings remain (`users.tenants`, Stripe `metadata[tenantId]`) | ❌ don't reintroduce |
+| Tenant (billing alias) | Removed (AGL-444/445) | none — identifiers and persisted strings are both gone | ❌ don't reintroduce |
 | Host / site | One published site | `hosts/{hostId}`, `AglynHost` | ✅ `host` in code, "site" in copy |

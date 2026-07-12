@@ -143,7 +143,6 @@ await put(firestore.collection('hosts').doc(hostId), {
   subdomain: hostId,
   displayName: 'Demo Bakery',
   orgId,
-  tenantId: E2E_UID,
   admins: { [E2E_UID]: true },
   memberRoles: { [E2E_UID]: 'admin' },
   createdAt: now,

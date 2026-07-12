@@ -214,12 +214,12 @@ export function BillingPlanCardsComponent(props: BillingPlanCardsProps) {
                     {`${entitlements.bandwidthGb} GB bandwidth`}
                   </Typography>
                   <Typography variant="body2">
-                    {`${entitlements.managersPerTenant} team seat${
-                      entitlements.managersPerTenant === 1 ? '' : 's'
+                    {`${entitlements.managersPerOrg} team seat${
+                      entitlements.managersPerOrg === 1 ? '' : 's'
                     }`}
                     {pricing.extraSeatMonthlyUsd != null
                       ? ` (+$${pricing.extraSeatMonthlyUsd}/extra, ` +
-                        `max ${entitlements.maxManagersPerTenant})`
+                        `max ${entitlements.maxManagersPerOrg})`
                       : ''}
                   </Typography>
                   <Typography variant="body2">

@@ -97,7 +97,7 @@ export function checkOrgQuota(
 }
 
 /** Seat quota (AGL-112) on the same effective-plan resolution. */
-export function checkTenantSeatQuota(
+export function checkOrgSeatQuota(
   org: Partial<AglynOrgBilling> | null | undefined,
   kind: SeatKind,
   currentUsage: number,

@@ -67,14 +67,17 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    const tenantId = decoded.uid
-    // Org metadata (AGL-237): the webhook mirrors billing to this org so
-    // orgs can take over as the entitlement source. Explicit orgId from
+    // Org metadata (AGL-445): orgId is the only billing key — the webhook
+    // mirrors the subscription onto this org doc. Explicit orgId from
     // the workspace-scoped console wins; otherwise the user's first org.
     const orgMembership = await resolveOrgMembership(
       decoded.uid,
       String(body?.orgId ?? '') || null,
     )
+    if (!orgMembership) {
+      return Response.json({ error: 'No workspace to bill' }, { status: 403 })
+    }
+    const orgId = orgMembership.orgId
     const origin = headers.origin ?? `https://${headers.host}`
 
     const params = new URLSearchParams({
@@ -83,12 +86,9 @@ async function handler(request: Request): Promise<Response> {
       'line_items[0][quantity]': '1',
       success_url: `${origin}/manage/billing?status=success`,
       cancel_url: `${origin}/manage/billing?status=canceled`,
-      client_reference_id: tenantId,
-      'subscription_data[metadata][tenantId]': tenantId,
+      client_reference_id: orgId,
+      'subscription_data[metadata][orgId]': orgId,
       'subscription_data[metadata][plan]': plan,
-      ...(orgMembership
-        ? { 'subscription_data[metadata][orgId]': orgMembership.orgId }
-        : {}),
       ...(decoded.email ? { customer_email: decoded.email } : {}),
     })
 

@@ -17,7 +17,7 @@
 'use client'
 
 import type { AglynOrgBilling } from '@aglyn/aglyn'
-import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import useOrgWorkspace from './use-org-workspace'
@@ -27,9 +27,9 @@ const MAX_RETRIES = 5
 
 /**
  * The org workspace's billing doc — the entitlement source the signed-in
- * user acts under (AGL-238). Formerly `useCurrentTenant` (the alias was
- * removed in AGL-444); `tenantId` keeps its name because it feeds the
- * legacy Stripe `metadata[tenantId]` wire key (uid-keyed).
+ * user acts under (AGL-238). Formerly `useCurrentTenant` (alias removed
+ * in AGL-444; the uid-keyed `tenantId` return leg retired with the Stripe
+ * `metadata[tenantId]` wire key in AGL-445).
  *
  * Subscribes with a raw `onSnapshot` (with its own retry) rather than
  * reactfire's `useFirestoreDocData` — that hook's cached Observable is a
@@ -40,19 +40,15 @@ const MAX_RETRIES = 5
  */
 export function useCurrentOrg(): {
   org: Partial<AglynOrgBilling> | undefined
-  tenantId: string | undefined
   /** The org the billing data came from, once orgs carry it (AGL-237). */
   orgId: string | undefined
 } {
-  const { data: user } = useUser()
   const firestore = useFirestore()
   const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
-  const tenantId = user?.uid
   // AGL-238 cutover: the org doc is the ONLY entitlement source (plan
   // mirrored by backfill + webhook). Accounts without an org yet (fresh
   // signups pre first host) resolve undefined, which the entitlement
-  // helpers treat as the pre-billing fail-open, same as before. The
-  // returned tenantId stays uid-keyed for the legacy billing APIs.
+  // helpers treat as the pre-billing fail-open, same as before.
   const orgId = currentOrg?.$id
   const sourcePath =
     orgsLoading || !orgId ? null : (['orgs', orgId] as const)
@@ -104,7 +100,7 @@ export function useCurrentOrg(): {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firestore, sourcePath?.[0], sourcePath?.[1]])
 
-  return { org, tenantId, orgId }
+  return { org, orgId }
 }
 
 export default useCurrentOrg

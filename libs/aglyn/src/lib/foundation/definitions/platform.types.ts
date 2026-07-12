@@ -91,7 +91,6 @@ export interface AglynUser extends AglynDocument {
   roleId?: RoleUid
   admin?: boolean
   email?: string
-  tenants?: Record<OrgUid, true>
 }
 
 /**
@@ -152,7 +151,10 @@ export type AglynHostTheme = HostTheme
 /** Hosted in tenants' host project */
 export interface AglynHost extends AglynDocument {
   $id: HostUid
-  tenantId?: OrgUid
+  /** Owning org (AGL-233); mirrored into `hostIndex/{hostId}`. */
+  orgId?: OrgUid
+  /** Membership projection from the org (AGL-233): uid → role tier. */
+  memberRoles?: Record<UserUid, string>
   subdomain?: string
   cname?: string
   /** Site-wide announcement bar (AGL-195); marketingOverlays-gated. */
@@ -308,7 +310,6 @@ export interface PublishSchedule {
 /** Hosted in tenants' host project */
 export interface AglynScreen extends AglynDocument {
   $id: ScreenUid
-  tenantId?: OrgUid
   hostId?: HostUid
   parentId?: ScreenUid
   slug?: ScreenSlug
@@ -364,7 +365,6 @@ export interface AglynScreen extends AglynDocument {
 export interface AglynScreenVersion<N = AglynNodeSchema>
   extends AglynDocument {
   $id: VersionUid
-  tenantId?: OrgUid
   hostId?: HostUid
   screenId?: ScreenUid
   createdAt?: ITimestamp
@@ -385,7 +385,6 @@ export type ComponentDefUid = string
 export interface AglynHostComponent<N = AglynNodeSchema>
   extends AglynDocument {
   $id: ComponentDefUid
-  tenantId?: OrgUid
   hostId?: HostUid
   displayName?: string
   description?: string
@@ -404,7 +403,6 @@ export interface AglynHostComponent<N = AglynNodeSchema>
  */
 export interface AglynLayout extends AglynDocument {
   $id: LayoutUid
-  tenantId?: OrgUid
   hostId?: HostUid
   /** Published version pointer; bound screens render this version. */
   versionId?: VersionUid

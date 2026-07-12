@@ -22,9 +22,10 @@
  * predate the organizations migration (AGL-232..238); the retired
  * `tenants/{uid}` collection's billing shape was mirrored ONTO the org
  * doc and the names came along. The alias is gone: everything here is
- * `Org*` and describes fields of `orgs/{orgId}`. Persisted STRINGS keep
- * their historic spellings (the `users.{uid}.tenants` map, Stripe
- * `metadata[tenantId]`) — only TypeScript identifiers were renamed.
+ * `Org*` and describes fields of `orgs/{orgId}`. The last persisted
+ * tenant spellings (the `users.{uid}.tenants` map, Stripe
+ * `metadata[tenantId]`, `host.tenantId`) were retired pre-launch in
+ * AGL-445 — billing keys off `metadata[orgId]` now.
  *
  * Convention (see the docs-site glossary): "organization/org" is the
  * entity; "workspace" is the user-facing word for it; "tenant" is
@@ -125,9 +126,9 @@ export interface OrgEntitlements {
   totalSiteSizeMb?: number
   membersPerHost?: number
   /** Seat model (AGL-112): included tenant-manager seats. */
-  managersPerTenant?: number
+  managersPerOrg?: number
   /** Hard seat caps incl. purchased addons; beyond these, upgrade the plan. */
-  maxManagersPerTenant?: number
+  maxManagersPerOrg?: number
   maxMembersPerHost?: number
   bandwidthGb?: number
   /** Form submissions accepted per calendar month (Forms & Lead Capture). */

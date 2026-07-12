@@ -172,8 +172,8 @@ describe('plan entitlements', () => {
         Object.entries(PLAN_ENTITLEMENTS).map(([plan, value]) => [
           plan,
           [
-            value.managersPerTenant,
-            value.maxManagersPerTenant,
+            value.managersPerOrg,
+            value.maxManagersPerOrg,
             value.membersPerHost,
             value.maxMembersPerHost,
           ],

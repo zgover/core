@@ -35,7 +35,7 @@ import {
 import { collection, doc, limit, query } from 'firebase/firestore'
 import { useCallback, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { checkTenantSeatQuota } from '../constants/entitlements'
+import { checkOrgSeatQuota } from '../constants/entitlements'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentOrg from '../hooks/use-current-org'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
@@ -91,7 +91,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
       ),
     [memberDocs],
   )
-  const seatQuota = checkTenantSeatQuota(org, 'members', members.length)
+  const seatQuota = checkOrgSeatQuota(org, 'members', members.length)
 
   const request = useCallback(
     async (method: string, body: Record<string, unknown>) => {
@@ -249,7 +249,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
                   spacing={1}
                   sx={{ alignItems: 'center' }}
                 >
-                  <span>{host?.tenantId === user?.uid
+                  <span>{host?.memberRoles?.[user?.uid ?? ''] === 'admin'
                     ? (user?.email ?? 'Owner')
                     : 'Account owner'}</span>
                   <Chip label="Owner" color="secondary" size="small" />

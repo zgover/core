@@ -21,7 +21,7 @@ import {
   SUBDOMAIN_PATTERN,
   suggestSubdomains,
 } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { firebaseAdmin, resolveOrgMembership } from '@aglyn/tenant-data-admin'
 
 async function subdomainTaken(
   firestore: FirebaseFirestore.Firestore,
@@ -101,16 +101,19 @@ async function handler(request: Request): Promise<Response> {
     }
 
     if (displayName) {
-      // Same-name hosts under one tenant are legal but confusing — warn.
-      const siblings = await firestore
-        .collection('hosts')
-        .where('tenantId', '==', decoded.uid)
-        .where('displayName', '==', displayName)
-        .limit(2)
-        .get()
-      result.displayNameCollision = siblings.docs.some(
-        (host) => host.id !== hostId,
-      )
+      // Same-name hosts under one workspace are legal but confusing — warn.
+      const membership = await resolveOrgMembership(decoded.uid)
+      if (membership) {
+        const siblings = await firestore
+          .collection('hosts')
+          .where('orgId', '==', membership.orgId)
+          .where('displayName', '==', displayName)
+          .limit(2)
+          .get()
+        result.displayNameCollision = siblings.docs.some(
+          (host) => host.id !== hostId,
+        )
+      }
     }
 
     return Response.json(result, { status: 200 })

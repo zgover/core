@@ -194,9 +194,6 @@ async function handler(request: Request): Promise<Response> {
           'items[0][price]': targetPrice,
           proration_behavior: 'create_prorations',
           'metadata[plan]': targetPlan,
-          ...(subscription.metadata?.tenantId
-            ? { 'metadata[tenantId]': subscription.metadata.tenantId }
-            : {}),
           'metadata[orgId]': orgId,
         }),
       )

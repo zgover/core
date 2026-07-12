@@ -252,8 +252,8 @@ const AdminOrgDetail: NextPageWithLayout = () => {
   const usageByKey = useMemo<Record<string, number>>(
     () => ({
       hostLimit: (hostDocs ?? []).length,
-      managersPerTenant: (memberDocs ?? []).length,
-      maxManagersPerTenant: (memberDocs ?? []).length,
+      managersPerOrg: (memberDocs ?? []).length,
+      maxManagersPerOrg: (memberDocs ?? []).length,
       ...(datasetCount != null
         ? { datasetsPerOrg: datasetCount, maxDatasetsPerOrg: datasetCount }
         : {}),

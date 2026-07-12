@@ -21,7 +21,7 @@
  * public listing. Pure data module — safe to import from API routes.
  */
 
-/** `profiles/{tenantId}` — one public publisher profile per tenant. */
+/** `profiles/{uid}` — one public publisher profile per account. */
 export interface CommunityProfile {
   handle: string
   displayName: string

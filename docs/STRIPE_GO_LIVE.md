@@ -30,13 +30,13 @@ The script prints the env block to paste into the console app's environment
 ## 2. How the flow works once envs are set
 
 1. Billing page → Upgrade → `POST /api/billing/checkout` (Firebase ID token)
-   → Stripe Checkout session with `tenantId` + `plan` in subscription
-   metadata → redirect.
+   → Stripe Checkout session with `orgId` + `plan` in subscription
+   metadata (AGL-445) → redirect.
 2. Stripe → `POST /api/billing/webhook` (signature-verified) on
-   subscription created/updated/deleted → tenant doc gets
+   subscription created/updated/deleted → the org doc gets
    `plan`/`stripeCustomerId`/`subscription`; plan falls back to the price id
    mapping when metadata is missing (dashboard edits).
-3. Entitlement enforcement activates per tenant **only when `tenant.plan` is
+3. Entitlement enforcement activates per org **only when `org.plan` is
    set** (dark launch) — nothing changes for existing accounts until they
    check out or staff assigns a plan.
 
