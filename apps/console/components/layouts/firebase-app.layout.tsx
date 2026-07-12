@@ -27,7 +27,7 @@ import { NoSsr } from '@mui/material'
 import { logEvent, setUserId, setUserProperties } from 'firebase/analytics'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
-import { OrgWorkspaceProvider } from '../../hooks/use-org-workspace'
+import { OrgScopeProvider } from '../../hooks/use-org-scope'
 import useSessionCookie from '../../hooks/use-session-cookie'
 import { ReleaseFlagsProvider } from '../../hooks/use-release-flags'
 
@@ -82,9 +82,9 @@ function FirebaseAppLayout(props: FirebaseAppLayoutProps) {
         appName={FIREBASE_CLIENT_APP_NAME}
       >
         <ReleaseFlagsProvider>
-          <OrgWorkspaceProvider>
+          <OrgScopeProvider>
             <AnalyticsGlobalEvents>{children}</AnalyticsGlobalEvents>
-          </OrgWorkspaceProvider>
+          </OrgScopeProvider>
         </ReleaseFlagsProvider>
       </FirebaseServicesProvider>
     </NoSsr>

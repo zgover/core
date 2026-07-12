@@ -29,7 +29,7 @@ import MainLayout from '../../../../components/layouts/main.layout'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 import useCurrentOrg from '../../../../hooks/use-current-org'
 
 /**
@@ -39,7 +39,7 @@ import useCurrentOrg from '../../../../hooks/use-current-org'
  */
 const OrgData: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
-  const { currentOrg, loading } = useOrgWorkspace()
+  const { currentOrg, loading } = useOrgScope()
   const { org } = useCurrentOrg()
   return (
     <>

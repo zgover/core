@@ -185,7 +185,7 @@ const AdminOrgDetail: NextPageWithLayout = () => {
     }
   }, [isStaff, orgId, user])
 
-  // Staff notes (wave v5): support context that never reaches tenants.
+  // Staff notes (wave v5): support context that never reaches workspaces.
   const [notes, setNotes] = useState<
     Array<{
       $id: string

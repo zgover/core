@@ -28,7 +28,7 @@ import MainLayout from '../../../../components/layouts/main.layout'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 import useOrgPermissions from '../../../../hooks/use-org-permissions'
 import OrgRolesCard from '../../../../components/org-roles-card.component'
 
@@ -41,7 +41,7 @@ import OrgRolesCard from '../../../../components/org-roles-card.component'
  */
 const ManageTeam: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const { can, loaded: permissionsLoaded } = useOrgPermissions()
   return (
     <>

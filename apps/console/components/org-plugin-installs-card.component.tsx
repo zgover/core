@@ -32,7 +32,7 @@ import {
 import { collection, limit, query } from 'firebase/firestore'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { buildRoute, Route } from '../constants/route-links'
-import { useAdminHosts } from '../hooks/use-admin-hosts'
+import { useOrgHosts } from '../hooks/use-org-hosts'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 
 export interface OrgPluginInstallsCardProps {
@@ -52,7 +52,7 @@ export function OrgPluginInstallsCard(props: OrgPluginInstallsCardProps) {
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   // The install API authorizes through a host the caller manages.
-  const { hosts } = useAdminHosts(firestore, (user as any)?.uid, orgId)
+  const { hosts } = useOrgHosts(firestore, (user as any)?.uid, orgId)
 
   const { data: installDocs } = useFirestoreCollection<any>(
     () =>

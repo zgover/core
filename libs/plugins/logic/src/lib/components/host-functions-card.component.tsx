@@ -423,7 +423,7 @@ export function HostFunctionsCard(props: HostFunctionsCardProps) {
           color="secondary"
           sx={{ alignSelf: 'flex-start' }}
           onClick={() => {
-            // Plan cap (AGL-99): dark-launch — plan-less tenants uncapped.
+            // Plan cap (AGL-99): dark-launch — plan-less workspaces uncapped.
             const quota = checkQuota(
               org,
               'functionsPerHost',

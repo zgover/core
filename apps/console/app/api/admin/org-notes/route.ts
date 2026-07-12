@@ -22,7 +22,7 @@ import { firebaseAdmin } from '@aglyn/tenant-data-admin'
  * Staff notes on organizations (wave v5): support/billing context that
  * lives with the org but never in the tenant-visible data —
  * `orgs/{orgId}/staffNotes`, staff-claim gated on both read and write
- * (tenants can't read the subcollection; there is no client rule for
+ * (workspace members can't read the subcollection; there is no client rule for
  * it). GET lists newest-first; POST appends and audits.
  */
 async function handler(request: Request): Promise<Response> {

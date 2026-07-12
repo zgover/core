@@ -27,7 +27,7 @@ import {
 import { doc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import useOrgWorkspace from './use-org-workspace'
+import useOrgScope from './use-org-scope'
 
 export type { OrgPermissions }
 
@@ -79,7 +79,7 @@ export function useOrgPermissions(): {
 } {
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
+  const { currentOrg, loading: orgsLoading } = useOrgScope()
   const orgId = currentOrg?.$id
   const [state, setState] = useState<{
     granted: Record<OrgPermission, boolean>

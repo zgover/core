@@ -38,7 +38,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 interface RoleDraft extends AglynOrgCustomRole {
   $id?: string
@@ -53,7 +53,7 @@ interface RoleDraft extends AglynOrgCustomRole {
  */
 export function OrgRolesCard() {
   const { data: user } = useUser()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const orgId = currentOrg?.$id

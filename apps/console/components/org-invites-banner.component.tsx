@@ -20,7 +20,7 @@ import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Alert, Button, Stack } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 interface PendingInvite {
   $id: string
@@ -37,7 +37,7 @@ interface PendingInvite {
  */
 export function OrgInvitesBanner() {
   const { data: user } = useUser()
-  const { selectOrg } = useOrgWorkspace()
+  const { selectOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
   const [invites, setInvites] = useState<PendingInvite[]>([])
   const [busyId, setBusyId] = useState<string | null>(null)

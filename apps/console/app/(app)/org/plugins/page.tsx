@@ -38,10 +38,10 @@ import PluginConfigCards from '../../../../components/plugin-config-card.compone
 import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
-import { useAdminHosts } from '../../../../hooks/use-admin-hosts'
+import { useOrgHosts } from '../../../../hooks/use-org-hosts'
 import useCurrentOrg from '../../../../hooks/use-current-org'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 
 /**
  * Plugins & add-ons hub (AGL-423): ONE place to manage everything
@@ -54,14 +54,14 @@ import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
  */
 const OrgPlugins: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
-  const { currentOrg, loading } = useOrgWorkspace()
+  const { currentOrg, loading } = useOrgScope()
   const { org } = useCurrentOrg()
   const { data: user } = useUser()
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const canManage = canManageOrg(currentOrg?.role)
 
-  const { hosts } = useAdminHosts(
+  const { hosts } = useOrgHosts(
     firestore,
     user?.uid,
     loading ? undefined : (currentOrg?.$id ?? null),

@@ -44,7 +44,7 @@ import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
  * append-only `adminAudit` entry (AGL-42) — this page finally makes them
  * readable: newest first, client-side filtering over actor/action/target,
  * expandable before/after diffs. Read access is staff-only in rules; the
- * page also hides itself without the claim, matching the tenants page.
+ * page also hides itself without the claim, matching the orgs page.
  */
 const AdminAudit: NextPageWithLayout = () => {
   const { data: user } = useUser()

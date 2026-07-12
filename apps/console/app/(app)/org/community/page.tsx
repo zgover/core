@@ -47,7 +47,7 @@ import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../hooks/use-firestore-doc'
@@ -61,7 +61,7 @@ const HANDLE_PATTERN = /^[a-z0-9][a-z0-9-]{2,29}$/
  */
 const CommunitySettings: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()

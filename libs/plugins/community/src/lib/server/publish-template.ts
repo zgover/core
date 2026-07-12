@@ -29,7 +29,7 @@ const MAX_TEMPLATE_SCREENS = 25
  * publishing — the id allowlist and size caps apply per screen) plus the
  * theme into a `communityListings` doc with `kind: 'template'`. Same
  * gates as component publishing: host admin, community profile,
- * `marketplaceSelling` for plan-gated tenants, Stripe onboarding for paid
+ * `marketplaceSelling` for plan-gated workspaces, Stripe onboarding for paid
  * listings. One template per source host; re-publishing bumps the version.
  */
 export const publishTemplateHandler: PluginApiHandler = async (req, res) => {

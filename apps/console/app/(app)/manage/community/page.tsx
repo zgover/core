@@ -38,7 +38,7 @@ import manageNavTabItems from '../../../../constants/manage-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import MediaUrlField from '../../../../components/media-url-field.component'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 import useFirestoreDoc from '../../../../hooks/use-firestore-doc'
 
 const HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$/
@@ -51,7 +51,7 @@ const HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$/
 const ManageCommunityProfile: NextPageWithLayout = () => {
   const firestore = useFirestore()
   const { data: user } = useUser()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
   const uid = user?.uid
   const { data: profile } = useFirestoreDoc<any>(

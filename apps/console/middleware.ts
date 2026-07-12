@@ -22,7 +22,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * requests, verifies the slug against the public `orgSlugs` collection
  * (Firestore REST — rules allow unauthenticated reads there) and bounces
  * unknown workspaces to the apex console. In-app org scoping stays
- * client-side (OrgWorkspaceProvider); this only stops dead subdomains
+ * client-side (OrgScopeProvider); this only stops dead subdomains
  * from rendering a broken console.
  *
  * Inert until ops sets NEXT_PUBLIC_WORKSPACE_DOMAIN (e.g. "aglyn.io" — the console apex is app.aglyn.io)

@@ -18,12 +18,13 @@
 import { pluginPermissionDefaults } from '../plugin-manager/plugin-permissions'
 
 /**
- * Tenant roles (AGL-120): named permission sets assigned to team members,
+ * Org roles (AGL-120): named permission sets assigned to team members,
  * with per-user overrides an admin can apply on top. Shared between the
  * console UI and the server permission resolver so both read one table.
  */
 
-export const TENANT_PERMISSION_KEYS = [
+/** Keys are persisted in custom role docs — add new ones, never rename. */
+export const ORG_ROLE_PERMISSION_KEYS = [
   'createHosts',
   'editHosts',
   'editBilling',
@@ -32,14 +33,8 @@ export const TENANT_PERMISSION_KEYS = [
   'manageMembers',
 ] as const
 
-export type OrgPermissionKey = (typeof TENANT_PERMISSION_KEYS)[number]
+export type OrgPermissionKey = (typeof ORG_ROLE_PERMISSION_KEYS)[number]
 
-/**
- * NAMING: "Tenant" in these role/permission types is the historic alias —
- * they describe ORG member roles and permissions (AGL-443; see the
- * glossary). Grandfathered because the keys are persisted in custom role
- * docs and threaded through every plugin.
- */
 export type OrgPermissionSet = Record<OrgPermissionKey, boolean>
 
 export type OrgRoleTier = 'admin' | 'editor' | 'viewer'
@@ -112,14 +107,14 @@ export function resolveRolePermissions(
     const custom = customRoles?.[role ?? '']
     if (custom) {
       base = { ...ORG_ROLE_TIER_PERMISSIONS.viewer }
-      for (const key of TENANT_PERMISSION_KEYS) {
+      for (const key of ORG_ROLE_PERMISSION_KEYS) {
         const value = custom.permissions?.[key]
         if (typeof value === 'boolean') base[key] = value
       }
     }
   }
   const permissions = { ...base }
-  for (const key of TENANT_PERMISSION_KEYS) {
+  for (const key of ORG_ROLE_PERMISSION_KEYS) {
     const value = overrides?.[key]
     if (typeof value === 'boolean') permissions[key] = value
   }

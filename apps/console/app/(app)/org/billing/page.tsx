@@ -60,7 +60,7 @@ import MainLayout from '../../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
-import { useAdminHosts } from '../../../../hooks/use-admin-hosts'
+import { useOrgHosts } from '../../../../hooks/use-org-hosts'
 import useCurrentOrg from '../../../../hooks/use-current-org'
 import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
@@ -79,7 +79,7 @@ const BillingContent: NextPageWithLayout = () => {
   const [interval, setInterval] = useState<'month' | 'year'>('month')
 
   // Workspace-scoped (AGL-236): meters cover the selected org's sites.
-  const { hosts } = useAdminHosts(firestore, user?.uid, orgId)
+  const { hosts } = useOrgHosts(firestore, user?.uid, orgId)
   const plan = (org?.plan ?? 'free') as OrgPlan
   const subscriptionStatus = org?.subscription?.status
   const subscriptionActive = ['active', 'trialing', 'past_due'].includes(

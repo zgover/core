@@ -123,7 +123,7 @@ async function handler(request: Request): Promise<Response> {
         ? String(body.folderId).slice(0, 64)
         : null
     // Media-type allowlist (AGL-162): images for everyone; video and PDF
-    // by tier (videoMedia flag; dark-launch tenants uncapped as usual).
+    // by tier (videoMedia flag; dark-launch workspaces uncapped as usual).
     const isImage = contentType.startsWith('image/')
     const isVideo = VIDEO_TYPES.has(contentType)
     const isPdf = contentType === 'application/pdf'
@@ -202,8 +202,8 @@ async function handler(request: Request): Promise<Response> {
       .update(new Uint8Array(buffer))
       .digest('hex')
       .slice(0, 16)
-    // Paid gate (AGL-175 pricing): free tenants serve raw storage URLs;
-    // dark-launch tenants (no explicit plan) pass as usual.
+    // Paid gate (AGL-175 pricing): free workspaces serve raw storage URLs;
+    // dark-launch workspaces (no explicit plan) pass as usual.
     const cdnAllowed = !tenant['plan'] || checkEntitlement(tenant, 'mediaCdn')
     const variants: number[] = []
     if (cdnAllowed && isImage && contentType !== 'image/svg+xml') {

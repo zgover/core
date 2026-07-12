@@ -44,7 +44,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentOrg from '../hooks/use-current-org'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
@@ -56,7 +56,7 @@ const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
  */
 export function OrgSwitcherNav() {
   const { data: user } = useUser()
-  const { orgs, currentOrg, selectOrg, workspaceSlug } = useOrgWorkspace()
+  const { orgs, currentOrg, selectOrg, orgSlug } = useOrgScope()
   // Org logo (AGL-363) — replaces the generic building icon when set.
   const { org } = useCurrentOrg()
   const logoUrl = (org as any)?.logoUrl as string | undefined
@@ -92,7 +92,7 @@ export function OrgSwitcherNav() {
       enqueueSnackbar(`Created "${name.trim()}"`, { variant: 'success' })
       // Land in the new workspace, not on the previous org's pages —
       // from a subdomain that means the new org's own subdomain.
-      if (workspaceSlug && slug) {
+      if (orgSlug && slug) {
         window.location.assign(
           `https://${slug}.${WORKSPACE_DOMAIN}` +
             buildRoute(Route.HOST_LIST),
@@ -171,7 +171,7 @@ export function OrgSwitcherNav() {
               // On a workspace subdomain the org IS the hostname, so
               // switching means moving to the other org's subdomain —
               // the session cookie signs it in silently (AGL-236).
-              if (workspaceSlug && org.slug) {
+              if (orgSlug && org.slug) {
                 window.location.assign(
                   `https://${org.slug}.${WORKSPACE_DOMAIN}` +
                     buildRoute(Route.HOST_LIST),

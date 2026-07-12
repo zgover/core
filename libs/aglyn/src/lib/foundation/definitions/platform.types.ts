@@ -21,12 +21,12 @@ import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type { AglynNodeSchema, NodeId } from './components.types'
 
 /**
- * Platform-side definitions: documents, hosts, screens, media, users,
- * roles. The ORG BILLING family (the legacy `AglynOrgBilling` shape and its
- * Tenant* plan/entitlement vocabulary) lives in `org-billing.types.ts` —
- * see the docs-site glossary for the org/workspace/tenant/host naming
- * convention. (This file was `workspace.types.ts`; renamed in AGL-443
- * because nothing in it is the workspace/org entity.)
+ * Platform-side definitions: documents, hosts, screens, media, users.
+ * The ORG BILLING family (`AglynOrgBilling` and the Org* plan/entitlement
+ * vocabulary) lives in `org-billing.types.ts` — see the docs-site glossary
+ * for the org/workspace/tenant/host naming convention. (This file was
+ * `workspace.types.ts`; renamed in AGL-443 because nothing in it is the
+ * workspace/org entity.)
  */
 export interface AglynDocument {
   [field: string]: any
@@ -73,14 +73,6 @@ export enum HostRedirectParams {
   MATCH = 0x2,
 }
 
-export enum ActivityAccess {
-  NONE,
-  READ = 0x1 << 0x1,
-  WRITE = 0x1 << 0x2,
-  READ_WRITE = READ | WRITE,
-  SUPER = READ_WRITE | (0x1 << 0x3),
-}
-
 /** Org document id (`orgs/{orgId}`). Formerly TenantUid (AGL-444). */
 export type OrgUid = string
 
@@ -88,7 +80,6 @@ export type UserUid = string
 
 export interface AglynUser extends AglynDocument {
   $id: UserUid
-  roleId?: RoleUid
   admin?: boolean
   email?: string
 }
@@ -148,7 +139,7 @@ export type HostMediaUid = string
  */
 export type AglynHostTheme = HostTheme
 
-/** Hosted in tenants' host project */
+/** Host-scoped document */
 export interface AglynHost extends AglynDocument {
   $id: HostUid
   /** Owning org (AGL-233); mirrored into `hostIndex/{hostId}`. */
@@ -206,30 +197,6 @@ export interface HostErrorScreens {
   unauthorized?: ScreenUid
   forbidden?: ScreenUid
   unavailable?: ScreenUid
-}
-
-export type RoleUid = string
-export type PermissionUid = string
-
-export interface AglynAuthRole extends AglynDocument {
-  $id: RoleUid
-  displayName?: string
-  description?: string
-  permissions?: Record<PermissionUid, true>
-  users?: Record<UserUid, true>
-}
-
-export interface AglynRolePermission extends AglynDocument {
-  $id: PermissionUid
-  displayName?: string
-  description?: string
-  roles?: Record<RoleUid, true>
-}
-
-export interface AglynAccessRule extends AglynDocument {
-  roles?: Record<RoleUid, ActivityAccess>
-  permissions?: Record<PermissionUid, ActivityAccess>
-  users?: Record<UserUid, ActivityAccess>
 }
 
 export type ScreenUid = string
@@ -307,7 +274,7 @@ export interface PublishSchedule {
   createdAt?: ITimestamp
 }
 
-/** Hosted in tenants' host project */
+/** Host-scoped document */
 export interface AglynScreen extends AglynDocument {
   $id: ScreenUid
   hostId?: HostUid
@@ -345,7 +312,7 @@ export interface AglynScreen extends AglynDocument {
   }
 
   // CONCEPT: Contextual visibility
-  visibility?: HostScreenVisibility | AglynAccessRule
+  visibility?: HostScreenVisibility
 
   // CONCEPT: Attribute editors
   owner?: UserUid
@@ -358,7 +325,7 @@ export interface AglynScreen extends AglynDocument {
 }
 
 /**
- * Hosted in tenants' host project.
+ * Host-scoped document.
  * `N` lets higher layers narrow the node schema (e.g. the aglyn SDK
  * instantiates it with its richer `NodeSchema`).
  */
@@ -379,7 +346,7 @@ export type ComponentDefUid = string
  * Reusable component definition: a node subtree promoted from a screen,
  * inserted anywhere as an instance node (`componentId: 'reusableInstance'`,
  * `props.refId`) and grafted at render time (see
- * `composeReusableComponentNodes`). Hosted in tenants' host project at
+ * `composeReusableComponentNodes`). Host-scoped document at
  * `hosts/{hostId}/components/{componentId}`.
  */
 export interface AglynHostComponent<N = AglynNodeSchema>
@@ -398,7 +365,7 @@ export interface AglynHostComponent<N = AglynNodeSchema>
 
 /**
  * Shared layout: canvas chrome (appbar, footer, nav) designed once and
- * rendered around every bound screen. Hosted in tenants' host project at
+ * rendered around every bound screen. Host-scoped document at
  * `hosts/{hostId}/layouts/{layoutId}`.
  */
 export interface AglynLayout extends AglynDocument {
@@ -429,7 +396,7 @@ export interface AglynLayoutVersion<N = AglynNodeSchema>
 
 export type RedirectUid = string
 
-/** CONCEPT: Host redirects. Hosted in tenants' host project */
+/** CONCEPT: Host redirects. Host-scoped document */
 export interface AglynRedirect extends AglynDocument {
   $id: RedirectUid
   hostId?: HostUid

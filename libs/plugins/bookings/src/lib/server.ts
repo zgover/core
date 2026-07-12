@@ -181,7 +181,7 @@ const slotsHandler: PluginApiHandler = async (req, res) => {
  * windows AND stored bookings inside a transaction (double-booking safe),
  * stores the booking, records a lead, emits the `booking` host event, and
  * sends an env-gated Resend confirmation. Plan gate: the owning org
- * needs the `bookings` flag (dark-launch tenants pass).
+ * needs the `bookings` flag (dark-launch workspaces pass).
  */
 const bookHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {

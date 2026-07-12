@@ -56,7 +56,7 @@ export interface HostMembersCardProps {
 /**
  * Host user manager (AGL-107): manual add-by-email with a role, role
  * changes, and removal — all through /api/hosts/members (Admin SDK: email →
- * uid lookup, `admins` rules map sync, member-seat quota AGL-112). Roles
+ * uid lookup, `memberRoles` sync, member-seat quota AGL-112). Roles
  * beyond admin/non-admin are recorded now and enforced with granular rules
  * (AGL-108 follow-up); the card says so instead of overpromising.
  */

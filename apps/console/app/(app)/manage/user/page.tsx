@@ -57,7 +57,7 @@ import MainLayout from '../../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import MediaUrlField from '../../../../components/media-url-field.component'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 import useFirestoreDoc from '../../../../hooks/use-firestore-doc'
 
 const basicSchema: FormSchema = {
@@ -84,7 +84,7 @@ const ManageUser: NextPageWithLayout = (props) => {
   const [tab, setTab] = useState('basic')
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const userRef = doc(firestore, 'users', user.uid)
   const { data } = useFirestoreDoc(
     () => userRef,

@@ -20,7 +20,7 @@ import type { AglynOrgBilling } from '@aglyn/aglyn'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import useOrgWorkspace from './use-org-workspace'
+import useOrgScope from './use-org-scope'
 
 const RETRY_DELAY_MS = 400
 const MAX_RETRIES = 5
@@ -44,7 +44,7 @@ export function useCurrentOrg(): {
   orgId: string | undefined
 } {
   const firestore = useFirestore()
-  const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
+  const { currentOrg, loading: orgsLoading } = useOrgScope()
   // AGL-238 cutover: the org doc is the ONLY entitlement source (plan
   // mirrored by backfill + webhook). Accounts without an org yet (fresh
   // signups pre first host) resolve undefined, which the entitlement

@@ -28,7 +28,7 @@ import { MediaLibraryComponent } from '../../../../components/media/media-librar
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 
 /**
  * Org media library without host context (AGL-236/237): the shared
@@ -36,7 +36,7 @@ import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
  */
 const OrgMedia: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
-  const { currentOrg, loading } = useOrgWorkspace()
+  const { currentOrg, loading } = useOrgScope()
   return (
     <>
       <NextPageTitle screen={'Media – Organization'} />

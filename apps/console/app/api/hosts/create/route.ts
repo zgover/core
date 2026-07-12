@@ -36,7 +36,7 @@ import {
  * flow). Server-side because the scoped Firestore rules only admit
  * admin-constrained host queries, so a client can't check subdomain
  * uniqueness; the hostLimit quota is enforced here too (plan-gated per
- * AGL-38: tenants without a plan are uncapped).
+ * AGL-38: workspaces without a plan are uncapped).
  */
 async function handler(request: Request): Promise<Response> {
   const { method, body, headers: rawHeaders } = await pluginRequestFromWeb(request)

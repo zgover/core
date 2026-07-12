@@ -46,11 +46,11 @@ import AuthenticatedLayout from '../../../../../components/layouts/authenticated
 import DashboardLayout from '../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../components/layouts/main.layout'
 import OrgActivityCard from '../../../../../components/org-activity-card.component'
-import { useAdminHosts } from '../../../../../hooks/use-admin-hosts'
+import { useOrgHosts } from '../../../../../hooks/use-org-hosts'
 import useOrgNavTabItems from '../../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../constants/shared'
-import { useOrgWorkspace } from '../../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../../hooks/use-org-scope'
 
 /**
  * Team member detail (AGL-364): org admins/owners inspect and edit a
@@ -62,14 +62,14 @@ const TeamMemberDetail: NextPageWithLayout = () => {
   const uid = params?.uid as string
   const router = useRouter()
   const orgNavTabs = useOrgNavTabItems()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const canManage = canManageOrg(currentOrg?.role)
 
   const firestore = useFirestore()
-  const { hosts } = useAdminHosts(firestore, user?.uid, currentOrg?.$id ?? null)
+  const { hosts } = useOrgHosts(firestore, user?.uid, currentOrg?.$id ?? null)
   const [member, setMember] = useState<any | null>(null)
   const [loadingMember, setLoadingMember] = useState(true)
   const [role, setRole] = useState('viewer')

@@ -30,8 +30,8 @@ export type {
   VersionUid,
 } from '../foundation'
 
-/** Hosted in tenants' host project */
+/** Host-scoped document */
 export type AglynScreenVersion = AglynScreenVersionBase<NodeSchema>
 
-/** CONCEPT: Shared layouts. Hosted in tenants' host project */
+/** CONCEPT: Shared layouts. Host-scoped document */
 export type AglynLayoutVersion = AglynLayoutVersionBase<NodeSchema>

@@ -72,7 +72,7 @@ export async function runEventWorkflows(
     }
 
     // Monthly run cap by the owning tenant's plan (AGL-165) — dark-launch
-    // rule: tenants without a plan are uncapped, like every other gate.
+    // rule: workspaces without a plan are uncapped, like every other gate.
     const monthKey = new Date().toISOString().slice(0, 7)
     const runCounterRef = hostRef.collection('counters').doc('workflowRuns')
     const hostSnapshot = await hostRef.get()

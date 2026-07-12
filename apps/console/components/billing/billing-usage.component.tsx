@@ -135,8 +135,7 @@ function HostUsageMeters(props: {
       getCountFromServer(
         collection(firestore, 'hosts', host.$id, 'functions'),
       ).catch(() => null),
-      // Member seats (AGL-107/119) — the managed subcollection, not the
-      // legacy admins map.
+      // Member seats (AGL-107/119).
       getCountFromServer(
         collection(firestore, 'hosts', host.$id, 'members'),
       ).catch(() => null),

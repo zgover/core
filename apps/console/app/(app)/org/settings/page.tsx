@@ -48,7 +48,7 @@ import HubTabs from '../../../../components/hub-tabs.component'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
-import { useOrgWorkspace } from '../../../../hooks/use-org-workspace'
+import { useOrgScope } from '../../../../hooks/use-org-scope'
 import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
 const WORKSPACE_DOMAIN =
@@ -61,7 +61,7 @@ const WORKSPACE_DOMAIN =
  */
 const OrgSettings: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
-  const { currentOrg, loading } = useOrgWorkspace()
+  const { currentOrg, loading } = useOrgScope()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()

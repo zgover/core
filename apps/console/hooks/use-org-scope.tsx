@@ -54,7 +54,7 @@ function subdomainSlugFromLocation(): string | null {
   return label
 }
 
-export interface OrgWorkspaceContextValue {
+export interface OrgScopeContextValue {
   /** Every org the user belongs to, from the reverse index. */
   orgs: UserOrgMembership[]
   /** The org the console is currently scoped to (null pre-resolution). */
@@ -62,15 +62,15 @@ export interface OrgWorkspaceContextValue {
   /** Selects an org on the apex console (persisted locally). */
   selectOrg: (orgId: string) => void
   /** The workspace slug the page was opened under, when subdomain-scoped. */
-  workspaceSlug: string | null
+  orgSlug: string | null
   loading: boolean
 }
 
-const OrgWorkspaceContext = createContext<OrgWorkspaceContextValue>({
+const OrgScopeContext = createContext<OrgScopeContextValue>({
   orgs: [],
   currentOrg: null,
   selectOrg: () => undefined,
-  workspaceSlug: null,
+  orgSlug: null,
   loading: true,
 })
 
@@ -80,7 +80,7 @@ const OrgWorkspaceContext = createContext<OrgWorkspaceContextValue>({
  * subdomain ({slug}.aglyn.com, resolved via the public orgSlugs doc),
  * then the locally remembered selection, then the user's first org.
  */
-export function OrgWorkspaceProvider(props: { children?: ReactNode }) {
+export function OrgScopeProvider(props: { children?: ReactNode }) {
   const { children } = props
   const firestore = useFirestore()
   const { data: user } = useUser()
@@ -88,7 +88,7 @@ export function OrgWorkspaceProvider(props: { children?: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
   const [subdomainOrgId, setSubdomainOrgId] = useState<string | null>(null)
-  const workspaceSlug = useMemo(subdomainSlugFromLocation, [])
+  const orgSlug = useMemo(subdomainSlugFromLocation, [])
 
   useEffect(() => {
     if (!user?.uid) {
@@ -120,9 +120,9 @@ export function OrgWorkspaceProvider(props: { children?: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!workspaceSlug) return
+    if (!orgSlug) return
     let active = true
-    void getDoc(doc(firestore, 'orgSlugs', workspaceSlug))
+    void getDoc(doc(firestore, 'orgSlugs', orgSlug))
       .then((snapshot) => {
         if (active) {
           setSubdomainOrgId((snapshot.data()?.['orgId'] as string) ?? null)
@@ -134,7 +134,7 @@ export function OrgWorkspaceProvider(props: { children?: ReactNode }) {
     return () => {
       active = false
     }
-  }, [firestore, workspaceSlug])
+  }, [firestore, orgSlug])
 
   const selectOrg = useCallback((orgId: string) => {
     setSelectedOrgId(orgId)
@@ -152,20 +152,20 @@ export function OrgWorkspaceProvider(props: { children?: ReactNode }) {
   }, [orgs, subdomainOrgId, selectedOrgId])
 
   const context = useMemo(
-    () => ({ orgs, currentOrg, selectOrg, workspaceSlug, loading }),
-    [orgs, currentOrg, selectOrg, workspaceSlug, loading],
+    () => ({ orgs, currentOrg, selectOrg, orgSlug, loading }),
+    [orgs, currentOrg, selectOrg, orgSlug, loading],
   )
 
   return (
-    <OrgWorkspaceContext.Provider value={context}>
+    <OrgScopeContext.Provider value={context}>
       {children}
-    </OrgWorkspaceContext.Provider>
+    </OrgScopeContext.Provider>
   )
 }
-OrgWorkspaceProvider.displayName = 'OrgWorkspaceProvider'
+OrgScopeProvider.displayName = 'OrgScopeProvider'
 
-export function useOrgWorkspace(): OrgWorkspaceContextValue {
-  return useContext(OrgWorkspaceContext)
+export function useOrgScope(): OrgScopeContextValue {
+  return useContext(OrgScopeContext)
 }
 
-export default useOrgWorkspace
+export default useOrgScope

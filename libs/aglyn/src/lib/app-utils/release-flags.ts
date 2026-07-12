@@ -234,7 +234,7 @@ export function releaseFlagBucket(flagKey: string, subjectId: string): number {
 }
 
 /**
- * The gating verdict for one subject. `subjectId` should be the tenantId
+ * The gating verdict for one subject. `subjectId` should be the orgId
  * when available (whole workspaces get features together) and fall back to
  * the uid; an empty subject only passes fully-enabled flags.
  */

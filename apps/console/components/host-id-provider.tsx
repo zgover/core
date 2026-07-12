@@ -20,7 +20,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { createContext, useContext, useEffect } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 const WORKSPACE_DOMAIN =
   process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
@@ -43,9 +43,9 @@ export function HostIdProvider({ children }) {
     orgs,
     currentOrg,
     selectOrg,
-    workspaceSlug,
+    orgSlug,
     loading: orgsLoading,
-  } = useOrgWorkspace()
+  } = useOrgScope()
 
   // Host-route guard (AGL-236): the [hostId] catch-all otherwise treats
   // any unknown first segment (a typo, or a bare /org before its index
@@ -93,7 +93,7 @@ export function HostIdProvider({ children }) {
           void router.replace('/hosts')
           return
         }
-        if (workspaceSlug && membership.slug) {
+        if (orgSlug && membership.slug) {
           // Subdomains pin the workspace to the hostname — follow the
           // site home instead (the session cookie signs it in). The Pages
           // Router `router.asPath` (path + query) is reconstructed here from
@@ -121,7 +121,7 @@ export function HostIdProvider({ children }) {
     orgs,
     currentOrg,
     selectOrg,
-    workspaceSlug,
+    orgSlug,
     orgsLoading,
   ])
 

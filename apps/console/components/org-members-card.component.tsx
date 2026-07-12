@@ -50,8 +50,8 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { buildRoute, Route } from '../constants/route-links'
-import { useAdminHosts } from '../hooks/use-admin-hosts'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgHosts } from '../hooks/use-org-hosts'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 const ASSIGNABLE_ROLES: OrgRole[] = ['admin', 'editor', 'viewer']
 const HOST_ROLE_OPTIONS: Array<HostAccessRole | 'none'> = [
@@ -79,7 +79,7 @@ interface AccessDraft {
 export function OrgMembersCard() {
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const [members, setMembers] = useState<AglynOrgMember[]>([])
@@ -99,7 +99,7 @@ export function OrgMembersCard() {
   const canManage = canManageOrg(currentOrg?.role)
   // An org admin sees every org host via the memberRoles projection, so
   // this doubles as the org host directory for the access editor.
-  const { hosts } = useAdminHosts(firestore, user?.uid, orgId)
+  const { hosts } = useOrgHosts(firestore, user?.uid, orgId)
   const orgHosts = useMemo(
     () => hosts.filter((host) => host['orgId'] === orgId),
     [hosts, orgId],

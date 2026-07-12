@@ -49,7 +49,7 @@ interface QuotaState {
  * any tracked quota — screens, storage, datasets per host, or team seats —
  * crosses 80% (warning) or 100% (error), with an Upgrade link to Billing.
  * Dismissible per browser session. Consistent with the dark-launch rule,
- * tenants without an explicit plan see nothing.
+ * workspaces without an explicit plan see nothing.
  */
 export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
   const params = useParams<{ hostId?: string }>()
@@ -146,7 +146,7 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
   }, [firestore, orgId, plan])
 
   // Suspension (AGL-202) outranks everything — not dismissible, shown
-  // regardless of plan so pre-billing tenants see it too.
+  // regardless of plan so pre-billing workspaces see it too.
   if ((org as any)?.suspendedAt) {
     return (
       <Alert severity="error" sx={{ borderRadius: 0 }}>

@@ -26,7 +26,6 @@ export * from './definitions/components.types'
 export * from './definitions/organization.types'
 export * from './definitions/shared'
 export {
-  ActivityAccess,
   HostEntityType,
   HostRedirectParams,
   HostScreenStatus,
@@ -36,9 +35,8 @@ export {
 } from './definitions/platform.types'
 // AglynScreenVersion/AglynLayoutVersion are exported (specialized with the
 // SDK's NodeSchema) from ../types/screen instead of this generic form.
-// Org billing vocabulary (historic Tenant* names — see the glossary and
-// definitions/org-billing.types.ts; AglynOrgBilling is the name for new
-// code).
+// Org billing vocabulary (see definitions/org-billing.types.ts and the
+// glossary).
 export type {
   AglynOrgBilling,
   OrgEntitlements,
@@ -49,8 +47,6 @@ export type {
   OrgUid,
 } from './definitions/org-billing.types'
 export type {
-  AglynAccessRule,
-  AglynAuthRole,
   AglynDocument,
   AglynHost,
   AglynHostComponent,
@@ -59,7 +55,6 @@ export type {
   AglynHostTheme,
   AglynLayout,
   AglynRedirect,
-  AglynRolePermission,
   AglynScreen,
   AglynUser,
   ComponentDefUid,
@@ -69,12 +64,10 @@ export type {
   HostPath,
   HostUid,
   LayoutUid,
-  PermissionUid,
   ProjectNumber,
   ProjectUid,
   PublishSchedule,
   RedirectUid,
-  RoleUid,
   ScreenSlug,
   ScreenUid,
   UserUid,

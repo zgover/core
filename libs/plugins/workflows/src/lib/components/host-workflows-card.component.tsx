@@ -166,7 +166,7 @@ export function HostWorkflowsCard(props: HostWorkflowsCardProps) {
   )
 
   const handleAdd = useCallback(() => {
-    // Feature + cap gate (AGL-99); dark-launch for plan-less tenants.
+    // Feature + cap gate (AGL-99); dark-launch for plan-less workspaces.
     if (!checkEntitlement(org, 'workflows')) {
       return void enqueueSnackbar(
         'Workflows require a Starter plan — see Billing to upgrade',

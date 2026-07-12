@@ -48,7 +48,7 @@ export interface AnnouncementBarCardProps {
  * the host doc; the tenant render gates on the marketingOverlays
  * entitlement and resolves binding tokens in the text server-side.
  * Starter+ (locked-state upsell below), dark-launched for plan-less
- * tenants like the other AGL-99 gates.
+ * workspaces like the other AGL-99 gates.
  */
 export function AnnouncementBarCard(props: AnnouncementBarCardProps) {
   const { hostId } = props

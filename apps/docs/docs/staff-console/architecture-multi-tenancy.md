@@ -124,7 +124,7 @@ workspace subdomain scopes the **console**, not published sites:
 ```mermaid
 flowchart LR
   B["Browser:<br/>business1.aglyn.io"] --> MW{"Next middleware:<br/>slug known?<br/>(public orgSlugs read, cached)"}
-  MW -- "yes" --> CON["Console renders;<br/>OrgWorkspaceProvider pins the org scope"]
+  MW -- "yes" --> CON["Console renders;<br/>OrgScopeProvider pins the org scope"]
   MW -- "no" --> APEX["Redirect to apex console<br/>?unknown-workspace=slug"]
   A2["Browser: app.aglyn.io"] --> SW["Org switcher<br/>(users/#lcub;uid#rcub;/orgs)"]
   SW --> CON
@@ -146,7 +146,7 @@ flowchart TD
   CO["Checkout API<br/>(orgId in Stripe metadata)"] --> ST["Stripe subscription"]
   ST -- "webhook" --> WH["/api/billing/webhook"]
   WH --> OG["orgs/#lcub;orgId#rcub;<br/>plan · subscription"]
-  OG --> ENT["useCurrentTenant →<br/>entitlements & quotas"]
+  OG --> ENT["useCurrentOrg →<br/>entitlements & quotas"]
   CRON["Monthly usage cron"] --> UR["orgs/#lcub;orgId#rcub;/usage/#lcub;month#rcub;<br/>storage · views · cost × 1.30"]
   UR --> METER["Stripe metered billing<br/>(pass-through pricing)"]
 ```

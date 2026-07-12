@@ -29,12 +29,13 @@ import { useEffect, useState } from 'react'
 const RETRY_DELAY_MS = 400
 const MAX_RETRIES = 5
 
-export interface AdminHost extends DocumentData {
+export interface OrgHost extends DocumentData {
   $id: string
 }
 
 /**
- * Subscribes to `hosts` filtered on `admins.{uid}`, with its own retry —
+ * Subscribes to the hosts where the user holds any `memberRoles` tier
+ * (admin/editor/viewer), with its own retry —
  * NOT via `useFirestoreCollectionData` (reactfire), whose cached Observable
  * is a *terminated* RxJS stream once it errors: resubscribing (even from a
  * freshly remounted component) replays the same cached error forever rather
@@ -45,19 +46,19 @@ export interface AdminHost extends DocumentData {
  * listener on a short backoff resolves it once the token has propagated
  * (AGL-216).
  */
-export function useAdminHosts(
+export function useOrgHosts(
   firestore: Firestore,
   uid: string | undefined,
   /**
-   * Workspace scope (AGL-236): the current org's id keeps every host list
+   * Org scope (AGL-236): the current org's id keeps every host list
    * inside the selected workspace — without it a member of several orgs
    * sees all their sites mixed together. Pass `undefined` while the
    * workspace is still resolving (the hook holds off rather than flash
    * another org's sites) and `null` for accounts with no org yet.
    */
   orgId?: string | null,
-): { hosts: AdminHost[]; ready: boolean } {
-  const [hosts, setHosts] = useState<AdminHost[]>([])
+): { hosts: OrgHost[]; ready: boolean } {
+  const [hosts, setHosts] = useState<OrgHost[]>([])
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -115,4 +116,4 @@ export function useAdminHosts(
   return { hosts, ready }
 }
 
-export default useAdminHosts
+export default useOrgHosts

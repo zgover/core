@@ -20,11 +20,10 @@
 // (datasets/records, contacts, contactSegments) — but ONLY where the org
 // copy verifiably exists (per-item parity check, not a blind wipe).
 //
-// Deliberately NOT touched here: hosts.admins (still synced for the rules
-// maps) and the v1 rules blocks. hosts.tenantId, the `tenants` collection,
-// and Stripe `metadata[tenantId]` were fully retired in AGL-445 — no live
-// reader or writer remains; this script's tenants-collection handling is
-// historical.
+// Deliberately NOT touched here: the v1 rules blocks. hosts.admins,
+// hosts.tenantId, the `tenants` collection, and Stripe `metadata[tenantId]`
+// are fully retired (AGL-238/445/446) — no live reader or writer remains;
+// this script's tenants-collection handling is historical.
 //
 //   FIREBASE_PROJECT_ID=… FIREBASE_CLIENT_EMAIL=… FIREBASE_PRIVATE_KEY=… \
 //     node tools/scripts/cleanup-legacy-tenancy.mjs [--apply]

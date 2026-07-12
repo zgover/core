@@ -36,8 +36,8 @@ import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { type MouseEvent, useCallback, useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
-import { useAdminHosts } from '../hooks/use-admin-hosts'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgHosts } from '../hooks/use-org-hosts'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 function HostsPlainLink() {
   return (
@@ -75,10 +75,10 @@ function HostSwitcherMenu(props: { uid: string }) {
   const hostId = params?.hostId
   const router = useRouter()
   const firestore = useFirestore()
-  const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
+  const { currentOrg, loading: orgsLoading } = useOrgScope()
   // Workspace-scoped (AGL-236): the switcher lists the selected org's
   // sites only; undefined holds the query while the workspace resolves.
-  const { hosts } = useAdminHosts(
+  const { hosts } = useOrgHosts(
     firestore,
     uid,
     orgsLoading ? undefined : (currentOrg?.$id ?? null),

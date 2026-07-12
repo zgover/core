@@ -36,7 +36,7 @@ import { runSingleAction } from '@aglyn/tenant-runtime'
 /**
  * Public event listing (AGL-145): published events for the Event List canvas
  * element. Drafts never leave the server; the paid `eventCalendar` add-on
- * gates plan-holding tenants (dark-launch tenants pass). Sorted by start;
+ * gates plan-holding workspaces (dark-launch workspaces pass). Sorted by start;
  * `mode=past` flips the window.
  */
 const eventsListHandler: PluginApiHandler = async (req, res) => {
