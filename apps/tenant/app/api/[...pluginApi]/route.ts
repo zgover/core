@@ -15,29 +15,62 @@
  * limitations under the License.
  */
 
-import { resolvePluginApiRoute, runLegacyHandler } from '@aglyn/aglyn/server'
-// Populate the plugin API registry before resolving (AGL-396). The plugin
-// `/server` entries are context-free (they import `@aglyn/aglyn/server`, not
-// the barrel), so this static side-effect import is safe in a route handler's
-// module graph.
-import '../../../utils/register-plugin-apis'
+import {
+  createPluginLoader,
+  resolveEnabledPlugins,
+  resolvePluginApiRoute,
+  runLegacyHandler,
+} from '@aglyn/aglyn/server'
+import { getOrgForHost } from '@aglyn/tenant-data-admin'
+import { TENANT_PLUGIN_SERVER_MANIFEST } from '../../../utils/plugins.server.generated'
 
 export const dynamic = 'force-dynamic'
 
+// Dynamic activation (AGL-417): handlers register on first dispatch from the
+// GENERATED manifest — the app carries no static plugin imports. Loading is
+// lazy-load-all (a shared serverless process serves every org, so per-org
+// REGISTRATION would be cosmetic); per-org enforcement happens per request
+// below, plus each handler's own entitlement self-gating.
+const loader = createPluginLoader(TENANT_PLUGIN_SERVER_MANIFEST)
+
 /**
- * Tenant plugin API dispatcher (AGL-396/408): the App Router counterpart to
- * the Pages Router catch-all. Named `app/api/*` routes win over it, so it
- * only serves paths a plugin has registered; unregistered paths 404. Plugin
- * handlers keep their framework-light `(req,res)` contract and run through
- * `runLegacyHandler` unchanged — the seam that keeps plugins decoupled from
- * the app router.
+ * Tenant plugin API dispatcher (AGL-396/408/417). Named `app/api/*` routes
+ * win over it; unregistered paths 404. Requests to a plugin the target
+ * host's org has switched OFF (org.enabledPlugins, AGL-416) 404 exactly
+ * like an unregistered path — a disabled plugin's API surface does not
+ * exist for that workspace.
  */
 async function dispatch(
   request: Request,
   { params }: { params: Promise<{ pluginApi?: string[] }> },
 ): Promise<Response> {
+  await loader.ensureAll(['tenantApi'])
   const { pluginApi } = await params
   const path = Array.isArray(pluginApi) ? pluginApi.join('/') : ''
+
+  // Per-request org gate: resolve the owning plugin from the path prefix
+  // and the target host from the request (query `hostId`, else JSON body —
+  // read off a clone so the handler still gets the untouched stream).
+  const pluginId = loader.pluginIdForApiPath(path)
+  if (pluginId) {
+    const url = new URL(request.url)
+    let hostId = url.searchParams.get('hostId') ?? ''
+    if (!hostId && request.method !== 'GET' && request.method !== 'HEAD') {
+      try {
+        const body = (await request.clone().json()) as { hostId?: unknown }
+        hostId = String(body?.hostId ?? '')
+      } catch {
+        // Non-JSON body — fall through to handler self-gating.
+      }
+    }
+    if (hostId) {
+      const org = (await getOrgForHost(hostId))?.org
+      if (org && !resolveEnabledPlugins(org).includes(pluginId)) {
+        return Response.json({ error: 'Not found' }, { status: 404 })
+      }
+    }
+  }
+
   const route = resolvePluginApiRoute(path)
   if (!route) return Response.json({ error: 'Not found' }, { status: 404 })
   return runLegacyHandler(route, request, { pluginApi: pluginApi ?? [] })

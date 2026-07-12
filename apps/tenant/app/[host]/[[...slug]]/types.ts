@@ -34,6 +34,8 @@ export interface Props {
     }
   }
   nodes: Record<Aglyn.NodeId, Aglyn.NodeSchema> | null
+  /** Org-enabled site plugins the client must load pre-canvas (AGL-417). */
+  enabledPlugins?: string[]
   /** Free-tier "Made with Aglyn" badge (AGL-69, removeBranding gate). */
   showBranding?: boolean
   /**

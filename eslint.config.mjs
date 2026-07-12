@@ -83,7 +83,15 @@ export default [
         {
           allow: [],
           enforceBuildableLibDependency: true,
-          checkDynamicDependenciesExceptions: ['@aglyn/besigner-ui'],
+          // @aglyn/plugins-*: the generated loader manifests (AGL-417)
+          // import plugins dynamically while the remaining static imports
+          // await extraction (AGL-418/419) — and plugin-internal console
+          // pages lazy() their own components. Exempt the consistency check;
+          // the scope:app boundary rule lands with the Phase-4 close-out.
+          checkDynamicDependenciesExceptions: [
+            '@aglyn/besigner-ui',
+            '@aglyn/plugins-*',
+          ],
           depConstraints: [
             {
               sourceTag: 'scope:lib',

@@ -40,11 +40,6 @@ import {
   getGoogleFontsUrl,
   HostThemeDocumentContext,
 } from '@aglyn/shared-ui-theme'
-import { registerCommercePlugin } from '@aglyn/plugins-commerce'
-import { registerEmailPlugin } from '@aglyn/plugins-email'
-import { registerBookingsPlugin } from '@aglyn/plugins-bookings'
-import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
-import { registerMuiPlugin } from '@aglyn/plugins-mui'
 import { useHost, useLayout, useLayoutVersion } from '@aglyn/tenant-feature-instance'
 import { Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
@@ -54,6 +49,9 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+// Dynamic site-plugin activation (AGL-417): canvas components register
+// via the org-gated loader; the page gates the canvas on readiness.
+import { withSitePlugins } from '../../../../../../../../components/console-plugins-gate.component'
 import AiAssistProvider from '../../../../../../../../components/ai-assist-provider.component'
 import BesignerFunctionsButton from '../../../../../../../../components/besigner-functions-button.component'
 import BindingPickerProvider from '../../../../../../../../components/binding-picker-provider.component'
@@ -70,11 +68,6 @@ import '../../../../../../../../constants/app-setup'
 import { buildRoute, Route } from '../../../../../../../../constants/route-links'
 import useFirestoreCollection from '../../../../../../../../hooks/use-firestore-collection'
 
-registerMuiPlugin()
-registerCommercePlugin()
-registerEventsCalendarPlugin()
-registerBookingsPlugin()
-registerEmailPlugin()
 
 const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
   () =>
@@ -420,4 +413,4 @@ function LayoutBesignerPage(props) {
 
 LayoutBesignerPage.displayName = 'Page:LayoutBesigner'
 
-export default withBesignerContext(observer(LayoutBesignerPage))
+export default withSitePlugins(withBesignerContext(observer(LayoutBesignerPage)))

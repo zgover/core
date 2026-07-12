@@ -19,11 +19,6 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer, useAglynSiteTheme } from '@aglyn/aglyn-node-renderer'
-import { registerCommercePlugin } from '@aglyn/plugins-commerce'
-import { registerEmailPlugin } from '@aglyn/plugins-email'
-import { registerBookingsPlugin } from '@aglyn/plugins-bookings'
-import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
-import { registerMuiPlugin } from '@aglyn/plugins-mui'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import {
   getGoogleFontsUrl,
@@ -36,16 +31,13 @@ import { observer } from 'mobx-react-lite'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import '../../../../../../../../constants/app-setup'
+// Dynamic site-plugin activation (AGL-417): canvas components register
+// via the org-gated loader; the page gates the canvas on readiness.
+import { withSitePlugins } from '../../../../../../../../components/console-plugins-gate.component'
 import {
   previewStateKey,
   readPreviewState,
 } from '../../../../../../../../constants/preview-state'
-
-registerMuiPlugin()
-registerCommercePlugin()
-registerEventsCalendarPlugin()
-registerBookingsPlugin()
-registerEmailPlugin()
 
 const SUPPRESSED_SCREEN_LINKS = { suppressNavigation: true }
 
@@ -141,4 +133,4 @@ function ScreenPreviewPage() {
   )
 }
 
-export default observer(ScreenPreviewPage)
+export default withSitePlugins(observer(ScreenPreviewPage))

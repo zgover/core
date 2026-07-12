@@ -20,23 +20,23 @@
 import * as Aglyn from '@aglyn/aglyn'
 import * as MarketingModel from '@aglyn/plugins-marketing/model'
 import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
-import { registerBookingsPlugin } from '@aglyn/plugins-bookings'
-import { registerCommercePlugin } from '@aglyn/plugins-commerce'
-import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
-import { registerMuiPlugin } from '@aglyn/plugins-mui'
 import { observer } from 'mobx-react-lite'
 // next/head is a no-op in the App Router; the <Head> blocks below are inert
 // and real metadata comes from the route's generateMetadata (AGL-398).
 import Head from 'next/head'
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  use,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { sitePluginLoader } from '../../../utils/site-plugin-loader'
 import type { ClientAutomation } from '../../../utils/get-client-automations'
 import type { ScreenExperiment } from '../../../utils/get-screen-experiments'
 import type { Props } from './types'
 
-registerMuiPlugin()
-registerCommercePlugin()
-registerEventsCalendarPlugin()
-registerBookingsPlugin()
 /**
  * Overlay metrics beacon (AGL-200): fire-and-forget, never blocks UX.
  * With an `overlayId` (marketing-hub docs, AGL-271) the collector also
@@ -768,6 +768,17 @@ function PopupOverlay(props: {
 }
 
 const CatchAllPage = observer(function CatchAllPage(props: Props) {
+  // Dynamic site-plugin activation (AGL-417): suspend — SSR included — until
+  // the org-enabled plugins register their canvas components. Rendering the
+  // canvas before registration is exactly the blank-site failure (AGL-52),
+  // so the gate sits above everything.
+  use(
+    sitePluginLoader.ensure(
+      props.enabledPlugins ?? [...Aglyn.DEFAULT_ENABLED_PLUGINS],
+      ['site'],
+    ),
+  )
+
   // const props = { data: exampleData }
   const nodes = props.nodes
   // Unlocked content for password-protected screens (AGL-87).

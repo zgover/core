@@ -18,6 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn/server'
 import * as MarketingModel from '@aglyn/plugins-marketing/model'
 import * as CommerceModel from '@aglyn/plugins-commerce/model'
+import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 import getScreen from '@aglyn/tenant-runtime/get-screen'
 import getVariables from '@aglyn/tenant-runtime/get-variables'
@@ -181,7 +182,6 @@ export const loadPageData = cache(
       // mechanism as entry-template screens below.
       const pdpSegments = path.split('/').filter(Boolean)
       if (pdpSegments.length === 2 && pdpSegments[0] === 'products') {
-        const { firebaseAdmin } = await import('@aglyn/tenant-data-admin')
         const adminFirestore = firebaseAdmin.app().firestore()
         const hostDocRef = adminFirestore.collection('hosts').doc(hostId)
         const [storeSettings, productSnapshot] = await Promise.all([
@@ -256,7 +256,6 @@ export const loadPageData = cache(
       // the designated collection template with collection tokens; the
       // product-grid block derives the same slug from the URL.
       if (pdpSegments.length === 2 && pdpSegments[0] === 'collections') {
-        const { firebaseAdmin } = await import('@aglyn/tenant-data-admin')
         const adminFirestore = firebaseAdmin.app().firestore()
         const hostDocRef = adminFirestore.collection('hosts').doc(hostId)
         const [storeSettings, collectionSnapshot] = await Promise.all([
@@ -672,6 +671,9 @@ export const loadPageData = cache(
         }),
       ),
       nodes: denormalized,
+      // Plugin switchboard (AGL-416/417): which site plugins the client
+      // loads before rendering the canvas.
+      enabledPlugins: Aglyn.resolveEnabledPlugins(tenantRes.tenant as never),
       showBranding,
       announcementBar,
       popup,

@@ -29,9 +29,10 @@ import type { ReactNode } from 'react'
 import HostIdProvider from '../components/host-id-provider'
 import FirebaseAppLayout from '../components/layouts/firebase-app.layout'
 import OsfaTooltip from '../components/osfa-tooltip'
-// Populate the ConsoleExtension registry (nav items + plugin pages) before
-// any nav renders, so plugins extend the console shell (AGL-394).
-import '../constants/register-console-plugins'
+// Dynamic plugin activation (AGL-417): the gate loads + registers the org's
+// enabled plugins (ConsoleExtension registry) before the shell renders —
+// replacing the static register-console-plugins composition root.
+import ConsolePluginsGate from '../components/console-plugins-gate.component'
 
 /**
  * The console's global client providers (App Router), ported from the Pages
@@ -46,7 +47,9 @@ const ThemeStack = withThemeCssVarProvider(
       <LoadingLayoutAppComponent>
         <ConfirmationProviderComponent>
           <SnackbarProvider>
-            <HostIdProvider>{children}</HostIdProvider>
+            <HostIdProvider>
+              <ConsolePluginsGate>{children}</ConsolePluginsGate>
+            </HostIdProvider>
           </SnackbarProvider>
           <OsfaTooltip />
         </ConfirmationProviderComponent>

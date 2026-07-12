@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
-export { default } from './plugin-manager'
-export * from './plugin-manager'
-export * from './enabled-plugins'
-export * from './plugin-loader'
-export * from './feature-plugins'
-export * from './plugin-bridge'
+import { createPluginLoader } from '@aglyn/aglyn'
+import { CONSOLE_PLUGIN_MANIFEST } from './plugins.client.generated'
+
+/**
+ * The console's plugin loader (AGL-417): activates the org-enabled plugins
+ * from the generated manifest — 'console' surfaces (nav + pages) behind the
+ * providers gate, 'site' surfaces (canvas components) on the editor pages.
+ * One module instance per bundle so registration is shared and cached.
+ */
+export const consolePluginLoader = createPluginLoader(CONSOLE_PLUGIN_MANIFEST)

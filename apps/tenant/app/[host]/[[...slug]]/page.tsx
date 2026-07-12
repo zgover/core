@@ -18,6 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn/server'
 import type { Metadata } from 'next'
 import { notFound, permanentRedirect, redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import CatchAllClient from './catch-all-client'
 import { loadPageData } from './load-page-data'
 import type { Props } from './types'
@@ -274,7 +275,12 @@ export default async function CatchAllPage({ params }: CatchAllPageProps) {
           dangerouslySetInnerHTML={{ __html: json }}
         />
       ))}
-      <CatchAllClient {...result.props} />
+      {/* The client suspends until the org-enabled site plugins register
+          (AGL-417) — streaming SSR awaits the dynamic imports, so published
+          screens keep their full HTML. */}
+      <Suspense fallback={null}>
+        <CatchAllClient {...result.props} />
+      </Suspense>
     </>
   )
 }

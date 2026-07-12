@@ -16,6 +16,7 @@
  */
 
 import { screenRoutePathToUrl } from '@aglyn/aglyn/server'
+import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import getHost from '../../../utils/get-host'
 
 export const dynamic = 'force-dynamic'
@@ -55,7 +56,6 @@ export async function GET(request: Request): Promise<Response> {
   // Commerce URLs (AGL-299): active product + collection pages join the
   // sitemap when the host has the matching template configured.
   try {
-    const { firebaseAdmin } = await import('@aglyn/tenant-data-admin')
     const hostRef = firebaseAdmin
       .app()
       .firestore()
