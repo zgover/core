@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { registerPluginApiRoute } from '@aglyn/aglyn/server'
+import {
+  registerBillingWebhookHandler,
+  registerPluginApiRoute,
+} from '@aglyn/aglyn/server'
+import { communityBillingWebhookHandler } from './server/billing-webhook'
 import { aiAssistHandler } from './server/ai-assist'
 import { publishPluginHandler } from './server/publish-plugin'
 import { checkoutHandler } from './server/checkout'
@@ -45,4 +49,6 @@ export function registerCommunityConsoleApi(): void {
   // Relocated console routes (AGL-418): URLs preserved via the dispatcher.
   registerPluginApiRoute('community/publish-plugin', publishPluginHandler)
   registerPluginApiRoute('ai/assist', aiAssistHandler)
+  // Marketplace purchases ride the platform Stripe webhook (AGL-418).
+  registerBillingWebhookHandler(communityBillingWebhookHandler)
 }

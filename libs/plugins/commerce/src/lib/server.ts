@@ -25,7 +25,11 @@
  * (server-only) API dispatcher registration.
  */
 
-import { registerPluginApiRoute } from '@aglyn/aglyn/server'
+import {
+  registerBillingWebhookHandler,
+  registerPluginApiRoute,
+} from '@aglyn/aglyn/server'
+import { commerceBillingWebhookHandler } from './server/billing-webhook'
 import { cartCheckoutHandler } from './server/cart-checkout'
 import { cartHandler } from './server/cart'
 import { catalogHandler } from './server/catalog'
@@ -92,6 +96,9 @@ export function registerCommerceApi(): void {
  * restock alerts, dropship supplier updates).
  */
 export function registerCommerceConsoleApi(): void {
+  // Stripe webhook sections (AGL-418): orders/carts/drafts/reservations/
+  // subscriptions ride the platform webhook via the hook registry.
+  registerBillingWebhookHandler(commerceBillingWebhookHandler)
   registerPluginApiRoute('commerce/connect', connectHandler)
   registerPluginApiRoute('commerce/draft-order', draftOrderHandler)
   registerPluginApiRoute('commerce/member-post', memberPostHandler)

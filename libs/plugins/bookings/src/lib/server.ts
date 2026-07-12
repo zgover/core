@@ -17,7 +17,12 @@
 
 import { checkEntitlement } from '@aglyn/aglyn/server'
 import { type BookedInterval, BOOKING_MAX_DAYS_AHEAD, computeOpenSlots, type HostBookingService, isSlotOpen } from './model'
-import { registerPluginApiRoute, type PluginApiHandler } from '@aglyn/aglyn/server'
+import {
+  registerBillingWebhookHandler,
+  registerPluginApiRoute,
+  type PluginApiHandler,
+} from '@aglyn/aglyn/server'
+import { bookingsBillingWebhookHandler } from './server/billing-webhook'
 import {
   firebaseAdmin,
   getOrgForHost,
@@ -481,4 +486,6 @@ export function registerBookingsApi(): void {
 /** Registers the bookings plugin's console-side API routes (AGL-396). */
 export function registerBookingsConsoleApi(): void {
   registerPluginApiRoute('bookings/reminders', remindersHandler)
+  // Paid-booking confirmation rides the platform Stripe webhook (AGL-418).
+  registerBillingWebhookHandler(bookingsBillingWebhookHandler)
 }
