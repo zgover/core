@@ -21,6 +21,7 @@ import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import { canManageOrg, isValidOrgSlug } from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import {
+  AppLink,
   CardDisplay,
   Container,
   useConfirmationContext,
@@ -426,19 +427,28 @@ const OrgSettings: NextPageWithLayout = () => {
                         id: 'plugins',
                         label: 'Plugins',
                         content: (
-                          <OrgPluginsCard
-                            tenant={tenant}
-                            disabled={!canManage || busy}
-                            onSave={async (enabledPlugins) => {
-                              await settingsRequest({
-                                action: 'set-enabled-plugins',
-                                enabledPlugins,
-                              })
-                              enqueueSnackbar('Plugins updated', {
-                                variant: 'success',
-                              })
-                            }}
-                          />
+                          <Stack spacing={1}>
+                            <OrgPluginsCard
+                              tenant={tenant}
+                              disabled={!canManage || busy}
+                              onSave={async (enabledPlugins) => {
+                                await settingsRequest({
+                                  action: 'set-enabled-plugins',
+                                  enabledPlugins,
+                                })
+                                enqueueSnackbar('Plugins updated', {
+                                  variant: 'success',
+                                })
+                              }}
+                            />
+                            <Typography variant="body2">
+                              {'Marketplace add-ons (installs, upgrades, '}
+                              <AppLink
+                                href={buildRoute(Route.ORG_PLUGINS)}
+                              >{'uninstalls) live in Plugins & add-ons'}</AppLink>
+                              {'.'}
+                            </Typography>
+                          </Stack>
                         ),
                       },
                     ]

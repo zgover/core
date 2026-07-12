@@ -20,6 +20,7 @@ import * as PluginSdk from '@aglyn/aglyn'
 import { mdiAccountGroupOutline } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
 import { AiAssistProvider } from './components/ai-assist-provider.component'
+import HostPluginsCard from './components/host-plugins-card.component'
 import { CommunityListingContent } from './components/listing-content.component'
 import { BUNDLE_ID } from './constants/bundle-common'
 
@@ -49,6 +50,14 @@ export function registerCommunityConsole(): void {
         slot: 'communityListing',
         widgetId: 'community-listing-content',
         Component: CommunityListingContent,
+      },
+      // Installed add-ons management (AGL-423): the org "Plugins &
+      // add-ons" hub renders this with an acting hostId — the card lists
+      // host + org install pins with upgrade/uninstall/share-with-org.
+      {
+        slot: 'orgAddons',
+        widgetId: 'community-installed-addons',
+        Component: HostPluginsCard,
       },
     ],
     pluginId: BUNDLE_ID,

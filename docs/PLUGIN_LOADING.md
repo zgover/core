@@ -28,8 +28,11 @@ by the nx boundary rule (`scope:app` may not depend on `aglyn:addons`,
 
 `org.enabledPlugins: string[]` (AGL-416) is the switchboard; absent means
 `DEFAULT_ENABLED_PLUGINS` (all first-party), and always-on plugins (`mui`)
-are unioned in via `resolveEnabledPlugins(org)`. Managed on the org
-settings "Plugins" tab.
+are unioned in via `resolveEnabledPlugins(org)`. Managed on the console's
+**Plugins & add-ons** page (org section, AGL-423) — first-party toggles
+with release-flag state chips plus the marketplace installs (upgrade /
+uninstall / share-with-org via the community plugin's `orgAddons` widget);
+the org-settings "Plugins" tab links there.
 
 On top of the org switchboard sits the **platform release gate**
 (AGL-422): every non-always-on first-party plugin maps to a release flag

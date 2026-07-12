@@ -19,18 +19,22 @@
 import {
   FIRST_PARTY_PLUGINS,
   resolveEnabledPlugins,
+  type ReleaseFlagKey,
 } from '@aglyn/aglyn'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import {
   Button,
+  Chip,
   List,
   ListItem,
   ListItemText,
   Stack,
   Switch,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useReleaseFlags } from '../hooks/use-release-flags'
 
 export interface OrgPluginsCardProps {
   /** The org doc (billing/tenant shape) carrying `enabledPlugins`. */
@@ -52,6 +56,10 @@ export default function OrgPluginsCard(props: OrgPluginsCardProps) {
   const [enabled, setEnabled] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
   const [dirty, setDirty] = useState(false)
+  // Platform release state per plugin (AGL-422): a flagged-off plugin is
+  // hidden from customers regardless of the org toggle — staff see it with
+  // a warning chip instead (the usual staff-preview bypass).
+  const { flags, isStaff } = useReleaseFlags()
 
   useEffect(() => {
     if (!dirty) setEnabled(resolveEnabledPlugins(tenant))
@@ -87,32 +95,70 @@ export default function OrgPluginsCard(props: OrgPluginsCardProps) {
             'the API. Plan entitlements still apply to enabled plugins.'}
         </Typography>
         <List dense disablePadding>
-          {FIRST_PARTY_PLUGINS.map((plugin) => (
-            <ListItem
-              key={plugin.id}
-              disableGutters
-              secondaryAction={
-                <Switch
-                  edge="end"
-                  checked={plugin.alwaysOn || enabled.includes(plugin.id)}
-                  disabled={Boolean(disabled) || plugin.alwaysOn || busy}
-                  onChange={() => toggle(plugin.id)}
-                  slotProps={{
-                    input: { 'aria-label': `Toggle ${plugin.label}` },
-                  }}
-                />
-              }
-            >
-              <ListItemText
-                primary={plugin.label}
-                secondary={
-                  plugin.alwaysOn
-                    ? `${plugin.description ?? ''} Always on.`.trim()
-                    : plugin.description
+          {FIRST_PARTY_PLUGINS.map((plugin) => {
+            const flagState = plugin.releaseFlag
+              ? flags[plugin.releaseFlag as ReleaseFlagKey]
+              : undefined
+            const flaggedOff = flagState ? !flagState.released : false
+            const rolloutPercent = flagState?.value.enabled
+              ? undefined
+              : flagState?.value.rolloutPercent
+            return (
+              <ListItem
+                key={plugin.id}
+                disableGutters
+                secondaryAction={
+                  <Switch
+                    edge="end"
+                    checked={plugin.alwaysOn || enabled.includes(plugin.id)}
+                    disabled={Boolean(disabled) || plugin.alwaysOn || busy}
+                    onChange={() => toggle(plugin.id)}
+                    slotProps={{
+                      input: { 'aria-label': `Toggle ${plugin.label}` },
+                    }}
+                  />
                 }
-              />
-            </ListItem>
-          ))}
+              >
+                <ListItemText
+                  primary={
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{ alignItems: 'center' }}
+                    >
+                      <span>{plugin.label}</span>
+                      {flaggedOff ? (
+                        <Tooltip
+                          title={
+                            isStaff
+                              ? 'Release flag is off — customers cannot load ' +
+                                'this plugin; you see it via the staff bypass.'
+                              : 'Not released to your workspace yet.'
+                          }
+                        >
+                          <Chip
+                            size="small"
+                            color="warning"
+                            variant="outlined"
+                            label={
+                              rolloutPercent
+                                ? `${rolloutPercent}% rollout`
+                                : 'Not released'
+                            }
+                          />
+                        </Tooltip>
+                      ) : null}
+                    </Stack>
+                  }
+                  secondary={
+                    plugin.alwaysOn
+                      ? `${plugin.description ?? ''} Always on.`.trim()
+                      : plugin.description
+                  }
+                />
+              </ListItem>
+            )
+          })}
         </List>
         <Stack direction="row" spacing={1}>
           <Button

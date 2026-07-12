@@ -168,6 +168,13 @@ const specs = [
     path: '/manage/notifications',
     expects: ["You're above 80%", 'Forms & bookings'],
   },
+  {
+    // Plugins & add-ons hub (AGL-423): the first-party switchboard card
+    // + the community plugin's installed add-ons section (widget slot).
+    name: 'org-plugins',
+    path: '/org/plugins',
+    expects: ['Save plugins', 'Marketplace add-ons', 'Installed plugins'],
+  },
 ]
 
 const apiKey = resolveApiKey()

@@ -30,6 +30,9 @@ are paid.
 - Installs are **version-pinned**, and you can **upgrade** deliberately.
 - Installed plugins appear as named entries in the Besigner **drawer**, alongside built-in
   components.
+- Manage everything in one place on the organization's **Plugins & add-ons** page:
+  first-party plugin toggles (with release state) plus every marketplace install with
+  upgrade, uninstall, and share-with-organization actions.
 
 ## How plugins run
 

@@ -46,6 +46,11 @@ export function orgNavTabItems() {
       href: buildRoute(Route.ORG_DATA),
     },
     {
+      id: 'nav-tab-org-plugins',
+      label: 'Plugins',
+      href: buildRoute(Route.ORG_PLUGINS),
+    },
+    {
       id: 'nav-tab-org-billing',
       label: 'Billing',
       href: buildRoute(Route.MANAGE_BILLING),
