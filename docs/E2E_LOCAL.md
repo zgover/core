@@ -92,6 +92,33 @@ emulator-host env vars** so it can never touch production):
 | `E2E_TIMEOUT_MS` | `45000` | Per-assertion timeout |
 | `E2E_ARTIFACTS_DIR` | `tmp/e2e-artifacts` | Failure screenshots |
 
+## Tenant render + API checks
+
+The same emulator + seed also drive a tenant smoke pass (no separate runner
+yet — curl assertions). The e2e firebase config pins `emulators.logging.port`
+to 4520 and `hub.port` to 4420 precisely so **port 4500 stays free**: the
+tenant middleware's `localhost:4500` case then resolves the seeded host
+`demo` natively, with no temporary middleware edits.
+
+```bash
+# emulators + seed as above, then:
+FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 FIRESTORE_EMULATOR_HOST=localhost:8082 \
+  npx nx serve tenant --port 4500
+```
+
+What to assert (all against `http://localhost:4500`):
+
+| Check | Expect |
+| --- | --- |
+| `/blog`, `/blog/three-day-sourdough`, `/search` | 200, themed, `… – Demo Bakery` titles; the entry page carries a server-rendered `application/ld+json` `Article` |
+| `/` | 404 — the seed publishes no screen, by design |
+| `/robots.txt`, `/sitemap.xml` | middleware rewrites into `app/api/robots` / `app/api/sitemap` (text/plain + xml) |
+| `/api/screen?host=demo` | 200 with the `{status, statusCode, data}` JSON envelope |
+| `/api/collections-rss?host=demo&collection=blog` | 200 RSS |
+| `/api/bookings/slots?hostId=demo` | 200 seeded service — proves the `[...pluginApi]` dispatcher → adapter → unchanged plugin handler chain |
+| `/api/anything-unregistered` | 404 |
+| `POST /api/analytics/collect` | 204 |
+
 ## Docs screenshots
 
 `tools/e2e/capture-docs-screenshots.mjs` reuses the same stack to capture

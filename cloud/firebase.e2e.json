@@ -21,6 +21,14 @@
     },
     "ui": {
       "enabled": false
+    },
+    "logging": {
+      "port": 4520,
+      "host": "127.0.0.1"
+    },
+    "hub": {
+      "port": 4420,
+      "host": "127.0.0.1"
     }
   }
 }
