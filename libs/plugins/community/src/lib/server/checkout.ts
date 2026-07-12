@@ -18,9 +18,9 @@
 import {
   COMMUNITY_PLATFORM_FEE_PERCENT,
   COMMUNITY_PLATFORM_FEE_PERCENT_FREE_PLAN,
-} from '@aglyn/aglyn'
+} from '@aglyn/aglyn/server'
 import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
-import { type PluginApiHandler } from '@aglyn/aglyn'
+import { type PluginApiHandler } from '@aglyn/aglyn/server'
 
 /**
  * Checkout for a paid community listing (AGL-46): one-time destination

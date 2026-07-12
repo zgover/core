@@ -24,14 +24,16 @@ export let fbAdminApp: App
 /**
  * @ignore - default module loading invokes
  *
- * Initializes the firebase-admin default app on import. Guarded on
- * `FIREBASE_PRIVATE_KEY`: every runtime environment sets it, so init runs
- * exactly as before there — but a BUILD without credentials (e.g. Next.js
- * page-data collection in CI/local without the secret) previously crashed
- * at module load on `undefined.replace(...)` / cert validation, taking the
- * whole build down. Skipping init when the key is absent lets the module
- * load cleanly at build time (firebase-admin is never actually invoked
- * during collection) while leaving runtime behavior untouched.
+ * Initializes the firebase-admin default app on import. Guarded on the
+ * FULL credential (`FIREBASE_PRIVATE_KEY` + `NEXT_PUBLIC_FIREBASE_PROJECT_ID`):
+ * every runtime environment sets both, so init runs exactly as before there —
+ * but a BUILD with partial credentials previously crashed at module load
+ * (App Router page-data collection evaluates route modules; the workspace
+ * root `.env` supplies the private key but not the NEXT_PUBLIC project id,
+ * so `cert()` threw "must contain a string project_id"), taking the whole
+ * build down. Skipping init when any piece is absent lets the module load
+ * cleanly at build time (firebase-admin is never actually invoked during
+ * collection) while leaving runtime behavior untouched.
  */
 ;(function main(): void {
   if (getApps().length) {
@@ -39,7 +41,8 @@ export let fbAdminApp: App
     return
   }
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
-  if (!privateKey) return
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  if (!privateKey || !projectId) return
   fbAdminApp = initializeApp({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,

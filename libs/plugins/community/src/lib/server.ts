@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { registerPluginApiRoute } from '@aglyn/aglyn'
+import { registerPluginApiRoute } from '@aglyn/aglyn/server'
 import { checkoutHandler } from './server/checkout'
 import { connectHandler } from './server/connect'
 import { installHandler } from './server/install'

@@ -19,31 +19,26 @@ import * as Aglyn from '@aglyn/aglyn/server'
 import type { Database, DataSnapshot } from 'firebase-admin/database'
 import firebaseAdmin from './firebase-admin'
 
-let db: Database
-if (!db) {
-  db = firebaseAdmin.database()
-  if (process.env.NODE_ENV !== 'production') {
-    // try {
-    //   db = firebaseAdmin.database().useEmulator(
-    //     process.env.FIREBASE_DATABASE_EMULATOR_HOSTNAME || 'localhost',
-    //     parseInt(process.env.FIREBASE_DATABASE_EMULATOR_PORT) || 9000,
-    //   )
-    //   console.log('firebase useEmulator')
-    // }
-    // catch (e) {
-    //   console.error('firebase useEmulator ERROR!', e)
-    // }
+// Lazy: resolving the database at module scope required an initialized
+// admin app at IMPORT time, which crashed App Router builds (page-data
+// collection evaluates route modules; fbserver skips init without full
+// credentials). First call resolves it instead — runtime-identical, since
+// every real runtime initializes the app before serving a request.
+let db: Database | undefined
+function tenantsRef() {
+  if (!db) {
+    db = firebaseAdmin.database()
   }
+  return db.ref(`tenants`)
 }
-const ref = db.ref(`tenants`)
 
 export function setAdminTenant(tenant: Aglyn.AglynTenant): Promise<void> {
   const { $id, ...rest } = tenant
-  return ref.child($id).set(rest)
+  return tenantsRef().child($id).set(rest)
 }
 
 export function getAdminTenant(
   tenantId: Aglyn.TenantUid,
 ): Promise<DataSnapshot> {
-  return ref.child(tenantId).get()
+  return tenantsRef().child(tenantId).get()
 }
