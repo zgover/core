@@ -6,6 +6,13 @@ description: Ship your own plugin to the community marketplace with version pinn
 
 # Publish a plugin
 
+:::tip
+This page covers the mechanics; the complete marketplace guide — review
+process, listing authoring, versioning, payouts — is the
+[Publisher handbook](./publishing/publisher-handbook.md).
+:::
+
+
 Built something reusable? Publish it to the **community marketplace** so other Aglyn users
 can install it — free or paid.
 
