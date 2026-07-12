@@ -3,7 +3,8 @@
 How plugins reach the running apps: the manifest pipeline, the org
 switchboard, and the three trust tiers. The companion authoring guide is
 `apps/docs/docs/plugins/building-feature-plugins.md`; the sandboxed-origin
-reference is `tools/plugin-loader/README.md`.
+reference is `tools/plugin-loader/README.md`; the competitive gap analysis
+and v2 roadmap live in `docs/PLUGIN_PLATFORM_GAPS.md`.
 
 ## The rule
 

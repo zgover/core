@@ -53,3 +53,7 @@ payouts, and a publisher **ledger**.
 
 - [The Besigner](../besigner/overview.md)
 - [Site templates & block library](../site-templates/overview.md)
+- [Building feature plugins](./building-feature-plugins.md) — the developer guide to every
+  extension surface
+- Repo docs: `docs/PLUGIN_LOADING.md` (loading architecture and trust tiers) and
+  `docs/PLUGIN_PLATFORM_GAPS.md` (competitive analysis and the v2 roadmap)
