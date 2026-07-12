@@ -23,7 +23,10 @@ import { getOrgForHost } from '@aglyn/tenant-data-admin'
  * since AGL-238 (the org doc mirrors the legacy tenant billing shape, so
  * the return keeps its historic `tenant` name for the render branches).
  * Fail-open: on error or a missing org, `tenant` is null — callers treat
- * that as the pre-billing state (all features on).
+ * that as the pre-billing state (all features on). Naming: "tenant"
+ * here is the historic billing alias for the ORG doc (AGL-443; see the
+ * docs-site glossary) — distinct from "the tenant app", which is this
+ * whole published-sites runtime.
  */
 export async function getTenant(options: { hostId?: string }) {
   const { hostId } = options

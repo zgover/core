@@ -33,9 +33,22 @@ export {
   HostScreenVisibility,
   HostViewFormat,
   HostViewType,
-} from './definitions/workspace.types'
+} from './definitions/platform.types'
 // AglynScreenVersion/AglynLayoutVersion are exported (specialized with the
 // SDK's NodeSchema) from ../types/screen instead of this generic form.
+// Org billing vocabulary (historic Tenant* names — see the glossary and
+// definitions/org-billing.types.ts; AglynOrgBilling is the name for new
+// code).
+export type {
+  AglynOrgBilling,
+  AglynTenant,
+  TenantEntitlements,
+  TenantFeatureFlags,
+  TenantPlan,
+  TenantSeatAddons,
+  TenantSubscription,
+  TenantUid,
+} from './definitions/org-billing.types'
 export type {
   AglynAccessRule,
   AglynAuthRole,
@@ -49,11 +62,6 @@ export type {
   AglynRedirect,
   AglynRolePermission,
   AglynScreen,
-  AglynTenant,
-  TenantEntitlements,
-  TenantFeatureFlags,
-  TenantPlan,
-  TenantSubscription,
   AglynUser,
   ComponentDefUid,
   HostAnnouncementBar,
@@ -70,10 +78,9 @@ export type {
   RoleUid,
   ScreenSlug,
   ScreenUid,
-  TenantUid,
   UserUid,
   VersionUid,
-} from './definitions/workspace.types'
+} from './definitions/platform.types'
 
 //    __________  _   ________________    _   _____________
 //   / ____/ __ \/ | / / ___/_  __/   |  / | / /_  __/ ___/

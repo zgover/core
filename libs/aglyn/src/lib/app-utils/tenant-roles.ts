@@ -34,6 +34,12 @@ export const TENANT_PERMISSION_KEYS = [
 
 export type TenantPermissionKey = (typeof TENANT_PERMISSION_KEYS)[number]
 
+/**
+ * NAMING: "Tenant" in these role/permission types is the historic alias —
+ * they describe ORG member roles and permissions (AGL-443; see the
+ * glossary). Grandfathered because the keys are persisted in custom role
+ * docs and threaded through every plugin.
+ */
 export type TenantPermissionSet = Record<TenantPermissionKey, boolean>
 
 export type TenantRoleId = 'admin' | 'editor' | 'viewer'

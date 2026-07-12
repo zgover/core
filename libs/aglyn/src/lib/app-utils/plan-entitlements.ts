@@ -495,6 +495,9 @@ function resolvePlan(tenant: Partial<AglynTenant> | null | undefined) {
 }
 
 /**
+ * NAMING: operates on the ORG billing doc (historic "tenant" alias —
+ * AGL-443, see the glossary).
+ *
  * Effective entitlements for a tenant: plan defaults with the tenant doc's
  * per-key overrides applied (features merge key-by-key too). Missing or
  * unknown plans resolve as `free`.

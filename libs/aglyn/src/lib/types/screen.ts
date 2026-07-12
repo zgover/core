@@ -18,7 +18,7 @@
 import type {
   AglynLayoutVersion as AglynLayoutVersionBase,
   AglynScreenVersion as AglynScreenVersionBase,
-} from '../foundation/definitions/workspace.types'
+} from '../foundation/definitions/platform.types'
 import type { NodeSchema } from './nodes'
 
 export type {

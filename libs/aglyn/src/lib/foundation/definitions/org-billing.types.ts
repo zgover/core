@@ -1,0 +1,242 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * The org's billing/entitlement vocabulary (AGL-443 naming cleanup).
+ *
+ * NAMING: these types are spelled `Tenant*` for historical reasons — they
+ * predate the organizations migration (AGL-232..238). The retired
+ * `tenants/{uid}` collection's billing shape was mirrored ONTO the org
+ * doc so every plan/entitlement resolver kept working, and the type names
+ * came along. Today they describe fields of `orgs/{orgId}`:
+ *
+ * - `AglynOrgBilling` is the canonical alias — use it in NEW code.
+ * - `AglynTenant` is the same type under its historic name (deprecated).
+ * - The `Tenant*` satellites (plan/flags/entitlements/seats/subscription)
+ *   are ACTIVE vocabulary carried by the org doc, not legacy data.
+ *
+ * Convention (see the docs-site glossary): "organization/org" is the
+ * entity; "workspace" is the user-facing word for it; "tenant" is
+ * reserved for the published-site runtime (`apps/tenant`,
+ * `@aglyn/tenant-*` libs).
+ */
+
+import type { ITimestamp } from '@aglyn/shared-util-timestamp'
+import type { AglynDocument, HostUid, UserUid } from './platform.types'
+
+export type TenantUid = string
+
+/** Hosted in master catalog */
+/** SaaS subscription tiers (Tenant Billing & SaaS Plans, AGL-38..41). */
+export type TenantPlan =
+  | 'free'
+  | 'starter'
+  | 'pro'
+  | 'business'
+  | 'advanced'
+
+/** Boolean feature gates per plan; quotas live beside them as numbers. */
+export interface TenantFeatureFlags {
+  /** A/B experiments (AGL-252); Business tier. */
+  abTesting?: boolean
+  versioning?: boolean
+  reusableComponents?: boolean
+  customDomain?: boolean
+  removeBranding?: boolean
+  /** Schedule a version to publish at a date/time (tier above versioning). */
+  scheduledPublishing?: boolean
+  /** Sell listings on the community marketplace (AGL-46). */
+  marketplaceSelling?: boolean
+  /** AI copy assist in the besigner (AGL-89). */
+  aiAssist?: boolean
+  /** No-code workflow builder (AGL-101). */
+  workflows?: boolean
+  /** Datasets + repeatable components (AGL-102/103). */
+  dataStore?: boolean
+  /** Video/file uploads in the media manager (AGL-162). */
+  videoMedia?: boolean
+  /** Appointment bookings (AGL-159). */
+  bookings?: boolean
+  /** Event → action automation builder (AGL-148). */
+  actions?: boolean
+  /** Outbound/inbound webhooks (AGL-149). */
+  webhooks?: boolean
+  /** Whole-site export/backup + restore (AGL-163). */
+  siteExport?: boolean
+  /** Multilingual sites (AGL-164): locale variants + switcher. */
+  multilingual?: boolean
+  /** Event Calendar add-on (AGL-145); paid, not part of any base tier. */
+  eventCalendar?: boolean
+  /** URL redirects manager (AGL-154). */
+  redirects?: boolean
+  /** Per-screen traffic analytics (AGL-150). */
+  screenAnalytics?: boolean
+  /** CDN delivery + responsive image variants for media (AGL-175). */
+  mediaCdn?: boolean
+  /** Announcement bar + promotional popups (AGL-195/196). */
+  marketingOverlays?: boolean
+  /** Full storefront commerce: catalog, cart, checkout (AGL-278). */
+  commerce?: boolean
+  /** Console point-of-sale mode (AGL-312). */
+  pos?: boolean
+  /** Recurring storefront subscription products (AGL-303). */
+  storefrontSubscriptions?: boolean
+  /** Entitlement-gated screens/sections/video paywalls (AGL-309). */
+  contentGating?: boolean
+  /** Gift cards & store credit (AGL-322). */
+  giftCards?: boolean
+  /** Verified-buyer product reviews (AGL-324). */
+  productReviews?: boolean
+  /** Abandoned checkout recovery emails (AGL-323). */
+  abandonedCart?: boolean
+  /** Dropship supplier routing on paid orders (AGL-289). */
+  dropshipRouting?: boolean
+  /** Commerce analytics dashboard (AGL-327). */
+  commerceAnalytics?: boolean
+}
+
+/**
+ * Effective limits/gates for a tenant. Plan defaults come from
+ * `PLAN_ENTITLEMENTS` (versioned with the app); per-tenant overrides can be
+ * stored on the tenant doc and win over the plan defaults.
+ */
+export interface TenantEntitlements {
+  hostLimit?: number
+  screensPerHost?: number
+  sharedLayoutsPerHost?: number
+  storagePerHostMb?: number
+  totalSiteSizeMb?: number
+  membersPerHost?: number
+  /** Seat model (AGL-112): included tenant-manager seats. */
+  managersPerTenant?: number
+  /** Hard seat caps incl. purchased addons; beyond these, upgrade the plan. */
+  maxManagersPerTenant?: number
+  maxMembersPerHost?: number
+  bandwidthGb?: number
+  /** Form submissions accepted per calendar month (Forms & Lead Capture). */
+  formSubmissionsPerMonth?: number
+  /** Component-builder caps (AGL-99): host variables. */
+  variablesPerHost?: number
+  /** Component-builder caps (AGL-99): host functions. */
+  functionsPerHost?: number
+  /** Workflow builder cap (AGL-99/101). */
+  workflowsPerHost?: number
+  /** Event-triggered workflow runs per calendar month (AGL-165). */
+  workflowRunsPerMonth?: number
+  /** Bookable services per host (AGL-159). */
+  servicesPerHost?: number
+  /** Redirect rules per host (AGL-154). */
+  redirectsPerHost?: number
+  /** Contacts CRM cap (AGL-197): unified people records per host. */
+  contactsPerHost?: number
+  /** Campaign emails sendable per calendar month (AGL-161). */
+  emailSendsPerMonth?: number
+  /** Action runs per calendar month (AGL-148). */
+  actionRunsPerMonth?: number
+  /** Dynamic data caps — org-scoped (AGL-239/240): datasets are shared
+   * by every host in the org, so counts and size meter per org. */
+  datasetsPerOrg?: number
+  /** Hard dataset cap incl. addons (AGL-132/240); beyond it, upgrade. */
+  maxDatasetsPerOrg?: number
+  recordsPerDataset?: number
+  /** Included aggregate dataset storage (MB) across the org (AGL-240);
+   * beyond it, metered overage per GB where the plan prices it. */
+  dataStorageMbPerOrg?: number
+  /** @deprecated Legacy host-keyed override (pre-AGL-240); resolved into
+   * `datasetsPerOrg` by `resolveTenantEntitlements`. */
+  datasetsPerHost?: number
+  /** @deprecated Legacy host-keyed override (pre-AGL-240); resolved into
+   * `maxDatasetsPerOrg` by `resolveTenantEntitlements`. */
+  maxDatasetsPerHost?: number
+  /** Catalog products per host (AGL-278). */
+  productsPerHost?: number
+  /** Inventory locations per host (AGL-286). */
+  inventoryLocations?: number
+  /** Concurrent POS registers (AGL-312); add-ons raise it (AGL-329). */
+  posRegisters?: number
+  /** Platform fee % on physical storefront sales (Connect app fee). */
+  transactionFeePhysicalPct?: number
+  /** Platform fee % on digital storefront sales (Connect app fee). */
+  transactionFeeDigitalPct?: number
+  features?: TenantFeatureFlags
+}
+
+/**
+ * Paid addon seats (AGL-112) purchased on top of the plan's included seats.
+ * The effective seat limit is `included + purchased`, clamped to the plan's
+ * hard max — beyond the max the tenant must upgrade.
+ */
+export interface TenantSeatAddons {
+  /** Extra tenant-manager seats. */
+  managers?: number
+  /** Extra host-member seats (applies per host). */
+  members?: number
+  /** Extra org datasets (AGL-132/240); billed monthly per dataset. */
+  datasets?: number
+}
+
+export interface TenantSubscription {
+  status?:
+    | 'active'
+    | 'trialing'
+    | 'past_due'
+    | 'canceled'
+    | 'incomplete'
+    | 'unpaid'
+  priceId?: string
+  currentPeriodEnd?: ITimestamp
+}
+
+/**
+ * @deprecated Historic name — this IS the org billing doc
+ * (`orgs/{orgId}`), not the retired `tenants/{uid}` shape it mirrors.
+ * Use {@link AglynOrgBilling} in new code; existing sites are
+ * grandfathered and renamed opportunistically.
+ */
+export interface AglynTenant extends AglynDocument {
+  $id: TenantUid
+  ownerId?: UserUid
+  displayName?: string
+  description?: string
+  hosts?: Record<HostUid, true>
+  users?: Record<UserUid, true>
+  /** Subscription tier; missing/unknown plans resolve as `free`. */
+  plan?: TenantPlan
+  /** Per-tenant entitlement overrides (admin console); win over plan defaults. */
+  entitlements?: TenantEntitlements
+  /** Per-org plugin switchboard (AGL-416); see plugin-manager/enabled-plugins. */
+  enabledPlugins?: string[]
+  /** Purchased addon seats (AGL-112); billed monthly per seat. */
+  seatAddons?: TenantSeatAddons
+  stripeCustomerId?: string
+  subscription?: TenantSubscription
+  /** Staff suspension (AGL-202): set = all the tenant's sites serve 503. */
+  suspendedAt?: ITimestamp | null
+  suspendedReason?: string
+  /**
+   * GDPR erasure request (AGL-206): hard deletion happens ONLY via
+   * tools/scripts/erase-tenant.mjs after a 7-day hold from this stamp.
+   */
+  erasureRequestedAt?: ITimestamp | null
+}
+
+/**
+ * The canonical name for the org's billing/entitlement doc shape — what
+ * `useCurrentTenant()`, the plugin-page `tenant` prop, and the
+ * entitlement resolvers actually carry. Prefer this in new code.
+ */
+export type AglynOrgBilling = AglynTenant

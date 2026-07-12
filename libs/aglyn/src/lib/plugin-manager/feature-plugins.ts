@@ -136,10 +136,11 @@ export interface ConsolePluginPageProps {
   /** True when the tenant holds the extension's `featureFlag` entitlement. */
   entitled: boolean
   /**
-   * The resolved entitlement source (org billing doc) the shell already
-   * loaded to compute `entitled`. Passed through so a plugin page can run
-   * its own `checkEntitlement`/`checkQuota` (e.g. per-plan service limits)
-   * without reaching for the console-app org/session hooks.
+   * The ORG billing doc (`orgs/{orgId}`) the shell already loaded to
+   * compute `entitled` — the prop name is the historic "tenant" alias
+   * (AGL-443; see the glossary). Passed through so a plugin page can run
+   * its own `checkEntitlement`/`checkQuota` (e.g. per-plan service
+   * limits) without reaching for the console-app org/session hooks.
    */
   tenant?: Partial<AglynTenant>
   /**

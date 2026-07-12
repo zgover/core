@@ -26,6 +26,11 @@ const RETRY_DELAY_MS = 400
 const MAX_RETRIES = 5
 
 /**
+ * NAMING (AGL-443): despite the name, this returns the ORG billing doc
+ * (`orgs/{orgId}` as {@link AglynOrgBilling}) — "tenant" here is the
+ * historic alias, kept because the hook threads through every plugin.
+ * See the docs-site glossary for the org/workspace/tenant convention.
+ *
  * The org workspace's billing doc — the entitlement source the signed-in
  * user acts under (AGL-238). The name is historic: the returned shape is
  * the org doc, which mirrors the legacy tenant billing fields.

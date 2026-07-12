@@ -25,14 +25,12 @@
 
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type {
-  AglynDocument,
-  HostUid,
   TenantEntitlements,
   TenantPlan,
   TenantSeatAddons,
   TenantSubscription,
-  UserUid,
-} from './workspace.types'
+} from './org-billing.types'
+import type { AglynDocument, HostUid, UserUid } from './platform.types'
 
 export type OrgUid = string
 /** Workspace subdomain label: `{slug}.aglyn.com` (Slack-style). */
