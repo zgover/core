@@ -52,7 +52,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 // Dynamic site-plugin activation (AGL-417): canvas components register
 // via the org-gated loader; the page gates the canvas on readiness.
 import { withSitePlugins } from '../../../../../../../../components/console-plugins-gate.component'
-import AiAssistProvider from '../../../../../../../../components/ai-assist-provider.component'
 import BesignerFunctionsButton from '../../../../../../../../components/besigner-functions-button.component'
 import BindingPickerProvider from '../../../../../../../../components/binding-picker-provider.component'
 import InteractionsProvider from '../../../../../../../../components/interactions-provider.component'
@@ -252,7 +251,6 @@ function LayoutBesignerPage(props) {
     <Aglyn.ScreenLinkContext.Provider value={screenLinks}>
     <EntityPickerProvider hostId={hostId}>
     <ReusableComponentsProvider hostId={hostId}>
-    <AiAssistProvider>
     <BindingPickerProvider hostId={hostId}>
     <InteractionsProvider hostId={hostId}>
     <BesignerMediaPickerProvider hostId={hostId}>
@@ -403,7 +401,6 @@ function LayoutBesignerPage(props) {
     </BesignerMediaPickerProvider>
     </InteractionsProvider>
     </BindingPickerProvider>
-    </AiAssistProvider>
     </ReusableComponentsProvider>
     </EntityPickerProvider>
     </Aglyn.ScreenLinkContext.Provider>

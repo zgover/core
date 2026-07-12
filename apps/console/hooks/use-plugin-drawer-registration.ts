@@ -17,7 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import { pluginInstallToPreset } from '@aglyn/plugins-mui'
+import { pluginInstallToPreset } from '@aglyn/aglyn'
 import { collection, limit, query } from 'firebase/firestore'
 import { runInAction } from 'mobx'
 import { useEffect, useRef } from 'react'

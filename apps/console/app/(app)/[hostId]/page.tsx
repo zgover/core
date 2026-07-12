@@ -26,9 +26,8 @@ import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import HostAnalyticsCard from '../../../components/analytics/host-analytics-card.component'
 import CampaignGlanceCard from '../../../components/dashboard/campaign-glance-card.component'
-import CommerceGlanceCard from '../../../components/dashboard/commerce-glance-card.component'
 import NewestSiteUsersCard from '../../../components/dashboard/newest-site-users-card.component'
-import { HostActivityCard } from '@aglyn/plugins-workflows'
+import PluginWidgetSlot from '../../../components/plugin-widget-slot.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../constants/route-links'
 import hostNavTabItems from '../../../constants/host-nav-tabs'
@@ -84,7 +83,7 @@ const Index: NextPageWithLayout = (props) => {
                 xs: 12,
                 md: 6,
               },
-              children: <CommerceGlanceCard hostId={hostId} />,
+              children: <PluginWidgetSlot slot="commerceGlance" hostId={hostId} />,
             },
             {
               size: {
@@ -102,7 +101,8 @@ const Index: NextPageWithLayout = (props) => {
                 xs: 12,
               },
               children: (
-                <HostActivityCard
+                <PluginWidgetSlot
+                  slot="hostActivity"
                   hostId={hostId}
                   max={10}
                   viewAllHref={`${buildRoute(Route.HOST_SETUP, { hostId })}?tab=activity`}

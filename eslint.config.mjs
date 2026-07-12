@@ -94,6 +94,16 @@ export default [
           ],
           depConstraints: [
             {
+              // Apps never import feature plugins statically (AGL-417/419):
+              // plugins reach the apps ONLY through the generated loader
+              // manifests (plugins.*.generated.ts, file-scoped disable) and
+              // the core plugin-manager registries (widgets, providers,
+              // site runtimes, page hooks, API dispatch). Plugin→plugin
+              // stays legal via the aglyn:addons source rule below.
+              sourceTag: 'scope:app',
+              notDependOnLibsWithTags: ['aglyn:addons'],
+            },
+            {
               sourceTag: 'scope:lib',
               onlyDependOnLibsWithTags: ['scope:lib'],
             },

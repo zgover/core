@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { resolveEnabledPlugins } from '@aglyn/aglyn'
+import { listConsoleProviders, resolveEnabledPlugins } from '@aglyn/aglyn'
 import type React from 'react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { consolePluginLoader } from '../constants/console-plugin-loader'
@@ -53,7 +53,17 @@ export default function ConsolePluginsGate({
   }, [orgId, enabledKey])
 
   if (orgId && readyForOrg !== orgId) return null
-  return children
+  // Plugin-registered app providers (AGL-419) wrap every console page —
+  // e.g. the community plugin's AI-assist provider. Mounted only once the
+  // registry is populated; each receives the org billing doc.
+  return listConsoleProviders().reduce<ReactNode>(
+    (inner, Provider, index) => (
+      <Provider key={index} tenant={tenant}>
+        {inner}
+      </Provider>
+    ),
+    children,
+  )
 }
 
 /**

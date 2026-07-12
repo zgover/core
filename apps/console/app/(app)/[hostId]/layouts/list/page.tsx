@@ -21,7 +21,7 @@ import {
   createResourceUid,
   LAYOUT_SLOT_COMPONENT_ID,
 } from '@aglyn/aglyn'
-import { BUNDLE_ID as MUI_BUNDLE_ID } from '@aglyn/plugins-mui'
+import { MUI_BUNDLE_ID } from '@aglyn/aglyn'
 import {
   ICON_VARIANT_CLOSE,
   ICON_VARIANT_MODIFY_DELETE,

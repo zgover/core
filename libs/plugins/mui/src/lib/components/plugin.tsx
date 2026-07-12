@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import { registerPluginInstallPresetMapper } from '@aglyn/aglyn'
 import { mdiPuzzle } from '@aglyn/shared-data-mdi'
 import Box from '@mui/material/Box'
 import { forwardRef } from 'react'
@@ -208,7 +209,7 @@ export interface PluginInstallLike {
  * manifest's lineal rules ride on the node data for later enforcement.
  * Returns null for an install without a resolvable listing id.
  */
-export function pluginInstallToPreset(
+export function muiPluginInstallToPreset(
   install: PluginInstallLike,
 ): Aglyn.PresetSchema | null {
   const listingId = install.listingId ?? install.$id

@@ -19,6 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import * as PluginSdk from '@aglyn/aglyn'
 import { mdiSitemap } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
+import { HostActivityCard } from './components/host-activity-card.component'
 import { BUNDLE_ID } from './constants/bundle-common'
 
 /** Code-split: the Workflows console page only loads when opened. */
@@ -37,6 +38,15 @@ const WorkflowsConsolePage = lazy(
  */
 export function registerWorkflowsConsole(): void {
   PluginSdk.registerConsoleExtension({
+    // Host activity feed (AGL-419): rendered by the shell's
+    // 'hostActivity' widget slot (dashboard + editor view page).
+    widgets: [
+      {
+        slot: 'hostActivity',
+        widgetId: 'workflows-host-activity',
+        Component: HostActivityCard,
+      },
+    ],
     pluginId: BUNDLE_ID,
     displayName: 'Workflows',
     featureFlag: 'workflows',

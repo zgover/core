@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import HostDatasetsCard from './components/host-datasets-card.component'
 import * as Aglyn from '@aglyn/aglyn'
 import * as PluginSdk from '@aglyn/aglyn'
 import { mdiDatabaseOutline } from '@aglyn/shared-data-mdi'
@@ -35,6 +36,15 @@ const DataConsolePage = lazy(() => import('./components/data-console-page'))
  */
 export function registerDataConsole(): void {
   PluginSdk.registerConsoleExtension({
+    // Org datasets card (AGL-419): org/data renders it through the
+    // 'orgData' widget slot.
+    widgets: [
+      {
+        slot: 'orgData',
+        widgetId: 'data-org-datasets',
+        Component: HostDatasetsCard,
+      },
+    ],
     pluginId: BUNDLE_ID,
     displayName: 'Data',
     featureFlag: 'dataStore',

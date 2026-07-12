@@ -19,6 +19,8 @@ import * as Aglyn from '@aglyn/aglyn'
 import * as PluginSdk from '@aglyn/aglyn'
 import { mdiAccountGroupOutline } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
+import { AiAssistProvider } from './components/ai-assist-provider.component'
+import { CommunityListingContent } from './components/listing-content.component'
 import { BUNDLE_ID } from './constants/bundle-common'
 
 /** Code-split: the Community console page only loads when opened. */
@@ -37,6 +39,18 @@ const CommunityConsolePage = lazy(
  */
 export function registerCommunityConsole(): void {
   PluginSdk.registerConsoleExtension({
+    // AI assist (AGL-89/419): mounted by the shell around every console
+    // page; besigner consumes AiAssistContext from besigner-ui.
+    providers: [AiAssistProvider],
+    // Listing detail content (AGL-419): the app route keeps the chrome
+    // and renders this through the 'communityListing' slot.
+    widgets: [
+      {
+        slot: 'communityListing',
+        widgetId: 'community-listing-content',
+        Component: CommunityListingContent,
+      },
+    ],
     pluginId: BUNDLE_ID,
     displayName: 'Community',
     navItems: [

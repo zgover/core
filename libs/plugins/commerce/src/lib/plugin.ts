@@ -19,6 +19,10 @@ import * as Aglyn from '@aglyn/aglyn'
 import * as PluginSdk from '@aglyn/aglyn'
 import { mdiStorefrontOutline } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
+const PosConsolePage = lazy(() => import('./components/console/pos-page.component'))
+const CommerceGlanceCard = lazy(
+  () => import('./components/console/commerce-glance-card.component'),
+)
 import * as Account from './components/account'
 import * as Cart from './components/cart'
 import * as Gate from './components/gate'
@@ -121,6 +125,15 @@ export function registerCommerceConsole(): void {
   PluginSdk.registerConsoleExtension({
     pluginId: BUNDLE_ID,
     displayName: 'Commerce',
+    // Dashboard/analytics glance card (AGL-419): rendered through the
+    // shell's 'commerceGlance' widget slot.
+    widgets: [
+      {
+        slot: 'commerceGlance',
+        widgetId: 'commerce-glance',
+        Component: CommerceGlanceCard,
+      },
+    ],
     navItems: [
       {
         label: 'Products',
@@ -128,6 +141,15 @@ export function registerCommerceConsole(): void {
         icon: { path: mdiStorefrontOutline.path },
         header: { title: 'Products', icon: { path: mdiStorefrontOutline.path } },
         Component: CommerceConsolePage,
+      },
+      {
+        // POS register (AGL-312/419): relocated from the app's /pos route —
+        // the generic [pluginSlug] shell now serves it at the same URL.
+        label: 'POS',
+        href: '/pos',
+        icon: { path: mdiStorefrontOutline.path },
+        header: { title: 'Point of Sale' },
+        Component: PosConsolePage,
       },
     ],
   })

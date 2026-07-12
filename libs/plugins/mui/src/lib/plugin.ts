@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { registerPluginInstallPresetMapper } from '@aglyn/aglyn'
+import { muiPluginInstallToPreset } from './components/plugin'
 import * as Aglyn from '@aglyn/aglyn'
 import { runInAction } from 'mobx'
 import * as AppBar from './components/app-bar'
@@ -51,6 +53,9 @@ import { BUNDLE_ID } from './constants/bundle-common'
  * events-calendar, email) declare a dependency on it.
  */
 export function registerMuiPlugin(): void {
+  // Install→preset mapper (AGL-419): the console's drawer registration
+  // consumes it through core, never importing this plugin.
+  registerPluginInstallPresetMapper(muiPluginInstallToPreset)
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
 
   // Single bundle manifest (AGL-140): one entry per component keeps

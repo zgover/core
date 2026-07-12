@@ -17,9 +17,9 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import * as CommerceModel from '@aglyn/plugins-commerce/model'
+import type { ConsolePluginPageProps } from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
-import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Alert,
@@ -40,10 +40,7 @@ import {
 import { collection, limit, query } from 'firebase/firestore'
 import { useCallback, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { useHostId } from '../../../../components/host-id-provider'
-import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
-import MainLayout from '../../../../components/layouts/main.layout'
-import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
+import { useFirestoreCollection } from '@aglyn/tenant-feature-instance'
 
 interface RegisterLine {
   productId: string
@@ -63,8 +60,7 @@ const usd = (cents: number) => `$${(cents / 100).toFixed(2)}`
  * discount, and cash / QR-card / reservation-folio settlement through
  * the server-priced pos-order API. Receipts print via the browser.
  */
-const HostPos: NextPageWithLayout = () => {
-  const hostId = useHostId()
+export function PosConsolePage({ hostId }: ConsolePluginPageProps) {
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
@@ -566,6 +562,6 @@ const HostPos: NextPageWithLayout = () => {
     </>
   )
 }
-HostPos.displayName = 'Page:HostPos'
+PosConsolePage.displayName = 'PosConsolePage'
 
-export default HostPos
+export default PosConsolePage

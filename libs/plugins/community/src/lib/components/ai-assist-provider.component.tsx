@@ -17,7 +17,8 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import * as CommunityModel from '@aglyn/plugins-community/model'
+import { checkEntitlement } from '@aglyn/aglyn'
+import * as CommunityModel from '../model'
 import { AiAssistContext } from '@aglyn/besigner-ui'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -33,10 +34,11 @@ import {
 } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
-import { hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
+
 
 export interface AiAssistProviderProps {
+  /** Org billing doc for the entitlement gate (mounted by the shell). */
+  tenant?: unknown
   children?: JSX.Children
 }
 
@@ -48,9 +50,9 @@ export interface AiAssistProviderProps {
  * object — and clears any stale rich-text `html` so the new text renders.
  */
 export function AiAssistProvider(props: AiAssistProviderProps) {
+  const tenant = props.tenant
   const { children } = props
   const { enqueueSnackbar } = useSnackbar()
-  const { tenant } = useCurrentTenant()
   const { data: user } = useUser()
   const [node, setNode] = useState<Aglyn.NodeSchema<any> | null>(null)
   const [instruction, setInstruction] = useState('')
@@ -85,7 +87,7 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
 
   const handleRewrite = useCallback(
     (target: Aglyn.NodeSchema<any>) => {
-      if (!hasEntitlement('ai-assist', tenant)) {
+      if (!checkEntitlement(tenant as never, 'aiAssist')) {
         return void enqueueSnackbar(
           'AI assist requires a Pro plan — see Billing to upgrade',
           { variant: 'warning', persist: false },
@@ -160,7 +162,7 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
   }, [node, instruction, busy, user, effectiveTarget, enqueueSnackbar])
 
   const handleGenerateSection = useCallback(() => {
-    if (!hasEntitlement('ai-assist', tenant)) {
+    if (!checkEntitlement(tenant as never, 'aiAssist')) {
       return void enqueueSnackbar(
         'AI assist requires a Pro plan — see Billing to upgrade',
         { variant: 'warning', persist: false },

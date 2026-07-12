@@ -21,6 +21,6 @@ export * from './lib/components/plugin-frame'
 export {
   PLUGIN_DRAWER_CATEGORY,
   type PluginInstallLike,
-  pluginInstallToPreset,
+  muiPluginInstallToPreset,
 } from './lib/components/plugin'
 export { sanitizeCustomHtml } from './lib/components/custom-html'

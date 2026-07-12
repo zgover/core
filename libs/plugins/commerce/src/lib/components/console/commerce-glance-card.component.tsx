@@ -16,14 +16,13 @@
  */
 'use client'
 
-import { formatOrderNumber, isLowStock, liftLegacyProduct } from '@aglyn/plugins-commerce/model'
+import { formatOrderNumber, isLowStock, liftLegacyProduct } from '../../model'
 import { AppLink, CardDisplay } from '@aglyn/shared-ui-jsx'
 import { Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { useMemo } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
-import { buildRoute, Route } from '../../constants/route-links'
-import useFirestoreCollection from '../../hooks/use-firestore-collection'
+import { useFirestoreCollection } from '@aglyn/tenant-feature-instance'
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -95,7 +94,7 @@ export function CommerceGlanceCard(props: { hostId: string }) {
           <Button
             component={AppLink as any}
             {...({ componentVariant: 'naked' } as any)}
-            href={buildRoute(Route.HOST_PRODUCTS, { hostId })}
+            href={`/${hostId}/products`}
             size="small"
             color="secondary"
           >

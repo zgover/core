@@ -91,7 +91,7 @@ import {
   publishScreenRoute,
   unpublishScreenRoute,
 } from '../../../../../../../../constants/screen-publishing'
-import { HostActivityCard } from '@aglyn/plugins-workflows'
+import PluginWidgetSlot from '../../../../../../../../components/plugin-widget-slot.component'
 import { CONTENT_MAX_WIDTH } from '../../../../../../../../constants/shared'
 import useCurrentTenant from '../../../../../../../../hooks/use-current-tenant'
 import useFirestoreCollection from '../../../../../../../../hooks/use-firestore-collection'
@@ -941,7 +941,8 @@ function ScreenDetails() {
               {
                 size: { xs: 12, md: 6, lg: 8 },
                 children: (
-                  <HostActivityCard
+                  <PluginWidgetSlot
+                    slot="hostActivity"
                     hostId={hostId}
                     targetId={screenId}
                     header={'Page Activity'}

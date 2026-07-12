@@ -22,7 +22,7 @@ import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-pr
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Alert } from '@mui/material'
 import FeatureGate from '../../../../components/feature-gate.component'
-import { HostDatasetsCard } from '@aglyn/plugins-data'
+import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
@@ -63,7 +63,11 @@ const OrgData: NextPageWithLayout = () => {
             </Alert>
           ) : currentOrg?.$id ? (
             <FeatureGate flag="release_data_store">
-              <HostDatasetsCard orgId={currentOrg.$id} tenant={tenant} />
+              <PluginWidgetSlot
+                slot="orgData"
+                orgId={currentOrg.$id}
+                tenant={tenant}
+              />
             </FeatureGate>
           ) : null}
         </Container>

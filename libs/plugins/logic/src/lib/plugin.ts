@@ -19,6 +19,8 @@ import * as Aglyn from '@aglyn/aglyn'
 import * as PluginSdk from '@aglyn/aglyn'
 import { mdiFunctionVariant } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
+import HostFunctionsCard from './components/host-functions-card.component'
+import HostVariablesCard from './components/host-variables-card.component'
 import { BUNDLE_ID } from './constants/bundle-common'
 
 /** Code-split: the Logic console page only loads when opened. */
@@ -34,6 +36,20 @@ const LogicConsolePage = lazy(() => import('./components/logic-console-page'))
  */
 export function registerLogicConsole(): void {
   PluginSdk.registerConsoleExtension({
+    // Variables/functions cards (AGL-419): the besigner functions
+    // drawer renders them through the 'besignerFunctions' slot.
+    widgets: [
+      {
+        slot: 'besignerFunctions',
+        widgetId: 'logic-variables',
+        Component: HostVariablesCard,
+      },
+      {
+        slot: 'besignerFunctions',
+        widgetId: 'logic-functions',
+        Component: HostFunctionsCard,
+      },
+    ],
     pluginId: BUNDLE_ID,
     displayName: 'Logic',
     navItems: [

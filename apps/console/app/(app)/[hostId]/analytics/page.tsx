@@ -23,7 +23,7 @@ import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Stack } from '@mui/material'
 import HostAnalyticsCard from '../../../../components/analytics/host-analytics-card.component'
 import CampaignGlanceCard from '../../../../components/dashboard/campaign-glance-card.component'
-import CommerceGlanceCard from '../../../../components/dashboard/commerce-glance-card.component'
+import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import { useHostId } from '../../../../components/host-id-provider'
 import HostDisplayNameComponent from '../../../../components/host-display-name.component'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
@@ -65,7 +65,7 @@ const HostAnalytics: NextPageWithLayout = () => {
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <Stack spacing={3}>
             <HostAnalyticsCard hostId={hostId} />
-            <CommerceGlanceCard hostId={hostId} />
+            <PluginWidgetSlot slot="commerceGlance" hostId={hostId} />
             <CampaignGlanceCard hostId={hostId} />
           </Stack>
         </Container>

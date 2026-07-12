@@ -18,7 +18,7 @@
 import {
   parsePluginPropsJson,
   PLUGIN_DRAWER_CATEGORY,
-  pluginInstallToPreset,
+  muiPluginInstallToPreset,
 } from './plugin'
 
 describe('parsePluginPropsJson (AGL-192)', () => {
@@ -30,9 +30,9 @@ describe('parsePluginPropsJson (AGL-192)', () => {
   })
 })
 
-describe('pluginInstallToPreset (AGL-190)', () => {
+describe('muiPluginInstallToPreset (AGL-190)', () => {
   it('builds a Community-category preset pinning the listing id', () => {
-    const preset = pluginInstallToPreset({
+    const preset = muiPluginInstallToPreset({
       $id: 'L1',
       displayName: 'Weather',
       manifest: { name: 'Weather', restrictParent: ['muiStack'] },
@@ -46,7 +46,7 @@ describe('pluginInstallToPreset (AGL-190)', () => {
   })
 
   it('prefers listingId over $id and falls back to the manifest name', () => {
-    const preset = pluginInstallToPreset({
+    const preset = muiPluginInstallToPreset({
       listingId: 'L2',
       $id: 'other',
       manifest: { name: 'Charts' },
@@ -56,6 +56,6 @@ describe('pluginInstallToPreset (AGL-190)', () => {
   })
 
   it('returns null without a resolvable listing id', () => {
-    expect(pluginInstallToPreset({ displayName: 'x' })).toBeNull()
+    expect(muiPluginInstallToPreset({ displayName: 'x' })).toBeNull()
   })
 })

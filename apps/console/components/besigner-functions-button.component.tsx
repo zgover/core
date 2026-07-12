@@ -26,7 +26,7 @@ import {
   Tooltip,
 } from '@mui/material'
 import { useState } from 'react'
-import { HostFunctionsCard, HostVariablesCard } from '@aglyn/plugins-logic'
+import PluginWidgetSlot from './plugin-widget-slot.component'
 import useCurrentTenant from '../hooks/use-current-tenant'
 
 export interface BesignerFunctionsButtonProps {
@@ -64,8 +64,11 @@ export function BesignerFunctionsButton(props: BesignerFunctionsButtonProps) {
         <DialogContent
           sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
-          <HostVariablesCard hostId={hostId} tenant={tenant} />
-          <HostFunctionsCard hostId={hostId} tenant={tenant} />
+          <PluginWidgetSlot
+            slot="besignerFunctions"
+            hostId={hostId}
+            tenant={tenant}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>{'Close'}</Button>
