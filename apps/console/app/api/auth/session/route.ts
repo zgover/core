@@ -21,6 +21,10 @@ export const dynamic = 'force-dynamic'
 
 const SESSION_COOKIE = '__session'
 const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000
+// Explicit sign-out tombstone (AGL-463): DELETE must be distinguishable
+// from "never minted", or every raced/expired mint reads as a
+// cross-subdomain sign-out and force-logs-out a valid local session.
+const SESSION_SIGNED_OUT = 'signed-out'
 const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
 /**
@@ -93,30 +97,61 @@ async function handler(request: Request): Promise<Response> {
     }
 
     if (request.method === 'GET') {
+      // 401 responses carry a `reason` so the client can tell an explicit
+      // sign-out (tombstone/revocation → sign this origin out too) from a
+      // merely missing/expired cookie (→ re-mint from the live local
+      // session) — AGL-463.
       const cookie = readCookie(request, SESSION_COOKIE)
       if (!cookie) {
-        return Response.json({ error: 'No session' }, { status: 401 })
+        return Response.json(
+          { error: 'No session', reason: 'absent' },
+          { status: 401 },
+        )
       }
-      const decoded = await auth.verifySessionCookie(cookie, true)
-      const token = await auth.createCustomToken(decoded.uid)
-      return Response.json({ token }, { status: 200 })
+      if (cookie === SESSION_SIGNED_OUT) {
+        return Response.json(
+          { error: 'Signed out', reason: 'signed-out' },
+          { status: 401 },
+        )
+      }
+      try {
+        const decoded = await auth.verifySessionCookie(cookie, true)
+        const token = await auth.createCustomToken(decoded.uid)
+        return Response.json({ token }, { status: 200 })
+      } catch (error) {
+        const code = (error as { code?: string })?.code ?? ''
+        const reason =
+          code === 'auth/session-cookie-revoked'
+            ? 'revoked'
+            : code === 'auth/session-cookie-expired'
+              ? 'expired'
+              : 'invalid'
+        return jsonWithCookie(
+          { error: 'Session invalid', reason },
+          401,
+          `${SESSION_COOKIE}=; ${cookieAttributes(request, 0)}`,
+        )
+      }
     }
 
     if (request.method === 'DELETE') {
+      // Tombstone, not deletion: other subdomains read this as "signed out
+      // elsewhere", while a truly absent cookie no longer signs anyone out.
       return jsonWithCookie(
         { ok: true },
         200,
-        `${SESSION_COOKIE}=; ${cookieAttributes(request, 0)}`,
+        `${SESSION_COOKIE}=${SESSION_SIGNED_OUT}; ${cookieAttributes(request, SESSION_TTL_MS / 1000)}`,
       )
     }
 
     return Response.json({ error: 'Method not allowed' }, { status: 405 })
   } catch (error) {
-    // Expired/revoked cookies land here — clear and report unauthenticated.
-    return jsonWithCookie(
-      { error: 'Session invalid' },
-      401,
-      `${SESSION_COOKIE}=; ${cookieAttributes(request, 0)}`,
+    // Unexpected failures (admin SDK init, malformed request) — report
+    // unauthenticated without touching the cookie; the client treats
+    // reasonless 401s as re-mintable.
+    return Response.json(
+      { error: 'Session invalid', reason: 'invalid' },
+      { status: 401 },
     )
   }
 }
