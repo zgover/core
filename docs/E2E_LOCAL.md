@@ -111,7 +111,8 @@ What to assert (all against `http://localhost:4500`):
 | Check | Expect |
 | --- | --- |
 | `/blog`, `/blog/three-day-sourdough`, `/search` | 200, themed, `… – Demo Bakery` titles; the entry page carries a server-rendered `application/ld+json` `Article` |
-| `/` | 404 — the seed publishes no screen, by design |
+| `/` | 404 — the seed publishes no ROOT screen, by design |
+| `/home` | 200 — the seeded `seed-home` screen (its `versionId` pointer is what publishes a screen) |
 | `/robots.txt`, `/sitemap.xml` | middleware rewrites into `app/api/robots` / `app/api/sitemap` (text/plain + xml) |
 | `/api/screen?host=demo` | 200 with the `{status, statusCode, data}` JSON envelope |
 | `/api/collections-rss?host=demo&collection=blog` | 200 RSS |
