@@ -1,0 +1,125 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type * as Aglyn from '@aglyn/aglyn/server'
+import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+
+/**
+ * Fetches the host's variables keyed by doc id (AGL-185/194) for
+ * `{{var:id}}` tokens; expression scopes read names off the values.
+ * Fail-open: on error an empty map is returned and tokens render
+ * literally/empty.
+ */
+export async function getVariables(options: {
+  hostId: string
+}): Promise<Record<string, Aglyn.HostVariable>> {
+  const variables: Record<string, Aglyn.HostVariable> = {}
+  try {
+    const snapshot = await firebaseAdmin
+      .app()
+      .firestore()
+      .collection('hosts')
+      .doc(options.hostId)
+      .collection('variables')
+      .limit(100)
+      .get()
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data() as Aglyn.HostVariable
+      if (data?.name && !((data as any).deletedAt)) {
+        variables[docSnapshot.id] = data
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  return variables
+}
+
+/**
+ * Fetches the host's function definitions keyed by name for
+ * `{{fn:name(...)}}` bindings (AGL-93). Fail-open like variables.
+ */
+export async function getFunctions(options: {
+  hostId: string
+}): Promise<Record<string, Aglyn.HostFunction>> {
+  const functions: Record<string, Aglyn.HostFunction> = {}
+  try {
+    const snapshot = await firebaseAdmin
+      .app()
+      .firestore()
+      .collection('hosts')
+      .doc(options.hostId)
+      .collection('functions')
+      .limit(100)
+      .get()
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data() as Aglyn.HostFunction
+      if (data?.name && !(data as any).deletedAt) {
+        // Plain evaluator fields only: doc timestamps aren't
+        // JSON-serializable and definitions embed into page props.
+        const definition = {
+          name: data.name,
+          parameters: data.parameters ?? [],
+          variables: data.variables ?? [],
+          operations: data.operations ?? [],
+          ...(data.returnValue && { returnValue: data.returnValue }),
+        }
+        // Keyed by doc id ({{fn:id(...)}}, AGL-185/194) AND name so
+        // legacy workflow steps that stored functionName keep resolving
+        // (AGL-261).
+        functions[docSnapshot.id] = definition
+        if (!functions[data.name]) functions[data.name] = definition
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  return functions
+}
+
+export default getVariables
+
+/**
+ * Fetches the host's workflows keyed by name for computed variables and
+ * function→workflow calls (AGL-129). Fail-open like variables.
+ */
+export async function getWorkflows(options: {
+  hostId: string
+}): Promise<Record<string, Aglyn.HostWorkflow>> {
+  const workflows: Record<string, Aglyn.HostWorkflow> = {}
+  try {
+    const snapshot = await firebaseAdmin
+      .app()
+      .firestore()
+      .collection('hosts')
+      .doc(options.hostId)
+      .collection('workflows')
+      .limit(100)
+      .get()
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data() as Aglyn.HostWorkflow
+      if ((data as any).deletedAt) continue
+      // Double-keyed by doc id AND name (AGL-261): id references are
+      // rename-safe; legacy name references keep resolving.
+      workflows[docSnapshot.id] = data
+      if (data?.name) workflows[data.name] = data
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  return workflows
+}

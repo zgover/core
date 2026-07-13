@@ -30,4 +30,14 @@ module.exports = withAglyn({
   env: {
     AGLYN_SILOED_HOST: process.env.AGLYN_SILOED_HOST,
   },
+  // Manage → Org section move (AGL-236): old bookmarks keep working.
+  async redirects() {
+    return [
+      ...['billing', 'team', 'support', 'community'].map((section) => ({
+        source: `/manage/${section}`,
+        destination: `/org/${section}`,
+        permanent: true,
+      })),
+    ]
+  },
 })

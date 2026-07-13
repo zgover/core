@@ -2,6 +2,7 @@
 
 # compiled output
 /dist
+tools/plugin-loader/realm/*/dist
 /tmp
 /out-tsc
 /.firebase
@@ -69,3 +70,4 @@ vite.config.*.timestamp*
 .nx/polygraph
 .nx/self-healing
 .vercel
+.env*

@@ -8,6 +8,8 @@
     "build": {
       "executor": "@nx/next:build",
       "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "cache": false,
       "options": {
         "outputPath": "dist/apps/console"
       },
@@ -18,11 +20,11 @@
         "development": {
           "outputPath": "apps/console"
         }
-      },
-      "defaultConfiguration": "production"
+      }
     },
     "serve": {
       "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
       "options": {
         "buildTarget": "console:build",
         "dev": true,
@@ -37,8 +39,7 @@
           "buildTarget": "console:build:development",
           "dev": true
         }
-      },
-      "defaultConfiguration": "development"
+      }
     },
     "export": {
       "executor": "@nx/next:export",

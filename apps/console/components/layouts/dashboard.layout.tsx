@@ -16,8 +16,10 @@
  */
 'use client'
 
+import { RELEASE_FLAGS, type ReleaseFlagKey } from '@aglyn/aglyn'
 import {
   ICON_VARIANT_HOME,
+  ICON_VARIANT_SYMBOL_FLAG,
   ICON_VARIANT_SYMBOL_SECURE,
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
@@ -25,10 +27,13 @@ import { Box, Stack } from '@mui/material'
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
 import { buildRoute, Route } from '../../constants/route-links'
+import { useReleaseFlags } from '../../hooks/use-release-flags'
 import DashboardHeaderComponent, {
   type DashboardHeaderProps,
 } from '../dashboard-header.component'
 import FooterComponent from '../footer.component'
+import HostSwitcherNavComponent from '../host-switcher-nav.component'
+import QuotaWarningsBanner from '../quota-warnings-banner.component'
 import SecondaryAppBarComponent, {
   type SecondaryAppBarProps,
 } from '../secondary-app-bar.component'
@@ -38,13 +43,13 @@ const defaultTabBarTitle = (
     direction="row"
     spacing={{ sm: 0.15, md: 0.5 }}
     sx={{
-      alignItems: "center",
+      alignItems: 'center',
       typography: 'subtitle2',
       lineHeight: 'normal',
-      color: 'tertiary.main'
-    }}>
-    <span>{'Secure'}</span>
-    <MdiIcon path={ICON_VARIANT_SYMBOL_SECURE.path} fontSize={'small'} />
+      color: 'tertiary.main',
+    }}
+  >
+    <HostSwitcherNavComponent />
   </Stack>
 )
 
@@ -56,6 +61,13 @@ const defaultBreadcrumbs = [
     icon: { path: ICON_VARIANT_HOME.path },
   },
 ]
+
+// Nav tabs governed by a release flag (AGL-229), keyed by tab id.
+const NAV_TAB_RELEASE_FLAGS = new Map(
+  RELEASE_FLAGS.filter((definition) => definition.navTabId).map(
+    (definition) => [definition.navTabId, definition],
+  ),
+)
 
 export interface DashboardLayoutProps {
   children?: JSX.Children
@@ -85,6 +97,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
   } = props
   const params = useParams<{ hostId: string }>()
   const hostId = params?.hostId
+  const { flags, isStaff } = useReleaseFlags()
 
   const breadcrumbs = useMemo(() => {
     return [
@@ -93,32 +106,60 @@ export function DashboardLayout(props: DashboardLayoutProps) {
     ]
   }, [breadcrumbItems, disableDefaultBreadcrumb])
 
+  // Release-flag gating (AGL-229): flagged-off tabs disappear for
+  // customers; staff keep them with a flag badge so unreleased surfaces
+  // are recognizably unlaunched.
+  const gatedNavTabItems = useMemo(() => {
+    const source = navTabItems ?? [
+      {
+        id: 'nav-tab-dashboard',
+        label: 'Dashboard',
+        href: buildRoute(Route.HOST_DASHBOARD, {
+          hostId,
+        }),
+      },
+      {
+        id: 'nav-tab-screens',
+        label: 'Screens',
+        href: buildRoute(Route.SCREEN_LIST, {
+          hostId,
+        }),
+      },
+    ]
+    return source.flatMap((item) => {
+      const definition = item.id
+        ? NAV_TAB_RELEASE_FLAGS.get(item.id)
+        : undefined
+      // Default to the flag's shipped state when the live flag map hasn't
+      // resolved yet, so defaultEnabled surfaces (e.g. Events) don't blink
+      // out on load and a missing entry can't crash the strip (AGL-387).
+      const released =
+        flags[definition?.key as ReleaseFlagKey]?.released ??
+        definition?.defaultEnabled ??
+        false
+      if (!definition || released) return [item]
+      if (!isStaff) return []
+      return [
+        {
+          ...item,
+          icon: { path: ICON_VARIANT_SYMBOL_FLAG.path },
+          title: `${definition.label} is hidden from customers by release flag ${definition.key}`,
+        },
+      ]
+    })
+  }, [navTabItems, hostId, flags, isStaff])
+
   return (
     <>
       <SecondaryAppBarComponent
         tabBarTitle={tabBarTitle ?? defaultTabBarTitle}
         activeTab={activeTab}
-        navTabItems={
-          navTabItems ?? [
-            {
-              id: 'nav-tab-dashboard',
-              label: 'Dashboard',
-              href: buildRoute(Route.HOST_DASHBOARD, {
-                hostId,
-              }),
-            },
-            {
-              id: 'nav-tab-screens',
-              label: 'Screens',
-              href: buildRoute(Route.SCREEN_LIST, {
-                hostId,
-              }),
-            },
-          ]
-        }
+        navTabItems={gatedNavTabItems}
       />
 
       <Stack component="main" direction="column" sx={{ flexGrow: 1 }}>
+        {/* Site-wide usage-cap banner (AGL-136). */}
+        <QuotaWarningsBanner />
         <DashboardHeaderComponent
           disableBreadcrumbs={disableBreadcrumbs}
           breadcrumbItems={breadcrumbs}

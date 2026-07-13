@@ -26,6 +26,11 @@ import {
   ICON_VARIANT_USER_SETTINGS,
 } from '@aglyn/shared-data-enums'
 import {
+  mdiAccountGroupOutline,
+  mdiCreditCardOutline,
+} from '@aglyn/shared-data-mdi'
+import {
+  AglynBesignerLogoFull,
   AglynConsoleLogoFull,
   AppLink,
   type AppLinkProps,
@@ -37,7 +42,7 @@ import {
   ScrollReaction,
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { getThemeModeDisplayName, mergeSxProps } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-tools'
 import { useUserPhoto } from '@aglyn/tenant-feature-instance'
@@ -45,6 +50,7 @@ import {
   AppBar,
   Avatar,
   type AvatarProps,
+  Box,
   Button,
   type ButtonProps,
   Divider,
@@ -57,8 +63,10 @@ import {
 } from '@mui/material'
 import { useColorScheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
-import { buildRoute, Route } from '../../constants/route-links'
+import { Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
+import NotificationsMenu from '../notifications-menu.component'
+import OrgSwitcherNav from '../org-switcher-nav.component'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {
@@ -128,6 +136,10 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
 export interface TopAppBarProps {
   appBarSuffix?: JSX.Node
   centerNavigationItems?: CenterNavMenuItem[]
+  /** Rendered before the center nav items (e.g. the version dropdown). */
+  centerPrefix?: JSX.Node
+  /** Rendered on the right, before the quick actions / user menu (AGL-57). */
+  actionsPrefix?: JSX.Node
   customCenter?: JSX.Node
   enableAppBarElevation?: boolean
   quickActions?: QuickActionsMenuItem[]
@@ -139,6 +151,8 @@ const TopAppBar = (props: TopAppBarProps) => {
   const {
     appBarSuffix,
     centerNavigationItems,
+    centerPrefix,
+    actionsPrefix,
     customCenter,
     enableAppBarElevation,
     quickActions,
@@ -154,7 +168,11 @@ const TopAppBar = (props: TopAppBarProps) => {
           color="surface"
           variant="elevation"
           elevation={enableAppBarElevation && activeWithoutHysteresis ? 4 : 0}
-          position={!enableAppBarElevation ? 'relative' : 'sticky'}
+          // Always scrolls away (user request 2026-07-07): the secondary
+          // nav-tabs bar is the sticky one; pages that passed
+          // enableAppBarElevation used to pin this bar too, so which bar
+          // stuck varied page to page.
+          position="relative"
           sx={{
             height: `${TOP_BAR_HEIGHT - 1}px`,
             borderBottomWidth: `1px`,
@@ -233,7 +251,11 @@ const TopAppBar = (props: TopAppBarProps) => {
                       md: theme.typography.pxToRem(20),
                     })
                   }}>
-                  <AglynConsoleLogoFull sx={{ height: 24, width: 'auto' }} />
+                  {besigner ? (
+                    <AglynBesignerLogoFull sx={{ height: 24, width: 'auto' }} />
+                  ) : (
+                    <AglynConsoleLogoFull sx={{ height: 24, width: 'auto' }} />
+                  )}
                   {appBarSuffix && (
                     <Typography
                       component="span"
@@ -260,7 +282,9 @@ const TopAppBar = (props: TopAppBarProps) => {
                 flexGrow: 1,
                 paddingLeft: 1.5
               }}>
-              {!customCenter && _isArrEmpty(centerNavigationItems) ? null : (
+              {!customCenter &&
+              !centerPrefix &&
+              _isArrEmpty(centerNavigationItems) ? null : (
                 <Stack
                   component="nav"
                   direction="row"
@@ -268,10 +292,22 @@ const TopAppBar = (props: TopAppBarProps) => {
                     alignItems: "center",
                     justifyContent: "flex-start"
                   }}>
+                  {centerPrefix}
                   {customCenter || centerNavigationItems.map(buildNav('text'))}
                 </Stack>
               )}
             </Stack>
+            {actionsPrefix ? (
+              <Stack
+                component="nav"
+                direction="row"
+                sx={{
+                  alignItems: "center",
+                  justifyContent: "flex-end"
+                }}>
+                {actionsPrefix}
+              </Stack>
+            ) : null}
             {_isArrEmpty(quickActions) ? null : (
               <Stack
                 component="nav"
@@ -324,6 +360,8 @@ export function MainLayout(props: MainLayoutProps) {
     title,
     appBarSuffix,
     centerNavigationItems,
+    centerPrefix,
+    actionsPrefix,
     customCenter,
     enableAppBarElevation,
     quickActions,
@@ -350,40 +388,71 @@ export function MainLayout(props: MainLayoutProps) {
         sx={[{
           alignItems: "stretch",
           flexDirection: "column",
-          height: "100vh"
+          // minHeight, not height: a fixed 100vh box is the containing block
+          // for the sticky secondary toolbar, which stopped sticking after
+          // one viewport of scroll on longer pages (AGL-37).
+          minHeight: "100vh",
+          // Besigner is a fixed editor shell (AGL-58/63): exactly the window
+          // height, never page-scrollable — overflow lives inside the editor
+          // regions (canvas pan, panel scroll).
+          ...(besigner && {
+            height: "100vh",
+            overflow: "hidden",
+            '@supports (height: 100dvh)': {
+              minHeight: "100dvh",
+              height: "100dvh",
+            },
+          }),
         }, ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx])]}>
         <TopAppBar
           enableAppBarElevation={enableAppBarElevation}
+          besigner={besigner}
           backButton={backButton}
-          centerNavigationItems={
-            centerNavigationItems || [
-              // {
-              //   id: 'center-nav-site-picker',
-              //   children: ,
-              // },
-              {
-                id: 'center-nav-hosts',
-                children: 'Hosts',
-                href: buildRoute(Route.HOST_LIST),
-              },
-              // {
-              //   id: 'center-nav-app',
-              //   children: 'Website',
-              //   // href: '/besigner',
-              //   items: [
-              //     {
-              //       id: 'center-nav-screens',
-              //       children: 'View Screens',
-              //       href: Route.SCREEN_LIST,
-              //     },
-              //   ],
-              // },
-            ]
+          centerPrefix={centerPrefix}
+          centerNavigationItems={centerNavigationItems || []}
+          customCenter={
+            // Default center nav is the ORG switcher (AGL-236 — swapped
+            // with the host switcher, which now lives in the secondary
+            // bar); pages passing their own nav items or center keep them.
+            customCenter ??
+            (centerNavigationItems ? undefined : <OrgSwitcherNav />)
           }
-          customCenter={customCenter}
+          actionsPrefix={
+            // Notifications bell (AGL-260) rides beside any page-provided
+            // prefix actions.
+            <>
+              {actionsPrefix}
+              <NotificationsMenu />
+            </>
+          }
           appBarSuffix={appBarSuffix}
           quickActions={[
             ...(quickActions || []),
+            // Theme mode toggle, in the slot the "Manage" cog menu used to
+            // occupy (AGL-236 follow-up) — a direct click-to-cycle icon
+            // button rather than a single-item menu.
+            {
+              title: `Theme mode: ${themeModeDisplayName}`,
+              onClick: () => {
+                // cycle: system/undefined → light → dark → system
+                setMode(
+                  mode === 'dark'
+                    ? 'system'
+                    : mode === 'light'
+                      ? 'dark'
+                      : 'light',
+                )
+              },
+              icon: {
+                path:
+                  mode === 'dark'
+                    ? ICON_VARIANT_THEME_DARK.path
+                    : mode === 'light'
+                      ? ICON_VARIANT_THEME_LIGHT.path
+                      : ICON_VARIANT_THEME_SYSTEM.path,
+              },
+              'aria-label': 'switch theme mode',
+            },
             {
               title: 'Manage account',
               MenuProps: { dense: true, horizontalOrigin: 'right' },
@@ -400,32 +469,27 @@ export function MainLayout(props: MainLayoutProps) {
               },
               items: [
                 {
-                  onClick: () => {
-                    // cycle: system/undefined → light → dark → system
-                    setMode(
-                      mode === 'dark'
-                        ? 'system'
-                        : mode === 'light'
-                          ? 'dark'
-                          : 'light',
-                    )
-                  },
-                  // component: 'button',
-                  children: `Theme mode: ${themeModeDisplayName}`,
-                  icon: {
-                    path:
-                      mode === 'dark'
-                        ? ICON_VARIANT_THEME_DARK.path
-                        : mode === 'light'
-                          ? ICON_VARIANT_THEME_LIGHT.path
-                          : ICON_VARIANT_THEME_SYSTEM.path,
-                  },
-                  'aria-label': 'switch theme mode',
-                },
-                {
                   children: 'Settings',
                   component: AppLink,
                   href: Route.MANAGE_USER_SETTINGS,
+                  icon: { path: ICON_VARIANT_USER_SETTINGS.path },
+                },
+                {
+                  children: 'Billing',
+                  component: AppLink,
+                  href: Route.MANAGE_BILLING,
+                  icon: { path: mdiCreditCardOutline.path },
+                },
+                {
+                  children: 'Community profile',
+                  component: AppLink,
+                  href: Route.MANAGE_COMMUNITY_PROFILE,
+                  icon: { path: mdiAccountGroupOutline.path },
+                },
+                {
+                  children: 'Staff console',
+                  component: AppLink,
+                  href: Route.ADMIN_OVERVIEW,
                   icon: { path: ICON_VARIANT_USER_SETTINGS.path },
                 },
                 {
@@ -441,7 +505,21 @@ export function MainLayout(props: MainLayoutProps) {
             },
           ]}
         />
-        {children}
+        {besigner ? (
+          <Box
+            sx={{
+              flexGrow: 1,
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            {children}
+          </Box>
+        ) : (
+          children
+        )}
       </Stack>
     </Fragment>
   );

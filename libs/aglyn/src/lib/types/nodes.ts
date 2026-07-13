@@ -18,10 +18,12 @@
 import type {
   ConditionDefinition,
   DataType,
-  FieldActions,
-  ResolvePropsFunction,
   Validator,
 } from '@data-driven-forms/react-form-renderer'
+import type {
+  FieldActions,
+  ResolvePropsFunction,
+} from '@data-driven-forms/react-form-renderer/common-types'
 import type { MuiStyledOptions } from '@mui/system/createStyled'
 import type { SvgIconProps } from '@mui/material/SvgIcon'
 /** Minimal icon-props type used in component/preset schemas. Structurally compatible with @aglyn/shared-ui-jsx MdiIconProps. */
@@ -435,6 +437,17 @@ export interface ComponentSchema<P = any> {
      * Describe nodes of this component type to be self-closing
      */
     selfClosing?: FEATURE_FLAG
+    /**
+     * Component renders its `children` prop as text content the editor may
+     * edit directly (Attributes "Text" field, inline canvas editing).
+     */
+    textEditable?: FEATURE_FLAG
+    /**
+     * Component also accepts basic rich text (AGL-54): the inline editor
+     * upgrades to a formatting surface and commits sanitized HTML into the
+     * `html` prop (with `children` kept as the plain-text fallback).
+     */
+    richTextEditable?: FEATURE_FLAG
   }
 }
 

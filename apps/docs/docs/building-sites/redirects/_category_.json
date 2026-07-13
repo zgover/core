@@ -1,0 +1,10 @@
+{
+  "label": "Redirects",
+  "position": 10,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "building-sites/redirects/overview"
+  }
+}

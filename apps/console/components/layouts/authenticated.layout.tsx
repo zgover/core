@@ -20,7 +20,8 @@ import { SplashScreen, useLoading } from '@aglyn/shared-ui-jsx'
 import { continueParam, useContinueUrl } from '@aglyn/shared-util-next'
 import { useRouter } from 'next/navigation'
 import { Fragment, useEffect } from 'react'
-import { useSigninCheck } from 'reactfire'
+import { useSigninCheck } from '@aglyn/tenant-feature-instance'
+import ImpersonationBanner from '../impersonation-banner.component'
 
 export interface AuthenticatedLayoutProps {
   children?: JSX.Children
@@ -60,7 +61,19 @@ function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
     signedIn,
   ])
 
-  return <Fragment>{!invalidAuth ? children : <SplashScreen />}</Fragment>
+  return (
+    <Fragment>
+      {!invalidAuth ? (
+        <Fragment>
+          {/* Impersonation warning (AGL-246). */}
+          <ImpersonationBanner />
+          {children}
+        </Fragment>
+      ) : (
+        <SplashScreen />
+      )}
+    </Fragment>
+  )
 }
 AuthenticatedLayout.displayName = 'AuthenticatedLayout'
 AuthenticatedLayout.aglyn = true

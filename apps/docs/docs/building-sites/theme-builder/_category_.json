@@ -1,0 +1,10 @@
+{
+  "label": "Theme Builder",
+  "position": 3,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "building-sites/theme-builder/overview"
+  }
+}

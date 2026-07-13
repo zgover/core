@@ -47,6 +47,10 @@ interface FocusState {
    * The computed last selected node
    */
   readonly lastSelected: LastSelectedNode
+  /** Number of currently selected nodes (AGL-5). */
+  readonly selectionCount: number
+  /** True when more than one node is selected (AGL-5). */
+  readonly hasMultipleSelected: boolean
 
   readonly isNodeSelected: (node: Aglyn.NodeSchema) => boolean
   readonly isNodeHovered: (node: Aglyn.NodeSchema) => boolean
@@ -70,6 +74,12 @@ const state = observable<FocusState>({
   },
   get lastSelected(): Aglyn.NodeSchema<any> | undefined {
     return this.selected[this.selected.length - 1]
+  },
+  get selectionCount(): number {
+    return this.selected.length
+  },
+  get hasMultipleSelected(): boolean {
+    return this.selected.length > 1
   },
 
   isNodeSelected: computedFn((node: Aglyn.NodeSchema<any>): boolean => {
@@ -102,6 +112,14 @@ const state = observable<FocusState>({
 
 export function getLastSelected(): LastSelectedNode {
   return state.lastSelected
+}
+
+export function selectionCount(): number {
+  return state.selectionCount
+}
+
+export function hasMultipleSelected(): boolean {
+  return state.hasMultipleSelected
 }
 
 export function getHovered(): HoveredNode | undefined {
@@ -236,6 +254,70 @@ export function setSelectedNode(
     state.manuallyCollapsed = state.manuallyCollapsed.filter(
       (id) => !ancestorIds.has(id),
     )
+  })
+}
+
+/**
+ * Flat, depth-first list of the nodes currently visible in the hierarchy —
+ * children of collapsed nodes are skipped (AGL-6). Range selection resolves
+ * its slice against this order.
+ */
+export function getVisibleNodeOrder(): Aglyn.NodeSchema<any>[] {
+  const result: Aglyn.NodeSchema<any>[] = []
+  const root = Aglyn.canvas.rootNode
+  if (!root) return result
+  const walk = (node: Aglyn.NodeSchema<any>) => {
+    result.push(node)
+    if (node.$id !== root.$id && !state.isNodeEffectivelyExpanded(node)) return
+    for (const id of node.nodes ?? []) {
+      const child = Aglyn.canvas.getNode(id)
+      if (child) walk(child)
+    }
+  }
+  walk(root)
+  return result
+}
+
+/**
+ * Shift+Click range selection (AGL-7): selects every visible node between
+ * the current anchor (`lastSelected`) and the target, in document order.
+ * Without an anchor it falls back to single selection.
+ */
+export function rangeSelectNode(node: Aglyn.NodeSchema<any>) {
+  if (!node) return
+  const anchor = state.lastSelected
+  if (!anchor || anchor.$id === node.$id) return setSelectedNode(node, false)
+
+  const visibleNodes = getVisibleNodeOrder()
+  const anchorIndex = visibleNodes.findIndex((n) => n.$id === anchor.$id)
+  const targetIndex = visibleNodes.findIndex((n) => n.$id === node.$id)
+  if (anchorIndex === -1 || targetIndex === -1) {
+    return setSelectedNode(node, false)
+  }
+  const [from, to] =
+    anchorIndex < targetIndex
+      ? [anchorIndex, targetIndex]
+      : [targetIndex, anchorIndex]
+  runInAction(() => {
+    state.selected = visibleNodes.slice(from, to + 1)
+  })
+}
+
+/**
+ * Cmd/Ctrl+A helper (AGL-7): selects every visible node at the same tree
+ * depth as the current selection anchor (siblings-and-cousins). No-ops
+ * without an anchor.
+ */
+export function selectAllAtDepth() {
+  const anchor = state.lastSelected
+  if (!anchor) return
+  const depth = anchor.breadcrumbPath?.length ?? 0
+  const peers = getVisibleNodeOrder().filter(
+    (node) => (node.breadcrumbPath?.length ?? 0) === depth,
+  )
+  if (!peers.length) return
+  runInAction(() => {
+    state.selected = peers
   })
 }
 

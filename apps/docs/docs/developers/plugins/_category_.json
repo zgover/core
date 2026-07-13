@@ -1,0 +1,10 @@
+{
+  "label": "Plugins & Marketplace",
+  "position": 1,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "developers/plugins/overview"
+  }
+}

@@ -17,12 +17,22 @@
 
 import {
   type DocumentReference,
+  serverTimestamp,
   setDoc,
   type SetOptions,
   type UpdateData,
   updateDoc,
 } from 'firebase/firestore'
 import { useCallback } from 'react'
+
+/**
+ * Every UI write stamps `updatedAt` (AGL-455) — the "last updated" columns
+ * read it, and callers historically forgot it. Spread order lets a caller's
+ * explicit `updatedAt` win (backfills, imports).
+ */
+function stampUpdatedAt<D extends object>(data: D): D {
+  return { updatedAt: serverTimestamp(), ...data }
+}
 
 
 export type UpdateDocCallback<T> = (data: UpdateData<T>) => Promise<void>
@@ -36,17 +46,32 @@ export type ModifyDocCallback<T> = (
   options?: ModifyDocOptions,
 ) => Promise<void>
 
+// `updateDoc`'s overload resolution keys off `DocumentReference`'s
+// `DbModelType` param, which defaults to the generic `DocumentData` when a
+// caller only supplies `AppModelType` (as every hook here does) — that
+// makes TS widen `UpdateData<T>` for unconstrained `T` and reject the
+// match. Pin the call to the single-overload signature actually used.
+const typedUpdateDoc = updateDoc as <T>(
+  ref: DocumentReference<T>,
+  data: UpdateData<T>,
+) => Promise<void>
+
 export function useUpdateDocCallback<T>(
   ref: DocumentReference<T>,
 ): UpdateDocCallback<T> {
-  return useCallback((data: UpdateData<T>) => updateDoc(ref, data), [ref])
+  return useCallback(
+    (data: UpdateData<T>) =>
+      typedUpdateDoc(ref, stampUpdatedAt(data as object) as UpdateData<T>),
+    [ref],
+  )
 }
 
 export function useSetDocCallback<T>(
   ref: DocumentReference<T>,
 ): SetDocCallback<T> {
   return useCallback(
-    (data: Partial<T>, options?: SetOptions) => setDoc(ref, data, options),
+    (data: Partial<T>, options?: SetOptions) =>
+      setDoc(ref, stampUpdatedAt(data as object) as Partial<T>, options ?? {}),
     [ref],
   )
 }
@@ -58,7 +83,14 @@ export function useModifyDocCallback<T>(
   const setDocCb = useSetDocCallback(ref)
   return useCallback(
     (data: UpdateData<T> | Partial<T>, options?: ModifyDocOptions) => {
-      if (options?.shouldSet) return setDocCb(data as Partial<T>, options)
+      // SetOptions semantics (merge/mergeFields) require setDoc: updateDoc
+      // ignores them and, critically, bypasses the ref's withConverter
+      // serialization (e.g. screen-version node compression).
+      const shouldSet =
+        options?.shouldSet ||
+        (options && 'merge' in options) ||
+        (options && 'mergeFields' in options)
+      if (shouldSet) return setDocCb(data as Partial<T>, options)
       return updateDocCb(data as UpdateData<T>)
     },
     [updateDocCb, setDocCb],

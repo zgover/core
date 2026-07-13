@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { HostViewType } from '@aglyn/aglyn'
 import { cloneDeep } from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
 import isEqual from 'lodash-es/isEqual'
@@ -71,6 +72,8 @@ export class BesignerInterfaceController
         logLevel: 'info',
         interactMode: InteractionModeFlag.SELECT,
         devicePreview: BesignerDeviceFlag.RESPONSIVE,
+        canvasScheme: 'light',
+        viewType: HostViewType.SCREEN,
       },
       panels: {
         panelLeft: {

@@ -54,12 +54,21 @@ export const config = {
     // '/(\\?\\!favicon.ico|robots.txt)',
     // '/(\\?\\!_next|_static|api)/:path*',
     // '/_sites/:path*',
-    '/((?!api|_next|fonts|examples|[\\\\w-]+\\\\.\\\\w+).*)',
+    '/((?!api|_next|_static|fonts|examples|[\\w-]+\\.\\w+).*)',
+    // Per-host SEO files, rewritten to the api routes with the resolved
+    // tenant host (SEO Toolkit).
+    '/sitemap.xml',
+    '/robots.txt',
   ],
 }
 
 type EnvVercelEnv = 'production' | 'development' | 'preview' | undefined
-const previewRegex = /^tenant-aglyn-([a-zA-Z0-9]+)-zgover\.vercel\.app$/
+
+// Preview/branch deployment urls have no tenant subdomain, so the host is
+// resolved from a ?tenantHost= override (persisted in a cookie for
+// subsequent navigations) and falls back to the demo host.
+const TENANT_HOST_PARAM = 'tenantHost'
+const TENANT_HOST_COOKIE = 'aglyn-tenant-host'
 
 export const middleware: NextMiddleware = (req, event) => {
   const reqHost = req?.headers?.get('host') || 'console.aglyn.io'
@@ -116,24 +125,30 @@ export const middleware: NextMiddleware = (req, event) => {
       )
       tenantHost = reqHost.replace(`.aglyn.app`, '')
       break
-    // Vercel preview deployment
-    case IS_VERCEL && previewRegex.test(reqHost):
+    // Vercel deployment urls (preview, branch and canonical project domains)
+    case IS_VERCEL && reqHost.endsWith('.vercel.app'):
     case reqHost === 'console.aglyn.io':
-    case reqHost === 'localhost:4500':
+    case reqHost === 'localhost:4500': {
+      const override =
+        req.nextUrl.searchParams.get(TENANT_HOST_PARAM) ||
+        req.cookies.get(TENANT_HOST_COOKIE)?.value
       console.debug(
         'Tenant Host Switch=',
         'assign',
-        'previewRegex=',
-        IS_VERCEL && previewRegex.test(reqHost),
+        "reqHost.endsWith('.vercel.app')=",
+        reqHost.endsWith('.vercel.app'),
         "reqHost === 'console.aglyn.io'=",
         reqHost === 'console.aglyn.io',
         "reqHost === 'localhost:4500'=",
         reqHost === 'localhost:4500',
+        'override=',
+        override,
         'request.match=',
-        AGLYN_TENANT_DEMO || 'demo',
+        override || AGLYN_TENANT_DEMO || 'demo',
       )
-      tenantHost = AGLYN_TENANT_DEMO || 'demo'
+      tenantHost = override || AGLYN_TENANT_DEMO || 'demo'
       break
+    }
     // Local preview dev/test
     case reqHost.endsWith(`.localhost:4500`):
       console.debug(
@@ -146,7 +161,18 @@ export const middleware: NextMiddleware = (req, event) => {
       )
       tenantHost = reqHost.replace(`.localhost:4500`, '') || 'demo'
       break
-    default:
+    default: {
+      // Custom domains (AGL-166): any other hostname is a customer domain
+      // CNAMEd at Vercel. The edge runtime can't query Firestore, so the
+      // hostname travels as a `cname--` sentinel and getStaticProps
+      // resolves it via host.cname (unknown domains 404 there). Only
+      // host-shaped names proceed; garbage still bounces to the console.
+      const hostname = reqHost.split(':')[0].toLowerCase()
+      if (IS_VERCEL && /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(hostname)) {
+        console.debug('Tenant Host Switch=', 'cname', 'hostname=', hostname)
+        tenantHost = `cname--${hostname}`
+        break
+      }
       console.debug(
         'Tenant Host Switch=',
         'Redirecting',
@@ -156,6 +182,7 @@ export const middleware: NextMiddleware = (req, event) => {
         'https://console.aglyn.io',
       )
       return NextResponse.redirect('https://console.aglyn.io')
+    }
   }
 
   if (
@@ -174,9 +201,30 @@ export const middleware: NextMiddleware = (req, event) => {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
-  // rewrite to the current hostname under the pages/_sites folder
-  // the main logic component will happen in pages/_sites/[host]/[...path].tsx
-  const rewrite = `/_sites/${tenantHost}${req.nextUrl.pathname}`
+  // Per-host SEO files resolve through api routes (SEO Toolkit). Clone the
+  // request URL so the host query survives the rewrite.
+  if (
+    req.nextUrl.pathname === '/sitemap.xml' ||
+    req.nextUrl.pathname === '/robots.txt'
+  ) {
+    const seoUrl = req.nextUrl.clone()
+    seoUrl.pathname =
+      req.nextUrl.pathname === '/sitemap.xml' ? '/api/sitemap' : '/api/robots'
+    seoUrl.searchParams.set('host', tenantHost)
+    // The query can be dropped across dev rewrites, so the resolved tenant
+    // host also travels as a request header the api routes prefer.
+    const seoHeaders = new Headers(req.headers)
+    seoHeaders.set('x-aglyn-tenant-host', tenantHost)
+    return NextResponse.rewrite(seoUrl, { request: { headers: seoHeaders } })
+  }
+
+  // Rewrite to the resolved tenant host as the first path segment; the
+  // catch-all render lives at app `[host]/[[...slug]]` (search at
+  // `app/[host]/search`). No `_sites` namespace is needed: the matcher above
+  // already keeps `/api`, `/_next`, etc. off this rewrite, and API routes are
+  // in `pages/api` (which win over the `[host]` catch-all). Preserve the
+  // query string (search pages, tenantHost overrides).
+  const rewrite = `/${tenantHost}${req.nextUrl.pathname}${req.nextUrl.search}`
   console.debug(
     'Tenant Host Switch=',
     'Rewriting',
@@ -187,5 +235,10 @@ export const middleware: NextMiddleware = (req, event) => {
     'req.nextUrl.pathname=',
     req.nextUrl.pathname,
   )
-  return NextResponse.rewrite(new URL(rewrite, req.url))
+  const response = NextResponse.rewrite(new URL(rewrite, req.url))
+  const overrideParam = req.nextUrl.searchParams.get(TENANT_HOST_PARAM)
+  if (overrideParam) {
+    response.cookies.set(TENANT_HOST_COOKIE, overrideParam, { path: '/' })
+  }
+  return response
 }

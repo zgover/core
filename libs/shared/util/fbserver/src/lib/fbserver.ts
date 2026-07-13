@@ -15,35 +15,66 @@
  * limitations under the License.
  */
 
-import * as fbAdmin from 'firebase-admin'
+import { cert, getApp, getApps, initializeApp, type App } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
+import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore'
 
-export let fbAdminApp: fbAdmin.app.App
+export let fbAdminApp: App
 
 /**
  * @ignore - default module loading invokes
+ *
+ * Initializes the firebase-admin default app on import. Guarded on the
+ * FULL credential (`FIREBASE_PRIVATE_KEY` + `NEXT_PUBLIC_FIREBASE_PROJECT_ID`):
+ * every runtime environment sets both, so init runs exactly as before there —
+ * but a BUILD with partial credentials previously crashed at module load
+ * (App Router page-data collection evaluates route modules; the workspace
+ * root `.env` supplies the private key but not the NEXT_PUBLIC project id,
+ * so `cert()` threw "must contain a string project_id"), taking the whole
+ * build down. Skipping init when any piece is absent lets the module load
+ * cleanly at build time (firebase-admin is never actually invoked during
+ * collection) while leaving runtime behavior untouched.
  */
 ;(function main(): void {
-  if (!fbAdmin.apps.length) {
-    fbAdminApp = fbAdmin.initializeApp({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-      serviceAccountId: process.env.FIREBASE_CLIENT_EMAIL,
-      credential: fbAdmin.credential.cert({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // https://stackoverflow.com/a/41044630/1332513
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      }),
-    })
-    // reCAPTCHA v3
-    fbAdmin.appCheck(fbAdminApp)
+  if (getApps().length) {
+    fbAdminApp = getApp()
     return
   }
-  fbAdminApp = fbAdmin.app()
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  if (!privateKey || !projectId) return
+  fbAdminApp = initializeApp({
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+    serviceAccountId: process.env.FIREBASE_CLIENT_EMAIL,
+    credential: cert({
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      // https://stackoverflow.com/a/41044630/1332513
+      privateKey: privateKey.replace(/\\n/g, '\n'),
+    }),
+  })
 })()
 
 export function verifyIdToken(idToken: string) {
-  return fbAdmin.auth().verifyIdToken(idToken)
+  return getAuth(fbAdminApp).verifyIdToken(idToken)
+}
+
+/**
+ * Compatibility facade replacing firebase-admin v14's removed namespace API
+ * (`import * as admin from 'firebase-admin'`) so existing call sites
+ * (`fbAdmin.firestore()`, `fbAdmin.firestore.Timestamp`, `fbAdmin.auth()`)
+ * keep working unchanged, backed internally by the modular SDK.
+ */
+function firestoreNamespace(app?: App) {
+  return getFirestore(app ?? fbAdminApp)
+}
+firestoreNamespace.FieldValue = FieldValue
+firestoreNamespace.Timestamp = Timestamp
+
+const fbAdmin = {
+  firestore: firestoreNamespace,
+  auth: (app?: App) => getAuth(app ?? fbAdminApp),
 }
 
 export { fbAdmin }

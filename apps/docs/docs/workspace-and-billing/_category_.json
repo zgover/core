@@ -1,0 +1,12 @@
+{
+  "label": "Workspace & billing",
+  "position": 8,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "slug": "/workspace-and-billing",
+    "title": "Workspace & billing",
+    "description": "Run your organization: teams, roles and permissions, plans, entitlements, and billing."
+  }
+}

@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
+import { AglynNodeRenderer, Leaf } from '@aglyn/aglyn-node-renderer'
 import * as Besigner from '@aglyn/besigner'
 import { useAglynSiteTheme } from '@aglyn/aglyn-node-renderer'
 import {
@@ -24,7 +24,11 @@ import {
   type MuiShadowRootProps,
   useMuiShadowDomContext,
 } from '@aglyn/shared-ui-jsx'
-import { styled, ThemeProvider } from '@aglyn/shared-ui-theme'
+import {
+  styled,
+  ThemeProvider,
+  useHostThemeDocument,
+} from '@aglyn/shared-ui-theme'
 import { Box, type BoxProps, CssBaseline, GlobalStyles } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
@@ -34,7 +38,10 @@ import {
   HTMLAttributes,
   useCallback,
 } from 'react'
+import { useLayoutChromeContext } from '../contexts/layout-chrome-context'
+import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
 import CanvasDropIndicator from './dnd/canvas-drop-indicator'
+import InlineTextEditorComponent from './inline-text-editor.component'
 import NodeLeaf from './node-leaf'
 import NodeOverlay from './node-overlay'
 
@@ -78,7 +85,15 @@ const FramePaper = styled('div', {
 })<SiteShadowDomProps>(({ theme }) => {
   const tv = (theme as any).vars || theme
   return {
+    // CssBaseline styles the document body, which a closed shadow root never
+    // sees (and `:host { all: initial }` resets inheritance), so this surface
+    // carries the body-level baseline itself.
+    ...theme.typography.body1,
+    color: tv.palette.text.primary,
     backgroundColor: tv.palette.background.default,
+    colorScheme: theme.palette.mode,
+    WebkitFontSmoothing: 'antialiased',
+    MozOsxFontSmoothing: 'grayscale',
     height: '100%',
     width: '100%',
     [`> [data-aglyn="leaf\\:_@_"]`]: {
@@ -100,7 +115,13 @@ const ViewportGlobalStyles = (
 )
 const ThemedElementContainer = ({ children }) => {
   const shadowDom = useMuiShadowDomContext()
-  const hostTheme = useAglynSiteTheme({ container: shadowDom })
+  const hostThemeDoc = useHostThemeDocument()
+  const [canvasScheme] = useAglynBesignerFlag('canvasScheme')
+  const hostTheme = useAglynSiteTheme({
+    container: shadowDom,
+    theme: hostThemeDoc,
+    scheme: canvasScheme,
+  })
   return (
     <ThemeProvider theme={hostTheme}>
       <CssBaseline />
@@ -109,9 +130,44 @@ const ThemedElementContainer = ({ children }) => {
   )
 }
 
+const EditableScreenRenderer = observer(() => (
+  <AglynNodeRenderer
+    node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)!}
+    LeafComponent={NodeLeaf}
+  />
+))
+EditableScreenRenderer.displayName = 'EditableScreenRenderer'
+
+/**
+ * Leaf for the read-only layout chrome tree: the LayoutSlot renders the
+ * editable screen canvas after any chrome the designer left inside the slot
+ * (matching composition semantics); everything else renders with the
+ * production Leaf, which carries none of the designer's selection/dnd
+ * behavior — the chrome is locked by construction.
+ */
+const LayoutChromeLeaf = forwardRef<any, any>((props, ref) => {
+  const { node, children, ...rest } = props
+  if (node?.componentId === Aglyn.LAYOUT_SLOT_COMPONENT_ID) {
+    return (
+      <Leaf ref={ref} node={node} {...rest}>
+        {children}
+        <EditableScreenRenderer />
+      </Leaf>
+    )
+  }
+  return (
+    <Leaf ref={ref} node={node} {...rest}>
+      {children}
+    </Leaf>
+  )
+})
+LayoutChromeLeaf.displayName = 'LayoutChromeLeaf'
+
 const SiteContainer = observer(
   forwardRef<any, SiteShadowDomProps>((props, ref) => {
     const { ...rest } = props
+    const { chromeCanvas } = useLayoutChromeContext()
+    const chromeRoot = chromeCanvas?.getNode(Aglyn.NODE_ROOT_ID)
     return (
       <SiteShadowDom
         ref={ref}
@@ -123,10 +179,14 @@ const SiteContainer = observer(
           {ViewportGlobalStyles}
           <ThemedElementContainer>
             <FramePaper>
-              <AglynNodeRenderer
-                node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)!}
-                LeafComponent={NodeLeaf}
-              />
+              {chromeRoot ? (
+                <AglynNodeRenderer
+                  node={chromeRoot}
+                  LeafComponent={LayoutChromeLeaf}
+                />
+              ) : (
+                <EditableScreenRenderer />
+              )}
             </FramePaper>
           </ThemedElementContainer>
         </>
@@ -144,13 +204,16 @@ const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
       data-aglyn="viewport:popover"
       sx={{
         // position: 'relative',
-        zIndex: 'tooltip',
+        // Above the canvas content, below the designer chrome (app bars and
+        // breadcrumbs sit at zIndex.appBar) within the workspace context.
+        zIndex: 10,
       }}
       {...rest}
     >
       <NodeOverlay data-aglyn="overlay:selected" variant="selected" />
       <NodeOverlay data-aglyn="overlay:hovered" variant="hovered" />
       <CanvasDropIndicator />
+      <InlineTextEditorComponent />
     </Box>
   )
 })

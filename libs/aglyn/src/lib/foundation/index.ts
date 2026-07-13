@@ -23,44 +23,56 @@
 // 👇
 
 export * from './definitions/components.types'
+export * from './definitions/organization.types'
 export * from './definitions/shared'
 export {
-  ActivityAccess,
   HostEntityType,
   HostRedirectParams,
   HostScreenStatus,
   HostScreenVisibility,
   HostViewFormat,
   HostViewType,
-} from './definitions/workspace.types'
+} from './definitions/platform.types'
 // AglynScreenVersion/AglynLayoutVersion are exported (specialized with the
 // SDK's NodeSchema) from ../types/screen instead of this generic form.
+// Org billing vocabulary (see definitions/org-billing.types.ts and the
+// glossary).
 export type {
-  AglynAccessRule,
-  AglynAuthRole,
+  AglynOrgBilling,
+  OrgEntitlements,
+  OrgFeatureFlags,
+  OrgPlan,
+  OrgSeatAddons,
+  OrgSubscription,
+  OrgUid,
+} from './definitions/org-billing.types'
+export type {
   AglynDocument,
   AglynHost,
+  AglynHostComponent,
+  AglynHostMedia,
+  AglynHostMediaFolder,
+  AglynHostTheme,
   AglynLayout,
   AglynRedirect,
-  AglynRolePermission,
   AglynScreen,
-  AglynTenant,
   AglynUser,
+  ComponentDefUid,
+  HostAnnouncementBar,
+  HostPopup,
   HostMediaUid,
   HostPath,
   HostUid,
   LayoutUid,
-  PermissionUid,
   ProjectNumber,
   ProjectUid,
+  PublishSchedule,
   RedirectUid,
-  RoleUid,
   ScreenSlug,
   ScreenUid,
-  TenantUid,
   UserUid,
   VersionUid,
-} from './definitions/workspace.types'
+} from './definitions/platform.types'
 
 //    __________  _   ________________    _   _____________
 //   / ____/ __ \/ | / / ___/_  __/   |  / | / /_  __/ ___/

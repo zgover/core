@@ -1,0 +1,30 @@
+{
+  "name": "tenant-runtime",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/tenant/runtime/src",
+  "projectType": "library",
+  "tags": ["scope:lib", "scope:aglyn", "aglyn:tenancy"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/tenant/runtime",
+        "main": "libs/tenant/runtime/src/index.ts",
+        "tsConfig": "libs/tenant/runtime/tsconfig.lib.json",
+        "assets": ["libs/tenant/runtime/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/tenant/runtime"],
+      "options": {
+        "jestConfig": "libs/tenant/runtime/jest.config.ts"
+      }
+    }
+  }
+}

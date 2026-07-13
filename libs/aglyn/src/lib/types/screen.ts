@@ -18,7 +18,7 @@
 import type {
   AglynLayoutVersion as AglynLayoutVersionBase,
   AglynScreenVersion as AglynScreenVersionBase,
-} from '../foundation/definitions/workspace.types'
+} from '../foundation/definitions/platform.types'
 import type { NodeSchema } from './nodes'
 
 export type {
@@ -30,8 +30,8 @@ export type {
   VersionUid,
 } from '../foundation'
 
-/** Hosted in tenants' host project */
+/** Host-scoped document */
 export type AglynScreenVersion = AglynScreenVersionBase<NodeSchema>
 
-/** CONCEPT: Shared layouts. Hosted in tenants' host project */
+/** CONCEPT: Shared layouts. Host-scoped document */
 export type AglynLayoutVersion = AglynLayoutVersionBase<NodeSchema>

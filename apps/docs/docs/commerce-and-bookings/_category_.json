@@ -1,0 +1,12 @@
+{
+  "label": "Commerce & bookings",
+  "position": 7,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "slug": "/commerce-and-bookings",
+    "title": "Commerce & bookings",
+    "description": "Sell and schedule: the catalog, storefront, orders, point of sale, and bookings."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "label": "Marketing Overlays",
+  "position": 3,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "marketing-and-automation/marketing-overlays/overview"
+  }
+}

@@ -101,6 +101,10 @@ const NodeOverlay = observer(
     const node = Aglyn.canvas.getNode($id)
 
     const elementRef = Besigner.refs.get($id)
+    // node.index throws for parentless nodes (the root, or a node whose
+    // parent isn't loaded) — selecting the root via the breadcrumbs must not
+    // crash the overlay.
+    const nodeIndex = node?.parent ? node.index : null
     const isOpen = Boolean(elementRef?.current)
     const [rect, setRect] = useState<DOMRect>(DEFAULT_RECT)
 
@@ -120,18 +124,21 @@ const NodeOverlay = observer(
       if (shadowHost) ro.observe(shadowHost)
       window.addEventListener('resize', update, { passive: true })
 
-      // In device preview mode the artboard has a fixed width so the canvas
-      // scroll container can scroll — scroll shifts getBoundingClientRect()
-      // values without triggering a resize, so we need a scroll listener too.
-      const scrollContainer = document.getElementById('aglyn:viewport-canvas')
-      scrollContainer?.addEventListener('scroll', update, { passive: true })
+      // Scrolling any ancestor (the canvas container, panels, or the page
+      // body) shifts getBoundingClientRect() values without triggering a
+      // resize — capture-phase listener catches them all.
+      window.addEventListener('scroll', update, { passive: true, capture: true })
 
       return () => {
         ro.disconnect()
         window.removeEventListener('resize', update)
-        scrollContainer?.removeEventListener('scroll', update)
+        window.removeEventListener('scroll', update, { capture: true })
       }
-    }, [elementRef])
+      // node?.index changes when the node is reordered among siblings (e.g.
+      // "shift up"/"shift down"). Reordering moves the same DOM element to a
+      // new position without resizing it, so ResizeObserver won't catch it —
+      // this dependency forces a rect recompute when sibling order changes.
+    }, [elementRef, nodeIndex])
 
     const virtualElement = useMemo<() => VirtualElement>(() => {
       return () => ({
@@ -147,7 +154,16 @@ const NodeOverlay = observer(
         modifiers={outerModifiers}
         open={isOpen}
         keepMounted
-        // disablePortal
+        // The anchor rect is viewport-relative; fixed positioning matches it
+        // and, unlike the default absolute strategy, cannot extend the
+        // document — an overlay past the fold otherwise grows the page,
+        // which grows the scroll range, which moves the overlay again
+        // (infinite scroll feedback).
+        popperOptions={{ strategy: 'fixed' }}
+        // Overlays belong to the canvas layer: rendering in place (no body
+        // portal) keeps them inside the viewport's stacking context, so the
+        // designer chrome (app bars, breadcrumbs) always paints above them.
+        disablePortal
         // transition
         {...rest}
       >
@@ -159,8 +175,9 @@ const NodeOverlay = observer(
             anchorEl={virtualElement}
             placement={variant === 'hovered' ? 'top-start' : undefined}
             modifiers={innerModifiers}
+            popperOptions={{ strategy: 'fixed' }}
+            disablePortal
             // keepMounted
-            // disablePortal
             // transition
             sx={{
               ['&[data-popper-placement^=top] #aglyn\\:element-overlay-label']:

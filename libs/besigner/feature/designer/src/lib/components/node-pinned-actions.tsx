@@ -57,7 +57,9 @@ import {
 import { observer } from 'mobx-react-lite'
 import { type ChangeEvent, forwardRef, useCallback, useState } from 'react'
 import useBesignerAppContext from '../hooks/use-besigner-app-context'
-import useDeleteElementCallback from '../hooks/use-delete-element-callback'
+import useDeleteElementCallback, {
+  useDeleteElementsCallback,
+} from '../hooks/use-delete-element-callback'
 
 export interface BadgeButtonProps extends ButtonProps {
   children?: SrOnlyProps['children']
@@ -131,6 +133,9 @@ export const NodePinnedActions = observer(
     const app = useBesignerAppContext()
     const node = Aglyn.canvas.getNode($id)
     const parent = node?.parent
+    // Multi-selection (AGL-10): only bulk-meaningful actions stay visible;
+    // drag/move/select-parent are ambiguous across parents and hide.
+    const multi = Besigner.focus.hasMultipleSelected()
     const handleProps = Besigner.handles.get($id)
     const [moreOpen, setMoreOpen] = useState(false)
     const [moreButton, moreButtonRef] = useState<HTMLButtonElement | null>(null)
@@ -140,9 +145,14 @@ export const NodePinnedActions = observer(
 
     const handleDuplicateClick = useCallback(
       (e: ChangeEvent<unknown>) => {
-        Aglyn.canvas.duplicateNode(node)
+        const targets = multi ? Besigner.focus.getSelected() : [node]
+        for (const target of targets) {
+          if (target && !Aglyn.canvas.isRootNode(target)) {
+            Aglyn.canvas.duplicateNode(target)
+          }
+        }
       },
-      [node],
+      [node, multi],
     )
 
     const handleModifyClick = useCallback(
@@ -179,10 +189,12 @@ export const NodePinnedActions = observer(
     }, [])
 
     const deleteElementCallback = useDeleteElementCallback()
+    const deleteElementsCallback = useDeleteElementsCallback()
     const handleDeleteClick = useCallback(() => {
       closeMore()
-      deleteElementCallback(node)
-    }, [node, closeMore, deleteElementCallback])
+      if (multi) void deleteElementsCallback(Besigner.focus.getSelected())
+      else void deleteElementCallback(node)
+    }, [node, multi, closeMore, deleteElementCallback, deleteElementsCallback])
 
     return (
       <>
@@ -214,7 +226,7 @@ export const NodePinnedActions = observer(
           }}
           {...rest}
         >
-          {!isRootElementId($id) && (
+          {!isRootElementId($id) && !multi && (
             <BadgeButton
               tooltip="Drag"
               children="drag"
@@ -229,7 +241,7 @@ export const NodePinnedActions = observer(
 
           {!isRootElementId($id) && (
             <BadgeButton
-              tooltip="Duplicate"
+              tooltip={multi ? 'Duplicate selection' : 'Duplicate'}
               children="duplicate"
               onClick={handleDuplicateClick}
               icon={{ path: ICON_VARIANT_MODIFY_DUPLICATE.path }}
@@ -237,7 +249,7 @@ export const NodePinnedActions = observer(
             />
           )}
 
-          {!isRootElementId($id) && (
+          {!isRootElementId($id) && !multi && (
             <BadgeButton
               tooltip="Select parent"
               children={'select parent'}
@@ -249,8 +261,8 @@ export const NodePinnedActions = observer(
             />
           )}
 
-          {!isRootElementId($id) && <MoveUpButton node={node} />}
-          {!isRootElementId($id) && <MoveDownButton node={node} />}
+          {!isRootElementId($id) && !multi && <MoveUpButton node={node} />}
+          {!isRootElementId($id) && !multi && <MoveDownButton node={node} />}
 
           <BadgeButton
             ref={moreButtonRef}
@@ -287,7 +299,7 @@ export const NodePinnedActions = observer(
                     dense
                     autoFocusItem
                   >
-                    {!isRootElementId($id) && (
+                    {!isRootElementId($id) && !multi && (
                       <MenuItem onClick={handleModifyClick}>
                         <ListItemIcon>
                           <MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />
@@ -301,7 +313,9 @@ export const NodePinnedActions = observer(
                         <ListItemIcon>
                           <MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />
                         </ListItemIcon>
-                        <ListItemText>{'Delete'}</ListItemText>
+                        <ListItemText>
+                          {multi ? 'Delete selection' : 'Delete'}
+                        </ListItemText>
                       </MenuItem>
                     )}
                   </MenuList>

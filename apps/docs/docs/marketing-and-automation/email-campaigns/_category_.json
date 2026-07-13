@@ -1,0 +1,10 @@
+{
+  "label": "Email Campaigns",
+  "position": 2,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "marketing-and-automation/email-campaigns/overview"
+  }
+}

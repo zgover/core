@@ -234,20 +234,25 @@ class HistoryManager<K extends string, T> {
 }
 
 export class CanvasManager {
-  private _initial: NodesMap | undefined
+  private _initial: NodesMap | undefined = undefined
   private _history: HistoryManager<NodeId, NodeSchema<any>>
 
   constructor(public aglyn: Aglyn) {
-    makeObservable(this, {
+    makeObservable<CanvasManager, '_initial'>(this, {
+      _initial: observable.ref,
       nodes: computed,
+      isInitialSame: computed,
+      didSetInitial: computed,
       undo: action,
       redo: action,
       saveHistory: action,
       clearHistory: action,
       clearNodes: action,
+      reset: action,
       updateInitialNodes: action,
       setNode: action,
       setNodes: action,
+      applyNodes: action,
       deleteNode: action,
       reparentNode: action,
       reorderNode: action,
@@ -268,7 +273,8 @@ export class CanvasManager {
     return this._history.canUndo
   }
   public get isInitialSame() {
-    return isEqual(toJS(this._initial), toJS(this.nodes))
+    if (!this._initial) return true
+    return isEqual(this._initial, this.serializeNodes())
   }
   public get didSetInitial() {
     return Boolean(this._initial)
@@ -339,10 +345,15 @@ export class CanvasManager {
   })
 
   public makeNested = computedFn((node: NodeSchema<any>) => {
-    const newNode = toJS(node) as unknown as NodeSchemaNested<any>
+    // Serialize to a plain schema object: a toJS copy would carry the node's
+    // own toJSON arrow (bound to the live instance), which JSON.stringify
+    // would then prefer over the nested structure built here.
+    const newNode = (
+      node instanceof AglynNode ? node.toJSON() : { ...toJS(node) }
+    ) as unknown as NodeSchemaNested<any>
 
     const childNodes: NodeSchemaNested<any>[] = []
-    for (const childId of (newNode.nodes ||= []) as unknown as NodeId[]) {
+    for (const childId of (toJS(node.nodes) || []) as unknown as NodeId[]) {
       const child = this.getNode(childId)
       if (child) {
         const nested = this.makeNested(child)
@@ -354,12 +365,16 @@ export class CanvasManager {
     return newNode
   })
 
-  public toJSON() {
+  private serializeNodes(): NodesMap {
     const nodes: NodesMap = {}
     this.nodes.forEach((node, id) => {
       nodes[id] = node.toJSON()
     })
-    return { nodes }
+    return nodes
+  }
+
+  public toJSON() {
+    return { nodes: this.serializeNodes() }
   }
 
   public redo(): this {
@@ -399,8 +414,20 @@ export class CanvasManager {
     this.nodes.clear()
     return this
   }
+  /**
+   * Returns the canvas to its pristine state (no nodes, no history, no
+   * recorded initial snapshot). The canvas is an app-level singleton shared
+   * by every editing session — call this when a session ends so the next
+   * document doesn't inherit stale content.
+   */
+  public reset() {
+    this.clearNodes()
+    this.clearHistory()
+    this._initial = undefined
+    return this
+  }
   public updateInitialNodes(nodes?: NodesMap) {
-    this._initial = toJS(nodes || this.nodes) as NodesMap
+    this._initial = nodes ? (toJS(nodes) as NodesMap) : this.serializeNodes()
     return this
   }
   public setNode(node: NodeSchema<any>, create = false) {
@@ -416,7 +443,13 @@ export class CanvasManager {
     const nodes: Record<NodeId, NodeSchema<any>> = {}
     for (const nodeId in cloned) {
       const node = cloned[nodeId]
-      if (node) nodes[nodeId] = this.createNode(node)
+      if (!node) continue
+      // Persisted maps key nodes by id. Early seeds omitted $id (which used
+      // to mint a random one), and the root must always keep the canonical
+      // id — the map key is authoritative.
+      const $id =
+        nodeId === NODE_ROOT_ID ? NODE_ROOT_ID : (node.$id ?? nodeId)
+      nodes[nodeId] = this.createNode({ ...node, $id })
     }
     if (merge) {
       this.nodes.merge(nodes)
@@ -424,6 +457,13 @@ export class CanvasManager {
       this.nodes.replace(nodes)
     }
     return this
+  }
+  public applyNodes(value: ProcessableNodes): this {
+    // Wholesale user edit (e.g. the raw-json editor): snapshot first so the
+    // replacement is undoable, unlike setNodes which also serves the
+    // history-restore and initial-load paths.
+    this.saveHistory()
+    return this.setNodes(this.processNodesToDenormalized(value))
   }
   public deleteNode(node: NodeSchema<any>): this {
     const validateNode = (node: NodeSchema<any>) => {

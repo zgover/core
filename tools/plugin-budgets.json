@@ -1,0 +1,54 @@
+{
+  "mui": {
+    "baseline": 62408,
+    "budget": 78848
+  },
+  "bookings": {
+    "baseline": 15214,
+    "budget": 19456
+  },
+  "commerce": {
+    "baseline": 182826,
+    "budget": 229376
+  },
+  "community": {
+    "baseline": 36079,
+    "budget": 46080
+  },
+  "contacts": {
+    "baseline": 9401,
+    "budget": 12288
+  },
+  "data": {
+    "baseline": 31178,
+    "budget": 39936
+  },
+  "email": {
+    "baseline": 32688,
+    "budget": 40960
+  },
+  "events-calendar": {
+    "baseline": 11074,
+    "budget": 14336
+  },
+  "inbox": {
+    "baseline": 7938,
+    "budget": 10240
+  },
+  "logic": {
+    "baseline": 26059,
+    "budget": 32768
+  },
+  "marketing": {
+    "baseline": 50528,
+    "budget": 63488
+  },
+  "redirects": {
+    "baseline": 11669,
+    "budget": 15360
+  },
+  "workflows": {
+    "baseline": 35643,
+    "budget": 45056
+  }
+}

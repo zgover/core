@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,13 @@ import {
   mdiDockBottom,
   mdiDockLeft,
   mdiDockRight,
+  mdiDomain,
   mdiDotsHorizontal,
   mdiDotsVertical,
   mdiDrag,
   mdiFileTree,
   mdiFilter,
+  mdiFlagVariant,
   mdiFormatAlignCenter,
   mdiFormatAlignJustify,
   mdiFormatAlignLeft,
@@ -162,6 +164,7 @@ export const ICON_VARIANT_APP_PREFERENCES = mdiTune
 export const ICON_VARIANT_APP_SETTINGS = mdiCog
 export const ICON_VARIANT_BESIGNER = mdiMathCompass
 export const ICON_VARIANT_HOME = mdiHomeVariant
+export const ICON_VARIANT_ORGANIZATION = mdiDomain
 export const ICON_VARIANT_PAGES = mdiWeb
 export const ICON_VARIANT_SIGN_IN = mdiLoginVariant
 export const ICON_VARIANT_SIGN_OUT = mdiLogoutVariant
@@ -191,4 +194,8 @@ export const ICON_VARIANT_TABLET = mdiTablet
 
 // Symbols + Status
 export const ICON_VARIANT_SYMBOL_CONFIRMED = mdiCheck
+// Release-flagged surface marker (AGL-229): staff-only badge on nav tabs
+// and admin flag rows for features hidden from customers.
+export const ICON_VARIANT_SYMBOL_FLAG = mdiFlagVariant
+export const ICON_VARIANT_SYMBOL_MINUS = mdiMinus
 export const ICON_VARIANT_SYMBOL_SECURE = mdiShieldLock

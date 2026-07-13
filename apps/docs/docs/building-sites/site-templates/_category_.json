@@ -1,0 +1,10 @@
+{
+  "label": "Templates, Blocks & Content",
+  "position": 5,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "building-sites/site-templates/overview"
+  }
+}

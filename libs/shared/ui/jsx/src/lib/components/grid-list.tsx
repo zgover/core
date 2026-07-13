@@ -165,10 +165,20 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
         function RefRenderFn(itemProps, ref) {
           const { className: gridClassName, ...restGridProps } = GridItemProps
           const { className, ...rest } = itemProps
-          return (<Grid ref={ref} className={clsx(classKey.gridItem, gridClassName, className)} />);
+          // `rest` carries Virtuoso's per-item props INCLUDING `children`
+          // (the rendered item) — dropping it rendered every cell empty
+          // (AGL-459: blank icon picker).
+          return (
+            <Grid
+              ref={ref}
+              className={clsx(classKey.gridItem, gridClassName, className)}
+              {...restGridProps}
+              {...rest}
+            />
+          )
         },
       )
-      Component.displayName = 'Component'
+      Component.displayName = 'GridListItem'
       Component.aglyn = true
       return Component
     }, [GridItemProps])

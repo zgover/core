@@ -1,0 +1,45 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "console",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nx",
+        "serve",
+        "console"
+      ],
+      "port": 4200
+    },
+    {
+      "name": "tenant",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nx",
+        "serve",
+        "tenant"
+      ],
+      "port": 4500
+    },
+    {
+      "name": "docs",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "nx",
+        "serve",
+        "docs"
+      ],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "console-emulated",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "serve:console:emulated"
+      ],
+      "port": 4200
+    }
+  ]
+}

@@ -9,6 +9,7 @@
       "executor": "@nx/next:build",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
+      "cache": false,
       "options": {
         "outputPath": "dist/apps/tenant"
       },
@@ -23,6 +24,7 @@
     },
     "serve": {
       "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
       "options": {
         "buildTarget": "tenant:build",
         "dev": true,
@@ -37,8 +39,7 @@
           "buildTarget": "tenant:build:development",
           "dev": true
         }
-      },
-      "defaultConfiguration": "development"
+      }
     },
     "export": {
       "executor": "@nx/next:export",

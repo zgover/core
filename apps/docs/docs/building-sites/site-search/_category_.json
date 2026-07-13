@@ -1,0 +1,10 @@
+{
+  "label": "Site Search",
+  "position": 8,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "building-sites/site-search/overview"
+  }
+}

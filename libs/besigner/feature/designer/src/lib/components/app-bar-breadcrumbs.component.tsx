@@ -31,6 +31,7 @@ import {
   type BreadcrumbsProps as MuiBreadcrumbsProps,
   ButtonBase as MuiButtonBase,
   type ButtonBaseProps as ButtonBaseProps,
+  Chip,
   Stack,
   Toolbar as MuiToolbar,
 } from '@mui/material'
@@ -156,7 +157,11 @@ const BreadcrumbItem = observer((props: BreadcrumbItemProps) => {
   } = props
   const node = Aglyn.canvas.getNode($id)
   const isHovered = Besigner.focus.isNodeHovered(node)
-  const { setNodeRef: setDroppableNodeRef } = useLeafDrop(node)
+  const { setNodeRef: setDroppableNodeRef } = useLeafDrop(
+    node,
+    undefined,
+    'breadcrumbs',
+  )
 
   const handleClick = useCallback(
     (e) => {
@@ -204,6 +209,7 @@ interface BreadcrumbsProps extends Partial<MuiBreadcrumbsProps> {}
 const Breadcrumbs = observer((props: BreadcrumbsProps) => {
   const { children, sx, ...rest } = props
   const lastSelected = Besigner.focus.getLastSelected()
+  const selectionCount = Besigner.focus.selectionCount()
 
   const handleClick = useCallback((e, node: Aglyn.NodeSchema<any>) => {
     Besigner.focus.setSelectedNode(node)
@@ -236,6 +242,15 @@ const Breadcrumbs = observer((props: BreadcrumbsProps) => {
           />
         )
       })}
+      {selectionCount > 1 ? (
+        <Chip
+          label={`+${selectionCount - 1} selected`}
+          size="small"
+          variant="outlined"
+          color="secondary"
+          sx={{ ml: 0.5, height: 18, fontSize: '0.65rem' }}
+        />
+      ) : null}
     </StyledBreadcrumbs>
   )
 })
@@ -261,6 +276,9 @@ export const AppBarBreadcrumbsComponent = forwardRef<
       sx={mergeSxProps(
         {
           top: 0,
+          // Stack above the canvas selection overlays (portaled, low z).
+          position: 'relative',
+          zIndex: 'appBar',
           borderBottomWidth: '1px',
           borderBottomStyle: 'solid',
           borderBottomColor: 'divider',

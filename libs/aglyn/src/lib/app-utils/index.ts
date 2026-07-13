@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
-export * from './compress'
-export * from './create-resource-uid'
-export * from './decompress'
+// Full app-utils surface = server-safe utils + the client-only React
+// contexts. Split so `@aglyn/aglyn/server` can re-export just `./server`
+// (no `createContext`) for tenant Server Components (AGL-405); this barrel,
+// reached via `@aglyn/aglyn`, keeps both for client consumers unchanged.
+export * from './server'
+export * from './contexts'

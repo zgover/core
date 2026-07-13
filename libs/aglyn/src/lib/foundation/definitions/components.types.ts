@@ -18,10 +18,12 @@
 import type {
   ConditionDefinition,
   DataType,
-  FieldActions,
-  ResolvePropsFunction,
   Validator,
 } from '@data-driven-forms/react-form-renderer'
+import type {
+  FieldActions,
+  ResolvePropsFunction,
+} from '@data-driven-forms/react-form-renderer/common-types'
 import type { SvgIconProps } from '@mui/material'
 import type { MuiStyledOptions } from '@mui/system/createStyled'
 import type { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
@@ -139,6 +141,16 @@ export interface AglynComponentSchema<P = any> {
      * Describe nodes of this component type to be self-closing
      */
     selfClosing?: FEATURE_FLAG
+    /**
+     * Component renders its `children` prop as text content the editor may
+     * edit directly (Attributes "Text" field, inline canvas editing).
+     */
+    textEditable?: FEATURE_FLAG
+    /**
+     * Component also accepts basic rich text (AGL-54): sanitized HTML in the
+     * `html` prop with `children` as the plain-text fallback.
+     */
+    richTextEditable?: FEATURE_FLAG
   }
 
   /**
@@ -176,6 +188,20 @@ export enum FieldComponentType {
   INPUT_ADDON_GROUP = 'input-addon-group',
   PLAIN_TEXT = 'plain-text',
   RADIO = 'radio',
+  /**
+   * Select listing the host's screens; the editor resolves the options from
+   * the host routing map at render time and writes the chosen screen id.
+   */
+  SCREEN_SELECT = 'screen-select',
+  /**
+   * Id-based entity pickers (AGL-343/344): the editor resolves options
+   * from EntityPickerContext at edit time and persists the entity id —
+   * renames never break the reference.
+   */
+  PRODUCT_SELECT = 'product-select',
+  COLLECTION_SELECT = 'collection-select',
+  CATEGORY_SELECT = 'category-select',
+  DATASET_SELECT = 'dataset-select',
   SELECT = 'select',
   SLIDER = 'slider',
   SUB_FORM = 'sub-form',
