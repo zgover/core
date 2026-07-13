@@ -54,6 +54,7 @@ import AuthErrorAlertComponent from '../../../components/auth-error-alert.compon
 import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
 import AuthFormComponent from '../../../components/auth-form.component'
 import AuthenticatingLayout from '../../../components/layouts/authenticating.layout'
+import guardPopupLoading from '../../../utils/popup-loading-guard'
 
 const googleOAuthProvider = new GoogleAuthProvider()
 
@@ -83,6 +84,11 @@ function SignUp() {
       if (loading) return
       if (error) setError(null)
       const dequeueLoading = queueLoading()
+      // Popup flows can wedge the overlay if the popup handle is severed
+      // and the SDK never rejects — see guardPopupLoading (AGL-459).
+      const releaseGuard = values
+        ? undefined
+        : guardPopupLoading(dequeueLoading)
       await setPersistence(firebaseAuth, browserLocalPersistence)
         .then(() => {
           if (values) {
@@ -107,6 +113,7 @@ function SignUp() {
           })
         })
         .finally(() => {
+          releaseGuard?.()
           dequeueLoading()
         })
     },

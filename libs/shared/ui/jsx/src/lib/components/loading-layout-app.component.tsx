@@ -16,20 +16,88 @@
  */
 'use client'
 
-import { forwardRef } from 'react'
-import { LoadingProviderComponent } from '../contexts/loading.context'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { forwardRef, type ReactNode, useEffect, useRef } from 'react'
+import {
+  LoadingProviderComponent,
+  useLoading,
+} from '../contexts/loading.context'
 import { LoadingModal } from './loading-modal'
 import type { LoadingLayoutComponentProps } from './loading-layout.component'
 
+/** Never wedge the UI when a navigation is interrupted/cancelled. */
+const NAVIGATION_OVERLAY_MAX_MS = 10_000
+
+/**
+ * App Router replacement for the Pages Router `router.events` wiring
+ * (AGL-459): the App Router has no transition events, so navigation intent
+ * is detected from same-origin link clicks (capture phase catches every
+ * `next/link`), and the overlay is dropped when the rendered route actually
+ * changes (`usePathname`/`useSearchParams`), on `popstate`, or after a
+ * safety timeout.
+ */
+function RouterLoadingApp({ children }: { children: ReactNode }) {
+  const { queueLoading } = useLoading()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const dequeueRef = useRef<(() => void) | null>(null)
+
+  const settle = () => {
+    dequeueRef.current?.()
+    dequeueRef.current = null
+  }
+  const settleRef = useRef(settle)
+  settleRef.current = settle
+
+  // The route the app actually renders changed — navigation completed.
+  useEffect(() => {
+    settleRef.current()
+  }, [pathname, searchParams])
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0) return
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        return
+      }
+      const anchor = (event.target as Element | null)?.closest?.('a[href]')
+      if (!(anchor instanceof HTMLAnchorElement)) return
+      if (anchor.target && anchor.target !== '_self') return
+      if (anchor.hasAttribute('download')) return
+      const url = new URL(anchor.href, window.location.href)
+      if (url.origin !== window.location.origin) return
+      if (
+        url.pathname === window.location.pathname &&
+        url.search === window.location.search
+      ) {
+        return
+      }
+      if (!dequeueRef.current) dequeueRef.current = queueLoading()
+      window.setTimeout(() => settleRef.current(), NAVIGATION_OVERLAY_MAX_MS)
+    }
+    const handlePopState = () => settleRef.current()
+
+    document.addEventListener('click', handleClick, true)
+    window.addEventListener('popstate', handlePopState)
+    return () => {
+      document.removeEventListener('click', handleClick, true)
+      window.removeEventListener('popstate', handlePopState)
+      settleRef.current()
+    }
+  }, [queueLoading])
+
+  return children
+}
+RouterLoadingApp.displayName = 'RouterLoadingApp'
+RouterLoadingApp.aglyn = true
+
 /**
  * App Router variant of {@link LoadingLayoutComponent}. The Pages Router
- * version wires a `RouterLoading` that shows the modal on `router.events`
- * transitions, but that API does not exist in the App Router (and calling
- * `useRouter()` from `next/router` there throws "NextRouter was not mounted").
- * App Router route transitions are covered by Suspense / `loading.tsx`
- * boundaries instead, so this variant drops the router-events wiring while
- * keeping the {@link LoadingProviderComponent} context and {@link LoadingModal}
- * so imperative `useLoading().queueLoading()` calls still render a modal.
+ * version wires `RouterLoading` on `router.events`, which does not exist in
+ * the App Router (and `useRouter()` from `next/router` throws there) —
+ * {@link RouterLoadingApp} covers navigations via link-click detection
+ * instead, and imperative `useLoading().queueLoading()` calls still render
+ * the modal.
  */
 const LoadingLayoutAppComponent = forwardRef<any, LoadingLayoutComponentProps>(
   (props, ref) => {
@@ -38,7 +106,7 @@ const LoadingLayoutAppComponent = forwardRef<any, LoadingLayoutComponentProps>(
     return (
       <LoadingProviderComponent>
         <LoadingModal ref={ref} {...rest}>
-          {children}
+          <RouterLoadingApp>{children}</RouterLoadingApp>
         </LoadingModal>
       </LoadingProviderComponent>
     )
