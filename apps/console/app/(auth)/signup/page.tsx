@@ -56,6 +56,7 @@ import AuthFormTemplateComponent from '../../../components/auth-form-template.co
 import AuthFormComponent from '../../../components/auth-form.component'
 import AuthenticatingLayout from '../../../components/layouts/authenticating.layout'
 import useGoogleRedirectResult from '../../../hooks/use-google-redirect-result'
+import { markInteractiveSignIn } from '../../../utils/interactive-signin'
 import isMobileBrowser from '../../../utils/is-mobile-browser'
 import guardPopupLoading from '../../../utils/popup-loading-guard'
 
@@ -95,6 +96,10 @@ function SignUp() {
       const releaseGuard = values
         ? undefined
         : guardPopupLoading(dequeueLoading)
+      // Flag the interactive sign-in BEFORE it starts so it survives the
+      // mobile redirect round-trip; the session hook mints the shared
+      // cookie on return instead of validating a stale one (AGL-463).
+      markInteractiveSignIn()
       await setPersistence(firebaseAuth, browserLocalPersistence)
         .then(() => {
           if (values) {
