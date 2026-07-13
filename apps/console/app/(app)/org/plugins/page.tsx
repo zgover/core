@@ -52,7 +52,7 @@ import { useOrgScope } from '../../../../hooks/use-org-scope'
  * plugin-free). Marketplace actions act through a site because install
  * pins are validated against host membership; the selector picks which.
  */
-const OrgPlugins: NextPageWithLayout = () => {
+const OrgPlugins: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgScope()
   const { org } = useCurrentOrg()

@@ -49,7 +49,9 @@ const nodes = {
 describe('sanitizeCommunityDefinition', () => {
   it('keeps only the reachable subtree and persisted keys', () => {
     const result = sanitizeCommunityDefinition({ rootId: 'root', nodes })
-    if (!result.ok) throw new Error(result.error)
+    // `=== false` (not `!result.ok`): with strictNullChecks off, truthiness
+    // checks don't narrow the discriminated union, but literal equality does.
+    if (result.ok === false) throw new Error(result.error)
     expect(Object.keys(result.nodes).sort()).toEqual(['child', 'root'])
     expect((result.nodes['root'] as any).resolvedProps).toBeUndefined()
     expect((result.nodes['root'] as any).componentSchema).toBeUndefined()

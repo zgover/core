@@ -53,7 +53,7 @@ const TENANT_ROOT = 'aglyn.app'
  * names, subdomain + custom domains, and usage (pages, media, storage,
  * members). Staff can retarget the subdomain (audited server-side).
  */
-const AdminHostDetail: NextPageWithLayout = () => {
+const AdminHostDetail: NextPageWithLayout<Record<string, never>> = () => {
   const params = useParams<{ orgId?: string; hostId?: string }>()
   const orgId = params?.orgId ?? ''
   const hostId = params?.hostId ?? ''

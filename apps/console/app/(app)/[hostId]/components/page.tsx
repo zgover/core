@@ -34,7 +34,7 @@ import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
  * Components page (AGL-250): reusable components moved off the dashboard —
  * named canvas subtrees that render identically on every screen using them.
  */
-const HostComponents: NextPageWithLayout = () => {
+const HostComponents: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
 
   return (

@@ -34,7 +34,7 @@ import { useOrgScope } from '../../../../hooks/use-org-scope'
  * Org media library without host context (AGL-236/237): the shared
  * library, scoped to the workspace switcher's current org.
  */
-const OrgMedia: NextPageWithLayout = () => {
+const OrgMedia: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgScope()
   return (

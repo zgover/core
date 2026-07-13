@@ -37,7 +37,7 @@ import useCurrentOrg from '../../../../hooks/use-current-org'
  * and shared by every site, so their home is the org area — the host
  * Data page shows the same collections in host context.
  */
-const OrgData: NextPageWithLayout = () => {
+const OrgData: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgScope()
   const { org } = useCurrentOrg()

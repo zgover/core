@@ -65,7 +65,7 @@ import useCurrentOrg from '../../../../hooks/use-current-org'
 import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
 
-const BillingContent: NextPageWithLayout = () => {
+const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { data: user } = useUser()
   const firestore = useFirestore()
@@ -545,7 +545,7 @@ const BillingContent: NextPageWithLayout = () => {
   )
 }
 
-const Billing: NextPageWithLayout = () => {
+const Billing: NextPageWithLayout<Record<string, never>> = () => {
   return <BillingContent />
 }
 Billing.displayName = 'Page:Billing'

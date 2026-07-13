@@ -33,7 +33,7 @@ import { buildRoute, Route } from '../../../constants/route-links'
 import hostNavTabItems from '../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
-const Index: NextPageWithLayout = (props) => {
+const Index: NextPageWithLayout<Record<string, never>> = (props) => {
   const params = useParams<{ hostId: string }>()
   const hostId = params?.hostId
   useNextPageTitle({ screen: 'My Dashboard' })

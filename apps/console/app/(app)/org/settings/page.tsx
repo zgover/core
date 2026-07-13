@@ -59,7 +59,7 @@ const WORKSPACE_DOMAIN =
  * client-writable org-doc key — everything else is Admin-SDK-only) and
  * workspace info. Slug changes and deletion stay deliberate future flows.
  */
-const OrgSettings: NextPageWithLayout = () => {
+const OrgSettings: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgScope()
   const { data: user } = useUser()

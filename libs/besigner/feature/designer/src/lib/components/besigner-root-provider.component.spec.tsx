@@ -32,7 +32,7 @@ describe('BesignerRootProviderComponent', () => {
 
   it('should render successfully', () => {
     const { baseElement } = render(
-      <BesignerRootProviderComponent appName={appName} elementComponents={[]} />,
+      <BesignerRootProviderComponent appName={appName} />,
     )
     expect(baseElement).toBeTruthy()
   })

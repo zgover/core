@@ -80,7 +80,7 @@ const securitySchema: FormSchema = {
   ],
 }
 
-const ManageUser: NextPageWithLayout = (props) => {
+const ManageUser: NextPageWithLayout<Record<string, never>> = (props) => {
   const [tab, setTab] = useState('basic')
   const { data: user } = useUser()
   const firestore = useFirestore()

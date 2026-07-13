@@ -47,7 +47,7 @@ import useFirestoreDoc from '../../../../../../hooks/use-firestore-doc'
  * Publisher profile public page (AGL-95): the community profile block and
  * every listing they publish, each linking to its detail page.
  */
-const CommunityPublisher: NextPageWithLayout = () => {
+const CommunityPublisher: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
   const params = useParams<{ profileId: string }>()
   const profileId = String(params.profileId ?? '')

@@ -23,7 +23,7 @@ import GridButtons from './grid-buttons'
 
 describe('GridButtons', () => {
   it('should render successfully', () => {
-    const {baseElement} = render(<GridButtons />)
+    const {baseElement} = render(<GridButtons items={[]} />)
     expect(baseElement).toBeTruthy()
   })
 })

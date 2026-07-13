@@ -32,7 +32,7 @@ import useOrgPermissions from '../../../../../hooks/use-org-permissions'
  * Dashboard chrome — the listing content is the community plugin's
  * 'communityListing' widget (the app never imports the plugin).
  */
-const CommunityListingDetail: NextPageWithLayout = () => {
+const CommunityListingDetail: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
   const params = useParams<{ listingId: string }>()
   const listingId = String(params.listingId ?? '')

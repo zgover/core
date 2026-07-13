@@ -46,6 +46,7 @@
     "build:console:dev": "nx build console --verbose --dev",
     "serve:console:dev": "nx serve console --verbose --dev",
     "serve:console:emulated": "FIREBASE_AUTH_EMULATOR_ENABLED=true FIREBASE_FIRESTORE_EMULATOR_ENABLED=true FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 FIRESTORE_EMULATOR_HOST=localhost:8082 nx serve console",
+    "serve:tenant:emulated": "FIREBASE_AUTH_EMULATOR_ENABLED=true FIREBASE_FIRESTORE_EMULATOR_ENABLED=true FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 FIRESTORE_EMULATOR_HOST=localhost:8082 nx serve tenant --port 4500",
     "seed:e2e": "FIRESTORE_EMULATOR_HOST=localhost:8082 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 node tools/scripts/seed-e2e.mjs",
     "e2e:console": "node tools/e2e/console.e2e.mjs",
     "build:console:prod": "nx build console --prod",
@@ -57,7 +58,8 @@
     "vercel:env-pull": "vercel env pull",
     "profile:nx-run-console:serve:development": "cargo instruments -t time --bin nx run console:serve:development profile",
     "postinstall": "patch-package",
-    "test:rules": "bash tools/scripts/test-rules.sh"
+    "test:rules": "bash tools/scripts/test-rules.sh",
+    "typecheck": "node tools/scripts/typecheck.mjs"
   },
   "dependencies": {
     "@codemirror/lang-json": "^6.0.1",
@@ -207,6 +209,7 @@
     "@types/unist": "^3.0.3",
     "@typescript-eslint/eslint-plugin": "8.63.0",
     "@typescript-eslint/parser": "8.63.0",
+    "@typescript/native": "npm:typescript@7.0.2",
     "@vitejs/plugin-react": "6.0.3",
     "@vitest/ui": "4.1.10",
     "babel-eslint": "^10.1.0",
@@ -250,7 +253,7 @@
     "to-ico": "^1.1.5",
     "ts-jest": "29.4.11",
     "ts-node": "10.9.2",
-    "typescript": "5.9.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "typescript-eslint": "^8.40.0",
     "url-loader": "^4.1.1",
     "vite": "8.1.4",

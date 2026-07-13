@@ -163,7 +163,7 @@ describe('attachPluginInstalls', () => {
     const result = attachPluginInstalls(nodes, {
       L1: { listingId: 'L1', version: '1.0.0', sha256: 'abc', revoked: true },
     })
-    expect(result.p1.props.revoked).toBe(true)
+    expect((result.p1.props as { revoked?: boolean }).revoked).toBe(true)
   })
 })
 

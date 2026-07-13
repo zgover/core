@@ -36,7 +36,7 @@ import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
  * Users section (AGL-350): site visitor accounts (searchable, paged)
  * plus the console collaborator manager — both off the dashboard.
  */
-const HostUsers: NextPageWithLayout = () => {
+const HostUsers: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
 
   return (

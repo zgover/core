@@ -105,7 +105,12 @@ describe('resolveBindings', () => {
 describe('attachFunctionDefinitions', () => {
   it('injects definitions into function widgets only', () => {
     const { attachFunctionDefinitions } = require('./variables')
-    const definition = { name: 'Sum', parameters: [], variables: [], operations: [] }
+    const definition = {
+      name: 'Sum',
+      parameters: [] as unknown[],
+      variables: [] as unknown[],
+      operations: [] as unknown[],
+    }
     const nodes = {
       widget: {
         $id: 'widget',

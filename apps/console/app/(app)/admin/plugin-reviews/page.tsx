@@ -66,7 +66,7 @@ interface QueueEntry {
  * verifier re-run and a manual checklist alongside. Realm trust is the
  * separate super-staff grant (sign-plugin) surfaced as its own button.
  */
-const PluginReviews: NextPageWithLayout = () => {
+const PluginReviews: NextPageWithLayout<Record<string, never>> = () => {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const [queue, setQueue] = useState<QueueEntry[]>([])

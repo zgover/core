@@ -139,7 +139,7 @@ const overrideCount = (org: any): number =>
  * writes on the billing/suspension keys and billing-staff writes on plan
  * and entitlements, so the same claims gate server-side.
  */
-const AdminOrgs: NextPageWithLayout = () => {
+const AdminOrgs: NextPageWithLayout<Record<string, never>> = () => {
   const { data: user } = useUser()
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()

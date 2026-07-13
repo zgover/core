@@ -27,7 +27,7 @@ import { buildRoute, Route } from '../../../../constants/route-links'
  * The theme editor moved under Setup → Theme (AGL-114); this route only
  * survives so old links and bookmarks keep working.
  */
-const HostTheme: NextPageWithLayout = () => {
+const HostTheme: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
   const router = useRouter()
 

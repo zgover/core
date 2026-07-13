@@ -39,7 +39,7 @@ import OrgRolesCard from '../../../../components/org-roles-card.component'
  * tenants collection. Per-site collaborators can also be added from a
  * site's own Users card, which grants org membership scoped to that site.
  */
-const ManageTeam: NextPageWithLayout = () => {
+const ManageTeam: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg } = useOrgScope()
   const { can, loaded: permissionsLoaded } = useOrgPermissions()

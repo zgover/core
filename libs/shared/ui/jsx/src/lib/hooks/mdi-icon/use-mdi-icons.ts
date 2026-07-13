@@ -29,7 +29,7 @@ export function useMdiIcons(iconId?: IconId[]): Icon[] {
   // MdiIcons map is populated so the memo recomputes with the full set.
   const [ready, setReady] = useState(() => getMdiAllIcons().size > 0)
   useEffect(() => {
-    if (ready) return
+    if (ready) return undefined
     let active = true
     void loadMdiIcons().then((icons) => {
       if (active && icons.size > 0) setReady(true)

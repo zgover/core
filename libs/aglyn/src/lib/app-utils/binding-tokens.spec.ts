@@ -81,7 +81,7 @@ describe('resolveBindings id tokens (AGL-185)', () => {
         {
           if: { left: 'P1', comparator: '>=', right: 'P1' },
           then: [{ set: 'P2', expression: 'P1 * 2' }],
-          otherwise: [],
+          otherwise: [] as { set: string; expression: string }[],
         },
       ],
       returnValue: 'P2',
@@ -224,7 +224,10 @@ describe('where-used matchers (AGL-187)', () => {
 
   it('scans node prop maps', () => {
     const ref = { kind: 'variable' as const, id: 'aB3xK9m2Qw', name: 'greeting' }
-    const nodes = {
+    const nodes: Record<
+      string,
+      { props?: Record<string, unknown> } | undefined
+    > = {
       a: { props: { children: 'plain' } },
       b: { props: { children: 'Hi {{greeting}}', title: 'x' } },
       c: undefined,

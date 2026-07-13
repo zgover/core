@@ -85,7 +85,7 @@ const slugify = (value: string) =>
  * entries the org serves at /{collectionSlug} and
  * /{collectionSlug}/{entrySlug}.
  */
-const HostContent: NextPageWithLayout = () => {
+const HostContent: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()

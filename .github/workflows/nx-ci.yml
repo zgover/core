@@ -28,4 +28,8 @@ jobs:
 
       - uses: nrwl/nx-set-shas@v4
 
+      # Native TypeScript 7 compiler; whole-workspace check runs in seconds
+      # and is the only type gate (builds transpile with swc, no type-check).
+      - run: npm run typecheck
+
       - run: npx nx affected -t lint test build --parallel=3

@@ -48,7 +48,7 @@ const HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28})[a-z0-9]$/
  * listings, comments, and the publisher page — distinct from the
  * organization's presence (which lives under the org's Community tab).
  */
-const ManageCommunityProfile: NextPageWithLayout = () => {
+const ManageCommunityProfile: NextPageWithLayout<Record<string, never>> = () => {
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { currentOrg } = useOrgScope()

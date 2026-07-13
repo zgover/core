@@ -59,7 +59,7 @@ interface FlagRow {
  * staff note, published per flag with etag concurrency. Reads are open to
  * all staff; edits require the super role (enforced server-side too).
  */
-const AdminFlags: NextPageWithLayout = () => {
+const AdminFlags: NextPageWithLayout<Record<string, never>> = () => {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const [isStaff, setIsStaff] = useState<boolean | null>(null)

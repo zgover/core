@@ -258,7 +258,7 @@ const DOMAIN_TAB_ID = 'domain'
 /** Activity tab id (AGL-249); `/setup?tab=activity` deep links. */
 const ACTIVITY_TAB_ID = 'activity'
 
-const HostSetup: NextPageWithLayout = (props) => {
+const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
 

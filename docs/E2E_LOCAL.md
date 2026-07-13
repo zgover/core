@@ -102,8 +102,7 @@ tenant middleware's `localhost:4500` case then resolves the seeded host
 
 ```bash
 # emulators + seed as above, then:
-FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 FIRESTORE_EMULATOR_HOST=localhost:8082 \
-  npx nx serve tenant --port 4500
+npm run serve:tenant:emulated      # nx serve tenant --port 4500 + emulator flags
 ```
 
 What to assert (all against `http://localhost:4500`):

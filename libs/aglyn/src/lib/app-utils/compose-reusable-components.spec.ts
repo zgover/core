@@ -24,7 +24,7 @@ const instance = (id: string, refId: string) => ({
   $id: id,
   componentId: REUSABLE_INSTANCE_COMPONENT_ID,
   props: { refId },
-  nodes: [],
+  nodes: [] as string[],
 })
 
 describe('composeReusableComponentNodes', () => {

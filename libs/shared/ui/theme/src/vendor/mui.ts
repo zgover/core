@@ -16,7 +16,12 @@
  */
 
 import type { Theme as MuiTheme } from '@mui/material/styles'
-import type { Color as MuiColor, CSSProperties, Shadows } from '@mui/material/styles'
+import type {
+  Color as MuiColor,
+  CssVarsTheme,
+  CSSProperties,
+  Shadows,
+} from '@mui/material/styles'
 // import type { ExtraColorOptions } from '@mui/material/styles/createPalette'
 // import type { WithStyles } from '@mui/styles'
 // import type { ClassKeyInferable } from '@mui/styles/withStyles'
@@ -154,10 +159,13 @@ declare module '@mui/material/styles' {
   }
 
   interface Theme {
-    vars: Omit<
-      Theme,
-      'typography' | 'mixins' | 'breakpoints' | 'direction' | 'transitions'
-    >
+    // CssVarsTheme['vars'] supplies the members MUI requires on vars (font,
+    // opacity, overlays, …); the Omit layers our theme augmentations on top.
+    vars: CssVarsTheme['vars'] &
+      Omit<
+        Theme,
+        'typography' | 'mixins' | 'breakpoints' | 'direction' | 'transitions' | 'vars'
+      >
   }
 
   interface DefaultTheme extends Theme {}

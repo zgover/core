@@ -46,7 +46,7 @@ import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
  * expandable before/after diffs. Read access is staff-only in rules; the
  * page also hides itself without the claim, matching the orgs page.
  */
-const AdminAudit: NextPageWithLayout = () => {
+const AdminAudit: NextPageWithLayout<Record<string, never>> = () => {
   const { data: user } = useUser()
   const firestore = useFirestore()
   const [isStaff, setIsStaff] = useState<boolean | null>(null)

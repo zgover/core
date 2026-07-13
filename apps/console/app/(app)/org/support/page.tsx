@@ -50,7 +50,7 @@ function formatWhen(ms: number | null): string {
  * Support (AGL-142): ticket threads with staff and the subscriber forum,
  * both server-gated to paid plans via the /api/support routes.
  */
-const ManageSupport: NextPageWithLayout = () => {
+const ManageSupport: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()

@@ -38,7 +38,7 @@ import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
  * and campaign performance in one place — the dashboard keeps only the
  * glanceable summaries.
  */
-const HostAnalytics: NextPageWithLayout = () => {
+const HostAnalytics: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
 
   return (

@@ -206,6 +206,10 @@ write(
         outDir: '../../../dist/out-tsc',
         types: ['@tshelpers', 'jest', 'node', '@jsx'],
       },
+      files: [
+        '../../../node_modules/@nx/react/typings/cssmodule.d.ts',
+        '../../../node_modules/@nx/react/typings/image.d.ts',
+      ],
       include: [
         '**/*.spec.ts',
         '**/*.test.ts',

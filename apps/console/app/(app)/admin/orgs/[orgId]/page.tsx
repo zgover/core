@@ -71,7 +71,7 @@ import useFirestoreDoc from '../../../../../hooks/use-firestore-doc'
  * this org — no minted tokens, no write surface, so there is nothing to
  * lock down. Mutations stay on the audited Organizations list page.
  */
-const AdminOrgDetail: NextPageWithLayout = () => {
+const AdminOrgDetail: NextPageWithLayout<Record<string, never>> = () => {
   const params = useParams<{ orgId?: string }>()
   const orgId = params?.orgId ?? ''
   const { data: user } = useUser()

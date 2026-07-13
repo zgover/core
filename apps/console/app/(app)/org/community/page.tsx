@@ -59,7 +59,7 @@ const HANDLE_PATTERN = /^[a-z0-9][a-z0-9-]{2,29}$/
  * (required before publishing) and their published listings with an
  * explicit unpublish. Handle format mirrors the Firestore rule.
  */
-const CommunitySettings: NextPageWithLayout = () => {
+const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
   const orgNavTabs = useOrgNavTabItems()
   const { currentOrg } = useOrgScope()
   const firestore = useFirestore()

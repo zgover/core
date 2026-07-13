@@ -66,7 +66,7 @@ interface AdminUser {
  * actions go through the audited /api/admin/users/manage endpoint, which
  * also blocks self-lockout.
  */
-const AdminUsers: NextPageWithLayout = () => {
+const AdminUsers: NextPageWithLayout<Record<string, never>> = () => {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()

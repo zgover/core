@@ -54,7 +54,7 @@ function formatDate(ms: number | null): string {
  * /api/admin/overview (staff-claim gated); mutations stay on the audited
  * Organizations page.
  */
-const AdminOverview: NextPageWithLayout = () => {
+const AdminOverview: NextPageWithLayout<Record<string, never>> = () => {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()

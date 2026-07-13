@@ -82,7 +82,7 @@ interface UserDetail {
  * state, staff role, org memberships with per-site access, and its
  * recent audit trail — plus impersonation (AGL-246).
  */
-const AdminUserDetail: NextPageWithLayout = () => {
+const AdminUserDetail: NextPageWithLayout<Record<string, never>> = () => {
   const params = useParams<{ uid: string }>()
   const uid = params?.uid
   const { data: user } = useUser()

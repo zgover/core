@@ -21,6 +21,40 @@ export const RECAPTCHA_API_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_PUBLIC_KEY
 export const FIREBASE_CLIENT_APP_NAME = 'DEFAULT_AGLYN'
 
 /**
+ * On deployed workspace hosts the OAuth handshake is funnelled through one
+ * dedicated same-site auth origin — `auth.<workspaceDomain>` (e.g.
+ * auth.aglyn.io), which reverse-proxies the Firebase auth helpers under
+ * /__/* (console next.config rewrite, AGL-462). This keeps the handshake
+ * same-site (all *.aglyn.io share the aglyn.io eTLD+1, so browser storage
+ * partitioning — which severed the cross-origin *.firebaseapp.com
+ * authDomain and broke mobile Google sign-in — never applies), while
+ * every host, including dynamically-provisioned {org}.aglyn.io
+ * workspaces, presents the SAME redirect URI. Google OAuth forbids
+ * wildcard redirect URIs, so a per-host authDomain would need a new
+ * registration per org; the single auth host needs exactly one.
+ *
+ * The host derives from NEXT_PUBLIC_WORKSPACE_DOMAIN so it tracks the
+ * deployment automatically; NEXT_PUBLIC_FIREBASE_AUTH_HANDLER_HOST
+ * overrides it outright. Localhost, preview URLs (not on the workspace
+ * domain), and the emulator keep the configured *.firebaseapp.com domain.
+ */
+function resolveFirebaseAuthDomain(): string | undefined {
+  const configured = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+  if (typeof window === 'undefined') return configured
+  if (process.env['FIREBASE_AUTH_EMULATOR_ENABLED'] === 'true') {
+    return configured
+  }
+  const workspaceDomain = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+  const { hostname } = window.location
+  const onWorkspaceDomain =
+    hostname === workspaceDomain || hostname.endsWith(`.${workspaceDomain}`)
+  if (!onWorkspaceDomain) return configured
+  return (
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_HANDLER_HOST ?? `auth.${workspaceDomain}`
+  )
+}
+
+/**
  * Firebase client-side configuration assembled directly from NEXT_PUBLIC_*
  * environment variables so that Next.js webpack DefinePlugin substitutes
  * them at build time and no intermediate constant indirection can carry a
@@ -28,7 +62,7 @@ export const FIREBASE_CLIENT_APP_NAME = 'DEFAULT_AGLYN'
  */
 export const fbClientAppOptions: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  authDomain: resolveFirebaseAuthDomain(),
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,

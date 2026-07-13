@@ -48,7 +48,7 @@ import useOrgPermissions from '../../../../hooks/use-org-permissions'
  * The Events page is the reference org of this route: it comes entirely
  * from the events-calendar plugin.
  */
-const HostPluginPage: NextPageWithLayout = () => {
+const HostPluginPage: NextPageWithLayout<Record<string, never>> = () => {
   const params = useParams<{ hostId: string; pluginSlug: string }>()
   const hostId = params?.hostId ?? ''
   const pluginSlug = params?.pluginSlug ?? ''

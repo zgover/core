@@ -41,7 +41,7 @@ function fakeRegistrar() {
 }
 
 const entry = {
-  component: () => null,
+  component: (): null => null,
   schema: { $id: 'event-list' } as any,
   presets: [{ $id: 'preset-event-list' } as any],
 }
@@ -140,7 +140,7 @@ describe('console extension registry', () => {
   })
 
   it('resolves a page only for a nav item that has a Component', () => {
-    const Page = () => null
+    const Page = (): null => null
     registerConsoleExtension({
       pluginId: 'events-calendar',
       displayName: 'Events',

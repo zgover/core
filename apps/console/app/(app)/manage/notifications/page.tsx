@@ -69,7 +69,7 @@ const PAGE_SIZE = 25
  * Notifications page (AGL-260): the full, cursor-paginated feed behind
  * the app-bar dropdown's "View all".
  */
-const ManageNotifications: NextPageWithLayout = () => {
+const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
   const { data: user } = useUser()
   const firestore = useFirestore()
   const router = useRouter()

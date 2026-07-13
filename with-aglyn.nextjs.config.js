@@ -376,6 +376,14 @@ const AGLYN_CONFIG = {
      */
     // ignoreDevErrors: IS_PRODUCTION,
     ignoreBuildErrors: IS_PRODUCTION,
+    /**
+     * Next resolves tsconfig `paths` against the app dir, while TypeScript 7
+     * (no baseUrl) declares them root-relative in tsconfig.base.json
+     * (AGL-460). Each app carries a generated Next-only tsconfig with the
+     * aliases rebased — regenerate via tools/scripts/sync-next-tsconfigs.mjs.
+     * See docs/TYPESCRIPT7.md.
+     */
+    tsconfigPath: 'tsconfig.next.json',
   },
   // Disable production source maps
   webpack: (config, options) => {

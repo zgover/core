@@ -16,6 +16,7 @@
  */
 
 import {
+  type AglynMediaFolder,
   folderDepth,
   isSiblingNameTaken,
   MEDIA_FOLDER_MAX_DEPTH,
@@ -36,7 +37,7 @@ describe('normalizeFolderName', () => {
 })
 
 describe('folderDepth', () => {
-  const folders = {
+  const folders: Record<string, AglynMediaFolder> = {
     a: { name: 'A', parentId: null },
     b: { name: 'B', parentId: 'a' },
     c: { name: 'C', parentId: 'b' },
@@ -57,7 +58,7 @@ describe('folderDepth', () => {
 })
 
 describe('wouldCreateCycle', () => {
-  const folders = {
+  const folders: Record<string, AglynMediaFolder> = {
     a: { name: 'A', parentId: null },
     b: { name: 'B', parentId: 'a' },
     c: { name: 'C', parentId: 'b' },

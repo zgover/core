@@ -57,7 +57,7 @@ import { useOrgScope } from '../../../../../hooks/use-org-scope'
  * member — role, job title, deactivation — with that member's activity
  * log on the same page.
  */
-const TeamMemberDetail: NextPageWithLayout = () => {
+const TeamMemberDetail: NextPageWithLayout<Record<string, never>> = () => {
   const params = useParams<{ uid: string }>()
   const uid = params?.uid as string
   const router = useRouter()

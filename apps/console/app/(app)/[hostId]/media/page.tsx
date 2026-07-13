@@ -34,7 +34,7 @@ import { buildRoute, Route } from '../../../../constants/route-links'
 import hostNavTabItems from '../../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 
-const HostMedia: NextPageWithLayout = () => {
+const HostMedia: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
   const hostOrgId = useHostOrgId(hostId)
 

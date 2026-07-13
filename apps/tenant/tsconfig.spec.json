@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "types": ["@tshelpers", "jest", "node", "@jsx"],
-    "jsx": "react"
+    "jsx": "react-jsx"
   },
   "include": [
     "**/*.test.ts",
