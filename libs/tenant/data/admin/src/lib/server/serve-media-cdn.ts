@@ -43,10 +43,15 @@ export async function serveMediaCdn(
     return
   }
   const path = Array.isArray(req.query['path']) ? req.query['path'] : []
-  const [hostId, mediaId, hash] = path.map((value) => String(value ?? ''))
+  const [scopeSegment, mediaId, hash] = path.map((value) =>
+    String(value ?? ''),
+  )
+  // Org DAM assets serve under `org:{orgId}` (host ids otherwise).
+  const isOrg = scopeSegment.startsWith('org:')
+  const scopeId = isOrg ? scopeSegment.slice('org:'.length) : scopeSegment
   if (
     path.length !== 3 ||
-    !SEGMENT.test(hostId) ||
+    !SEGMENT.test(scopeId) ||
     !SEGMENT.test(mediaId) ||
     !SEGMENT.test(hash)
   ) {
@@ -57,8 +62,8 @@ export async function serveMediaCdn(
   try {
     const firestore = firebaseAdmin.app().firestore()
     const snapshot = await firestore
-      .collection('hosts')
-      .doc(hostId)
+      .collection(isOrg ? 'orgs' : 'hosts')
+      .doc(scopeId)
       .collection('media')
       .doc(mediaId)
       .get()
@@ -79,9 +84,12 @@ export async function serveMediaCdn(
     const width = Number(req.query['w'] ?? 0)
     const variants: number[] = snapshot.get('variants') ?? []
     const useVariant = Boolean(width) && variants.includes(width)
-    const objectPath = useVariant
-      ? `hosts/${hostId}/media/${mediaId}__w${width}.webp`
-      : `hosts/${hostId}/media/${mediaId}`
+    // Real folders: the doc records its object path; legacy assets fall
+    // back to the flat layout.
+    const basePath =
+      (snapshot.get('storagePath') as string | undefined) ||
+      `${isOrg ? 'orgs' : 'hosts'}/${scopeId}/media/${mediaId}`
+    const objectPath = useVariant ? `${basePath}__w${width}.webp` : basePath
     const file = bucket.file(objectPath)
     const [metadata] = await file.getMetadata().catch(() => [null as any])
     if (!metadata) {
@@ -110,8 +118,8 @@ export async function serveMediaCdn(
     // acceptable at current traffic, shard or sample if an asset gets hot.
     const day = new Date().toISOString().slice(0, 10)
     void firestore
-      .collection('hosts')
-      .doc(hostId)
+      .collection(isOrg ? 'orgs' : 'hosts')
+      .doc(scopeId)
       .collection('analytics')
       .doc(day)
       .set(
@@ -140,7 +148,7 @@ export async function serveMediaCdn(
         .pipe(res)
     })
   } catch (error) {
-    console.error('serveMediaCdn failed', hostId, mediaId, error)
+    console.error('serveMediaCdn failed', scopeSegment, mediaId, error)
     if (!res.headersSent) res.status(500).json({ error: 'Delivery failed' })
     else res.end()
   }

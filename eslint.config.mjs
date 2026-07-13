@@ -83,8 +83,26 @@ export default [
         {
           allow: [],
           enforceBuildableLibDependency: true,
-          checkDynamicDependenciesExceptions: ['@aglyn/besigner-ui'],
+          // @aglyn/plugins-*: the generated loader manifests (AGL-417)
+          // import plugins dynamically while the remaining static imports
+          // await extraction (AGL-418/419) — and plugin-internal console
+          // pages lazy() their own components. Exempt the consistency check;
+          // the scope:app boundary rule lands with the Phase-4 close-out.
+          checkDynamicDependenciesExceptions: [
+            '@aglyn/besigner-ui',
+            '@aglyn/plugins-*',
+          ],
           depConstraints: [
+            {
+              // Apps never import feature plugins statically (AGL-417/419):
+              // plugins reach the apps ONLY through the generated loader
+              // manifests (plugins.*.generated.ts, file-scoped disable) and
+              // the core plugin-manager registries (widgets, providers,
+              // site runtimes, page hooks, API dispatch). Plugin→plugin
+              // stays legal via the aglyn:addons source rule below.
+              sourceTag: 'scope:app',
+              notDependOnLibsWithTags: ['aglyn:addons'],
+            },
             {
               sourceTag: 'scope:lib',
               onlyDependOnLibsWithTags: ['scope:lib'],
@@ -115,16 +133,22 @@ export default [
               onlyDependOnLibsWithTags: ['scope:util', 'scope:data'],
             },
             {
-              sourceTag: 'scope:addons',
+              // Feature plugins (AGL-409). They carry ONLY `aglyn:addons`
+              // (not the generic `scope:lib`/`scope:aglyn`), so as a
+              // dependency TARGET no core scope's allowlist reaches them —
+              // core libs cannot import a plugin, keeping the app runnable
+              // with any plugin absent. As a SOURCE they may still import
+              // any lib (every lib is `scope:lib`) and each other.
+              sourceTag: 'aglyn:addons',
               onlyDependOnLibsWithTags: [
-                'scope:addons',
+                'aglyn:addons',
+                'aglyn:framework',
+                'aglyn:renderer',
                 'scope:aglyn',
                 'scope:shared',
                 'scope:ui',
-                'scope:framework',
                 'scope:util',
                 'scope:data',
-                'scope:renderer',
                 'scope:feature',
                 'scope:lib',
               ],

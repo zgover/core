@@ -18,25 +18,50 @@
 import * as Aglyn from '@aglyn/aglyn'
 import useAglynBesignerFlag from './use-aglyn-besigner-flag'
 
+/** Bundle id of the email designer's blocks (AGL-395). */
+const EMAIL_PLUGIN_ID = 'email'
+
 function isLayoutOnlyPreset(preset: Aglyn.PresetSchema | undefined) {
   return preset?.data?.componentId === Aglyn.LAYOUT_SLOT_COMPONENT_ID
 }
 
+function isEmailComponent(item: { pluginId?: string } | undefined) {
+  return item?.pluginId === EMAIL_PLUGIN_ID
+}
+
 /**
  * Component-drawer categories filtered by the current canvas view type:
- * layout-only components (the LayoutSlot outlet) are hidden while editing
- * screens. Call inside an observer component — the category list is a MobX
- * computed.
+ *
+ *  - Editing an EMAIL document → only the email plugin's email-safe blocks;
+ *    web/layout components would render inconsistently across mail clients.
+ *  - Editing a screen or layout → email blocks are hidden (they belong to
+ *    emails only); layout-only components (the LayoutSlot outlet) are also
+ *    hidden while editing screens.
+ *
+ * Call inside an observer component — the category list is a MobX computed.
  */
 export function useVisibleComponentCategories() {
   const [viewType] = useAglynBesignerFlag('viewType')
-  const categories = Aglyn.components.schemasBySortedCategories
-  if (viewType === Aglyn.HostViewType.LAYOUT) return categories
-  return categories
+
+  if (viewType === Aglyn.HostViewType.EMAIL) {
+    return Aglyn.components.schemasBySortedCategories
+      .map((category) => ({
+        ...category,
+        items: category.items?.filter((item) => isEmailComponent(item)),
+      }))
+      .filter((category) => category.items?.length)
+  }
+
+  const isLayout = viewType === Aglyn.HostViewType.LAYOUT
+  return Aglyn.components.schemasBySortedCategories
     .map((category) => ({
       ...category,
       items: category.items?.filter(
-        (item) => !isLayoutOnlyPreset(item as Aglyn.PresetSchema),
+        (item) =>
+          // Email blocks never appear outside an email document.
+          !isEmailComponent(item) &&
+          // The LayoutSlot outlet is layout-only.
+          (isLayout || !isLayoutOnlyPreset(item as Aglyn.PresetSchema)),
       ),
     }))
     .filter((category) => category.items?.length)

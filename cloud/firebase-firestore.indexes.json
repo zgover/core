@@ -1,6 +1,20 @@
 {
   "indexes": [
     {
+      "collectionGroup": "campaigns",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sendAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "invites",
       "queryScope": "COLLECTION_GROUP",
       "fields": [

@@ -8,6 +8,15 @@ description: Create a screen, design it in the Besigner, and publish it live.
 
 This walks through the core loop: **create → design → publish**.
 
+![The screens list with each screen's publish state](/img/getting-started/screens-list.png)
+
+:::tip Publish from the editor
+You don't have to leave the Besigner to go live: the **Publish** button in
+the top-right of the editor publishes the version you're editing (and
+flips to **Unpublish** once the screen is live). Screens without a URL
+path yet are prompted to set one in Properties first.
+:::
+
 ## 1. Create a screen
 
 1. Go to **Screens** and choose **New screen**.
@@ -18,11 +27,11 @@ This walks through the core loop: **create → design → publish**.
 
 ## 2. Design it in the Besigner
 
-1. Open the screen to launch the **[Besigner](../besigner/overview.md)**.
+1. Open the screen to launch the **[Besigner](../building-sites/besigner/overview.md)**.
 2. Drag components from the drawer onto the canvas. Rearrange them in the **hierarchy**
    panel or directly on the canvas.
 3. Double-click text to edit it inline. Set component attributes in the inspector.
-4. Bind a shared **[layout](../screens-and-layouts/overview.md#layouts)** if you want a
+4. Bind a shared **[layout](../building-sites/screens-and-layouts/overview.md#layouts)** if you want a
    common header/footer.
 
 ## 3. Preview and publish

@@ -18,6 +18,9 @@
 
 import {
   canManageOrg,
+  ORG_PERMISSIONS,
+  resolveOrgPermissions,
+  type AglynOrgCustomRole,
   type AglynOrgMember,
   type HostAccessRole,
   type OrgRole,
@@ -33,6 +36,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  Link as MuiLink,
   MenuItem,
   Stack,
   Table,
@@ -45,8 +49,9 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { useAdminHosts } from '../hooks/use-admin-hosts'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { buildRoute, Route } from '../constants/route-links'
+import { useOrgHosts } from '../hooks/use-org-hosts'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 const ASSIGNABLE_ROLES: OrgRole[] = ['admin', 'editor', 'viewer']
 const HOST_ROLE_OPTIONS: Array<HostAccessRole | 'none'> = [
@@ -74,21 +79,27 @@ interface AccessDraft {
 export function OrgMembersCard() {
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const [members, setMembers] = useState<AglynOrgMember[]>([])
   const [invites, setInvites] = useState<any[]>([])
+  // Custom roles (AGL-243): named permission sets assignable per member.
+  const [roles, setRoles] = useState<Array<{ $id: string; name?: string }>>([])
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<OrgRole>('editor')
   const [allHosts, setAllHosts] = useState(true)
   const [busy, setBusy] = useState(false)
   const [accessDraft, setAccessDraft] = useState<AccessDraft | null>(null)
+  // Effective-permissions viewer (AGL-270).
+  const [permissionsFor, setPermissionsFor] = useState<AglynOrgMember | null>(
+    null,
+  )
   const orgId = currentOrg?.$id
   const canManage = canManageOrg(currentOrg?.role)
   // An org admin sees every org host via the memberRoles projection, so
   // this doubles as the org host directory for the access editor.
-  const { hosts } = useAdminHosts(firestore, user?.uid, orgId)
+  const { hosts } = useOrgHosts(firestore, user?.uid, orgId)
   const orgHosts = useMemo(
     () => hosts.filter((host) => host['orgId'] === orgId),
     [hosts, orgId],
@@ -120,14 +131,16 @@ export function OrgMembersCard() {
 
   const refresh = useCallback(async () => {
     if (!orgId || !user) return
-    const [membersPayload, invitesPayload] = await Promise.all([
+    const [membersPayload, invitesPayload, rolesPayload] = await Promise.all([
       request(`/api/orgs/members?orgId=${orgId}`, 'GET'),
       canManage
         ? request(`/api/orgs/invites?orgId=${orgId}`, 'GET')
         : Promise.resolve({ invites: [] }),
+      request(`/api/orgs/roles?orgId=${orgId}`, 'GET'),
     ])
     if (membersPayload?.members) setMembers(membersPayload.members)
     if (invitesPayload?.invites) setInvites(invitesPayload.invites)
+    if (rolesPayload?.roles) setRoles(rolesPayload.roles)
   }, [orgId, user, canManage, request])
 
   useEffect(() => {
@@ -227,6 +240,7 @@ export function OrgMembersCard() {
             <TableRow>
               <TableCell>{'Member'}</TableCell>
               <TableCell>{'Role'}</TableCell>
+              <TableCell>{'Custom role'}</TableCell>
               <TableCell>{'Access'}</TableCell>
               <TableCell align="right" />
             </TableRow>
@@ -235,7 +249,25 @@ export function OrgMembersCard() {
             {members.map((member) => (
               <TableRow key={member.$id}>
                 <TableCell>
-                  {member.displayName || member.email || member.$id}
+                  {/* Member detail page (AGL-364). */}
+                  <MuiLink
+                    href={buildRoute(Route.MANAGE_TEAM_MEMBER, {
+                      uid: member.$id,
+                    })}
+                    color="inherit"
+                    underline="hover"
+                  >
+                    {member.displayName || member.email || member.$id}
+                  </MuiLink>
+                  {member.title ? (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      component="div"
+                    >
+                      {member.title}
+                    </Typography>
+                  ) : null}
                 </TableCell>
                 <TableCell>
                   {canManage && member.role !== 'owner' ? (
@@ -266,6 +298,46 @@ export function OrgMembersCard() {
                   )}
                 </TableCell>
                 <TableCell>
+                  {canManage && member.role !== 'owner' ? (
+                    <TextField
+                      size="small"
+                      select
+                      value={(member as any).roleId ?? ''}
+                      onChange={(event) =>
+                        void request('/api/orgs/members', 'POST', {
+                          orgId,
+                          action: 'upsert',
+                          uid: member.$id,
+                          role: member.role ?? 'viewer',
+                          allHosts: member.allHosts === true,
+                          hostAccess: member.hostAccess ?? {},
+                          roleId: event.target.value || null,
+                        }).then((ok) => ok && refresh())
+                      }
+                      sx={{ width: 150 }}
+                    >
+                      <MenuItem value="">{'—'}</MenuItem>
+                      {roles.map((customRole) => (
+                        <MenuItem key={customRole.$id} value={customRole.$id}>
+                          {customRole.name ?? customRole.$id}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  ) : (member as any).roleId ? (
+                    <Chip
+                      size="small"
+                      label={
+                        roles.find(
+                          (customRole) =>
+                            customRole.$id === (member as any).roleId,
+                        )?.name ?? 'custom'
+                      }
+                    />
+                  ) : (
+                    '—'
+                  )}
+                </TableCell>
+                <TableCell>
                   {member.role === 'owner' || member.role === 'admin' ? (
                     'All sites'
                   ) : canManage ? (
@@ -293,6 +365,12 @@ export function OrgMembersCard() {
                   )}
                 </TableCell>
                 <TableCell align="right">
+                  <Button
+                    size="small"
+                    onClick={() => setPermissionsFor(member)}
+                  >
+                    {'Permissions'}
+                  </Button>
                   {canManage && member.role !== 'owner' ? (
                     <Button
                       size="small"
@@ -440,6 +518,72 @@ export function OrgMembersCard() {
           >
             {busy ? 'Saving…' : 'Save access'}
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={Boolean(permissionsFor)}
+        onClose={() => setPermissionsFor(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {`Effective permissions — ${
+            permissionsFor?.displayName ??
+            permissionsFor?.email ??
+            permissionsFor?.$id ??
+            ''
+          }`}
+        </DialogTitle>
+        <DialogContent>
+          {permissionsFor
+            ? (() => {
+                // Role defaults → custom role → member overrides (AGL-243),
+                // resolved with the roles list this card already loads.
+                const customRole =
+                  ((permissionsFor as any).roleId
+                    ? (roles.find(
+                        (candidate) =>
+                          candidate.$id === (permissionsFor as any).roleId,
+                      ) as AglynOrgCustomRole | undefined)
+                    : undefined) ?? null
+                const granted = resolveOrgPermissions(
+                  permissionsFor as any,
+                  customRole,
+                )
+                return (
+                  <Stack spacing={0.75} sx={{ pt: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {`Org role: ${permissionsFor.role ?? 'viewer'}` +
+                        (customRole?.name
+                          ? ` · custom role: ${customRole.name}`
+                          : '')}
+                    </Typography>
+                    {ORG_PERMISSIONS.map((definition) => (
+                      <Stack
+                        key={definition.key}
+                        direction="row"
+                        spacing={1}
+                        sx={{ alignItems: 'center' }}
+                      >
+                        <Chip
+                          size="small"
+                          color={granted[definition.key] ? 'success' : 'default'}
+                          variant={granted[definition.key] ? 'filled' : 'outlined'}
+                          label={granted[definition.key] ? 'yes' : 'no'}
+                          sx={{ width: 48 }}
+                        />
+                        <Typography variant="body2">
+                          {definition.label}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                )
+              })()
+            : null}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPermissionsFor(null)}>{'Close'}</Button>
         </DialogActions>
       </Dialog>
     </CardDisplay>

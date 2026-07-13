@@ -193,6 +193,15 @@ export enum FieldComponentType {
    * the host routing map at render time and writes the chosen screen id.
    */
   SCREEN_SELECT = 'screen-select',
+  /**
+   * Id-based entity pickers (AGL-343/344): the editor resolves options
+   * from EntityPickerContext at edit time and persists the entity id —
+   * renames never break the reference.
+   */
+  PRODUCT_SELECT = 'product-select',
+  COLLECTION_SELECT = 'collection-select',
+  CATEGORY_SELECT = 'category-select',
+  DATASET_SELECT = 'dataset-select',
   SELECT = 'select',
   SLIDER = 'slider',
   SUB_FORM = 'sub-form',

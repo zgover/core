@@ -50,6 +50,21 @@ describe('validateHostAction', () => {
     ).toMatch(/Custom event/)
   })
 
+  it('validates frequency caps (AGL-274)', () => {
+    expect(
+      validateHostAction({
+        ...base,
+        trigger: { ...base.trigger, cooldownMinutes: 0 },
+      }),
+    ).toMatch(/Cooldown/)
+    expect(
+      validateHostAction({
+        ...base,
+        trigger: { ...base.trigger, cooldownMinutes: 30 },
+      }),
+    ).toBeNull()
+  })
+
   it('validates per-step required fields', () => {
     expect(
       validateHostAction({
@@ -97,5 +112,38 @@ describe('WEBHOOK_URL_PATTERN', () => {
         steps: [{ type: 'webhookPost', webhookName: '' }],
       }),
     ).toMatch(/Step 1/)
+  })
+
+  it('validates class steps incl. toggleClass (AGL-314)', () => {
+    const base = {
+      name: 'Class toggler',
+      trigger: { event: 'click' as any },
+    }
+    expect(
+      validateHostAction({
+        ...base,
+        steps: [
+          {
+            type: 'toggleClass',
+            selector: '[data-node-id="hero"]',
+            className: 'is-open',
+          },
+        ],
+      } as any),
+    ).toBeNull()
+    expect(
+      validateHostAction({
+        ...base,
+        steps: [{ type: 'toggleClass', selector: '', className: 'x' }],
+      } as any),
+    ).not.toBeNull()
+    const { isClientActionStep } = jest.requireActual('./actions')
+    expect(
+      isClientActionStep({
+        type: 'toggleClass',
+        selector: 'x',
+        className: 'y',
+      }),
+    ).toBe(true)
   })
 })

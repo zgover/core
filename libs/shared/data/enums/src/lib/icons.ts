@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import {
   mdiDockBottom,
   mdiDockLeft,
   mdiDockRight,
+  mdiDomain,
   mdiDotsHorizontal,
   mdiDotsVertical,
   mdiDrag,
@@ -163,6 +164,7 @@ export const ICON_VARIANT_APP_PREFERENCES = mdiTune
 export const ICON_VARIANT_APP_SETTINGS = mdiCog
 export const ICON_VARIANT_BESIGNER = mdiMathCompass
 export const ICON_VARIANT_HOME = mdiHomeVariant
+export const ICON_VARIANT_ORGANIZATION = mdiDomain
 export const ICON_VARIANT_PAGES = mdiWeb
 export const ICON_VARIANT_SIGN_IN = mdiLoginVariant
 export const ICON_VARIANT_SIGN_OUT = mdiLogoutVariant

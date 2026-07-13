@@ -22,6 +22,10 @@
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/build"],
+      "inputs": [
+        "default",
+        { "runtime": "git log -1 --format=%H" }
+      ],
       "options": {
         "cwd": "apps/docs",
         "command": "npm run build"

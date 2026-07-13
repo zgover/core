@@ -1,0 +1,10 @@
+{
+  "label": "Billing & Plans",
+  "position": 2,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "workspace-and-billing/billing-and-plans/overview"
+  }
+}

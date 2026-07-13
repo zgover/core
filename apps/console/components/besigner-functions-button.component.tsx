@@ -26,8 +26,8 @@ import {
   Tooltip,
 } from '@mui/material'
 import { useState } from 'react'
-import HostFunctionsCard from './host-functions-card.component'
-import HostVariablesCard from './host-variables-card.component'
+import PluginWidgetSlot from './plugin-widget-slot.component'
+import useCurrentOrg from '../hooks/use-current-org'
 
 export interface BesignerFunctionsButtonProps {
   hostId: string
@@ -41,6 +41,7 @@ export interface BesignerFunctionsButtonProps {
 export function BesignerFunctionsButton(props: BesignerFunctionsButtonProps) {
   const { hostId } = props
   const [open, setOpen] = useState(false)
+  const { org } = useCurrentOrg()
   return (
     <>
       <Tooltip title="Variables & functions">
@@ -63,8 +64,11 @@ export function BesignerFunctionsButton(props: BesignerFunctionsButtonProps) {
         <DialogContent
           sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
-          <HostVariablesCard hostId={hostId} />
-          <HostFunctionsCard hostId={hostId} />
+          <PluginWidgetSlot
+            slot="besignerFunctions"
+            hostId={hostId}
+            org={org}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>{'Close'}</Button>

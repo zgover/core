@@ -19,7 +19,7 @@
 import {
   PLAN_ENTITLEMENTS,
   PLAN_PRICING,
-  type TenantPlan,
+  type OrgPlan,
   UNLIMITED,
 } from '@aglyn/aglyn'
 import {
@@ -38,20 +38,28 @@ import {
   Typography,
 } from '@mui/material'
 
-export const PLAN_ORDER: TenantPlan[] = ['free', 'starter', 'pro', 'business']
+export const PLAN_ORDER: OrgPlan[] = [
+  'free',
+  'starter',
+  'pro',
+  'business',
+  'advanced',
+]
 
-export const PLAN_LABELS: Record<TenantPlan, string> = {
+export const PLAN_LABELS: Record<OrgPlan, string> = {
   free: 'Free',
   starter: 'Starter',
   pro: 'Pro',
   business: 'Business',
+  advanced: 'Advanced',
 }
 
-const PLAN_TAGLINES: Record<TenantPlan, string> = {
+const PLAN_TAGLINES: Record<OrgPlan, string> = {
   free: 'Try Aglyn and publish your first site.',
   starter: 'Everything a single production site needs.',
   pro: 'For growing teams shipping several sites.',
   business: 'Scale, scheduling, and priority limits.',
+  advanced: 'High-volume commerce with zero platform fees.',
 }
 
 const quotaLabel = (value: number, unit?: string) =>
@@ -87,8 +95,8 @@ const FEATURE_ROWS: Array<{
 
 export interface BillingPlanCardsProps {
   /** The tenant's current plan; undefined when no plan is assigned yet. */
-  plan: TenantPlan | undefined
-  onSelect: (plan: TenantPlan) => void
+  plan: OrgPlan | undefined
+  onSelect: (plan: OrgPlan) => void
 }
 
 /**
@@ -206,12 +214,12 @@ export function BillingPlanCardsComponent(props: BillingPlanCardsProps) {
                     {`${entitlements.bandwidthGb} GB bandwidth`}
                   </Typography>
                   <Typography variant="body2">
-                    {`${entitlements.managersPerTenant} team seat${
-                      entitlements.managersPerTenant === 1 ? '' : 's'
+                    {`${entitlements.managersPerOrg} team seat${
+                      entitlements.managersPerOrg === 1 ? '' : 's'
                     }`}
                     {pricing.extraSeatMonthlyUsd != null
                       ? ` (+$${pricing.extraSeatMonthlyUsd}/extra, ` +
-                        `max ${entitlements.maxManagersPerTenant})`
+                        `max ${entitlements.maxManagersPerOrg})`
                       : ''}
                   </Typography>
                   <Typography variant="body2">
@@ -229,9 +237,10 @@ export function BillingPlanCardsComponent(props: BillingPlanCardsProps) {
                       `${quotaLabel(entitlements.workflowsPerHost)} workflows`}
                   </Typography>
                   <Typography variant="body2">
-                    {entitlements.datasetsPerHost > 0
-                      ? `${quotaLabel(entitlements.datasetsPerHost)} datasets × ` +
-                        `${quotaLabel(entitlements.recordsPerDataset)} records`
+                    {entitlements.datasetsPerOrg > 0
+                      ? `${quotaLabel(entitlements.datasetsPerOrg)} org datasets × ` +
+                        `${quotaLabel(entitlements.recordsPerDataset)} records · ` +
+                        `${Math.round(entitlements.dataStorageMbPerOrg / 1024)} GB data`
                       : 'No datasets'}
                   </Typography>
                 </Stack>

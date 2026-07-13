@@ -37,11 +37,14 @@ const webhookUrlIndex = args.indexOf('--webhook-url')
 const webhookUrl =
   webhookUrlIndex !== -1 ? args[webhookUrlIndex + 1] : undefined
 
-// Mirrors PLAN_PRICING (AGL-68).
+// Mirrors PLAN_PRICING (AGL-278/306/307). The v2 lookup keys leave the
+// original aglyn_{plan} prices untouched, so existing subscriptions are
+// grandfathered at their old price until the tenant changes plans.
 const PLANS = [
-  { plan: 'starter', name: 'Aglyn Starter', usd: 19, extraHostUsd: 10 },
-  { plan: 'pro', name: 'Aglyn Pro', usd: 49, extraHostUsd: 8 },
-  { plan: 'business', name: 'Aglyn Business', usd: 149, extraHostUsd: 5 },
+  { plan: 'starter', name: 'Aglyn Starter', usd: 25, yearlyUsd: 16 * 12, extraHostUsd: 10 },
+  { plan: 'pro', name: 'Aglyn Pro', usd: 56, yearlyUsd: 39 * 12, extraHostUsd: 8 },
+  { plan: 'business', name: 'Aglyn Business', usd: 139, yearlyUsd: 99 * 12, extraHostUsd: 5 },
+  { plan: 'advanced', name: 'Aglyn Advanced', usd: 399, yearlyUsd: 299 * 12, extraHostUsd: 4 },
 ]
 
 async function stripe(path, params) {
@@ -67,21 +70,30 @@ async function findPriceByLookupKey(lookupKey) {
   return result.data?.[0]
 }
 
-async function ensurePrice({ lookupKey, productName, usd, planMetadata }) {
+async function ensurePrice({
+  lookupKey,
+  productName,
+  usd,
+  planMetadata,
+  interval = 'month',
+  productId,
+}) {
   const existing = await findPriceByLookupKey(lookupKey)
   if (existing) {
     console.log(`= ${lookupKey} already exists (${existing.id})`)
     return existing
   }
-  const product = await stripe('products', {
-    name: productName,
-    'metadata[plan]': planMetadata,
-  })
+  const product = productId
+    ? { id: productId }
+    : await stripe('products', {
+        name: productName,
+        'metadata[plan]': planMetadata,
+      })
   const price = await stripe('prices', {
     product: product.id,
     currency: 'usd',
     unit_amount: String(usd * 100),
-    'recurring[interval]': 'month',
+    'recurring[interval]': interval,
     lookup_key: lookupKey,
     'metadata[plan]': planMetadata,
   })
@@ -90,14 +102,23 @@ async function ensurePrice({ lookupKey, productName, usd, planMetadata }) {
 }
 
 const env = {}
-for (const { plan, name, usd, extraHostUsd } of PLANS) {
+for (const { plan, name, usd, yearlyUsd, extraHostUsd } of PLANS) {
   const base = await ensurePrice({
-    lookupKey: `aglyn_${plan}`,
+    lookupKey: `aglyn_${plan}_v2`,
     productName: name,
     usd,
     planMetadata: plan,
   })
   env[`STRIPE_PRICE_${plan.toUpperCase()}`] = base.id
+  const yearly = await ensurePrice({
+    lookupKey: `aglyn_${plan}_v2_yearly`,
+    productName: name,
+    usd: yearlyUsd,
+    planMetadata: plan,
+    interval: 'year',
+    productId: base.product,
+  })
+  env[`STRIPE_PRICE_${plan.toUpperCase()}_YEARLY`] = yearly.id
   const extra = await ensurePrice({
     lookupKey: `aglyn_${plan}_extra_host`,
     productName: `${name} — extra host`,
@@ -124,6 +145,15 @@ if (webhookUrl) {
       'STRIPE_WEBHOOK_SECRET',
   )
 }
+
+// POS Pro register add-on (AGL-329).
+const posAddon = await ensurePrice({
+  lookupKey: 'aglyn_pos_register_addon',
+  productName: 'Aglyn POS Pro register',
+  usd: 89,
+  planMetadata: 'addon',
+})
+env['STRIPE_PRICE_POS_REGISTER'] = posAddon.id
 
 console.log('\nAdd these to the console app environment:\n')
 for (const [key, value] of Object.entries(env)) {

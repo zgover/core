@@ -56,10 +56,13 @@ export function BindingPickerProvider(props: BindingPickerProviderProps) {
     const options: BindingOption[] = []
     for (const variable of variableDocs ?? []) {
       if (variable.deletedAt || !variable.name) continue
+      // Live value preview (AGL-262): show what the binding resolves to.
+      const preview = String(variable.value ?? '').slice(0, 60)
       options.push({
         group: 'Variables',
         label: variable.name,
         token: formatVariableIdToken(variable.$id),
+        ...(preview ? { preview } : {}),
       })
     }
     for (const definition of functionDocs ?? []) {
@@ -71,6 +74,11 @@ export function BindingPickerProvider(props: BindingPickerProviderProps) {
         group: 'Functions',
         label: `${definition.name}(${parameters.join(', ')})`,
         token: formatFunctionIdToken(definition.$id, parameters),
+        preview: parameters.length
+          ? `Runs with ${parameters.length} argument${
+              parameters.length === 1 ? '' : 's'
+            }`
+          : 'Runs with no arguments',
       })
     }
     // Live canvas resolution (AGL-97): id keys serve resolveBindings;

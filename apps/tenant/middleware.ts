@@ -218,11 +218,13 @@ export const middleware: NextMiddleware = (req, event) => {
     return NextResponse.rewrite(seoUrl, { request: { headers: seoHeaders } })
   }
 
-  // rewrite to the current hostname under the pages/_sites folder
-  // the main logic component will happen in pages/_sites/[host]/[...path].tsx
-  // Preserve the query string (search pages, tenantHost overrides) — the
-  // path-only rewrite silently dropped it.
-  const rewrite = `/_sites/${tenantHost}${req.nextUrl.pathname}${req.nextUrl.search}`
+  // Rewrite to the resolved tenant host as the first path segment; the
+  // catch-all render lives at app `[host]/[[...slug]]` (search at
+  // `app/[host]/search`). No `_sites` namespace is needed: the matcher above
+  // already keeps `/api`, `/_next`, etc. off this rewrite, and API routes are
+  // in `pages/api` (which win over the `[host]` catch-all). Preserve the
+  // query string (search pages, tenantHost overrides).
+  const rewrite = `/${tenantHost}${req.nextUrl.pathname}${req.nextUrl.search}`
   console.debug(
     'Tenant Host Switch=',
     'Rewriting',

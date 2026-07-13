@@ -30,8 +30,7 @@ module.exports = withAglyn({
   env: {
     AGLYN_SILOED_HOST: process.env.AGLYN_SILOED_HOST,
   },
-  // Manage → Org section move (AGL-236) and the staff Tenants →
-  // Organizations rename (AGL-238): old bookmarks keep working.
+  // Manage → Org section move (AGL-236): old bookmarks keep working.
   async redirects() {
     return [
       ...['billing', 'team', 'support', 'community'].map((section) => ({
@@ -39,16 +38,6 @@ module.exports = withAglyn({
         destination: `/org/${section}`,
         permanent: true,
       })),
-      {
-        source: '/admin/tenants',
-        destination: '/admin/orgs',
-        permanent: true,
-      },
-      {
-        source: '/admin/tenants/:tenantId',
-        destination: '/admin/orgs',
-        permanent: true,
-      },
     ]
   },
 })

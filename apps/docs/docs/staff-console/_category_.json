@@ -1,7 +1,10 @@
 {
   "label": "Staff Console (internal)",
-  "position": 39,
+  "position": 10,
   "collapsible": true,
   "collapsed": true,
-  "link": { "type": "doc", "id": "staff-console/overview" }
+  "link": {
+    "type": "doc",
+    "id": "staff-console/overview"
+  }
 }

@@ -1,0 +1,12 @@
+{
+  "label": "Building sites",
+  "position": 4,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "slug": "/building-sites",
+    "title": "Building sites",
+    "description": "Design and ship your site: the Besigner, screens and layouts, theming, bindings, languages, SEO, search, protection, redirects, and domains."
+  }
+}

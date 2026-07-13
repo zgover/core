@@ -17,10 +17,10 @@
 'use client'
 
 import {
-  type AglynTenant,
+  type AglynOrgBilling,
   checkDatasetQuota,
   checkSeatQuota,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   UNLIMITED,
 } from '@aglyn/aglyn'
 import { Link, LinearProgress, Stack, Typography } from '@mui/material'
@@ -29,7 +29,7 @@ import { useEffect, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 
 export interface BillingUsageProps {
-  tenant: Partial<AglynTenant> | null | undefined
+  org: Partial<AglynOrgBilling> | null | undefined
   hosts: any[]
 }
 
@@ -90,9 +90,9 @@ export function UsageMeter(props: {
 function HostUsageMeters(props: {
   host: any
   showName: boolean
-  tenant: Partial<AglynTenant> | null | undefined
+  org: Partial<AglynOrgBilling> | null | undefined
 }) {
-  const { host, showName, tenant } = props
+  const { host, showName, org } = props
   const firestore = useFirestore()
   const { data: user } = useUser()
   const [counts, setCounts] = useState<{
@@ -103,7 +103,6 @@ function HostUsageMeters(props: {
     members: number | null
     storageMb: number | null
     workflowRuns: number | null
-    datasets: number | null
   }>({
     screens: null,
     layouts: null,
@@ -112,13 +111,12 @@ function HostUsageMeters(props: {
     members: null,
     storageMb: null,
     workflowRuns: null,
-    datasets: null,
   })
   const [usage, setUsage] = useState<{
     siteSizeMb: number | null
     bandwidthGb: number | null
   }>({ siteSizeMb: null, bandwidthGb: null })
-  const entitlements = resolveTenantEntitlements(tenant)
+  const entitlements = resolveOrgEntitlements(org)
 
   // Aggregation counts instead of full collection reads — one billed read
   // per counter regardless of collection size.
@@ -137,11 +135,7 @@ function HostUsageMeters(props: {
       getCountFromServer(
         collection(firestore, 'hosts', host.$id, 'functions'),
       ).catch(() => null),
-      getCountFromServer(
-        collection(firestore, 'hosts', host.$id, 'datasets'),
-      ).catch(() => null),
-      // Member seats (AGL-107/119) — the managed subcollection, not the
-      // legacy admins map.
+      // Member seats (AGL-107/119).
       getCountFromServer(
         collection(firestore, 'hosts', host.$id, 'members'),
       ).catch(() => null),
@@ -153,7 +147,7 @@ function HostUsageMeters(props: {
       getDoc(
         doc(firestore, 'hosts', host.$id, 'counters', 'workflowRuns'),
       ).catch(() => null),
-    ]).then(([screens, layouts, variables, functions, datasets, members, media, runs]) => {
+    ]).then(([screens, layouts, variables, functions, members, media, runs]) => {
       if (!active) return
       const bytes = media?.exists() ? (media.data()?.bytes ?? 0) : 0
       const monthKey = new Date().toISOString().slice(0, 7)
@@ -164,7 +158,6 @@ function HostUsageMeters(props: {
         functions: functions?.data().count ?? null,
         members: members?.data().count ?? null,
         storageMb: Math.round((bytes / (1024 * 1024)) * 10) / 10,
-        datasets: datasets?.data().count ?? null,
         workflowRuns: runs?.exists()
           ? Number(runs.data()?.[monthKey] ?? 0)
           : 0,
@@ -209,7 +202,7 @@ function HostUsageMeters(props: {
   }, [user, host.$id])
 
   // Effective seat limit includes purchased addon seats (AGL-112).
-  const memberSeatLimit = checkSeatQuota(tenant, 'members', 0).limit
+  const memberSeatLimit = checkSeatQuota(org, 'members', 0).limit
 
   return (
     <>
@@ -255,11 +248,6 @@ function HostUsageMeters(props: {
         limit={entitlements.workflowRunsPerMonth}
       />
       <UsageMeter
-        label="Datasets"
-        used={counts.datasets}
-        limit={checkDatasetQuota(tenant, 0).limit}
-      />
-      <UsageMeter
         label="Total site size"
         used={usage.siteSizeMb}
         limit={entitlements.totalSiteSizeMb}
@@ -277,18 +265,22 @@ function HostUsageMeters(props: {
 
 /**
  * Usage section of the billing page (AGL-70): the hosts meter plus per-host
- * screens/layouts/members/storage meters, and tenant-level site size and
+ * screens/layouts/members/storage meters, and org-level site size and
  * bandwidth rows.
  */
 export function BillingUsageComponent(props: BillingUsageProps) {
-  const { tenant, hosts } = props
-  const entitlements = resolveTenantEntitlements(tenant)
+  const { org, hosts } = props
+  const entitlements = resolveOrgEntitlements(org)
   // Team seats (AGL-119, org roster since AGL-238): every org member
   // occupies a seat; the roster is member-readable so the count is a
   // client aggregate query.
   const firestore = useFirestore()
-  const orgId = (tenant as any)?.$id as string | undefined
+  const orgId = (org as any)?.$id as string | undefined
   const [teamSeats, setTeamSeats] = useState<number | null>(null)
+  // Org-level data meters (AGL-239/240): datasets and their storage are
+  // org-scoped, so they meter once here instead of per host.
+  const [orgDatasets, setOrgDatasets] = useState<number | null>(null)
+  const [dataStorageMb, setDataStorageMb] = useState<number | null>(null)
   useEffect(() => {
     if (!orgId) return
     let active = true
@@ -299,11 +291,41 @@ export function BillingUsageComponent(props: BillingUsageProps) {
       .catch(() => {
         // Meter keeps its "not yet metered" state on failure.
       })
+    void getCountFromServer(collection(firestore, 'orgs', orgId, 'datasets'))
+      .then((snapshot) => {
+        if (active) setOrgDatasets(snapshot.data().count)
+      })
+      .catch(() => {
+        // Meter keeps its "not yet metered" state on failure.
+      })
+    // Dataset storage comes from the monthly rollup (report-usage); the
+    // current month may not exist yet, so fall back to the previous one.
+    void (async () => {
+      const now = new Date()
+      const month = now.toISOString().slice(0, 7)
+      const previous = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        .toISOString()
+        .slice(0, 7)
+      for (const key of [month, previous]) {
+        try {
+          const rollup = await getDoc(
+            doc(firestore, 'orgs', orgId, 'usage', key),
+          )
+          const value = rollup.exists() ? rollup.data()?.dataStorageMb : null
+          if (typeof value === 'number') {
+            if (active) setDataStorageMb(value)
+            return
+          }
+        } catch {
+          // Meter keeps its "not yet metered" state on failure.
+        }
+      }
+    })()
     return () => {
       active = false
     }
   }, [firestore, orgId])
-  const teamSeatLimit = checkSeatQuota(tenant, 'managers', 0).limit
+  const teamSeatLimit = checkSeatQuota(org, 'managers', 0).limit
   return (
     <>
       <UsageMeter
@@ -316,12 +338,23 @@ export function BillingUsageComponent(props: BillingUsageProps) {
         used={teamSeats}
         limit={teamSeatLimit}
       />
+      <UsageMeter
+        label="Datasets (organization)"
+        used={orgDatasets}
+        limit={checkDatasetQuota(org, 0).limit}
+      />
+      <UsageMeter
+        label="Data storage (organization)"
+        used={dataStorageMb}
+        limit={entitlements.dataStorageMbPerOrg}
+        unit="MB"
+      />
       {hosts.map((host) => (
         <HostUsageMeters
           key={host.$id}
           host={host}
           showName={hosts.length > 1}
-          tenant={tenant}
+          org={org}
         />
       ))}
     </>

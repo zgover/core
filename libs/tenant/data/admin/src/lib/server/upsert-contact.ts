@@ -20,8 +20,8 @@ import {
   type ContactSource,
   mergeContactInteraction,
   normalizeContactEmail,
-  resolveTenantEntitlements,
-} from '@aglyn/aglyn'
+  resolveOrgEntitlements,
+} from '@aglyn/aglyn/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { firebaseAdmin } from './firebase-admin'
 import { getOrgForHost, orgDataCollectionForHost } from './organizations'
@@ -42,6 +42,10 @@ export async function upsertHostContact(options: {
   name?: string
   source: ContactSource
   interaction: Omit<ContactInteraction, 'type' | 'atMs'> & { atMs?: number }
+  /** Explicit marketing opt-in (AGL-301) with a consent timestamp. */
+  marketingConsent?: boolean
+  /** Order value in cents — rolls into RFM fields (AGL-328). */
+  purchaseCents?: number
 }): Promise<void> {
   try {
     const email = normalizeContactEmail(options.email)
@@ -85,6 +89,16 @@ export async function upsertHostContact(options: {
           ...(merged.name ? { name: merged.name } : {}),
           sources: merged.sources,
           interactions: merged.interactions,
+          ...(options.marketingConsent
+            ? { marketingConsent: true, marketingConsentAtMs: Date.now() }
+            : {}),
+          ...(options.purchaseCents
+            ? {
+                ltvCents: FieldValue.increment(options.purchaseCents),
+                ordersCount: FieldValue.increment(1),
+                lastPurchaseAtMs: Date.now(),
+              }
+            : {}),
           updatedAt: FieldValue.serverTimestamp(),
         },
         { merge: true },
@@ -95,7 +109,7 @@ export async function upsertHostContact(options: {
     // New contact: enforce the plan quota via the aggregate count (cheap;
     // no doc reads) against the owning org's entitlements (AGL-238).
     const orgBilling = await getOrgForHost(options.hostId)
-    const limit = resolveTenantEntitlements(
+    const limit = resolveOrgEntitlements(
       (orgBilling?.org as any) ?? null,
     ).contactsPerHost
     const count = (await contactsRef.count().get()).data().count
@@ -114,6 +128,17 @@ export async function upsertHostContact(options: {
       sources: { [options.source]: true },
       interactions: [interaction],
       tags: [],
+      ...(options.marketingConsent
+        ? { marketingConsent: true, marketingConsentAtMs: Date.now() }
+        : {}),
+      ...(options.purchaseCents
+        ? {
+            ltvCents: options.purchaseCents,
+            ordersCount: 1,
+            lastPurchaseAtMs: Date.now(),
+            firstPurchaseAtMs: Date.now(),
+          }
+        : {}),
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     })

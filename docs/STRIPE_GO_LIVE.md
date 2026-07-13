@@ -11,8 +11,14 @@ STRIPE_SECRET_KEY=sk_live_... node tools/scripts/setup-stripe.mjs \
   --webhook-url https://<console-domain>/api/billing/webhook
 ```
 
-Idempotent — prices are keyed by `lookup_key` (`aglyn_starter`, `aglyn_pro`,
-`aglyn_business`, plus `_extra_host` variants), so re-running reuses them.
+Idempotent — prices are keyed by `lookup_key` (`aglyn_{plan}_v2` monthly,
+`aglyn_{plan}_v2_yearly` annual, plus `_extra_host` variants; plans:
+starter/pro/business/advanced), so re-running reuses them.
+
+**Grandfathering (AGL-307):** the original `aglyn_{plan}` prices are left
+untouched — existing subscriptions keep billing at their old price until
+the tenant changes plans, at which point checkout uses the v2 prices. Do
+not archive the old prices while any subscription references them.
 The script prints the env block to paste into the console app's environment
 (Vercel project settings):
 
@@ -24,13 +30,13 @@ The script prints the env block to paste into the console app's environment
 ## 2. How the flow works once envs are set
 
 1. Billing page → Upgrade → `POST /api/billing/checkout` (Firebase ID token)
-   → Stripe Checkout session with `tenantId` + `plan` in subscription
-   metadata → redirect.
+   → Stripe Checkout session with `orgId` + `plan` in subscription
+   metadata (AGL-445) → redirect.
 2. Stripe → `POST /api/billing/webhook` (signature-verified) on
-   subscription created/updated/deleted → tenant doc gets
+   subscription created/updated/deleted → the org doc gets
    `plan`/`stripeCustomerId`/`subscription`; plan falls back to the price id
    mapping when metadata is missing (dashboard edits).
-3. Entitlement enforcement activates per tenant **only when `tenant.plan` is
+3. Entitlement enforcement activates per org **only when `org.plan` is
    set** (dark launch) — nothing changes for existing accounts until they
    check out or staff assigns a plan.
 

@@ -28,7 +28,7 @@ import {
   Typography,
 } from '@mui/material'
 import { collection, doc, limit, query } from 'firebase/firestore'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { observer } from 'mobx-react-lite'
 import { type UIEvent, useCallback, useMemo, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'

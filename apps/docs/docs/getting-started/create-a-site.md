@@ -9,12 +9,14 @@ description: Sign in, create your first site, and understand what a site contain
 A **site** is one website you own in Aglyn — its screens, theme, data, domain, and
 settings. Everything you build lives under a site, and you can own several.
 
+![Your sites, with the New site action](/img/getting-started/sites-page.png)
+
 ## Create your first site
 
 1. Sign in to the console.
 2. Open the **site switcher** in the app bar (top-left) and choose **Create site**.
 3. Give it a name. Aglyn generates a working subdomain immediately so the site is live
-   from the first moment — you can attach a [custom domain](../custom-domains/overview.md)
+   from the first moment — you can attach a [custom domain](../building-sites/custom-domains/overview.md)
    later.
 4. You're dropped into the new site's dashboard.
 

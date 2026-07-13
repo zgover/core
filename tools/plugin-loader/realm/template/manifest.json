@@ -1,0 +1,13 @@
+{
+  "$comment": "Plugin manifest — published with each version. `id` is your stable plugin id (matches register()'s pluginId); `entry` names the bundle file; `capabilities` declare what the sandbox tier may do (network allowlist, events) and are enforced by the platform.",
+  "id": "my-plugin",
+  "name": "My plugin",
+  "version": "1.0.0",
+  "entry": "plugin.bundle.mjs",
+  "hostAbi": 1,
+  "description": "One line for the marketplace listing.",
+  "capabilities": {
+    "network": [],
+    "events": []
+  }
+}

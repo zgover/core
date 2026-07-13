@@ -16,20 +16,24 @@
  */
 
 import {
+  checkDataStorageQuota,
   checkDatasetQuota,
   checkEntitlement,
+  resolveEffectivePlan,
   checkQuota,
   checkSeatQuota,
   PLAN_ENTITLEMENTS,
   PLAN_PRICING,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
+  resolveTransactionFeePct,
   UNLIMITED,
 } from './plan-entitlements'
+import type { OrgPlan } from '../foundation'
 
 describe('plan entitlements', () => {
   it('resolves missing/unknown plans as free', () => {
-    expect(resolveTenantEntitlements(undefined).hostLimit).toBe(1)
-    expect(resolveTenantEntitlements({ plan: 'nope' as any }).hostLimit).toBe(1)
+    expect(resolveOrgEntitlements(undefined).hostLimit).toBe(1)
+    expect(resolveOrgEntitlements({ plan: 'nope' as any }).hostLimit).toBe(1)
     expect(checkEntitlement(null, 'versioning')).toBe(false)
   })
 
@@ -48,7 +52,7 @@ describe('plan entitlements', () => {
       plan: 'free',
       entitlements: { hostLimit: 10, features: { versioning: true } },
     } as any
-    const resolved = resolveTenantEntitlements(tenant)
+    const resolved = resolveOrgEntitlements(tenant)
     expect(resolved.hostLimit).toBe(10)
     expect(resolved.features.versioning).toBe(true)
     // untouched defaults survive
@@ -80,6 +84,7 @@ describe('plan entitlements', () => {
       starter: [1, 25, 3],
       pro: [3, 100, UNLIMITED],
       business: [10, UNLIMITED, UNLIMITED],
+      advanced: [25, UNLIMITED, UNLIMITED],
     })
     // Media storage exceeds the published-site cap by design (AGL-67).
     for (const plan of Object.values(PLAN_ENTITLEMENTS)) {
@@ -92,7 +97,7 @@ describe('plan entitlements', () => {
     // Builder gating (AGL-99): paid tiers unlock workflows/datasets, free
     // keeps a taste of variables/functions only.
     expect(PLAN_ENTITLEMENTS.free.workflowsPerHost).toBe(0)
-    expect(PLAN_ENTITLEMENTS.free.datasetsPerHost).toBe(0)
+    expect(PLAN_ENTITLEMENTS.free.datasetsPerOrg).toBe(0)
     expect(PLAN_ENTITLEMENTS.free.features.workflows).toBe(false)
     expect(PLAN_ENTITLEMENTS.starter.variablesPerHost).toBe(25)
     expect(PLAN_ENTITLEMENTS.starter.features.dataStore).toBe(true)
@@ -111,35 +116,52 @@ describe('plan entitlements', () => {
     expect(result.remaining).toBe(UNLIMITED)
   })
 
-  it('pins the AGL-68 pricing model', () => {
+  it('pins the AGL-278 pricing model (Squarespace/Shopify parity)', () => {
     expect(PLAN_PRICING).toEqual({
       free: {
         basePriceMonthlyUsd: 0,
+        basePriceAnnualMonthlyUsd: 0,
         extraHostMonthlyUsd: null,
         extraSeatMonthlyUsd: null,
         extraMemberMonthlyUsd: null,
         extraDatasetMonthlyUsd: null,
+        extraDataGbMonthlyUsd: null,
       },
       starter: {
-        basePriceMonthlyUsd: 19,
+        basePriceMonthlyUsd: 25,
+        basePriceAnnualMonthlyUsd: 16,
         extraHostMonthlyUsd: 10,
         extraSeatMonthlyUsd: 5,
         extraMemberMonthlyUsd: 3,
         extraDatasetMonthlyUsd: 2,
+        extraDataGbMonthlyUsd: 0.25,
       },
       pro: {
-        basePriceMonthlyUsd: 49,
+        basePriceMonthlyUsd: 56,
+        basePriceAnnualMonthlyUsd: 39,
         extraHostMonthlyUsd: 8,
         extraSeatMonthlyUsd: 4,
         extraMemberMonthlyUsd: 2,
         extraDatasetMonthlyUsd: 2,
+        extraDataGbMonthlyUsd: 0.25,
       },
       business: {
-        basePriceMonthlyUsd: 149,
+        basePriceMonthlyUsd: 139,
+        basePriceAnnualMonthlyUsd: 99,
         extraHostMonthlyUsd: 5,
         extraSeatMonthlyUsd: 3,
         extraMemberMonthlyUsd: 1,
         extraDatasetMonthlyUsd: 1,
+        extraDataGbMonthlyUsd: 0.25,
+      },
+      advanced: {
+        basePriceMonthlyUsd: 399,
+        basePriceAnnualMonthlyUsd: 299,
+        extraHostMonthlyUsd: 4,
+        extraSeatMonthlyUsd: 2,
+        extraMemberMonthlyUsd: 1,
+        extraDatasetMonthlyUsd: 1,
+        extraDataGbMonthlyUsd: 0.25,
       },
     })
   })
@@ -150,8 +172,8 @@ describe('plan entitlements', () => {
         Object.entries(PLAN_ENTITLEMENTS).map(([plan, value]) => [
           plan,
           [
-            value.managersPerTenant,
-            value.maxManagersPerTenant,
+            value.managersPerOrg,
+            value.maxManagersPerOrg,
             value.membersPerHost,
             value.maxMembersPerHost,
           ],
@@ -161,6 +183,7 @@ describe('plan entitlements', () => {
       free: [1, 1, 1, 1],
       starter: [2, 5, 3, 10],
       pro: [5, 20, 10, 25],
+      advanced: [50, 250, 100, 250],
       business: [15, 100, 50, 100],
     })
   })
@@ -199,19 +222,166 @@ describe('plan entitlements', () => {
     expect(result.addonPriceUsd).toBeNull()
   })
 
-  it('checkDatasetQuota counts purchased addon datasets up to the max (AGL-132)', () => {
+  it('checkDatasetQuota counts purchased addon datasets up to the max (AGL-132/240)', () => {
     const tenant = { plan: 'starter', seatAddons: { datasets: 2 } } as any
-    const quota = checkDatasetQuota(tenant, 2)
-    expect(quota.limit).toBe(3)
+    const quota = checkDatasetQuota(tenant, 4)
+    expect(quota.limit).toBe(5)
     expect(quota.allowed).toBe(true)
-    expect(checkDatasetQuota(tenant, 3).allowed).toBe(false)
-    // Hard max: starter caps at 3 no matter how many addons.
+    expect(checkDatasetQuota(tenant, 5).allowed).toBe(false)
+    // Hard max: starter caps at 10 org datasets no matter how many addons.
     const maxed = { plan: 'starter', seatAddons: { datasets: 99 } } as any
-    expect(checkDatasetQuota(maxed, 0).limit).toBe(3)
-    expect(checkDatasetQuota(maxed, 3).upgradeRequired).toBe(true)
+    expect(checkDatasetQuota(maxed, 0).limit).toBe(10)
+    expect(checkDatasetQuota(maxed, 10).upgradeRequired).toBe(true)
     // Free plan sells no dataset addons.
     expect(checkDatasetQuota({ plan: 'free' } as any, 0).upgradeRequired).toBe(
       true,
     )
+  })
+
+  it('resolves legacy per-host dataset overrides into org keys (AGL-240)', () => {
+    const legacy = {
+      plan: 'starter',
+      entitlements: { datasetsPerHost: 7, maxDatasetsPerHost: 12 },
+    } as any
+    const resolved = resolveOrgEntitlements(legacy)
+    expect(resolved.datasetsPerOrg).toBe(7)
+    expect(resolved.maxDatasetsPerOrg).toBe(12)
+    // Org-keyed overrides win over legacy keys.
+    const both = {
+      plan: 'starter',
+      entitlements: { datasetsPerHost: 7, datasetsPerOrg: 9 },
+    } as any
+    expect(resolveOrgEntitlements(both).datasetsPerOrg).toBe(9)
+  })
+
+  it('resolves the effective plan from subscription state (AGL-247)', () => {
+    expect(resolveEffectivePlan(null)).toBe('free')
+    expect(resolveEffectivePlan({} as any)).toBe('free')
+    expect(resolveEffectivePlan({ plan: 'nonsense' } as any)).toBe('free')
+    expect(resolveEffectivePlan({ plan: 'pro' } as any)).toBe('pro')
+    // Dunning grace: past_due keeps the plan.
+    expect(
+      resolveEffectivePlan({
+        plan: 'pro',
+        subscription: { status: 'past_due' },
+      } as any),
+    ).toBe('pro')
+    // Dead subscriptions downgrade paid plans to free.
+    for (const status of ['canceled', 'unpaid', 'incomplete']) {
+      expect(
+        resolveEffectivePlan({ plan: 'business', subscription: { status } } as any),
+      ).toBe('free')
+    }
+    // Entitlements follow: a canceled business org loses paid features.
+    const canceled = {
+      plan: 'business',
+      subscription: { status: 'canceled' },
+    } as any
+    expect(checkEntitlement(canceled, 'workflows')).toBe(false)
+    expect(checkQuota(canceled, 'screensPerHost', 5).allowed).toBe(false)
+  })
+
+  it('verifies plan × feature gating both directions (AGL-247)', () => {
+    // Free must NOT reach paid features; paid tiers MUST reach theirs.
+    const table: Array<[OrgPlan, keyof typeof PLAN_ENTITLEMENTS.free.features, boolean]> = [
+      ['free', 'workflows', false],
+      ['free', 'dataStore', false],
+      ['free', 'marketingOverlays', false],
+      ['free', 'customDomain', false],
+      ['starter', 'workflows', true],
+      ['starter', 'dataStore', true],
+      ['starter', 'marketingOverlays', true],
+      ['starter', 'versioning', false],
+      ['pro', 'versioning', true],
+      ['pro', 'aiAssist', true],
+      ['pro', 'webhooks', false],
+      ['business', 'webhooks', true],
+      ['business', 'multilingual', true],
+    ]
+    for (const [plan, feature, expected] of table) {
+      expect(checkEntitlement({ plan } as any, feature)).toBe(expected)
+    }
+  })
+
+  it('checkDataStorageQuota meters overage on paid plans, blocks on free (AGL-240)', () => {
+    // Starter includes 1 GB; 1.5 GB used → 0.5 GB overage at $0.25/GB.
+    const starter = checkDataStorageQuota({ plan: 'starter' } as any, 1536)
+    expect(starter.allowed).toBe(true)
+    expect(starter.includedMb).toBe(1024)
+    expect(starter.overageGb).toBeCloseTo(0.5)
+    expect(starter.overageMonthlyUsd).toBeCloseTo(0.13)
+    // Within the included size there is no overage.
+    const within = checkDataStorageQuota({ plan: 'pro' } as any, 1024)
+    expect(within.overageGb).toBe(0)
+    expect(within.remainingMb).toBe(4096)
+    // Free has no metered rate and hard-blocks at the (zero) included size.
+    const free = checkDataStorageQuota({ plan: 'free' } as any, 1)
+    expect(free.allowed).toBe(false)
+    expect(free.overageRateUsd).toBeNull()
+  })
+
+  it('gates commerce features per the AGL-278 matrix', () => {
+    const table: Array<[OrgPlan, any, boolean]> = [
+      ['free', 'commerce', false],
+      ['starter', 'commerce', true],
+      ['starter', 'pos', false],
+      ['pro', 'pos', true],
+      ['pro', 'abandonedCart', true],
+      ['pro', 'giftCards', false],
+      ['pro', 'storefrontSubscriptions', false],
+      ['business', 'storefrontSubscriptions', true],
+      ['business', 'contentGating', true],
+      ['business', 'giftCards', true],
+    ]
+    for (const [plan, feature, expected] of table) {
+      expect(checkEntitlement({ plan } as any, feature)).toBe(expected)
+    }
+  })
+
+  it('caps products per host by plan (AGL-278)', () => {
+    expect(checkQuota({ plan: 'free' } as any, 'productsPerHost', 0).allowed)
+      .toBe(false)
+    const starter = checkQuota(
+      { plan: 'starter' } as any,
+      'productsPerHost',
+      99,
+    )
+    expect(starter.allowed).toBe(true)
+    expect(starter.remaining).toBe(1)
+    expect(
+      checkQuota({ plan: 'starter' } as any, 'productsPerHost', 100).allowed,
+    ).toBe(false)
+  })
+
+  it('resolves transaction fees by plan and product type (AGL-278)', () => {
+    expect(resolveTransactionFeePct({ plan: 'starter' } as any, 'physical'))
+      .toBe(2)
+    expect(resolveTransactionFeePct({ plan: 'starter' } as any, 'digital'))
+      .toBe(7)
+    expect(resolveTransactionFeePct({ plan: 'pro' } as any, 'physical'))
+      .toBe(0)
+    expect(resolveTransactionFeePct({ plan: 'pro' } as any, 'service'))
+      .toBe(5)
+    expect(resolveTransactionFeePct({ plan: 'business' } as any, 'digital'))
+      .toBe(2)
+    // Canceled subscriptions resolve to free — which cannot sell at all.
+    expect(
+      resolveTransactionFeePct(
+        {
+          plan: 'business',
+          subscription: { status: 'canceled' },
+        } as any,
+        'digital',
+      ),
+    ).toBe(0)
+  })
+
+  it('prices the AGL-278 table (annual headline, monthly billing)', () => {
+    expect(PLAN_PRICING.starter.basePriceAnnualMonthlyUsd).toBe(16)
+    expect(PLAN_PRICING.starter.basePriceMonthlyUsd).toBe(25)
+    expect(PLAN_PRICING.pro.basePriceAnnualMonthlyUsd).toBe(39)
+    expect(PLAN_PRICING.pro.basePriceMonthlyUsd).toBe(56)
+    expect(PLAN_PRICING.business.basePriceAnnualMonthlyUsd).toBe(99)
+    expect(PLAN_PRICING.business.basePriceMonthlyUsd).toBe(139)
   })
 })

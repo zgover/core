@@ -56,6 +56,7 @@ const API_ROUTES: Array<[string, number]> = [
   ['/api/orgs/settings', 405],
   ['/api/admin/org-usage?orgId=x', 401],
   ['/api/admin/audit-archive', 405],
+  ['/api/media/folders', 405],
   ['/api/hosts/create', 405],
   ['/api/hosts/members?hostId=x', 401],
   ['/api/support/tickets', 401],

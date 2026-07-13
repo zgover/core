@@ -43,11 +43,16 @@ const config: Config = {
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           editUrl,
-          // Last-updated stamps shell out to `git log` per doc, which
-          // hard-fails on Vercel: the project's root directory is
-          // apps/docs, so the build has no .git to read. Keep them for
-          // local/dev builds where the repo is present.
-          showLastUpdateTime: !process.env.VERCEL,
+          // Last-updated stamps shell out to `git log` per doc. Two
+          // gotchas keep them honest (AGL-454):
+          // - Nx caches docs:build on file CONTENTS, so the build target
+          //   also hashes the HEAD commit (see project.json inputs) —
+          //   otherwise a post-commit rebuild replays pre-commit dates.
+          // - Vercel's default shallow clone has no usable history (the
+          //   project root is apps/docs); set VERCEL_DEEP_CLONE=true in
+          //   the Vercel project env to enable the stamps in prod.
+          showLastUpdateTime:
+            !process.env.VERCEL || process.env.VERCEL_DEEP_CLONE === 'true',
         },
         blog: false,
         theme: {
@@ -94,10 +99,15 @@ const config: Config = {
       },
     },
     navbar: {
-      title: 'Aglyn Docs',
+      // The wordmark carries the name (AGL-449), so no navbar title text.
+      // The console-themed navbar is dark slate in BOTH color modes, so
+      // both modes use the light-word variant (aglyn-docs-logo.svg is the
+      // dark-word one for light surfaces elsewhere).
       logo: {
-        alt: 'Aglyn',
-        src: 'img/logo.svg',
+        alt: 'Aglyn Documentation',
+        src: 'img/aglyn-docs-logo-dark.svg',
+        height: 24,
+        width: 220,
       },
       items: [
         {
@@ -105,6 +115,11 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Docs',
+        },
+        {
+          to: '/developers/plugins/overview',
+          label: 'Developers',
+          position: 'left',
         },
         {
           to: '/whats-new',
@@ -131,9 +146,9 @@ const config: Config = {
         {
           title: 'Build',
           items: [
-            { label: 'The Besigner', to: '/besigner/overview' },
-            { label: 'Datasets', to: '/datasets/overview' },
-            { label: 'Plugins', to: '/plugins/overview' },
+            { label: 'The Besigner', to: '/building-sites/besigner/overview' },
+            { label: 'Datasets', to: '/content-and-data/datasets/overview' },
+            { label: 'Plugins', to: '/developers/plugins/overview' },
           ],
         },
         {

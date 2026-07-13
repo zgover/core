@@ -16,17 +16,23 @@
  */
 
 export enum Route {
-  MANAGE_ACCOUNT_SETTINGS = '/manage/account',
   ADMIN_ORGS = '/admin/orgs',
   ADMIN_ORG_DETAIL = '/admin/orgs/[orgId]',
+  ADMIN_ORG_HOST_DETAIL = '/admin/orgs/[orgId]/host/[hostId]',
   ADMIN_OVERVIEW = '/admin/overview',
   ADMIN_AUDIT = '/admin/audit',
   ADMIN_USERS = '/admin/users',
+  ADMIN_USER_DETAIL = '/admin/users/[uid]',
   ADMIN_FLAGS = '/admin/flags',
+  ADMIN_PLUGIN_REVIEWS = '/admin/plugin-reviews',
   ORG_MEDIA = '/org/media',
+  ORG_DATA = '/org/data',
+  ORG_PLUGINS = '/org/plugins',
   ORG_SETTINGS = '/org/settings',
   MANAGE_BILLING = '/org/billing',
   MANAGE_USER_SETTINGS = '/manage/user',
+  MANAGE_NOTIFICATIONS = '/manage/notifications',
+  MANAGE_MY_COMMUNITY = '/manage/community',
   AUTH_SIGN_IN = '/signin',
   AUTH_SIGN_OUT = '/signout',
   AUTH_SIGN_UP = '/signup',
@@ -38,6 +44,7 @@ export enum Route {
   HOST_CONTENT = '/[hostId]/content',
   MANAGE_COMMUNITY_PROFILE = '/org/community',
   MANAGE_TEAM = '/org/team',
+  MANAGE_TEAM_MEMBER = '/org/team/[uid]',
   MANAGE_SUPPORT = '/org/support',
   HOST_DASHBOARD = '/[hostId]',
   HOST_INBOX = '/[hostId]/inbox',
@@ -47,9 +54,16 @@ export enum Route {
   HOST_THEME = '/[hostId]/theme',
   HOST_WORKFLOWS = '/[hostId]/workflows',
   HOST_DATA = '/[hostId]/data',
+  HOST_LOGIC = '/[hostId]/logic',
+  HOST_PRODUCTS = '/[hostId]/products',
+  HOST_COMPONENTS = '/[hostId]/components',
+  HOST_MARKETING = '/[hostId]/marketing',
   HOST_BOOKINGS = '/[hostId]/bookings',
-  HOST_EVENTS = '/[hostId]/events',
+  // Events now come from the events-calendar plugin, served by the generic
+  // `[hostId]/[pluginSlug]` route (AGL-394) — no dedicated enum needed.
   HOST_REDIRECTS = '/[hostId]/redirects',
+  HOST_USERS = '/[hostId]/users',
+  HOST_ANALYTICS = '/[hostId]/analytics',
   LAYOUT_BESIGNER = '/[hostId]/layouts/[layoutId]/versions/[versionId]/besigner',
   LAYOUT_LIST = '/[hostId]/layouts/list',
   SCREEN_BESIGNER = '/[hostId]/screens/[screenId]/versions/[versionId]/besigner',
@@ -71,11 +85,18 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.HOST_DASHBOARD]: { hostId: string }
   [Route.ADMIN_ORGS]: undefined
   [Route.ADMIN_ORG_DETAIL]: { orgId: string }
+  [Route.ADMIN_ORG_HOST_DETAIL]: { orgId: string; hostId: string }
   [Route.ADMIN_OVERVIEW]: undefined
   [Route.ADMIN_AUDIT]: undefined
   [Route.ADMIN_USERS]: undefined
+  [Route.ADMIN_USER_DETAIL]: { uid: string }
   [Route.ADMIN_FLAGS]: undefined
+  [Route.ADMIN_PLUGIN_REVIEWS]: undefined
   [Route.ORG_MEDIA]: undefined
+  [Route.ORG_DATA]: undefined
+  [Route.ORG_PLUGINS]: undefined
+  [Route.MANAGE_NOTIFICATIONS]: undefined
+  [Route.MANAGE_MY_COMMUNITY]: undefined
   [Route.ORG_SETTINGS]: undefined
   [Route.HOST_COMMUNITY]: { hostId: string }
   [Route.HOST_COMMUNITY_LISTING]: { hostId: string; listingId: string }
@@ -83,15 +104,21 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.HOST_CONTENT]: { hostId: string }
   [Route.MANAGE_COMMUNITY_PROFILE]: undefined
   [Route.MANAGE_TEAM]: undefined
+  [Route.MANAGE_TEAM_MEMBER]: { uid: string }
   [Route.MANAGE_SUPPORT]: undefined
   [Route.HOST_INBOX]: { hostId: string }
   [Route.HOST_MEDIA]: { hostId: string }
   [Route.HOST_THEME]: { hostId: string }
   [Route.HOST_WORKFLOWS]: { hostId: string }
   [Route.HOST_DATA]: { hostId: string }
+  [Route.HOST_LOGIC]: { hostId: string }
+  [Route.HOST_PRODUCTS]: { hostId: string }
+  [Route.HOST_COMPONENTS]: { hostId: string }
+  [Route.HOST_MARKETING]: { hostId: string }
   [Route.HOST_BOOKINGS]: { hostId: string }
-  [Route.HOST_EVENTS]: { hostId: string }
   [Route.HOST_REDIRECTS]: { hostId: string }
+  [Route.HOST_USERS]: { hostId: string }
+  [Route.HOST_ANALYTICS]: { hostId: string }
   [Route.LAYOUT_BESIGNER]: {
     hostId: string
     layoutId: string

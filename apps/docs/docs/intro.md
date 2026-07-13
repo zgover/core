@@ -27,6 +27,8 @@ flowchart TD
   S --> P[Published site]
 ```
 
+![A site's dashboard in the Aglyn console](/img/getting-started/console-dashboard.png)
+
 ## The mental model
 
 A few concepts show up everywhere in Aglyn. Learn these first and the rest of the
@@ -45,10 +47,23 @@ product clicks into place.
 
 ## How the docs are organized
 
-- **Getting Started** — create a site and publish your first screen.
-- **What's New** — the features shipped most recently, with links into each area.
-- **Feature areas** — one section per part of the product (Besigner, Datasets, Media,
-  Commerce, and so on), each with an overview and task-based how-tos.
+- **[Getting Started](getting-started/create-a-site.md)** — create a site and
+  publish your first screen.
+- **[Concepts](concepts/glossary.md)** — the vocabulary and mental model:
+  the naming conventions and the [term reference](concepts/term-reference.md).
+- **[Building sites](/building-sites)** — the Besigner, screens and layouts,
+  theming, bindings, languages, SEO, protection, redirects, and domains.
+- **[Content & data](/content-and-data)** — datasets, media, forms, and contacts.
+- **[Marketing & automation](/marketing-and-automation)** — workflows, email
+  campaigns, overlays and experiments, AI assist, and analytics.
+- **[Commerce & bookings](/commerce-and-bookings)** — catalog, storefront,
+  orders, POS, and bookings.
+- **[Workspace & billing](/workspace-and-billing)** — teams, roles, plans,
+  and billing.
+- **[Developers](developers/plugins/overview.md)** — build and publish
+  plugins that extend the platform.
+- **[What's New](whats-new.md)** — the features shipped most recently, with
+  links into each area.
 
 :::tip Plan gating
 Many features are gated by your plan. Where that matters, a page starts with a callout

@@ -34,7 +34,7 @@ import { collection, doc, getDoc, limit, query, setDoc } from 'firebase/firestor
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 
 export interface ReusableComponentsProviderProps {
@@ -72,7 +72,7 @@ export function ReusableComponentsProvider(
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const [promoteNode, setPromoteNode] = useState<Aglyn.NodeSchema<any> | null>(
     null,
   )
@@ -114,7 +114,7 @@ export function ReusableComponentsProvider(
 
   const handlePromote = useCallback(
     (node: Aglyn.NodeSchema<any>) => {
-      if (!hasEntitlement('reusable-components', tenant)) {
+      if (!hasEntitlement('reusable-components', org)) {
         return void enqueueSnackbar(
           'Reusable components require a Starter plan — see Billing to upgrade',
           { variant: 'warning', persist: false },
@@ -124,7 +124,7 @@ export function ReusableComponentsProvider(
       setDescription('')
       setPromoteNode(node)
     },
-    [tenant, enqueueSnackbar],
+    [org, enqueueSnackbar],
   )
 
   const handlePromoteConfirm = useCallback(async () => {
@@ -152,7 +152,7 @@ export function ReusableComponentsProvider(
       })
       // The source element stays as-is on the canvas (AGL-64): the editor
       // renders instances as empty placeholders (definitions graft on the
-      // tenant only), so swapping the subtree for an instance here would
+      // org only), so swapping the subtree for an instance here would
       // visually empty the element the user just promoted.
       setPromoteNode(null)
       enqueueSnackbar(

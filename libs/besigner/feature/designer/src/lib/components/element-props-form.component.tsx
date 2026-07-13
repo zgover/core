@@ -32,7 +32,15 @@ import {
 import {
   MdiIcon,
 } from '@aglyn/shared-ui-jsx'
-import { Alert, NoSsr, TextField } from '@mui/material'
+import {
+  Alert,
+  IconButton,
+  NoSsr,
+  Stack,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
@@ -45,6 +53,11 @@ import * as Besigner from '@aglyn/besigner'
 import { forwardRef, memo, type SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AiAssistContext } from '../contexts/ai-assist-context'
 import { BindingPickerContext } from '../contexts/binding-picker-context'
+import {
+  InteractionsContext,
+  nodeElementSelector,
+  type InteractionTriggerEvent,
+} from '../contexts/interactions-context'
 import { MediaPickerContext } from '../contexts/media-picker-context'
 import { ComponentPromotionContext } from '../contexts/component-promotion-context'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
@@ -154,31 +167,59 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     const rawAttributes = schema?.attributes
     // Screen-select fields can't carry static options (the host's screens
     // are only known at edit time), so resolve them here from the routing
-    // map + labels the console provides via ScreenLinkContext.
+    // map + labels the console provides via ScreenLinkContext. Entity
+    // pickers (AGL-343/344) resolve the same way from EntityPickerContext.
     const { screens, labels } = useContext(Aglyn.ScreenLinkContext)
-    const attributes = useMemo(
-      () =>
-        (rawAttributes ?? []).map((field) =>
-          field.component === Aglyn.FieldComponentType.SCREEN_SELECT
-            ? {
-                ...field,
-                component: Aglyn.FieldComponentType.SELECT,
-                options: [
-                  { value: '', label: 'None (use external URL)' },
-                  ...Object.entries(screens ?? {})
-                    .sort(([, a], [, b]) => a.localeCompare(b))
-                    .map(([screenId, path]) => ({
-                      value: screenId,
-                      label: `${labels?.[screenId] ?? screenId} (${
-                        path === '/' ? '/' : `/${path}`
-                      })`,
-                    })),
-                ],
-              }
-            : field,
-        ),
-      [rawAttributes, screens, labels],
-    )
+    const entityOptions = useContext(Aglyn.EntityPickerContext)
+    const attributes = useMemo(() => {
+      const entityListFor = (component: Aglyn.FieldComponentType) => {
+        switch (component) {
+          case Aglyn.FieldComponentType.PRODUCT_SELECT:
+            return entityOptions.products
+          case Aglyn.FieldComponentType.COLLECTION_SELECT:
+            return entityOptions.collections
+          case Aglyn.FieldComponentType.CATEGORY_SELECT:
+            return entityOptions.categories
+          case Aglyn.FieldComponentType.DATASET_SELECT:
+            return entityOptions.datasets
+          default:
+            return undefined
+        }
+      }
+      return (rawAttributes ?? []).map((field) => {
+        if (field.component === Aglyn.FieldComponentType.SCREEN_SELECT) {
+          return {
+            ...field,
+            component: Aglyn.FieldComponentType.SELECT,
+            options: [
+              { value: '', label: 'None (use external URL)' },
+              ...Object.entries(screens ?? {})
+                .sort(([, a], [, b]) => a.localeCompare(b))
+                .map(([screenId, path]) => ({
+                  value: screenId,
+                  label: `${labels?.[screenId] ?? screenId} (${
+                    path === '/' ? '/' : `/${path}`
+                  })`,
+                })),
+            ],
+          }
+        }
+        const entities = entityListFor(field.component as any)
+        if (entities !== undefined) {
+          return {
+            ...field,
+            component: Aglyn.FieldComponentType.SELECT,
+            options: [
+              { value: '', label: 'None' },
+              ...[...entities]
+                .sort((a, b) => a.label.localeCompare(b.label))
+                .map((entity) => ({ value: entity.id, label: entity.label })),
+            ],
+          }
+        }
+        return field
+      })
+    }, [rawAttributes, screens, labels, entityOptions])
 
     // Reusable-component flows (AGL-35): actions appear only when the host
     // app provides callbacks; locked nodes (layout chrome) never promote.
@@ -268,17 +309,44 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     // asset from the host's media library; the commit spreads current props
     // (updateNodeProps REPLACES the props object).
     const { onPickMedia } = useContext(MediaPickerContext)
-    const hasSrcAttribute = (rawAttributes ?? []).some(
-      (field: any) => field?.name === 'src',
+    // Interactions (AGL-258): element-scoped automations + section A/B.
+    const interactions = useContext(InteractionsContext)
+    const nodeSelector = node?.$id ? nodeElementSelector(node.$id) : ''
+    const nodeAutomations = (interactions.automations ?? []).filter(
+      (automation) => automation.selector === nodeSelector,
     )
-    const handleBrowseMedia = useCallback(() => {
-      onPickMedia?.((url) => {
-        const current = (Aglyn.canvas.toJSON().nodes as Record<string, any>)[
-          node?.$id
-        ]
-        Aglyn.canvas.updateNodeProps(node, { ...current?.props, src: url })
-      })
-    }, [onPickMedia, node])
+    const nodeExperiment = (interactions.sectionExperiments ?? []).find(
+      (experiment) => experiment.nodeId === node?.$id,
+    )
+    // Media-bearing attributes (AGL-341): every image/media URL field gets
+    // a library browse button; the text field itself stays as the manual
+    // URL escape hatch.
+    const mediaAttributes = useMemo(
+      () =>
+        (rawAttributes ?? []).filter(
+          (field: any) =>
+            field?.component === Aglyn.FieldComponentType.TEXT_FIELD &&
+            typeof field?.name === 'string' &&
+            /^(src|poster)$|(image|logo|avatar|media|thumbnail|photo|background)(Url)?$/i.test(
+              field.name,
+            ),
+        ),
+      [rawAttributes],
+    )
+    const handleBrowseMedia = useCallback(
+      (propName: string) => () => {
+        onPickMedia?.((url) => {
+          const current = (
+            Aglyn.canvas.toJSON().nodes as Record<string, any>
+          )[node?.$id]
+          Aglyn.canvas.updateNodeProps(node, {
+            ...current?.props,
+            [propName]: url,
+          })
+        })
+      },
+      [onPickMedia, node],
+    )
 
     const handleFormCancel = useCallback((e: SyntheticEvent, reason?: string) => {}, [])
     const handleElementSave = useCallback(
@@ -415,23 +483,171 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                               handleInsertBinding(option.token)
                             }}
                           >
-                            {option.label}
+                            <Stack sx={{ minWidth: 0 }}>
+                              <Typography variant="body2" noWrap>
+                                {option.label}
+                              </Typography>
+                              {/* Live value preview (AGL-262). */}
+                              {option.preview ? (
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  noWrap
+                                >
+                                  {option.preview}
+                                </Typography>
+                              ) : null}
+                            </Stack>
                           </MuiMenuItem>,
                         ]
                       })}
                     </MuiMenu>
                   </FormControl>
                 ) : null}
-                {onPickMedia && hasSrcAttribute ? (
+                {onPickMedia && mediaAttributes.length
+                  ? mediaAttributes.map((field: any) => (
+                      <FormControl key={field.name} margin="none" fullWidth>
+                        <Button
+                          color="secondary"
+                          onClick={handleBrowseMedia(field.name)}
+                          sx={{ mt: 2 }}
+                          fullWidth
+                        >
+                          {mediaAttributes.length > 1
+                            ? `Browse media — ${field.label ?? field.name}`
+                            : 'Browse media'}
+                        </Button>
+                      </FormControl>
+                    ))
+                  : null}
+                {interactions.onCreateInteraction && node?.$id ? (
                   <FormControl margin="none" fullWidth>
-                    <Button
-                      color="secondary"
-                      onClick={handleBrowseMedia}
+                    {/* Interactions (AGL-258): automations bound to this
+                        element's stable data-aglyn selector. */}
+                    <Typography
+                      variant="overline"
+                      color="text.secondary"
                       sx={{ mt: 2 }}
-                      fullWidth
                     >
-                      Browse media
-                    </Button>
+                      {'Interactions'}
+                    </Typography>
+                    {nodeAutomations.map((automation) => (
+                      <Stack
+                        key={automation.id}
+                        direction="row"
+                        spacing={1}
+                        sx={{ alignItems: 'center', mb: 0.5 }}
+                      >
+                        <Typography variant="body2" noWrap sx={{ flex: 1 }}>
+                          {automation.name ?? automation.id}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {automation.event}
+                        </Typography>
+                        {/* Manage in place (wave v7): toggle + remove
+                            without leaving the canvas. */}
+                        {interactions.onToggleInteraction ? (
+                          <Switch
+                            size="small"
+                            checked={automation.enabled !== false}
+                            onChange={(event) =>
+                              interactions.onToggleInteraction?.({
+                                id: automation.id,
+                                enabled: event.target.checked,
+                              })
+                            }
+                            slotProps={{
+                              input: { 'aria-label': 'Interaction enabled' },
+                            }}
+                          />
+                        ) : automation.enabled === false ? (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                          >
+                            {'off'}
+                          </Typography>
+                        ) : null}
+                        {/* Fluent builder (AGL-319): edit reopens the
+                            inline dialog — no Workflows detour. */}
+                        {interactions.onEditInteraction && node?.$id ? (
+                          <IconButton
+                            size="small"
+                            aria-label="Edit interaction"
+                            onClick={() =>
+                              interactions.onEditInteraction?.({
+                                id: automation.id,
+                                nodeId: node.$id as string,
+                              })
+                            }
+                          >
+                            {'✎'}
+                          </IconButton>
+                        ) : null}
+                        {interactions.onDeleteInteraction ? (
+                          <IconButton
+                            size="small"
+                            aria-label="Remove interaction"
+                            onClick={() =>
+                              interactions.onDeleteInteraction?.({
+                                id: automation.id,
+                              })
+                            }
+                          >
+                            {'✕'}
+                          </IconButton>
+                        ) : null}
+                      </Stack>
+                    ))}
+                    <TextField
+                      select
+                      size="small"
+                      label="Add interaction"
+                      value=""
+                      onChange={(event) => {
+                        const trigger = event.target
+                          .value as InteractionTriggerEvent
+                        if (trigger && node?.$id) {
+                          interactions.onCreateInteraction?.({
+                            nodeId: node.$id,
+                            event: trigger,
+                          })
+                        }
+                      }}
+                    >
+                      <MuiMenuItem value="elementClick">
+                        {'When clicked…'}
+                      </MuiMenuItem>
+                      <MuiMenuItem value="elementVisible">
+                        {'When scrolled into view…'}
+                      </MuiMenuItem>
+                    </TextField>
+                    {interactions.onCreateSectionExperiment ? (
+                      nodeExperiment ? (
+                        <Typography
+                          variant="caption"
+                          color="secondary"
+                          sx={{ mt: 1 }}
+                        >
+                          {`A/B test: ${nodeExperiment.name ?? nodeExperiment.id}` +
+                            ` (${nodeExperiment.status ?? 'draft'})`}
+                        </Typography>
+                      ) : (
+                        <Button
+                          color="secondary"
+                          size="small"
+                          sx={{ mt: 1, alignSelf: 'flex-start' }}
+                          onClick={() =>
+                            node?.$id &&
+                            interactions.onCreateSectionExperiment?.({
+                              nodeId: node.$id,
+                            })
+                          }
+                        >
+                          {'A/B test this section'}
+                        </Button>
+                      )
+                    ) : null}
                   </FormControl>
                 ) : null}
                 {(node?.props as any)?.repeatDataset ? (

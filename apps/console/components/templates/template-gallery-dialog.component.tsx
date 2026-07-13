@@ -44,13 +44,13 @@ import {
 } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { checkTenantQuota } from '../../constants/entitlements'
+import { checkOrgQuota } from '../../constants/entitlements'
 import { publishScreenRoute } from '../../constants/screen-publishing'
 import {
   STARTER_TEMPLATES,
   type StarterTemplate,
 } from '../../constants/starter-templates'
-import useCurrentTenant from '../../hooks/use-current-tenant'
+import useCurrentOrg from '../../hooks/use-current-org'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 
 export interface TemplateGalleryDialogProps {
@@ -74,7 +74,7 @@ export function TemplateGalleryDialog(props: TemplateGalleryDialogProps) {
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const { data: user } = useUser()
 
   // Community site templates (AGL-137): published bundles with previews.
@@ -140,8 +140,8 @@ export function TemplateGalleryDialog(props: TemplateGalleryDialogProps) {
 
   const handleUse = useCallback(
     (template: StarterTemplate) => async () => {
-      const quota = checkTenantQuota(
-        tenant,
+      const quota = checkOrgQuota(
+        org,
         'screensPerHost',
         screenCount + template.screens.length - 1,
       )
@@ -212,7 +212,7 @@ export function TemplateGalleryDialog(props: TemplateGalleryDialogProps) {
       }
     },
     [
-      tenant,
+      org,
       screenCount,
       existingSlugs,
       firestore,

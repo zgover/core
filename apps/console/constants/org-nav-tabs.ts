@@ -38,6 +38,18 @@ export function orgNavTabItems() {
       label: 'Media',
       href: buildRoute(Route.ORG_MEDIA),
     },
+    // Shares the host Data tab id so the release_data_store flag
+    // gating in DashboardLayout applies here too.
+    {
+      id: 'nav-tab-data',
+      label: 'Data',
+      href: buildRoute(Route.ORG_DATA),
+    },
+    {
+      id: 'nav-tab-org-plugins',
+      label: 'Plugins',
+      href: buildRoute(Route.ORG_PLUGINS),
+    },
     {
       id: 'nav-tab-org-billing',
       label: 'Billing',

@@ -30,13 +30,14 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Typography,
 } from '@mui/material'
 import { useParams } from 'next/navigation'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { type MouseEvent, useCallback, useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
-import { useAdminHosts } from '../hooks/use-admin-hosts'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgHosts } from '../hooks/use-org-hosts'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 function HostsPlainLink() {
   return (
@@ -74,10 +75,10 @@ function HostSwitcherMenu(props: { uid: string }) {
   const hostId = params?.hostId
   const router = useRouter()
   const firestore = useFirestore()
-  const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
+  const { currentOrg, loading: orgsLoading } = useOrgScope()
   // Workspace-scoped (AGL-236): the switcher lists the selected org's
   // sites only; undefined holds the query while the workspace resolves.
-  const { hosts } = useAdminHosts(
+  const { hosts } = useOrgHosts(
     firestore,
     uid,
     orgsLoading ? undefined : (currentOrg?.$id ?? null),
@@ -117,6 +118,7 @@ function HostSwitcherMenu(props: { uid: string }) {
         aria-haspopup="menu"
         aria-expanded={anchorEl ? 'true' : undefined}
         onClick={handleOpen}
+        startIcon={<MdiIcon path={ICON_VARIANT_HOST.path} />}
         endIcon={<MdiIcon path={ICON_VARIANT_MENU_DOWN.path} />}
         sx={{
           maxWidth: 260,
@@ -124,7 +126,14 @@ function HostSwitcherMenu(props: { uid: string }) {
           '& .MuiButton-endIcon>*:nth-of-type(1)': { fontSize: `1.7em` },
         }}
       >
-        {label}
+        <Typography
+          variant="inherit"
+          noWrap
+          title={label}
+          sx={{ display: 'block', minWidth: 0 }}
+        >
+          {label}
+        </Typography>
       </Button>
       <Menu
         anchorEl={anchorEl}

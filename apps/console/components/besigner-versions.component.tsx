@@ -61,12 +61,12 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { observer } from 'mobx-react-lite'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { hasEntitlement } from '../constants/entitlements'
 import { buildRoute, Route } from '../constants/route-links'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 import useFirestoreDoc from '../hooks/use-firestore-doc'
 
@@ -94,7 +94,7 @@ export const BesignerVersionsComponent = observer(
     const router = useRouter()
     const { enqueueSnackbar } = useSnackbar()
     const { queueLoading } = useLoading()
-    const { tenant } = useCurrentTenant()
+    const { org } = useCurrentOrg()
     const { confirm } = useConfirmationContext()
     const [open, setOpen] = useState(false)
     // Name dialog serves both "create with a name" (AGL-59) and rename.
@@ -230,7 +230,7 @@ export const BesignerVersionsComponent = observer(
     )
 
     const handleCreateVersion = useCallback(() => {
-      if (!hasEntitlement('versioning', tenant)) {
+      if (!hasEntitlement('versioning', org)) {
         return enqueueSnackbar(
           'Versioning requires a Pro plan — see Billing to upgrade',
           { variant: 'warning', persist: false },
@@ -249,7 +249,7 @@ export const BesignerVersionsComponent = observer(
           ?.displayName ?? versionId
       setNameValue(`Copy of ${currentName}`)
       setNameDialog({ mode: 'create' })
-    }, [tenant, enqueueSnackbar, versionDocs, versionId])
+    }, [org, enqueueSnackbar, versionDocs, versionId])
 
     const handleRename = useCallback(
       (targetId: string, currentName: string) => () => {
@@ -357,7 +357,7 @@ export const BesignerVersionsComponent = observer(
 
     const handleScheduleOpen = useCallback(
       (targetId: string) => () => {
-        if (!hasEntitlement('scheduled-publishing', tenant)) {
+        if (!hasEntitlement('scheduled-publishing', org)) {
           return void enqueueSnackbar(
             'Scheduled publishing requires a Business plan — see Billing',
             { variant: 'warning', persist: false },
@@ -374,7 +374,7 @@ export const BesignerVersionsComponent = observer(
         )
         setScheduleFor(targetId)
       },
-      [tenant, enqueueSnackbar],
+      [org, enqueueSnackbar],
     )
 
     const handleScheduleConfirm = useCallback(async () => {

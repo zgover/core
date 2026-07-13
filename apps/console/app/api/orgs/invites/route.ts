@@ -1,0 +1,257 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
+import {
+  canManageOrg,
+  createResourceUid,
+  type HostAccessRole,
+  isOrgRole,
+} from '@aglyn/aglyn/server'
+import {
+  firebaseAdmin,
+  logOrgActivity,
+  resolveOrgMembership,
+  upsertOrgMember,
+} from '@aglyn/tenant-data-admin'
+import { FieldValue } from 'firebase-admin/firestore'
+
+const HOST_ROLES = new Set<HostAccessRole>(['admin', 'editor', 'viewer'])
+
+/**
+ * Org invites (AGL-234) for people without Aglyn accounts yet. Admins
+ * create/revoke; anyone signed in with a matching verified email accepts,
+ * which materializes the membership via the same Admin-SDK path as direct
+ * adds (reverse index + host projections included). Email delivery is a
+ * follow-up — invites surface in the console for now.
+ */
+async function handler(request: Request): Promise<Response> {
+  const { method, query, body, headers: rawHeaders } = await pluginRequestFromWeb(request)
+  const headers = rawHeaders as Partial<Record<string, string>>
+  if (method !== 'GET' && method !== 'POST') {
+    return Response.json({ error: 'Method not allowed' }, { status: 405 })
+  }
+  const authorization = headers.authorization ?? ''
+  const idToken = authorization.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : undefined
+  if (!idToken) return Response.json({ error: 'Unauthenticated' }, { status: 401 })
+
+  const orgId = String(
+    (method === 'GET' ? query.orgId : body?.orgId) ?? '',
+  )
+  const mine = method === 'GET' && query.mine === '1'
+  if (!orgId && !mine) return Response.json({ error: 'Missing orgId' }, { status: 400 })
+
+  try {
+    const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+
+    // Cross-org "invites for me" (AGL-234): pending invites addressed to
+    // the caller's verified email, joined with the org names so the
+    // console banner can render without extra reads.
+    if (mine) {
+      const email = String(decoded.email ?? '').toLowerCase()
+      if (!email || !decoded.email_verified) {
+        return Response.json({ invites: [] }, { status: 200 })
+      }
+      const firestore = firebaseAdmin.app().firestore()
+      const snapshot = await firestore
+        .collectionGroup('invites')
+        .where('email', '==', email)
+        .where('acceptedAt', '==', null)
+        .limit(20)
+        .get()
+      const invites = await Promise.all(
+        snapshot.docs.map(async (inviteDoc) => {
+          const orgRef = inviteDoc.ref.parent.parent
+          const orgSnapshot = orgRef ? await orgRef.get() : null
+          return {
+            $id: inviteDoc.id,
+            orgId: orgRef?.id ?? null,
+            orgName: orgSnapshot?.get('name') ?? null,
+            role: inviteDoc.get('role') ?? null,
+          }
+        }),
+      )
+      return Response.json({ invites }, { status: 200 })
+    }
+    const isStaff = decoded['staff'] === true
+    const actor = await resolveOrgMembership(decoded.uid, orgId)
+    const firestore = firebaseAdmin.app().firestore()
+    const invitesRef = firestore
+      .collection('orgs')
+      .doc(orgId)
+      .collection('invites')
+
+    const actorManages = isStaff || canManageOrg(actor?.member.role)
+
+    if (method === 'GET') {
+      if (!actorManages) {
+        return Response.json({ error: 'Listing invites requires the admin role' }, { status: 403 })
+      }
+      const snapshot = await invitesRef
+        .where('acceptedAt', '==', null)
+        .limit(100)
+        .get()
+      return Response.json({
+        invites: snapshot.docs.map((doc) => ({ $id: doc.id, ...doc.data() })),
+      }, { status: 200 })
+    }
+
+    const action = String(body?.action ?? '')
+
+    if (action === 'create') {
+      if (!actorManages) {
+        return Response.json({ error: 'Inviting members requires the admin role' }, { status: 403 })
+      }
+      const email = String(body?.email ?? '')
+        .trim()
+        .toLowerCase()
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return Response.json({ error: 'Invalid email' }, { status: 400 })
+      }
+      const role = body?.role
+      if (!isOrgRole(role) || role === 'owner') {
+        return Response.json({ error: 'Role must be admin, editor, or viewer' }, { status: 400 })
+      }
+      const hostAccess: Record<string, HostAccessRole> = {}
+      for (const [hostId, hostRole] of Object.entries(
+        (body?.hostAccess ?? {}) as Record<string, unknown>,
+      )) {
+        if (
+          typeof hostRole === 'string' &&
+          HOST_ROLES.has(hostRole as HostAccessRole)
+        ) {
+          hostAccess[hostId] = hostRole as HostAccessRole
+        }
+      }
+      const inviteId = createResourceUid()
+      await invitesRef.doc(inviteId).set({
+        email,
+        role,
+        allHosts: body?.allHosts === true,
+        hostAccess,
+        invitedBy: decoded.uid,
+        createdAt: FieldValue.serverTimestamp(),
+        acceptedAt: null,
+      })
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Invited ${email} as ${role}`,
+        { type: 'invite', id: inviteId, name: email },
+      )
+      // Best-effort notification via Resend (same provider as AGL-137's
+      // usage emails); the invite works without it — the console banner
+      // surfaces it after sign-in either way.
+      const resendKey = process.env.RESEND_API_KEY
+      const from = process.env.USAGE_EMAIL_FROM
+      if (resendKey && from) {
+        const orgName =
+          (await firestore.collection('orgs').doc(orgId).get()).get('name') ??
+          'an organization'
+        const origin = headers.origin ?? `https://${headers.host}`
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from,
+            to: email,
+            subject: `You've been invited to ${orgName} on Aglyn`,
+            text:
+              `You've been invited to join ${orgName} as ${role}.\n\n` +
+              `Sign in at ${origin} with this email address and accept ` +
+              'the invite from your dashboard.',
+          }),
+        }).catch((error) => console.error('invite email failed', error))
+      }
+      return Response.json({ ok: true, inviteId }, { status: 200 })
+    }
+
+    if (action === 'revoke') {
+      if (!actorManages) {
+        return Response.json({ error: 'Revoking invites requires the admin role' }, { status: 403 })
+      }
+      const inviteId = String(body?.inviteId ?? '')
+      if (!inviteId) return Response.json({ error: 'Missing inviteId' }, { status: 400 })
+      const revokedSnapshot = await invitesRef.doc(inviteId).get()
+      const revokedEmail = revokedSnapshot.get('email') ?? inviteId
+      await invitesRef.doc(inviteId).delete()
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Revoked invite for ${revokedEmail}`,
+        { type: 'invite', id: inviteId, name: revokedEmail },
+      )
+      return Response.json({ ok: true }, { status: 200 })
+    }
+
+    if (action === 'accept') {
+      const inviteId = String(body?.inviteId ?? '')
+      if (!inviteId) return Response.json({ error: 'Missing inviteId' }, { status: 400 })
+      const snapshot = await invitesRef.doc(inviteId).get()
+      const invite = snapshot.data()
+      if (!snapshot.exists || !invite) {
+        return Response.json({ error: 'Invite not found' }, { status: 404 })
+      }
+      if (invite['acceptedAt']) {
+        return Response.json({ error: 'Invite already accepted' }, { status: 409 })
+      }
+      const email = String(decoded.email ?? '').toLowerCase()
+      if (!email || email !== invite['email'] || !decoded.email_verified) {
+        return Response.json({
+          error: 'This invite is for a different (or unverified) email',
+        }, { status: 403 })
+      }
+      await upsertOrgMember({
+        orgId,
+        uid: decoded.uid,
+        role: invite['role'],
+        allHosts: invite['allHosts'] === true,
+        hostAccess: invite['hostAccess'] ?? {},
+        email,
+        displayName: (decoded['name'] as string | undefined) ?? null,
+        invitedBy: invite['invitedBy'] ?? null,
+      })
+      await invitesRef.doc(inviteId).set(
+        {
+          acceptedAt: FieldValue.serverTimestamp(),
+          acceptedBy: decoded.uid,
+        },
+        { merge: true },
+      )
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Joined the organization as ${invite['role']}`,
+        { type: 'member', id: decoded.uid, name: email },
+      )
+      return Response.json({ ok: true }, { status: 200 })
+    }
+
+    return Response.json({ error: 'Unknown action' }, { status: 400 })
+  } catch (error) {
+    console.error(error)
+    return Response.json({ error: 'Invite operation failed' }, { status: 500 })
+  }
+}
+
+export const dynamic = 'force-dynamic'
+export { handler as GET, handler as POST }

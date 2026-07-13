@@ -15,37 +15,9 @@
  * limitations under the License.
  */
 
-export * from './binding-tokens'
-export * from './community'
-export * from './contacts'
-export * from './compose-layout-nodes'
-export * from './functions'
-export * from './compose-reusable-components'
-export * from './compress'
-export * from './create-resource-uid'
-export * from './decompress'
-export * from './organizations'
-export * from './plan-entitlements'
-export * from './release-flags'
-export * from './screen-link-context'
-export * from './site-context'
-export * from './usage-metering'
-export * from './variables'
-export * from './workflows'
-export * from './datasets'
-export * from './expand-repeatables'
-export * from './tenant-roles'
-export * from './markdown-lite'
-export * from './resolve-named-tokens'
-export * from './screen-route'
-export * from './host-naming'
-export * from './bookings'
-export * from './actions'
-export * from './redirects'
-export * from './media-folders'
-export * from './media-metadata'
-export * from './dataset-models'
-export * from './dataset-query'
-export * from './dataset-io'
-export * from './plugin-manifest'
-export * from './plugin-bridge'
+// Full app-utils surface = server-safe utils + the client-only React
+// contexts. Split so `@aglyn/aglyn/server` can re-export just `./server`
+// (no `createContext`) for tenant Server Components (AGL-405); this barrel,
+// reached via `@aglyn/aglyn`, keeps both for client consumers unchanged.
+export * from './server'
+export * from './contexts'

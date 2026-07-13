@@ -48,6 +48,41 @@
       },
       "description": "Community browsing, publishing and plugin installs.",
       "valueType": "JSON"
+    },
+    "release_commerce_v2": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Commerce v2 wave: catalog, cart/checkout, digital goods, reservations, POS, repriced tiers (AGL-276..331).",
+      "valueType": "JSON"
+    },
+    "release_marketing": {
+      "defaultValue": {
+        "value": "{\"enabled\": true, \"rolloutPercent\": 0}"
+      },
+      "description": "Overlays, campaigns at-a-glance, and A/B experiments.",
+      "valueType": "JSON"
+    },
+    "release_email": {
+      "defaultValue": {
+        "value": "{\"enabled\": true, \"rolloutPercent\": 0}"
+      },
+      "description": "Designed emails, campaigns, and audience sending.",
+      "valueType": "JSON"
+    },
+    "release_inbox": {
+      "defaultValue": {
+        "value": "{\"enabled\": true, \"rolloutPercent\": 0}"
+      },
+      "description": "Form submissions, site members, and the lead inbox.",
+      "valueType": "JSON"
+    },
+    "release_logic": {
+      "defaultValue": {
+        "value": "{\"enabled\": true, \"rolloutPercent\": 0}"
+      },
+      "description": "Variables, no-code functions, and reference health.",
+      "valueType": "JSON"
     }
   },
   "version": {

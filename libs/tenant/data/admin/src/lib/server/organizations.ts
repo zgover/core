@@ -23,14 +23,17 @@
  */
 
 import {
-  type AglynOrganization,
-  type AglynOrgMember,
   createResourceUid,
   generateOrgSlug,
+  hasOrgPermission,
   isValidOrgSlug,
-  type OrgRole,
   projectHostMemberRoles,
-} from '@aglyn/aglyn'
+  type AglynOrganization,
+  type AglynOrgCustomRole,
+  type AglynOrgMember,
+  type OrgPermission,
+  type OrgRole,
+} from '@aglyn/aglyn/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import firebaseAdmin from './firebase-admin'
 
@@ -302,6 +305,32 @@ export async function orgDataCollectionForHost(
     : firestore().collection('hosts').doc(hostId).collection(name)
 }
 
+/**
+ * Server-side permission check (AGL-243): the member's org-role defaults
+ * refined by their custom role doc (one read, only when assigned). API
+ * routes call this before privileged mutations.
+ */
+export async function memberHasOrgPermission(
+  orgId: string,
+  member: Partial<AglynOrgMember> | null | undefined,
+  permission: OrgPermission,
+): Promise<boolean> {
+  if (!member) return false
+  let customRole: AglynOrgCustomRole | null = null
+  if (member.roleId) {
+    const snapshot = await firestore()
+      .collection('orgs')
+      .doc(orgId)
+      .collection('roles')
+      .doc(member.roleId)
+      .get()
+    customRole = snapshot.exists
+      ? (snapshot.data() as AglynOrgCustomRole)
+      : null
+  }
+  return hasOrgPermission(member, permission, customRole)
+}
+
 export async function listOrgMembers(
   orgId: string,
 ): Promise<AglynOrgMember[]> {
@@ -349,14 +378,55 @@ export async function syncHostMemberRoles(
   await batch.commit()
 }
 
+/** What an org activity entry points at; `id` lets detail views filter. */
+export interface OrgActivityTarget {
+  type: 'org' | 'member' | 'invite'
+  id?: string
+  name?: string
+}
+
+/**
+ * Org-level counterpart to the host activity log (AGL-118): fire-and-
+ * forget append to `orgs/{orgId}/activity` from the org API routes. Never
+ * throws — an audit miss must not break the mutation that triggered it.
+ * Admin-SDK-only, like the rest of this file; the rules deny client writes.
+ */
+export async function logOrgActivity(
+  orgId: string,
+  actor: { uid: string; email?: string | null },
+  action: string,
+  target: OrgActivityTarget,
+): Promise<void> {
+  await firestore()
+    .collection('orgs')
+    .doc(orgId)
+    .collection('activity')
+    .add({
+      actorId: actor.uid,
+      actorEmail: actor.email ?? null,
+      action,
+      target: {
+        type: target.type,
+        ...(target.id ? { id: target.id } : {}),
+        ...(target.name ? { name: target.name } : {}),
+      },
+      createdAt: FieldValue.serverTimestamp(),
+    })
+    .catch(() => undefined)
+}
+
 export interface UpsertOrgMemberOptions {
   orgId: string
   uid: string
   role: OrgRole
   allHosts?: boolean
   hostAccess?: Record<string, 'admin' | 'editor' | 'viewer'>
+  /** Custom role reference (AGL-243); null clears it. */
+  roleId?: string | null
   email?: string | null
   displayName?: string | null
+  /** Job title shown on the roster/member page (AGL-364). */
+  title?: string | null
   invitedBy?: string | null
 }
 
@@ -368,8 +438,18 @@ export interface UpsertOrgMemberOptions {
 export async function upsertOrgMember(
   options: UpsertOrgMemberOptions,
 ): Promise<void> {
-  const { orgId, uid, role, allHosts, hostAccess, email, displayName, invitedBy } =
-    options
+  const {
+    orgId,
+    uid,
+    role,
+    allHosts,
+    hostAccess,
+    roleId,
+    email,
+    displayName,
+    title,
+    invitedBy,
+  } = options
   const db = firestore()
   await db.runTransaction(async (tx) => {
     const orgSnapshot = await tx.get(db.collection('orgs').doc(orgId))
@@ -387,8 +467,10 @@ export async function upsertOrgMember(
         role,
         allHosts: allHosts ?? false,
         hostAccess: hostAccess ?? {},
+        ...(roleId !== undefined ? { roleId } : {}),
         ...(email !== undefined ? { email } : {}),
         ...(displayName !== undefined ? { displayName } : {}),
+        ...(title !== undefined ? { title } : {}),
         ...(invitedBy ? { invitedBy } : {}),
         ...(existing.exists
           ? {}

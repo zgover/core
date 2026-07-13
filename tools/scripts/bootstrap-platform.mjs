@@ -16,7 +16,7 @@
  */
 
 // One-command managed-platform bootstrap. Aglyn is a managed service —
-// tenants never touch infrastructure; this script is how OUR operators
+// customer workspaces never touch infrastructure; this script is how OUR operators
 // spin up / converge the shared platform:
 //
 //   node tools/scripts/bootstrap-platform.mjs [--apply]

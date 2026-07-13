@@ -21,6 +21,7 @@ import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Button,
   Chip,
+  Link,
   MenuItem,
   Stack,
   Table,
@@ -34,12 +35,13 @@ import {
 import { collection, doc, limit, query } from 'firebase/firestore'
 import { useCallback, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { checkTenantSeatQuota } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import { checkOrgSeatQuota } from '../constants/entitlements'
+import { buildRoute, Route } from '../constants/route-links'
+import useCurrentOrg from '../hooks/use-current-org'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 import useFirestoreDoc from '../hooks/use-firestore-doc'
 import useHostActivityLogger from '../hooks/use-host-activity-logger'
-import useTenantPermissions from '../hooks/use-tenant-permissions'
+import useOrgPermissions from '../hooks/use-org-permissions'
 
 const ROLE_OPTIONS = [
   { value: 'viewer', label: 'Viewer' },
@@ -54,7 +56,7 @@ export interface HostMembersCardProps {
 /**
  * Host user manager (AGL-107): manual add-by-email with a role, role
  * changes, and removal — all through /api/hosts/members (Admin SDK: email →
- * uid lookup, `admins` rules map sync, member-seat quota AGL-112). Roles
+ * uid lookup, `memberRoles` sync, member-seat quota AGL-112). Roles
  * beyond admin/non-admin are recorded now and enforced with granular rules
  * (AGL-108 follow-up); the card says so instead of overpromising.
  */
@@ -64,9 +66,9 @@ export function HostMembersCard(props: HostMembersCardProps) {
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const logActivity = useHostActivityLogger(hostId)
-  const { permissions } = useTenantPermissions()
+  const { permissions } = useOrgPermissions()
   const canManage = permissions.manageMembers
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('editor')
@@ -89,7 +91,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
       ),
     [memberDocs],
   )
-  const seatQuota = checkTenantSeatQuota(tenant, 'members', members.length)
+  const seatQuota = checkOrgSeatQuota(org, 'members', members.length)
 
   const request = useCallback(
     async (method: string, body: Record<string, unknown>) => {
@@ -182,6 +184,13 @@ export function HostMembersCard(props: HostMembersCardProps) {
       contentBordered="all"
     >
       <Stack spacing={1.5}>
+        <Typography variant="caption" color="text.secondary">
+          {'Site users are organization members scoped to this site — the '}
+          <Link href={buildRoute(Route.MANAGE_TEAM)} color="secondary">
+            {'organization Team page'}
+          </Link>
+          {' manages everyone in one place.'}
+        </Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
           <TextField
             size="small"
@@ -240,7 +249,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
                   spacing={1}
                   sx={{ alignItems: 'center' }}
                 >
-                  <span>{host?.tenantId === user?.uid
+                  <span>{host?.memberRoles?.[user?.uid ?? ''] === 'admin'
                     ? (user?.email ?? 'Owner')
                     : 'Account owner'}</span>
                   <Chip label="Owner" color="secondary" size="small" />

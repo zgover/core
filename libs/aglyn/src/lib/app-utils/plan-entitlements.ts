@@ -16,10 +16,10 @@
  */
 
 import type {
-  AglynTenant,
-  TenantEntitlements,
-  TenantFeatureFlags,
-  TenantPlan,
+  AglynOrgBilling,
+  OrgEntitlements,
+  OrgFeatureFlags,
+  OrgPlan,
 } from '../foundation'
 
 /** Sentinel for quotas a plan does not cap; `checkQuota` always allows. */
@@ -27,18 +27,23 @@ export const UNLIMITED = Number.POSITIVE_INFINITY
 
 /**
  * Plan → default entitlements. Versioned with the app so pricing changes are
- * code-reviewed; per-tenant overrides live on `tenant.entitlements` and win
+ * code-reviewed; per-org overrides live on `org.entitlements` and win
  * key-by-key. Tier table aligned to the Tenant Billing & SaaS Plans proposal
  * (AGL-67, 2026-07-07): storage-per-host is media storage and exceeds the
  * published total-site-size cap by design. Metered costs are passed through
  * from Firebase/Vercel at cost × 1.30 separately (AGL-41).
  */
-export const PLAN_ENTITLEMENTS: Record<
-  TenantPlan,
-  Required<Omit<TenantEntitlements, 'features'>> & {
-    features: Required<TenantFeatureFlags>
-  }
-> = {
+/** Legacy host-keyed dataset overrides resolved into org keys (AGL-240). */
+type LegacyEntitlementKeys = 'datasetsPerHost' | 'maxDatasetsPerHost'
+
+/** Fully-resolved entitlements: every quota present, features complete. */
+export type ResolvedOrgEntitlements = Required<
+  Omit<OrgEntitlements, 'features' | LegacyEntitlementKeys>
+> & {
+  features: Required<OrgFeatureFlags>
+}
+
+export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
   free: {
     hostLimit: 1,
     screensPerHost: 5,
@@ -46,8 +51,8 @@ export const PLAN_ENTITLEMENTS: Record<
     storagePerHostMb: 250,
     totalSiteSizeMb: 100,
     membersPerHost: 1,
-    managersPerTenant: 1,
-    maxManagersPerTenant: 1,
+    managersPerOrg: 1,
+    maxManagersPerOrg: 1,
     maxMembersPerHost: 1,
     bandwidthGb: 5,
     formSubmissionsPerMonth: 20,
@@ -60,10 +65,17 @@ export const PLAN_ENTITLEMENTS: Record<
     contactsPerHost: 100,
     emailSendsPerMonth: 0,
     actionRunsPerMonth: 0,
-    datasetsPerHost: 0,
-    maxDatasetsPerHost: 0,
+    datasetsPerOrg: 0,
+    maxDatasetsPerOrg: 0,
     recordsPerDataset: 0,
+    dataStorageMbPerOrg: 0,
+    productsPerHost: 0,
+    inventoryLocations: 1,
+    posRegisters: 0,
+    transactionFeePhysicalPct: 0,
+    transactionFeeDigitalPct: 0,
     features: {
+      abTesting: false,
       versioning: false,
       reusableComponents: false,
       customDomain: false,
@@ -84,6 +96,15 @@ export const PLAN_ENTITLEMENTS: Record<
       screenAnalytics: false,
       mediaCdn: false,
       marketingOverlays: false,
+      commerce: false,
+      pos: false,
+      storefrontSubscriptions: false,
+      contentGating: false,
+      giftCards: false,
+      productReviews: false,
+      abandonedCart: false,
+      dropshipRouting: false,
+      commerceAnalytics: false,
     },
   },
   starter: {
@@ -93,8 +114,8 @@ export const PLAN_ENTITLEMENTS: Record<
     storagePerHostMb: 2048,
     totalSiteSizeMb: 1024,
     membersPerHost: 3,
-    managersPerTenant: 2,
-    maxManagersPerTenant: 5,
+    managersPerOrg: 2,
+    maxManagersPerOrg: 5,
     maxMembersPerHost: 10,
     bandwidthGb: 50,
     formSubmissionsPerMonth: 200,
@@ -107,10 +128,17 @@ export const PLAN_ENTITLEMENTS: Record<
     contactsPerHost: 1000,
     emailSendsPerMonth: 500,
     actionRunsPerMonth: 0,
-    datasetsPerHost: 1,
-    maxDatasetsPerHost: 3,
+    datasetsPerOrg: 3,
+    maxDatasetsPerOrg: 10,
     recordsPerDataset: 1000,
+    dataStorageMbPerOrg: 1024,
+    productsPerHost: 100,
+    inventoryLocations: 1,
+    posRegisters: 0,
+    transactionFeePhysicalPct: 2,
+    transactionFeeDigitalPct: 7,
     features: {
+      abTesting: false,
       versioning: false,
       reusableComponents: true,
       customDomain: true,
@@ -131,6 +159,15 @@ export const PLAN_ENTITLEMENTS: Record<
       screenAnalytics: false,
       mediaCdn: true,
       marketingOverlays: true,
+      commerce: true,
+      pos: false,
+      storefrontSubscriptions: false,
+      contentGating: false,
+      giftCards: false,
+      productReviews: false,
+      abandonedCart: false,
+      dropshipRouting: false,
+      commerceAnalytics: false,
     },
   },
   pro: {
@@ -140,8 +177,8 @@ export const PLAN_ENTITLEMENTS: Record<
     storagePerHostMb: 10240,
     totalSiteSizeMb: 5120,
     membersPerHost: 10,
-    managersPerTenant: 5,
-    maxManagersPerTenant: 20,
+    managersPerOrg: 5,
+    maxManagersPerOrg: 20,
     maxMembersPerHost: 25,
     bandwidthGb: 250,
     formSubmissionsPerMonth: 1000,
@@ -154,10 +191,17 @@ export const PLAN_ENTITLEMENTS: Record<
     contactsPerHost: 10000,
     emailSendsPerMonth: 5000,
     actionRunsPerMonth: 5000,
-    datasetsPerHost: 10,
-    maxDatasetsPerHost: 25,
+    datasetsPerOrg: 15,
+    maxDatasetsPerOrg: 50,
     recordsPerDataset: 10000,
+    dataStorageMbPerOrg: 5120,
+    productsPerHost: 2500,
+    inventoryLocations: 2,
+    posRegisters: 1,
+    transactionFeePhysicalPct: 0,
+    transactionFeeDigitalPct: 5,
     features: {
+      abTesting: false,
       versioning: true,
       reusableComponents: true,
       customDomain: true,
@@ -178,6 +222,15 @@ export const PLAN_ENTITLEMENTS: Record<
       screenAnalytics: true,
       mediaCdn: true,
       marketingOverlays: true,
+      commerce: true,
+      pos: true,
+      storefrontSubscriptions: false,
+      contentGating: false,
+      giftCards: false,
+      productReviews: true,
+      abandonedCart: true,
+      dropshipRouting: true,
+      commerceAnalytics: true,
     },
   },
   business: {
@@ -187,8 +240,8 @@ export const PLAN_ENTITLEMENTS: Record<
     storagePerHostMb: 51200,
     totalSiteSizeMb: 25600,
     membersPerHost: 50,
-    managersPerTenant: 15,
-    maxManagersPerTenant: 100,
+    managersPerOrg: 15,
+    maxManagersPerOrg: 100,
     maxMembersPerHost: 100,
     bandwidthGb: 1000,
     formSubmissionsPerMonth: 10000,
@@ -201,10 +254,17 @@ export const PLAN_ENTITLEMENTS: Record<
     contactsPerHost: 100000,
     emailSendsPerMonth: 50000,
     actionRunsPerMonth: 50000,
-    datasetsPerHost: 50,
-    maxDatasetsPerHost: 100,
+    datasetsPerOrg: 100,
+    maxDatasetsPerOrg: 250,
     recordsPerDataset: 100000,
+    dataStorageMbPerOrg: 25600,
+    productsPerHost: 10000,
+    inventoryLocations: 4,
+    posRegisters: 2,
+    transactionFeePhysicalPct: 0,
+    transactionFeeDigitalPct: 2,
     features: {
+      abTesting: true,
       versioning: true,
       reusableComponents: true,
       customDomain: true,
@@ -225,6 +285,78 @@ export const PLAN_ENTITLEMENTS: Record<
       screenAnalytics: true,
       mediaCdn: true,
       marketingOverlays: true,
+      commerce: true,
+      pos: true,
+      storefrontSubscriptions: true,
+      contentGating: true,
+      giftCards: true,
+      productReviews: true,
+      abandonedCart: true,
+      dropshipRouting: true,
+      commerceAnalytics: true,
+    },
+  },
+  advanced: {
+    hostLimit: 25,
+    screensPerHost: UNLIMITED,
+    sharedLayoutsPerHost: UNLIMITED,
+    storagePerHostMb: 102400,
+    totalSiteSizeMb: 51200,
+    membersPerHost: 100,
+    managersPerOrg: 50,
+    maxManagersPerOrg: 250,
+    maxMembersPerHost: 250,
+    bandwidthGb: 5000,
+    formSubmissionsPerMonth: 100000,
+    variablesPerHost: UNLIMITED,
+    functionsPerHost: 1000,
+    workflowsPerHost: 500,
+    workflowRunsPerMonth: 500000,
+    servicesPerHost: UNLIMITED,
+    redirectsPerHost: UNLIMITED,
+    contactsPerHost: 1000000,
+    emailSendsPerMonth: 250000,
+    actionRunsPerMonth: 250000,
+    datasetsPerOrg: 500,
+    maxDatasetsPerOrg: 1000,
+    recordsPerDataset: 1000000,
+    dataStorageMbPerOrg: 102400,
+    productsPerHost: UNLIMITED,
+    inventoryLocations: 10,
+    posRegisters: 5,
+    transactionFeePhysicalPct: 0,
+    transactionFeeDigitalPct: 0,
+    features: {
+      abTesting: true,
+      versioning: true,
+      reusableComponents: true,
+      customDomain: true,
+      removeBranding: true,
+      scheduledPublishing: true,
+      marketplaceSelling: true,
+      aiAssist: true,
+      workflows: true,
+      dataStore: true,
+      videoMedia: true,
+      bookings: true,
+      actions: true,
+      webhooks: true,
+      siteExport: true,
+      multilingual: true,
+      eventCalendar: false,
+      redirects: true,
+      screenAnalytics: true,
+      mediaCdn: true,
+      marketingOverlays: true,
+      commerce: true,
+      pos: true,
+      storefrontSubscriptions: true,
+      contentGating: true,
+      giftCards: true,
+      productReviews: true,
+      abandonedCart: true,
+      dropshipRouting: true,
+      commerceAnalytics: true,
     },
   },
 }
@@ -236,16 +368,29 @@ export const PLAN_ENTITLEMENTS: Record<
  */
 export const EVENT_CALENDAR_ADDON_MONTHLY_USD = 9
 
+/**
+ * POS Pro register add-on (AGL-329): $89/mo per extra register/location
+ * (Shopify POS Pro parity). Purchased add-ons land as a per-org
+ * `posRegisters` entitlement override, which
+ * `resolveOrgEntitlements` already applies over the plan default.
+ */
+export const POS_REGISTER_ADDON_MONTHLY_USD = 89
+
 export interface PlanPricing {
-  /** Flat monthly base price in USD. */
+  /** Flat monthly base price in USD (month-to-month billing). */
   basePriceMonthlyUsd: number
+  /**
+   * Effective per-month price when billed annually (AGL-278): the
+   * Squarespace/Shopify-parity headline number. Charged as ×12 up front.
+   */
+  basePriceAnnualMonthlyUsd: number
   /**
    * Monthly price per host beyond `hostLimit` (AGL-68); null when the plan
    * cannot buy extra hosts.
    */
   extraHostMonthlyUsd: number | null
   /**
-   * Monthly price per tenant-manager seat beyond `managersPerTenant`
+   * Monthly price per org-manager seat beyond `managersPerOrg`
    * (AGL-112); null when the plan cannot buy extra seats.
    */
   extraSeatMonthlyUsd: number | null
@@ -255,10 +400,17 @@ export interface PlanPricing {
    */
   extraMemberMonthlyUsd: number | null
   /**
-   * Monthly price per dataset beyond `datasetsPerHost` (AGL-132); null
-   * when the plan cannot buy extra datasets.
+   * Monthly price per org dataset beyond `datasetsPerOrg` (AGL-132/240);
+   * null when the plan cannot buy extra datasets.
    */
   extraDatasetMonthlyUsd: number | null
+  /**
+   * Metered overage per GB-month of dataset storage beyond
+   * `dataStorageMbPerOrg` (AGL-240). Priced from Firestore storage cost
+   * (~$0.18/GiB-mo) at roughly the platform's cost-plus posture; null
+   * when the plan hard-blocks at the included size instead of metering.
+   */
+  extraDataGbMonthlyUsd: number | null
 }
 
 /**
@@ -266,59 +418,113 @@ export interface PlanPricing {
  * so price changes ride the same review path; Stripe price ids map to plans
  * via `STRIPE_PRICE_*` env vars on the billing API routes.
  */
-export const PLAN_PRICING: Record<TenantPlan, PlanPricing> = {
+export const PLAN_PRICING: Record<OrgPlan, PlanPricing> = {
   free: {
     basePriceMonthlyUsd: 0,
+    basePriceAnnualMonthlyUsd: 0,
     extraHostMonthlyUsd: null,
     extraSeatMonthlyUsd: null,
     extraMemberMonthlyUsd: null,
     extraDatasetMonthlyUsd: null,
+    extraDataGbMonthlyUsd: null,
   },
   starter: {
-    basePriceMonthlyUsd: 19,
+    basePriceMonthlyUsd: 25,
+    basePriceAnnualMonthlyUsd: 16,
     extraHostMonthlyUsd: 10,
     extraSeatMonthlyUsd: 5,
     extraMemberMonthlyUsd: 3,
     extraDatasetMonthlyUsd: 2,
+    extraDataGbMonthlyUsd: 0.25,
   },
   pro: {
-    basePriceMonthlyUsd: 49,
+    basePriceMonthlyUsd: 56,
+    basePriceAnnualMonthlyUsd: 39,
     extraHostMonthlyUsd: 8,
     extraSeatMonthlyUsd: 4,
     extraMemberMonthlyUsd: 2,
     extraDatasetMonthlyUsd: 2,
+    extraDataGbMonthlyUsd: 0.25,
   },
   business: {
-    basePriceMonthlyUsd: 149,
+    basePriceMonthlyUsd: 139,
+    basePriceAnnualMonthlyUsd: 99,
     extraHostMonthlyUsd: 5,
     extraSeatMonthlyUsd: 3,
     extraMemberMonthlyUsd: 1,
     extraDatasetMonthlyUsd: 1,
+    extraDataGbMonthlyUsd: 0.25,
+  },
+  advanced: {
+    basePriceMonthlyUsd: 399,
+    basePriceAnnualMonthlyUsd: 299,
+    extraHostMonthlyUsd: 4,
+    extraSeatMonthlyUsd: 2,
+    extraMemberMonthlyUsd: 1,
+    extraDatasetMonthlyUsd: 1,
+    extraDataGbMonthlyUsd: 0.25,
   },
 }
 
-function resolvePlan(tenant: Partial<AglynTenant> | null | undefined) {
-  const plan = tenant?.plan
-  return plan && plan in PLAN_ENTITLEMENTS ? plan : 'free'
+/**
+ * Subscription states that stop paying for the plan (AGL-247). `past_due`
+ * keeps working as a dunning grace period; these do not.
+ */
+const DEAD_SUBSCRIPTION_STATUSES = new Set(['canceled', 'unpaid', 'incomplete'])
+
+/**
+ * The plan the org actually gets (AGL-247): missing/unknown plans resolve
+ * as `free`, and a paid plan whose subscription is canceled/unpaid/
+ * incomplete downgrades to `free` until the webhook restores it — plan
+ * fields alone are not entitlement.
+ */
+export function resolveEffectivePlan(
+  org: Partial<AglynOrgBilling> | null | undefined,
+): OrgPlan {
+  const plan = org?.plan
+  if (!plan || !(plan in PLAN_ENTITLEMENTS)) return 'free'
+  const status = org?.subscription?.status
+  if (plan !== 'free' && status && DEAD_SUBSCRIPTION_STATUSES.has(status)) {
+    return 'free'
+  }
+  return plan
+}
+
+function resolvePlan(org: Partial<AglynOrgBilling> | null | undefined) {
+  return resolveEffectivePlan(org)
 }
 
 /**
- * Effective entitlements for a tenant: plan defaults with the tenant doc's
+ * Effective entitlements for an org: plan defaults with the org doc's
  * per-key overrides applied (features merge key-by-key too). Missing or
  * unknown plans resolve as `free`.
  */
-export function resolveTenantEntitlements(
-  tenant: Partial<AglynTenant> | null | undefined,
-): Required<Omit<TenantEntitlements, 'features'>> & {
-  features: Required<TenantFeatureFlags>
-} {
-  const defaults = PLAN_ENTITLEMENTS[resolvePlan(tenant)]
-  const overrides = tenant?.entitlements
+export function resolveOrgEntitlements(
+  org: Partial<AglynOrgBilling> | null | undefined,
+): ResolvedOrgEntitlements {
+  const defaults = PLAN_ENTITLEMENTS[resolvePlan(org)]
+  const overrides = org?.entitlements
   if (!overrides) return defaults
-  const { features: featureOverrides, ...quotaOverrides } = overrides
+  const {
+    features: featureOverrides,
+    datasetsPerHost: legacyDatasets,
+    maxDatasetsPerHost: legacyMaxDatasets,
+    ...quotaOverrides
+  } = overrides
   const merged = { ...defaults }
   for (const [key, value] of Object.entries(quotaOverrides)) {
     if (typeof value === 'number') (merged as any)[key] = value
+  }
+  // Pre-AGL-240 override docs keyed datasets per host; resolve them into
+  // the org keys unless an org-keyed override is present.
+  if (typeof legacyDatasets === 'number' && overrides.datasetsPerOrg == null) {
+    merged.datasetsPerOrg = legacyDatasets
+  }
+  if (
+    typeof legacyMaxDatasets === 'number' &&
+    overrides.maxDatasetsPerOrg == null
+  ) {
+    merged.maxDatasetsPerOrg = legacyMaxDatasets
   }
   return {
     ...merged,
@@ -326,12 +532,30 @@ export function resolveTenantEntitlements(
   }
 }
 
-/** True when the tenant's plan (or overrides) enables the boolean feature. */
+/**
+ * Platform transaction fee % for a storefront sale (AGL-278): resolved
+ * from the effective plan (with per-org overrides) by product type.
+ * Digital and service sales use the digital rate; AGL-307 turns this into
+ * the Stripe Connect `application_fee_amount` at charge time.
+ */
+export function resolveTransactionFeePct(
+  org: Partial<AglynOrgBilling> | null | undefined,
+  productType: 'physical' | 'digital' | 'service',
+): number {
+  const entitlements = resolveOrgEntitlements(org)
+  const pct =
+    productType === 'physical'
+      ? entitlements.transactionFeePhysicalPct
+      : entitlements.transactionFeeDigitalPct
+  return Number.isFinite(pct) && pct > 0 ? pct : 0
+}
+
+/** True when the org's plan (or overrides) enables the boolean feature. */
 export function checkEntitlement(
-  tenant: Partial<AglynTenant> | null | undefined,
-  feature: keyof TenantFeatureFlags,
+  org: Partial<AglynOrgBilling> | null | undefined,
+  feature: keyof OrgFeatureFlags,
 ): boolean {
-  return Boolean(resolveTenantEntitlements(tenant).features[feature])
+  return Boolean(resolveOrgEntitlements(org).features[feature])
 }
 
 /**
@@ -364,31 +588,31 @@ export interface SeatQuotaResult {
 }
 
 /**
- * Seat quota check (AGL-112): seats differ from plain quotas because tenants
- * can buy addon seats (`tenant.seatAddons`) up to a per-plan hard max —
+ * Seat quota check (AGL-112): seats differ from plain quotas because orgs
+ * can buy addon seats (`org.seatAddons`) up to a per-plan hard max —
  * beyond the max the only path is upgrading the plan. `managers` counts
- * tenant-manager seats tenant-wide; `members` counts host members per host.
+ * org-manager seats org-wide; `members` counts host members per host.
  */
 export function checkSeatQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+  org: Partial<AglynOrgBilling> | null | undefined,
   kind: SeatKind,
   currentUsage: number,
 ): SeatQuotaResult {
-  const entitlements = resolveTenantEntitlements(tenant)
-  const pricing = PLAN_PRICING[resolvePlan(tenant)]
+  const entitlements = resolveOrgEntitlements(org)
+  const pricing = PLAN_PRICING[resolvePlan(org)]
   const included =
     kind === 'managers'
-      ? entitlements.managersPerTenant
+      ? entitlements.managersPerOrg
       : entitlements.membersPerHost
   const maxSeats =
     kind === 'managers'
-      ? entitlements.maxManagersPerTenant
+      ? entitlements.maxManagersPerOrg
       : entitlements.maxMembersPerHost
   const addonPriceUsd =
     kind === 'managers'
       ? pricing.extraSeatMonthlyUsd
       : pricing.extraMemberMonthlyUsd
-  const purchased = Math.max(0, tenant?.seatAddons?.[kind] ?? 0)
+  const purchased = Math.max(0, org?.seatAddons?.[kind] ?? 0)
   const limit = Math.min(included + purchased, maxSeats)
   return {
     allowed: currentUsage < limit,
@@ -403,11 +627,11 @@ export function checkSeatQuota(
 }
 
 export function checkQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
-  quota: keyof Omit<TenantEntitlements, 'features'>,
+  org: Partial<AglynOrgBilling> | null | undefined,
+  quota: keyof Omit<ResolvedOrgEntitlements, 'features'>,
   currentUsage: number,
 ): { allowed: boolean; limit: number; remaining: number } {
-  const limit = resolveTenantEntitlements(tenant)[quota]
+  const limit = resolveOrgEntitlements(org)[quota]
   return {
     allowed: currentUsage < limit,
     limit,
@@ -431,20 +655,20 @@ export interface DatasetQuotaResult {
 }
 
 /**
- * Dataset quota check (AGL-132), mirroring `checkSeatQuota`: tenants can
- * buy addon datasets (`tenant.seatAddons.datasets`, applied per host) up
- * to the plan's hard max; beyond the max the only path is upgrading.
+ * Dataset quota check (AGL-132/240), mirroring `checkSeatQuota`: orgs can
+ * buy addon datasets (`org.seatAddons.datasets`, org-wide) up to the
+ * plan's hard max; beyond the max the only path is upgrading.
  */
 export function checkDatasetQuota(
-  tenant: Partial<AglynTenant> | null | undefined,
+  org: Partial<AglynOrgBilling> | null | undefined,
   currentUsage: number,
 ): DatasetQuotaResult {
-  const entitlements = resolveTenantEntitlements(tenant)
-  const pricing = PLAN_PRICING[resolvePlan(tenant)]
-  const included = entitlements.datasetsPerHost
-  const maxDatasets = entitlements.maxDatasetsPerHost
+  const entitlements = resolveOrgEntitlements(org)
+  const pricing = PLAN_PRICING[resolvePlan(org)]
+  const included = entitlements.datasetsPerOrg
+  const maxDatasets = entitlements.maxDatasetsPerOrg
   const addonPriceUsd = pricing.extraDatasetMonthlyUsd
-  const purchased = Math.max(0, tenant?.seatAddons?.datasets ?? 0)
+  const purchased = Math.max(0, org?.seatAddons?.datasets ?? 0)
   const limit = Math.min(included + purchased, maxDatasets)
   return {
     allowed: currentUsage < limit,
@@ -455,5 +679,55 @@ export function checkDatasetQuota(
     maxDatasets,
     upgradeRequired: addonPriceUsd === null || limit >= maxDatasets,
     addonPriceUsd,
+  }
+}
+
+export interface DataStorageQuotaResult {
+  /**
+   * False only when the plan hard-blocks (no overage pricing) and usage
+   * meets the included size; metered plans always allow and bill overage.
+   */
+  allowed: boolean
+  /** Included dataset storage on the plan, MB. */
+  includedMb: number
+  usedMb: number
+  /** Remaining included storage, MB; 0 once into overage. */
+  remainingMb: number
+  /** Usage beyond the included size, GB (0 when within the plan). */
+  overageGb: number
+  /** Estimated overage this month at the plan's per-GB rate. */
+  overageMonthlyUsd: number
+  /** Per-GB-month overage rate; null when the plan meters nothing. */
+  overageRateUsd: number | null
+}
+
+/**
+ * Org dataset-storage meter (AGL-240): aggregate stored document bytes
+ * across `orgs/{orgId}/datasets`. Plans with an `extraDataGbMonthlyUsd`
+ * rate meter the overage onto the monthly invoice (cost-plus, AGL-41);
+ * plans without one (free) hard-block at the included size.
+ */
+export function checkDataStorageQuota(
+  org: Partial<AglynOrgBilling> | null | undefined,
+  usedMb: number,
+): DataStorageQuotaResult {
+  const entitlements = resolveOrgEntitlements(org)
+  const pricing = PLAN_PRICING[resolvePlan(org)]
+  const includedMb = entitlements.dataStorageMbPerOrg
+  const overageRateUsd = pricing.extraDataGbMonthlyUsd
+  const used = Math.max(0, usedMb)
+  const overageMb = Math.max(0, used - includedMb)
+  const overageGb = overageMb / 1024
+  return {
+    allowed: overageRateUsd !== null ? true : used < includedMb,
+    includedMb,
+    usedMb: used,
+    remainingMb: Math.max(0, includedMb - used),
+    overageGb,
+    overageMonthlyUsd:
+      overageRateUsd === null
+        ? 0
+        : Math.round(overageGb * overageRateUsd * 100) / 100,
+    overageRateUsd,
   }
 }

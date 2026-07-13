@@ -32,7 +32,12 @@ export type ReleaseFlagKey =
   | 'release_data_store'
   | 'release_workflows'
   | 'release_redirects'
+  | 'release_commerce_v2'
   | 'release_community'
+  | 'release_marketing'
+  | 'release_email'
+  | 'release_inbox'
+  | 'release_logic'
 
 export interface ReleaseFlagDefinition {
   key: ReleaseFlagKey
@@ -100,11 +105,51 @@ export const RELEASE_FLAGS: readonly ReleaseFlagDefinition[] = [
     navTabId: 'nav-tab-redirects',
   },
   {
+    key: 'release_commerce_v2',
+    label: 'Commerce v2',
+    description:
+      'Full ecommerce wave: catalog/variants, cart + checkout, digital ' +
+      'goods, reservations, POS, and the repriced commerce tiers ' +
+      '(AGL-276..331).',
+    defaultEnabled: true,
+  },
+  {
     key: 'release_community',
     label: 'Community marketplace',
     description: 'Community browsing, publishing and plugin installs.',
     defaultEnabled: true,
     navTabId: 'nav-tab-community',
+  },
+  // AGL-422: every first-party plugin is release-flagged — the flag now
+  // feeds the plugin LOADER (console, published sites, API dispatch), not
+  // just nav visibility, so staff can kill-switch a whole plugin platform-
+  // wide from the Feature Flags page.
+  {
+    key: 'release_marketing',
+    label: 'Marketing',
+    description: 'Overlays, campaigns at-a-glance, and A/B experiments.',
+    defaultEnabled: true,
+    navTabId: 'nav-tab-marketing',
+  },
+  {
+    key: 'release_email',
+    label: 'Email',
+    description: 'Designed emails, campaigns, and audience sending.',
+    defaultEnabled: true,
+  },
+  {
+    key: 'release_inbox',
+    label: 'Inbox',
+    description: 'Form submissions, site members, and the lead inbox.',
+    defaultEnabled: true,
+    navTabId: 'nav-tab-inbox',
+  },
+  {
+    key: 'release_logic',
+    label: 'Logic',
+    description: 'Variables, no-code functions, and reference health.',
+    defaultEnabled: true,
+    navTabId: 'nav-tab-logic',
   },
 ]
 
@@ -189,7 +234,7 @@ export function releaseFlagBucket(flagKey: string, subjectId: string): number {
 }
 
 /**
- * The gating verdict for one subject. `subjectId` should be the tenantId
+ * The gating verdict for one subject. `subjectId` should be the orgId
  * when available (whole workspaces get features together) and fall back to
  * the uid; an empty subject only passes fully-enabled flags.
  */

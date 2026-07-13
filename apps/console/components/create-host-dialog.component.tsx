@@ -30,11 +30,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import { buildRoute, Route } from '../constants/route-links'
-import { useOrgWorkspace } from '../hooks/use-org-workspace'
+import { useOrgScope } from '../hooks/use-org-scope'
 
 export interface CreateHostDialogProps {
   open: boolean
@@ -50,7 +50,7 @@ export function CreateHostDialog(props: CreateHostDialogProps) {
   const { open, onClose } = props
   const router = useRouter()
   const { data: user } = useUser()
-  const { currentOrg } = useOrgWorkspace()
+  const { currentOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
   const [name, setName] = useState('')
   const [subdomain, setSubdomain] = useState('')

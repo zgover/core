@@ -68,6 +68,8 @@ export interface HostVariable {
    * workflow is missing or fails.
    */
   workflowName?: string
+  /** Computed source by workflow doc id (AGL-261); wins over the name. */
+  workflowId?: string
 }
 
 export const VARIABLE_NAME_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]{0,39}$/
@@ -206,7 +208,7 @@ export function hasBindings(text: string): boolean {
  * option lists) pass through untouched; unsafe values in hrefs remain
  * covered by the render-time SAFE_HREF/sanitizer checks.
  */
-/** Component id of the interactive function widget (plugins-ui-mui). */
+/** Component id of the interactive function widget (plugins-mui). */
 export const FUNCTION_WIDGET_COMPONENT_ID = 'functionWidget'
 
 /**

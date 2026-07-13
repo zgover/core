@@ -14,108 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use client'
-
-import {
-  onSnapshot,
-  type DocumentData,
-  type DocumentReference,
-  type FirestoreError,
-} from 'firebase/firestore'
-import { useEffect, useRef, useState, type DependencyList } from 'react'
-
-const RETRY_DELAY_MS = 400
-const MAX_RETRIES = 5
-
-export type FirestoreDocStatus = 'loading' | 'success' | 'error'
-
-export interface UseFirestoreDocOptions {
-  idField?: string
-}
-
-export interface UseFirestoreDocResult<T> {
-  data: T | undefined
-  status: FirestoreDocStatus
-  error: FirestoreError | undefined
-}
 
 /**
- * Single-document counterpart to `useFirestoreCollection` — see that hook's
- * doc comment for why this exists instead of reactfire's
- * `useFirestoreDocData` (AGL-216/217).
- *
- * `buildRef` is re-invoked from `deps` the same way a `useEffect`/`useMemo`
- * callback would be — pass the same primitive values (ids, uid, firestore)
- * you'd put in a `useMemo` dependency array, not the `DocumentReference`
- * object itself.
+ * Moved to `@aglyn/tenant-feature-instance` (AGL-395) so relocated feature
+ * plugins can share it; this shim keeps the app's import sites working.
  */
-export function useFirestoreDoc<T = DocumentData>(
-  buildRef: () => DocumentReference<DocumentData> | null | undefined,
-  deps: DependencyList,
-  options: UseFirestoreDocOptions = {},
-): UseFirestoreDocResult<T> {
-  const [data, setData] = useState<T | undefined>(undefined)
-  const [status, setStatus] = useState<FirestoreDocStatus>('loading')
-  const [error, setError] = useState<FirestoreError | undefined>(undefined)
-  const buildRefRef = useRef(buildRef)
-  buildRefRef.current = buildRef
-  const idField = options.idField
-
-  useEffect(() => {
-    setStatus('loading')
-    setError(undefined)
-
-    const ref = buildRefRef.current()
-    if (!ref) {
-      setData(undefined)
-      return
-    }
-
-    let cancelled = false
-    let unsubscribe: (() => void) | null = null
-    let timer: ReturnType<typeof setTimeout> | null = null
-    let attempt = 0
-
-    const subscribe = () => {
-      unsubscribe = onSnapshot(
-        ref,
-        (snapshot) => {
-          if (cancelled) return
-          attempt = 0
-          setStatus('success')
-          setError(undefined)
-          if (!snapshot.exists()) {
-            setData(undefined)
-            return
-          }
-          const value = { ...snapshot.data() } as Record<string, unknown>
-          if (idField) value[idField] = snapshot.id
-          setData(value as T)
-        },
-        (err) => {
-          if (cancelled) return
-          unsubscribe?.()
-          if (attempt < MAX_RETRIES) {
-            attempt += 1
-            timer = setTimeout(subscribe, RETRY_DELAY_MS)
-          } else {
-            setStatus('error')
-            setError(err)
-          }
-        },
-      )
-    }
-    subscribe()
-
-    return () => {
-      cancelled = true
-      if (timer) clearTimeout(timer)
-      unsubscribe?.()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
-
-  return { data, status, error }
-}
-
-export default useFirestoreDoc
+export {
+  useFirestoreDoc,
+  useFirestoreDoc as default,
+} from '@aglyn/tenant-feature-instance'
+export type {
+  FirestoreDocStatus,
+  UseFirestoreDocOptions,
+  UseFirestoreDocResult,
+} from '@aglyn/tenant-feature-instance'

@@ -17,8 +17,6 @@
 
 import {
   APP_CONSOLE,
-  ICON_VARIANT_APP_PREFERENCES,
-  ICON_VARIANT_APP_SETTINGS,
   ICON_VARIANT_LEFT,
   ICON_VARIANT_MENU_DOWN,
   ICON_VARIANT_SIGN_OUT,
@@ -32,6 +30,7 @@ import {
   mdiCreditCardOutline,
 } from '@aglyn/shared-data-mdi'
 import {
+  AglynBesignerLogoFull,
   AglynConsoleLogoFull,
   AppLink,
   type AppLinkProps,
@@ -43,7 +42,7 @@ import {
   ScrollReaction,
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { getThemeModeDisplayName, mergeSxProps } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-tools'
 import { useUserPhoto } from '@aglyn/tenant-feature-instance'
@@ -66,6 +65,7 @@ import { useColorScheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
 import { Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
+import NotificationsMenu from '../notifications-menu.component'
 import OrgSwitcherNav from '../org-switcher-nav.component'
 
 // eslint-disable-next-line react/display-name
@@ -251,7 +251,11 @@ const TopAppBar = (props: TopAppBarProps) => {
                       md: theme.typography.pxToRem(20),
                     })
                   }}>
-                  <AglynConsoleLogoFull sx={{ height: 24, width: 'auto' }} />
+                  {besigner ? (
+                    <AglynBesignerLogoFull sx={{ height: 24, width: 'auto' }} />
+                  ) : (
+                    <AglynConsoleLogoFull sx={{ height: 24, width: 'auto' }} />
+                  )}
                   {appBarSuffix && (
                     <Typography
                       component="span"
@@ -402,9 +406,9 @@ export function MainLayout(props: MainLayoutProps) {
         }, ...(Array.isArray(rest.sx) ? rest.sx : [rest.sx])]}>
         <TopAppBar
           enableAppBarElevation={enableAppBarElevation}
+          besigner={besigner}
           backButton={backButton}
           centerPrefix={centerPrefix}
-          actionsPrefix={actionsPrefix}
           centerNavigationItems={centerNavigationItems || []}
           customCenter={
             // Default center nav is the ORG switcher (AGL-236 — swapped
@@ -413,31 +417,41 @@ export function MainLayout(props: MainLayoutProps) {
             customCenter ??
             (centerNavigationItems ? undefined : <OrgSwitcherNav />)
           }
+          actionsPrefix={
+            // Notifications bell (AGL-260) rides beside any page-provided
+            // prefix actions.
+            <>
+              {actionsPrefix}
+              <NotificationsMenu />
+            </>
+          }
           appBarSuffix={appBarSuffix}
           quickActions={[
             ...(quickActions || []),
-            // Manage quick menu (AGL-110), trimmed to the user-scoped
-            // pages — Billing/Community/Team/Support live in the org tab
-            // strip now (AGL-236).
+            // Theme mode toggle, in the slot the "Manage" cog menu used to
+            // occupy (AGL-236 follow-up) — a direct click-to-cycle icon
+            // button rather than a single-item menu.
             {
-              title: 'Manage',
-              MenuProps: { dense: true, horizontalOrigin: 'right' },
-              icon: { path: ICON_VARIANT_APP_SETTINGS.path },
-              'aria-label': 'manage',
-              items: [
-                {
-                  children: 'User settings',
-                  component: AppLink,
-                  href: Route.MANAGE_USER_SETTINGS,
-                  icon: { path: ICON_VARIANT_USER_SETTINGS.path },
-                },
-                {
-                  children: 'Account',
-                  component: AppLink,
-                  href: Route.MANAGE_ACCOUNT_SETTINGS,
-                  icon: { path: ICON_VARIANT_APP_PREFERENCES.path },
-                },
-              ],
+              title: `Theme mode: ${themeModeDisplayName}`,
+              onClick: () => {
+                // cycle: system/undefined → light → dark → system
+                setMode(
+                  mode === 'dark'
+                    ? 'system'
+                    : mode === 'light'
+                      ? 'dark'
+                      : 'light',
+                )
+              },
+              icon: {
+                path:
+                  mode === 'dark'
+                    ? ICON_VARIANT_THEME_DARK.path
+                    : mode === 'light'
+                      ? ICON_VARIANT_THEME_LIGHT.path
+                      : ICON_VARIANT_THEME_SYSTEM.path,
+              },
+              'aria-label': 'switch theme mode',
             },
             {
               title: 'Manage account',
@@ -454,29 +468,6 @@ export function MainLayout(props: MainLayoutProps) {
                 },
               },
               items: [
-                {
-                  onClick: () => {
-                    // cycle: system/undefined → light → dark → system
-                    setMode(
-                      mode === 'dark'
-                        ? 'system'
-                        : mode === 'light'
-                          ? 'dark'
-                          : 'light',
-                    )
-                  },
-                  // component: 'button',
-                  children: `Theme mode: ${themeModeDisplayName}`,
-                  icon: {
-                    path:
-                      mode === 'dark'
-                        ? ICON_VARIANT_THEME_DARK.path
-                        : mode === 'light'
-                          ? ICON_VARIANT_THEME_LIGHT.path
-                          : ICON_VARIANT_THEME_SYSTEM.path,
-                  },
-                  'aria-label': 'switch theme mode',
-                },
                 {
                   children: 'Settings',
                   component: AppLink,
@@ -498,7 +489,7 @@ export function MainLayout(props: MainLayoutProps) {
                 {
                   children: 'Staff console',
                   component: AppLink,
-                  href: Route.ADMIN_ORGS,
+                  href: Route.ADMIN_OVERVIEW,
                   icon: { path: ICON_VARIANT_USER_SETTINGS.path },
                 },
                 {

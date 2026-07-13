@@ -30,7 +30,7 @@ import { deleteField, doc, updateDoc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 import useFirestoreDoc from '../hooks/use-firestore-doc'
 
 const CNAME_TARGET =
@@ -50,7 +50,7 @@ export function CustomDomainCard(props: CustomDomainCardProps) {
   const { hostId } = props
   const firestore = useFirestore()
   const { data: user } = useUser()
-  const { tenant } = useCurrentTenant()
+  const { org } = useCurrentOrg()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
   const { data: host } = useFirestoreDoc<any>(
@@ -61,7 +61,7 @@ export function CustomDomainCard(props: CustomDomainCardProps) {
   const connected = host?.cname as string | undefined
   const [domain, setDomain] = useState('')
   const [checking, setChecking] = useState(false)
-  const entitled = hasEntitlement('custom-domain', tenant)
+  const entitled = hasEntitlement('custom-domain', org)
 
   const handleConnect = useCallback(async () => {
     const value = domain.trim().toLowerCase()

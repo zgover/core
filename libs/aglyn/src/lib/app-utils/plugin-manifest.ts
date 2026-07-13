@@ -49,6 +49,13 @@ export interface PluginManifest {
   version: string
   /** Bundle entry the loader imports on the plugin origin. */
   entry: string
+  /**
+   * Host ABI generation the bundle was built against (AGL-429). Realm and
+   * remote-server loaders refuse a bundle whose declared ABI differs from
+   * the running host's PLUGIN_HOST_ABI_VERSION; absent = pre-compat
+   * bundle, loaded with a warning. Bumping the ABI is a breaking change.
+   */
+  hostAbi?: number
   capabilities?: PluginCapabilities
   /** Besigner lineal rules the registered component honors (AGL-45 §4). */
   restrictParent?: string[]
@@ -61,6 +68,13 @@ export interface PluginListingVersion {
   version: string
   /** Content hash of the artifact bundle (integrity check at load). */
   sha256: string
+  /**
+   * Trust tier (AGL-420): 'realm' = staff-reviewed + platform-signed,
+   * may load into the app realm; anything else stays in the sandboxed
+   * PluginFrame. Staff-writable only.
+   */
+  trust?: string
+  /** Ed25519 signature (base64) over the sha256 hex (AGL-420). */
   signature?: string
   changelog?: string
   createdAtMs?: number
@@ -72,6 +86,9 @@ export interface PluginInstall {
   listingId: string
   version: string
   sha256: string
+  /** Mirrored trust tier + signature at install time (AGL-420). */
+  trust?: string
+  signature?: string
   installedAtMs?: number
   updatedAtMs?: number
   entitlementRef?: string
@@ -193,6 +210,15 @@ export function validatePluginManifest(
     return ids.length ? [...new Set(ids)] : undefined
   }
 
+  const hostAbiRaw = raw['hostAbi']
+  let hostAbi: number | undefined
+  if (hostAbiRaw !== undefined) {
+    hostAbi = Number(hostAbiRaw)
+    if (!Number.isInteger(hostAbi) || hostAbi < 1 || hostAbi > 99) {
+      return { ok: false, error: 'hostAbi must be a small positive integer' }
+    }
+  }
+
   return {
     ok: true,
     manifest: {
@@ -200,6 +226,7 @@ export function validatePluginManifest(
       name,
       version,
       entry,
+      ...(hostAbi !== undefined ? { hostAbi } : {}),
       ...(Object.keys(capabilities).length ? { capabilities } : {}),
       ...(restrict(raw['restrictParent'])
         ? { restrictParent: restrict(raw['restrictParent']) }
@@ -297,7 +324,7 @@ export function isPluginNetworkAllowed(
   }
 }
 
-/** Component id of the sandboxed plugin canvas element (plugins-ui-mui). */
+/** Component id of the sandboxed plugin canvas element (plugins-mui). */
 export const PLUGIN_COMPONENT_ID = 'communityPlugin'
 
 /** Resolved install data injected into a plugin node's props at compose. */

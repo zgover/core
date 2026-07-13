@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { RELEASE_FLAGS } from '@aglyn/aglyn'
+import { RELEASE_FLAGS, type ReleaseFlagKey } from '@aglyn/aglyn'
 import {
   ICON_VARIANT_HOME,
   ICON_VARIANT_SYMBOL_FLAG,
@@ -49,9 +49,7 @@ const defaultTabBarTitle = (
       color: 'tertiary.main',
     }}
   >
-    <MdiIcon path={ICON_VARIANT_SYMBOL_SECURE.path} fontSize={'small'} />
     <HostSwitcherNavComponent />
-    {/*<span>{'Secure'}</span>*/}
   </Stack>
 )
 
@@ -132,7 +130,14 @@ export function DashboardLayout(props: DashboardLayoutProps) {
       const definition = item.id
         ? NAV_TAB_RELEASE_FLAGS.get(item.id)
         : undefined
-      if (!definition || flags[definition.key].released) return [item]
+      // Default to the flag's shipped state when the live flag map hasn't
+      // resolved yet, so defaultEnabled surfaces (e.g. Events) don't blink
+      // out on load and a missing entry can't crash the strip (AGL-387).
+      const released =
+        flags[definition?.key as ReleaseFlagKey]?.released ??
+        definition?.defaultEnabled ??
+        false
+      if (!definition || released) return [item]
       if (!isStaff) return []
       return [
         {

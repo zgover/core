@@ -1,7 +1,0 @@
-{
-  "label": "Redirects",
-  "position": 33,
-  "collapsible": true,
-  "collapsed": true,
-  "link": { "type": "doc", "id": "redirects/overview" }
-}

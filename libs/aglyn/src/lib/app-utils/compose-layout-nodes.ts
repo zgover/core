@@ -18,7 +18,7 @@
 import type { AglynNodeSchema, NodeId } from '../foundation'
 import { NODE_ROOT_ID } from '../canvas-manager/canvas-manager'
 
-/** Persisted component id of the layout content outlet (plugins-ui-mui). */
+/** Persisted component id of the layout content outlet (plugins-mui). */
 export const LAYOUT_SLOT_COMPONENT_ID = 'layoutSlot'
 
 /**

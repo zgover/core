@@ -18,23 +18,26 @@
 /**
  * Multi-tenant organizations (AGL-233, docs/MULTI_TENANT_FIRESTORE.md):
  * the org is the tenant boundary — one subscription, one workspace
- * subdomain, one isolation subtree. Billing fields mirror `AglynTenant`
+ * subdomain, one isolation subtree. Billing fields mirror `AglynOrgBilling`
  * so the plan/entitlement resolvers work on either doc during the
  * transition; org-keyed billing lands with AGL-237.
  */
 
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type {
+  OrgEntitlements,
+  OrgPlan,
+  OrgSeatAddons,
+  OrgSubscription,
+} from './org-billing.types'
+import type {
   AglynDocument,
   HostUid,
-  TenantEntitlements,
-  TenantPlan,
-  TenantSeatAddons,
-  TenantSubscription,
+  OrgUid,
   UserUid,
-} from './workspace.types'
+} from './platform.types'
 
-export type OrgUid = string
+export type { OrgUid } from './platform.types'
 /** Workspace subdomain label: `{slug}.aglyn.com` (Slack-style). */
 export type OrgSlug = string
 
@@ -50,15 +53,21 @@ export interface AglynOrganization extends AglynDocument {
   slug?: OrgSlug
   /** Creator; ownership can move without re-keying anything. */
   ownerUid?: UserUid
-  /** Directory of the org's hosts (mirrors AglynTenant.hosts). */
+  /** Directory of the org's hosts (mirrors AglynOrgBilling.hosts). */
   hosts?: Record<HostUid, true>
 
-  // Billing (mirrors AglynTenant; source of truth moves here with AGL-237)
-  plan?: TenantPlan
-  entitlements?: TenantEntitlements
-  seatAddons?: TenantSeatAddons
+  // Billing (mirrors AglynOrgBilling; source of truth moves here with AGL-237)
+  plan?: OrgPlan
+  entitlements?: OrgEntitlements
+  /**
+   * Per-org plugin switchboard (AGL-416): ids of plugins the workspace
+   * loads (see plugin-manager/enabled-plugins). Absent = all first-party
+   * plugins; always-on ids (base components) are unioned in regardless.
+   */
+  enabledPlugins?: string[]
+  seatAddons?: OrgSeatAddons
   stripeCustomerId?: string
-  subscription?: TenantSubscription
+  subscription?: OrgSubscription
   suspendedAt?: ITimestamp | null
   suspendedReason?: string
   erasureRequestedAt?: ITimestamp | null
@@ -72,6 +81,13 @@ export interface AglynOrganization extends AglynDocument {
 export interface AglynOrgMember extends AglynDocument {
   $id: UserUid
   role?: OrgRole
+  /**
+   * Custom role reference (AGL-243): id of an `orgs/{orgId}/roles` doc
+   * whose permission map overrides the org role's defaults.
+   */
+  roleId?: string
+  /** Per-member permission overrides (AGL-243); win over every layer. */
+  permissions?: Record<string, boolean>
   /** Org-wide host access shortcut; otherwise `hostAccess` decides. */
   allHosts?: boolean
   hostAccess?: Record<HostUid, HostAccessRole>

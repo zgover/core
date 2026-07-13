@@ -77,8 +77,8 @@ import {
   useState,
 } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { checkTenantQuota } from '../../constants/entitlements'
-import useCurrentTenant from '../../hooks/use-current-tenant'
+import { checkOrgQuota } from '../../constants/entitlements'
+import useCurrentOrg from '../../hooks/use-current-org'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../hooks/use-firestore-doc'
 import useHostActivityLogger from '../../hooks/use-host-activity-logger'
@@ -87,7 +87,10 @@ import { ImageEditorDialog } from './image-editor-dialog.component'
 import { MediaFolderRail } from './media-folder-rail.component'
 
 export interface MediaLibraryComponentProps {
-  hostId: string
+  /** Host scope — the site's own library. Mutually exclusive with orgId. */
+  hostId?: string
+  /** Org scope: the organization's shared library (same features). */
+  orgId?: string
   /** When set, clicking an item selects it instead of exposing row actions. */
   onSelect?: (media: Aglyn.AglynHostMedia) => void
 }
@@ -149,13 +152,22 @@ function fileToBase64(file: File): Promise<string> {
  * Doubles as the browse grid inside MediaPickerDialog via `onSelect`.
  */
 export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
-  const { hostId, onSelect } = props
+  const { hostId, orgId, onSelect } = props
+  // Scope plumbing: one library serves both a site's media and the org
+  // DAM — only the Firestore base path and the API identity differ.
+  const scopeCollection = orgId ? 'orgs' : 'hosts'
+  const scopeId = (orgId ?? hostId) as string
+  const scopeBody = orgId ? { orgId } : { hostId }
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
-  const logActivity = useHostActivityLogger(hostId)
+  const { org } = useCurrentOrg()
+  const logHostActivity = useHostActivityLogger(hostId ?? '')
+  // Activity feeds are a host-dashboard feature; the org DAM skips them.
+  const logActivity = hostId
+    ? logHostActivity
+    : ((() => undefined) as typeof logHostActivity)
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
 
@@ -176,8 +188,8 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   )
   // Usage + total from the counter doc — accurate past pagination.
   const { data: mediaCounter } = useFirestoreDoc<any>(
-    () => doc(firestore, 'hosts', hostId, 'counters', 'media'),
-    [firestore, hostId],
+    () => doc(firestore, scopeCollection, scopeId, 'counters', 'media'),
+    [firestore, scopeId],
   )
   const usedBytes = Number(mediaCounter?.['bytes'] ?? 0)
   const totalCount = Number(mediaCounter?.['count'] ?? 0)
@@ -186,8 +198,8 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   // free-text `folder` string. Legacy strings migrate lazily below.
   const { data: folderDocs } = useFirestoreCollection<any>(
     () =>
-      query(collection(firestore, 'hosts', hostId, 'mediaFolders'), limit(500)),
-    [firestore, hostId],
+      query(collection(firestore, scopeCollection, scopeId, 'mediaFolders'), limit(500)),
+    [firestore, scopeId],
     { idField: '$id' },
   )
   const folderList: Array<Aglyn.AglynHostMediaFolder> = useMemo(
@@ -225,14 +237,14 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       }
     }
     for (const name of plan.foldersToCreate) {
-      const ref = doc(collection(firestore, 'hosts', hostId, 'mediaFolders'))
+      const ref = doc(collection(firestore, scopeCollection, scopeId, 'mediaFolders'))
       idByName[name.toLowerCase()] = ref.id
       batch.set(ref, { name, parentId: null, createdAt: serverTimestamp() })
     }
     for (const assignment of plan.assignments) {
       const folderId = idByName[assignment.folderName.toLowerCase()]
       if (!folderId) continue
-      batch.update(doc(firestore, 'hosts', hostId, 'media', assignment.mediaId), {
+      batch.update(doc(firestore, scopeCollection, scopeId, 'media', assignment.mediaId), {
         folderId,
       })
     }
@@ -240,7 +252,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       .commit()
       .then(() => setRefreshKey((key) => key + 1))
       .catch((error) => console.error('media migration', error))
-  }, [mediaDocs, folderDocs, firestore, hostId])
+  }, [mediaDocs, folderDocs, firestore, scopeId])
 
   // Organization (AGL-124): search + folder/tag filters over doc metadata.
   const [search, setSearch] = useState('')
@@ -314,7 +326,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       const snapshot = await firestoreOneShotRetry(() =>
         getDocs(
           query(
-            collection(firestore, 'hosts', hostId, 'media'),
+            collection(firestore, scopeCollection, scopeId, 'media'),
             ...buildConstraints(cursor),
           ),
         ),
@@ -328,7 +340,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         more: snapshot.docs.length === MEDIA_PAGE_SIZE,
       }
     },
-    [firestore, hostId, buildConstraints],
+    [firestore, scopeId, buildConstraints],
   )
   useEffect(() => {
     let active = true
@@ -450,7 +462,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         firestoreOneShotRetry(() =>
           getCountFromServer(
             query(
-              collection(firestore, 'hosts', hostId, 'media'),
+              collection(firestore, scopeCollection, scopeId, 'media'),
               where('folderId', '==', folder.$id),
             ),
           ),
@@ -468,7 +480,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     return () => {
       active = false
     }
-  }, [folderList, firestore, hostId, totalCount, refreshKey])
+  }, [folderList, firestore, scopeId, totalCount, refreshKey])
 
   // Breadcrumb chain for the open folder.
   const breadcrumb = useMemo(() => {
@@ -515,14 +527,14 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         )
         return null
       }
-      const ref = doc(collection(firestore, 'hosts', hostId, 'mediaFolders'))
+      const ref = doc(collection(firestore, scopeCollection, scopeId, 'mediaFolders'))
       const batch = writeBatch(firestore)
       batch.set(ref, { name, parentId, createdAt: serverTimestamp() })
       await batch.commit()
       logActivity('Created media folder', { type: 'media', name })
       return ref.id
     },
-    [firestore, hostId, folderList, foldersById, enqueueSnackbar, logActivity],
+    [firestore, scopeId, folderList, foldersById, enqueueSnackbar, logActivity],
   )
   const handleFolderRename = useCallback(
     async (folder: Aglyn.AglynHostMediaFolder, rawName: string) => {
@@ -541,12 +553,32 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           { variant: 'warning', persist: false },
         )
       }
-      await updateDoc(
-        doc(firestore, 'hosts', hostId, 'mediaFolders', folder.$id),
-        { name },
-      )
+      // API-routed: renaming a folder renames a REAL Storage prefix, so
+      // the server relocates every asset underneath (urls follow).
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/media/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          ...scopeBody,
+          action: 'rename',
+          folderId: folder.$id,
+          name,
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Rename failed', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      }
+      refresh()
     },
-    [firestore, hostId, folderList, enqueueSnackbar],
+    [firestore, scopeId, folderList, enqueueSnackbar, user, refresh],
   )
   const handleFolderDelete = useCallback(
     async (folder: Aglyn.AglynHostMediaFolder) => {
@@ -562,25 +594,28 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         .catch(() => false)
       if (!confirmed) return
       const parentId = folder.parentId ?? null
-      const batch = writeBatch(firestore)
-      // Documented AGL-171 policy: re-parent children and assets.
-      for (const child of folderList) {
-        if ((child.parentId ?? null) === folder.$id) {
-          batch.update(
-            doc(firestore, 'hosts', hostId, 'mediaFolders', child.$id),
-            { parentId },
-          )
-        }
+      // API-routed (AGL-171 policy preserved): the server re-parents
+      // children and assets AND moves their Storage objects up a level.
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/media/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          ...scopeBody,
+          action: 'delete',
+          folderId: folder.$id,
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Delete failed', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
       }
-      for (const item of items as any[]) {
-        if (item.folderId === folder.$id) {
-          batch.update(doc(firestore, 'hosts', hostId, 'media', item.$id), {
-            folderId: parentId,
-          })
-        }
-      }
-      batch.delete(doc(firestore, 'hosts', hostId, 'mediaFolders', folder.$id))
-      await batch.commit()
       if (currentFolder === folder.$id) setCurrentFolder(parentId ?? 'all')
       refresh()
       logActivity('Deleted media folder', { type: 'media', name: folder.name })
@@ -588,7 +623,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     [
       confirm,
       firestore,
-      hostId,
+      scopeId,
       folderList,
       items,
       currentFolder,
@@ -604,14 +639,28 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const moveMedia = useCallback(
     async (mediaIds: string[], folderId: string | null) => {
       if (!mediaIds.length) return
-      const batch = writeBatch(firestore)
-      for (const mediaId of mediaIds) {
-        batch.update(doc(firestore, 'hosts', hostId, 'media', mediaId), {
+      // API-routed: moving between folders moves the REAL objects too.
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/media/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          ...scopeBody,
+          action: 'move-assets',
+          mediaIds,
           folderId,
-          folder: folderId ? (folderNameById[folderId] ?? '') : '',
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Move failed', {
+          variant: 'error',
+          allowDuplicate: true,
         })
       }
-      await batch.commit()
       setSelected(new Set())
       refresh()
       enqueueSnackbar(
@@ -619,7 +668,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         { variant: 'success', persist: false },
       )
     },
-    [firestore, hostId, folderNameById, enqueueSnackbar, refresh],
+    [user, scopeId, enqueueSnackbar, refresh],
   )
 
   const sensors = useSensors(
@@ -674,7 +723,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           )
         }
         void updateDoc(
-          doc(firestore, 'hosts', hostId, 'mediaFolders', folderId),
+          doc(firestore, scopeCollection, scopeId, 'mediaFolders', folderId),
           { parentId: targetId },
         )
       }
@@ -685,7 +734,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       foldersById,
       folderList,
       firestore,
-      hostId,
+      scopeId,
       enqueueSnackbar,
     ],
   )
@@ -705,7 +754,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const handleEditorSave = useCallback(async () => {
     if (!editor) return
     const folderId = editor.folderId || null
-    await updateDoc(doc(firestore, 'hosts', hostId, 'media', editor.id), {
+    await updateDoc(doc(firestore, scopeCollection, scopeId, 'media', editor.id), {
       folderId,
       // Legacy string kept in sync until every reader is on folderId.
       folder: folderId ? (folderNameById[folderId] ?? '') : '',
@@ -734,7 +783,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       .catch(() =>
         enqueueSnackbar('An error has occurred', { variant: 'error' }),
       )
-  }, [editor, folderNameById, firestore, hostId, enqueueSnackbar, logActivity, refresh])
+  }, [editor, folderNameById, firestore, scopeId, enqueueSnackbar, logActivity, refresh])
 
   // Asset editing (AGL-184): replace-file + image transforms.
   const replaceInputRef = useRef<HTMLInputElement>(null)
@@ -755,7 +804,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         },
         body: JSON.stringify({
-          hostId,
+          ...scopeBody,
           mediaId: editor.id,
           contentType,
           data: base64,
@@ -778,7 +827,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       setEditor(null)
       refresh()
     },
-    [editor, user, hostId, enqueueSnackbar, logActivity, refresh],
+    [editor, user, scopeId, enqueueSnackbar, logActivity, refresh],
   )
   const handleReplaceFile = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -812,7 +861,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         bulkTag.mode === 'add'
           ? Aglyn.normalizeMediaTags([...tags, tag])
           : tags.filter((existing) => existing !== tag)
-      batch.update(doc(firestore, 'hosts', hostId, 'media', item.$id), {
+      batch.update(doc(firestore, scopeCollection, scopeId, 'media', item.$id), {
         tags: next,
       })
     }
@@ -823,7 +872,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       `${bulkTag.mode === 'add' ? 'Tagged' : 'Untagged'} ${selected.size} file${selected.size === 1 ? '' : 's'}`,
       { variant: 'success', persist: false },
     )
-  }, [bulkTag, items, selected, firestore, hostId, enqueueSnackbar, refresh])
+  }, [bulkTag, items, selected, firestore, scopeId, enqueueSnackbar, refresh])
   const handleBulkDelete = useCallback(async () => {
     const count = selected.size
     if (!count) return
@@ -848,7 +897,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
             'Content-Type': 'application/json',
             ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
           },
-          body: JSON.stringify({ hostId, mediaId }),
+          body: JSON.stringify({ ...scopeBody, mediaId }),
         })
         if (!response.ok) throw new Error(`Delete failed (${response.status})`)
       }
@@ -868,7 +917,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     } finally {
       setBusy(false)
     }
-  }, [selected, confirm, user, hostId, enqueueSnackbar, logActivity, refresh])
+  }, [selected, confirm, user, scopeId, enqueueSnackbar, logActivity, refresh])
 
   // Per-asset usage (AGL-176), loaded when the drawer opens: on-demand
   // reference scan plus 30 days of origin-serve counters from the
@@ -893,7 +942,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           'Content-Type': 'application/json',
           ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         },
-        body: JSON.stringify({ hostId, mediaId: editorId }),
+        body: JSON.stringify({ ...scopeBody, mediaId: editorId }),
       })
         .then((response) => (response.ok ? response.json() : { references: null }))
         .catch(() => ({ references: null }))
@@ -904,7 +953,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
       })
       const statsPromise = Promise.all(
         dayIds.map((day) =>
-          getDoc(doc(firestore, 'hosts', hostId, 'analytics', day))
+          getDoc(doc(firestore, scopeCollection, scopeId, 'analytics', day))
             .then((snapshot) => {
               const media = snapshot.get('media') ?? {}
               return media[editorId] ?? { serves: 0, bytes: 0 }
@@ -926,7 +975,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     return () => {
       active = false
     }
-  }, [editorId, user, hostId, firestore])
+  }, [editorId, user, scopeId, firestore])
 
   const handleUpload = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -944,7 +993,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         )
       }
       const usedMb = (usedBytes + file.size) / (1024 * 1024)
-      const quota = checkTenantQuota(tenant, 'storagePerHostMb', usedMb - 1)
+      const quota = checkOrgQuota(org, 'storagePerHostMb', usedMb - 1)
       if (!quota.allowed) {
         return void enqueueSnackbar(
           `Storage limit reached (${quota.limit} MB) — see Billing to upgrade`,
@@ -970,9 +1019,11 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
               ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
             },
             body: JSON.stringify({
-              hostId,
+              ...scopeBody,
               contentType: file.type,
               sizeBytes: file.size,
+              // The signed URL is bound to the folder's Storage path.
+              folderId: uploadFolderId,
             }),
           })
           const minted = await mint.json().catch(() => ({}))
@@ -1000,7 +1051,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
               ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
             },
             body: JSON.stringify({
-              hostId,
+              ...scopeBody,
               mediaId: minted.mediaId,
               fileName: file.name,
               folderId: uploadFolderId,
@@ -1028,7 +1079,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
             ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
           },
           body: JSON.stringify({
-            hostId,
+            ...scopeBody,
             fileName: file.name,
             contentType: file.type,
             folderId: uploadFolderId,
@@ -1058,12 +1109,12 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         setBusy(false)
       }
     },
-    [user, hostId, tenant, usedBytes, currentFolder, enqueueSnackbar, logActivity, refresh],
+    [user, scopeId, org, usedBytes, currentFolder, enqueueSnackbar, logActivity, refresh],
   )
 
   const handleCopyUrl = useCallback(
     (media: Aglyn.AglynHostMedia) => () => {
-      // Prefer the immutable CDN path (AGL-175) — resolves on tenant
+      // Prefer the immutable CDN path (AGL-175) — resolves on org
       // sites and in the editor alike and rides the edge cache. Older
       // assets without one fall back to the raw storage URL.
       const value = media.cdnPath ?? media.url
@@ -1090,7 +1141,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
             'Content-Type': 'application/json',
             ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
           },
-          body: JSON.stringify({ hostId, mediaId: media.$id }),
+          body: JSON.stringify({ ...scopeBody, mediaId: media.$id }),
         })
         const payload = response.ok ? await response.json() : null
         const references: Array<{ name: string }> =
@@ -1125,7 +1176,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
             'Content-Type': 'application/json',
             ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
           },
-          body: JSON.stringify({ hostId, mediaId: media.$id }),
+          body: JSON.stringify({ ...scopeBody, mediaId: media.$id }),
         })
         if (!response.ok) throw new Error(`Delete failed (${response.status})`)
         enqueueSnackbar('File deleted', { variant: 'success', persist: false })
@@ -1143,7 +1194,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         })
       }
     },
-    [confirm, user, hostId, enqueueSnackbar, logActivity, refresh],
+    [confirm, user, scopeId, enqueueSnackbar, logActivity, refresh],
   )
 
   return (
@@ -1681,7 +1732,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
                   ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
                 },
                 body: JSON.stringify({
-                  hostId,
+                  ...scopeBody,
                   fileName: copyName,
                   contentType: result.contentType,
                   folderId:

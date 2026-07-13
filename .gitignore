@@ -2,6 +2,7 @@
 
 # compiled output
 /dist
+tools/plugin-loader/realm/*/dist
 /tmp
 /out-tsc
 /.firebase

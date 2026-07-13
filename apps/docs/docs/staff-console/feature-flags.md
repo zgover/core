@@ -12,9 +12,11 @@ changes requires the **super** staff role.
 :::
 
 Release flags control whether a feature is **launched** — a separate axis from
-[plan entitlements](../billing-and-plans/overview.md), which control whether an organization's
+[plan entitlements](../workspace-and-billing/billing-and-plans/overview.md), which control whether an organization's
 *plan includes* a feature. A customer sees a feature only when it's released **and**
 their plan allows it.
+
+![The release flags page](/img/staff-console/admin-flags.png)
 
 ## How a flag is evaluated
 
@@ -60,7 +62,7 @@ Remote Config:
 
 Publishing is immediate and global: clients pick up changes on their next Remote Config
 fetch (within an hour, or on the next full page load). Every publish writes an entry to
-the [audit log](./overview.md), and concurrent edits are etag-guarded — if another staff
+the [audit log](overview.md), and concurrent edits are etag-guarded — if another staff
 member published first, the page reloads the latest values instead of overwriting them.
 
 Reads are open to all staff roles; publishing requires the **super** role, matching user

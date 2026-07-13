@@ -74,6 +74,22 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Custom roles (AGL-243): named permission sets members resolve
+      // their own access from — member-readable, API-written only.
+      match /roles/{roleId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+
+      // Per-plugin settings (AGL-428): overrides for a plugin's declared
+      // config schema. Readers defensively coerce types (the doc is
+      // manager-writable), so junk here can misconfigure only that
+      // plugin, never break it.
+      match /pluginSettings/{pluginId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if isStaff() || (canManageOrg() && orgNotSuspended());
+      }
+
       // Org-shared data (AGL-237): datasets (records included), contacts
       // and segments are shared across every host in the org. Any member
       // reads; editors and up write; viewers stay read-only. Suspension
@@ -100,10 +116,31 @@ service cloud.firestore {
         allow write: if isStaff() || canWriteOrgData();
       }
 
-      // Org media library (AGL-237): shareable with any host in the org.
-      // Docs are API-written only — every doc pairs with a Storage object
-      // under orgs/{orgId}/media/, and the API keeps them consistent.
+      // Email lists (AGL-254): static audiences shared across the org's
+      // hosts; the enrollList automation step writes members server-side.
+      match /lists/{listId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if isStaff() || canWriteOrgData();
+        match /members/{memberId} {
+          allow read: if isStaff() || isOrgMember();
+          allow write: if isStaff() || canWriteOrgData();
+        }
+      }
+
+      // Org media library (AGL-237, full DAM parity): shareable with any
+      // host in the org. Storage objects stay API-managed (upload/delete
+      // routes enforce quota), but editors mutate the metadata docs the
+      // same way they do on a host's library (rename, folder moves).
       match /media/{mediaId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if isStaff() || canWriteOrgData();
+      }
+      match /mediaFolders/{folderId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if isStaff() || canWriteOrgData();
+      }
+      // Storage quota meter for the org library.
+      match /counters/{counterId} {
         allow read: if isStaff() || isOrgMember();
         allow write: if false;
       }
@@ -112,6 +149,13 @@ service cloud.firestore {
       // in the org; written only by the install API (entitlement + kill
       // switch checks live there).
       match /installs/{listingId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+
+      // Org activity log: mirrors hosts/{hostId}/activity, visible to any
+      // member; written only by the org API routes (Admin SDK).
+      match /activity/{entryId} {
         allow read: if isStaff() || isOrgMember();
         allow write: if false;
       }
@@ -199,15 +243,23 @@ service cloud.firestore {
           (isSignedIn() && request.auth.uid == userId);
         allow write: if false;
       }
+
+      // In-app notifications (AGL-259): Admin-SDK-written fan-out; the
+      // owner reads, marks read (update), and clears them.
+      match /notifications/{notificationId} {
+        allow read, update, delete: if isSignedIn() &&
+          request.auth.uid == userId;
+        allow create: if false;
+      }
     }
 
     // Community marketplace (AGL-44). Profiles are public publisher pages
     // keyed by the publisher's uid; the owner or staff may write. Handle
     // and names are length-capped here since any owner writes client-side.
-    match /profiles/{tenantId} {
+    match /profiles/{profileUid} {
       allow read: if true;
       allow write: if (isStaff() ||
-          (isSignedIn() && request.auth.uid == tenantId)) &&
+          (isSignedIn() && request.auth.uid == profileUid)) &&
         request.resource.data.handle is string &&
         request.resource.data.handle.size() >= 3 &&
         request.resource.data.handle.size() <= 30 &&

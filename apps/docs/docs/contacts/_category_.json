@@ -1,7 +1,0 @@
-{
-  "label": "Contacts CRM",
-  "position": 19,
-  "collapsible": true,
-  "collapsed": true,
-  "link": { "type": "doc", "id": "contacts/overview" }
-}

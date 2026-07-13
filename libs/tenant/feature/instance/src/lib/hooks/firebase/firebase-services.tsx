@@ -126,11 +126,23 @@ export function FirebaseServicesProvider(props: FirebaseServicesProviderProps) {
 
     if (!connectedFirestore) {
       try {
-        initializeFirestore(app, {
-          localCache: persistentLocalCache({
-            tabManager: persistentMultipleTabManager(),
-          }),
-        })
+        // Under the emulator (dev/e2e only): force long-polling and skip
+        // the persistent multi-tab cache. The emulator's WebChannel
+        // streaming misbehaves in automated Chrome — listeners serve the
+        // initial empty from-cache snapshot and the server sync never
+        // arrives, which looks like "empty pages with zero errors"
+        // (the AGL-217 mystery). Production keeps the default transport
+        // and persistent cache.
+        initializeFirestore(
+          app,
+          FIREBASE_FIRESTORE_EMULATOR_ENABLED
+            ? { experimentalForceLongPolling: true }
+            : {
+                localCache: persistentLocalCache({
+                  tabManager: persistentMultipleTabManager(),
+                }),
+              },
+        )
         if (FIREBASE_FIRESTORE_EMULATOR_ENABLED) {
           connectFirestoreEmulator(getFirestore(app), 'localhost', 8082)
         }
@@ -162,13 +174,21 @@ export function FirebaseServicesProvider(props: FirebaseServicesProviderProps) {
         console.error(error)
       }
     }
-    try {
-      initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider(RECAPTCHA_API_KEY),
-        isTokenAutoRefreshEnabled: true,
-      })
-    } catch (error) {
-      console.error(error)
+    // App Check must be skipped under the emulators: there is no App
+    // Check emulator, so ReCaptcha would hit the real backend and its
+    // 403s break emulator auth (the AGL-216 emulator sessions hit this).
+    if (
+      !FIREBASE_AUTH_EMULATOR_ENABLED &&
+      !FIREBASE_FIRESTORE_EMULATOR_ENABLED
+    ) {
+      try {
+        initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider(RECAPTCHA_API_KEY),
+          isTokenAutoRefreshEnabled: true,
+        })
+      } catch (error) {
+        console.error(error)
+      }
     }
     let analytics: Analytics
     try {

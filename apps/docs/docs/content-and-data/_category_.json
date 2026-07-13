@@ -1,0 +1,12 @@
+{
+  "label": "Content & data",
+  "position": 5,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "slug": "/content-and-data",
+    "title": "Content & data",
+    "description": "The data behind your sites: datasets and records, the media library, forms, and your audience's contacts."
+  }
+}

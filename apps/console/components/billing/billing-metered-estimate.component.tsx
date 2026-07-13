@@ -20,7 +20,7 @@ import {
   estimateMonthlyUsageCost,
   type HostUsageSnapshot,
   METERED_MARKUP,
-} from '@aglyn/aglyn'
+} from '../../utils/usage-metering'
 import { Stack, Typography } from '@mui/material'
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
 import { documentId } from 'firebase/firestore'
@@ -34,7 +34,7 @@ export interface BillingMeteredEstimateProps {
 /**
  * Month-to-date metered cost estimate (AGL-41): mirrors the report-usage
  * rollup's math (shared `estimateMonthlyUsageCost`) over the same counters
- * so tenants see the number before it lands on an invoice.
+ * so workspaces see the number before it lands on an invoice.
  */
 export function BillingMeteredEstimateComponent(
   props: BillingMeteredEstimateProps,

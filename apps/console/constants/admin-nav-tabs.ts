@@ -45,6 +45,11 @@ export function adminNavTabItems() {
       href: buildRoute(Route.ADMIN_FLAGS),
     },
     {
+      id: 'nav-tab-admin-plugin-reviews',
+      label: 'Plugin reviews',
+      href: buildRoute(Route.ADMIN_PLUGIN_REVIEWS),
+    },
+    {
       id: 'nav-tab-admin-audit',
       label: 'Audit log',
       href: buildRoute(Route.ADMIN_AUDIT),

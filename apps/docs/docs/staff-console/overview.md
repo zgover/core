@@ -13,6 +13,10 @@ not accessible to regular host owners.
 
 The **staff console** is where Aglyn operators manage the platform and support customer organizations.
 
+![The staff organizations directory](/img/staff-console/admin-orgs.png)
+
+![The staff audit log](/img/staff-console/admin-audit.png)
+
 ## What's there
 
 - **Staff overview** — platform metrics, the newest organizations, purchases, and
@@ -20,10 +24,23 @@ The **staff console** is where Aglyn operators manage the platform and support c
 - **Organization management** — audited plan and entitlement overrides, suspension,
   and GDPR-erasure flags, per organization.
 - **Entitlement editor** — full override editor for an organization's entitlements.
-- **Users admin** — staff-claim management and disabling users, with gated listing.
-- **[Feature flags](./feature-flags.md)** — release-gate console features via Remote
+- **Users admin** — staff-claim management and disabling users, with gated listing
+  and an **exact-email lookup** for accounts beyond the loaded pages.
+  Each account opens a **detail page** showing identity/auth state, staff role, every
+  organization membership with roles and per-site access, and its recent audit trail.
+- **Staff notes** — free-text support/billing context on each organization's detail
+  page, visible to staff only (never in tenant-readable data) and audited.
+- **Broadcast announcements** — push a product announcement or maintenance notice as
+  an in-app notification to every organization's owner/admins (optionally one plan
+  tier), respecting each recipient's mute preferences; audited.
+- **Billing insight** — every organization's Stripe **invoice history** and default
+  **payment method** (with delinquency state) render on its detail page.
+- **Impersonation** — staff can open the console as a customer account (audited; a
+  pinned warning banner with one-click exit shows for the entire session; staff
+  accounts cannot be impersonated).
+- **[Feature flags](feature-flags.md)** — release-gate console features via Remote
   Config, with percentage rollout; staff preview everything.
-- **[Multi-tenant architecture](./architecture-multi-tenancy.md)** — how organizations,
+- **[Multi-tenant architecture](architecture-multi-tenancy.md)** — how organizations,
   membership, security rules, subdomains, and billing attribution fit together.
 - **Audit archival** — a nightly cron moves audit entries past the 90-day retention
   window into a Storage compliance trail (JSON lines, month-partitioned) and reminds
@@ -41,4 +58,4 @@ site.
 
 ## Related
 
-- [Billing & plans](../billing-and-plans/overview.md)
+- [Billing & plans](../workspace-and-billing/billing-and-plans/overview.md)

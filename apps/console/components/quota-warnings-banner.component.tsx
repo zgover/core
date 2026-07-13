@@ -18,7 +18,7 @@
 
 import {
   checkSeatQuota,
-  resolveTenantEntitlements,
+  resolveOrgEntitlements,
   UNLIMITED,
 } from '@aglyn/aglyn'
 import { Alert, Button } from '@mui/material'
@@ -27,7 +27,7 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { buildRoute, Route } from '../constants/route-links'
-import useCurrentTenant from '../hooks/use-current-tenant'
+import useCurrentOrg from '../hooks/use-current-org'
 
 const DISMISS_KEY = 'aglyn-quota-banner-dismissed'
 const SEATS_KEY = 'aglyn-quota-banner-team-seats'
@@ -49,13 +49,13 @@ interface QuotaState {
  * any tracked quota — screens, storage, datasets per host, or team seats —
  * crosses 80% (warning) or 100% (error), with an Upgrade link to Billing.
  * Dismissible per browser session. Consistent with the dark-launch rule,
- * tenants without an explicit plan see nothing.
+ * workspaces without an explicit plan see nothing.
  */
 export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
   const params = useParams<{ hostId?: string }>()
   const hostId = props.hostId ?? params?.hostId
   const firestore = useFirestore()
-  const { tenant, orgId } = useCurrentTenant()
+  const { org, orgId } = useCurrentOrg()
   const [quotas, setQuotas] = useState<QuotaState[]>([])
   const [dismissed, setDismissed] = useState(true)
 
@@ -63,13 +63,13 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
     setDismissed(sessionStorage.getItem(DISMISS_KEY) === '1')
   }, [])
 
-  const plan = tenant?.plan
+  const plan = org?.plan
 
   // Host-level quotas: screens, media storage, datasets.
   useEffect(() => {
     if (!plan || !hostId) return
     let active = true
-    const entitlements = resolveTenantEntitlements(tenant)
+    const entitlements = resolveOrgEntitlements(org)
     void Promise.all([
       getCountFromServer(
         collection(firestore, 'hosts', hostId, 'screens'),
@@ -77,8 +77,12 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
       getDoc(doc(firestore, 'hosts', hostId, 'counters', 'media')).catch(
         () => null,
       ),
+      // Datasets are org-scoped (AGL-239/240); the host path is the
+      // pre-migration fallback.
       getCountFromServer(
-        collection(firestore, 'hosts', hostId, 'datasets'),
+        orgId
+          ? collection(firestore, 'orgs', orgId, 'datasets')
+          : collection(firestore, 'hosts', hostId, 'datasets'),
       ).catch(() => null),
     ]).then(([screens, media, datasets]) => {
       if (!active) return
@@ -98,7 +102,7 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
         {
           label: 'datasets',
           used: datasets?.data().count ?? 0,
-          limit: entitlements.datasetsPerHost,
+          limit: entitlements.datasetsPerOrg,
         },
       ])
     })
@@ -106,7 +110,7 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
       active = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firestore, hostId, plan])
+  }, [firestore, hostId, orgId, plan])
 
   // Org-level team seats (AGL-238): the org roster is member-readable,
   // so the seat count is a client aggregate query, cached per session.
@@ -115,7 +119,7 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
     let active = true
     const apply = (seats: number) => {
       if (!active) return
-      const seatQuota = checkSeatQuota(tenant, 'managers', 0)
+      const seatQuota = checkSeatQuota(org, 'managers', 0)
       setQuotas((previous) => [
         ...previous.filter((quota) => quota.label !== 'team seats'),
         { label: 'team seats', used: seats, limit: seatQuota.limit },
@@ -142,15 +146,39 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
   }, [firestore, orgId, plan])
 
   // Suspension (AGL-202) outranks everything — not dismissible, shown
-  // regardless of plan so pre-billing tenants see it too.
-  if ((tenant as any)?.suspendedAt) {
+  // regardless of plan so pre-billing workspaces see it too.
+  if ((org as any)?.suspendedAt) {
     return (
       <Alert severity="error" sx={{ borderRadius: 0 }}>
         {'This account is suspended' +
-          ((tenant as any)?.suspendedReason
-            ? ` — ${(tenant as any).suspendedReason}`
+          ((org as any)?.suspendedReason
+            ? ` — ${(org as any).suspendedReason}`
             : '') +
           '. Your published sites are offline. Contact support to resolve.'}
+      </Alert>
+    )
+  }
+
+  // Dunning (AGL-275): past_due is the grace window — entitlements keep
+  // working, but the card needs fixing before the subscription dies.
+  // Deliberately not dismissible; it clears when Stripe retries succeed.
+  if ((org?.subscription as any)?.status === 'past_due') {
+    return (
+      <Alert
+        severity="warning"
+        sx={{ borderRadius: 0 }}
+        action={
+          <Button
+            color="inherit"
+            size="small"
+            href={buildRoute(Route.MANAGE_BILLING)}
+          >
+            {'Fix payment'}
+          </Button>
+        }
+      >
+        {'Your last payment failed. Update your payment method to keep ' +
+          'your plan — access continues during the retry window.'}
       </Alert>
     )
   }
