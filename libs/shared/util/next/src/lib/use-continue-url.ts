@@ -16,8 +16,7 @@
  */
 'use client'
 
-import { _isArr } from '@aglyn/shared-util-tools'
-import { useParams, usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 
 export type UseContinueUrlDecodedRoutePusher = (
@@ -40,15 +39,26 @@ export type UseContinueUrlResponse = [
 export const ContinueParamName = 'continue'
 export const continueParam = (value: string) => `${ContinueParamName}=${value}`
 
+/**
+ * Only same-app relative paths may be continued to — anything absolute or
+ * protocol-relative would make the post-auth redirect an open redirect.
+ */
+const isSafeContinueUrl = (url: string): boolean =>
+  url.startsWith('/') && !url.startsWith('//')
+
 export function useContinueUrlDecoded(): UseContinueUrlDecodedResponse {
   const router = useRouter()
-  const params = useParams()
+  // App Router: query strings live in useSearchParams — useParams only
+  // carries dynamic route segments, which is why the continue redirect
+  // silently broke after the pages→app migration (AGL-458). `get` already
+  // percent-decodes, so no second decode (it would corrupt paths that
+  // legitimately contain %-sequences).
+  const searchParams = useSearchParams()
 
   const continueUrl = useMemo(() => {
-    const url = params?.continue
-    const continueUrl = (_isArr(url) ? url[0] : url) || ''
-    return decodeURIComponent(continueUrl || '')
-  }, [params])
+    const url = searchParams?.get(ContinueParamName) ?? ''
+    return isSafeContinueUrl(url) ? url : ''
+  }, [searchParams])
 
   const pushNext = useCallback(
     (
