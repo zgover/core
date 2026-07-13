@@ -33,7 +33,11 @@ const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
 const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY
 
-const APEX_LABELS = new Set(['www', 'console', 'app'])
+// Reserved subdomain labels that are never org workspaces. `auth` hosts
+// the Firebase OAuth helper origin (auth.aglyn.io, AGL-462) — without
+// this it resolves as an unknown org slug and 307s the /__/auth/*
+// handshake away to the apex, breaking Google sign-in.
+const APEX_LABELS = new Set(['www', 'console', 'app', 'auth'])
 const CACHE_TTL_MS = 60_000
 type SlugVerdict = { known: boolean; movedTo: string | null; at: number }
 const slugCache = new Map<string, SlugVerdict>()
@@ -100,7 +104,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Pages and data routes only — assets and API routes are never
-  // workspace-scoped.
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|_static).*)'],
+  // Pages and data routes only — assets, API routes, and the Firebase
+  // auth-helper namespace (/__/*, AGL-462) are never workspace-scoped and
+  // must reach the next.config rewrite untouched on every host.
+  matcher: ['/((?!api|__|_next/static|_next/image|favicon.ico|_static).*)'],
 }
