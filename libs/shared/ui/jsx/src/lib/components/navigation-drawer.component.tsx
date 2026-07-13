@@ -78,9 +78,16 @@ export const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
         className={clsx(classKeys.root, className)}
         sx={mergeSxProps(
           {
-            width: (theme) => `${theme.breakpoints.values.sm}px`,
-            flexShrink: 0,
-            maxWidth: '100%',
+            // Root width reserves layout space for DOCKED drawers only.
+            // For `temporary`, the root IS the fixed modal container, and
+            // sizing it breaks MUI's container-relative Slide math (the
+            // close animation ran toward the wrong edge): the paper alone
+            // carries the width there.
+            ...(props.variant !== 'temporary' && {
+              width: (theme) => `${theme.breakpoints.values.sm}px`,
+              flexShrink: 0,
+              maxWidth: '100%',
+            }),
             '& .MuiDrawer-paper': {
               width: (theme) => `${theme.breakpoints.values.sm}px`,
               maxWidth: '100%',
