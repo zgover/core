@@ -69,13 +69,28 @@ export function useSessionCookie(): void {
         hadUser.current = true
 
         if (isInitialState) {
-          // Restored from this origin's persistence — defer to the
-          // shared cookie. Gone/invalid ⇒ signed out elsewhere.
+          // Restored from this origin's persistence — defer to the shared
+          // cookie, but only an EXPLICIT sign-out elsewhere (tombstone) or
+          // a revocation may end this session. A merely absent/expired
+          // cookie is ambiguous — a mint that raced a hard navigation, the
+          // 14-day TTL lapsing, a blocked fetch — and treating it as
+          // sign-out was the "logged in for 2-10 seconds, then kicked out"
+          // bug (AGL-463). For those, re-mint from the live local session.
           try {
             const response = await fetch('/api/auth/session')
-            if (active && response.status === 401) {
-              await signOut(auth)
+            if (!active || response.ok || response.status !== 401) return
+            const payload = await response.json().catch(() => null)
+            const reason = payload?.reason
+            if (reason === 'signed-out' || reason === 'revoked') {
+              if (active) await signOut(auth)
+              return
             }
+            mintedForUid.current = user.uid
+            const idToken = await user.getIdToken()
+            await fetch('/api/auth/session', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${idToken}` },
+            })
           } catch {
             // Network trouble never signs anyone out.
           }
