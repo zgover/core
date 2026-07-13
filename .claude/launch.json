@@ -40,6 +40,15 @@
         "serve:console:emulated"
       ],
       "port": 4200
+    },
+    {
+      "name": "tenant-emulated",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "serve:tenant:emulated"
+      ],
+      "port": 4500
     }
   ]
 }
