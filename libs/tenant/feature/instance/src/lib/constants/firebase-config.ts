@@ -21,12 +21,22 @@ export const RECAPTCHA_API_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_PUBLIC_KEY
 export const FIREBASE_CLIENT_APP_NAME = 'DEFAULT_AGLYN'
 
 /**
- * On deployed workspace hosts the auth helpers are reverse-proxied under
- * this origin's /__/* (console next.config rewrite, AGL-462), so the
- * OAuth redirect/popup handshake stays same-site — a cross-origin
- * *.firebaseapp.com authDomain gets its storage partitioned away by
- * mobile Safari/Chrome and the sign-in result never reaches the app.
- * Localhost, previews, and the emulator keep the configured domain.
+ * On deployed workspace hosts the OAuth handshake is funnelled through one
+ * dedicated same-site auth origin — `auth.<workspaceDomain>` (e.g.
+ * auth.aglyn.io), which reverse-proxies the Firebase auth helpers under
+ * /__/* (console next.config rewrite, AGL-462). This keeps the handshake
+ * same-site (all *.aglyn.io share the aglyn.io eTLD+1, so browser storage
+ * partitioning — which severed the cross-origin *.firebaseapp.com
+ * authDomain and broke mobile Google sign-in — never applies), while
+ * every host, including dynamically-provisioned {org}.aglyn.io
+ * workspaces, presents the SAME redirect URI. Google OAuth forbids
+ * wildcard redirect URIs, so a per-host authDomain would need a new
+ * registration per org; the single auth host needs exactly one.
+ *
+ * The host derives from NEXT_PUBLIC_WORKSPACE_DOMAIN so it tracks the
+ * deployment automatically; NEXT_PUBLIC_FIREBASE_AUTH_HANDLER_HOST
+ * overrides it outright. Localhost, preview URLs (not on the workspace
+ * domain), and the emulator keep the configured *.firebaseapp.com domain.
  */
 function resolveFirebaseAuthDomain(): string | undefined {
   const configured = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
@@ -38,7 +48,10 @@ function resolveFirebaseAuthDomain(): string | undefined {
   const { hostname } = window.location
   const onWorkspaceDomain =
     hostname === workspaceDomain || hostname.endsWith(`.${workspaceDomain}`)
-  return onWorkspaceDomain ? window.location.host : configured
+  if (!onWorkspaceDomain) return configured
+  return (
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_HANDLER_HOST ?? `auth.${workspaceDomain}`
+  )
 }
 
 /**
