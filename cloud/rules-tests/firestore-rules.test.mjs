@@ -193,10 +193,30 @@ describe('hosts', () => {
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'hosts', HOST)))
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'hosts', HOST, 'screens', 'screen-1')))
     await assertFails(
-      setDoc(doc(authed(VIEWER), 'hosts', HOST, 'screens', 'screen-2'), { name: 'No' }),
+      updateDoc(doc(authed(VIEWER), 'hosts', HOST, 'screens', 'screen-1'), { name: 'No' }),
+    )
+    // Screen/layout DOC creates are API-only (AGL-473) — even editors
+    // cannot create directly; updates/deletes on existing docs still work.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-2'), { name: 'New' }),
+    )
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'layouts', 'layout-2'), { name: 'New' }),
     )
     await assertSucceeds(
-      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-2'), { name: 'Yes' }),
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-1'), { name: 'Yes' }),
+    )
+    await assertSucceeds(
+      deleteDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-1')),
+    )
+    // Versions (and other screen subcollections) stay editor-writable —
+    // they aren't quota-governed.
+    await assertSucceeds(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-1', 'versions', 'v1'), { nodes: {} }),
+    )
+    // Non-screen/layout subcollections keep client create this phase.
+    await assertSucceeds(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'variables', 'var-1'), { name: 'v' }),
     )
     await assertSucceeds(
       updateDoc(doc(authed(EDITOR), 'hosts', HOST), { displayName: 'Renamed' }),

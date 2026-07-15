@@ -224,14 +224,44 @@ service cloud.firestore {
         (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
       allow delete: if isStaff() ||
         (hostMemberRole(hostId) == 'admin' && !hostOrgSuspended(hostId));
+      // Screen/layout DOC creates are API-only (AGL-473): /api/hosts/
+      // resources enforces screensPerHost / sharedLayoutsPerHost (and the
+      // owning org's suspension) server-side. Their `versions` (and any
+      // other) subcollections stay editor-writable — not quota-governed.
+      // These are carved OUT of the catch-all below (rules OR their allows,
+      // so a dedicated deny can't win unless the catch-all stops matching).
+      match /screens/{screenId} {
+        allow read: if isStaff() || isHostAdmin(hostId);
+        allow create: if isStaff();
+        allow update, delete: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        match /{sub}/{document=**} {
+          allow read: if isStaff() || isHostAdmin(hostId);
+          allow write: if isStaff() ||
+            (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        }
+      }
+      match /layouts/{layoutId} {
+        allow read: if isStaff() || isHostAdmin(hostId);
+        allow create: if isStaff();
+        allow update, delete: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        match /{sub}/{document=**} {
+          allow read: if isStaff() || isHostAdmin(hostId);
+          allow write: if isStaff() ||
+            (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        }
+      }
       // The extra {subcollection} segment matters: a bare {document=**}
       // matches ZERO or more segments in rules v2, i.e. the host doc
       // itself too — which would let editors delete the host through
-      // this write rule (caught by rules-tests, AGL-235).
+      // this write rule (caught by rules-tests, AGL-235). Screens/layouts
+      // are excluded so their dedicated blocks above own create.
       match /{subcollection}/{document=**} {
         allow read: if isStaff() || isHostAdmin(hostId);
-        allow write: if isStaff() ||
-          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        allow write: if (isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId))) &&
+          !(subcollection in ['screens', 'layouts']);
       }
     }
 
