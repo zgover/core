@@ -106,8 +106,13 @@ async function handler(request: Request): Promise<Response> {
       }
       const id = createResourceUid()
       // The model rides from the console (deriveModelFromFields output or
-      // the join-collection template) — shape-bounded by the field cap.
+      // the join-collection template). `model` is independent of `fields`,
+      // so cap its serialized size explicitly (a legit model is well under
+      // this — 64 KB covers hundreds of typed fields).
       const model = body?.model && typeof body.model === 'object' ? body.model : null
+      if (model && JSON.stringify(model).length > 64 * 1024) {
+        return Response.json({ error: 'Dataset model too large' }, { status: 413 })
+      }
       await orgRef
         .collection('datasets')
         .doc(id)
