@@ -51,7 +51,11 @@ import {
   signInWithRedirect,
 } from 'firebase/auth'
 import { useCallback, useState } from 'react'
-import { useAnalytics, useAuth } from '@aglyn/tenant-feature-instance'
+import {
+  useAnalytics,
+  useAuth,
+  useSigninCheck,
+} from '@aglyn/tenant-feature-instance'
 import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
 import AuthFormComponent from '../../../components/auth-form.component'
@@ -91,6 +95,10 @@ function SignUp() {
   // Mobile browsers sign in via redirect (AGL-462); this completes the
   // round-trip when Google sends the user back here.
   useGoogleRedirectResult('sign_up', setError, delegation === 'off')
+  // Hold the loading splash during the post-auth redirect window instead of
+  // flashing the form back at the user (AGL-476).
+  const { data: signInCheckResult } = useSigninCheck()
+  const signedIn = signInCheckResult?.signedIn === true
 
   const handleSignUp = useCallback(
     async (values?: any) => {
@@ -158,6 +166,21 @@ function SignUp() {
       <AuthFormComponent
         headingTop={'Redirecting'}
         headingBottom={'Taking you to sign in'}
+        headingBottomProps={{
+          sx: { pb: 4 },
+          component: LoadingTextComponent,
+        }}
+        headingAfter={<CircularProgress color="secondary" />}
+      />
+    )
+  }
+  if (signedIn) {
+    // Authenticated — the layout is about to route away. Hold the loading
+    // screen so the form doesn't flash back (AGL-476).
+    return (
+      <AuthFormComponent
+        headingTop={'Signing in'}
+        headingBottom={'One moment'}
         headingBottomProps={{
           sx: { pb: 4 },
           component: LoadingTextComponent,
