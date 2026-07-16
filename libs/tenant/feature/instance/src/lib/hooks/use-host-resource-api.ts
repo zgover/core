@@ -36,6 +36,7 @@ export type HostResourceKind =
   | 'location'
   | 'product'
   | 'reusableComponent'
+  | 'register'
 
 /**
  * Creates a quota-governed host resource through the console API

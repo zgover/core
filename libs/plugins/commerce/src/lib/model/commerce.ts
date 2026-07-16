@@ -75,6 +75,19 @@ export interface InventoryLocation {
 }
 
 /**
+ * `hosts/{hostId}/registers/{id}` doc (AGL-472): a named point-of-sale
+ * register. Creation is capped by the plan's `posRegisters` quota (Pro 1,
+ * Business 2, Advanced 5; raised by a per-org entitlement override for the
+ * $89/mo add-on), enforced server-side by the resources route. Each POS
+ * sale stamps its `registerId` so takings are attributable per register.
+ */
+export interface PosRegister {
+  name: string
+  /** Optional default inventory location this register sells from. */
+  locationId?: string
+}
+
+/**
  * `hosts/{hostId}/suppliers/{id}` doc (AGL-289): where dropshipped
  * order lines route on payment. Email and webhook are both optional but
  * one must be set for routing to do anything; webhook payloads are

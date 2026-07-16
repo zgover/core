@@ -28,6 +28,7 @@ import LocationsCard from './console/locations-card.component'
 import MemberPostsCard from './console/member-posts-card.component'
 import PaymentsSettingsCard from './console/payments-settings-card.component'
 import ProductsHubCard from './console/products-hub-card.component'
+import RegistersCard from './console/registers-card.component'
 import ReservationsCard from './console/reservations-card.component'
 import ReviewsModerationCard from './console/reviews-moderation-card.component'
 import ShippingSettingsCard from './console/shipping-settings-card.component'
@@ -105,6 +106,7 @@ export function CommerceConsolePage(props: ConsolePluginPageProps) {
                 { size: { xs: 12 }, children: <StoreSettingsCard hostId={hostId} /> },
                 { size: { xs: 12 }, children: <TaxSettingsCard hostId={hostId} /> },
                 { size: { xs: 12 }, children: <LocationsCard hostId={hostId} /> },
+                { size: { xs: 12 }, children: <RegistersCard hostId={hostId} /> },
                 {
                   size: { xs: 12 },
                   children: <ShippingSettingsCard hostId={hostId} />,
