@@ -7,15 +7,28 @@ description: Sell in person from the console register and take date-range reserv
 # POS & reservations
 
 :::info Plan availability
-POS requires **Pro** or above; the register count follows your plan
-(add-ons available on Business+).
+POS requires **Pro** or above. The number of **registers** you can run at
+once follows your plan — Pro 1, Business 2, Advanced 5 — and the $89/mo
+register add-on raises it. Opening more browser tabs does not give you
+more registers; each sale runs through a register you've created.
 :::
 
 ![The point-of-sale page](/img/commerce/pos-page.png)
 
+## Registers
+
+Create your registers under **Commerce → Settings → POS registers** — one
+per till or device that takes in-person payments. Give each a name (and,
+if you use inventory locations, the location it sells from). Every POS sale
+is tagged with its register so you can reconcile end-of-day takings per
+till. Your plan caps how many registers you can run; add more with the
+register add-on in Billing.
+
 ## The register
 
-Open **`/{site}/pos`** in the console for a touch-first register:
+Open **`/{site}/pos`** in the console for a touch-first register. Pick which
+register you're on at the top of the panel (skipped automatically when you
+have only one):
 
 - **Product grid** — tap to add; products with variants show quick chips.
 - **Barcode scanners** — any keyboard-wedge scanner works: it types the

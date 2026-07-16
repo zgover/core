@@ -83,6 +83,15 @@ const RESOURCES: Record<string, {
     entitlement: 'reusableComponents',
     label: 'reusable components',
   },
+  // POS registers (AGL-472): the `posRegisters` cap becomes enforceable
+  // by routing register creation here. `pos` gates access to POS at all
+  // (Pro+); `posRegisters` caps how many named registers a host runs.
+  register: {
+    collection: 'registers',
+    quotaKey: 'posRegisters',
+    entitlement: 'pos',
+    label: 'POS registers',
+  },
 }
 
 /** Payload cap: none of these docs legitimately approach this size. */

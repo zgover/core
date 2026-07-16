@@ -48,6 +48,7 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
   const cashReceivedCents = Math.round(Number(body.cashReceivedCents ?? 0))
   const customerEmail = String(body.customerEmail ?? '').trim().toLowerCase()
   const reservationId = String(body.reservationId ?? '')
+  const registerId = String(body.registerId ?? '')
   const locationId = String(body.locationId ?? '')
   const discountPct = Math.min(100, Math.max(0, Number(body.discountPct ?? 0)))
   const rawLines = Array.isArray(body.lines) ? body.lines : []
@@ -69,6 +70,21 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
       return res
         .status(403)
         .json({ error: 'POS requires the Pro plan or above' })
+    }
+    // Register attribution (AGL-472): a sale must run through a named
+    // register that exists on this host. Registers are created through the
+    // quota-enforcing resources route, so requiring one here is what makes
+    // the `posRegisters` cap real — a host can't transact past its plan's
+    // register count by opening more browser tabs.
+    if (!registerId) {
+      return res.status(400).json({ error: 'Missing registerId' })
+    }
+    const registerSnapshot = await hostRef
+      .collection('registers')
+      .doc(registerId)
+      .get()
+    if (!registerSnapshot.exists) {
+      return res.status(404).json({ error: 'Unknown register' })
     }
 
     // Server pricing per line.
@@ -149,6 +165,7 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
           number,
           status: 'pending',
           channel: 'pos',
+          registerId,
           lineItems,
           totals,
           customerEmail: customerEmail || null,
@@ -208,6 +225,7 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
         number,
         status: 'paid',
         channel: 'pos',
+        registerId,
         lineItems,
         totals,
         customerEmail: customerEmail || null,
