@@ -17,7 +17,11 @@
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { isBlockedSubdomain, SUBDOMAIN_PATTERN } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 
 /**
@@ -46,6 +50,9 @@ async function handler(request: Request): Promise<Response> {
   try {
     const auth = firebaseAdmin.app().auth()
     const decoded = await auth.verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     if (!decoded['staff']) return Response.json({ error: 'Staff only' }, { status: 403 })
     const actorRole = String(decoded['staffRole'] ?? 'super')
     if (actorRole !== 'super') {

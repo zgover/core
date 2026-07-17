@@ -77,9 +77,8 @@ function Index(props: Record<string, unknown>) {
                     <Image
                       src={img1}
                       alt="website designer preview collage"
-                      width="504"
-                      height="380"
-                      shimmer
+                      width={504}
+                      height={380}
                       priority
                     />
                   ),
@@ -152,9 +151,8 @@ function Index(props: Record<string, unknown>) {
                     <Image
                       src={img2}
                       alt="website designer element category search"
-                      width="400"
-                      height="478"
-                      shimmer
+                      width={400}
+                      height={478}
                     />
                   ),
                 },
@@ -213,9 +211,8 @@ function Index(props: Record<string, unknown>) {
                     <Image
                       src={img3}
                       alt="website designer custom element attributes"
-                      width="400"
-                      height="477"
-                      shimmer
+                      width={400}
+                      height={477}
                     />
                   ),
                 },
@@ -279,9 +276,8 @@ function Index(props: Record<string, unknown>) {
                     <Image
                       src={img4}
                       alt="website designer functional operations"
-                      width="400"
-                      height="440"
-                      shimmer
+                      width={400}
+                      height={440}
                     />
                   ),
                 },

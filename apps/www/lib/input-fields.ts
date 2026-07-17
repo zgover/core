@@ -113,7 +113,7 @@ export namespace FieldPreset {
   }
 
   export const createProperty: GridFieldPreset = {
-    allIds: ['name', 'kind'],
+    ids: ['name', 'kind'],
     byId: {
       name: Named.byKey.name,
       type: Named.byKey.kind,

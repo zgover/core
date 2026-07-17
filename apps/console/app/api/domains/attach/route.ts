@@ -16,7 +16,12 @@
  */
 
 import { checkEntitlement, pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  getOrgForHost,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 
 /**
  * Attaches a verified custom domain to the tenant Vercel project so SSL
@@ -50,6 +55,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const hostSnapshot = await firebaseAdmin
       .app()
       .firestore()

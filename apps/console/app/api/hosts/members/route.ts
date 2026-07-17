@@ -18,9 +18,11 @@
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { checkSeatQuota, createResourceUid } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   firebaseAdmin,
   getOrgForHost,
   grantHostAccess,
+  isImpersonationSession,
   revokeHostAccess,
 } from '@aglyn/tenant-data-admin'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
@@ -56,6 +58,9 @@ async function handler(request: Request): Promise<Response> {
   try {
     const app = firebaseAdmin.app()
     const decoded = await app.auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = app.firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()

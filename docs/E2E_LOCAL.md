@@ -75,6 +75,19 @@ emulator-host env vars** so it can never touch production):
   claim; the password satisfies the sign-in form's client-side policy).
 - Org `e2e-owner` — business plan, active subscription (all entitlements
   unlock), owner member, `users/{uid}/orgs` workspace mirror.
+- Auth user `owner@aglyn.test` / `E2e-Password-1` (uid `e2e-nonstaff-owner`,
+  **no** `staff` claim) + Org `e2e-nonstaff-owner` (business plan, owner
+  member, workspace mirror, no host). Because the primary org's owner is the
+  staff account, staff impersonation of _its_ owner always 400s; this org's
+  non-staff owner is the only fixture that exercises the impersonation
+  success path (AGL-357).
+- Auth user `unverified-owner@aglyn.test` / `E2e-Password-1` (uid
+  `e2e-unverified-owner`, **`emailVerified: false`**, no `staff` claim) + Org
+  `e2e-unverified-owner` (business plan, owner member, workspace mirror, no
+  host). Exercises the AGL-480 impersonation exemption from the AGL-479
+  email-verify gate: staff impersonating this owner reach a working console
+  (the `impersonatedBy` claim is exempt), while a direct sign-in as this owner
+  stays gated to `/verify-email`.
 - Host `demo` — `orgId`, `memberRoles`, `hostIndex` mirror.
 - Org-scoped: `datasets` (Team + records), `contacts`, `lists`.
 - Host-scoped: root-level media (with `createdAt`), bookings (with
@@ -83,14 +96,14 @@ emulator-host env vars** so it can never touch production):
 
 ## Env knobs (all optional)
 
-| Var | Default | Meaning |
-| --- | --- | --- |
-| `E2E_BASE_URL` | `http://localhost:4200` | Console dev server |
-| `E2E_HOST` | `demo` | Host under test |
-| `E2E_EMAIL` / `E2E_PASSWORD` | seeded values | Test account |
-| `E2E_CHROME_PATH` | system Chrome | Browser binary |
-| `E2E_TIMEOUT_MS` | `45000` | Per-assertion timeout |
-| `E2E_ARTIFACTS_DIR` | `tmp/e2e-artifacts` | Failure screenshots |
+| Var                          | Default                 | Meaning               |
+| ---------------------------- | ----------------------- | --------------------- |
+| `E2E_BASE_URL`               | `http://localhost:4200` | Console dev server    |
+| `E2E_HOST`                   | `demo`                  | Host under test       |
+| `E2E_EMAIL` / `E2E_PASSWORD` | seeded values           | Test account          |
+| `E2E_CHROME_PATH`            | system Chrome           | Browser binary        |
+| `E2E_TIMEOUT_MS`             | `45000`                 | Per-assertion timeout |
+| `E2E_ARTIFACTS_DIR`          | `tmp/e2e-artifacts`     | Failure screenshots   |
 
 ## Tenant render + API checks
 
@@ -107,17 +120,17 @@ npm run serve:tenant:emulated      # nx serve tenant --port 4500 + emulator flag
 
 What to assert (all against `http://localhost:4500`):
 
-| Check | Expect |
-| --- | --- |
-| `/blog`, `/blog/three-day-sourdough`, `/search` | 200, themed, `… – Demo Bakery` titles; the entry page carries a server-rendered `application/ld+json` `Article` |
-| `/` | 404 — the seed publishes no ROOT screen, by design |
-| `/home` | 200 — the seeded `seed-home` screen (its `versionId` pointer is what publishes a screen) |
-| `/robots.txt`, `/sitemap.xml` | middleware rewrites into `app/api/robots` / `app/api/sitemap` (text/plain + xml) |
-| `/api/screen?host=demo` | 200 with the `{status, statusCode, data}` JSON envelope |
-| `/api/collections-rss?host=demo&collection=blog` | 200 RSS |
-| `/api/bookings/slots?hostId=demo` | 200 seeded service — proves the `[...pluginApi]` dispatcher → adapter → unchanged plugin handler chain |
-| `/api/anything-unregistered` | 404 |
-| `POST /api/analytics/collect` | 204 |
+| Check                                            | Expect                                                                                                          |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `/blog`, `/blog/three-day-sourdough`, `/search`  | 200, themed, `… – Demo Bakery` titles; the entry page carries a server-rendered `application/ld+json` `Article` |
+| `/`                                              | 404 — the seed publishes no ROOT screen, by design                                                              |
+| `/home`                                          | 200 — the seeded `seed-home` screen (its `versionId` pointer is what publishes a screen)                        |
+| `/robots.txt`, `/sitemap.xml`                    | middleware rewrites into `app/api/robots` / `app/api/sitemap` (text/plain + xml)                                |
+| `/api/screen?host=demo`                          | 200 with the `{status, statusCode, data}` JSON envelope                                                         |
+| `/api/collections-rss?host=demo&collection=blog` | 200 RSS                                                                                                         |
+| `/api/bookings/slots?hostId=demo`                | 200 seeded service — proves the `[...pluginApi]` dispatcher → adapter → unchanged plugin handler chain          |
+| `/api/anything-unregistered`                     | 404                                                                                                             |
+| `POST /api/analytics/collect`                    | 204                                                                                                             |
 
 ## Docs screenshots
 

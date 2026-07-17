@@ -16,7 +16,12 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin, resolveOrgMembership } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+  resolveOrgMembership,
+} from '@aglyn/tenant-data-admin'
 
 const PRICE_ENV: Record<string, string | undefined> = {
   starter: process.env.STRIPE_PRICE_STARTER,
@@ -67,6 +72,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     // Org metadata (AGL-445): orgId is the only billing key — the webhook
     // mirrors the subscription onto this org doc. Explicit orgId from
     // the workspace-scoped console wins; otherwise the user's first org.

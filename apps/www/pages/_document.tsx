@@ -53,7 +53,7 @@ export interface _DocumentProps extends _EmotionDocumentProps {}
  *
  * @exports
  * @class _Document
- * @extends {NextDocument<P>}
+ * @extends {_EmotionDocumentComponent<P>}
  * @template P
  */
 class _Document<P extends _DocumentProps> extends _EmotionDocumentComponent<P> {}

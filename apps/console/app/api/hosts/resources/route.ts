@@ -23,7 +23,12 @@ import {
   type OrgEntitlements,
   type OrgFeatureFlags,
 } from '@aglyn/aglyn/server'
-import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  getOrgForHost,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 import { Timestamp } from 'firebase-admin/firestore'
 
 /**
@@ -135,6 +140,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()

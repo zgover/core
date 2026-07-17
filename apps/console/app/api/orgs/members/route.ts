@@ -22,7 +22,9 @@ import {
   isOrgRole,
 } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
   listOrgMembers,
   logOrgActivity,
   memberHasOrgPermission,
@@ -74,6 +76,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const isStaff = decoded['staff'] === true
     const actor = await resolveOrgMembership(decoded.uid, orgId)
     if (!actor && !isStaff) {

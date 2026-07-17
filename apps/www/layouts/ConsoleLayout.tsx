@@ -30,7 +30,7 @@ import {
 import { styled } from '@aglyn/shared-ui-theme'
 import { str } from '@aglyn/shared-util-tools'
 import { Typography } from '@mui/material'
-import { type ReactNode } from 'react'
+import { type ReactElement, type ReactNode } from 'react'
 import { isElement } from 'react-is'
 import Breadcrumbs from '../components/Breadcrumbs'
 import {
@@ -65,7 +65,7 @@ export interface ConsoleLayoutProps extends MainLayoutProps {
   ContentGridItemsProps?: GridItemsProps
   items?: GridItemsProps['items']
   header?: {
-    icon?: MdiIconProps | ReactNode
+    icon?: MdiIconProps | ReactElement
     children?: ReactNode
   }
   aggregatedPageMeta: AggregatedPageMeta
@@ -88,7 +88,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
   const title = titleProp ?? (overrideMeta ?? pageMeta)?.title
   const [rootArea, mainArea, subArea] = pageAncestors
   const header = {
-    icon: { path: mainArea?.icon },
+    icon: { path: mainArea?.icon?.path },
     children: getHeader(
       mainArea ? mainArea.name.default : rootArea?.name.default,
       subArea ? subArea.name.plural : (overrideMeta ?? pageMeta)?.name.default,
@@ -130,6 +130,17 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
     },
   ]
 
+  const renderHeaderIcon = () => {
+    const icon = header?.icon
+    if (!icon) {
+      return null
+    }
+    if (isElement(icon)) {
+      return icon
+    }
+    return <MdiIcon color="secondary" fontSize="inherit" {...icon} />
+  }
+
   return (
     <MainLayout
       navTabItems={tabItems as any}
@@ -142,11 +153,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
         <StyledNavBarSpacer />
         <Container maxWidth={CONTENT_MAX_WIDTH}>
           <Typography component="h1" variant="h4">
-            {!header?.icon || isElement(header.icon) ? (
-              header.icon
-            ) : (
-              <MdiIcon color="secondary" fontSize="inherit" {...header.icon} />
-            )}
+            {renderHeaderIcon()}
             {header?.children ?? title}
           </Typography>
           <Breadcrumbs items={breadcrumbItems} />

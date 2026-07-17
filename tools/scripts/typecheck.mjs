@@ -41,14 +41,10 @@ const TSC = join(root, 'node_modules', '@typescript', 'native', 'bin', 'tsc')
 //   one program with conflicting globals.
 // - tools/: no .ts inputs (scripts are .mjs) -> TS18003.
 // - apps/docs: standalone Docusaurus package with its own TypeScript.
-// - apps/www: pre-existing type debt, tracked in AGL-461; its `next build`
-//   still type-checks via the TS6 bridge.
 const SKIP = [
   'tsconfig.base.json',
   'tools/',
   'apps/docs/',
-  'apps/www/tsconfig.json',
-  'apps/www/tsconfig.spec.json',
 ]
 
 const PRUNE = new Set(['node_modules', 'dist', '.next', '.docusaurus', '.git'])

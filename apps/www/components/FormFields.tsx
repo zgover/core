@@ -16,6 +16,7 @@
  */
 
 import {GridItems, type GridItemsProps} from '@aglyn/shared-ui-jsx'
+import {type ElementType} from 'react'
 import {type GridField} from '../lib/input-fields'
 
 
@@ -27,7 +28,8 @@ function FormFields(props: Props) {
   const {items = [], ...rest} = props
 
   const itemMapper = (item: GridField) => {
-    const {GridItemProps, component: Component, props} = item
+    const {GridItemProps, component, props} = item
+    const Component: ElementType = component
     return {children: <Component {...props} />, ...GridItemProps}
   }
 

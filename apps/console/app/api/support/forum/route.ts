@@ -16,7 +16,12 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  getOrgForUser,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 
 const MAX_BODY = 5000
 const FORUM_CATEGORIES = ['General', 'Building', 'Showcase', 'Feedback']
@@ -40,6 +45,9 @@ async function handler(request: Request): Promise<Response> {
   try {
     const app = firebaseAdmin.app()
     const decoded = await app.auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = app.firestore()
     const isStaff = Boolean(decoded['staff'])
 

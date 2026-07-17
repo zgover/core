@@ -18,7 +18,12 @@
 import { NavigationDrawerComponent } from '@aglyn/shared-ui-jsx'
 import { mdiClose } from '@aglyn/shared-data-mdi'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
-import { alpha, createStyles, withStyles } from '@aglyn/shared-ui-theme'
+import {
+  alpha,
+  createStyles,
+  type WithStyles,
+  withStyles,
+} from '@aglyn/shared-ui-theme'
 import { _isStrT } from '@aglyn/shared-util-tools'
 import { objectRemap } from '@aglyn/shared-util-tools'
 import { Box, Button } from '@mui/material'
@@ -51,8 +56,8 @@ export const drawerFormViewStyles = (theme) =>
 
 export type FormVariant = 'creating' | 'updating'
 
-export interface DrawerFormViewProps {
-  // extends ExtendPropsOfWithStyles<Partial<NavigationDrawerProps>, typeof drawerFormViewStyles> {
+export interface DrawerFormViewProps
+  extends WithStyles<typeof drawerFormViewStyles> {
   id: string
   fields: Fields.FieldGroup
   label: string

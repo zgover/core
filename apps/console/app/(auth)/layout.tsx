@@ -31,7 +31,13 @@ import AuthenticatingLayout from '../../components/layouts/authenticating.layout
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   return (
-    <AuthenticatingLayout signingOut={pathname?.startsWith('/signout')}>
+    <AuthenticatingLayout
+      signingOut={pathname?.startsWith('/signout')}
+      // On /verify-email, keep a signed-in-but-unverified user put instead of
+      // bouncing them into the app; a verified user still falls through to the
+      // continue URL (AGL-479).
+      requireEmailVerification={pathname?.startsWith('/verify-email')}
+    >
       {children}
     </AuthenticatingLayout>
   )

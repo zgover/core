@@ -19,7 +19,9 @@ import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { canManageOrg, isValidOrgSlug } from '@aglyn/aglyn/server'
 import {
   changeOrgSlug,
+  emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
   listOrgMembers,
   logOrgActivity,
   OrgSlugTakenError,
@@ -50,6 +52,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const membership = await resolveOrgMembership(decoded.uid, orgId)
     if (
       decoded['staff'] !== true &&

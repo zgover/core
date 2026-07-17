@@ -18,16 +18,10 @@
 
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Alert, Button, Stack } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import { useOrgScope } from '../hooks/use-org-scope'
-
-interface PendingInvite {
-  $id: string
-  orgId: string | null
-  orgName: string | null
-  role: string | null
-}
+import { usePendingInvites, type PendingInvite } from '../hooks/use-pending-invites'
 
 /**
  * Pending organization invites (AGL-234): surfaces invites addressed to
@@ -39,29 +33,8 @@ export function OrgInvitesBanner() {
   const { data: user } = useUser()
   const { selectOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
-  const [invites, setInvites] = useState<PendingInvite[]>([])
+  const { invites, refresh } = usePendingInvites()
   const [busyId, setBusyId] = useState<string | null>(null)
-
-  const refresh = useCallback(async () => {
-    const idToken = await (user as any)?.getIdToken?.()
-    if (!idToken) return
-    try {
-      const response = await fetch('/api/orgs/invites?mine=1', {
-        headers: { Authorization: `Bearer ${idToken}` },
-      })
-      if (!response.ok) return
-      const payload = await response.json()
-      setInvites(
-        (payload.invites ?? []).filter((invite: PendingInvite) => invite.orgId),
-      )
-    } catch {
-      // banner is best-effort; the team page still lists invites
-    }
-  }, [user])
-
-  useEffect(() => {
-    void refresh()
-  }, [refresh])
 
   const accept = async (invite: PendingInvite) => {
     setBusyId(invite.$id)

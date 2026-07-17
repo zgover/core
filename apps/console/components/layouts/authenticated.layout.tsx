@@ -19,7 +19,7 @@
 import { SplashScreen, useLoading } from '@aglyn/shared-ui-jsx'
 import { continueParam, useContinueUrl } from '@aglyn/shared-util-next'
 import { useRouter } from 'next/navigation'
-import { Fragment, useEffect } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useSigninCheck } from '@aglyn/tenant-feature-instance'
 import useIdleLogout from '../../hooks/use-idle-logout'
 import ImpersonationBanner from '../impersonation-banner.component'
@@ -38,15 +38,50 @@ function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
   const authLoading = status === 'loading'
   const signedIn = signInCheckResult?.signedIn === true
   const emailVerified = signInCheckResult?.user?.emailVerified
-  const invalidAuth =
-    authLoading || !signedIn || (requireEmailVerification && !emailVerified)
+  const user = signInCheckResult?.user
+  // Staff impersonation sessions (AGL-357) carry an `impersonatedBy` claim and
+  // are exempt from the email-verify gate (AGL-480) — otherwise staff can't
+  // reach a still-unverified owner. Only resolved when it could matter (signed
+  // in but unverified); `null` = still reading the claim, so hold the splash
+  // rather than redirect. Verified users never pay for the token read.
+  const [impersonating, setImpersonating] = useState<boolean | null>(null)
+  const gateOnVerify = requireEmailVerification && !emailVerified
+  useEffect(() => {
+    // Only read the claim when it could matter (gating + a user present).
+    // Leave it `null` otherwise — never pre-set `false`, or the redirect below
+    // could fire before the claim resolves and bounce an impersonation session.
+    if (!gateOnVerify || !user) return void 0
+    let active = true
+    setImpersonating(null)
+    void (
+      user as {
+        getIdTokenResult?: () => Promise<{ claims?: Record<string, unknown> }>
+      }
+    )
+      .getIdTokenResult?.()
+      .then((result) => {
+        if (active) {
+          setImpersonating(Boolean(result?.claims?.['impersonatedBy']))
+        }
+      })
+      .catch(() => {
+        // Fail closed: unreadable claim → treat as a normal session, gate applies.
+        if (active) setImpersonating(false)
+      })
+    return () => void (active = false)
+  }, [gateOnVerify, user])
+
+  const verifyBlocked = gateOnVerify && impersonating !== true
+  const invalidAuth = authLoading || !signedIn || verifyBlocked
   // Idle session expiry (AGL-464) — armed only while signed in.
   useIdleLogout(signedIn)
 
   useEffect(() => {
     if (authLoading) return void 0
     if (!signedIn) return void pushToRequestAuth(`/signin`)
-    if (requireEmailVerification && !emailVerified)
+    // Redirect only once the impersonation claim has resolved to false — while
+    // it's unresolved (`null`) the splash holds and we must not bounce.
+    if (gateOnVerify && impersonating === false)
       return void pushToRequestAuth(`/verify-email`)
 
     return void 0
@@ -57,9 +92,9 @@ function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
   }, [
     authLoading,
     next,
-    emailVerified,
+    gateOnVerify,
+    impersonating,
     queueLoading,
-    requireEmailVerification,
     router,
     signedIn,
   ])

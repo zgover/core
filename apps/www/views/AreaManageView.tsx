@@ -25,7 +25,8 @@ import {
 import { objectRemap, str } from '@aglyn/shared-util-tools'
 import { createUid } from '@aglyn/shared-util-vendor'
 import IconButton from '@mui/material/IconButton'
-import { useRouter } from 'next/navigation'
+import { doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { usePathname, useRouter } from 'next/navigation'
 import { useSnackbar } from 'notistack'
 import {
   type ChangeEvent,
@@ -71,6 +72,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
     onSaveError,
   } = props
   const router = useRouter()
+  const pathname = usePathname()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading, loading } = useLoading()
   const [loadingDocuments, setLoadingDocuments] = useState(false)
@@ -89,7 +91,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
 
   // Open document
   const handleDocumentOpen = async (documentId) => {
-    await router.push(`${router.asPath}/${documentId}`)
+    await router.push(`${pathname}/${documentId}`)
   }
   // Handle table data row click
   const handleRowClick = (p) => {
@@ -98,9 +100,9 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
   // Close Document
   const removeDocumentIdFromUrl = useCallback(async () => {
     if (documentId) {
-      await router.push(router.asPath.replace(`/${documentId}`, ''))
+      await router.push(pathname.replace(`/${documentId}`, ''))
     }
-  }, [documentId])
+  }, [documentId, pathname])
 
   // Close form
   const handleCloseForm = async () => {
@@ -137,9 +139,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
     const { type, data } = activeDocument
     const { id: dataId, ...allExceptId } = data
     const id = dataId ?? createUid()
-    await query
-      .doc(id)
-      .set(allExceptId)
+    await setDoc(doc(query, id), allExceptId)
       .then((res) => {
         const actionMsg = type === 'creating' ? 'Created' : 'Updated'
         enqueueSnackbar(`${actionMsg} successfully`, { variant: 'success' })
@@ -178,7 +178,8 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
 
   // Listen for realtime updates
   useEffect(() => {
-    const cancelListener = query.onSnapshot(
+    const cancelListener = onSnapshot(
+      query,
       (querySnapshot) => {
         setLoadingDocuments(true)
         setDocuments((prev) => {
@@ -237,8 +238,8 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
             size: { xs: 12, md: 9 },
             children: (
               <CardDisplay
-                header={{
-                  title: `All ${documentName.plural}`,
+                header={`All ${documentName.plural}`}
+                HeaderProps={{
                   action: (
                     <Fragment>
                       <IconButton title="Filter list" disabled>

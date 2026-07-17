@@ -17,7 +17,11 @@
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { ESTIMATED_PAGE_TRANSFER_BYTES } from '../../../../utils/usage-metering'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 
 /** Approximate persisted size of one version doc's node payload. */
 function nodesBytes(nodes: unknown): number {
@@ -56,6 +60,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()

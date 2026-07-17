@@ -56,7 +56,7 @@ function AuthenticatingLayout(props: AuthenticatingLayoutProps) {
           : '/signin',
       )
     if (requireEmailVerification && !emailVerified)
-      return void router.push('/validate-email')
+      return void router.push('/verify-email')
 
     // Delegated cross-origin return (AGL-465/466): the workspace subdomain
     // signs in silently from the shared __session cookie, so that cookie

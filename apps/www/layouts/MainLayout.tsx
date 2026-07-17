@@ -225,7 +225,7 @@ const StyledMenu = styled(Menu, {
 //   },
 // }))
 
-function a11yProps(index: number) {
+function a11yProps(index: string | number) {
   return {
     id: `scrollable-auto-tab-${index}`,
     'aria-controls': `scrollable-auto-tabpanel-${index}`,
@@ -244,12 +244,12 @@ export interface QuickActionsMenuItem extends IconButtonProps {
 }
 
 export type NavTabItem = Partial<
-  AppLinkProps<'text'> & MuiTabProps & { icon: MdiIconProps }
+  Omit<AppLinkProps<'text'> & MuiTabProps, 'icon'> & { icon: MdiIconProps }
 >
 
 export interface MainLayoutProps {
   children?: ReactNode | undefined
-  title?: ReactNode[] | ReactNode
+  title?: string | string[]
   tabBarTitle?: string
   centerNavigationItems?: Array<any>
   // breadcrumbItems?: BreadcrumbsProps['items']
@@ -387,7 +387,7 @@ export function MainLayout(props: MainLayoutProps) {
               >
                 {tabBarTitle && <TabBarTitle>{tabBarTitle}</TabBarTitle>}
                 {navTabItems &&
-                  navTabItems.map(({ icon, ...item }, key) => (
+                  navTabItems.map(({ icon = {}, ...item }, key) => (
                     <TabItem
                       key={item.key ?? item.id ?? key}
                       // disableRipple
@@ -399,7 +399,7 @@ export function MainLayout(props: MainLayoutProps) {
                       value={item.key ?? item.id ?? key}
                       wrapped
                       {...({ component: AppLink } as any)}
-                      {...a11yProps(item.key ?? item.id ?? key)}
+                      {...a11yProps(String(item.key ?? item.id ?? key))}
                       {...item}
                     />
                   ))}

@@ -19,7 +19,7 @@ import { createStyles, makeStyles, type Theme } from '@aglyn/shared-ui-theme'
 import { _isArr } from '@aglyn/shared-util-tools'
 import { MenuItem, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
-import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { ChangeEventHandler } from 'react'
@@ -56,18 +56,18 @@ function CheckboxListRow(props: CheckboxListRowProps) {
   const { index, style, items } = props
   const item = (items ?? [])[index]
   return (
-    <ListItem dense button style={style} onClick={() => {}}>
+    <ListItemButton dense style={style} onClick={() => {}}>
       <ListItemIcon>
         <Checkbox
           edge="start"
           checked={true}
           tabIndex={-1}
           disableRipple
-          inputProps={{ 'aria-labelledby': item.label }}
+          slotProps={{ input: { 'aria-labelledby': item.label } }}
         />
       </ListItemIcon>
       <ListItemText primary={item.label} />
-    </ListItem>
+    </ListItemButton>
   )
 }
 
@@ -107,7 +107,7 @@ export default function FieldSet(props: Props) {
   const getTextOrSelect = (field: Fields.FieldT, key?: any) => (
     <TextField
       fullWidth
-      key={field?.key ?? field?.id ?? key}
+      key={field?.id ?? key}
       name={field.id}
       type={field.type ?? 'text'}
       label={field.label}

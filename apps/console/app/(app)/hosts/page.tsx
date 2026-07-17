@@ -30,6 +30,7 @@ import { useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import CreateHostDialog from '../../../components/create-host-dialog.component'
+import EmptyState from '../../../components/empty-state.component'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import OrgInvitesBanner from '../../../components/org-invites-banner.component'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
@@ -40,6 +41,7 @@ import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useOrgHosts } from '../../../hooks/use-org-hosts'
 import { useOrgScope } from '../../../hooks/use-org-scope'
 import useOrgPermissions from '../../../hooks/use-org-permissions'
+import { usePendingInvites } from '../../../hooks/use-pending-invites'
 
 function HostInfoItem({ label, value }) {
   return (
@@ -90,6 +92,10 @@ function HostsContent() {
   const [creating, setCreating] = useState(false)
   const { permissions } = useOrgPermissions()
   const orgNavTabs = useOrgNavTabItems()
+  // When the user has a pending invite, the banner's "accept" is the primary
+  // path to their first org — so the zero-state steps aside to avoid two
+  // competing calls to action (AGL-234).
+  const { invites } = usePendingInvites()
 
   return (
     <>
@@ -122,6 +128,32 @@ function HostsContent() {
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           {/* Pending org invites (AGL-234). */}
           <OrgInvitesBanner />
+          {!orgsLoading && (data?.length ?? 0) === 0 && invites.length === 0 ? (
+            <EmptyState
+              iconPath={ICON_VARIANT_HOST_GROUP.path}
+              title={
+                currentOrg ? 'No sites yet' : 'Create your first site'
+              }
+              description={
+                currentOrg
+                  ? 'Create a site to start building — it will live in this ' +
+                    'workspace.'
+                  : 'Your first site sets up your workspace automatically — ' +
+                    'no separate setup needed.'
+              }
+              action={
+                permissions.createHosts ? (
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => setCreating(true)}
+                  >
+                    {'Create site'}
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : (
           <GridItems
             spacing={3}
             items={[
@@ -207,6 +239,7 @@ function HostsContent() {
               })),
             ]}
           />
+          )}
         </Container>
         <CreateHostDialog open={creating} onClose={() => setCreating(false)} />
       </DashboardLayout>

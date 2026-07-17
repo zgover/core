@@ -17,7 +17,12 @@
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { createResourceUid, orgRoleAtLeast } from '@aglyn/aglyn/server'
-import { firebaseAdmin, resolveOrgMembership } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+  resolveOrgMembership,
+} from '@aglyn/tenant-data-admin'
 import { randomUUID } from 'crypto'
 
 const MAX_BYTES = 10 * 1024 * 1024
@@ -47,6 +52,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const membership = await resolveOrgMembership(decoded.uid, orgId)
     const canWrite =
       decoded['staff'] === true ||

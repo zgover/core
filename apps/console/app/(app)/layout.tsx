@@ -30,7 +30,9 @@ import MainLayout from '../../components/layouts/main.layout'
  */
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <AuthenticatedLayout>
+    // Email/password accounts must verify before any console access
+    // (AGL-479); OAuth accounts arrive verified, so this only gates them.
+    <AuthenticatedLayout requireEmailVerification>
       <MainLayout>{children}</MainLayout>
     </AuthenticatedLayout>
   )

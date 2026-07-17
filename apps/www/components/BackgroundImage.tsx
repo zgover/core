@@ -32,7 +32,7 @@ type BaseProps = HTMLAttributes<HTMLDivElement>
 
 export interface BackgroundImageProps
   extends BaseProps,
-    OverrideableComponentProps {
+    JSX.OverrideableComponentProps {
   url: string
   parallax?: boolean
 }
