@@ -83,6 +83,16 @@ export const E2E_OWNER_UID = 'e2e-nonstaff-owner'
 export const E2E_OWNER_EMAIL = 'owner@aglyn.test'
 const ownerOrgId = E2E_OWNER_UID
 
+// Third org owned by a non-staff user whose email is UNVERIFIED (AGL-480).
+// The email-verify gate (AGL-479) redirects unverified sessions to
+// /verify-email and 403s their API calls; impersonation sessions carry an
+// `impersonatedBy` claim and are exempt. This fixture exercises that
+// exemption — staff impersonating this owner must reach a working console,
+// while a direct sign-in as this owner stays gated.
+export const E2E_UNVERIFIED_OWNER_UID = 'e2e-unverified-owner'
+export const E2E_UNVERIFIED_OWNER_EMAIL = 'unverified-owner@aglyn.test'
+const unverifiedOwnerOrgId = E2E_UNVERIFIED_OWNER_UID
+
 try {
   await auth.getUser(E2E_UID)
   // Converge on re-runs: the password may have changed between seeds.
@@ -119,6 +129,25 @@ try {
   })
 }
 await auth.setCustomUserClaims(E2E_OWNER_UID, {})
+
+// Unverified non-staff owner (AGL-480). Converge `emailVerified: false` on
+// re-runs so the gate always applies to a direct sign-in.
+try {
+  await auth.getUser(E2E_UNVERIFIED_OWNER_UID)
+  await auth.updateUser(E2E_UNVERIFIED_OWNER_UID, {
+    password: E2E_PASSWORD,
+    emailVerified: false,
+  })
+} catch {
+  await auth.createUser({
+    uid: E2E_UNVERIFIED_OWNER_UID,
+    email: E2E_UNVERIFIED_OWNER_EMAIL,
+    password: E2E_PASSWORD,
+    emailVerified: false,
+    displayName: 'E2E Unverified Owner',
+  })
+}
+await auth.setCustomUserClaims(E2E_UNVERIFIED_OWNER_UID, {})
 
 const now = FieldValue.serverTimestamp()
 let written = 0
@@ -213,6 +242,39 @@ await put(
   { name: 'E2E Client Co', role: 'owner', createdAt: now },
 )
 
+// ── Unverified-owner org (impersonation email-verify exemption) ─────────────
+// Same minimal shape as the non-staff org above; its owner's email is
+// unverified so it exercises the AGL-480 gate exemption.
+await put(firestore.collection('orgs').doc(unverifiedOwnerOrgId), {
+  name: 'E2E Unverified Co',
+  ownerUid: E2E_UNVERIFIED_OWNER_UID,
+  plan: 'business',
+  subscription: { status: 'active' },
+  createdAt: now,
+})
+await put(
+  firestore
+    .collection('orgs')
+    .doc(unverifiedOwnerOrgId)
+    .collection('members')
+    .doc(E2E_UNVERIFIED_OWNER_UID),
+  {
+    email: E2E_UNVERIFIED_OWNER_EMAIL,
+    displayName: 'E2E Unverified Owner',
+    role: 'owner',
+    status: 'active',
+    createdAt: now,
+  },
+)
+await put(
+  firestore
+    .collection('users')
+    .doc(E2E_UNVERIFIED_OWNER_UID)
+    .collection('orgs')
+    .doc(unverifiedOwnerOrgId),
+  { name: 'E2E Unverified Co', role: 'owner', createdAt: now },
+)
+
 // ── Org-scoped data (AGL-237/239): datasets, contacts, lists ───────────────
 const teamDataset = orgRef.collection('datasets').doc('seed-team')
 await put(teamDataset, {
@@ -291,8 +353,20 @@ await put(hostRef.collection('services').doc('seed-tasting'), {
 })
 const dayMs = 86_400_000
 const bookings = [
-  ['seed-booking-past', 'Ada Lovelace', 'ada@example.com', -2 * dayMs, 'confirmed'],
-  ['seed-booking-next', 'Grace Hopper', 'grace@example.com', 3 * dayMs, 'confirmed'],
+  [
+    'seed-booking-past',
+    'Ada Lovelace',
+    'ada@example.com',
+    -2 * dayMs,
+    'confirmed',
+  ],
+  [
+    'seed-booking-next',
+    'Grace Hopper',
+    'grace@example.com',
+    3 * dayMs,
+    'confirmed',
+  ],
 ]
 for (const [id, name, email, offsetMs, status] of bookings) {
   const startsAtMs = Date.now() + offsetMs
@@ -348,8 +422,7 @@ await put(homeScreen.collection('versions').doc('seed-home-v1'), {
       componentId: 'muiTypography',
       parentId: 'stack',
       props: {
-        children:
-          'Small-batch breads and pastries from the Demo Bakery ovens.',
+        children: 'Small-batch breads and pastries from the Demo Bakery ovens.',
         variant: 'body1',
       },
     },
@@ -437,7 +510,12 @@ await put(hostRef.collection('functions').doc('seed-order-total'), {
 await put(hostRef.collection('workflows').doc('seed-quote'), {
   name: 'DozenQuote',
   steps: [
-    { functionId: 'seed-order-total', functionName: 'OrderTotal', args: ['12'], resultName: 'dozenPrice' },
+    {
+      functionId: 'seed-order-total',
+      functionName: 'OrderTotal',
+      args: ['12'],
+      resultName: 'dozenPrice',
+    },
   ],
   returnValue: 'dozenPrice',
   trigger: { event: 'formSubmission' },
@@ -603,5 +681,8 @@ console.log(
   `Done — ${written} docs. user=${E2E_EMAIL} (uid ${E2E_UID}, staff) ` +
     `org=${orgId} host=${hostId} project=${projectId}. ` +
     `Non-staff owner=${E2E_OWNER_EMAIL} (uid ${E2E_OWNER_UID}) ` +
-    `org=${ownerOrgId} (impersonation success path).`,
+    `org=${ownerOrgId} (impersonation success path). ` +
+    `Unverified owner=${E2E_UNVERIFIED_OWNER_EMAIL} ` +
+    `(uid ${E2E_UNVERIFIED_OWNER_UID}) org=${unverifiedOwnerOrgId} ` +
+    `(AGL-480 gate-exemption path).`,
 )
