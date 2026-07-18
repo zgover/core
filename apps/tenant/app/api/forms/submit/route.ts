@@ -144,13 +144,20 @@ export async function POST(request: Request): Promise<Response> {
     if (datasetName) {
       try {
         // Org-scoped datasets (AGL-237): the form's named dataset
-        // resolves against the org so every host shares it.
-        const datasetsSnapshot = await (
-          await orgDataCollectionForHost(hostId, 'datasets')
-        )
-          .where('name', '==', datasetName)
+        // resolves against the org so every host shares it. Console-
+        // created datasets store the human name as `displayName`
+        // (AGL-536); `name` covers pre-migration docs.
+        const datasetsRef = await orgDataCollectionForHost(hostId, 'datasets')
+        let datasetsSnapshot = await datasetsRef
+          .where('displayName', '==', datasetName)
           .limit(1)
           .get()
+        if (datasetsSnapshot.empty) {
+          datasetsSnapshot = await datasetsRef
+            .where('name', '==', datasetName)
+            .limit(1)
+            .get()
+        }
         const datasetDoc = datasetsSnapshot.docs[0]
         if (datasetDoc && !datasetDoc.get('deletedAt')) {
           const declaredFields: string[] = Array.isArray(datasetDoc.get('fields'))

@@ -59,6 +59,24 @@ interface ActionRunEnv {
   }>
 }
 
+/**
+ * Resolves a dataset by its human name: console-created docs store it as
+ * `displayName` (AGL-536); the `name` fallback covers pre-migration docs.
+ */
+async function findDatasetByName(
+  datasetsRef: FirebaseFirestore.CollectionReference,
+  datasetName: string,
+): Promise<FirebaseFirestore.QueryDocumentSnapshot | undefined> {
+  const byDisplayName = await datasetsRef
+    .where('displayName', '==', datasetName)
+    .limit(1)
+    .get()
+  if (!byDisplayName.empty) return byDisplayName.docs[0]
+  return (
+    await datasetsRef.where('name', '==', datasetName).limit(1).get()
+  ).docs[0]
+}
+
 function makeWorkflowContextLoader(
   hostRef: FirebaseFirestore.DocumentReference,
 ) {
@@ -222,12 +240,10 @@ async function executeAction(
         const datasetsRef = await orgDataCollectionForHost(hostId, 'datasets')
         const datasetDoc = step.datasetId?.trim()
           ? await datasetsRef.doc(step.datasetId.trim()).get()
-          : (
-              await datasetsRef
-                .where('name', '==', step.datasetName?.trim() ?? '')
-                .limit(1)
-                .get()
-            ).docs[0]
+          : await findDatasetByName(
+              datasetsRef,
+              step.datasetName?.trim() ?? '',
+            )
         if (!datasetDoc?.exists || datasetDoc.get('deletedAt')) {
           stepErrors.push(
             `unknown dataset "${step.datasetName || step.datasetId}"`,
@@ -252,12 +268,10 @@ async function executeAction(
         const datasetsRef = await orgDataCollectionForHost(hostId, 'datasets')
         const datasetDoc = step.datasetId?.trim()
           ? await datasetsRef.doc(step.datasetId.trim()).get()
-          : (
-              await datasetsRef
-                .where('name', '==', step.datasetName?.trim() ?? '')
-                .limit(1)
-                .get()
-            ).docs[0]
+          : await findDatasetByName(
+              datasetsRef,
+              step.datasetName?.trim() ?? '',
+            )
         if (!datasetDoc?.exists || datasetDoc.get('deletedAt')) {
           stepErrors.push(
             `unknown dataset "${step.datasetName || step.datasetId}"`,
