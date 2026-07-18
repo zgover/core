@@ -289,12 +289,19 @@ service cloud.firestore {
         // client `create` by name is safe. Screens/layouts also appear
         // here — their dedicated blocks above own create; excluding them
         // from update/delete too keeps this catch-all from re-granting.
+        // `installs` (plugin pins) are create/update API-only (AGL-508): the
+        // install route enforces entitlement + purchase + kill-switch before
+        // writing the pin; only DELETE (uninstall) stays client-side, so
+        // update/delete is split to allow the console's uninstall.
         allow create: if isStaff() ||
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
             !(subcollection in ['screens', 'layouts', 'variables',
               'functions', 'workflows', 'services', 'redirects',
-              'locations', 'products', 'components', 'registers']));
-        allow update, delete: if isStaff() ||
+              'locations', 'products', 'components', 'registers', 'installs']));
+        allow update: if isStaff() ||
+          ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
+            !(subcollection in ['screens', 'layouts', 'installs']));
+        allow delete: if isStaff() ||
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
             !(subcollection in ['screens', 'layouts']));
       }
