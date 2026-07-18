@@ -137,7 +137,11 @@ export async function searchContent(options: {
   }
   for (const datasetDoc of datasets.docs) {
     if (datasetDoc.get('deletedAt')) continue
-    const datasetName = String(datasetDoc.get('name') ?? '')
+    // Console-created datasets store the human name as `displayName`
+    // (AGL-536); `name` covers pre-migration docs.
+    const datasetName = String(
+      datasetDoc.get('displayName') ?? datasetDoc.get('name') ?? '',
+    )
     const records = await datasetDoc.ref
       .collection('records')
       .limit(200)
