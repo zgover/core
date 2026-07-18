@@ -1,11 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "docusaurus-2",
-  "buildCommand": "npm run build",
-  "outputDirectory": "build",
-  "installCommand": "npm install",
-  "cleanUrls": true,
-  "trailingSlash": false,
   "git": {
     "deploymentEnabled": {
       "production": true,
