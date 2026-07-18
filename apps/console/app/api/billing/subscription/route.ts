@@ -34,6 +34,15 @@ const PRICE_ENV: Record<string, string | undefined> = {
   starter: process.env.STRIPE_PRICE_STARTER,
   pro: process.env.STRIPE_PRICE_PRO,
   business: process.env.STRIPE_PRICE_BUSINESS,
+  advanced: process.env.STRIPE_PRICE_ADVANCED,
+}
+
+/** Annual prices (AGL-269/532); switches honor the page's toggle. */
+const YEARLY_PRICE_ENV: Record<string, string | undefined> = {
+  starter: process.env.STRIPE_PRICE_STARTER_YEARLY,
+  pro: process.env.STRIPE_PRICE_PRO_YEARLY,
+  business: process.env.STRIPE_PRICE_BUSINESS_YEARLY,
+  advanced: process.env.STRIPE_PRICE_ADVANCED_YEARLY,
 }
 
 async function stripeRequest(
@@ -191,10 +200,6 @@ async function handler(request: Request): Promise<Response> {
 
     // Preview/switch share the target resolution.
     const targetPlan = String(body?.plan ?? '')
-    const targetPrice = PRICE_ENV[targetPlan]
-    if (!targetPrice) {
-      return Response.json({ error: 'Unknown target plan' }, { status: 400 })
-    }
     const items: any[] = subscription.items?.data ?? []
     // The base plan item is the one no add-on price claims (AGL-528) —
     // with add-on items on the subscription it need not be items[0].
@@ -202,11 +207,25 @@ async function handler(request: Request): Promise<Response> {
       items.find((item: any) => !addonKindFromPriceId(item?.price?.id)) ??
       items[0]
     const itemId = planItem?.id
+    // Billing interval (AGL-532): the page's monthly/annual toggle rides
+    // the request; absent, the subscription keeps its current interval.
+    const currentInterval: 'month' | 'year' =
+      planItem?.price?.recurring?.interval === 'year' ? 'year' : 'month'
+    const targetInterval: 'month' | 'year' =
+      body?.interval === 'year' || body?.interval === 'month'
+        ? body.interval
+        : currentInterval
+    const targetPrice = (
+      targetInterval === 'year' ? YEARLY_PRICE_ENV : PRICE_ENV
+    )[targetPlan]
+    if (!targetPrice) {
+      return Response.json({ error: 'Unknown target plan' }, { status: 400 })
+    }
 
     // Per-plan add-on items (seats/members/datasets/hosts) re-price to
     // the target plan in the same update (AGL-528); kinds the target
     // doesn't sell are dropped and reported. Flat add-ons re-resolve too
-    // so they follow the base interval (PRICE_ENV targets are monthly).
+    // so every item follows the target interval (one per subscription).
     const itemChanges: Array<Array<[string, string]>> = [
       [['id', String(itemId)], ['price', targetPrice]],
     ]
@@ -214,7 +233,7 @@ async function handler(request: Request): Promise<Response> {
     for (const item of items) {
       const kind = addonKindFromPriceId(item?.price?.id)
       if (!kind) continue
-      const target = addonPriceId(kind, targetPlan as OrgPlan, 'month')
+      const target = addonPriceId(kind, targetPlan as OrgPlan, targetInterval)
       if (target === item?.price?.id) continue
       if (target) {
         itemChanges.push([['id', String(item.id)], ['price', target]])
@@ -249,6 +268,7 @@ async function handler(request: Request): Promise<Response> {
           subscription: {
             status: updated.status ?? subscription.status,
             priceId: targetPrice,
+            interval: targetInterval,
           },
         },
         { merge: true },

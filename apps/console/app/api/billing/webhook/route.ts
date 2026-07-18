@@ -164,6 +164,12 @@ async function handler(request: Request): Promise<Response> {
           subscription: {
             status: canceled ? 'canceled' : (object?.status ?? 'active'),
             priceId: priceId ?? null,
+            // Billing interval (AGL-532): the Billing page's monthly/
+            // annual toggle initializes from this mirror.
+            interval:
+              planItem?.price?.recurring?.interval === 'year'
+                ? 'year'
+                : 'month',
             currentPeriodEnd: object?.current_period_end
               ? new Date(object.current_period_end * 1000)
               : null,

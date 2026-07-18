@@ -211,6 +211,12 @@ export interface OrgSubscription {
     | 'incomplete'
     | 'unpaid'
   priceId?: string
+  /**
+   * Billing interval of the plan item (AGL-532), webhook-mirrored: the
+   * Billing page initializes its monthly/annual toggle from it and plan
+   * switches keep it unless the toggle says otherwise.
+   */
+  interval?: 'month' | 'year'
   currentPeriodEnd?: ITimestamp
 }
 

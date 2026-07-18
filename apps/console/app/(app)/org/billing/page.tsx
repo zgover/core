@@ -83,6 +83,14 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
   const { confirm } = useConfirmationContext()
   // Annual billing (AGL-269): checkout maps to the *_YEARLY price ids.
   const [interval, setInterval] = useState<'month' | 'year'>('month')
+  // The toggle starts on the live subscription's interval (AGL-532) so
+  // annual orgs see their real prices and switches keep their interval.
+  const subscriptionInterval = (org?.subscription as any)?.interval
+  useEffect(() => {
+    if (subscriptionInterval === 'year' || subscriptionInterval === 'month') {
+      setInterval(subscriptionInterval)
+    }
+  }, [subscriptionInterval])
   // Self-serve add-on purchases (AGL-529), release-gated.
   const addonStore = useReleaseFlag('release_addon_store')
 
@@ -232,6 +240,7 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
           const preview = await subscriptionRequest({
             action: 'preview',
             plan: targetPlan,
+            interval,
           })
           if (!preview) return
           const over = await overLimitSummary(targetPlan)
@@ -258,6 +267,7 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
           const switched = await subscriptionRequest({
             action: 'switch',
             plan: targetPlan,
+            interval,
           })
           if (switched) {
             enqueueSnackbar(`Plan switched to ${targetPlan}`, {
@@ -624,6 +634,7 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
                 children: (
                   <BillingPlanCardsComponent
                     plan={org?.plan as OrgPlan | undefined}
+                    interval={interval}
                     onSelect={(tier) =>
                       permissions.editBilling
                         ? void handleUpgrade(tier)()
