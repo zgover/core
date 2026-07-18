@@ -219,9 +219,16 @@ service cloud.firestore {
       // checks org role + quota + subdomain uniqueness with the Admin SDK.
       allow create: if false;
       // The host doc carries live directories (screens, layouts), so
-      // editors update it too; deletion is admin-only.
+      // editors update it too; deletion is admin-only. Editors must NOT be
+      // able to rewrite the identity/projection keys: `memberRoles` is the
+      // access list (self-escalation / add-outsider / lock-out-owner),
+      // `orgId` gates suspension, and `admins`/`hosts` are legacy/ownership.
+      // Those keys are Admin-SDK-only (org APIs bypass rules); staff keep
+      // full control for tooling.
       allow update: if isStaff() ||
-        (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        (canWriteHostContent(hostId) && !hostOrgSuspended(hostId) &&
+          !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['memberRoles', 'orgId', 'admins', 'hosts']));
       allow delete: if isStaff() ||
         (hostMemberRole(hostId) == 'admin' && !hostOrgSuspended(hostId));
       // Screen/layout DOC creates are API-only (AGL-473): /api/hosts/
