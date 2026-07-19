@@ -101,35 +101,42 @@ describe('Drawer element (AGL-562)', () => {
     ).toBeTruthy()
   })
 
-  it('renders contents expanded inline on editing surfaces', () => {
+  it('renders a collapsed placeholder on editing surfaces by default (AGL-571)', () => {
     renderEditor(
       <DrawerElement {...{ 'data-aglyn': 'leaf:drawer-4' }}>
         <span>{'Editable contents'}</span>
       </DrawerElement>,
     )
-    expect(screen.getByText('Editable contents')).toBeTruthy()
+    // The drawer is invisible on the live site until opened; the canvas
+    // shows a slim, selectable marker instead of the expanded contents.
     expect(screen.getByText(/slides in on the live site/)).toBeTruthy()
+    expect(screen.queryByText('Editable contents')).toBeNull()
     // Editor surfaces never enroll on the command bus.
     command('open', 'drawer-4')
     expect(screen.queryByRole('button', { name: 'Close menu' })).toBeNull()
+    expect(screen.queryByText('Editable contents')).toBeNull()
+  })
+
+  it('expands contents while the drawer subtree holds the selection (AGL-571)', () => {
+    // The besigner renderer stamps data-aglyn-selected-within on the leaf
+    // whenever the drawer node or any descendant is selected.
+    renderEditor(
+      <DrawerElement
+        {...{
+          'data-aglyn': 'leaf:drawer-5',
+          'data-aglyn-selected-within': '',
+        }}
+      >
+        <span>{'Editable contents'}</span>
+      </DrawerElement>,
+    )
+    expect(screen.getByText('Editable contents')).toBeTruthy()
+    expect(screen.getByText(/slides in on the live site/)).toBeTruthy()
   })
 })
 
-describe('DrawerToggle (AGL-562)', () => {
-  it('toggles its target drawer on click', () => {
-    render(
-      <>
-        <DrawerToggle targetNodeId="drawer-t1" ariaLabel="Open menu" />
-        <DrawerElement {...{ 'data-aglyn': 'leaf:drawer-t1' }}>
-          <span>{'Toggled contents'}</span>
-        </DrawerElement>
-      </>,
-    )
-    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
-    expect(screen.getByText('Toggled contents')).toBeTruthy()
-  })
-
-  it('drives the first drawer when no target is set (preset wiring)', () => {
+describe('DrawerToggle (AGL-562, interactions-only targeting AGL-572)', () => {
+  it('toggles the first drawer on the page by default (preset wiring)', () => {
     render(
       <>
         <DrawerToggle ariaLabel="Open menu" />
@@ -140,6 +147,28 @@ describe('DrawerToggle (AGL-562)', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
     expect(screen.getByText('Broadcast contents')).toBeTruthy()
+  })
+
+  it('silently ignores the legacy persisted targetNodeId binding', () => {
+    render(
+      <>
+        <DrawerToggle targetNodeId="drawer-legacy" ariaLabel="Open menu" />
+        <DrawerElement {...{ 'data-aglyn': 'leaf:drawer-first' }}>
+          <span>{'First drawer contents'}</span>
+        </DrawerElement>
+        <DrawerElement {...{ 'data-aglyn': 'leaf:drawer-legacy' }}>
+          <span>{'Legacy target contents'}</span>
+        </DrawerElement>
+      </>,
+    )
+    const button = screen.getByRole('button', { name: 'Open menu' })
+    fireEvent.click(button)
+    // The click still broadcasts to the page's first drawer — the old
+    // binding neither retargets it nor leaks into the DOM. Explicit
+    // targeting is an interaction now (When clicked → Open a drawer).
+    expect(screen.getByText('First drawer contents')).toBeTruthy()
+    expect(screen.queryByText('Legacy target contents')).toBeNull()
+    expect(button.hasAttribute('targetnodeid')).toBe(false)
   })
 
   it('is inert on editing surfaces', () => {
@@ -162,13 +191,26 @@ describe('drawer schemas & presets (AGL-562)', () => {
     )
   })
 
-  it('targets drawers through the canvas element picker', () => {
-    const byName = Object.fromEntries(
-      (drawerToggleSchema.attributes ?? []).map((attr) => [attr.name, attr]),
+  it('has no drawer-binding attribute — targeting is an interaction (AGL-572)', () => {
+    const names = (drawerToggleSchema.attributes ?? []).map(
+      (attr) => attr.name,
     )
-    expect(byName['targetNodeId']?.component).toBe(
-      Aglyn.FieldComponentType.NODE_SELECT,
-    )
+    expect(names).toEqual(['ariaLabel'])
+  })
+
+  it('ships presets without the legacy binding attribute (AGL-572)', () => {
+    const menuButton = drawerPresets.find(
+      (preset) => preset.displayName === 'Menu Button',
+    )!
+    expect(menuButton.data.props).toEqual({})
+    const mobileNav = drawerPresets.find(
+      (preset) => preset.displayName === 'Mobile Nav',
+    )!
+    const toggle = (mobileNav.data.nodes ?? [])[0] as any
+    expect(toggle.componentId).toBe('muiDrawerToggle')
+    // Zero-config default (click toggles the page's first drawer) is
+    // what wires the preset — no targetNodeId persisted anywhere.
+    expect('targetNodeId' in toggle.props).toBe(false)
   })
 
   it('ships Drawer, Menu Button, and Mobile Nav presets', () => {

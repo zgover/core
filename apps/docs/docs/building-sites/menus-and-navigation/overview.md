@@ -19,8 +19,10 @@ in — no code, no raw JSON:
 | **Mobile Nav** | A one-insert preset: menu button + drawer + inline desktop links, responsive wiring included. |
 
 All of them render **closed on the live site until the visitor interacts**,
-and render **expanded inline on the canvas** so their contents stay
-selectable and editable — exactly like form fields do.
+and the canvas mirrors that: menus show just their trigger and drawers a
+slim placeholder. **Select the element — or anything inside it — and it
+expands in place** so its contents stay selectable and editable; click
+elsewhere and it collapses again.
 
 ## Dropdown menu
 
@@ -61,15 +63,20 @@ The **Drawer** slides in from the page edge and holds any canvas
 children — typically a vertical stack of screen links. It opens three
 ways:
 
-1. A **Menu Button** element. Leave its **Drawer** attribute empty to
-   control the page's first drawer (which is why the Mobile Nav preset
-   works with zero wiring), or pick a specific drawer element.
-2. An **interaction** on any element with the *Open / Close / Open-close
-   a drawer* actions ([below](#interactions-for-menus)).
+1. A **Menu Button** element. **Clicking it toggles the page's first
+   drawer — no configuration at all** (which is why the Mobile Nav
+   preset works with zero wiring). Its only attribute is
+   **Accessibility label**; how it targets a drawer is not an attribute.
+2. An **interaction** with the *Open / Close / Open-close a drawer*
+   actions ([below](#interactions-for-menus)) — on the Menu Button
+   itself when a page has several drawers and you need to point it at a
+   specific one, or on any other element.
 3. The built-in close button, backdrop click, or <kbd>Esc</kbd> — closing
    is always handled for you.
 
-Drawer attributes: **Slides in from** (left/right) and **Width**.
+Drawer attributes: **Slides in from** (left/right) and **Width**. The
+canvas renders the drawer inline at its configured width, so its links
+and headers stay full-size and editable.
 
 ## The Mobile Nav preset
 
@@ -95,7 +102,8 @@ choreography ([interactions guide](../besigner/interactions-and-custom-html.md))
   a list of canvas elements), *Open / Close / Open-close a menu* (drives
   a Dropdown or Mega Menu; picking defaults to the element itself when it
   is a menu, or the page's first menu), and *Open / Close / Open-close a
-  drawer* (pick the drawer, or default to the page's first).
+  drawer* (defaults to the element itself when it is a drawer, or the
+  page's first drawer).
 - **Frequency**: new interactions default to **Every time** so toggles
   keep working; the legacy *once per page view* and the per-session /
   per-visitor / cooldown caps are still there for announcements.
