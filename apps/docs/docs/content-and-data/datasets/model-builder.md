@@ -22,6 +22,22 @@ against it, so your data stays clean.
 3. Save. The model is stored on the dataset, and records are validated against it on
    the way in.
 
+### Display name vs reference ID
+
+Every field has two names:
+
+- **Display name** — the human label shown in the record editor, table headers, and
+  anywhere the field appears. Rename it any time.
+- **Reference ID** — the stable key used in [bindings](../../building-sites/bindings/overview.md)
+  (`{{item.reference_id}}`), form field mappings, and CSV import/export.
+
+When you create a field, the Reference ID **auto-fills from the display name** (for
+example, *Roast preference* → `roast_preference`). Edit it in the same dialog to set your
+own — handy when you want a short, code-friendly key that differs from the label. Once the
+field is created the ID is **fixed**: records, bindings, and forms all point at it, so it
+can't change without orphaning that data. Pick it deliberately, then rename the display
+name freely afterward.
+
 ## Edit records
 
 Open the **typed document editor** to add and edit records. Each field renders the input for

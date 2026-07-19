@@ -19,13 +19,17 @@ A dataset field has two names, and the distinction matters everywhere:
 
 - The **display name** is what you type in the schema dialog and what table
   headers and record editors show. Rename it freely.
-- The **field id** is a slug generated **once** from the display name when the
-  field is created (`Visit frequency` → `visitFrequency`). It never changes
-  afterwards. Records store values keyed by field id — it's the key you use in
-  `{{item.fieldId}}` bindings and what a form field's **Maps to schema field**
-  picker stores.
+- The **reference id** is the stable key. It **auto-fills from the display
+  name** when you create the field (`Visit frequency` → `visit_frequency`), and
+  the schema dialog lets you **edit it** right there to set your own — for
+  example a short, code-friendly key that differs from the label. Once the field
+  is created the id is **fixed** and never changes. Records store values keyed by
+  reference id — it's the key you use in `{{item.reference_id}}` bindings and
+  what a form field's **Maps to schema field** picker stores.
 
 The schema dialog shows both — each field row reads `Display name · fieldId`.
+The Reference ID input sits directly under Display name in the field editor; it
+follows the name as you type until you edit it, then keeps your value.
 The dataset itself likewise has a **Singular name** and a **Plural name**; the
 plural is the dataset's display name — the label its entry shows in
 "[Write to dataset](build-and-publish-a-survey.md#5-point-the-form-at-the-dataset)"
