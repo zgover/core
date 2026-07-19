@@ -109,6 +109,57 @@ export function evaluateTriggerCondition(
   return false
 }
 
+/** How chained trigger conditions combine (AGL-565). */
+export const TRIGGER_COMBINATORS = ['and', 'or'] as const
+
+export type TriggerCombinator = (typeof TRIGGER_COMBINATORS)[number]
+
+/** Cap on chained conditions per trigger (AGL-565). */
+export const ACTION_MAX_CONDITIONS = 5
+
+/**
+ * Normalizes a trigger's condition clauses to a list (AGL-565): the
+ * `conditions` array wins when present; a legacy single `condition`
+ * (AGL-557) becomes a one-element list. Read-time only — persisted docs
+ * are never migrated, so pre-565 single-condition docs keep working
+ * unchanged.
+ */
+export function normalizeTriggerConditions(
+  trigger:
+    | Pick<HostActionTrigger, 'condition' | 'conditions'>
+    | undefined
+    | null,
+): HostActionTriggerCondition[] {
+  const conditions = trigger?.conditions
+  if (Array.isArray(conditions)) return conditions.filter(Boolean)
+  return trigger?.condition ? [trigger.condition] : []
+}
+
+/**
+ * Evaluates a trigger's condition list with its combinator (AGL-565):
+ * `and` (the default) requires every condition to pass, `or` any one.
+ * Per-condition semantics are unchanged from AGL-557
+ * (`evaluateTriggerCondition`), and an empty list always passes — which
+ * covers every pre-565 doc without conditions.
+ */
+export function evaluateTriggerConditions(
+  trigger:
+    | Pick<HostActionTrigger, 'condition' | 'conditions' | 'combinator'>
+    | undefined
+    | null,
+  payload: Record<string, unknown>,
+): boolean {
+  const conditions = normalizeTriggerConditions(trigger)
+  if (!conditions.length) return true
+  return trigger?.combinator === 'or'
+    ? conditions.some((condition) =>
+        evaluateTriggerCondition(condition, payload),
+      )
+    : conditions.every((condition) =>
+        evaluateTriggerCondition(condition, payload),
+      )
+}
+
 export interface HostActionTrigger {
   /**
    * Event the action enrolls on: a HOST_EVENT_TYPE (server-emitted), a
@@ -120,6 +171,14 @@ export interface HostActionTrigger {
   filter?: string
   /** Optional structured payload condition (AGL-557); null clears it. */
   condition?: HostActionTriggerCondition | null
+  /**
+   * Chained payload conditions (AGL-565), combined with `combinator`.
+   * When present this list wins over the legacy single `condition`
+   * (see `normalizeTriggerConditions`); null clears it.
+   */
+  conditions?: HostActionTriggerCondition[] | null
+  /** How the chained conditions combine (AGL-565); default `and`. */
+  combinator?: TriggerCombinator | null
   /** CSS selector for element-scoped site events (click/visible/scroll-to). */
   selector?: string
   /** Percent 0-100 (scrollDepth) or seconds (timeOnPage). */
@@ -186,6 +245,13 @@ export type HostActionStep =
   | { type: 'openDrawer'; drawerNodeId?: string }
   | { type: 'closeDrawer'; drawerNodeId?: string }
   | { type: 'toggleDrawer'; drawerNodeId?: string }
+  // Menu commands (AGL-568): the drawer pattern for Dropdown/Mega Menu
+  // elements — delivered over their own window event bus keyed by node
+  // id; an empty target addresses the page's first menu. Hover-triggered
+  // opens carry a hover flag so the menu closes on pointer leave.
+  | { type: 'openMenu'; menuNodeId?: string }
+  | { type: 'closeMenu'; menuNodeId?: string }
+  | { type: 'toggleMenu'; menuNodeId?: string }
   | { type: 'showHtml'; html: string }
   | { type: 'runJs'; code: string }
   // Screen targets are rename-safe (AGL-339): the tenant resolves the
@@ -218,6 +284,9 @@ export const CLIENT_ACTION_STEP_TYPES: ReadonlySet<HostActionStepType> =
     'openDrawer',
     'closeDrawer',
     'toggleDrawer',
+    'openMenu',
+    'closeMenu',
+    'toggleMenu',
     'showHtml',
     'runJs',
     'redirect',
@@ -263,6 +332,9 @@ export const HOST_ACTION_STEP_LABELS: Record<HostActionStepType, string> = {
   openDrawer: 'Open a drawer',
   closeDrawer: 'Close a drawer',
   toggleDrawer: 'Open/close a drawer',
+  openMenu: 'Open a menu',
+  closeMenu: 'Close a menu',
+  toggleMenu: 'Open/close a menu',
   showHtml: 'Show custom HTML',
   runJs: 'Run custom JS (Business)',
   redirect: 'Redirect the visitor',
@@ -319,17 +391,27 @@ export function validateHostAction(action: HostAction): string | null {
   ) {
     return 'Cooldown must be at least 1 minute'
   }
-  // Structured payload condition (AGL-557).
-  const condition = action.trigger?.condition
-  if (condition) {
+  // Structured payload conditions (AGL-557; chained AGL-565).
+  const combinator = action.trigger?.combinator
+  if (combinator != null && !TRIGGER_COMBINATORS.includes(combinator)) {
+    return 'Combine conditions with AND or OR'
+  }
+  const conditions = normalizeTriggerConditions(action.trigger)
+  if (conditions.length > ACTION_MAX_CONDITIONS) {
+    return `Conditions are capped at ${ACTION_MAX_CONDITIONS}`
+  }
+  for (const [index, condition] of conditions.entries()) {
+    // Single-condition messages stay exactly as AGL-557 shipped them;
+    // the row marker only appears once there are rows to tell apart.
+    const where = conditions.length > 1 ? ` (condition ${index + 1})` : ''
     if (!TRIGGER_CONDITION_OPS.includes(condition.op)) {
-      return 'Pick a condition operator'
+      return `Pick a condition operator${where}`
     }
     if (!condition.field?.trim()) {
-      return 'Name the field the condition checks'
+      return `Name the field the condition checks${where}`
     }
     if (condition.op !== 'notEmpty' && !condition.value?.trim()) {
-      return 'Enter the value the condition compares against'
+      return `Enter the value the condition compares against${where}`
     }
   }
   const steps = action.steps ?? []
@@ -378,7 +460,8 @@ export function validateHostAction(action: HostAction): string | null {
       if (!step.className?.trim()) return `${label}: enter the class name`
     }
     // Element show/hide steps (AGL-562) always target a selector; drawer
-    // commands may omit the target (the page's first drawer answers).
+    // (AGL-562) and menu (AGL-568) commands may omit the target (the
+    // page's first drawer/menu answers).
     if (
       (step.type === 'showElement' ||
         step.type === 'hideElement' ||
