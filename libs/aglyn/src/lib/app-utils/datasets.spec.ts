@@ -17,12 +17,14 @@
 
 import {
   buildDatasetRecordValues,
+  defaultDatasetFieldId,
   humanizeDatasetFieldId,
   parseDatasetFieldEntries,
   parseDatasetFields,
   sanitizeRecordValues,
   slugifyDatasetFieldId,
   sortDatasetRecords,
+  validateDatasetFieldId,
 } from './datasets'
 
 describe('datasets', () => {
@@ -44,6 +46,41 @@ describe('datasets', () => {
     expect(slugifyDatasetFieldId('  Unit-Price ($) ')).toBe('unit_price')
     expect(slugifyDatasetFieldId('9 lives')).toBe('lives')
     expect(slugifyDatasetFieldId('???')).toBe('')
+  })
+
+  describe('reference id defaults + validation (AGL-578)', () => {
+    it('defaults the reference id from the display name, unique within the dataset', () => {
+      expect(defaultDatasetFieldId('Roast preference', new Set())).toBe(
+        'roast_preference',
+      )
+      // Collides with an existing id → suffixes to stay unique.
+      expect(defaultDatasetFieldId('Title', new Set(['title']))).toBe('title_2')
+      expect(
+        defaultDatasetFieldId('Title', new Set(['title', 'title_2'])),
+      ).toBe('title_3')
+      // Uniqueness check is case-insensitive.
+      expect(defaultDatasetFieldId('Title', new Set(['TITLE']))).toBe('title_2')
+      // Nothing salvageable → empty (caller keeps the field un-addable).
+      expect(defaultDatasetFieldId('???', new Set())).toBe('')
+    })
+
+    it('validates a user-entered reference id', () => {
+      expect(validateDatasetFieldId('roast_level', new Set())).toBeNull()
+      expect(validateDatasetFieldId('  spacey  ', new Set())).toBeNull()
+      expect(validateDatasetFieldId('', new Set())).toMatch(/required/i)
+      expect(validateDatasetFieldId('   ', new Set())).toMatch(/required/i)
+      // Must start with a letter; no spaces or punctuation.
+      expect(validateDatasetFieldId('9lives', new Set())).toMatch(/letter/i)
+      expect(validateDatasetFieldId('has space', new Set())).toMatch(/letter/i)
+      expect(validateDatasetFieldId('kebab-case', new Set())).toMatch(/letter/i)
+      // Uniqueness, case-insensitive.
+      expect(validateDatasetFieldId('title', new Set(['title']))).toMatch(
+        /already uses/i,
+      )
+      expect(validateDatasetFieldId('Title', new Set(['title']))).toMatch(
+        /already uses/i,
+      )
+    })
   })
 
   it('humanizes raw ids for display', () => {

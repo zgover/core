@@ -72,6 +72,45 @@ export function slugifyDatasetFieldId(name: string): string {
   return DATASET_FIELD_PATTERN.test(slug) ? slug : ''
 }
 
+/**
+ * Default reference id for a new field (AGL-578): the `slugifyDatasetFieldId`
+ * slug, suffixed (`_2`, `_3`, …) to stay unique within the dataset. `taken`
+ * holds the ids already in use (compared case-insensitively). Returns '' when
+ * the name yields nothing valid. The user can override the result.
+ */
+export function defaultDatasetFieldId(
+  name: string,
+  taken: ReadonlySet<string>,
+): string {
+  const base = slugifyDatasetFieldId(name)
+  if (!base) return ''
+  const used = new Set([...taken].map((id) => id.toLowerCase()))
+  let candidate = base
+  let suffix = 2
+  while (used.has(candidate.toLowerCase())) candidate = `${base}_${suffix++}`
+  return candidate
+}
+
+/**
+ * Validate a user-entered reference id (AGL-578): non-empty, matches
+ * `DATASET_FIELD_PATTERN`, and unique within the dataset (`taken` = ids already
+ * used, compared case-insensitively). Returns an error message, or null when
+ * the id is usable.
+ */
+export function validateDatasetFieldId(
+  id: string,
+  taken: ReadonlySet<string>,
+): string | null {
+  const trimmed = id.trim()
+  if (!trimmed) return 'A reference ID is required'
+  if (!DATASET_FIELD_PATTERN.test(trimmed))
+    return 'Start with a letter; use only letters, numbers, and underscores'
+  const used = new Set([...taken].map((existing) => existing.toLowerCase()))
+  if (used.has(trimmed.toLowerCase()))
+    return 'Another field already uses this reference ID'
+  return null
+}
+
 /** Display fallback for raw ids: "roast_preference" → "Roast preference". */
 export function humanizeDatasetFieldId(id: string): string {
   const words = id.replace(/_/g, ' ').trim()
