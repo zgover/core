@@ -20,6 +20,17 @@
 // deployment of its Vercel project, and (with --fix) repairs a stale alias by
 // running `vercel promote` on that deployment (AGL-542).
 //
+// It ALSO asserts that the serving deployment was built from the current
+// production branch HEAD (AGL-566). Alias currency alone is not enough: when a
+// production merge's Vercel↔GitHub webhook is dropped, NO deployment is created
+// for that commit, so the newest READY deployment is an older commit and the
+// alias points at it — "current" by the alias check, yet missing the merge.
+// This guard compares the newest deployment's `githubCommitSha` (Vercel API)
+// against `git ls-remote <remote> production` and flags a build that lags HEAD.
+// The `www` project runs a per-path ignore-build-step (it only rebuilds when
+// `apps/www` changes), so its commit legitimately trails HEAD — it's reported
+// but never fails (`alwaysBuilds: false`).
+//
 // Why this exists: after promoting to production, the tenant wildcard domain
 // (*.aglyn.app) has repeatedly stayed aliased to a STALE deployment. Directory
 // links are a footgun here — the repo-root `.vercel/repo.json` maps EVERY
@@ -29,22 +40,31 @@
 // cross-checks every result against the project name that `vercel inspect`
 // reports. A mismatch aborts rather than trusting the wrong project.
 //
-// Usage (relies on your existing `vercel` CLI login — no secrets read/stored):
+// Usage (rides your existing `vercel` CLI login; the commit check additionally
+// reads the CLI's own token from `VERCEL_TOKEN` or the CLI auth file to call
+// the Vercel API — the same credential the CLI uses, never a new secret):
 //
 //   node tools/deploy/verify-production-aliases.mjs           # verify only
 //   node tools/deploy/verify-production-aliases.mjs --fix     # promote when stale
 //   node tools/deploy/verify-production-aliases.mjs --json    # machine output
 //
-// Exit codes: 0 = all domains current; 1 = at least one domain stale (after
-// the fix attempt when --fix); 2 = operational error (vercel missing/not
-// authenticated, unparseable CLI output).
+// Env knobs for the commit check (all optional):
+//   VERCEL_TOKEN     API token (else the CLI auth file is read)
+//   DEPLOY_REMOTE    git remote that Vercel builds from (else auto-detect zgover/core)
+//   DEPLOY_BRANCH    production branch name (default: production)
+//
+// Exit codes: 0 = all domains current AND on HEAD; 1 = a domain is stale, or an
+// always-build project's deployment lags HEAD (a missed build); 2 = operational
+// error (vercel missing/not authenticated, unparseable CLI output).
 //
 // CLI quirks handled here: `vercel inspect` prints to STDERR (we capture
 // both streams); piped `vercel ls` emits bare deployment URLs with no status
 // column (we confirm Ready via inspect); every inspect is timed out at ~30s.
 
 import { execFile } from 'node:child_process'
-import { dirname, resolve } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -61,18 +81,24 @@ const PROJECTS = [
     name: 'app-aglyn-io',
     label: 'console',
     domains: ['https://app.aglyn.io'],
+    // Builds on every production push; its commit must equal HEAD.
+    alwaysBuilds: true,
   },
   {
     name: 'tenant-aglyn-app',
     label: 'tenant',
     // northwind-coffee.aglyn.app probes the *.aglyn.app wildcard alias.
     domains: ['https://northwind-coffee.aglyn.app'],
+    alwaysBuilds: true,
   },
   {
     name: 'www-aglyn-io',
     label: 'www',
     // The aglyn.app apex serves the marketing site, not the tenant wildcard.
     domains: ['https://aglyn.app'],
+    // Per-path ignore-build-step: rebuilds only when apps/www changes, so its
+    // commit trails HEAD by design — report the SHA, never fail on it.
+    alwaysBuilds: false,
   },
 ]
 
@@ -131,6 +157,80 @@ const hostOf = (url) => {
     return new URL(url.includes('://') ? url : `https://${url}`).hostname
   } catch {
     return url.replace(/^https?:\/\//, '').split('/')[0]
+  }
+}
+
+const short = (sha) => (sha ? sha.slice(0, 7) : '—')
+
+/**
+ * The Vercel API token for the commit check (AGL-566): `VERCEL_TOKEN` first,
+ * then the CLI's own auth file (the same credential `vercel` already uses).
+ * Returns null when neither is available — the commit check then degrades to a
+ * skipped note rather than an error.
+ */
+function readVercelToken() {
+  if (process.env.VERCEL_TOKEN) return process.env.VERCEL_TOKEN.trim()
+  const candidates = [
+    join(homedir(), 'Library', 'Application Support', 'com.vercel.cli', 'auth.json'),
+    join(homedir(), '.local', 'share', 'com.vercel.cli', 'auth.json'),
+    join(homedir(), '.config', 'com.vercel.cli', 'auth.json'),
+    join(homedir(), '.vercel', 'auth.json'),
+  ]
+  for (const path of candidates) {
+    try {
+      if (!existsSync(path)) continue
+      const token = JSON.parse(readFileSync(path, 'utf8'))?.token
+      if (token) return String(token).trim()
+    } catch {
+      // Unreadable/!JSON — try the next candidate.
+    }
+  }
+  return null
+}
+
+function git(cmdArgs, { timeoutMs = INSPECT_TIMEOUT_MS } = {}) {
+  return new Promise((resolveP) => {
+    execFile('git', cmdArgs, { cwd: repoRoot, timeout: timeoutMs, encoding: 'utf8' }, (error, stdout) =>
+      resolveP({ ok: !error, stdout: stdout ?? '' }),
+    )
+  })
+}
+
+/**
+ * The production branch HEAD SHA that Vercel builds from (AGL-566). Uses
+ * `DEPLOY_REMOTE`/`DEPLOY_BRANCH` when set, else the first git remote whose URL
+ * points at the Vercel-connected repo (…/zgover/core). Returns null on failure
+ * (the commit check then reports "unknown" rather than failing the run).
+ */
+async function productionHeadSha() {
+  const branch = process.env.DEPLOY_BRANCH?.trim() || 'production'
+  let remote = process.env.DEPLOY_REMOTE?.trim()
+  if (!remote) {
+    const remotes = (await git(['remote', '-v'])).stdout
+    remote =
+      remotes
+        .split('\n')
+        .find((l) => /\bzgover\/core\b/i.test(l) && /\(fetch\)/.test(l))
+        ?.split(/\s+/)[0] ?? 'origin'
+  }
+  const res = await git(['ls-remote', remote, `refs/heads/${branch}`])
+  const sha = res.stdout.trim().split(/\s+/)[0]
+  return { sha: /^[0-9a-f]{40}$/i.test(sha) ? sha : null, remote, branch }
+}
+
+/** A deployment's source commit SHA via the Vercel API (AGL-566). */
+async function deploymentCommitSha(deploymentId, token) {
+  if (!token || !deploymentId) return null
+  try {
+    const res = await fetch(
+      `https://api.vercel.com/v13/deployments/${deploymentId}?teamId=${TEAM_SCOPE}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
+    if (!res.ok) return null
+    const body = await res.json()
+    return body?.meta?.githubCommitSha ?? body?.gitSource?.sha ?? null
+  } catch {
+    return null
   }
 }
 
@@ -228,10 +328,48 @@ async function checkDomain(project, domain, newestReady) {
   }
 }
 
-async function verifyProject(project) {
-  const newestReady = await findNewestReady(project)
+async function verifyProject(project, { token, head }) {
+  let newestReady = await findNewestReady(project)
+  // A non-always-build project (www) cancels most pushes via its ignore-build-
+  // step, so its recent deployments are all Canceled and the real Ready build
+  // is buried past the scan window. Don't fail — fall back to whatever the
+  // apex domain currently serves (an older, legitimately-Ready build).
+  if (newestReady.error && project.alwaysBuilds === false) {
+    const served = await inspect(project.domains[0])
+    if (!served.error && /^ready$/i.test(served.status ?? '')) {
+      newestReady = { url: served.url, id: served.id, viaDomain: true }
+    }
+  }
   if (newestReady.error) return { project: project.name, error: newestReady.error }
-  log(`[${project.label}] newest READY production deployment: ${hostOf(newestReady.url)}`)
+  log(
+    `[${project.label}] ${newestReady.viaDomain ? 'serving' : 'newest READY'} production ` +
+      `deployment: ${hostOf(newestReady.url)}${newestReady.viaDomain ? ' (ignore-build-step; no recent rebuild)' : ''}`,
+  )
+
+  // Commit guard (AGL-566): is the newest deployment built from HEAD?
+  let commit = null
+  if (head?.sha) {
+    const sha = await deploymentCommitSha(newestReady.id, token)
+    if (!token) {
+      commit = { status: 'skipped', note: 'set VERCEL_TOKEN or log in with the Vercel CLI' }
+    } else if (!sha) {
+      commit = { status: 'unknown', note: 'commit unavailable from the Vercel API' }
+    } else {
+      const onHead = sha === head.sha
+      // Only an always-build project lagging HEAD is a real problem: a missed
+      // build. www trails HEAD by design (per-path ignore-build-step).
+      const behind = !onHead && project.alwaysBuilds !== false
+      commit = { sha, head: head.sha, onHead, behind }
+      log(
+        `[${project.label}] commit ${short(sha)} ${onHead ? '==' : '!='} HEAD ${short(head.sha)}` +
+          (behind
+            ? ' — BUILD MISSING for HEAD (production merge never built)'
+            : onHead
+              ? ''
+              : ' (ignore-build-step; trails HEAD by design)'),
+      )
+    }
+  }
 
   let domains = []
   for (const domain of project.domains) {
@@ -264,19 +402,26 @@ async function verifyProject(project) {
     }
   }
 
-  return { project: project.name, newestReady, domains, promoted }
+  return { project: project.name, newestReady, domains, promoted, commit }
+}
+
+const commitCell = (c) => {
+  if (!c) return '—'
+  if (c.status === 'skipped' || c.status === 'unknown') return c.status
+  if (c.onHead) return `${short(c.sha)}=HEAD`
+  return `${short(c.sha)} ${c.behind ? 'MISSING' : 'trails(ok)'}`
 }
 
 function printTable(results) {
   const rows = []
   for (const r of results) {
     if (r.error) {
-      rows.push([r.project, '—', '—', '—', `ERROR: ${r.error}`])
+      rows.push([r.project, '—', '—', '—', '—', `ERROR: ${r.error}`])
       continue
     }
     for (const d of r.domains) {
       if (d.error) {
-        rows.push([r.project, hostOf(d.domain), hostOf(r.newestReady.url), '—', `ERROR: ${d.error}`])
+        rows.push([r.project, hostOf(d.domain), hostOf(r.newestReady.url), '—', commitCell(r.commit), `ERROR: ${d.error}`])
       } else {
         const verdict =
           d.verdict === 'current'
@@ -284,11 +429,11 @@ function printTable(results) {
               ? 'current (fixed)'
               : 'current'
             : `STALE${d.promoted ? ' (still stale after promote)' : ''}${d.note ? ` — ${d.note}` : ''}`
-        rows.push([r.project, hostOf(d.domain), hostOf(r.newestReady.url), hostOf(d.serving.url) ?? d.serving.id ?? '?', verdict])
+        rows.push([r.project, hostOf(d.domain), hostOf(r.newestReady.url), hostOf(d.serving.url) ?? d.serving.id ?? '?', commitCell(r.commit), verdict])
       }
     }
   }
-  const header = ['PROJECT', 'DOMAIN', 'NEWEST READY', 'SERVING', 'VERDICT']
+  const header = ['PROJECT', 'DOMAIN', 'NEWEST READY', 'SERVING', 'COMMIT', 'VERDICT']
   const widths = header.map((h, i) => Math.max(h.length, ...rows.map((row) => String(row[i]).length)))
   const fmt = (row) => row.map((cell, i) => String(cell).padEnd(widths[i])).join('  ')
   console.log('')
@@ -312,21 +457,42 @@ async function main() {
   }
   log(`Authenticated as ${firstLine(who.stdout)} (scope ${TEAM_SCOPE})`)
 
+  // Shared inputs for the commit guard (AGL-566), resolved once.
+  const token = readVercelToken()
+  const head = await productionHeadSha()
+  if (head?.sha) {
+    log(
+      `Production HEAD: ${short(head.sha)} (${head.remote}/${head.branch})` +
+        (token ? '' : ' — commit check SKIPPED (no Vercel API token)'),
+    )
+  } else {
+    log('Production HEAD: unknown (git ls-remote failed) — commit check skipped')
+  }
+
   const results = []
   for (const project of PROJECTS) {
-    results.push(await verifyProject(project))
+    results.push(await verifyProject(project, { token, head }))
   }
 
   const anyError = results.some((r) => r.error || r.domains?.some((d) => d.error))
   const anyStale = results.some((r) => r.domains?.some((d) => d.verdict === 'STALE'))
-  const exitCode = anyError ? 2 : anyStale ? 1 : 0
+  const anyBuildMissing = results.some((r) => r.commit?.behind)
+  const exitCode = anyError ? 2 : anyStale || anyBuildMissing ? 1 : 0
 
   if (JSON_OUT) {
-    console.log(JSON.stringify({ ok: exitCode === 0, exitCode, fix: FIX, results }, null, 2))
+    console.log(JSON.stringify({ ok: exitCode === 0, exitCode, fix: FIX, head, results }, null, 2))
   } else {
     printTable(results)
     if (anyStale && !FIX) {
       console.log('Stale alias detected — re-run with --fix to promote the newest deployment.')
+    }
+    if (anyBuildMissing) {
+      const behind = results.filter((r) => r.commit?.behind).map((r) => r.project)
+      console.log(
+        `Build MISSING for production HEAD on: ${behind.join(', ')} — the production ` +
+          "merge never built (dropped Vercel webhook, AGL-566). Re-push the branch or " +
+          'trigger a redeploy; `--fix` cannot repair this (there is no HEAD build to promote).',
+      )
     }
   }
   process.exit(exitCode)
