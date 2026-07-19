@@ -194,6 +194,12 @@ export enum FieldComponentType {
    */
   SCREEN_SELECT = 'screen-select',
   /**
+   * Select listing the canvas's other elements (AGL-557): the editor
+   * resolves options from the live canvas at edit time and persists the
+   * node id — e.g. the form's reveal-on-submit target.
+   */
+  NODE_SELECT = 'node-select',
+  /**
    * Id-based entity pickers (AGL-343/344): the editor resolves options
    * from EntityPickerContext at edit time and persists the entity id —
    * renames never break the reference.

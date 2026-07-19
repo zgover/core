@@ -17,7 +17,16 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import Form, { FormField, formFieldSchema, parseFieldOptions } from './form'
+import Form, {
+  FORM_SUBMITTED_EVENT,
+  FormField,
+  formNavigation,
+  formFieldSchema,
+  formSchema,
+  parseFieldOptions,
+  resolveRedirectTarget,
+  sanitizeRedirectUrl,
+} from './form'
 
 /** Renders children inside a Form with a live site context + fetch mock. */
 const renderForm = (children: React.ReactNode) => {
@@ -177,6 +186,184 @@ describe('form survey fields (AGL-544)', () => {
       await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
       // Only the hidden input submits; the `__`-prefixed radios do not.
       expect(submittedFields(fetchMock)).toEqual({ satisfaction: '4' })
+    })
+  })
+
+  describe('after-submit outcomes (AGL-557)', () => {
+    describe('sanitizeRedirectUrl', () => {
+      it('allows same-site paths and absolute https URLs', () => {
+        expect(sanitizeRedirectUrl('/thanks')).toBe('/thanks')
+        expect(sanitizeRedirectUrl('  /thanks?x=1  ')).toBe('/thanks?x=1')
+        expect(sanitizeRedirectUrl('https://example.com/next')).toBe(
+          'https://example.com/next',
+        )
+        expect(sanitizeRedirectUrl('HTTPS://EXAMPLE.COM')).toBe(
+          'HTTPS://EXAMPLE.COM',
+        )
+      })
+
+      it('rejects protocol-relative, http, and script URLs', () => {
+        expect(sanitizeRedirectUrl('//evil.com/x')).toBeUndefined()
+        expect(sanitizeRedirectUrl('http://example.com')).toBeUndefined()
+        expect(sanitizeRedirectUrl('javascript:alert(1)')).toBeUndefined()
+        expect(sanitizeRedirectUrl('data:text/html,x')).toBeUndefined()
+        expect(sanitizeRedirectUrl('thanks')).toBeUndefined()
+        expect(sanitizeRedirectUrl('')).toBeUndefined()
+        expect(sanitizeRedirectUrl(undefined)).toBeUndefined()
+      })
+    })
+
+    describe('resolveRedirectTarget', () => {
+      it('prefers the resolved screen href over the manual URL', () => {
+        expect(resolveRedirectTarget('/thanks', 'https://x.com')).toBe(
+          '/thanks',
+        )
+        expect(resolveRedirectTarget(undefined, '/thanks')).toBe('/thanks')
+        expect(
+          resolveRedirectTarget(undefined, 'javascript:alert(1)'),
+        ).toBeUndefined()
+        expect(resolveRedirectTarget(undefined, undefined)).toBeUndefined()
+      })
+    })
+
+    /** jsdom's location is unpatchable — stub the navigation seam. */
+    const mockLocationAssign = () => {
+      const assign = jest
+        .spyOn(formNavigation, 'assign')
+        .mockImplementation(() => undefined)
+      return { assign, restore: () => assign.mockRestore() }
+    }
+
+    const renderOutcomeForm = (
+      props: Partial<React.ComponentProps<typeof Form>>,
+      context: Partial<Aglyn.ScreenLinkContextValue> = {},
+    ) => {
+      const utils = render(
+        <Aglyn.SiteContext.Provider value={{ hostId: 'host-1' }}>
+          <Aglyn.ScreenLinkContext.Provider value={context}>
+            <Form formName="Signup" {...props}>
+              <FormField fieldName="email" fieldType="email" />
+            </Form>
+          </Aglyn.ScreenLinkContext.Provider>
+        </Aglyn.SiteContext.Provider>,
+      )
+      const form = utils.container.querySelector('form') as HTMLFormElement
+      return { ...utils, form }
+    }
+
+    it('dispatches the submitted event on success', async () => {
+      const listener = jest.fn()
+      window.addEventListener(FORM_SUBMITTED_EVENT, listener)
+      const { form } = renderOutcomeForm({})
+      fireEvent.submit(form)
+      await waitFor(() => expect(listener).toHaveBeenCalledTimes(1))
+      expect((listener.mock.calls[0][0] as CustomEvent).detail).toEqual({
+        formName: 'Signup',
+      })
+      window.removeEventListener(FORM_SUBMITTED_EVENT, listener)
+    })
+
+    it('redirects to the resolved screen route after a successful submit', async () => {
+      const { assign, restore } = mockLocationAssign()
+      const { form } = renderOutcomeForm(
+        { afterSubmit: 'redirect', redirectScreenId: 'scr-1' },
+        { screens: { 'scr-1': 'thank-you' } },
+      )
+      fireEvent.submit(form)
+      await waitFor(() =>
+        expect(assign).toHaveBeenCalledWith('/thank-you'),
+      )
+      restore()
+    })
+
+    it('falls back to the message and never navigates on a bad URL', async () => {
+      const { assign, restore } = mockLocationAssign()
+      const { form } = renderOutcomeForm({
+        afterSubmit: 'redirect',
+        redirectUrl: '//evil.com/x',
+      })
+      fireEvent.submit(form)
+      await waitFor(() =>
+        expect(screen.getByRole('alert').textContent).toMatch(/Thanks/),
+      )
+      expect(assign).not.toHaveBeenCalled()
+      restore()
+    })
+
+    it('never navigates on editing surfaces (suppressNavigation)', async () => {
+      const { assign, restore } = mockLocationAssign()
+      const { form } = renderOutcomeForm(
+        { afterSubmit: 'redirect', redirectScreenId: 'scr-1' },
+        { screens: { 'scr-1': 'thank-you' }, suppressNavigation: true },
+      )
+      fireEvent.submit(form)
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+      expect(assign).not.toHaveBeenCalled()
+      restore()
+    })
+
+    it('hides the reveal target until submit, then unmounts with the form', async () => {
+      const { container, form } = renderOutcomeForm({
+        afterSubmit: 'reveal',
+        revealNodeId: 'node-1',
+      })
+      const style = container.querySelector('style')
+      expect(style?.textContent).toBe(
+        '[data-aglyn="leaf:node-1"]{display:none !important}',
+      )
+      fireEvent.submit(form)
+      // The whole form (style tag included) unmounts — that is the reveal.
+      await waitFor(() =>
+        expect(container.querySelector('style')).toBeNull(),
+      )
+      expect(container.querySelector('form')).toBeNull()
+      expect(screen.queryByRole('alert')).toBeNull()
+    })
+
+    it('ignores reveal ids that could smuggle CSS selector syntax', async () => {
+      const { container, form } = renderOutcomeForm({
+        afterSubmit: 'reveal',
+        revealNodeId: 'x"],body{display:none}',
+      })
+      expect(container.querySelector('style')).toBeNull()
+      fireEvent.submit(form)
+      // Degrades to the message outcome.
+      await waitFor(() =>
+        expect(screen.getByRole('alert').textContent).toMatch(/Thanks/),
+      )
+    })
+
+    it('keeps the reveal target visible on editing surfaces', () => {
+      const { container } = renderOutcomeForm(
+        { afterSubmit: 'reveal', revealNodeId: 'node-1' },
+        { suppressNavigation: true },
+      )
+      expect(container.querySelector('style')).toBeNull()
+    })
+
+    it('declares the outcome attributes with edit-time conditions', () => {
+      const byName = Object.fromEntries(
+        (formSchema.attributes ?? []).map((attribute) => [
+          attribute.name,
+          attribute,
+        ]),
+      )
+      expect((byName['afterSubmit']?.options ?? []).map((o: any) => o.value))
+        .toEqual(['', 'redirect', 'reveal'])
+      expect(byName['redirectScreenId']?.component).toBe(
+        Aglyn.FieldComponentType.SCREEN_SELECT,
+      )
+      expect(byName['revealNodeId']?.component).toBe(
+        Aglyn.FieldComponentType.NODE_SELECT,
+      )
+      expect(byName['redirectScreenId']?.condition).toEqual({
+        when: 'afterSubmit',
+        is: 'redirect',
+      })
+      expect(byName['revealNodeId']?.condition).toEqual({
+        when: 'afterSubmit',
+        is: 'reveal',
+      })
     })
   })
 
