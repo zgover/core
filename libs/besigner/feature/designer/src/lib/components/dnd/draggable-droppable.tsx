@@ -96,6 +96,19 @@ export const DraggableDroppable = observer(
             cursor: 'move',
           }
         : {}),
+      // Element-picker affordance (AGL-574): while the interaction builder
+      // is picking a target, every leaf shows the crosshair and the hovered
+      // one gets a distinct violet ring — deliberately unlike the normal
+      // selection/drop outlines so "pick this" reads as its own mode.
+      ...(Besigner.pick.isPicking() ? { cursor: 'crosshair' } : {}),
+      ...(Besigner.pick.isPicking() && Besigner.focus.isNodeHovered(node)
+        ? {
+            outlineColor: '#7c4dff',
+            outlineStyle: 'solid',
+            outlineWidth: 2,
+            outlineOffset: 2 as any,
+          }
+        : {}),
     }
 
     const ref = useRef<HTMLElement>(null)
@@ -142,6 +155,14 @@ export const DraggableDroppable = observer(
       function handleMouseDown(e: Event) {
         e.preventDefault()
         e.stopPropagation()
+        // Element-picker capture (AGL-574): while the interaction builder is
+        // picking, this click resolves the target and exits pick mode —
+        // never the normal select/navigate, so the designer's selection and
+        // the open interaction stay put.
+        if (Besigner.pick.isPicking()) {
+          Besigner.pick.handlePickClick(node.$id)
+          return
+        }
         // Canvas multi-selection modifiers (AGL-12), mirroring the
         // hierarchy panel: Shift ranges, Cmd/Ctrl toggles.
         const pointer = e as globalThis.MouseEvent
@@ -160,8 +181,7 @@ export const DraggableDroppable = observer(
         // — same gate the drag system uses.
         const flag = node?.componentSchema?.flags?.textEditable
         const editable =
-          typeof flag === 'number' &&
-          (flag & Aglyn.FEATURE_FLAG.ENABLED) !== 0
+          typeof flag === 'number' && (flag & Aglyn.FEATURE_FLAG.ENABLED) !== 0
         if (!editable || !Besigner.dnd.canDragNode(node)) return
         e.preventDefault()
         e.stopPropagation()

@@ -123,6 +123,54 @@ describe('canvas selection stamping (AGL-571)', () => {
   })
 })
 
+describe('canvas element-picker capture (AGL-574)', () => {
+  const pickable = () =>
+    ({
+      $id: 'pickable-node',
+      type: 'node',
+      componentId: 'unregistered-box',
+      props: {},
+      nodes: [],
+    }) as any
+
+  const leaf = () =>
+    document.querySelector('[data-aglyn="leaf:pickable-node"]') as HTMLElement
+
+  const mousedown = () =>
+    act(() => {
+      leaf().dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, cancelable: true }),
+      )
+    })
+
+  afterEach(() => {
+    Besigner.pick.cancelPick()
+    act(() => Besigner.focus.clearFocusStatus())
+  })
+
+  it('routes a picking click to the picker and skips normal selection', () => {
+    const onPicked = jest.fn()
+    render(<ElementLeafComponent node={pickable()} />)
+    act(() => Besigner.pick.startPick(onPicked))
+
+    mousedown()
+
+    // The picker receives the raw canvas id …
+    expect(onPicked).toHaveBeenCalledWith('pickable-node', expect.any(String))
+    // … the click never becomes a selection, and pick mode exits.
+    expect(Besigner.focus.getSelected()).toHaveLength(0)
+    expect(Besigner.pick.isPicking()).toBe(false)
+  })
+
+  it('selects normally when not picking', () => {
+    render(<ElementLeafComponent node={pickable()} />)
+    mousedown()
+    expect(Besigner.focus.getSelected().map((selected) => selected.$id)).toEqual(
+      ['pickable-node'],
+    )
+  })
+})
+
 describe('Leaf sx composition (AGL-569)', () => {
   it('applies node-level sx alongside props.sx on the shared Leaf', () => {
     // Repro shape from the live bug: props.sx colors the link while the
