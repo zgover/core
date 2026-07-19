@@ -18,17 +18,16 @@
 
 // Verifies that each production domain points at the newest READY production
 // deployment of its Vercel project, and (with --fix) repairs a stale alias by
-// running `vercel promote` from the correctly linked directory (AGL-542).
+// running `vercel promote` on that deployment (AGL-542).
 //
 // Why this exists: after promoting to production, the tenant wildcard domain
-// (*.aglyn.app) has repeatedly stayed aliased to a STALE deployment. The root
-// cause of most operator error is the repo-root `.vercel/repo.json`, which maps
-// EVERY directory to the console project (`app-aglyn-io`) — so a tenant-scoped
-// `vercel` command run from the wrong cwd silently inspects/promotes the wrong
-// project. The only directory correctly linked to `tenant-aglyn-app` is
-// `apps/tenant` (its own `.vercel/project.json`). This script resolves the
-// right cwd per project from the on-disk link files and cross-checks the
-// project name at runtime before trusting any result.
+// (*.aglyn.app) has repeatedly stayed aliased to a STALE deployment. Directory
+// links are a footgun here — the repo-root `.vercel/repo.json` maps EVERY
+// directory to the console project (`app-aglyn-io`) — so this script never
+// relies on the cwd link at all: it names the project explicitly in
+// `vercel ls <project> --prod`, identifies deployments by URL, and
+// cross-checks every result against the project name that `vercel inspect`
+// reports. A mismatch aborts rather than trusting the wrong project.
 //
 // Usage (relies on your existing `vercel` CLI login — no secrets read/stored):
 //
@@ -38,15 +37,14 @@
 //
 // Exit codes: 0 = all domains current; 1 = at least one domain stale (after
 // the fix attempt when --fix); 2 = operational error (vercel missing/not
-// authenticated, missing project link, unparseable CLI output).
+// authenticated, unparseable CLI output).
 //
 // CLI quirks handled here: `vercel inspect` prints to STDERR (we capture
 // both streams); piped `vercel ls` emits bare deployment URLs with no status
 // column (we confirm Ready via inspect); every inspect is timed out at ~30s.
 
 import { execFile } from 'node:child_process'
-import { readFileSync } from 'node:fs'
-import { dirname, join, relative, resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -54,31 +52,27 @@ const TEAM_SCOPE = 'team_Mu9NFauDO31nvj89PgmQJEtN'
 const INSPECT_TIMEOUT_MS = 30_000
 const LS_TIMEOUT_MS = 60_000
 const PROMOTE_TIMEOUT_MS = 240_000
-const MAX_LS_CANDIDATES = 5
+// Deep enough to reach a Ready deployment past the run of Canceled entries the
+// ignore-step produces on every non-production push.
+const MAX_LS_CANDIDATES = 25
 
 const PROJECTS = [
   {
     name: 'app-aglyn-io',
     label: 'console',
     domains: ['https://app.aglyn.io'],
-    // Root repo.json legitimately maps "." to app-aglyn-io; apps/console is
-    // the fallback if someone has linked it directly.
-    cwdCandidates: [repoRoot, join(repoRoot, 'apps', 'console')],
-    linkHint: 'vercel link --yes --scope ' + TEAM_SCOPE + ' --project app-aglyn-io',
   },
   {
     name: 'tenant-aglyn-app',
     label: 'tenant',
     // northwind-coffee.aglyn.app probes the *.aglyn.app wildcard alias.
-    domains: ['https://northwind-coffee.aglyn.app', 'https://aglyn.app'],
-    // MUST be apps/tenant: it is the only directory whose own
-    // .vercel/project.json links tenant-aglyn-app. Anywhere else falls
-    // through to the root repo.json and hits the console project.
-    cwdCandidates: [join(repoRoot, 'apps', 'tenant')],
-    linkHint:
-      'cd apps/tenant && vercel link --yes --scope ' +
-      TEAM_SCOPE +
-      ' --project tenant-aglyn-app',
+    domains: ['https://northwind-coffee.aglyn.app'],
+  },
+  {
+    name: 'www-aglyn-io',
+    label: 'www',
+    // The aglyn.app apex serves the marketing site, not the tenant wildcard.
+    domains: ['https://aglyn.app'],
   },
 ]
 
@@ -105,13 +99,13 @@ if (unknown.length > 0) {
 const log = (msg) => process.stderr.write(msg + '\n')
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-function vercel(cmdArgs, { cwd, timeoutMs = INSPECT_TIMEOUT_MS } = {}) {
+function vercel(cmdArgs, { timeoutMs = INSPECT_TIMEOUT_MS } = {}) {
   return new Promise((resolveP) => {
     execFile(
       'vercel',
       [...cmdArgs, '--scope', TEAM_SCOPE],
       {
-        cwd: cwd ?? repoRoot,
+        cwd: repoRoot,
         timeout: timeoutMs,
         maxBuffer: 16 * 1024 * 1024,
         encoding: 'utf8',
@@ -129,68 +123,6 @@ function vercel(cmdArgs, { cwd, timeoutMs = INSPECT_TIMEOUT_MS } = {}) {
       },
     )
   })
-}
-
-function readJsonIfExists(path) {
-  try {
-    return JSON.parse(readFileSync(path, 'utf8'))
-  } catch {
-    return null
-  }
-}
-
-/**
- * What is this directory linked to? Only the directory's OWN link files count
- * — deliberately no walk-up, because the repo-root repo.json maps everything
- * to app-aglyn-io and that fallback is exactly the AGL-542 footgun.
- */
-function linkedProjectAt(dir) {
-  const proj = readJsonIfExists(join(dir, '.vercel', 'project.json'))
-  if (proj?.projectId) {
-    return {
-      source: 'project.json',
-      projectId: proj.projectId,
-      projectName: proj.projectName ?? null,
-    }
-  }
-  const repo = readJsonIfExists(join(dir, '.vercel', 'repo.json'))
-  const entry = repo?.projects?.find((p) => p.directory === '.')
-  if (entry) {
-    return { source: 'repo.json', projectId: entry.id, projectName: entry.name ?? null }
-  }
-  return null
-}
-
-/** Pick the first candidate cwd whose own link plausibly targets the project. */
-function resolveProjectCwd(project) {
-  const seen = []
-  for (const dir of project.cwdCandidates) {
-    const link = linkedProjectAt(dir)
-    if (!link) continue
-    seen.push({ dir, link })
-    if (link.projectName === null || link.projectName === project.name) {
-      // projectName can be absent in older CLI link files; the runtime
-      // cross-checks below (deployment URL prefix + inspect `name`) catch a
-      // wrong link even then.
-      return { cwd: dir, link }
-    }
-  }
-  const detail =
-    seen.length > 0
-      ? ` (found link(s) to ${seen
-          .map((s) => `${s.link.projectName ?? s.link.projectId} in ${rel(s.dir)}`)
-          .join(', ')})`
-      : ''
-  return {
-    error:
-      `no directory is linked to ${project.name}${detail}. ` +
-      `Link it first: ${project.linkHint}`,
-  }
-}
-
-const rel = (p) => {
-  const r = relative(repoRoot, p)
-  return r === '' ? '<repo root>' : r
 }
 
 const hostOf = (url) => {
@@ -214,8 +146,8 @@ function parseInspect(out) {
   }
 }
 
-async function inspect(target, cwd) {
-  const res = await vercel(['inspect', target], { cwd, timeoutMs: INSPECT_TIMEOUT_MS })
+async function inspect(target) {
+  const res = await vercel(['inspect', target], { timeoutMs: INSPECT_TIMEOUT_MS })
   if (res.binMissing) throw new FatalError('`vercel` CLI not found on PATH — install it (npm i -g vercel)')
   if (res.timedOut) return { error: `inspect ${target} timed out after ${INSPECT_TIMEOUT_MS / 1000}s` }
   const parsed = parseInspect(res.out)
@@ -229,11 +161,11 @@ const firstLine = (s) => (s || '(empty output)').split('\n').find((l) => l.trim(
 
 class FatalError extends Error {}
 
-/** Newest-first production deployment URLs from piped `vercel ls --prod`. */
-async function listProdDeployments(cwd) {
-  const res = await vercel(['ls', '--prod'], { cwd, timeoutMs: LS_TIMEOUT_MS })
+/** Newest-first production deployment URLs from piped `vercel ls <project> --prod`. */
+async function listProdDeployments(project) {
+  const res = await vercel(['ls', project.name, '--prod'], { timeoutMs: LS_TIMEOUT_MS })
   if (res.binMissing) throw new FatalError('`vercel` CLI not found on PATH — install it (npm i -g vercel)')
-  if (res.timedOut) return { error: `\`vercel ls --prod\` timed out after ${LS_TIMEOUT_MS / 1000}s` }
+  if (res.timedOut) return { error: `\`vercel ls ${project.name} --prod\` timed out after ${LS_TIMEOUT_MS / 1000}s` }
   // Piped `vercel ls` emits bare deployment URLs (no status column) on stdout.
   let urls = res.stdout
     .split('\n')
@@ -244,35 +176,25 @@ async function listProdDeployments(cwd) {
     urls = [...new Set(res.out.match(/https:\/\/[a-z0-9][a-z0-9.-]*\.vercel\.app/gi) ?? [])]
   }
   if (urls.length === 0) {
-    return { error: `no production deployments found (\`vercel ls --prod\`): ${firstLine(res.out)}` }
+    return { error: `no production deployments found (\`vercel ls ${project.name} --prod\`): ${firstLine(res.out)}` }
   }
   return { urls }
 }
 
 /** Newest deployment whose inspect status is Ready. */
-async function findNewestReady(project, cwd) {
-  const listed = await listProdDeployments(cwd)
+async function findNewestReady(project) {
+  const listed = await listProdDeployments(project)
   if (listed.error) return { error: listed.error }
-  // Cross-check the link: deployment hosts start with "<project-name>-".
-  // If they don't, the cwd is linked to the wrong project (repo.json gotcha).
-  const wrong = listed.urls.find((u) => !hostOf(u).startsWith(`${project.name}-`))
-  if (wrong) {
-    return {
-      error:
-        `deployments listed from ${rel(cwd)} belong to a different project ` +
-        `(${hostOf(wrong)}) — this directory is not linked to ${project.name}. ` +
-        `Fix the link: ${project.linkHint}`,
-    }
-  }
   const tried = []
   for (const url of listed.urls.slice(0, MAX_LS_CANDIDATES)) {
-    const info = await inspect(url, cwd)
+    const info = await inspect(url)
     if (info.error) return { error: info.error }
+    // Authoritative cross-check: inspect reports the owning project's name.
     if (info.name && info.name !== project.name) {
       return {
         error:
           `\`vercel inspect ${url}\` reports project "${info.name}", expected ` +
-          `"${project.name}" — wrong link in ${rel(cwd)}. Fix it: ${project.linkHint}`,
+          `"${project.name}" — \`vercel ls ${project.name}\` returned another project's deployments`,
       }
     }
     if (/^ready$/i.test(info.status ?? '')) {
@@ -288,8 +210,8 @@ async function findNewestReady(project, cwd) {
 }
 
 /** Which deployment currently serves this domain? (inspect resolves the alias) */
-async function checkDomain(project, cwd, domain, newestReady) {
-  const info = await inspect(domain, cwd)
+async function checkDomain(project, domain, newestReady) {
+  const info = await inspect(domain)
   if (info.error) return { domain, error: info.error }
   const serving = { url: info.url ?? null, id: info.id ?? null, name: info.name ?? null }
   const current =
@@ -307,25 +229,19 @@ async function checkDomain(project, cwd, domain, newestReady) {
 }
 
 async function verifyProject(project) {
-  const resolved = resolveProjectCwd(project)
-  if (resolved.error) return { project: project.name, error: resolved.error }
-  const { cwd } = resolved
-  log(`[${project.label}] using cwd ${rel(cwd)} (${resolved.link.source})`)
-
-  const newestReady = await findNewestReady(project, cwd)
-  if (newestReady.error) return { project: project.name, cwd: rel(cwd), error: newestReady.error }
+  const newestReady = await findNewestReady(project)
+  if (newestReady.error) return { project: project.name, error: newestReady.error }
   log(`[${project.label}] newest READY production deployment: ${hostOf(newestReady.url)}`)
 
   let domains = []
   for (const domain of project.domains) {
-    domains.push(await checkDomain(project, cwd, domain, newestReady))
+    domains.push(await checkDomain(project, domain, newestReady))
   }
 
   let promoted = false
   if (FIX && domains.some((d) => d.verdict === 'STALE')) {
-    log(`[${project.label}] STALE domain detected — promoting ${hostOf(newestReady.url)} from ${rel(cwd)}`)
+    log(`[${project.label}] STALE domain detected — promoting ${hostOf(newestReady.url)}`)
     const res = await vercel(['promote', newestReady.url, '--yes'], {
-      cwd,
       timeoutMs: PROMOTE_TIMEOUT_MS,
     })
     if (!res.ok) {
@@ -340,7 +256,7 @@ async function verifyProject(project) {
         if (attempt > 0) await sleep(5000)
         domains = await Promise.all(
           domains.map(async (d) =>
-            d.error ? d : { ...(await checkDomain(project, cwd, d.domain, newestReady)), promoted: true },
+            d.error ? d : { ...(await checkDomain(project, d.domain, newestReady)), promoted: true },
           ),
         )
         if (domains.every((d) => d.error || d.verdict === 'current')) break
@@ -348,7 +264,7 @@ async function verifyProject(project) {
     }
   }
 
-  return { project: project.name, cwd: rel(cwd), newestReady, domains, promoted }
+  return { project: project.name, newestReady, domains, promoted }
 }
 
 function printTable(results) {

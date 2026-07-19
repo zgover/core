@@ -27,58 +27,55 @@ node tools/deploy/verify-production-aliases.mjs --json   # machine-readable outp
 
 ## What it checks
 
-| Project | Domain(s) checked | Linked directory |
-| --- | --- | --- |
-| `app-aglyn-io` (console) | `app.aglyn.io` | repo root (or `apps/console`) |
-| `tenant-aglyn-app` (tenant) | `northwind-coffee.aglyn.app` (wildcard probe), `aglyn.app` | `apps/tenant` **only** |
+| Project | Domain(s) checked |
+| --- | --- |
+| `app-aglyn-io` (console) | `app.aglyn.io` |
+| `tenant-aglyn-app` (tenant) | `northwind-coffee.aglyn.app` (wildcard probe) |
+| `www-aglyn-io` (marketing) | `aglyn.app` (the apex serves the marketing site, not the tenant wildcard) |
 
 For each project it finds the newest **Ready** production deployment
-(`vercel ls --prod`, confirmed via `vercel inspect`), inspects each domain to
-see which deployment actually serves it, and prints a verdict table:
-`current` or `STALE`. With `--fix` it runs `vercel promote <newest-ready-url>`
-from the correctly linked directory and re-verifies.
+(`vercel ls <project> --prod`, confirmed via `vercel inspect` — scanning past
+the run of Canceled deployments the ignore-step produces on non-production
+pushes), inspects each domain to see which deployment actually serves it, and
+prints a verdict table: `current` or `STALE`. With `--fix` it runs
+`vercel promote <newest-ready-url>` and re-verifies.
 
 Exit codes: `0` all current, `1` at least one stale (after the fix attempt when
-`--fix`), `2` operational error (CLI missing/unauthenticated, broken link,
-unparseable output).
+`--fix`), `2` operational error (CLI missing/unauthenticated, unparseable
+output).
 
 ## The `repo.json` gotcha (why staleness happens)
 
 The repo-root `.vercel/repo.json` maps **every** directory in the monorepo to
-the console project `app-aglyn-io`. The only directory correctly linked to
-`tenant-aglyn-app` is `apps/tenant`, via its own `.vercel/project.json`.
+the console project `app-aglyn-io`, and `apps/tenant` has no link files of its
+own — so any `vercel` command that relies on the *directory link* to pick the
+project silently operates on the **console** project: the promote "succeeds",
+but `*.aglyn.app` never moves.
 
-That means a tenant-scoped `vercel promote` / `vercel inspect` / `vercel ls`
-run from the repo root (or anywhere else) silently operates on the **console**
-project — the promote "succeeds", but `*.aglyn.app` never moves. The script
-defends against this three ways:
+The script therefore never uses directory links at all:
 
-1. It resolves the cwd per project from each directory's *own* link files
-   (no walk-up to the root `repo.json`).
-2. It refuses to proceed if the deployments listed from a directory belong to
-   a different project (deployment hostnames must start with the project name,
-   and `vercel inspect` must report the expected project).
-3. Tenant promotes always execute with cwd `apps/tenant`.
+1. Deployments are listed by explicit project name
+   (`vercel ls tenant-aglyn-app --prod`), which works from any directory.
+2. Promotes target an explicit deployment URL, which pins the project by
+   itself.
+3. Every `vercel inspect` result must report the expected project `name` —
+   any mismatch aborts with exit code `2` rather than trusting the wrong
+   project.
 
-If the tenant link is missing, re-create it:
-
-```bash
-cd apps/tenant && vercel link --yes \
-  --scope team_Mu9NFauDO31nvj89PgmQJEtN --project tenant-aglyn-app
-```
+The same rule applies when running `vercel` by hand: **always pass the project
+name or a full deployment URL**; never trust the directory link in this repo.
 
 ## Reading the output
 
 ```text
 PROJECT           DOMAIN                      NEWEST READY            SERVING                 VERDICT
 ----------------  --------------------------  ----------------------  ----------------------  -------
-app-aglyn-io      app.aglyn.io                app-aglyn-io-xxxx…      app-aglyn-io-xxxx…      current
-tenant-aglyn-app  northwind-coffee.aglyn.app  tenant-aglyn-app-new…   tenant-aglyn-app-old…   STALE
-tenant-aglyn-app  aglyn.app                   tenant-aglyn-app-new…   tenant-aglyn-app-old…   STALE
+app-aglyn-io      app.aglyn.io                app-aglyn-xxxx…         app-aglyn-xxxx…         current
+tenant-aglyn-app  northwind-coffee.aglyn.app  tenant-aglyn-new…       tenant-aglyn-old…       STALE
 ```
 
 A `STALE` row means the domain still serves an older deployment: re-run with
-`--fix`, or promote manually **from `apps/tenant`**. `--json` prints the same
+`--fix`, or run `vercel promote <newest-ready-url>` manually. `--json` prints the same
 result as structured JSON on stdout (progress goes to stderr), so it can gate
 CI or release automation.
 
