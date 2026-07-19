@@ -171,6 +171,7 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     // pickers (AGL-343/344) resolve the same way from EntityPickerContext.
     const { screens, labels } = useContext(Aglyn.ScreenLinkContext)
     const entityOptions = useContext(Aglyn.EntityPickerContext)
+<<<<<<< HEAD
     // Canvas-node options for NODE_SELECT attributes (AGL-557): every
     // other element on the canvas, labeled by component name + a text
     // snippet, with a short id suffix to tell repeats apart. The edited
@@ -207,6 +208,36 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
         })
         .sort((a, b) => a.label.localeCompare(b.label))
     }, [rawAttributes, node?.$id])
+=======
+    // Dataset-field selects (AGL-556) list the model fields of the nearest
+    // ancestor's chosen dataset (e.g. the form field's parent form). The
+    // ancestor persists the dataset id; legacy nodes carrying only a name
+    // resolve it by matching the current display labels.
+    const hasDatasetFieldSelect = (rawAttributes ?? []).some(
+      (field) =>
+        field.component === Aglyn.FieldComponentType.DATASET_FIELD_SELECT,
+    )
+    const ancestorDatasetId = useMemo(() => {
+      if (!hasDatasetFieldSelect || !node?.$id) return undefined
+      const nodes = Aglyn.canvas.toJSON().nodes as Record<string, any>
+      let current = nodes[node.$id]
+      for (let hops = 0; current && hops < 100; hops += 1) {
+        const props = current.props ?? {}
+        if (typeof props.datasetId === 'string' && props.datasetId) {
+          return props.datasetId as string
+        }
+        if (typeof props.datasetName === 'string' && props.datasetName) {
+          const byLabel = (entityOptions.datasets ?? []).find(
+            (dataset) => dataset.label === props.datasetName,
+          )
+          if (byLabel) return byLabel.id
+        }
+        current = current.parentId ? nodes[current.parentId] : undefined
+      }
+      return undefined
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hasDatasetFieldSelect, node, entityOptions.datasets])
+>>>>>>> main
     const attributes = useMemo(() => {
       const entityListFor = (component: Aglyn.FieldComponentType) => {
         switch (component) {
@@ -240,12 +271,37 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
             ],
           }
         }
+<<<<<<< HEAD
         if (field.component === Aglyn.FieldComponentType.NODE_SELECT) {
           // Canvas-element picker (AGL-557), resolved above.
           return {
             ...field,
             component: Aglyn.FieldComponentType.SELECT,
             options: [{ value: '', label: 'None' }, ...nodeOptions],
+=======
+        if (
+          field.component === Aglyn.FieldComponentType.DATASET_FIELD_SELECT
+        ) {
+          // Model order, never alphabetized — it mirrors the schema dialog.
+          const modelFields = ancestorDatasetId
+            ? entityOptions.datasetFields?.[ancestorDatasetId] ?? []
+            : []
+          return {
+            ...field,
+            component: Aglyn.FieldComponentType.SELECT,
+            options: [
+              {
+                value: '',
+                label: modelFields.length
+                  ? 'None (match by field name)'
+                  : 'No dataset selected on the form',
+              },
+              ...modelFields.map((modelField) => ({
+                value: modelField.id,
+                label: modelField.label,
+              })),
+            ],
+>>>>>>> main
           }
         }
         const entities = entityListFor(field.component as any)
@@ -263,7 +319,11 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
         }
         return field
       })
+<<<<<<< HEAD
     }, [rawAttributes, screens, labels, entityOptions, nodeOptions])
+=======
+    }, [rawAttributes, screens, labels, entityOptions, ancestorDatasetId])
+>>>>>>> main
 
     // Reusable-component flows (AGL-35): actions appear only when the host
     // app provides callbacks; locked nodes (layout chrome) never promote.
