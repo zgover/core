@@ -47,7 +47,19 @@ export const Leaf = observer(
     const Factory = Aglyn.components.getFactory(node?.componentId)
     const Component = isValidElementType(Factory) ? Factory : DefaultComponent
 
-    const textContent = resolvedProps?.['children']
+    // Self-closing components (AGL-579): a component whose schema flags it
+    // selfClosing renders a void DOM element (e.g. Image -> <img>), and React
+    // throws during SSR when ANY children value reaches one — even the empty
+    // `[undefined, false]` the JSX below always produces. Rendering the whole
+    // page 500s off one image node (blog covers, AGL-579), so honor the flag
+    // here: no JSX children, and strip a stray `children` prop too.
+    const schema = Aglyn.components.getSchema(node?.componentId)
+    const selfClosing = Boolean(
+      (schema?.flags?.selfClosing ?? 0) & Aglyn.FEATURE_FLAG.ENABLED,
+    )
+    if (selfClosing) delete resolvedProps['children']
+
+    const textContent = selfClosing ? null : resolvedProps?.['children']
 
     const mergedClassName =
       [propsClassName, node?.className, className].filter(Boolean).join(' ') ||
@@ -55,18 +67,25 @@ export const Leaf = observer(
     const mergedStyle =
       propsStyle || style ? { ...propsStyle, ...style } : undefined
 
+    // Shared leaf attributes; self-closing components must receive NO
+    // children at all (AGL-579) — a separate element expression keeps the
+    // childless case genuinely childless instead of `[undefined, false]`.
+    const leafProps = {
+      ref,
+      'data-aglyn': `leaf:${node?.$id}`,
+      ...resolvedProps,
+      ...rest,
+      className: mergedClassName,
+      style: mergedStyle,
+      // MUI array composition: later entries win on key conflicts, so the
+      // node-level sx (Styles panel output) overrides props.sx.
+      sx: mergeSxProps(sx as any, propsSx as any, node?.sx as any),
+    }
+
+    if (selfClosing) return <Component {...leafProps} />
+
     return (
-      <Component
-        ref={ref}
-        data-aglyn={`leaf:${node?.$id}`}
-        {...resolvedProps}
-        {...rest}
-        className={mergedClassName}
-        style={mergedStyle}
-        // MUI array composition: later entries win on key conflicts, so the
-        // node-level sx (Styles panel output) overrides props.sx.
-        sx={mergeSxProps(sx as any, propsSx as any, node?.sx as any)}
-      >
+      <Component {...leafProps}>
         {children}
 
         {textContent != null && (

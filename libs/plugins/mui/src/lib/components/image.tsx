@@ -61,8 +61,12 @@ const Image = forwardRef<HTMLElement, ImageProps>((props, ref) => {
     radius,
     screenId,
     href: externalHref,
+    // Never forward children to the <img> below — React throws on ANY
+    // children value reaching a void element, which 500'd whole pages
+    // when a renderer passed empty JSX children through (AGL-579).
+    children: _children,
     ...rest
-  } = props
+  } = props as ImageProps & { children?: unknown }
   // Optional link mode (AGL-339): screen id first (rename-safe), external
   // URL as fallback; suppressed in the besigner canvas like Screen Link.
   const { href: resolvedHref, suppressNavigation } =

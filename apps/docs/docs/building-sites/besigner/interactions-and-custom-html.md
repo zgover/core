@@ -18,7 +18,9 @@ one dialog without leaving the besigner:
 - **Frequency**: **every time** (the default — repeatable, for menu and
   drawer toggles), once per page view, once per session, once per
   visitor, or with a cooldown.
-- **Actions** (stack as many as you need):
+- **Actions** (stack as many as you need). The **basic** actions below are
+  pure in-page choreography — available on **every plan** (see
+  [Plan availability](#plan-availability)):
   - **Show / hide / show-hide an element** — pick any other canvas
     element from a list; no selectors or classes needed. Add the
     `aglyn-hidden` class to a target to start it hidden on the live
@@ -35,15 +37,54 @@ one dialog without leaving the besigner:
   - **Toggle / append / remove a class** — targets this element by
     default, or any CSS selector. Pair with your theme's utility classes
     for menus, reveals, and state changes.
-  - **Show a message**, **run a workflow**, **open an overlay**, **go to
-    a URL**, or **track an analytics event**. Workflows and overlays are
-    picked from lists — never typed by name — so renames can't break them.
+  - **Make the nav sticky**, **go to a URL / screen**, or **show a site
+    alert** — navigation and lightweight feedback, no server involved.
+- The remaining actions are the **automations engine** (Pro+, metered —
+  see [Plan availability](#plan-availability)):
+  - **Open an overlay**, **show custom HTML**, or **track an analytics
+    event** in the page.
+  - **Run custom JavaScript** (Business tier).
+  - **Server steps** — run a workflow, send an email, notify admins,
+    enroll a contact in a list, update a dataset, or assign a campaign.
+    Workflows, overlays, lists, and datasets are picked from lists — never
+    typed by name — so renames can't break them.
 - **Test** runs class and show/hide actions against the canvas
   immediately and explains what the other actions will do on the live
   site.
 
 Saved interactions are **enabled immediately** and appear on the element's
 Interactions list with edit (✎), enable/disable, and remove controls.
+
+## Plan availability
+
+Interactions come in two tiers, and the field editor labels the steps that
+need a higher plan:
+
+- **Basic interactions — every plan, including Free.** Opening and closing
+  menus and drawers, showing and hiding elements, toggling classes, sticky
+  nav, navigation, and site alerts are pure client-side DOM behavior with
+  **no server cost**. They run everywhere and are **never metered** — a
+  hover-to-open menu is not a paid feature.
+- **The automations engine — Pro+, metered.** Steps that reach the server
+  or a data pipeline — overlays, analytics events, custom JS (Business),
+  and the server steps (workflows, email, datasets, campaigns) — require
+  the `actions` entitlement and count against your monthly action runs.
+
+On a plan without the automations entitlement, an interaction that mixes
+tiers still runs its **basic** steps live; the Pro+ steps are simply
+skipped until you upgrade. See
+[workflows & actions](../../marketing-and-automation/workflows-and-actions/actions-builder.md)
+for the full step catalog and metering.
+
+## Pick the target by clicking
+
+Any action that points at an element — *open a menu*, *show / hide*, *open
+a drawer* — lets you **choose the target visually**: click **Pick element**,
+click the element on the canvas, and confirm. No CSS selectors to write,
+and the picker resolves the stable `data-aglyn` id under the hood so the
+target survives edits. A **custom selector** field is there as a secondary
+option for advanced cases (a class or attribute selector you maintain
+yourself).
 
 ### Interaction cookbook
 
@@ -78,5 +119,7 @@ theming or interactions.
 
 ## Related
 
+- [Walkthrough: build a mega menu with hover interactions](../../guides/mega-menu-with-interactions.md)
+- [Menus & navigation](../menus-and-navigation/overview.md)
 - [Besigner overview](overview.md)
 - [Workflows & actions](../../marketing-and-automation/workflows-and-actions/overview.md)

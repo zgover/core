@@ -147,6 +147,7 @@ for how breakpoint-scoped styles behave on the canvas.
 
 ## Related
 
+- [Walkthrough: build a mega menu with hover interactions](../../guides/mega-menu-with-interactions.md)
 - [Interactions & custom HTML](../besigner/interactions-and-custom-html.md)
 - [Responsive styling & custom CSS](../besigner/responsive-styling.md)
 - [Screens & layouts](../screens-and-layouts/overview.md)
