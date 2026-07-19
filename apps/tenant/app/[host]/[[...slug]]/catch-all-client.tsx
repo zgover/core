@@ -33,6 +33,7 @@ import {
 } from 'react'
 import { loadSiteRealmPlugins } from '../../../utils/realm-plugins.client'
 import { sitePluginLoader } from '../../../utils/site-plugin-loader'
+import MembershipPage from './membership-page'
 import type { Props } from './types'
 
 const CatchAllPage = observer(function CatchAllPage(props: Props) {
@@ -104,21 +105,6 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       active = false
     }
   }, [props.memberScreen, memberHostId, memberScreenId])
-  // Membership forms (AGL-109).
-  const [memberFormError, setMemberFormError] = useState<string | null>(null)
-  // Password recovery (AGL-552): reset token from the emailed link, read
-  // post-hydration (the query string is unavailable during SSR), and the
-  // step the built-in /recover flow is on.
-  const [recoverToken, setRecoverToken] = useState('')
-  const [recoverDone, setRecoverDone] = useState<
-    'requested' | 'reset' | null
-  >(null)
-  useEffect(() => {
-    if (props.membershipPage !== 'recover') return
-    setRecoverToken(
-      new URLSearchParams(window.location.search).get('token') ?? '',
-    )
-  }, [props.membershipPage])
 
   // Fill the canvas DURING render, not only in an effect: the server
   // otherwise emits an empty page (crawlers see nothing) and hydration
@@ -217,179 +203,21 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
 
   // Password-protected screens render an unlock form; the composed nodes
   // arrive from /api/protection/unlock after verification (AGL-87).
-  // Membership sign-in/up forms (AGL-109).
-  if (props.membershipPage === 'recover') {
-    // Built-in password recovery (AGL-552), mirroring /signin's pattern:
-    // request form by default, reset form when the emailed token is in the
-    // URL. Both endpoints are the AGL-552 membership APIs; the request
-    // route always reports success (no account-existence leak).
+  // Membership sign-in/up/recovery (AGL-109/552): the theme-wrapped
+  // built-in forms (AGL-553). A designated auth screen (host `authScreens`)
+  // arrives WITH composed nodes and falls through to the normal canvas
+  // render below instead.
+  if (props.membershipPage && !nodes) {
     return (
-      <div style={{ maxWidth: 420, margin: '15vh auto', padding: 24 }}>
+      <>
         <Head>
-          <title>{'Reset your password'}</title>
           <meta key="robots" name="robots" content="noindex" />
         </Head>
-        <h1 style={{ fontSize: 22 }}>{'Reset your password'}</h1>
-        {recoverDone === 'reset' ? (
-          <p>
-            {'Your password has been updated. '}
-            <a href="/signin">{'Sign in'}</a>
-          </p>
-        ) : recoverDone === 'requested' ? (
-          <p style={{ opacity: 0.8 }}>
-            {'If that email belongs to an account here, a reset link is ' +
-              'on its way. The link works once and expires in an hour.'}
-          </p>
-        ) : (
-          <form
-            onSubmit={async (event) => {
-              event.preventDefault()
-              setMemberFormError(null)
-              const form = new FormData(event.currentTarget)
-              const isReset = Boolean(recoverToken)
-              const response = await fetch(
-                isReset ? '/api/membership/reset' : '/api/membership/recover',
-                {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    hostId: props.data?.host?.$id,
-                    ...(isReset
-                      ? {
-                          token: recoverToken,
-                          password: String(form.get('password') ?? ''),
-                        }
-                      : { email: String(form.get('email') ?? '') }),
-                  }),
-                },
-              )
-              if (!response.ok) {
-                const payload = await response.json().catch(() => ({}))
-                return setMemberFormError(
-                  payload?.error ?? 'Something went wrong',
-                )
-              }
-              setRecoverDone(isReset ? 'reset' : 'requested')
-            }}
-          >
-            {recoverToken ? (
-              <input
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                placeholder="New password (min 8 characters)"
-                style={{ width: '100%', padding: 8 }}
-              />
-            ) : (
-              <input
-                name="email"
-                type="email"
-                required
-                placeholder="Email"
-                style={{ width: '100%', padding: 8 }}
-              />
-            )}
-            <button
-              type="submit"
-              style={{ marginTop: 12, padding: '8px 16px' }}
-            >
-              {recoverToken ? 'Set new password' : 'Email me a reset link'}
-            </button>
-            {memberFormError ? (
-              <p style={{ color: '#c62828' }}>{memberFormError}</p>
-            ) : null}
-          </form>
-        )}
-        <p style={{ opacity: 0.8 }}>
-          <a href="/signin">{'Back to sign in'}</a>
-        </p>
-      </div>
-    )
-  }
-  if (props.membershipPage) {
-    const isSignup = props.membershipPage === 'signup'
-    return (
-      <div style={{ maxWidth: 420, margin: '15vh auto', padding: 24 }}>
-        <Head>
-          <title>{isSignup ? 'Sign up' : 'Sign in'}</title>
-          <meta key="robots" name="robots" content="noindex" />
-        </Head>
-        <h1 style={{ fontSize: 22 }}>
-          {isSignup ? 'Create your account' : 'Welcome back'}
-        </h1>
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault()
-            setMemberFormError(null)
-            const form = new FormData(event.currentTarget)
-            const response = await fetch(
-              isSignup ? '/api/membership/register' : '/api/membership/login',
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  hostId: props.data?.host?.$id,
-                  email: String(form.get('email') ?? ''),
-                  password: String(form.get('password') ?? ''),
-                  ...(isSignup
-                    ? { displayName: String(form.get('displayName') ?? '') }
-                    : {}),
-                }),
-              },
-            )
-            if (!response.ok) {
-              const payload = await response.json().catch(() => ({}))
-              return setMemberFormError(
-                payload?.error ??
-                  (isSignup ? 'Sign-up failed' : 'Sign-in failed'),
-              )
-            }
-            window.location.href = '/'
-          }}
-        >
-          {isSignup ? (
-            <input
-              name="displayName"
-              placeholder="Name"
-              style={{ width: '100%', padding: 8, marginBottom: 8 }}
-            />
-          ) : null}
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            style={{ width: '100%', padding: 8, marginBottom: 8 }}
-          />
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={isSignup ? 8 : undefined}
-            placeholder="Password"
-            style={{ width: '100%', padding: 8 }}
-          />
-          <button type="submit" style={{ marginTop: 12, padding: '8px 16px' }}>
-            {isSignup ? 'Sign up' : 'Sign in'}
-          </button>
-          {memberFormError ? (
-            <p style={{ color: '#c62828' }}>{memberFormError}</p>
-          ) : null}
-        </form>
-        <p style={{ opacity: 0.8 }}>
-          {isSignup ? (
-            <a href="/signin">{'Already a member? Sign in'}</a>
-          ) : (
-            <>
-              <a href="/signup">{'New here? Create an account'}</a>
-              {' · '}
-              {/* Recovery flow (AGL-552). */}
-              <a href="/recover">{'Forgot password?'}</a>
-            </>
-          )}
-        </p>
-      </div>
+        <MembershipPage
+          page={props.membershipPage}
+          hostId={props.data?.host?.$id}
+        />
+      </>
     )
   }
 

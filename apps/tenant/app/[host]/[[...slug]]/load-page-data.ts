@@ -172,6 +172,60 @@ export const loadPageData = cache(
     // Membership routes (AGL-109): fixed sign-in/up surfaces per site,
     // plus /recover for password recovery (AGL-552).
     if (path === 'signin' || path === 'signup' || path === 'recover') {
+      // Designable auth screens (AGL-553): a host can designate a
+      // besigner-built screen per auth route (host doc `authScreens`, set
+      // from Setup like `errorScreens`); it renders through the normal
+      // composition pipeline (theme + shared layout + nodes). Fallback =
+      // the built-in forms below.
+      const authScreens = (hostRes.host as any)?.authScreens ?? {}
+      const designatedScreenId =
+        path === 'signin'
+          ? authScreens.signinScreenId
+          : path === 'signup'
+            ? authScreens.signupScreenId
+            : authScreens.recoveryScreenId
+      if (designatedScreenId) {
+        const designated = await getScreen({
+          hostId,
+          screenId: designatedScreenId,
+        })
+        if (designated.screen) {
+          const designatedNodes = await composeScreenNodes({
+            hostId,
+            screenId: designatedScreenId,
+            screen: designated.screen,
+          })
+          if (designatedNodes) {
+            // The member auth blocks live in the commerce plugin, so the
+            // client needs the real enabled-plugin set (same gate as the
+            // published-screen path below).
+            const authEnabledPlugins =
+              await filterEnabledPluginsByReleaseFlags(
+                Aglyn.resolveEnabledPlugins(orgRes.org as never),
+                {
+                  subjectId:
+                    (orgRes.org as { $id?: string })?.$id ?? hostId,
+                },
+              )
+            return {
+              props: JSON.parse(
+                JSON.stringify({
+                  data: {
+                    host: hostRes.host,
+                    screen: { data: designated.screen },
+                  },
+                  nodes: designatedNodes,
+                  membershipPage: path,
+                  enabledPlugins: authEnabledPlugins,
+                  showBranding: !Aglyn.resolveOrgEntitlements(orgRes.org)
+                    .features.removeBranding,
+                }),
+              ),
+              revalidate: 60,
+            }
+          }
+        }
+      }
       return {
         props: JSON.parse(
           JSON.stringify({

@@ -22,6 +22,46 @@ subscription lapses) gated content is not served.
 Enable site **membership** so visitors can **sign in / sign up** to your site. New members
 flow into your [Contacts CRM](../../content-and-data/contacts/overview.md) automatically.
 
+## Sign-in, sign-up, and recovery pages
+
+Every site serves three membership routes out of the box:
+
+- **`/signin`** — email + password sign-in
+- **`/signup`** — create an account
+- **`/recover`** — forgotten-password recovery
+
+By default these render simple built-in forms styled with your site theme. To make them
+fully yours, **design them in the besigner** like any other screen:
+
+1. Create a screen and drop in the matching block from the **Members** group of the
+   element picker — **Member sign-in**, **Member sign-up**, or **Password recovery**.
+   Add anything else you like around it: your logo, imagery, copy.
+2. Open **Setup → Basic details → Sign-in & sign-up pages** and assign the screen to
+   its route.
+
+Assigned screens render through the normal pipeline — your theme, shared layout, and
+all — and are kept out of search results. Clearing a slot falls back to the built-in
+form.
+
+:::tip Send members back where they came from
+The sign-in and sign-up blocks honor a `continue` query parameter
+(e.g. `/signin?continue=/members/welcome`), so links from gated pages can return
+the visitor to the page they wanted. Only same-site paths are followed.
+:::
+
+### Forgotten passwords
+
+Members who forget their password can request a reset from the **Forgot password?**
+link on the sign-in form (or by visiting `/recover` directly):
+
+1. The member enters their account email. The response is always the same, so the
+   form can't be used to check whether an address has an account.
+2. If the address belongs to a member, they receive an email with a reset link to
+   your site. The link **works once** and **expires after one hour** — and completing
+   a reset invalidates any other outstanding links.
+3. The member sets a new password and signs in with it. Suspended members don't
+   receive reset emails.
+
 ## Gate a screen
 
 1. Open the screen you want to protect.

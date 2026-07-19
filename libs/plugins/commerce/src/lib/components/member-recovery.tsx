@@ -212,7 +212,7 @@ export const schema: Aglyn.ComponentSchema<MemberRecoveryProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Password recovery',
-  category: Aglyn.ComponentCategory.COMMERCE,
+  category: Aglyn.ComponentCategory.MEMBERS,
   icon: { path: mdiLockReset.path, sx: { color: '#2e7d32' } },
   flags: { selfClosing: Aglyn.FEATURE_FLAG.ENABLED },
   attributes: [
@@ -238,7 +238,7 @@ export const presets: Aglyn.PresetSchema[] = [
     displayName: 'Password recovery',
     pluginId: BUNDLE_ID,
     description: 'Forgot-password request and reset forms',
-    category: Aglyn.ComponentCategory.COMMERCE,
+    category: Aglyn.ComponentCategory.MEMBERS,
     icon: { path: mdiLockReset.path, sx: { color: '#2e7d32' } },
     data: {
       $id: null,

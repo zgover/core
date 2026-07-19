@@ -45,6 +45,7 @@ import AuthenticatedLayout from '../../../../components/layouts/authenticated.la
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import MainLayout from '../../../../components/layouts/main.layout'
+import AuthScreensCard from '../../../../components/auth-screens-card.component'
 import CustomDomainCard from '../../../../components/custom-domain-card.component'
 import FaviconCard from '../../../../components/favicon-card.component'
 import ErrorScreensCard from '../../../../components/error-screens-card.component'
@@ -485,6 +486,10 @@ const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
                             <>
                               <div style={{ marginTop: 24 }}>
                                 <ErrorScreensCard hostId={hostId} />
+                              </div>
+                              {/* Designable auth screens (AGL-553). */}
+                              <div style={{ marginTop: 24 }}>
+                                <AuthScreensCard hostId={hostId} />
                               </div>
                               <div style={{ marginTop: 24 }}>
                                 <LanguagesCard hostId={hostId} />

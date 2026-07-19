@@ -39,8 +39,9 @@ plan-gated (noted where relevant).
   **Navigation** (app bar, toolbar, screen links, language switcher, social links),
   **Text**, **Forms** (forms, fields, search), **Input** (buttons, switches, widgets),
   **Media** (images, video, icons), **Data Display** (lists, custom HTML, feeds),
-  **Commerce** (product grids, cart, checkout companions), **Surface**, then any
-  plugin-provided groups such as **Community** and **Your components**.
+  **Commerce** (product grids, cart, checkout companions), **Members** (sign-in,
+  sign-up, password recovery), **Surface**, then any plugin-provided groups such as
+  **Community** and **Your components**.
 - **Multi-select** across the hierarchy and canvas, then move the whole selection at once.
 - **Edit text inline** — double-click a text-capable element to type directly; opt-in
   elements support basic rich text.
