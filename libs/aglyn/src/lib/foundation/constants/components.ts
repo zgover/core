@@ -29,6 +29,8 @@ export enum ComponentCategory {
   MEDIA = 'Media',
   /** Store widgets: products, cart, checkout companions (AGL-541). */
   COMMERCE = 'Commerce',
+  /** Site-member auth: sign-in, sign-up, password recovery (AGL-553). */
+  MEMBERS = 'Members',
   SURFACE = 'Surface',
   NAVIGATION = 'Navigation',
   LAYOUT = 'Layout',
@@ -54,5 +56,6 @@ export const COMPONENT_CATEGORY_ORDER: readonly string[] = [
   ComponentCategory.MEDIA,
   ComponentCategory.DATA_DISPLAY,
   ComponentCategory.COMMERCE,
+  ComponentCategory.MEMBERS,
   ComponentCategory.SURFACE,
 ]

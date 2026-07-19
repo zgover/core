@@ -28,6 +28,9 @@ import * as Cart from './components/cart'
 import * as Gate from './components/gate'
 import * as GatedVideo from './components/gated-video'
 import * as MemberFeed from './components/member-feed'
+import * as MemberRecovery from './components/member-recovery'
+import * as MemberSignin from './components/member-signin'
+import * as MemberSignup from './components/member-signup'
 import * as NewsletterSignup from './components/newsletter-signup'
 import * as ProductDetail from './components/product-detail'
 import * as ReservationWidget from './components/reservation-widget'
@@ -94,6 +97,21 @@ export const COMMERCE_BUNDLE: PluginSdk.FeatureBundleEntry[] = [
     component: MemberFeed.default,
     schema: MemberFeed.schema,
     presets: MemberFeed.presets,
+  },
+  {
+    component: MemberRecovery.default,
+    schema: MemberRecovery.schema,
+    presets: MemberRecovery.presets,
+  },
+  {
+    component: MemberSignin.default,
+    schema: MemberSignin.schema,
+    presets: MemberSignin.presets,
+  },
+  {
+    component: MemberSignup.default,
+    schema: MemberSignup.schema,
+    presets: MemberSignup.presets,
   },
   {
     component: ReservationWidget.default,
