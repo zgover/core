@@ -27,6 +27,7 @@ import { collection, doc, limit, query, setDoc } from 'firebase/firestore'
 import { useMemo, useState } from 'react'
 import InteractionBuilderDialog, {
   type InteractionBuilderState,
+  PickModeBanner,
 } from './interaction-builder-dialog.component'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
@@ -190,6 +191,9 @@ export function InteractionsProvider(props: InteractionsProviderProps) {
           onClose={() => setBuilder(null)}
         />
       ) : null}
+      {/* Floating pick affordance while a builder target is picked on the
+          canvas (AGL-574) — shown over the minimized dialog. */}
+      <PickModeBanner />
     </InteractionsContext.Provider>
   )
 }

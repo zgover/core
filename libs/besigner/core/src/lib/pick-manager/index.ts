@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
-import { DndManager } from './dnd-manager'
-
-export * from './node-refs'
-export * from './dnd-manager'
-export * from './focus-manager'
-export * from './pick-manager'
-
-export const dnd = new DndManager()
+export * as pick from './pick-manager'
+export {
+  type PickHandler,
+  type StartPickOptions,
+  nodeElementLabel,
+} from './pick-manager'
