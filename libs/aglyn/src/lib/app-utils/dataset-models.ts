@@ -94,7 +94,13 @@ export interface DatasetFieldValidation {
 }
 
 export interface DatasetFieldDefinition {
-  /** Display name; doubles as the binding key for `{{item.name}}`. */
+  /**
+   * Human-facing display label only. The stable reference id is the KEY in
+   * `DatasetModel.fields` (and `order`), NOT this name — bindings resolve
+   * `{{item.<fieldId>}}` against that key. The default id is derived from
+   * this name once at creation but is user-overridable (AGL-578); renaming
+   * the label afterwards never changes the id.
+   */
   name: string
   type: DatasetFieldType
   /**
