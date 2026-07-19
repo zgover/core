@@ -38,6 +38,9 @@ import { generatePresetId } from '../utils/generate-preset-id'
 export const FORM_ID: Aglyn.ComponentId = 'form'
 export const FORM_FIELD_ID: Aglyn.ComponentId = 'formField'
 
+/** After-submit outcomes (AGL-557); message is the historical default. */
+export type FormAfterSubmit = 'message' | 'redirect' | 'reveal'
+
 export interface FormProps {
   /** Identifies the form in the submissions inbox. */
   formName?: string
@@ -53,6 +56,20 @@ export interface FormProps {
   datasetName?: string
   submitLabel?: string
   successMessage?: string
+  /**
+   * What a successful submit does (AGL-557): show the success message
+   * (default), redirect the visitor, or reveal a hidden element.
+   */
+  afterSubmit?: FormAfterSubmit
+  /** Redirect target screen — rename-safe id, resolved like ScreenLink. */
+  redirectScreenId?: string
+  /**
+   * Manual redirect target used when no screen is picked: a same-site
+   * `/path` or an absolute https URL (everything else is dropped).
+   */
+  redirectUrl?: string
+  /** Node revealed on submit; hidden until then (afterSubmit=reveal). */
+  revealNodeId?: string
   children?: React.ReactNode
 }
 
@@ -63,6 +80,45 @@ export interface FormProps {
  * `__` prefix keeps it out of the submitted fields.
  */
 export const FIELD_MAP_INPUT_PREFIX = '__map__'
+
+/**
+ * Redirect targets are restricted to same-origin paths (`/thanks`) and
+ * absolute https URLs (AGL-557): stored props reach every visitor's
+ * browser, so `javascript:`/`data:` URLs — and protocol-relative
+ * `//host` forms, which keep the scheme but swap the host — never pass.
+ */
+export const sanitizeRedirectUrl = (url?: string): string | undefined => {
+  const trimmed = (url ?? '').trim()
+  if (!trimmed) return undefined
+  if (/^https:\/\//i.test(trimmed)) return trimmed
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed
+  return undefined
+}
+
+/**
+ * Where a redirect outcome sends the visitor: the picked screen's
+ * resolved href wins; the manual URL is the fallback, sanitized above.
+ * Undefined (deleted screen, bad URL) degrades to the message outcome.
+ */
+export const resolveRedirectTarget = (
+  screenHref: string | undefined,
+  redirectUrl: string | undefined,
+): string | undefined => screenHref ?? sanitizeRedirectUrl(redirectUrl)
+
+// Reveal ids are interpolated into a CSS selector — restrict to the id
+// alphabet so a stored prop can't smuggle selector syntax (AGL-557).
+const REVEAL_NODE_ID_PATTERN = /^[A-Za-z0-9_-]+$/
+
+/**
+ * Navigation seam for the redirect outcome: jsdom's `window.location`
+ * is not patchable, so tests stub this indirection instead.
+ */
+export const formNavigation = {
+  assign: (url: string) => window.location.assign(url),
+}
+
+/** DOM event dispatched on every successful submit (AGL-557). */
+export const FORM_SUBMITTED_EVENT = 'aglyn:form-submitted'
 
 /**
  * Lead-capture form (AGL-76): collects its field children's values and
@@ -78,10 +134,30 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
     datasetName,
     submitLabel,
     successMessage,
+    afterSubmit,
+    redirectScreenId,
+    redirectUrl,
+    revealNodeId,
     children,
     ...rest
   } = props
   const { hostId } = Aglyn.useSite()
+  // Resolves the redirect screen like ScreenLink does (rename-safe) and
+  // flags editing surfaces, where outcomes must never fire (AGL-557).
+  const { href: redirectScreenHref, suppressNavigation } = Aglyn.useScreenLink(
+    afterSubmit === 'redirect' ? redirectScreenId : undefined,
+  )
+  // Reveal target (AGL-557): hidden through a form-owned <style> tag so
+  // SSR paints it hidden from the first frame; the style unmounts with
+  // the form after a successful submit — which IS the reveal. Editing
+  // surfaces keep the target visible so it stays editable.
+  const revealSelector =
+    afterSubmit === 'reveal' &&
+    revealNodeId &&
+    REVEAL_NODE_ID_PATTERN.test(revealNodeId) &&
+    !suppressNavigation
+      ? `[data-aglyn="leaf:${revealNodeId}"]`
+      : undefined
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>(
     'idle',
   )
@@ -141,16 +217,45 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
           // Site alerts from the actions builder (AGL-148).
           const payload = await response.json().catch(() => ({}))
           if (Array.isArray(payload?.alerts)) setAlerts(payload.alerts)
+          // Announced for reveal-style listeners/analytics (AGL-557).
+          window.dispatchEvent(
+            new CustomEvent(FORM_SUBMITTED_EVENT, {
+              detail: { formName: formName || 'Form' },
+            }),
+          )
+          if (afterSubmit === 'redirect' && !suppressNavigation) {
+            const target = resolveRedirectTarget(
+              redirectScreenHref,
+              redirectUrl,
+            )
+            // No valid target (deleted screen, rejected URL) degrades to
+            // the success message below.
+            if (target) formNavigation.assign(target)
+          }
         }
         setStatus(response.ok ? 'sent' : 'error')
       } catch {
         setStatus('error')
       }
     },
-    [hostId, status, formName, datasetId, datasetName],
+    [
+      hostId,
+      status,
+      formName,
+      datasetId,
+      datasetName,
+      afterSubmit,
+      redirectScreenHref,
+      redirectUrl,
+      suppressNavigation,
+    ],
   )
 
   if (status === 'sent') {
+    // Reveal outcome: the form (with its hide-style below) unmounts and
+    // the revealed element is the confirmation. Redirect keeps the
+    // message visible as a fallback while the browser navigates.
+    if (revealSelector) return null
     return (
       <Alert severity="success">
         {successMessage || 'Thanks — your message has been sent.'}
@@ -166,6 +271,12 @@ const Form = forwardRef<HTMLFormElement, FormProps>((props, ref) => {
       onSubmit={handleSubmit}
       {...rest}
     >
+      {/* Hides the reveal target until submit (AGL-557); rendered by the
+          form so SSR ships it hidden — no flash, no target-side props.
+          MUI Stack spacing already skips <style> children. */}
+      {revealSelector ? (
+        <style>{`${revealSelector}{display:none !important}`}</style>
+      ) : null}
       {children}
       {/* Honeypot: humans never see or fill this. */}
       <input
@@ -415,6 +526,48 @@ export const formSchema: Aglyn.ComponentSchema<FormProps> = {
       description: 'Shown after a successful submission.',
       component: Aglyn.FieldComponentType.TEXT_FIELD,
       label: 'Success message',
+    },
+    // After-submit outcomes (AGL-557).
+    {
+      name: 'afterSubmit',
+      description:
+        'What a successful submit does: show the success message, send ' +
+        'the visitor to another page, or reveal a hidden element.',
+      component: Aglyn.FieldComponentType.SELECT,
+      label: 'After submit',
+      options: [
+        { value: '', label: 'Show the success message' },
+        { value: 'redirect', label: 'Redirect the visitor' },
+        { value: 'reveal', label: 'Reveal a hidden element' },
+      ],
+    },
+    {
+      name: 'redirectScreenId',
+      description:
+        'Screen the visitor lands on after submitting. The address is ' +
+        "resolved at render time, so renaming the screen's slug never " +
+        'breaks the redirect.',
+      component: Aglyn.FieldComponentType.SCREEN_SELECT,
+      label: 'Redirect to screen',
+      condition: { when: 'afterSubmit', is: 'redirect' },
+    },
+    {
+      name: 'redirectUrl',
+      description:
+        'Used only when no screen is selected above: a same-site path ' +
+        '(/thanks) or an https URL. Anything else is ignored.',
+      component: Aglyn.FieldComponentType.TEXT_FIELD,
+      label: 'Redirect URL',
+      condition: { when: 'afterSubmit', is: 'redirect' },
+    },
+    {
+      name: 'revealNodeId',
+      description:
+        'Element shown after a successful submit — it stays hidden on ' +
+        'the published page until then.',
+      component: Aglyn.FieldComponentType.NODE_SELECT,
+      label: 'Element to reveal',
+      condition: { when: 'afterSubmit', is: 'reveal' },
     },
   ],
 }
