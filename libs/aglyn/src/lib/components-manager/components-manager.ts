@@ -31,6 +31,7 @@ import {
   type NodeSchemaNested,
   NodeType,
   type PresetId,
+  type PresetInteractionSchema,
   type PresetSchema,
   type SchemasByCategory,
 } from '../types/nodes'
@@ -44,6 +45,7 @@ export class AglynPreset<P = JSX.AnyProps> implements PresetSchema<P> {
   public displayName: string
   public icon: MdiIconProps
   public pluginId: PluginId
+  public interactions?: PresetInteractionSchema[]
 
   constructor(schema: PresetSchema<P>) {
     this.$id = schema.$id
@@ -53,6 +55,10 @@ export class AglynPreset<P = JSX.AnyProps> implements PresetSchema<P> {
     this.displayName = schema.displayName
     this.icon = schema.icon
     this.pluginId = schema.pluginId
+    // Interaction templates ride along so the add-element flow can wire
+    // them at insert (AGL-589) — an explicit copy, or the field is lost
+    // between registration and the drawer's resolved option.
+    this.interactions = schema.interactions
 
     makeAutoObservable(this)
   }
