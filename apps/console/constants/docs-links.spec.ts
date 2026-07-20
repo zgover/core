@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   buildDocsUrl,
@@ -23,7 +24,10 @@ import {
   DOCS_HELP_TOPICS,
 } from './docs-links'
 
-describe('docs-links', () => {
+const REPO_ROOT = join(__dirname, '../../..')
+const GENERATOR = join(REPO_ROOT, 'tools/scripts/generate-docs-help.mjs')
+
+describe('docs help registry', () => {
   it('has a well-formed base URL with no trailing slash', () => {
     expect(DOCS_BASE_URL).toMatch(/^https:\/\/[^/]+$/)
   })
@@ -40,155 +44,49 @@ describe('docs-links', () => {
     const topics = Object.entries(DOCS_HELP_TOPICS)
     expect(topics.length).toBeGreaterThan(0)
     for (const [key, topic] of topics) {
+      expect(key.length).toBeGreaterThan(0)
       expect(topic.path.startsWith('/')).toBe(true)
       expect(topic.path.endsWith('/')).toBe(false)
       expect(topic.title.length).toBeGreaterThan(0)
-      // Excerpts are tooltip copy — keep them brief.
+      // Excerpts are tooltip copy (verbatim docs descriptions) — keep short.
       expect(topic.excerpt.length).toBeGreaterThan(0)
-      expect(topic.excerpt.length).toBeLessThanOrEqual(200)
-      expect(key.length).toBeGreaterThan(0)
+      expect(topic.excerpt.length).toBeLessThanOrEqual(220)
     }
   })
 
-  it('uses only anchors that exist as headings on the linked docs page', () => {
-    // Mirror Docusaurus' github-slugger: lowercase, strip punctuation,
-    // then turn EVERY space into a hyphen (so "A & B" → "a--b").
-    const slugify = (heading: string) =>
-      heading
-        .trim()
-        .toLowerCase()
-        .replace(/[^\p{L}\p{N}\s-]/gu, '')
-        .replace(/ /g, '-')
-
-    const docsRoot = join(__dirname, '../../docs/docs')
-    const headingSlugs = (topicPath: string): Set<string> => {
-      const md = join(docsRoot, `${topicPath}.md`)
-      const source = readFileSync(md, 'utf8')
-      const slugs = new Set<string>()
-      for (const match of source.matchAll(/^#{2,4}\s+(.+?)\s*$/gm)) {
-        const explicit = match[1].match(/\{#([^}]+)\}\s*$/)
-        slugs.add(
-          explicit ? explicit[1] : slugify(match[1].replace(/\{#[^}]+\}\s*$/, '')),
-        )
-      }
-      return slugs
-    }
-
-    // Sweep every docsHelp('<topic>', { anchor: '#...' }) call in the app.
-    const sourceRoots = ['app', 'components', 'constants'].map((dir) =>
-      join(__dirname, '..', dir),
-    )
-    const sourceFiles: string[] = []
-    const walk = (dir: string) => {
-      for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        const full = join(dir, entry.name)
-        if (entry.isDirectory()) walk(full)
-        else if (/\.tsx?$/.test(entry.name)) sourceFiles.push(full)
-      }
-    }
-    sourceRoots.forEach(walk)
-
-    const anchorCall =
-      /docsHelp\(\s*'(\w+)'\s*,\s*\{[^}]*anchor:\s*'#([^']+)'/gs
-    for (const file of sourceFiles) {
-      const source = readFileSync(file, 'utf8')
-      for (const match of source.matchAll(anchorCall)) {
-        const [, topicKey, anchor] = match
-        const topic =
-          DOCS_HELP_TOPICS[topicKey as keyof typeof DOCS_HELP_TOPICS]
-        if (!topic) {
-          throw new Error(`${file} uses unknown docsHelp topic '${topicKey}'`)
-        }
-        const slugs = headingSlugs(topic.path)
-        if (!slugs.has(anchor)) {
-          throw new Error(
-            `${file} links ${topic.path}#${anchor}, but that heading does not exist (have: ${[...slugs].join(', ')})`,
-          )
-        }
-      }
-    }
-  })
-
-  it('validates the besigner designer lib docs links and anchors', () => {
-    // The designer lib can't import console constants, so it carries its own
-    // BESIGNER_DOCS map (libs/besigner/feature/designer/.../docs-help.ts).
-    // Validate its paths and every besignerDocsUrl anchor the same way.
-    const slugify = (heading: string) =>
-      heading
-        .trim()
-        .toLowerCase()
-        .replace(/[^\p{L}\p{N}\s-]/gu, '')
-        .replace(/ /g, '-')
-
-    const docsRoot = join(__dirname, '../../docs/docs')
-    const libRoot = join(
-      __dirname,
-      '../../../libs/besigner/feature/designer/src',
-    )
-    const helper = readFileSync(join(libRoot, 'lib/utils/docs-help.ts'), 'utf8')
-    const pages: Record<string, string> = {}
-    for (const match of helper.matchAll(/^\s*(\w+):\s*'([^']+)',$/gm)) {
-      pages[match[1]] = match[2]
-    }
-    expect(Object.keys(pages).length).toBeGreaterThan(0)
-    for (const [key, pagePath] of Object.entries(pages)) {
-      if (!existsSync(join(docsRoot, `${pagePath}.md`))) {
-        throw new Error(
-          `BESIGNER_DOCS.${key} points at ${pagePath}, but no page exists under apps/docs/docs`,
-        )
-      }
-    }
-
-    const sourceFiles: string[] = []
-    const walk = (dir: string) => {
-      for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        const full = join(dir, entry.name)
-        if (entry.isDirectory()) walk(full)
-        else if (/\.tsx?$/.test(entry.name)) sourceFiles.push(full)
-      }
-    }
-    walk(libRoot)
-
-    const anchorCall = /besignerDocsUrl\(\s*'(\w+)'\s*,\s*'#([^']+)'/gs
-    for (const file of sourceFiles) {
-      const source = readFileSync(file, 'utf8')
-      for (const match of source.matchAll(anchorCall)) {
-        const [, key, anchor] = match
-        const pagePath = pages[key]
-        if (!pagePath) {
-          throw new Error(`${file} uses unknown BESIGNER_DOCS key '${key}'`)
-        }
-        const md = readFileSync(join(docsRoot, `${pagePath}.md`), 'utf8')
-        const slugs = new Set<string>()
-        for (const heading of md.matchAll(/^#{2,4}\s+(.+?)\s*$/gm)) {
-          const explicit = heading[1].match(/\{#([^}]+)\}\s*$/)
-          slugs.add(
-            explicit
-              ? explicit[1]
-              : slugify(heading[1].replace(/\{#[^}]+\}\s*$/, '')),
-          )
-        }
-        if (!slugs.has(anchor)) {
-          throw new Error(
-            `${file} links ${pagePath}#${anchor}, but that heading does not exist (have: ${[...slugs].join(', ')})`,
-          )
-        }
-      }
-    }
-  })
-
-  it('points every topic at an existing apps/docs page', () => {
-    // Docs serve from the site root (docusaurus routeBasePath '/'), so a
-    // topic path maps 1:1 onto a markdown file under apps/docs/docs.
-    const docsRoot = join(__dirname, '../../docs/docs')
+  it('every topic points at an existing apps/docs page', () => {
+    const docsRoot = join(REPO_ROOT, 'apps/docs/docs')
     for (const [key, topic] of Object.entries(DOCS_HELP_TOPICS)) {
-      const md = join(docsRoot, `${topic.path}.md`)
-      const mdx = join(docsRoot, `${topic.path}.mdx`)
-      if (!existsSync(md) && !existsSync(mdx)) {
+      const exists =
+        existsSync(join(docsRoot, `${topic.path}.md`)) ||
+        existsSync(join(docsRoot, `${topic.path}.mdx`))
+      if (!exists) {
         throw new Error(
-          `DOCS_HELP_TOPICS.${key} points at ${topic.path}, but no matching page exists under apps/docs/docs`,
+          `DOCS_HELP_TOPICS.${key} points at ${topic.path}, but no page exists under apps/docs/docs. Regenerate: node tools/scripts/generate-docs-help.mjs`,
         )
       }
+    }
+  })
+
+  // The freshness gate: the generated registry (console + besigner) must match
+  // what the generator produces from apps/docs right now. This subsumes anchor
+  // validation — anchors are generated from headings, and the typed
+  // DocsHelpAnchor unions make a stale call-site anchor a compile error. If a
+  // docs page's title/description/headings changed without regenerating, this
+  // fails with the exact stale file (AGL-602).
+  it('is in sync with apps/docs (run the generator to fix)', () => {
+    expect(existsSync(GENERATOR)).toBe(true)
+    let error: (Error & { stdout?: Buffer; stderr?: Buffer }) | undefined
+    try {
+      execFileSync('node', [GENERATOR, '--check'], { cwd: REPO_ROOT })
+    } catch (caught) {
+      error = caught as typeof error
+    }
+    if (error) {
+      const detail = `${error.stdout ?? ''}${error.stderr ?? ''}`.trim()
+      throw new Error(
+        `Docs help registry is stale.\n${detail}\nRegenerate: node tools/scripts/generate-docs-help.mjs`,
+      )
     }
   })
 })
