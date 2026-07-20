@@ -57,8 +57,10 @@ export function useCurrentOrg(): {
   )
 
   useEffect(() => {
+    // Clear on every scope change (AGL-591): switching orgs must not keep
+    // the previous org's name/logo in the switcher until the new doc lands.
+    setOrg(undefined)
     if (!sourcePath) {
-      setOrg(undefined)
       return
     }
     let cancelled = false

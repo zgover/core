@@ -64,10 +64,13 @@ export function useFirestoreDoc<T = DocumentData>(
   useEffect(() => {
     setStatus('loading')
     setError(undefined)
+    // Clear on every dep change (AGL-591): a scope move between two live
+    // refs must not keep showing the previous doc until the new snapshot
+    // arrives. Mirrors use-firestore-collection.
+    setData(undefined)
 
     const ref = buildRefRef.current()
     if (!ref) {
-      setData(undefined)
       return
     }
 
