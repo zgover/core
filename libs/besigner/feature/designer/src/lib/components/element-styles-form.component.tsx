@@ -61,6 +61,7 @@ import {
   type FormRendererProps,
 } from '@aglyn/shared-ui-jsx-forms'
 import { Container, MdiIcon } from '@aglyn/shared-ui-jsx'
+import { useHostThemeDocument } from '@aglyn/shared-ui-theme'
 import { objectFlatten } from '@aglyn/shared-util-vendor'
 import {
   Chip,
@@ -86,12 +87,14 @@ import {
 import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 import {
+  canvasSchemeToSxScheme,
   deviceFlagToBreakpoint,
-  readSxValue,
-  writeSxValue,
 } from '../utils/responsive-sx'
 import {
+  applyStylePartialToSx,
+  buildFlexGapGroup,
   buildStyleFieldGroups,
+  computeEffectiveStyleValues,
   computeStylePartial,
   pickStyleValues,
   styleGroupFieldNames,
@@ -105,357 +108,7 @@ import {
 import { Accordion } from './accordion-list.component'
 import CustomCssForm from './custom-css-form.component'
 import ElementClassesField from './element-classes-field.component'
-import { ElementPropsFormTemplate } from './element-props-form.component'
-
-const stylesSchema = (presetColors: string[]) => ({
-  fields: [
-    {
-      component: FieldComponentType.SELECT,
-      name: 'display',
-      label: 'Display Variant',
-      description:
-        'The display property specifies the display behavior (the type of rendering box) of an element.',
-      options: [
-        { value: '', label: 'Default' },
-        { value: 'block', label: 'Block' },
-        { value: 'inline', label: 'Inline' },
-        { value: 'content', label: 'Contents' },
-        { value: 'list-item', label: 'List Item' },
-        { value: 'inline-block', label: 'Inline Block' },
-        { value: 'flex', label: 'Flex' },
-        { value: 'inline-flex', label: 'Inline Flex' },
-        { value: 'grid', label: 'Grid' },
-        { value: 'inline-grid', label: 'Inline Grid' },
-        { value: 'table', label: 'Table' },
-        { value: 'inline-table', label: 'Inline Table' },
-        { value: 'table-caption', label: 'Table Caption' },
-        { value: 'table-column', label: 'Table Column' },
-        { value: 'table-column-group', label: 'Table Column Group' },
-        { value: 'table-cell', label: 'Table Cell' },
-        { value: 'table-row', label: 'Table Row' },
-        { value: 'table-row-group', label: 'Table Row Group' },
-        { value: 'table-header-group', label: 'Table Header Group' },
-        { value: 'table-footer-group', label: 'Table Footer Group' },
-        { value: 'none', label: 'None' },
-        { value: 'initial', label: 'Initial' },
-        { value: 'unset', label: 'Unset' },
-      ],
-    },
-    {
-      component: FieldComponentType.COLOR_PICKER,
-      name: 'color',
-      label: 'Text Color',
-      description: 'The text color of the element',
-      presetColors,
-      FormFieldGridProps: {
-        size: { xs: 12, sm: 6 },
-      },
-    },
-    {
-      component: FieldComponentType.COLOR_PICKER,
-      name: 'backgroundColor',
-      label: 'Background Color',
-      description: 'The background color of the element',
-      presetColors,
-      FormFieldGridProps: {
-        size: { xs: 12, sm: 6 },
-      },
-    },
-    {
-      component: FieldComponentType.SELECT,
-      name: 'float',
-      label: 'Float',
-      description:
-        'The float property is used for positioning and formatting content e.g. let an image float left to the text in a container.',
-      options: [
-        {
-          value: '',
-          label: 'Default',
-        },
-        {
-          value: 'inherit',
-          label: 'Inherit',
-          description: 'The element inherits the float value of its parent',
-        },
-        {
-          value: 'none',
-          label: 'None',
-          description:
-            'The element does not float (will be displayed just where it occurs in the text)',
-        },
-        {
-          value: 'left',
-          label: 'Left',
-          description: 'The element floats to the left of its container',
-        },
-        {
-          value: 'right',
-          label: 'Right',
-          description: 'The element floats to the right of its container',
-        },
-      ],
-    },
-    {
-      component: FieldComponentType.SELECT,
-      name: 'flexDirection',
-      label: 'Flex Direction',
-      description:
-        'Sets how flex items are placed in the flex container defining the main axis and the direction (normal or reversed).',
-      options: [
-        { value: '', label: 'Default' },
-        { value: 'unset', label: 'Unset' },
-        { value: 'inherit', label: 'Inherit' },
-        { value: 'initial', label: 'Initial' },
-        { value: 'row', label: 'Row' },
-        { value: 'row-reverse', label: 'Row Reverse' },
-        { value: 'column', label: 'Column' },
-        { value: 'column-reverse', label: 'Column Reverse' },
-        { value: 'revert', label: 'Revert' },
-        { value: 'revert-layer', label: 'Revert Layer' },
-      ],
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      type: 'number',
-      name: 'flexGrow',
-      label: 'Flex Grow',
-      description: "Sets the flex grow factor of a flex item's main size",
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'gap',
-      label: 'Gap',
-      description:
-        'Sets the gaps (gutters) between rows and columns. It is a shorthand for row-gap and column-gap',
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'columnGap',
-      label: 'Column Gap',
-      description:
-        "Sets the size of the gap (gutter) between an element's columns",
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'rowGap',
-      label: 'Row Gap',
-      description:
-        "Sets the size of the gap (gutter) between an element's rows",
-    },
-    {
-      component: FieldComponentType.TEXT_FIELD,
-      name: 'flexBasis',
-      label: 'Flex Basis',
-      description:
-        'Sets the initial main size of a flex item. It sets the size of the content box unless otherwise set with box-sizing',
-    },
-    {
-      component: FieldComponentType.SELECT,
-      // type: 'number',
-      name: 'alignItems',
-      label: 'Align Items',
-      description:
-        'Sets the align-self value on all direct children as a group. In Flexbox, it controls the alignment of items on the Cross Axis. In Grid Layout, it controls the alignment of items on the Block Axis within their grid area',
-      options: [
-        { value: '', label: 'Default' },
-        { value: 'unset', label: 'Unset' },
-        { value: 'inherit', label: 'Inherit' },
-        { value: 'initial', label: 'Initial' },
-        { value: 'normal', label: 'normal' },
-        { value: 'stretch', label: 'stretch' },
-        { value: 'center', label: 'center' },
-        { value: 'start', label: 'start' },
-        { value: 'end', label: 'end' },
-        { value: 'flex-start', label: 'flex-start' },
-        { value: 'flex-end', label: 'flex-end' },
-        { value: 'baseline', label: 'baseline' },
-        { value: 'first baseline', label: 'first baseline' },
-        { value: 'last baseline', label: 'last baseline' },
-        { value: 'safe center', label: 'safe center' },
-        { value: 'unsafe center', label: 'unsafe center' },
-        { value: 'revert', label: 'revert' },
-        { value: 'revert-layer', label: 'revert-layer' },
-      ],
-    },
-    {
-      component: FieldComponentType.SELECT,
-      // type: 'number',
-      name: 'alignContent',
-      label: 'Align Content',
-      description:
-        "Sets the distribution of space between and around content items along a flexbox's cross-axis or a grid's block axis",
-      options: [
-        { value: '', label: 'Default' },
-        { value: 'unset', label: 'Unset' },
-        { value: 'inherit', label: 'Inherit' },
-        { value: 'initial', label: 'Initial' },
-        { value: 'normal', label: 'normal' },
-        { value: 'stretch', label: 'stretch' },
-        { value: 'center', label: 'center' },
-        { value: 'start', label: 'start' },
-        { value: 'end', label: 'end' },
-        { value: 'space-between', label: 'space-between' },
-        { value: 'space-around', label: 'space-around' },
-        { value: 'space-evenly', label: 'space-evenly' },
-        { value: 'flex-start', label: 'flex-start' },
-        { value: 'flex-end', label: 'flex-end' },
-        { value: 'baseline', label: 'baseline' },
-        { value: 'first baseline', label: 'first baseline' },
-        { value: 'last baseline', label: 'last baseline' },
-        { value: 'safe center', label: 'safe center' },
-        { value: 'unsafe center', label: 'unsafe center' },
-        { value: 'revert', label: 'revert' },
-        { value: 'revert-layer', label: 'revert-layer' },
-      ],
-    },
-    {
-      component: FieldComponentType.SELECT,
-      // type: 'number',
-      name: 'justifyContent',
-      label: 'Justify Content',
-      description:
-        'Defines how the browser distributes space between and around content items along the main-axis of a flex container, and the inline axis of a grid container',
-      options: [
-        { value: '', label: 'Default' },
-        { value: 'unset', label: 'Unset' },
-        { value: 'inherit', label: 'Inherit' },
-        { value: 'initial', label: 'Initial' },
-        { value: 'normal', label: 'normal' },
-        { value: 'stretch', label: 'stretch' },
-        { value: 'center', label: 'center' },
-        { value: 'start', label: 'start' },
-        { value: 'end', label: 'end' },
-        { value: 'space-between', label: 'space-between' },
-        { value: 'space-around', label: 'space-around' },
-        { value: 'space-evenly', label: 'space-evenly' },
-        { value: 'flex-start', label: 'flex-start' },
-        { value: 'flex-end', label: 'flex-end' },
-        { value: 'baseline', label: 'baseline' },
-        { value: 'first baseline', label: 'first baseline' },
-        { value: 'last baseline', label: 'last baseline' },
-        { value: 'safe center', label: 'safe center' },
-        { value: 'unsafe center', label: 'unsafe center' },
-        { value: 'revert', label: 'revert' },
-        { value: 'revert-layer', label: 'revert-layer' },
-      ],
-    },
-    {
-      component: FieldComponentType.SELECT,
-      // type: 'number',
-      name: 'justifyItems',
-      label: 'Justify Items',
-      description:
-        'Defines the default justify-self for all items of the box, giving them all a default way of justifying each box along the appropriate axis',
-      options: [
-        { value: '', label: 'Default' },
-        { value: 'unset', label: 'Unset' },
-        { value: 'inherit', label: 'Inherit' },
-        { value: 'initial', label: 'Initial' },
-        { value: 'normal', label: 'normal' },
-        { value: 'stretch', label: 'stretch' },
-        { value: 'center', label: 'center' },
-        { value: 'start', label: 'start' },
-        { value: 'end', label: 'end' },
-        { value: 'left', label: 'left' },
-        { value: 'right', label: 'right' },
-        { value: 'self-start', label: 'self-start' },
-        { value: 'self-end', label: 'self-end' },
-        { value: 'space-between', label: 'space-between' },
-        { value: 'space-around', label: 'space-around' },
-        { value: 'space-evenly', label: 'space-evenly' },
-        { value: 'flex-start', label: 'flex-start' },
-        { value: 'flex-end', label: 'flex-end' },
-        { value: 'baseline', label: 'baseline' },
-        { value: 'first baseline', label: 'first baseline' },
-        { value: 'last baseline', label: 'last baseline' },
-        { value: 'safe center', label: 'safe center' },
-        { value: 'unsafe center', label: 'unsafe center' },
-        { value: 'revert', label: 'revert' },
-        { value: 'revert-layer', label: 'revert-layer' },
-      ],
-    },
-    {
-      component: FieldComponentType.SELECT,
-      // type: 'number',
-      name: 'flexWrap',
-      label: 'Flex Wrap',
-      description:
-        'Sets whether flex items are forced onto one line or can wrap onto multiple lines. If wrapping is allowed, it sets the direction that lines are stacked',
-      options: [
-        { value: '', label: 'Default' },
-        { value: 'unset', label: 'Unset' },
-        { value: 'inherit', label: 'Inherit' },
-        { value: 'initial', label: 'Initial' },
-        { value: 'nowrap', label: 'nowrap' },
-        { value: 'wrap', label: 'wrap' },
-        { value: 'wrap-reverse', label: 'wrap-reverse' },
-      ],
-    },
-    // {
-    //   component: FieldComponentType.TOGGLE_BUTTON,
-    //   name: 'textAlign',
-    //   label: 'Text Alignment',
-    //   description:
-    //     'Sets the horizontal alignment of the inline-level content inside a block element or table-cell box.',
-    //   exclusive: true,
-    //   size: 'small',
-    //   fullWidth: true,
-    //   options: [
-    //     {
-    //       value: '',
-    //       children: (
-    //         <MdiIcon
-    //           fontSize={'inherit'}
-    //           path={ICON_VARIANT_CSS_DEFAULT.path}
-    //         />
-    //       ),
-    //     },
-    //     {
-    //       value: 'inherit',
-    //       children: (
-    //         <MdiIcon
-    //           fontSize={'inherit'}
-    //           path={ICON_VARIANT_CSS_INHERIT.path}
-    //         />
-    //       ),
-    //     },
-    //     {
-    //       value: 'left',
-    //       children: (
-    //         <MdiIcon fontSize={'inherit'} path={ICON_VARIANT_ALIGN_LEFT.path} />
-    //       ),
-    //     },
-    //     {
-    //       value: 'center',
-    //       children: (
-    //         <MdiIcon
-    //           fontSize={'inherit'}
-    //           path={ICON_VARIANT_ALIGN_CENTER.path}
-    //         />
-    //       ),
-    //     },
-    //     {
-    //       value: 'right',
-    //       children: (
-    //         <MdiIcon
-    //           fontSize={'inherit'}
-    //           path={ICON_VARIANT_ALIGN_RIGHT.path}
-    //         />
-    //       ),
-    //     },
-    //     {
-    //       value: 'justify',
-    //       children: (
-    //         <MdiIcon
-    //           fontSize={'inherit'}
-    //           path={ICON_VARIANT_ALIGN_JUSTIFY.path}
-    //         />
-    //       ),
-    //     },
-    //   ],
-    // },
-  ],
-})
+import ElementStylesFormTemplate from './element-styles-form-template.component'
 
 const alignItems: ButtonGroupFormControl = {
   name: 'alignItems',
@@ -848,12 +501,26 @@ export interface ElementStylesFormProps extends FormRendererProps {
   node?: Aglyn.NodeSchema
 }
 
+/**
+ * The styles panel (AGL-587 consolidation): every control applies
+ * immediately through {@link ElementStylesFormTemplate} or a direct
+ * `applyStyleValues` call — no per-group "Save Element" buttons — and
+ * every style field has exactly one home:
+ *
+ * - Flexbox & Grids: container toggles + the gap controls.
+ * - Visibility: device-band switches.
+ * - Layout / Colors / Sizing / Typography / Borders & Shadows /
+ *   Position & Overflow / Grid & Flex Child: the accordion field groups
+ *   from `buildStyleFieldGroups`.
+ * - Top level: breakpoint chip, BoxStyler, and the text-align toggle.
+ */
 const ElementStylesForm = observer(
   forwardRef<any, ElementStylesFormProps>((props, ref) => {
-    const { node, ...rest } = props
+    const { node } = props
     const deleteElementCallback = useDeleteElementCallback()
     const nodeSx = node?.sx
-    const siteTheme = useAglynSiteTheme()
+    const hostThemeDoc = useHostThemeDocument()
+    const siteTheme = useAglynSiteTheme({ theme: hostThemeDoc })
 
     const presetColors = useMemo(
       () =>
@@ -862,13 +529,14 @@ const ElementStylesForm = observer(
           .filter((color) => Boolean(color.match(/^(rgb|#)/)?.[0])),
       [siteTheme],
     )
-    const schema = useMemo(() => stylesSchema(presetColors), [presetColors])
-    // Accordion field groups (AGL-540): sizing, typography, borders &
-    // shadows, position & overflow, grid/flex-child controls.
+    // Accordion field groups (AGL-540/587): layout, colors, sizing,
+    // typography, borders & shadows, position & overflow, grid/flex-child.
     const styleGroups = useMemo(
       () => buildStyleFieldGroups(presetColors),
       [presetColors],
     )
+    // Container gap controls, rendered inside Flexbox & Grids (AGL-587).
+    const gapGroup = useMemo(() => buildFlexGapGroup(), [])
 
     // Breakpoint-scoped editing (AGL-333): when the artboard preview is a
     // device size, style edits write into that breakpoint's slice of the
@@ -876,59 +544,49 @@ const ElementStylesForm = observer(
     const [devicePreview] = useAglynBesignerFlag('devicePreview')
     const activeBreakpoint = deviceFlagToBreakpoint(devicePreview)
 
-    const handleFormCancel = useCallback((e: SyntheticEvent, reason?: string) => {}, [])
+    // Scheme-scoped colors (AGL-588): while the artboard previews the
+    // DARK scheme, color-bearing fields write into the sx dark slice and
+    // read through it; light preview edits the base (light IS the base).
+    // Non-color fields stay scheme-agnostic either way.
+    const [canvasScheme] = useAglynBesignerFlag('canvasScheme')
+    const activeScheme = canvasSchemeToSxScheme(canvasScheme)
 
     /**
-     * Merges style values into node.sx at the active breakpoint scope.
-     * Unchanged values are skipped so effective (inherited) readings never
-     * get pinned into a breakpoint slice by round-tripping through a form.
+     * Merges style values into node.sx at the active breakpoint + scheme
+     * scope. Unchanged values are skipped so effective (inherited)
+     * readings never get pinned into a slice by round-tripping through a
+     * form.
      */
     const applyStyleValues = useCallback(
       (partial: Record<string, unknown>) => {
         action(() => {
           if (!node) return
-          let sx = { ...(node.sx ?? {}) } as Record<string, any>
-          for (const [key, value] of Object.entries(partial)) {
-            const normalized = value === '' ? undefined : value
-            if (readSxValue(sx, key, activeBreakpoint) === normalized) continue
-            sx = writeSxValue(sx, key, normalized, activeBreakpoint)
-          }
-          node.sx = sx as any
+          node.sx = applyStylePartialToSx(
+            (node.sx ?? {}) as Record<string, any>,
+            partial,
+            activeBreakpoint,
+            activeScheme,
+          ) as any
         })()
       },
-      [node, activeBreakpoint],
+      [node, activeBreakpoint, activeScheme],
     )
 
-    // Effective scalar values at the active breakpoint — feeds the form
-    // and controls; responsive objects resolve to their active slice.
-    const effectiveValues = useMemo(() => {
-      const out: Record<string, any> = {}
-      for (const key of Object.keys((nodeSx ?? {}) as Record<string, any>)) {
-        const value = readSxValue(
+    // Effective scalar values at the active breakpoint + scheme — feeds
+    // the form and controls; responsive objects resolve to their active
+    // slice, color fields through the dark slice while previewing dark.
+    const effectiveValues = useMemo(
+      () =>
+        computeEffectiveStyleValues(
           nodeSx as Record<string, any>,
-          key,
           activeBreakpoint,
-        )
-        if (value !== undefined && typeof value !== 'object') out[key] = value
-      }
-      return out
-    }, [nodeSx, activeBreakpoint])
-
-    const handleElementSave = useCallback(
-      (values: Record<string, unknown>) => {
-        const keys = new Set([
-          ...Object.keys(values ?? {}),
-          ...Object.keys(effectiveValues),
-        ])
-        const partial: Record<string, unknown> = {}
-        for (const key of keys) partial[key] = (values as any)?.[key]
-        applyStyleValues(partial)
-      },
-      [applyStyleValues, effectiveValues],
+          activeScheme,
+        ),
+      [nodeSx, activeBreakpoint, activeScheme],
     )
 
     /**
-     * Scoped group save (AGL-540): a group's auto-submit may only write
+     * Scoped group save (AGL-540): a group's auto-apply may only write
      * its own field names, so it can never clear values owned by other
      * groups or by the custom-CSS editor.
      */
@@ -990,6 +648,12 @@ const ElementStylesForm = observer(
       [node],
     )
 
+    // Re-seeds a group form's initial values when the selection or the
+    // artboard scope changes (AGL-540/588).
+    const formSeedKey =
+      `${node?.$id ?? ''}:${activeBreakpoint ?? 'base'}` +
+      `:${activeScheme ?? 'light'}`
+
     return (
       <>
         <Container gutterY={[1]} dense>
@@ -1013,6 +677,27 @@ const ElementStylesForm = observer(
               }
             />
           </Tooltip>
+          {/* Scheme scope chip (AGL-588): only the non-default (dark)
+              preview shows it — color edits become dark-only overrides
+              while the rest of the panel keeps editing shared values. */}
+          {activeScheme === 'dark' ? (
+            <Tooltip
+              title={
+                'The artboard is previewing the dark scheme: text, ' +
+                'background, and border color edits apply to dark mode ' +
+                'only. Other styles still apply to both schemes. Switch ' +
+                'the artboard back to light to edit the base colors.'
+              }
+            >
+              <Chip
+                size="small"
+                color="secondary"
+                variant="outlined"
+                sx={{ ml: 1 }}
+                label="Styling: dark scheme"
+              />
+            </Tooltip>
+          ) : null}
         </Container>
         <Container gutterY={[2]} dense>
           <BoxStyler
@@ -1020,71 +705,10 @@ const ElementStylesForm = observer(
             onChange={handleBoxStylerChange}
           />
         </Container>
-
-        <Accordion summary="Flexbox & Grids" sx={{ mb: 2 }}>
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(alignItems.name)}
-            schema={alignItems}
-          />
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(alignContent.name)}
-            schema={alignContent}
-          />
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(alignSelf.name)}
-            schema={alignSelf}
-          />
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(flexWrap.name)}
-            schema={flexWrap}
-          />
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(flexDirection.name)}
-            schema={flexDirection}
-          />
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(justifyItems.name)}
-            schema={justifyItems}
-          />
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(justifyContent.name)}
-            schema={justifyContent}
-          />
-          <ToggleButtonFormControl
-            onChange={handleFlexboxChange(justifySelf.name)}
-            schema={justifySelf}
-          />
-        </Accordion>
-
-        {/* Responsive visibility (AGL-562): hide the element on whole
-            device bands — e.g. hide the desktop link cluster on mobile
-            and show a menu button instead. */}
-        <Accordion summary="Visibility" sx={{ mb: 2 }}>
-          {VISIBILITY_BANDS.map((band) => (
-            <FormControlLabel
-              key={band}
-              control={
-                <Switch
-                  size="small"
-                  checked={hiddenBands.includes(band)}
-                  onChange={handleVisibilityChange(band)}
-                />
-              }
-              label={VISIBILITY_BAND_LABELS[band]}
-              sx={{ display: 'flex', mb: 0.5 }}
-            />
-          ))}
-          <FormHelperText>
-            {'Hidden bands apply on the live site at those screen widths. ' +
-              'The canvas preview follows your browser window width, so ' +
-              'resize the window (or publish) to see the effect.'}
-          </FormHelperText>
-        </Accordion>
-
         <Container gutterY={[2]} dense>
           <TextAlignToggleButtonGroup
             onChange={handleTextAlignChange}
-            value={nodeSx?.['textAlign']}
+            value={effectiveValues['textAlign']}
             field={{
               component: FieldComponentType.TOGGLE_BUTTON,
               name: 'textAlign',
@@ -1121,49 +745,111 @@ const ElementStylesForm = observer(
               ],
             }}
           />
+        </Container>
 
-          <FormRenderer
-            FormTemplate={ElementPropsFormTemplate}
-            componentMapper={componentMapper}
-            onCancel={handleFormCancel}
-            onSubmit={handleElementSave}
-            initialValues={effectiveValues}
-            schema={schema}
-            {...rest}
+        <Accordion summary="Flexbox & Grids" sx={{ mb: 2 }}>
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(alignItems.name)}
+            schema={alignItems}
           />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(alignContent.name)}
+            schema={alignContent}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(alignSelf.name)}
+            schema={alignSelf}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(flexWrap.name)}
+            schema={flexWrap}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(flexDirection.name)}
+            schema={flexDirection}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(justifyItems.name)}
+            schema={justifyItems}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(justifyContent.name)}
+            schema={justifyContent}
+          />
+          <ToggleButtonFormControl
+            onChange={handleFlexboxChange(justifySelf.name)}
+            schema={justifySelf}
+          />
+          {/* Container gaps live with the container toggles (AGL-587);
+              they apply immediately like everything else. */}
+          <FormRenderer
+            key={formSeedKey}
+            FormTemplate={ElementStylesFormTemplate}
+            componentMapper={componentMapper}
+            onSubmit={handleGroupSave(styleGroupFieldNames(gapGroup))}
+            initialValues={pickStyleValues(
+              styleGroupFieldNames(gapGroup),
+              effectiveValues,
+            )}
+            schema={{ fields: gapGroup.fields }}
+          />
+        </Accordion>
 
-          {/* First-class style groups (AGL-540). Each form is keyed on
-              the node + breakpoint so switching selection or artboard
-              scope re-seeds the initial values. */}
-          {styleGroups.map((group) => {
-            const fieldNames = styleGroupFieldNames(group)
-            return (
-              <Accordion
-                key={group.$id}
-                summary={group.label}
-                sx={{ mt: 2 }}
-              >
-                <FormRenderer
-                  key={`${node?.$id ?? ''}:${activeBreakpoint ?? 'base'}`}
-                  FormTemplate={ElementPropsFormTemplate}
-                  componentMapper={componentMapper}
-                  onSubmit={handleGroupSave(fieldNames)}
-                  initialValues={pickStyleValues(fieldNames, effectiveValues)}
-                  schema={{ fields: group.fields }}
+        {/* Responsive visibility (AGL-562): hide the element on whole
+            device bands — e.g. hide the desktop link cluster on mobile
+            and show a menu button instead. */}
+        <Accordion summary="Visibility" sx={{ mb: 2 }}>
+          {VISIBILITY_BANDS.map((band) => (
+            <FormControlLabel
+              key={band}
+              control={
+                <Switch
+                  size="small"
+                  checked={hiddenBands.includes(band)}
+                  onChange={handleVisibilityChange(band)}
                 />
-              </Accordion>
-            )
-          })}
+              }
+              label={VISIBILITY_BAND_LABELS[band]}
+              sx={{ display: 'flex', mb: 0.5 }}
+            />
+          ))}
+          <FormHelperText>
+            {'Hidden bands apply on the live site at those screen widths. ' +
+              'The canvas preview follows your browser window width, so ' +
+              'resize the window (or publish) to see the effect.'}
+          </FormHelperText>
+        </Accordion>
 
-          <Accordion summary="Classes & custom CSS" sx={{ mt: 2 }}>
-            <ElementClassesField node={node} />
-            <CustomCssForm node={node} breakpoint={activeBreakpoint} />
-          </Accordion>
+        {/* First-class style groups (AGL-540/587). Each form is keyed on
+            the node + breakpoint so switching selection or artboard
+            scope re-seeds the initial values; edits apply immediately
+            through the shared debounced template. */}
+        {styleGroups.map((group) => {
+          const fieldNames = styleGroupFieldNames(group)
+          return (
+            <Accordion key={group.$id} summary={group.label} sx={{ mb: 2 }}>
+              <FormRenderer
+                key={formSeedKey}
+                FormTemplate={ElementStylesFormTemplate}
+                componentMapper={componentMapper}
+                onSubmit={handleGroupSave(fieldNames)}
+                initialValues={pickStyleValues(fieldNames, effectiveValues)}
+                schema={{ fields: group.fields }}
+              />
+            </Accordion>
+          )
+        })}
 
+        <Accordion summary="Classes & custom CSS" sx={{ mb: 2 }}>
+          <ElementClassesField node={node} />
+          <CustomCssForm node={node} breakpoint={activeBreakpoint} />
+        </Accordion>
+
+        <Container gutterY={[2]} dense>
           <FormControl margin="none" fullWidth>
             <Button
               onClick={() => deleteElementCallback(node)}
-              sx={{ mt: 2, color: 'error.main' }}
+              sx={{ color: 'error.main' }}
               fullWidth
             >
               Delete Element

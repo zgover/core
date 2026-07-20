@@ -681,7 +681,13 @@ function BesignerPage(props) {
     <EntityPickerProvider hostId={hostId}>
     <ReusableComponentsProvider hostId={hostId}>
     <BindingPickerProvider hostId={hostId}>
-    <InteractionsProvider hostId={hostId} screenId={screenId}>
+    {/* Email documents run no client JS (AGL-587): disable interaction
+        capabilities so the attributes panel never offers the section. */}
+    <InteractionsProvider
+      hostId={hostId}
+      screenId={screenId}
+      disabled={screenKind === 'email'}
+    >
     <BesignerMediaPickerProvider hostId={hostId}>
       {hostFontsHref ? (
         <Head>

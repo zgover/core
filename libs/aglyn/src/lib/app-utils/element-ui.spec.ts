@@ -272,3 +272,95 @@ describe('visibility bands (AGL-562)', () => {
     expect(VISIBILITY_BAND_MEDIA.desktop).toContain('min-width:900px')
   })
 })
+
+// AGL-589: menu-grade choreography for element-visibility steps — grace
+// delays with later-intent cancellation, and Escape / outside-pointerdown
+// self-dismissal armed only while the target is shown.
+describe('runElementVisibilityStep (AGL-589)', () => {
+  const {
+    runElementVisibilityStep,
+    resetElementVisibilityChoreography,
+  } = jest.requireActual('./element-ui')
+
+  const mount = () => {
+    document.body.innerHTML =
+      '<div id="outside"></div>' +
+      '<div data-aglyn="leaf:wrap"><button id="btn"></button>' +
+      `<div id="panel" data-aglyn="leaf:panel" class="${ELEMENT_HIDDEN_CLASS}"></div></div>`
+    return document.getElementById('panel') as HTMLElement
+  }
+  const hidden = (el: Element) => el.classList.contains(ELEMENT_HIDDEN_CLASS)
+
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => {
+    resetElementVisibilityChoreography()
+    jest.runOnlyPendingTimers()
+    jest.useRealTimers()
+  })
+
+  it('applies immediately without options (parity with applyElementVisibility)', () => {
+    const panel = mount()
+    runElementVisibilityStep('show', '#panel')
+    expect(hidden(panel)).toBe(false)
+  })
+
+  it('defers with delayMs and applies after the delay', () => {
+    const panel = mount()
+    runElementVisibilityStep('show', '#panel')
+    runElementVisibilityStep('hide', '#panel', { delayMs: 250 })
+    expect(hidden(panel)).toBe(false)
+    jest.advanceTimersByTime(249)
+    expect(hidden(panel)).toBe(false)
+    jest.advanceTimersByTime(1)
+    expect(hidden(panel)).toBe(true)
+  })
+
+  it('a later step cancels a pending one — the hover grace period', () => {
+    const panel = mount()
+    runElementVisibilityStep('show', '#panel')
+    // Pointer leaves: delayed hide…
+    runElementVisibilityStep('hide', '#panel', { delayMs: 250 })
+    jest.advanceTimersByTime(100)
+    // …pointer re-enters before the grace elapses: show cancels the hide.
+    runElementVisibilityStep('show', '#panel')
+    jest.advanceTimersByTime(500)
+    expect(hidden(panel)).toBe(false)
+  })
+
+  it('dismisses a shown element on Escape and disarms after', () => {
+    const panel = mount()
+    runElementVisibilityStep('show', '#panel', { dismissOn: ['escape'] })
+    expect(hidden(panel)).toBe(false)
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(hidden(panel)).toBe(true)
+    // Re-show without dismissal: Escape no longer hides.
+    runElementVisibilityStep('show', '#panel')
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(hidden(panel)).toBe(false)
+  })
+
+  it('dismisses on outside pointerdown but never from inside the target', () => {
+    const panel = mount()
+    runElementVisibilityStep('show', '#panel', { dismissOn: ['outsideClick'] })
+    // Inside the panel: stays open.
+    panel.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    expect(hidden(panel)).toBe(false)
+    // Outside: closes.
+    document
+      .getElementById('outside')!
+      .dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    expect(hidden(panel)).toBe(true)
+  })
+
+  it('toggle arms dismissal only when it lands shown', () => {
+    const panel = mount()
+    runElementVisibilityStep('toggle', '#panel', { dismissOn: ['escape'] })
+    expect(hidden(panel)).toBe(false)
+    // Toggle again — now hidden; Escape listeners must be gone.
+    runElementVisibilityStep('toggle', '#panel', { dismissOn: ['escape'] })
+    expect(hidden(panel)).toBe(true)
+    runElementVisibilityStep('show', '#panel')
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(hidden(panel)).toBe(false)
+  })
+})

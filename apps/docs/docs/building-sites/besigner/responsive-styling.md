@@ -42,10 +42,17 @@ The margin/padding stylers are fully interactive:
 
 ## Style groups
 
-Beyond display, colors, and the flexbox toggles, the styles panel groups
-first-class controls into accordions — no custom CSS needed for the
-common properties:
+The styles panel organizes every control into accordions, and every
+field has exactly one home — no custom CSS needed for the common
+properties:
 
+- **Flexbox & Grids** — the container controls: alignment and
+  direction toggles plus the gap, row-gap, and column-gap fields.
+- **Layout** — display variant and float.
+- **Colors** — text color and background color. Both pickers open on
+  **theme color references** first (see
+  [scheme-scoped colors](#scheme-scoped-colors)); a *Custom color*
+  step reveals the full picker.
 - **Sizing** — width, height, and the min/max bounds for both.
 - **Typography** — font size, weight, family, line height, letter
   spacing, text transform, and text decoration.
@@ -54,12 +61,16 @@ common properties:
   preset menu (Subtle / Medium / Large / None).
 - **Position & Overflow** — position scheme with top/right/bottom/left
   offsets, z-index, overflow, opacity, and cursor.
-- **Grid & Flex Child** — grid template columns/rows, auto-flow, and the
-  per-item grid column/row, flex shrink, and order controls.
+- **Grid & Flex Child** — grid template columns/rows, auto-flow, and
+  the per-item controls: grid column/row placement, flex grow, flex
+  shrink, flex basis, and order.
 
-Every group writes through the same responsive pipeline, so the active
-breakpoint scope applies — and each group saves only its own
-properties, never touching values you set elsewhere.
+Every control **applies immediately** — toggles and switches on click,
+text fields on a short pause in typing (or when focus leaves the
+field). There is no Save button in the styles panel; undo/redo covers
+you as usual. Everything writes through the same responsive pipeline,
+so the active breakpoint scope applies — and each group saves only its
+own properties, never touching values you set elsewhere.
 
 ## Visibility per device band
 
@@ -77,6 +88,41 @@ XS shows the mobile band, SM the tablet band, MD and up the desktop
 band. In Fluid Responsive mode the canvas follows the real browser
 window instead, so resize the window (or open the published site) to
 see bands flip.
+
+## Scheme-scoped colors
+
+Published sites follow each visitor's **light/dark scheme** (system
+setting, or their own choice via the theme mode switcher component), so
+a hardcoded light-mode hex can be unreadable in dark mode. Two tools
+keep colors correct in both schemes:
+
+**Theme color references (preferred).** Every color picker — text,
+background, and border color, plus color attributes on components —
+opens on your site theme's palette references first: Primary,
+Secondary, Background, Surface, Text, Divider, and friends. Each
+swatch is split to preview its **light and dark** resolutions, and
+selecting one stores the *reference* (e.g. `background.paper`), not a
+fixed color — the element automatically re-colors when the site
+switches schemes. Pick **Custom color** to reveal the full picker when
+you really want a fixed value.
+
+**Per-scheme custom colors.** The artboard's scheme toggle (the
+sun/moon button in the toolbar) doubles as a styling scope, exactly
+like the device preview does for breakpoints:
+
+- **Light preview** (default) — color edits set the element's **base**
+  colors, which both schemes share until dark overrides exist.
+- **Dark preview** — the styles panel shows a **"Styling: dark
+  scheme"** chip, and edits to *text, background, and border color*
+  become **dark-only overrides**. Light mode keeps the base values;
+  the canvas shows the dark result as you edit.
+
+Only color fields scope to the scheme — spacing, sizing, typography,
+and layout always apply to both schemes no matter which one you
+preview. Clearing a color while previewing dark removes the override
+and falls back to the base color. Scheme overrides compose with
+[breakpoint scoping](#style-per-breakpoint): previewing dark on the
+*MD – Laptop* artboard writes a dark override that applies from MD up.
 
 ## Custom classes
 
