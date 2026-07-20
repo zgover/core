@@ -28,7 +28,9 @@ import {
   mdiCodeTags,
 } from '@aglyn/shared-data-mdi'
 import { sanitizeCustomHtml } from '@aglyn/plugins-mui'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import Box from '@mui/material/Box'
+import type { SxProps, Theme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import { forwardRef } from 'react'
 import { BUNDLE_ID } from '../constants/bundle-common'
@@ -41,12 +43,22 @@ import { generatePresetId } from '../utils/generate-preset-id'
  * tokens like {{contact.firstName}} substitute at send time.
  *
  * Component ids are persisted in screen documents; never rename.
+ *
+ * Every block pulls `sx` out of its props and composes it AFTER its own
+ * defaults with MUI array composition (AGL-587): the renderer's Leaf
+ * passes the node-level sx (styles-panel output) through props.sx, and a
+ * literal `sx={{...}}` after `{...rest}` used to silently discard it.
  */
+
+interface EmailBlockStyleProps {
+  /** Node-level styles merged by the renderer; wins over block defaults. */
+  sx?: SxProps<Theme>
+}
 
 // ---------------------------------------------------------------- section
 export const SECTION_ID: Aglyn.ComponentId = 'emailSection'
 
-export interface EmailSectionProps {
+export interface EmailSectionProps extends EmailBlockStyleProps {
   backgroundColor?: string
   /** Inner padding in px (default 24). */
   padding?: number
@@ -56,18 +68,21 @@ export interface EmailSectionProps {
 
 export const EmailSection = forwardRef<HTMLDivElement, EmailSectionProps>(
   (props, ref) => {
-    const { backgroundColor, padding, align, children, ...rest } = props
+    const { backgroundColor, padding, align, children, sx, ...rest } = props
     return (
       <Box
         ref={ref}
         {...rest}
-        sx={{
-          maxWidth: 600,
-          mx: 'auto',
-          backgroundColor: backgroundColor || '#ffffff',
-          p: `${padding ?? 24}px`,
-          textAlign: align ?? 'left',
-        }}
+        sx={mergeSxProps(
+          {
+            maxWidth: 600,
+            mx: 'auto',
+            backgroundColor: backgroundColor || '#ffffff',
+            p: `${padding ?? 24}px`,
+            textAlign: align ?? 'left',
+          },
+          sx,
+        )}
       >
         {children}
       </Box>
@@ -112,7 +127,7 @@ export const emailSectionSchema: Aglyn.ComponentSchema<EmailSectionProps> = {
 // ------------------------------------------------------------------- text
 export const TEXT_ID: Aglyn.ComponentId = 'emailText'
 
-export interface EmailTextProps {
+export interface EmailTextProps extends EmailBlockStyleProps {
   children?: string
   variant?: 'heading' | 'subheading' | 'body' | 'caption'
   color?: string
@@ -131,22 +146,25 @@ const TEXT_PRESETS: Record<
 
 export const EmailText = forwardRef<HTMLDivElement, EmailTextProps>(
   (props, ref) => {
-    const { children, variant, color, align, ...rest } = props
+    const { children, variant, color, align, sx, ...rest } = props
     const preset = TEXT_PRESETS[variant ?? 'body']
     return (
       <Typography
         ref={ref}
         component="div"
         {...rest}
-        sx={{
-          fontSize: preset.fontSize,
-          fontWeight: preset.fontWeight,
-          lineHeight: preset.lineHeight,
-          color: color || '#1a1a1a',
-          textAlign: align ?? 'left',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          mb: 1,
-        }}
+        sx={mergeSxProps(
+          {
+            fontSize: preset.fontSize,
+            fontWeight: preset.fontWeight,
+            lineHeight: preset.lineHeight,
+            color: color || '#1a1a1a',
+            textAlign: align ?? 'left',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            mb: 1,
+          },
+          sx,
+        )}
       >
         {children ?? 'Email text'}
       </Typography>
@@ -203,26 +221,29 @@ export const emailTextSchema: Aglyn.ComponentSchema<EmailTextProps> = {
 // --------------------------------------------------------------- richtext
 export const RICHTEXT_ID: Aglyn.ComponentId = 'emailRichtext'
 
-export interface EmailRichtextProps {
+export interface EmailRichtextProps extends EmailBlockStyleProps {
   /** HTML fragment; sanitized with the custom-html policy (AGL-320). */
   html?: string
 }
 
 export const EmailRichtext = forwardRef<HTMLDivElement, EmailRichtextProps>(
   (props, ref) => {
-    const { html, ...rest } = props
+    const { html, sx, ...rest } = props
     if (!html?.trim()) {
       return (
         <Box
           ref={ref}
           {...rest}
-          sx={{
-            p: 2,
-            border: '1px dashed',
-            borderColor: 'divider',
-            color: 'text.secondary',
-            fontSize: 13,
-          }}
+          sx={mergeSxProps(
+            {
+              p: 2,
+              border: '1px dashed',
+              borderColor: 'divider',
+              color: 'text.secondary',
+              fontSize: 13,
+            },
+            sx,
+          )}
         >
           {'Rich text — add HTML in the attributes panel'}
         </Box>
@@ -232,7 +253,10 @@ export const EmailRichtext = forwardRef<HTMLDivElement, EmailRichtextProps>(
       <Box
         ref={ref}
         {...rest}
-        sx={{ fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 15 }}
+        sx={mergeSxProps(
+          { fontFamily: 'Helvetica, Arial, sans-serif', fontSize: 15 },
+          sx,
+        )}
         // Sanitized on every render — same policy as the custom HTML block.
         dangerouslySetInnerHTML={{
           __html:
@@ -267,7 +291,7 @@ export const emailRichtextSchema: Aglyn.ComponentSchema<EmailRichtextProps> = {
 // ------------------------------------------------------------------ image
 export const IMAGE_ID: Aglyn.ComponentId = 'emailImage'
 
-export interface EmailImageProps {
+export interface EmailImageProps extends EmailBlockStyleProps {
   src?: string
   alt?: string
   /** Rendered width in px (max 600). */
@@ -278,9 +302,13 @@ export interface EmailImageProps {
 
 export const EmailImage = forwardRef<HTMLDivElement, EmailImageProps>(
   (props, ref) => {
-    const { src, alt, width, href, align, ...rest } = props
+    const { src, alt, width, href, align, sx, ...rest } = props
     return (
-      <Box ref={ref} {...rest} sx={{ textAlign: align ?? 'center', my: 1 }}>
+      <Box
+        ref={ref}
+        {...rest}
+        sx={mergeSxProps({ textAlign: align ?? 'center', my: 1 }, sx)}
+      >
         {src ? (
           <Box
             component="img"
@@ -357,7 +385,7 @@ export const emailImageSchema: Aglyn.ComponentSchema<EmailImageProps> = {
 // ----------------------------------------------------------------- button
 export const BUTTON_ID: Aglyn.ComponentId = 'emailButton'
 
-export interface EmailButtonProps {
+export interface EmailButtonProps extends EmailBlockStyleProps {
   children?: string
   href?: string
   backgroundColor?: string
@@ -367,9 +395,14 @@ export interface EmailButtonProps {
 
 export const EmailButton = forwardRef<HTMLDivElement, EmailButtonProps>(
   (props, ref) => {
-    const { children, href, backgroundColor, color, align, ...rest } = props
+    const { children, href, backgroundColor, color, align, sx, ...rest } =
+      props
     return (
-      <Box ref={ref} {...rest} sx={{ textAlign: align ?? 'center', my: 1.5 }}>
+      <Box
+        ref={ref}
+        {...rest}
+        sx={mergeSxProps({ textAlign: align ?? 'center', my: 1.5 }, sx)}
+      >
         <Box
           component="span"
           sx={{
@@ -437,23 +470,26 @@ export const emailButtonSchema: Aglyn.ComponentSchema<EmailButtonProps> = {
 // ---------------------------------------------------------------- divider
 export const DIVIDER_ID: Aglyn.ComponentId = 'emailDivider'
 
-export interface EmailDividerProps {
+export interface EmailDividerProps extends EmailBlockStyleProps {
   color?: string
 }
 
 export const EmailDivider = forwardRef<HTMLHRElement, EmailDividerProps>(
   (props, ref) => {
-    const { color, ...rest } = props
+    const { color, sx, ...rest } = props
     return (
       <Box
         ref={ref}
         component="hr"
         {...rest}
-        sx={{
-          border: 0,
-          borderTop: `1px solid ${color || '#e0e0e0'}`,
-          my: 2,
-        }}
+        sx={mergeSxProps(
+          {
+            border: 0,
+            borderTop: `1px solid ${color || '#e0e0e0'}`,
+            my: 2,
+          },
+          sx,
+        )}
       />
     )
   },
@@ -479,15 +515,21 @@ export const emailDividerSchema: Aglyn.ComponentSchema<EmailDividerProps> = {
 // ----------------------------------------------------------------- spacer
 export const SPACER_ID: Aglyn.ComponentId = 'emailSpacer'
 
-export interface EmailSpacerProps {
+export interface EmailSpacerProps extends EmailBlockStyleProps {
   /** Height in px (default 24). */
   height?: number
 }
 
 export const EmailSpacer = forwardRef<HTMLDivElement, EmailSpacerProps>(
   (props, ref) => {
-    const { height, ...rest } = props
-    return <Box ref={ref} {...rest} sx={{ height: height ?? 24 }} />
+    const { height, sx, ...rest } = props
+    return (
+      <Box
+        ref={ref}
+        {...rest}
+        sx={mergeSxProps({ height: height ?? 24 }, sx)}
+      />
+    )
   },
 )
 EmailSpacer.displayName = 'EmailSpacer'
@@ -512,7 +554,7 @@ export const emailSpacerSchema: Aglyn.ComponentSchema<EmailSpacerProps> = {
 // ---------------------------------------------------------------- product
 export const PRODUCT_ID: Aglyn.ComponentId = 'emailProduct'
 
-export interface EmailProductProps {
+export interface EmailProductProps extends EmailBlockStyleProps {
   /** Product id — resolved server-side at render (rename-safe). */
   productId?: string
   buttonLabel?: string
@@ -520,21 +562,24 @@ export interface EmailProductProps {
 
 export const EmailProduct = forwardRef<HTMLDivElement, EmailProductProps>(
   (props, ref) => {
-    const { productId, buttonLabel, ...rest } = props
+    const { productId, buttonLabel, sx, ...rest } = props
     return (
       <Box
         ref={ref}
         {...rest}
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 1,
-          p: 2,
-          my: 1,
-          textAlign: 'center',
-          color: 'text.secondary',
-          fontSize: 13,
-        }}
+        sx={mergeSxProps(
+          {
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            p: 2,
+            my: 1,
+            textAlign: 'center',
+            color: 'text.secondary',
+            fontSize: 13,
+          },
+          sx,
+        )}
       >
         {productId
           ? `Product card (${productId}) — name, price, image fill in at send`
@@ -574,18 +619,18 @@ export const emailProductSchema: Aglyn.ComponentSchema<EmailProductProps> = {
 // ------------------------------------------------------------ custom html
 export const HTML_ID: Aglyn.ComponentId = 'emailHtml'
 
-export interface EmailHtmlProps {
+export interface EmailHtmlProps extends EmailBlockStyleProps {
   html?: string
 }
 
 export const EmailHtml = forwardRef<HTMLDivElement, EmailHtmlProps>(
   (props, ref) => {
-    const { html, ...rest } = props
+    const { html, sx, ...rest } = props
     return (
       <Box
         ref={ref}
         {...rest}
-        sx={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
+        sx={mergeSxProps({ fontFamily: 'Helvetica, Arial, sans-serif' }, sx)}
         dangerouslySetInnerHTML={{
           __html:
             typeof window === 'undefined' || !html
