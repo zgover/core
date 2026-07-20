@@ -17,8 +17,8 @@
 'use client'
 
 import { Box, CircularProgress } from '@mui/material'
-import { useRouter } from 'next/navigation'
-import { useEffect, type ReactNode } from 'react'
+import { notFound } from 'next/navigation'
+import { type ReactNode } from 'react'
 import { useOrgScope } from '../hooks/use-org-scope'
 
 function GuardSpinner() {
@@ -30,27 +30,20 @@ function GuardSpinner() {
 }
 
 /**
- * `/[orgSlug]/…` membership guard (AGL-621). The org in the URL must be one
- * the signed-in user belongs to. An unknown or non-member slug is sent to
- * the org jump page — NEVER signed out (that was the cross-org logout bug);
- * AGL-625 replaces the bounce with a designed 404 on the dashboard layout.
- * A definitive answer is required before redirecting, so nothing happens
- * while memberships load.
+ * `/[orgSlug]/…` membership guard (AGL-621/AGL-625). The org in the URL must
+ * be one the signed-in user belongs to. An unknown or non-member slug renders
+ * the designed 404 (`notFound()`) — NEVER a sign-out (that was the cross-org
+ * logout bug). A definitive answer is required first, so nothing happens while
+ * memberships load.
  */
 export function OrgGuard({ children }: { children?: ReactNode }) {
   const { orgs, pathOrgSlug, loading } = useOrgScope()
-  const router = useRouter()
-  const known =
-    !pathOrgSlug || orgs.some((org) => org.slug === pathOrgSlug)
+  const known = !pathOrgSlug || orgs.some((org) => org.slug === pathOrgSlug)
 
-  useEffect(() => {
-    if (loading || known) return
-    router.replace('/')
-  }, [loading, known, router])
-
-  // Hold the child tree until the slug is confirmed to avoid flashing a
-  // foreign org's shell during the redirect.
-  if (loading || !known) return <GuardSpinner />
+  // Hold the child tree until memberships resolve to avoid flashing the 404
+  // (or a foreign org's shell) before the slug is confirmed.
+  if (loading) return <GuardSpinner />
+  if (!known) notFound()
   return <>{children}</>
 }
 OrgGuard.displayName = 'OrgGuard'
