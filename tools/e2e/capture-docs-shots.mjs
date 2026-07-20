@@ -548,6 +548,89 @@ async function seedGuideFixtures() {
     createdAtMs: Date.now() - 5 * dayMs,
   })
 
+  // Mega-menu walkthrough fixture (AGL-580): a nav-bar screen with a
+  // composed Mega Menu, so the besigner shots show the walkthrough's
+  // exact state without automating the insert flow. Columns mirror the
+  // element's starter preset.
+  const navColumn = (prefix, title, links) => ({
+    [prefix]: {
+      $id: prefix,
+      componentId: 'muiStack',
+      parentId: 'mmrow',
+      nodes: [`${prefix}t`, ...links.map((_, index) => `${prefix}l${index}`)],
+      props: { spacing: 0.5, sx: { minWidth: 180, alignItems: 'flex-start' } },
+    },
+    [`${prefix}t`]: {
+      $id: `${prefix}t`,
+      componentId: 'muiTypography',
+      parentId: prefix,
+      props: { variant: 'overline', color: 'text.secondary', children: title },
+    },
+    ...Object.fromEntries(
+      links.map((label, index) => [
+        `${prefix}l${index}`,
+        {
+          $id: `${prefix}l${index}`,
+          componentId: 'muiScreenLink',
+          parentId: prefix,
+          props: { children: label, color: 'inherit' },
+        },
+      ]),
+    ),
+  })
+  const navCols = {
+    ...navColumn('nc1', 'Coffee', ['Shop beans', 'Brew guides']),
+    ...navColumn('nc2', 'Learn', ['Blog', 'About us']),
+    ...navColumn('nc3', 'Get in touch', ['Contact', 'Visit us']),
+  }
+  // Converge on re-runs: the dropdown-panel shot inserts through the real
+  // add-element flow, which persists two host actions each run — drop the
+  // strays so the fixture stays clean (staleRecords pattern above).
+  const staleActions = await hostRef.collection('actions').get()
+  for (const action of staleActions.docs) {
+    if (!action.id.startsWith('seed-')) await action.ref.delete()
+  }
+
+  await putScreen(
+    'seed-guide-nav',
+    { displayName: 'Nav bar' },
+    {
+      '_@_': { $id: '_@_', componentId: 'root', nodes: ['bar'] },
+      bar: {
+        $id: 'bar',
+        componentId: 'muiStack',
+        parentId: '_@_',
+        nodes: ['brand', 'mm'],
+        props: {
+          direction: 'row',
+          spacing: 2,
+          sx: { alignItems: 'center', px: 3, py: 1.5, bgcolor: 'background.paper' },
+        },
+      },
+      brand: {
+        $id: 'brand',
+        componentId: 'muiTypography',
+        parentId: 'bar',
+        props: { children: 'Northwind Coffee', variant: 'h6', sx: { mr: 'auto' } },
+      },
+      mm: {
+        $id: 'mm',
+        componentId: 'muiMegaMenu',
+        parentId: 'bar',
+        nodes: ['mmrow'],
+        props: { label: 'Explore', panelWidth: 'wide' },
+      },
+      mmrow: {
+        $id: 'mmrow',
+        componentId: 'muiStack',
+        parentId: 'mm',
+        nodes: ['nc1', 'nc2', 'nc3'],
+        props: { direction: 'row', spacing: 4, sx: { flexWrap: 'wrap' } },
+      },
+      ...navCols,
+    },
+  )
+
   console.log(`seeded ${written} guide fixture docs`)
 }
 
@@ -675,6 +758,7 @@ for (const path of [
   `/${HOST_ID}/products`,
   `/${HOST_ID}/users`,
   `/${HOST_ID}/screens/seed-guide-survey-screen/versions/seed-guide-survey-screen-v1/besigner`,
+  `/${HOST_ID}/screens/seed-guide-nav/versions/seed-guide-nav-v1/besigner`,
 ]) {
   await fetch(`${CONSOLE_BASE}${path}`).catch(() => undefined)
 }
@@ -782,6 +866,93 @@ await shot({
       optional: true,
       waitFor: 'Repeats over dataset',
     },
+  ],
+})
+
+// ── 3b. Mega-menu walkthrough — besigner nav shots (AGL-580) ───────────────
+
+const navBesigner = `/${HOST_ID}/screens/seed-guide-nav/versions/seed-guide-nav-v1/besigner`
+
+// The element picker's Navigation group — Mega Menu + the Dropdown Panel
+// preset (AGL-589) both in frame.
+await shot({
+  out: 'mega-menu-elements-navigation.png',
+  base: CONSOLE_BASE,
+  path: navBesigner,
+  waitFor: 'Properties',
+  settleMs: 6000,
+  actions: [
+    { click: 'role=tab[name="Elements"]', settleMs: 1500 },
+    // Deep enough that the menu rows (Dropdown Menu / Dropdown Panel /
+    // Mega Menu / Drawer) sit inside the clip.
+    { scroll: 'text=Dropdown Panel', optional: true, settleMs: 1200 },
+  ],
+  clip: { x: 0, y: 88, width: 290, height: 780 },
+})
+
+// The Mega Menu selected on canvas — its panel expands in place with the
+// three link columns (canvas clicks can't reach the closed shadow root,
+// so selection goes through the hierarchy tree).
+await shot({
+  out: 'mega-menu-canvas-panel.png',
+  base: CONSOLE_BASE,
+  path: navBesigner,
+  waitFor: 'Properties',
+  settleMs: 8000,
+  actions: [
+    { click: 'text=Document', optional: true, settleMs: 1000 },
+    { click: 'text=Stack', optional: true, settleMs: 1000 },
+    { click: 'text=Mega Menu', optional: true, settleMs: 2000 },
+  ],
+})
+
+// The hover interaction configured in the builder dialog: When hovered →
+// Open a menu (the walkthrough's step 3).
+await shot({
+  out: 'mega-menu-interaction-dialog.png',
+  base: CONSOLE_BASE,
+  path: navBesigner,
+  waitFor: 'Properties',
+  settleMs: 8000,
+  actions: [
+    { click: 'text=Document', optional: true, settleMs: 1000 },
+    { click: 'text=Stack', optional: true, settleMs: 1000 },
+    { click: 'text=Mega Menu', optional: true, settleMs: 1500 },
+    {
+      click: 'role=tab[name="Attributes"]',
+      optional: true,
+      waitFor: 'Interactions',
+    },
+    { click: 'role=combobox[name="Add interaction"]', settleMs: 1000 },
+    { click: 'role=option[name="When hovered…"]', settleMs: 1500 },
+    { click: 'role=combobox[name="Action"]', optional: true, settleMs: 800 },
+    { click: 'role=option[name="Open a menu"]', optional: true, settleMs: 1200 },
+  ],
+})
+
+// The Dropdown Panel preset (AGL-589) inserted through the real add-element
+// flow — the snackbar + Interactions list prove the pre-wired hover
+// choreography persisted. This shot exercises the feature end to end.
+await shot({
+  out: 'mega-menu-dropdown-panel-interactions.png',
+  base: CONSOLE_BASE,
+  path: navBesigner,
+  waitFor: 'Properties',
+  settleMs: 8000,
+  actions: [
+    { click: 'text=Document', optional: true, settleMs: 1000 },
+    { click: 'text=Stack', optional: true, settleMs: 1000 },
+    { click: 'text=Add Element', settleMs: 1500 },
+    // Two-step picker: select the card, then confirm the footer.
+    { click: 'text=Dropdown Panel', settleMs: 1000 },
+    { click: 'text=CONFIRM', settleMs: 2500 },
+    { waitFor: 'interactions wired and enabled', optional: true },
+    {
+      click: 'role=tab[name="Attributes"]',
+      optional: true,
+      waitFor: 'Interactions',
+    },
+    { scroll: 'text=Dropdown panel — open on hover', optional: true, settleMs: 1000 },
   ],
 })
 
