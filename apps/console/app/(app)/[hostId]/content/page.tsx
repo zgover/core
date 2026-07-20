@@ -17,7 +17,6 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import { parseMarkdownLite } from '@aglyn/aglyn'
 import { mdiFileDocumentMultipleOutline } from '@aglyn/shared-data-mdi'
 import {
   CardDisplay,
@@ -37,13 +36,11 @@ import {
   DialogTitle,
   MenuItem,
   Stack,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Tabs,
   TextField,
   Typography,
 } from '@mui/material'
@@ -85,67 +82,6 @@ const slugify = (value: string) =>
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '')
-
-/**
- * Live markdown-lite preview (AGL-582): the SAME parser the tenant's Entry
- * Body block renders with, so what editors see here is what publishes.
- */
-const MarkdownLitePreview = ({ body }: { body: string }) => (
-  <>
-    {parseMarkdownLite(body).map((block, index) => {
-      const inline = (inlines: Aglyn.MarkdownInline[]) =>
-        inlines.map((item, i) =>
-          item.type === 'bold' ? (
-            <strong key={i}>{item.text}</strong>
-          ) : item.type === 'italic' ? (
-            <em key={i}>{item.text}</em>
-          ) : item.type === 'link' ? (
-            <MuiLink key={i} href={item.href} target="_blank">
-              {item.text}
-            </MuiLink>
-          ) : (
-            <span key={i}>{item.text}</span>
-          ),
-        )
-      if (block.type === 'heading') {
-        return (
-          <Typography
-            key={index}
-            variant={block.level === 2 ? 'h5' : 'h6'}
-            sx={{ mt: 2 }}
-          >
-            {inline(block.inlines)}
-          </Typography>
-        )
-      }
-      if (block.type === 'image') {
-        return (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={index}
-            src={block.src}
-            alt={block.alt}
-            style={{ maxWidth: '100%', borderRadius: 8, marginTop: 16 }}
-          />
-        )
-      }
-      if (block.type === 'list') {
-        return (
-          <ul key={index}>
-            {block.items.map((item, i) => (
-              <li key={i}>{inline(item)}</li>
-            ))}
-          </ul>
-        )
-      }
-      return (
-        <Typography key={index} variant="body1" sx={{ mt: 1.5 }}>
-          {inline(block.inlines)}
-        </Typography>
-      )
-    })}
-  </>
-)
 
 /**
  * Content collections manager (AGL-81): collections (e.g. Blog) with
@@ -1006,19 +942,12 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
             </Button>
           </Stack>
           <Box>
-            <Tabs
-              value={bodyTab}
-              onChange={(_event, tab) => setBodyTab(tab)}
-              sx={{ minHeight: 36, borderBottom: 1, borderColor: 'divider' }}
-            >
-              <Tab value="visual" label="Visual" sx={{ minHeight: 36 }} />
-              <Tab value="markdown" label="Markdown" sx={{ minHeight: 36 }} />
-            </Tabs>
             {bodyTab === 'visual' ? (
               // WYSIWYG surface (AGL-582): the editor IS the preview — it
               // round-trips through the same markdown-lite parser/serializer
-              // the tenant renders with, so no separate preview pane.
-              <Box sx={{ mt: 1.5 }}>
+              // the tenant renders with. Raw markdown is an advanced escape
+              // hatch behind the "Edit markdown" button, not a co-equal tab.
+              <Box>
                 <MarkdownVisualEditor
                   ref={visualEditorRef}
                   value={editor?.body ?? ''}
@@ -1026,25 +955,37 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                     setEditor((prev) => (prev ? { ...prev, body } : prev))
                   }
                 />
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  component="div"
-                  sx={{ mt: 0.5 }}
+                <Stack
+                  direction="row"
+                  sx={{
+                    mt: 0.5,
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                  }}
                 >
-                  {'Cmd/Ctrl+B bold · Cmd/Ctrl+I italic · Cmd/Ctrl+Z undo · ' +
-                    'type "## ", "### " or "- " at a line start to convert · ' +
-                    'Enter splits, Backspace at a line start merges'}
-                </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    component="div"
+                  >
+                    {'Cmd/Ctrl+B bold · Cmd/Ctrl+I italic · Cmd/Ctrl+Z undo · ' +
+                      'type "## ", "### " or "- " at a line start to convert'}
+                  </Typography>
+                  <Button
+                    size="small"
+                    color="inherit"
+                    onClick={() => setBodyTab('markdown')}
+                    sx={{ flexShrink: 0, color: 'text.secondary' }}
+                  >
+                    {'Edit markdown'}
+                  </Button>
+                </Stack>
               </Box>
             ) : (
-              <Stack
-                direction={{ xs: 'column', md: 'row' }}
-                spacing={2}
-                sx={{ alignItems: 'stretch', mt: 1.5 }}
-              >
+              <Box>
                 <TextField
-                  label="Body"
+                  label="Markdown source"
                   value={editor?.body ?? ''}
                   onChange={(event) =>
                     setEditor((prev) =>
@@ -1053,43 +994,17 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                   }
                   size="small"
                   multiline
-                  minRows={12}
+                  minRows={14}
+                  fullWidth
                   inputRef={bodyInputRef}
-                  sx={{ flex: 1, minWidth: 0 }}
                   helperText="Markdown-lite: **bold**, *italic*, ## headings, - lists, [links](https:// or /page), ![images](https://)."
                 />
-                {/* Live preview (AGL-582): same parser the tenant renders
-                    with. The Visual tab needs no preview pane. */}
-                <Box
-                  sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    maxHeight: 420,
-                    overflow: 'auto',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 1,
-                    px: 2,
-                    pb: 2,
-                  }}
-                >
-                  <Typography
-                    variant="overline"
-                    color="text.secondary"
-                    component="div"
-                    sx={{ pt: 1 }}
-                  >
-                    {'Preview'}
-                  </Typography>
-                  {editor?.body?.trim() ? (
-                    <MarkdownLitePreview body={editor.body} />
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      {'Start writing to see the preview.'}
-                    </Typography>
-                  )}
-                </Box>
-              </Stack>
+                <Stack direction="row" sx={{ mt: 0.5, justifyContent: 'flex-end' }}>
+                  <Button size="small" onClick={() => setBodyTab('visual')}>
+                    {'Done — back to the editor'}
+                  </Button>
+                </Stack>
+              </Box>
             )}
           </Box>
         </DialogContent>
