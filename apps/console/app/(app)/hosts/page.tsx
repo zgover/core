@@ -109,6 +109,7 @@ function HostsContent() {
             href: buildRoute(Route.HOST_LIST),
           },
         ]}
+        help="gettingStarted"
         header={{
           children: 'All Sites',
           icon: { path: ICON_VARIANT_HOST_GROUP.path },

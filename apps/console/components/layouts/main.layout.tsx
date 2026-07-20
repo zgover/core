@@ -27,7 +27,9 @@ import {
 } from '@aglyn/shared-data-enums'
 import {
   mdiAccountGroupOutline,
+  mdiBookOpenVariant,
   mdiCreditCardOutline,
+  mdiOpenInNew,
 } from '@aglyn/shared-data-mdi'
 import {
   AglynBesignerLogoFull,
@@ -63,6 +65,7 @@ import {
 } from '@mui/material'
 import { useColorScheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
+import { buildDocsUrl } from '../../constants/docs-links'
 import { Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
 import NotificationsMenu from '../notifications-menu.component'
@@ -491,6 +494,18 @@ export function MainLayout(props: MainLayoutProps) {
                   component: AppLink,
                   href: Route.ADMIN_OVERVIEW,
                   icon: { path: ICON_VARIANT_USER_SETTINGS.path },
+                },
+                {
+                  type: 'divider',
+                },
+                {
+                  children: 'Documentation',
+                  component: 'a',
+                  href: buildDocsUrl(),
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                  icon: { path: mdiBookOpenVariant.path },
+                  endIcon: { path: mdiOpenInNew.path },
                 },
                 {
                   type: 'divider',

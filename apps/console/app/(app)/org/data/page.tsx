@@ -50,6 +50,7 @@ const OrgData: NextPageWithLayout<Record<string, never>> = () => {
         breadcrumbItems={[
           { children: 'Data', href: buildRoute(Route.ORG_DATA) },
         ]}
+        help="datasets"
         header={{
           children: 'Organization Data',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },

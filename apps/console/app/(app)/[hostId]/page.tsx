@@ -41,6 +41,7 @@ const Index: NextPageWithLayout<Record<string, never>> = (props) => {
   return (
     <DashboardLayout
       navTabItems={hostNavTabItems(hostId)}
+      help="consoleTour"
       header={{
         children: 'My Dashboard',
         icon: { path: ICON_VARIANT_HOME.path },

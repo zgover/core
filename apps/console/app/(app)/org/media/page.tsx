@@ -46,6 +46,7 @@ const OrgMedia: NextPageWithLayout<Record<string, never>> = () => {
         breadcrumbItems={[
           { children: 'Media', href: buildRoute(Route.ORG_MEDIA) },
         ]}
+        help="media"
         header={{
           children: 'Organization Media',
           icon: { path: ICON_VARIANT_HOST_GROUP.path },

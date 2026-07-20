@@ -195,6 +195,7 @@ const ManageUser: NextPageWithLayout<Record<string, never>> = (props) => {
             href: buildRoute(Route.MANAGE_USER_SETTINGS),
           },
         ]}
+        help="account"
         header={{
           children: 'Account',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },

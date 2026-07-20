@@ -53,6 +53,7 @@ const HostMedia: NextPageWithLayout<Record<string, never>> = () => {
             href: buildRoute(Route.HOST_MEDIA, { hostId }),
           },
         ]}
+        help="media"
         header={{
           children: 'Media',
           icon: { path: mdiImageMultipleOutline.path },

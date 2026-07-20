@@ -383,6 +383,7 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
         breadcrumbItems={[
           { children: 'Billing', href: buildRoute(Route.MANAGE_BILLING) },
         ]}
+        help="billing"
         header={{
           children: 'Billing',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },

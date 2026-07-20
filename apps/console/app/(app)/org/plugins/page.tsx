@@ -105,6 +105,7 @@ const OrgPlugins: NextPageWithLayout<Record<string, never>> = () => {
         breadcrumbItems={[
           { children: 'Plugins', href: buildRoute(Route.ORG_PLUGINS) },
         ]}
+        help="plugins"
         header={{
           children: 'Plugins & add-ons',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },

@@ -169,6 +169,7 @@ const AdminOverview: NextPageWithLayout<Record<string, never>> = () => {
           { children: 'Staff', href: buildRoute(Route.ADMIN_OVERVIEW) },
           { children: 'Overview', href: buildRoute(Route.ADMIN_OVERVIEW) },
         ]}
+        help="staffConsole"
         header={{
           children: 'Platform Overview',
           icon: { path: ICON_VARIANT_SYMBOL_SECURE.path },

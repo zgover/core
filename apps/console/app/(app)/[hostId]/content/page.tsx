@@ -619,6 +619,7 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
             href: buildRoute(Route.HOST_CONTENT, { hostId }),
           },
         ]}
+        help="content"
         header={{
           children: 'Content',
           icon: { path: mdiFileDocumentMultipleOutline.path },

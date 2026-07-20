@@ -304,6 +304,7 @@ function Layouts(props) {
             href: buildRoute(Route.LAYOUT_LIST, { hostId }),
           },
         ]}
+        help="screens"
         header={{
           children: 'Layouts',
           icon: { path: mdiPageLayoutBody.path },

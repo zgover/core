@@ -52,6 +52,7 @@ const HostComponents: NextPageWithLayout<Record<string, never>> = () => {
             href: buildRoute(Route.HOST_COMPONENTS, { hostId }),
           },
         ]}
+        help="components"
         header={{
           children: 'Reusable Components',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },

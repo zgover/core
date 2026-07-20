@@ -30,7 +30,14 @@ The **console** is where you manage a site. Here's what each part of the chrome 
   notifications (form submissions, bookings, invoices, team changes); "View all" opens
   the full paginated feed.
 - **Theme toggle** — cycle between light, dark, and system display mode.
-- **Account menu** — settings, billing, community profile, and sign-out.
+- **Account menu** — settings, billing, community profile, a **Documentation**
+  link that opens this docs site in a new tab, and sign-out.
+
+## In-context help
+
+Feature pages show a small **?** icon next to their title. Hover it for a
+one-line summary of the feature, and click it (or the **Open documentation**
+link in the tooltip) to jump straight to that feature's docs page in a new tab.
 
 ## Primary navigation
 

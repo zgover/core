@@ -113,6 +113,7 @@ const HostPluginPage: NextPageWithLayout<Record<string, never>> = () => {
           },
           { children: title },
         ]}
+        help="plugins"
         header={{
           children: title,
           icon: { path: header?.icon?.path ?? ICON_VARIANT_APP_SETTINGS.path },

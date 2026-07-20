@@ -187,6 +187,7 @@ const AdminFlags: NextPageWithLayout<Record<string, never>> = () => {
           { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
           { children: 'Feature flags', href: buildRoute(Route.ADMIN_FLAGS) },
         ]}
+        help="featureFlags"
         header={{
           children: 'Feature Flags',
           icon: { path: ICON_VARIANT_SYMBOL_FLAG.path },

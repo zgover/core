@@ -57,6 +57,7 @@ const HostAnalytics: NextPageWithLayout<Record<string, never>> = () => {
             href: buildRoute(Route.HOST_ANALYTICS, { hostId }),
           },
         ]}
+        help="analytics"
         header={{
           children: 'Analytics',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },

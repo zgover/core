@@ -55,6 +55,7 @@ const ManageTeam: NextPageWithLayout<Record<string, never>> = () => {
             href: buildRoute(Route.MANAGE_TEAM),
           },
         ]}
+        help="team"
         header={{
           children: 'Team',
           icon: { path: mdiAccountMultipleOutline.path },

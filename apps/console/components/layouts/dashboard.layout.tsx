@@ -76,6 +76,7 @@ export interface DashboardLayoutProps {
   disableDefaultBreadcrumb?: true
   header?: DashboardHeaderProps['header']
   headerRight?: DashboardHeaderProps['headerRight']
+  help?: DashboardHeaderProps['help']
   tabBarTitle?: SecondaryAppBarProps['tabBarTitle']
   navTabItems?: SecondaryAppBarProps['navTabItems']
   activeTab?: SecondaryAppBarProps['activeTab']
@@ -86,6 +87,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
   const {
     children,
     header,
+    help,
     breadcrumbItems,
     disableBreadcrumbs,
     disableDefaultBreadcrumb = false,
@@ -165,6 +167,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
           breadcrumbItems={breadcrumbs}
           headerRight={headerRight}
           header={header}
+          help={help}
         />
 
         <Box component="section" sx={{ flexGrow: 1 }}>

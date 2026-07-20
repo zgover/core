@@ -419,6 +419,7 @@ const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
             href: buildRoute(Route.HOST_SETUP, { hostId }),
           },
         ]}
+        help="gettingStarted"
         header={{
           children: 'Host Setup',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },

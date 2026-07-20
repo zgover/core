@@ -55,6 +55,7 @@ const HostUsers: NextPageWithLayout<Record<string, never>> = () => {
             href: buildRoute(Route.HOST_USERS, { hostId }),
           },
         ]}
+        help="members"
         header={{
           children: 'Users',
           icon: { path: ICON_VARIANT_USER_SETTINGS.path },

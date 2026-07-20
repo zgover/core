@@ -180,6 +180,7 @@ const PluginReviews: NextPageWithLayout<Record<string, never>> = () => {
             href: buildRoute(Route.ADMIN_PLUGIN_REVIEWS),
           },
         ]}
+        help="staffConsole"
         header={{
           children: 'Plugin reviews',
           icon: { path: ICON_VARIANT_SYMBOL_FLAG.path },

@@ -553,6 +553,7 @@ function Screens(props) {
             href: buildRoute(Route.SCREEN_LIST, { hostId }),
           },
         ]}
+        help="screens"
         header={{
           children: 'Screens',
           icon: { path: ICON_VARIANT_PAGES.path },

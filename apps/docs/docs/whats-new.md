@@ -10,7 +10,14 @@ description: The features Aglyn shipped most recently, grouped by area with link
 A huge wave of features shipped over the last few days. Here's the tour, grouped by area.
 Each links into its section for the how-to.
 
-## Nav menu system (newest)
+## In-console help (newest)
+
+- **[Documentation from the console](getting-started/console-tour.md#the-app-bar)** —
+  the account menu now has a **Documentation** entry that opens this site in a
+  new tab, and feature pages grew a small **?** icon next to their titles: hover
+  for a one-line summary, click through for the full docs page.
+
+## Nav menu system
 
 - **[Dropdown Panel preset](building-sites/menus-and-navigation/overview.md#the-dropdown-panel-preset)** —
   a primitive-built hover panel (Stack + Button + hidden panel) that inserts
