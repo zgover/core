@@ -93,6 +93,7 @@ import {
 } from '../../../../../../../../constants/screen-publishing'
 import PluginWidgetSlot from '../../../../../../../../components/plugin-widget-slot.component'
 import { CONTENT_MAX_WIDTH } from '../../../../../../../../constants/shared'
+import { docsHelp } from '../../../../../../../../constants/docs-links'
 import useCurrentOrg from '../../../../../../../../hooks/use-current-org'
 import useFirestoreCollection from '../../../../../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../../../../../hooks/use-firestore-doc'
@@ -607,6 +608,7 @@ function ScreenDetails() {
             children: displayName,
           },
         ]}
+        help="screens"
         header={{
           children: displayName,
           icon: { path: ICON_VARIANT_PAGES.path },
@@ -674,6 +676,7 @@ function ScreenDetails() {
                 children: (
                   <CardDisplay
                     header={'Basic Details'}
+                    help={docsHelp('screens', { anchor: '#screens--routing', excerpt: 'A screen\u2019s name, slug, and where it sits in your site\u2019s routing hierarchy.' })}
                     contentGutterY
                     contentBordered="all"
                   >
@@ -714,6 +717,7 @@ function ScreenDetails() {
                 children: (
                   <CardDisplay
                     header={'Publishing'}
+                    help={docsHelp('screens', { anchor: '#versions--scheduled-publishing', excerpt: 'Publish this screen live now or schedule a version to go live at a set time.' })}
                     contentGutterX
                     contentGutterY
                     contentBordered="all"
@@ -821,6 +825,7 @@ function ScreenDetails() {
                 children: (
                   <CardDisplay
                     header={'Page Access'}
+                    help={docsHelp('siteProtection', { anchor: '#per-screen-passwords', excerpt: 'Control who can view this screen \u2014 members-only gating or a password.' })}
                     contentGutterX
                     contentGutterY
                     contentBordered="all"
@@ -894,6 +899,7 @@ function ScreenDetails() {
                 children: (
                   <CardDisplay
                     header={'SEO'}
+                    help={docsHelp('seo', { anchor: '#per-screen-seo', excerpt: 'Per-screen search title, description, and social share image \u2014 overrides the site defaults.' })}
                     contentGutterX
                     contentGutterY
                     contentBordered="all"
@@ -954,6 +960,7 @@ function ScreenDetails() {
                 children: (
                   <CardDisplay
                     header={'Versions'}
+                    help={docsHelp('screens', { anchor: '#versions--scheduled-publishing', excerpt: 'Every publish is a version you can view, restore, or schedule.' })}
                     contentBordered="all"
                   >
                     <Table size="small">
@@ -1070,6 +1077,7 @@ function ScreenDetails() {
                 children: (
                   <CardDisplay
                     header={'Raw JSON'}
+                    help={docsHelp('screens', { excerpt: 'The screen document as stored \u2014 a read-only developer view of its structure.' })}
                     contentGutterX
                     contentGutterY
                     contentBordered="all"
