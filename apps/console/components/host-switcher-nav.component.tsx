@@ -39,6 +39,7 @@ import {
 import { useParams, useRouter } from 'next/navigation'
 import { type MouseEvent, useMemo, useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
+import { hostDisplayDomain } from '../constants/tenant-links'
 import { useHostId } from '../components/host-id-provider'
 import { useOrgHosts } from '../hooks/use-org-hosts'
 import { useOrgScope, useOrgSlug } from '../hooks/use-org-scope'
@@ -219,7 +220,7 @@ function HostSwitcherMenu(props: { uid: string }) {
                   </ListItemIcon>
                   <ListItemText
                     primary={host.displayName ?? host.$id}
-                    secondary={host.cname ?? host.subdomain ?? undefined}
+                    secondary={hostDisplayDomain(host)}
                     slotProps={{
                       primary: { noWrap: true },
                       secondary: { noWrap: true, variant: 'caption' },

@@ -201,7 +201,15 @@ export function OrgSwitcherNav() {
                   </ListItemIcon>
                   <ListItemText
                     primary={item.orgName ?? item.slug ?? item.$id}
-                    slotProps={{ primary: { noWrap: true } }}
+                    secondary={
+                      item.slug
+                        ? `${item.slug}.${WORKSPACE_DOMAIN}`
+                        : undefined
+                    }
+                    slotProps={{
+                      primary: { noWrap: true },
+                      secondary: { noWrap: true, variant: 'caption' },
+                    }}
                   />
                   {tier ? (
                     <Chip
