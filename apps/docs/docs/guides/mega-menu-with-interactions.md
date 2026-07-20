@@ -43,10 +43,14 @@ don't have a layout yet, see
 3. Insert **Mega Menu**. It arrives as a nav item labelled *Menu* with a
    starter panel of three link columns.
 
+![The Navigation group in the element picker — Dropdown Menu, Dropdown Panel, Mega Menu, Drawer, Menu Button, and Mobile Nav](/img/guides/mega-menu-elements-navigation.png)
+
 On the canvas the menu shows **just its trigger** — that's how it renders
 on the live site until a visitor interacts. Select the Mega Menu (or
 anything inside it) and the panel **expands in place** so you can edit its
 contents; click elsewhere and it collapses again.
+
+![The Mega Menu selected on the canvas with its panel expanded — three columns of links under the Explore trigger](/img/guides/mega-menu-canvas-panel.png)
 
 :::tip Set the label
 With the Mega Menu selected, set its **Label** in the inspector (for the
@@ -85,6 +89,8 @@ setup. To add the classic hover behavior:
    element's Interactions list with edit, enable/disable, and remove
    controls.
 
+![The New interaction dialog — When "This element is hovered", every time, then "Open a menu" targeting this element](/img/guides/mega-menu-interaction-dialog.png)
+
 That's the whole wiring. A menu opened by hover **closes itself** when the
 pointer leaves the nav item and its panel, with a short grace period so the
 pointer can travel between the two — you don't need a separate *When hover
@@ -96,6 +102,22 @@ drawer) lets you **pick the target by clicking it on the canvas** and
 confirming — no CSS selectors to write. A "define a custom selector" option
 is there as a secondary escape hatch.
 :::
+
+### Prefer primitives? Insert the Dropdown Panel preset
+
+If you'd rather build the same pattern from **plain elements** — a Stack
+wrapper, a Button trigger, and an absolutely-positioned panel you style
+freely — insert **Dropdown Panel** from the Navigation group instead. It
+arrives with the whole hover choreography **already wired as ordinary
+interactions**: *show on hover* (with **Close on Esc** and **Close on
+outside click**) and *hide on hover leave* with a **250ms grace delay**.
+Edit or delete them on the wrapper's Interactions list like anything you
+authored yourself.
+
+![The Dropdown Panel preset just inserted — "2 interactions wired and enabled", both hover interactions listed on the wrapper](/img/guides/mega-menu-dropdown-panel-interactions.png)
+
+The [menus & navigation reference](../building-sites/menus-and-navigation/overview.md#the-dropdown-panel-preset)
+covers when to reach for the preset versus the Mega Menu element.
 
 ## 4. Add a mobile drawer (optional)
 

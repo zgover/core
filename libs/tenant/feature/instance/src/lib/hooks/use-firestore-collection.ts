@@ -68,10 +68,15 @@ export function useFirestoreCollection<T = DocumentData>(
   useEffect(() => {
     setStatus('loading')
     setError(undefined)
+    // Clear on EVERY dep change, not only when the query goes null: when
+    // the scope moves between two live queries (org A → org B, host A →
+    // host B) the old rows would otherwise stay rendered until the new
+    // snapshot arrives — the org-switch "remnants" bug (AGL-591). Same
+    // hold-nothing-rather-than-show-the-wrong-org rule as useOrgHosts.
+    setData([])
 
     const q = buildQueryRef.current()
     if (!q) {
-      setData([])
       return
     }
 
