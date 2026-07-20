@@ -23,6 +23,7 @@ import { useMemo } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { docsHelp } from '../../constants/docs-links'
 import { buildRoute, Route } from '../../constants/route-links'
+import { useOrgSlug } from '../../hooks/use-org-scope'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 
 /**
@@ -32,6 +33,7 @@ import useFirestoreCollection from '../../hooks/use-firestore-collection'
 export function CampaignGlanceCard(props: { hostId: string }) {
   const { hostId } = props
   const firestore = useFirestore()
+  const orgSlug = useOrgSlug()
   const { data: campaignDocs } = useFirestoreCollection<any>(
     () =>
       query(collection(firestore, 'hosts', hostId, 'campaigns'), limit(30)),
@@ -67,7 +69,7 @@ export function CampaignGlanceCard(props: { hostId: string }) {
           <Button
             component={AppLink as any}
             {...({ componentVariant: 'naked' } as any)}
-            href={buildRoute(Route.HOST_MARKETING, { hostId })}
+            href={buildRoute(Route.HOST_MARKETING, { orgSlug,  hostId })}
             size="small"
             color="secondary"
           >

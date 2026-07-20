@@ -15,6 +15,13 @@
  * limitations under the License.
  */
 
+// URL scheme (AGL-621): the org is a first-class path segment `[orgSlug]`
+// so the URL — not client-side precedence — is the source of truth for the
+// active workspace. Host routes nest under `/[orgSlug]/hosts/[hostId]`; the
+// org area (settings, team, billing, media, data, plugins, support,
+// community) lives directly under `/[orgSlug]`. User-level `manage/*`,
+// staff `admin/*`, and `auth` routes are NOT org-scoped. Hosts stay keyed
+// by doc id here; AGL-622 swaps `[hostId]` for the subdomain slug.
 export enum Route {
   ADMIN_ORGS = '/admin/orgs',
   ADMIN_ORG_DETAIL = '/admin/orgs/[orgId]',
@@ -25,11 +32,12 @@ export enum Route {
   ADMIN_USER_DETAIL = '/admin/users/[uid]',
   ADMIN_FLAGS = '/admin/flags',
   ADMIN_PLUGIN_REVIEWS = '/admin/plugin-reviews',
-  ORG_MEDIA = '/org/media',
-  ORG_DATA = '/org/data',
-  ORG_PLUGINS = '/org/plugins',
-  ORG_SETTINGS = '/org/settings',
-  MANAGE_BILLING = '/org/billing',
+  ORG_HOME = '/[orgSlug]',
+  ORG_MEDIA = '/[orgSlug]/media',
+  ORG_DATA = '/[orgSlug]/data',
+  ORG_PLUGINS = '/[orgSlug]/plugins',
+  ORG_SETTINGS = '/[orgSlug]/settings',
+  MANAGE_BILLING = '/[orgSlug]/billing',
   MANAGE_USER_SETTINGS = '/manage/user',
   MANAGE_NOTIFICATIONS = '/manage/notifications',
   MANAGE_MY_COMMUNITY = '/manage/community',
@@ -37,39 +45,39 @@ export enum Route {
   AUTH_SIGN_OUT = '/signout',
   AUTH_SIGN_UP = '/signup',
   AUTH_VERIFY_EMAIL = '/verify-email',
-  HOST_LIST = '/hosts',
-  HOST_COMMUNITY = '/[hostId]/community',
-  HOST_COMMUNITY_LISTING = '/[hostId]/community/[listingId]',
-  HOST_COMMUNITY_PUBLISHER = '/[hostId]/community/publisher/[profileId]',
-  HOST_CONTENT = '/[hostId]/content',
-  MANAGE_COMMUNITY_PROFILE = '/org/community',
-  MANAGE_TEAM = '/org/team',
-  MANAGE_TEAM_MEMBER = '/org/team/[uid]',
-  MANAGE_SUPPORT = '/org/support',
-  HOST_DASHBOARD = '/[hostId]',
-  HOST_INBOX = '/[hostId]/inbox',
-  HOST_CONTACTS = '/[hostId]/contacts',
-  HOST_MEDIA = '/[hostId]/media',
-  HOST_SETUP = '/[hostId]/setup',
-  HOST_THEME = '/[hostId]/theme',
-  HOST_WORKFLOWS = '/[hostId]/workflows',
-  HOST_DATA = '/[hostId]/data',
-  HOST_LOGIC = '/[hostId]/logic',
-  HOST_PRODUCTS = '/[hostId]/products',
-  HOST_COMPONENTS = '/[hostId]/components',
-  HOST_MARKETING = '/[hostId]/marketing',
-  HOST_BOOKINGS = '/[hostId]/bookings',
+  HOST_LIST = '/[orgSlug]/hosts',
+  HOST_COMMUNITY = '/[orgSlug]/hosts/[hostId]/community',
+  HOST_COMMUNITY_LISTING = '/[orgSlug]/hosts/[hostId]/community/[listingId]',
+  HOST_COMMUNITY_PUBLISHER = '/[orgSlug]/hosts/[hostId]/community/publisher/[profileId]',
+  HOST_CONTENT = '/[orgSlug]/hosts/[hostId]/content',
+  MANAGE_COMMUNITY_PROFILE = '/[orgSlug]/community',
+  MANAGE_TEAM = '/[orgSlug]/team',
+  MANAGE_TEAM_MEMBER = '/[orgSlug]/team/[uid]',
+  MANAGE_SUPPORT = '/[orgSlug]/support',
+  HOST_DASHBOARD = '/[orgSlug]/hosts/[hostId]',
+  HOST_INBOX = '/[orgSlug]/hosts/[hostId]/inbox',
+  HOST_CONTACTS = '/[orgSlug]/hosts/[hostId]/contacts',
+  HOST_MEDIA = '/[orgSlug]/hosts/[hostId]/media',
+  HOST_SETUP = '/[orgSlug]/hosts/[hostId]/setup',
+  HOST_THEME = '/[orgSlug]/hosts/[hostId]/theme',
+  HOST_WORKFLOWS = '/[orgSlug]/hosts/[hostId]/workflows',
+  HOST_DATA = '/[orgSlug]/hosts/[hostId]/data',
+  HOST_LOGIC = '/[orgSlug]/hosts/[hostId]/logic',
+  HOST_PRODUCTS = '/[orgSlug]/hosts/[hostId]/products',
+  HOST_COMPONENTS = '/[orgSlug]/hosts/[hostId]/components',
+  HOST_MARKETING = '/[orgSlug]/hosts/[hostId]/marketing',
+  HOST_BOOKINGS = '/[orgSlug]/hosts/[hostId]/bookings',
   // Events now come from the events-calendar plugin, served by the generic
-  // `[hostId]/[pluginSlug]` route (AGL-394) — no dedicated enum needed.
-  HOST_REDIRECTS = '/[hostId]/redirects',
-  HOST_USERS = '/[hostId]/users',
-  HOST_ANALYTICS = '/[hostId]/analytics',
-  LAYOUT_BESIGNER = '/[hostId]/layouts/[layoutId]/versions/[versionId]/besigner',
-  LAYOUT_LIST = '/[hostId]/layouts/list',
-  SCREEN_BESIGNER = '/[hostId]/screens/[screenId]/versions/[versionId]/besigner',
-  SCREEN_DETAILS = '/[hostId]/screens/[screenId]/versions/[versionId]/view',
-  SCREEN_PREVIEW = '/[hostId]/screens/[screenId]/versions/[versionId]/preview',
-  SCREEN_LIST = '/[hostId]/screens/list',
+  // `[orgSlug]/hosts/[hostId]/[pluginSlug]` route (AGL-394).
+  HOST_REDIRECTS = '/[orgSlug]/hosts/[hostId]/redirects',
+  HOST_USERS = '/[orgSlug]/hosts/[hostId]/users',
+  HOST_ANALYTICS = '/[orgSlug]/hosts/[hostId]/analytics',
+  LAYOUT_BESIGNER = '/[orgSlug]/hosts/[hostId]/layouts/[layoutId]/versions/[versionId]/besigner',
+  LAYOUT_LIST = '/[orgSlug]/hosts/[hostId]/layouts/list',
+  SCREEN_BESIGNER = '/[orgSlug]/hosts/[hostId]/screens/[screenId]/versions/[versionId]/besigner',
+  SCREEN_DETAILS = '/[orgSlug]/hosts/[hostId]/screens/[screenId]/versions/[versionId]/view',
+  SCREEN_PREVIEW = '/[orgSlug]/hosts/[hostId]/screens/[screenId]/versions/[versionId]/preview',
+  SCREEN_LIST = '/[orgSlug]/hosts/[hostId]/screens/list',
 }
 
 export interface RoutePayload extends Record<keyof any, any> {
@@ -78,11 +86,13 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.AUTH_SIGN_OUT]: undefined
   [Route.AUTH_VERIFY_EMAIL]: undefined
   [Route.SCREEN_BESIGNER]: {
+    orgSlug: string
     hostId: string
     screenId: string
     versionId: string
   }
-  [Route.HOST_DASHBOARD]: { hostId: string }
+  [Route.ORG_HOME]: { orgSlug: string }
+  [Route.HOST_DASHBOARD]: { orgSlug: string; hostId: string }
   [Route.ADMIN_ORGS]: undefined
   [Route.ADMIN_ORG_DETAIL]: { orgId: string }
   [Route.ADMIN_ORG_HOST_DETAIL]: { orgId: string; hostId: string }
@@ -92,60 +102,81 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.ADMIN_USER_DETAIL]: { uid: string }
   [Route.ADMIN_FLAGS]: undefined
   [Route.ADMIN_PLUGIN_REVIEWS]: undefined
-  [Route.ORG_MEDIA]: undefined
-  [Route.ORG_DATA]: undefined
-  [Route.ORG_PLUGINS]: undefined
+  [Route.ORG_MEDIA]: { orgSlug: string }
+  [Route.ORG_DATA]: { orgSlug: string }
+  [Route.ORG_PLUGINS]: { orgSlug: string }
   [Route.MANAGE_NOTIFICATIONS]: undefined
   [Route.MANAGE_MY_COMMUNITY]: undefined
-  [Route.ORG_SETTINGS]: undefined
-  [Route.HOST_COMMUNITY]: { hostId: string }
-  [Route.HOST_COMMUNITY_LISTING]: { hostId: string; listingId: string }
-  [Route.HOST_COMMUNITY_PUBLISHER]: { hostId: string; profileId: string }
-  [Route.HOST_CONTENT]: { hostId: string }
-  [Route.MANAGE_COMMUNITY_PROFILE]: undefined
-  [Route.MANAGE_TEAM]: undefined
-  [Route.MANAGE_TEAM_MEMBER]: { uid: string }
-  [Route.MANAGE_SUPPORT]: undefined
-  [Route.HOST_INBOX]: { hostId: string }
-  [Route.HOST_MEDIA]: { hostId: string }
-  [Route.HOST_THEME]: { hostId: string }
-  [Route.HOST_WORKFLOWS]: { hostId: string }
-  [Route.HOST_DATA]: { hostId: string }
-  [Route.HOST_LOGIC]: { hostId: string }
-  [Route.HOST_PRODUCTS]: { hostId: string }
-  [Route.HOST_COMPONENTS]: { hostId: string }
-  [Route.HOST_MARKETING]: { hostId: string }
-  [Route.HOST_BOOKINGS]: { hostId: string }
-  [Route.HOST_REDIRECTS]: { hostId: string }
-  [Route.HOST_USERS]: { hostId: string }
-  [Route.HOST_ANALYTICS]: { hostId: string }
+  [Route.ORG_SETTINGS]: { orgSlug: string }
+  [Route.HOST_LIST]: { orgSlug: string }
+  [Route.HOST_COMMUNITY]: { orgSlug: string; hostId: string }
+  [Route.HOST_COMMUNITY_LISTING]: {
+    orgSlug: string
+    hostId: string
+    listingId: string
+  }
+  [Route.HOST_COMMUNITY_PUBLISHER]: {
+    orgSlug: string
+    hostId: string
+    profileId: string
+  }
+  [Route.HOST_CONTENT]: { orgSlug: string; hostId: string }
+  [Route.MANAGE_COMMUNITY_PROFILE]: { orgSlug: string }
+  [Route.MANAGE_TEAM]: { orgSlug: string }
+  [Route.MANAGE_TEAM_MEMBER]: { orgSlug: string; uid: string }
+  [Route.MANAGE_SUPPORT]: { orgSlug: string }
+  [Route.MANAGE_BILLING]: { orgSlug: string }
+  [Route.HOST_INBOX]: { orgSlug: string; hostId: string }
+  [Route.HOST_MEDIA]: { orgSlug: string; hostId: string }
+  [Route.HOST_THEME]: { orgSlug: string; hostId: string }
+  [Route.HOST_WORKFLOWS]: { orgSlug: string; hostId: string }
+  [Route.HOST_DATA]: { orgSlug: string; hostId: string }
+  [Route.HOST_LOGIC]: { orgSlug: string; hostId: string }
+  [Route.HOST_PRODUCTS]: { orgSlug: string; hostId: string }
+  [Route.HOST_COMPONENTS]: { orgSlug: string; hostId: string }
+  [Route.HOST_MARKETING]: { orgSlug: string; hostId: string }
+  [Route.HOST_BOOKINGS]: { orgSlug: string; hostId: string }
+  [Route.HOST_REDIRECTS]: { orgSlug: string; hostId: string }
+  [Route.HOST_USERS]: { orgSlug: string; hostId: string }
+  [Route.HOST_ANALYTICS]: { orgSlug: string; hostId: string }
   [Route.LAYOUT_BESIGNER]: {
+    orgSlug: string
     hostId: string
     layoutId: string
     versionId: string
   }
-  [Route.LAYOUT_LIST]: { hostId: string }
+  [Route.LAYOUT_LIST]: { orgSlug: string; hostId: string }
   [Route.SCREEN_DETAILS]: {
+    orgSlug: string
     hostId: string
     screenId: string
     versionId: string
   }
   [Route.SCREEN_PREVIEW]: {
+    orgSlug: string
     hostId: string
     screenId: string
     versionId: string
   }
-  [Route.SCREEN_LIST]: { hostId: string }
+  [Route.SCREEN_LIST]: { orgSlug: string; hostId: string }
 }
 
 export const routeReplacePattern = /\[([^\]]+)\]/g
 
+/**
+ * Builds a concrete path from a {@link Route} template. The payload is
+ * REQUIRED whenever the route declares params (e.g. `orgSlug`, `hostId`) and
+ * omitted only for param-less routes — so a forgotten `orgSlug` is a compile
+ * error, not a `/<orgSlug?>/…` link that breaks at runtime (AGL-621).
+ */
 export function buildRoute<Tmpl extends Route>(
   template: Tmpl,
-  payload?: RoutePayload[Tmpl],
+  ...[payload]: RoutePayload[Tmpl] extends undefined
+    ? [payload?: undefined]
+    : [payload: RoutePayload[Tmpl]]
 ) {
   return template.replace(routeReplacePattern, (match, key) => {
-    const value = payload?.[key]
+    const value = (payload as Record<string, unknown> | undefined)?.[key]
     return value != null ? String(value) : `<${key}?>`
   })
 }

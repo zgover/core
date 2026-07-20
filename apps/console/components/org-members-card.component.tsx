@@ -54,7 +54,7 @@ import { checkOrgSeatQuota } from '../constants/entitlements'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentOrg from '../hooks/use-current-org'
 import { useOrgHosts } from '../hooks/use-org-hosts'
-import { useOrgScope } from '../hooks/use-org-scope'
+import { useOrgScope, useOrgSlug } from '../hooks/use-org-scope'
 
 const ASSIGNABLE_ROLES: OrgRole[] = ['admin', 'editor', 'viewer']
 const HOST_ROLE_OPTIONS: Array<HostAccessRole | 'none'> = [
@@ -82,6 +82,7 @@ interface AccessDraft {
 export function OrgMembersCard() {
   const { data: user } = useUser()
   const firestore = useFirestore()
+  const orgSlug = useOrgSlug()
   const { currentOrg } = useOrgScope()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -277,7 +278,7 @@ export function OrgMembersCard() {
                 <TableCell>
                   {/* Member detail page (AGL-364). */}
                   <MuiLink
-                    href={buildRoute(Route.MANAGE_TEAM_MEMBER, {
+                    href={buildRoute(Route.MANAGE_TEAM_MEMBER, { orgSlug, 
                       uid: member.$id,
                     })}
                     color="inherit"

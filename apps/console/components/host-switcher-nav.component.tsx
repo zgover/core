@@ -37,16 +37,17 @@ import { useRouter } from 'next/navigation'
 import { type MouseEvent, useCallback, useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import { useOrgHosts } from '../hooks/use-org-hosts'
-import { useOrgScope } from '../hooks/use-org-scope'
+import { useOrgScope, useOrgSlug } from '../hooks/use-org-scope'
 
 function HostsPlainLink() {
+  const orgSlug = useOrgSlug()
   return (
     <Button
       id="center-nav-hosts"
       color="inherit"
       component={AppLink as any}
       {...({ componentVariant: 'button', nativeButton: false } as any)}
-      href={buildRoute(Route.HOST_LIST)}
+      href={buildRoute(Route.HOST_LIST, { orgSlug })}
     >
       {'Sites'}
     </Button>
@@ -74,6 +75,7 @@ function HostSwitcherMenu(props: { uid: string }) {
   const params = useParams<{ hostId?: string }>()
   const hostId = params?.hostId
   const router = useRouter()
+  const orgSlug = useOrgSlug()
   const firestore = useFirestore()
   const { currentOrg, loading: orgsLoading } = useOrgScope()
   // Workspace-scoped (AGL-236): the switcher lists the selected org's
@@ -94,7 +96,7 @@ function HostSwitcherMenu(props: { uid: string }) {
       setAnchorEl(null)
       if (nextHostId !== hostId) {
         void router.push(
-          buildRoute(Route.HOST_DASHBOARD, { hostId: nextHostId }),
+          buildRoute(Route.HOST_DASHBOARD, { orgSlug,  hostId: nextHostId }),
         )
       }
     },
@@ -102,7 +104,7 @@ function HostSwitcherMenu(props: { uid: string }) {
   )
   const handleViewAll = useCallback(() => {
     setAnchorEl(null)
-    void router.push(buildRoute(Route.HOST_LIST))
+    void router.push(buildRoute(Route.HOST_LIST, { orgSlug }))
   }, [router])
 
   const current = (hosts ?? []).find((host: any) => host.$id === hostId)

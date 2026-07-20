@@ -33,6 +33,7 @@ import { collection, limit, query } from 'firebase/firestore'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { docsHelp } from '../constants/docs-links'
 import { buildRoute, Route } from '../constants/route-links'
+import { useOrgSlug } from '../hooks/use-org-scope'
 import { useOrgHosts } from '../hooks/use-org-hosts'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 
@@ -49,6 +50,7 @@ export interface OrgPluginInstallsCardProps {
 export function OrgPluginInstallsCard(props: OrgPluginInstallsCardProps) {
   const { orgId } = props
   const firestore = useFirestore()
+  const orgSlug = useOrgSlug()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -166,7 +168,7 @@ export function OrgPluginInstallsCard(props: OrgPluginInstallsCardProps) {
               <>
                 {' '}
                 <a
-                  href={buildRoute(Route.HOST_COMMUNITY, {
+                  href={buildRoute(Route.HOST_COMMUNITY, { orgSlug, 
                     hostId: hosts[0].$id,
                   })}
                 >

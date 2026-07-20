@@ -42,10 +42,12 @@ const CONSOLE_ROOT = join(REPO_ROOT, 'apps/console')
  * here, you are asserting help genuinely does not apply.
  */
 const EXCEPTIONS: Record<string, string> = {
-  'apps/console/app/(app)/[hostId]/community/[listingId]/page.tsx':
+  'apps/console/app/(app)/[orgSlug]/hosts/[hostId]/community/[listingId]/page.tsx':
     'Chrome only — content is a plugin widget slot (communityListing) that renders its own card.',
   'apps/console/components/card-display-form-template.tsx':
     'Infrastructure wrapper — forwards schema-level help via CardDisplayProps, has no header of its own.',
+  'apps/console/app/page.tsx':
+    'Org jump page — navigational workspace picker cards, not a documented feature surface.',
 }
 
 function walk(dir: string, out: string[] = []): string[] {

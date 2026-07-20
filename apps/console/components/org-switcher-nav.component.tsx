@@ -16,27 +16,18 @@
  */
 'use client'
 
-import { generateOrgSlug } from '@aglyn/aglyn'
 import {
-  ICON_VARIANT_MENU_DOWN, ICON_VARIANT_ORGANIZATION,
-  ICON_VARIANT_SYMBOL_SECURE,
+  ICON_VARIANT_MENU_DOWN,
+  ICON_VARIANT_ORGANIZATION,
 } from '@aglyn/shared-data-enums'
 import { AppLink, MdiIcon } from '@aglyn/shared-ui-jsx'
-import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { useUser } from '@aglyn/tenant-feature-instance'
 import {
   Avatar,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
-  InputAdornment,
   ListItemText,
   Menu,
   MenuItem,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -45,73 +36,26 @@ import { useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentOrg from '../hooks/use-current-org'
 import { useOrgScope } from '../hooks/use-org-scope'
+import CreateOrgDialog from './create-org-dialog.component'
 
 const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
 /**
- * Slack-style organization switcher (AGL-236), rendered in the secondary
- * app bar. Switching scopes the console to that org (persisted locally);
- * once wildcard workspace subdomains are live the menu will navigate to
- * {slug}.aglyn.io instead.
+ * Slack-style organization switcher (AGL-236/AGL-621), rendered in the
+ * secondary app bar. Switching NAVIGATES to the other org's URL — the URL is
+ * the source of truth, so there is no local selection to race and snap back
+ * (the old switch-bounce). On the apex that is `/[orgSlug]/hosts`; on a
+ * workspace subdomain it is the other org's subdomain (the session cookie
+ * signs it in silently).
  */
 export function OrgSwitcherNav() {
-  const { data: user } = useUser()
-  const { orgs, currentOrg, selectOrg, orgSlug } = useOrgScope()
+  const { orgs, currentOrg, orgSlug } = useOrgScope()
   // Org logo (AGL-363) — replaces the generic building icon when set.
   const { org } = useCurrentOrg()
   const logoUrl = (org as any)?.logoUrl as string | undefined
   const router = useRouter()
-  const { enqueueSnackbar } = useSnackbar()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const [creating, setCreating] = useState(false)
-  const [name, setName] = useState('')
-  const [slug, setSlug] = useState('')
-  const [slugTouched, setSlugTouched] = useState(false)
-  const [busy, setBusy] = useState(false)
-
-  const handleCreate = async () => {
-    if (!name.trim() || busy) return
-    setBusy(true)
-    try {
-      const idToken = await (user as any)?.getIdToken?.()
-      const response = await fetch('/api/orgs/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
-        },
-        body: JSON.stringify({ name: name.trim(), slug: slug.trim() }),
-      })
-      const payload = await response.json().catch(() => ({}))
-      if (!response.ok || !payload?.orgId) {
-        enqueueSnackbar(payload?.error ?? 'Creating the organization failed', {
-          variant: response.status === 409 ? 'warning' : 'error',
-        })
-        return
-      }
-      enqueueSnackbar(`Created "${name.trim()}"`, { variant: 'success' })
-      // Land in the new workspace, not on the previous org's pages —
-      // from a subdomain that means the new org's own subdomain.
-      if (orgSlug && slug) {
-        window.location.assign(
-          `https://${slug}.${WORKSPACE_DOMAIN}` +
-            buildRoute(Route.HOST_LIST),
-        )
-        return
-      }
-      selectOrg(payload.orgId)
-      void router.push(buildRoute(Route.HOST_LIST))
-      setCreating(false)
-      setName('')
-      setSlug('')
-      setSlugTouched(false)
-    } catch (error) {
-      console.error(error)
-      enqueueSnackbar('Creating the organization failed', { variant: 'error' })
-    } finally {
-      setBusy(false)
-    }
-  }
 
   if (!currentOrg) return null
 
@@ -161,35 +105,32 @@ export function OrgSwitcherNav() {
         open={Boolean(anchor)}
         onClose={() => setAnchor(null)}
       >
-        {orgs.map((org) => (
+        {orgs.map((item) => (
           <MenuItem
-            key={org.$id}
-            selected={org.$id === currentOrg.$id}
+            key={item.$id}
+            selected={item.$id === currentOrg.$id}
             onClick={() => {
               setAnchor(null)
-              if (org.$id === currentOrg.$id) return
-              // On a workspace subdomain the org IS the hostname, so
-              // switching means moving to the other org's subdomain —
-              // the session cookie signs it in silently (AGL-236).
-              if (orgSlug && org.slug) {
+              if (item.$id === currentOrg.$id || !item.slug) return
+              const href = buildRoute(Route.HOST_LIST, { orgSlug: item.slug })
+              // On a workspace subdomain the org IS the hostname, so switching
+              // means moving to the other org's subdomain; on the apex it is a
+              // client navigation. Either way the URL drives the scope.
+              if (orgSlug) {
                 window.location.assign(
-                  `https://${org.slug}.${WORKSPACE_DOMAIN}` +
-                    buildRoute(Route.HOST_LIST),
+                  `https://${item.slug}.${WORKSPACE_DOMAIN}${href}`,
                 )
                 return
               }
-              // Apex: re-scope in place and leave any page from the
-              // previous org (Slack semantics).
-              selectOrg(org.$id)
-              void router.push(buildRoute(Route.HOST_LIST))
+              router.push(href)
             }}
           >
             <ListItemText
-              primary={org.orgName ?? org.$id}
+              primary={item.orgName ?? item.$id}
               secondary={
-                org.slug
-                  ? `${org.slug}.${WORKSPACE_DOMAIN} · ${org.role}`
-                  : org.role
+                item.slug
+                  ? `${item.slug}.${WORKSPACE_DOMAIN} · ${item.role}`
+                  : item.role
               }
             />
           </MenuItem>
@@ -198,7 +139,7 @@ export function OrgSwitcherNav() {
         <MenuItem
           component={AppLink as any}
           {...({ componentVariant: 'naked' } as any)}
-          href={buildRoute(Route.MANAGE_TEAM)}
+          href={buildRoute(Route.MANAGE_TEAM, { orgSlug: currentOrg.slug })}
           onClick={() => setAnchor(null)}
         >
           {'Manage organization…'}
@@ -212,58 +153,7 @@ export function OrgSwitcherNav() {
           {'Create organization…'}
         </MenuItem>
       </Menu>
-      <Dialog
-        open={creating}
-        onClose={() => (busy ? null : setCreating(false))}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>{'Create an organization'}</DialogTitle>
-        <DialogContent
-          sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            {'Organizations own sites and share media, data, plugins and ' +
-              'billing across them. You become the owner.'}
-          </Typography>
-          <TextField
-            label="Organization name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value)
-              if (!slugTouched) setSlug(generateOrgSlug(event.target.value))
-            }}
-            autoFocus
-          />
-          <TextField
-            label="Workspace URL"
-            value={slug}
-            onChange={(event) => {
-              setSlug(event.target.value.toLowerCase())
-              setSlugTouched(true)
-            }}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">{`.${WORKSPACE_DOMAIN}`}</InputAdornment>
-                ),
-              },
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button disabled={busy} onClick={() => setCreating(false)}>
-            {'Cancel'}
-          </Button>
-          <Button
-            variant="contained"
-            disabled={busy || !name.trim()}
-            onClick={() => void handleCreate()}
-          >
-            {busy ? 'Creating…' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <CreateOrgDialog open={creating} onClose={() => setCreating(false)} />
     </>
   )
 }

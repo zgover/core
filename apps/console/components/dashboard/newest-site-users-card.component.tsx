@@ -27,6 +27,7 @@ import {
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { docsHelp } from '../../constants/docs-links'
 import { buildRoute, Route } from '../../constants/route-links'
+import { useOrgSlug } from '../../hooks/use-org-scope'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 
 /**
@@ -37,6 +38,7 @@ import useFirestoreCollection from '../../hooks/use-firestore-collection'
 export function NewestSiteUsersCard(props: { hostId: string }) {
   const { hostId } = props
   const firestore = useFirestore()
+  const orgSlug = useOrgSlug()
   const { data: memberDocs } = useFirestoreCollection<any>(
     () =>
       query(
@@ -64,7 +66,7 @@ export function NewestSiteUsersCard(props: { hostId: string }) {
           <Button
             component={AppLink as any}
             {...({ componentVariant: 'naked' } as any)}
-            href={buildRoute(Route.HOST_USERS, { hostId })}
+            href={buildRoute(Route.HOST_USERS, { orgSlug,  hostId })}
             size="small"
             color="secondary"
           >

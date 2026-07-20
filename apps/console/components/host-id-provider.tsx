@@ -17,13 +17,16 @@
 'use client'
 
 import { doc, getDoc } from 'firebase/firestore'
-import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 import { createContext, useContext, useEffect } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { buildRoute, Route } from '../constants/route-links'
 import { useOrgScope } from '../hooks/use-org-scope'
-
-const WORKSPACE_DOMAIN =
-  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
 export const HostIdContext = createContext<string>(null)
 
@@ -32,80 +35,66 @@ export const useHostId = () => {
 }
 
 export function HostIdProvider({ children }) {
-  const params = useParams<{ hostId: string }>()
+  const params = useParams<{ orgSlug?: string; hostId?: string }>()
   const hostId = params?.hostId as string
+  const pathOrgSlug =
+    typeof params?.orgSlug === 'string' ? params.orgSlug : null
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const firestore = useFirestore()
   const { data: user } = useUser()
-  const {
-    orgs,
-    currentOrg,
-    selectOrg,
-    orgSlug,
-    loading: orgsLoading,
-  } = useOrgScope()
+  const { orgs, currentOrg, loading: orgsLoading } = useOrgScope()
 
-  // Host-route guard (AGL-236): the [hostId] catch-all otherwise treats
-  // any unknown first segment (a typo, or a bare /org before its index
-  // existed) as a host and renders a broken dashboard. Verify against
-  // hostIndex and bounce phantoms to the sites list. The index also
-  // carries the owning org, which scopes the WORKSPACE: a site from a
-  // different org never renders inside this one — on the apex the
-  // workspace switches to the owning org (deep links keep working,
-  // Slack-style); on a workspace subdomain the visit moves to the
-  // owning org's subdomain; without membership it bounces to the sites
-  // list. Lookup errors (signed-out, offline) don't redirect — only a
-  // definitive answer does.
+  // Host-route guard (AGL-236/AGL-621/AGL-623). The `[orgSlug]/hosts/[hostId]`
+  // route otherwise renders a broken shell for a phantom or cross-org host.
+  // Verify against hostIndex, which carries the owning org:
+  //  - phantom (no index doc) → the current org's sites list;
+  //  - a host owned by a DIFFERENT org the user belongs to → REDIRECT to
+  //    that org's canonical URL (swap the org segment), never a sign-out —
+  //    this is the cross-org bug fix (AGL-623);
+  //  - a host in another org the user is NOT in → the sites list;
+  //  - same org but no host access (AGL-242) → the sites list on a
+  //    permission-denied read (a denied host doc must never cascade to a
+  //    sign-out). Lookup errors (offline/signed-out) don't redirect.
   useEffect(() => {
     if (!hostId || !user || orgsLoading || !currentOrg) return
+    const homeHref = buildRoute(Route.HOST_LIST, { orgSlug: currentOrg.slug })
     let active = true
     void getDoc(doc(firestore, 'hostIndex', hostId))
       .then((snapshot) => {
         if (!active) return
         if (!snapshot.exists()) {
-          void router.replace('/hosts')
+          void router.replace(homeHref)
           return
         }
         const hostOrgId = snapshot.get('orgId') as string | undefined
         if (!hostOrgId || hostOrgId === currentOrg.$id) {
-          // Host-scoped access guard (AGL-242): membership in the org is
-          // not access to every host — restricted members carry
-          // `hostAccess` and the host doc's memberRoles projection (and
-          // the rules) exclude them elsewhere. A permission-denied read
-          // here means "not your site": bounce instead of rendering an
-          // empty shell. Staff claims pass the rules, so staff keep
-          // access.
           void getDoc(doc(firestore, 'hosts', hostId)).catch(
             (error: { code?: string }) => {
               if (active && error?.code === 'permission-denied') {
-                void router.replace('/hosts')
+                void router.replace(homeHref)
               }
             },
           )
           return
         }
         const membership = orgs.find((org) => org.$id === hostOrgId)
-        if (!membership) {
-          // Not this user's org — rules already deny the data; keep the
-          // UI from rendering an empty shell of someone else's site.
-          void router.replace('/hosts')
+        if (!membership || !membership.slug) {
+          void router.replace(homeHref)
           return
         }
-        if (orgSlug && membership.slug) {
-          // Subdomains pin the workspace to the hostname — follow the
-          // site home instead (the session cookie signs it in). The Pages
-          // Router `router.asPath` (path + query) is reconstructed here from
-          // `usePathname()` + `useSearchParams()`.
+        // The host lives in another org the user belongs to: rewrite the
+        // URL's org segment to that org and keep the rest of the deep link
+        // (and query) intact. Redirect — never sign out.
+        if (pathOrgSlug) {
           const query = searchParams?.toString()
-          const asPath = query ? `${pathname}?${query}` : pathname
-          window.location.assign(
-            `https://${membership.slug}.${WORKSPACE_DOMAIN}${asPath}`,
+          const corrected = pathname.replace(
+            `/${pathOrgSlug}/`,
+            `/${membership.slug}/`,
           )
-          return
+          void router.replace(query ? `${corrected}?${query}` : corrected)
         }
-        selectOrg(hostOrgId)
       })
       .catch(() => undefined)
     return () => {
@@ -114,14 +103,13 @@ export function HostIdProvider({ children }) {
   }, [
     firestore,
     hostId,
+    pathOrgSlug,
     user,
     router,
     pathname,
     searchParams,
     orgs,
     currentOrg,
-    selectOrg,
-    orgSlug,
     orgsLoading,
   ])
 
