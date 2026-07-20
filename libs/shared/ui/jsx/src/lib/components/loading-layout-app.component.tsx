@@ -100,10 +100,12 @@ RouterLoadingApp.aglyn = true
  * the modal.
  */
 export interface LoadingLayoutAppComponentProps
-  extends LoadingLayoutComponentProps {
+  extends Omit<LoadingLayoutComponentProps, 'children'> {
   /** Per-site branding for the overlay (AGL-594) — see LoadingModal. */
   brandLogoUrl?: string
   brandName?: string
+  /** Any renderable children — the tenant layout passes a ReactNode. */
+  children?: ReactNode
 }
 
 const LoadingLayoutAppComponent = forwardRef<
