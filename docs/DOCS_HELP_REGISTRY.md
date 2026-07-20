@@ -75,8 +75,27 @@ href={besignerDocsUrl('responsiveStyling', '#box-stylers')}
 The editor autocompletes valid anchors per topic, and an invalid one won't
 compile.
 
+## Coverage guard
+
+Content freshness is one half; the other is that new surfaces actually *get*
+help. `apps/console/specs/help-coverage.spec.ts` fails if a `DashboardLayout`
+page or a `CardDisplay` with a `header` ships without a `help` prop. If a
+surface genuinely shouldn't have help (e.g. a plugin-widget-slot page with no
+card of its own), add it to that spec's `EXCEPTIONS` map with a specific
+reason — the map doubles as the record of deliberate non-help surfaces, and the
+guard also fails if an exempted file later gains help (remove the stale entry).
+
+The checks are file-level heuristics: they catch a whole surface added with no
+help at all (how the screen detail page was missed, AGL-604), not partial
+coverage inside a file that already uses help elsewhere.
+
 ## CI
 
-`npm run generate:docs-help:check` (also run as part of `nx test console` via
-the spec) fails if the generated files are stale relative to `apps/docs`. If CI
-flags it, run `npm run generate:docs-help` and commit the result.
+Two gates run as part of `nx test console`:
+
+- **Freshness** — `npm run generate:docs-help:check` fails if the generated
+  files are stale relative to `apps/docs`. Fix: `npm run generate:docs-help`
+  and commit.
+- **Coverage** — `help-coverage.spec.ts` fails if a new page/card skipped
+  help. Fix: add `help` (see call-site examples above) or an `EXCEPTIONS`
+  entry.
