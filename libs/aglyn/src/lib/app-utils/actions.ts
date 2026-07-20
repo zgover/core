@@ -236,9 +236,23 @@ export type HostActionStep =
   // hidden class (see element-ui.ts) so authors never type class names.
   // The besigner target picker emits the node's stable data-aglyn
   // selector; any CSS selector works.
-  | { type: 'showElement'; selector: string }
-  | { type: 'hideElement'; selector: string }
-  | { type: 'toggleElement'; selector: string }
+  // Element visibility (AGL-562) with menu-grade choreography (AGL-589):
+  // `delayMs` defers the change and a later visibility step on the same
+  // selector cancels the pending one (the hover grace period), and
+  // `dismissOn` self-dismisses a shown element on Escape / outside click.
+  | {
+      type: 'showElement'
+      selector: string
+      delayMs?: number
+      dismissOn?: ElementDismissOption[]
+    }
+  | { type: 'hideElement'; selector: string; delayMs?: number }
+  | {
+      type: 'toggleElement'
+      selector: string
+      delayMs?: number
+      dismissOn?: ElementDismissOption[]
+    }
   // Drawer commands (AGL-562): delivered to muiDrawer instances over the
   // window event bus keyed by node id; an empty target addresses the
   // page's first drawer.
@@ -373,6 +387,12 @@ export interface HostAction {
 export const ACTION_MAX_STEPS = 10
 /** Custom-event chaining depth cap (mirrors CROSS_MAX_DEPTH). */
 export const ACTION_MAX_EVENT_DEPTH = 3
+
+/** Self-dismiss triggers for shown elements (AGL-589). */
+export const ELEMENT_DISMISS_OPTIONS = ['escape', 'outsideClick'] as const
+export type ElementDismissOption = (typeof ELEMENT_DISMISS_OPTIONS)[number]
+/** Visibility grace-delay ceiling — enough for hover travel, no dead UIs. */
+export const ELEMENT_VISIBILITY_MAX_DELAY_MS = 5000
 /** Custom event names: short, no collision with built-ins. */
 export const CUSTOM_EVENT_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]{1,39}$/
 
@@ -530,6 +550,38 @@ export function validateHostAction(action: HostAction): string | null {
       !step.selector?.trim()
     ) {
       return `${label}: pick the element to show or hide`
+    }
+    if (
+      step.type === 'showElement' ||
+      step.type === 'hideElement' ||
+      step.type === 'toggleElement'
+    ) {
+      // Choreography options (AGL-589).
+      const delay = (step as { delayMs?: unknown }).delayMs
+      if (
+        delay != null &&
+        !(
+          Number.isInteger(delay) &&
+          (delay as number) >= 0 &&
+          (delay as number) <= ELEMENT_VISIBILITY_MAX_DELAY_MS
+        )
+      ) {
+        return `${label}: delay must be 0–${ELEMENT_VISIBILITY_MAX_DELAY_MS}ms`
+      }
+      const dismiss = (step as { dismissOn?: unknown }).dismissOn
+      if (
+        dismiss != null &&
+        !(
+          Array.isArray(dismiss) &&
+          dismiss.every((option) =>
+            (ELEMENT_DISMISS_OPTIONS as readonly string[]).includes(
+              option as string,
+            ),
+          )
+        )
+      ) {
+        return `${label}: dismiss options are escape and outsideClick`
+      }
     }
     if (step.type === 'showHtml' && !step.html?.trim()) {
       return `${label}: enter the HTML`
