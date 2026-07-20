@@ -23,6 +23,7 @@ import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Alert,
   Button,
+  Checkbox,
   Chip,
   Collapse,
   Dialog,
@@ -30,6 +31,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControlLabel,
   Link,
   MenuItem,
   Paper,
@@ -810,6 +812,106 @@ export function InteractionBuilderDialog(props: InteractionBuilderDialogProps) {
                   updateStep(index, { selector: value })
                 }
               />
+            ) : null}
+            {['showElement', 'hideElement', 'toggleElement'].includes(
+              step.type,
+            ) ? (
+              // Choreography options (AGL-589): a grace delay (a later
+              // visibility step on the same target cancels a pending one)
+              // and, for steps that can SHOW, self-dismissal.
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{ alignItems: 'center', flexWrap: 'wrap', pl: 0.5 }}
+              >
+                <TextField
+                  label="Delay (ms)"
+                  type="number"
+                  size="small"
+                  value={(step as { delayMs?: number }).delayMs ?? ''}
+                  onChange={(inputEvent) => {
+                    const raw = inputEvent.target.value
+                    updateStep(index, {
+                      delayMs: raw === '' ? undefined : Number(raw),
+                    } as Partial<StepDraft>)
+                  }}
+                  slotProps={{
+                    htmlInput: {
+                      min: 0,
+                      max: Aglyn.ELEMENT_VISIBILITY_MAX_DELAY_MS,
+                      step: 50,
+                    },
+                  }}
+                  sx={{ width: 120 }}
+                  helperText="Grace period"
+                />
+                {step.type !== 'hideElement' ? (
+                  <>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={Boolean(
+                            (
+                              step as {
+                                dismissOn?: Aglyn.ElementDismissOption[]
+                              }
+                            ).dismissOn?.includes('escape'),
+                          )}
+                          onChange={(_e, checked) => {
+                            const current = new Set(
+                              (
+                                step as {
+                                  dismissOn?: Aglyn.ElementDismissOption[]
+                                }
+                              ).dismissOn ?? [],
+                            )
+                            if (checked) current.add('escape')
+                            else current.delete('escape')
+                            updateStep(index, {
+                              dismissOn: current.size
+                                ? [...current]
+                                : undefined,
+                            } as Partial<StepDraft>)
+                          }}
+                        />
+                      }
+                      label="Close on Esc"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={Boolean(
+                            (
+                              step as {
+                                dismissOn?: Aglyn.ElementDismissOption[]
+                              }
+                            ).dismissOn?.includes('outsideClick'),
+                          )}
+                          onChange={(_e, checked) => {
+                            const current = new Set(
+                              (
+                                step as {
+                                  dismissOn?: Aglyn.ElementDismissOption[]
+                                }
+                              ).dismissOn ?? [],
+                            )
+                            if (checked) current.add('outsideClick')
+                            else current.delete('outsideClick')
+                            updateStep(index, {
+                              dismissOn: current.size
+                                ? [...current]
+                                : undefined,
+                            } as Partial<StepDraft>)
+                          }}
+                        />
+                      }
+                      label="Close on outside click"
+                    />
+                  </>
+                ) : null}
+              </Stack>
             ) : null}
           </Stack>
         ))}

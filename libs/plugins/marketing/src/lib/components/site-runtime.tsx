@@ -305,9 +305,10 @@ function AutomationsEngine(props: {
             // Element choreography (AGL-562): class-based so "show"
             // reveals targets the author started hidden. The tenant page
             // ships the hidden-class rule in its SSR HTML; ensure is the
-            // fallback for other embeddings.
+            // fallback for other embeddings. Grace delays + Escape/
+            // outside-click dismissal ride the same step (AGL-589).
             Aglyn.ensureElementHiddenStyle()
-            Aglyn.applyElementVisibility(
+            Aglyn.runElementVisibilityStep(
               step.type === 'showElement'
                 ? 'show'
                 : step.type === 'hideElement'
@@ -316,6 +317,12 @@ function AutomationsEngine(props: {
               // Expand so a show/hide/toggle authored against the raw
               // canvas id still reaches the layout-composed node (AGL-573).
               Aglyn.expandLeafSelector(step.selector),
+              {
+                delayMs: (step as { delayMs?: number }).delayMs,
+                dismissOn: (
+                  step as { dismissOn?: Aglyn.ElementDismissOption[] }
+                ).dismissOn,
+              },
             )
           } else if (
             step.type === 'openDrawer' ||

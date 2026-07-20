@@ -87,6 +87,120 @@ export function applyElementVisibility(
   return elements.length
 }
 
+/* ── Visibility choreography: grace delays + self-dismissal (AGL-589) ── */
+
+export interface ElementVisibilityOptions {
+  /** Defer the change; a later visibility step on the same selector
+   * cancels the pending one — the hover grace period. */
+  delayMs?: number
+  /** Self-dismiss a SHOWN element on Escape / a pointerdown outside it. */
+  dismissOn?: Array<'escape' | 'outsideClick'>
+}
+
+// Selector-keyed registries. One document per site runtime, so module
+// scope is the right lifetime; reset exists for tests.
+const pendingVisibilityTimers = new Map<string, ReturnType<typeof setTimeout>>()
+const activeDismissers = new Map<string, () => void>()
+
+/** Tears down all pending timers and dismiss listeners (tests). */
+export function resetElementVisibilityChoreography(): void {
+  for (const timer of pendingVisibilityTimers.values()) clearTimeout(timer)
+  pendingVisibilityTimers.clear()
+  for (const teardown of activeDismissers.values()) teardown()
+  activeDismissers.clear()
+}
+
+function disarmDismissal(selector: string): void {
+  activeDismissers.get(selector)?.()
+  activeDismissers.delete(selector)
+}
+
+function armDismissal(
+  selector: string,
+  dismissOn: NonNullable<ElementVisibilityOptions['dismissOn']>,
+  doc: Document,
+): void {
+  disarmDismissal(selector)
+  if (!dismissOn.length) return
+  const dismiss = () => {
+    applyElementVisibility('hide', selector, doc)
+    disarmDismissal(selector)
+  }
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') dismiss()
+  }
+  const onPointerDown = (event: Event) => {
+    const target = event.target as Element | null
+    // Inside the shown element (or its trigger sharing a wrapper that
+    // matches the selector) never dismisses — only genuine outside taps.
+    if (target?.closest?.(selector)) return
+    dismiss()
+  }
+  if (dismissOn.includes('escape')) {
+    doc.addEventListener('keydown', onKeyDown)
+  }
+  if (dismissOn.includes('outsideClick')) {
+    doc.addEventListener('pointerdown', onPointerDown)
+  }
+  activeDismissers.set(selector, () => {
+    doc.removeEventListener('keydown', onKeyDown)
+    doc.removeEventListener('pointerdown', onPointerDown)
+  })
+}
+
+/**
+ * Runs an element-visibility step with menu-grade choreography (AGL-589):
+ *
+ * - `delayMs` defers the change; ANY later visibility step on the same
+ *   selector cancels the pending one first. Hover menus author
+ *   hover-enter → show (immediate, cancels a pending hide) and
+ *   hover-leave → hide with a small delay — the classic grace period.
+ * - `dismissOn` arms Escape / outside-pointerdown listeners while the
+ *   element is shown (armed AFTER the change applies, so the click that
+ *   opened it can never instantly close it) and disarms them on hide.
+ *
+ * Without options this is exactly {@link applyElementVisibility}.
+ */
+export function runElementVisibilityStep(
+  command: ElementVisibilityCommand,
+  selector: string,
+  options: ElementVisibilityOptions = {},
+  doc: Document = document,
+): void {
+  // Later intent wins: cancel whatever is pending for this selector.
+  const pending = pendingVisibilityTimers.get(selector)
+  if (pending != null) {
+    clearTimeout(pending)
+    pendingVisibilityTimers.delete(selector)
+  }
+  const apply = () => {
+    pendingVisibilityTimers.delete(selector)
+    applyElementVisibility(command, selector, doc)
+    const dismissOn = options.dismissOn ?? []
+    if (!dismissOn.length) return
+    // Toggle can land either way — read the DOM for the outcome.
+    let shown = command === 'show'
+    if (command === 'toggle') {
+      try {
+        const element = doc.querySelector(selector)
+        shown =
+          element != null &&
+          !element.classList.contains(ELEMENT_HIDDEN_CLASS)
+      } catch {
+        shown = false
+      }
+    }
+    if (command === 'hide' || !shown) disarmDismissal(selector)
+    else armDismissal(selector, dismissOn, doc)
+  }
+  const delay = Number(options.delayMs)
+  if (Number.isFinite(delay) && delay > 0) {
+    pendingVisibilityTimers.set(selector, setTimeout(apply, delay))
+  } else {
+    apply()
+  }
+}
+
 /* ── Layout-namespace-insensitive id matching (AGL-573) ─────────────── */
 
 /**
