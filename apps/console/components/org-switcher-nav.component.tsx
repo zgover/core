@@ -18,13 +18,18 @@
 
 import {
   ICON_VARIANT_MENU_DOWN,
+  ICON_VARIANT_MODIFY_ADD,
   ICON_VARIANT_ORGANIZATION,
+  ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
-import { AppLink, MdiIcon } from '@aglyn/shared-ui-jsx'
+import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import {
   Avatar,
+  Box,
   Button,
+  Chip,
   Divider,
+  ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
@@ -32,63 +37,99 @@ import {
   Typography,
 } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentOrg from '../hooks/use-current-org'
 import { useOrgScope } from '../hooks/use-org-scope'
 import CreateOrgDialog from './create-org-dialog.component'
+import SwitcherSearchField from './switcher-search-field.component'
 
 const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 
+const titleCase = (value?: string) =>
+  value ? value.charAt(0).toUpperCase() + value.slice(1) : ''
+
 /**
- * Slack-style organization switcher (AGL-236/AGL-621), rendered in the
- * secondary app bar. Switching NAVIGATES to the other org's URL — the URL is
- * the source of truth, so there is no local selection to race and snap back
- * (the old switch-bounce). On the apex that is `/[orgSlug]/hosts`; on a
- * workspace subdomain it is the other org's subdomain (the session cookie
- * signs it in silently).
+ * Organization switcher (AGL-236/AGL-621; AGL-629 Vercel team-switcher UI).
+ * The button shows the current workspace; the dropdown filters the user's
+ * orgs, marks the current one with a check, and offers a create row.
+ * Switching NAVIGATES to the other org's URL — the URL is the source of truth,
+ * so there is no local selection to race and snap back (the old switch-bounce).
+ * On the apex that is `/[orgSlug]/hosts`; on a workspace subdomain it is the
+ * other org's subdomain (the session cookie signs it in silently).
  */
 export function OrgSwitcherNav() {
   const { orgs, currentOrg, orgSlug } = useOrgScope()
-  // Org logo (AGL-363) — replaces the generic building icon when set.
+  // The full current-org doc carries the logo (AGL-363) and plan for the badge.
   const { org } = useCurrentOrg()
   const logoUrl = (org as any)?.logoUrl as string | undefined
+  const plan = (org as any)?.plan as string | undefined
   const router = useRouter()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const [creating, setCreating] = useState(false)
+  const [query, setQuery] = useState('')
+
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return orgs
+    return orgs.filter((item) =>
+      [item.orgName, item.slug, item.$id].some((field) =>
+        field?.toLowerCase().includes(needle),
+      ),
+    )
+  }, [orgs, query])
+
+  const close = () => {
+    setAnchor(null)
+    setQuery('')
+  }
+
+  const switchTo = (item: (typeof orgs)[number]) => {
+    close()
+    if (item.$id === currentOrg?.$id || !item.slug) return
+    const href = buildRoute(Route.HOST_LIST, { orgSlug: item.slug })
+    // On a workspace subdomain the org IS the hostname, so switching means
+    // moving to the other org's subdomain; on the apex it is a client
+    // navigation. Either way the URL drives the scope.
+    if (orgSlug) {
+      window.location.assign(`https://${item.slug}.${WORKSPACE_DOMAIN}${href}`)
+      return
+    }
+    router.push(href)
+  }
 
   if (!currentOrg) return null
+  const currentBadge = titleCase(plan) || titleCase(currentOrg.role)
+
+  const orgAvatar = (url?: string) =>
+    url ? (
+      <Avatar src={url} variant="rounded" sx={{ width: 22, height: 22 }} />
+    ) : (
+      <Avatar
+        variant="rounded"
+        sx={{ width: 22, height: 22, bgcolor: 'primary.main' }}
+      >
+        <MdiIcon path={ICON_VARIANT_ORGANIZATION.path} fontSize="small" />
+      </Avatar>
+    )
 
   return (
     <>
       <Tooltip title={`Workspace: ${currentOrg.orgName ?? currentOrg.$id}`}>
         <Button
           size="small"
-          variant="contained"
-          color="primary"
+          variant="text"
+          color="inherit"
           onClick={(event) => setAnchor(event.currentTarget)}
-          startIcon={
-            logoUrl ? (
-              <Avatar
-                src={logoUrl}
-                variant="rounded"
-                sx={{ width: 18, height: 18 }}
-              />
-            ) : (
-              <MdiIcon
-                path={ICON_VARIANT_ORGANIZATION.path}
-                fontSize={'small'}
-              />
-            )
-          }
+          startIcon={orgAvatar(logoUrl)}
           endIcon={
             <MdiIcon path={ICON_VARIANT_MENU_DOWN.path} fontSize="small" />
           }
           sx={{
-            maxWidth: 240,
+            maxWidth: 280,
             textTransform: 'none',
-            '& .MuiButton-endIcon': { marginLeft: 0 },
-            '& .MuiButton-endIcon>*:nth-of-type(1)': { fontSize: `1.7em` },
+            gap: 0.5,
+            '& .MuiButton-endIcon': { marginLeft: 0.25 },
           }}
         >
           <Typography
@@ -98,59 +139,110 @@ export function OrgSwitcherNav() {
           >
             {currentOrg.orgName ?? currentOrg.slug ?? currentOrg.$id}
           </Typography>
+          {currentBadge ? (
+            <Chip
+              label={currentBadge}
+              size="small"
+              variant="outlined"
+              sx={{ height: 20, '& .MuiChip-label': { px: 0.75, fontSize: 11 } }}
+            />
+          ) : null}
         </Button>
       </Tooltip>
       <Menu
         anchorEl={anchor}
         open={Boolean(anchor)}
-        onClose={() => setAnchor(null)}
+        onClose={close}
+        autoFocus={false}
+        slotProps={{
+          list: { autoFocusItem: false, sx: { pt: 0 } },
+          paper: { sx: { width: 320, maxWidth: '90vw', mt: 0.5 } },
+        }}
       >
-        {orgs.map((item) => (
-          <MenuItem
-            key={item.$id}
-            selected={item.$id === currentOrg.$id}
-            onClick={() => {
-              setAnchor(null)
-              if (item.$id === currentOrg.$id || !item.slug) return
-              const href = buildRoute(Route.HOST_LIST, { orgSlug: item.slug })
-              // On a workspace subdomain the org IS the hostname, so switching
-              // means moving to the other org's subdomain; on the apex it is a
-              // client navigation. Either way the URL drives the scope.
-              if (orgSlug) {
-                window.location.assign(
-                  `https://${item.slug}.${WORKSPACE_DOMAIN}${href}`,
-                )
-                return
-              }
-              router.push(href)
-            }}
-          >
-            <ListItemText
-              primary={item.orgName ?? item.$id}
-              secondary={
-                item.slug
-                  ? `${item.slug}.${WORKSPACE_DOMAIN} · ${item.role}`
-                  : item.role
-              }
-            />
-          </MenuItem>
-        ))}
+        <SwitcherSearchField
+          value={query}
+          onChange={setQuery}
+          placeholder="Find organization…"
+        />
+        <Divider />
+        <Box sx={{ maxHeight: 280, overflowY: 'auto', py: 0.5 }}>
+          {filtered.length === 0 ? (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ px: 2, py: 1.5 }}
+            >
+              {'No organizations match.'}
+            </Typography>
+          ) : (
+            filtered.map((item) => {
+              const isCurrent = item.$id === currentOrg.$id
+              return (
+                <MenuItem
+                  key={item.$id}
+                  selected={isCurrent}
+                  onClick={() => switchTo(item)}
+                  sx={{ gap: 1 }}
+                >
+                  <ListItemIcon sx={{ minWidth: 0 }}>
+                    {orgAvatar(isCurrent ? logoUrl : undefined)}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.orgName ?? item.slug ?? item.$id}
+                    slotProps={{ primary: { noWrap: true } }}
+                  />
+                  {item.role ? (
+                    <Chip
+                      label={titleCase(item.role)}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        height: 20,
+                        '& .MuiChip-label': { px: 0.75, fontSize: 11 },
+                      }}
+                    />
+                  ) : null}
+                  {isCurrent ? (
+                    <MdiIcon
+                      path={ICON_VARIANT_SYMBOL_CONFIRMED.path}
+                      fontSize="small"
+                      sx={{ color: 'text.secondary' }}
+                    />
+                  ) : null}
+                </MenuItem>
+              )
+            })
+          )}
+        </Box>
         <Divider />
         <MenuItem
-          component={AppLink as any}
-          {...({ componentVariant: 'naked' } as any)}
-          href={buildRoute(Route.MANAGE_TEAM, { orgSlug: currentOrg.slug })}
-          onClick={() => setAnchor(null)}
-        >
-          {'Manage organization…'}
-        </MenuItem>
-        <MenuItem
           onClick={() => {
-            setAnchor(null)
+            close()
             setCreating(true)
           }}
+          sx={{ gap: 1, py: 1 }}
         >
-          {'Create organization…'}
+          <ListItemIcon sx={{ minWidth: 0 }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                width: 22,
+                height: 22,
+                bgcolor: 'action.hover',
+                color: 'text.secondary',
+              }}
+            >
+              <MdiIcon path={ICON_VARIANT_MODIFY_ADD.path} fontSize="small" />
+            </Avatar>
+          </ListItemIcon>
+          <ListItemText
+            primary="Create organization"
+            secondary="Own sites and share media, data & billing"
+            slotProps={{
+              primary: { variant: 'body2' },
+              secondary: { variant: 'caption' },
+            }}
+          />
         </MenuItem>
       </Menu>
       <CreateOrgDialog open={creating} onClose={() => setCreating(false)} />
