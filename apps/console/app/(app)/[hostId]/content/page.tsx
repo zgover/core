@@ -17,7 +17,6 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import { parseMarkdownLite } from '@aglyn/aglyn'
 import { mdiFileDocumentMultipleOutline } from '@aglyn/shared-data-mdi'
 import {
   CardDisplay,
@@ -72,6 +71,10 @@ import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../hooks/use-firestore-doc'
 import useHostActivityLogger from '../../../../hooks/use-host-activity-logger'
 import MediaPickerDialog from '../../../../components/media/media-picker-dialog.component'
+import MarkdownVisualEditor, {
+  type MarkdownEditorCommand,
+  type MarkdownVisualEditorHandle,
+} from '../../../../components/markdown-visual-editor.component'
 
 const slugify = (value: string) =>
   value
@@ -81,65 +84,10 @@ const slugify = (value: string) =>
     .replace(/(^-|-$)+/g, '')
 
 /**
- * Live markdown-lite preview (AGL-582): the SAME parser the tenant's Entry
- * Body block renders with, so what editors see here is what publishes.
+ * Sentinel option in the entry editor's category Select (AGL-582) that
+ * opens the Manage categories dialog instead of assigning a value.
  */
-const MarkdownLitePreview = ({ body }: { body: string }) => (
-  <>
-    {parseMarkdownLite(body).map((block, index) => {
-      const inline = (inlines: Aglyn.MarkdownInline[]) =>
-        inlines.map((item, i) =>
-          item.type === 'bold' ? (
-            <strong key={i}>{item.text}</strong>
-          ) : item.type === 'italic' ? (
-            <em key={i}>{item.text}</em>
-          ) : item.type === 'link' ? (
-            <MuiLink key={i} href={item.href} target="_blank">
-              {item.text}
-            </MuiLink>
-          ) : (
-            <span key={i}>{item.text}</span>
-          ),
-        )
-      if (block.type === 'heading') {
-        return (
-          <Typography
-            key={index}
-            variant={block.level === 2 ? 'h5' : 'h6'}
-            sx={{ mt: 2 }}
-          >
-            {inline(block.inlines)}
-          </Typography>
-        )
-      }
-      if (block.type === 'image') {
-        return (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={index}
-            src={block.src}
-            alt={block.alt}
-            style={{ maxWidth: '100%', borderRadius: 8, marginTop: 16 }}
-          />
-        )
-      }
-      if (block.type === 'list') {
-        return (
-          <ul key={index}>
-            {block.items.map((item, i) => (
-              <li key={i}>{inline(item)}</li>
-            ))}
-          </ul>
-        )
-      }
-      return (
-        <Typography key={index} variant="body1" sx={{ mt: 1.5 }}>
-          {inline(block.inlines)}
-        </Typography>
-      )
-    })}
-  </>
-)
+const MANAGE_CATEGORIES_VALUE = '__manage__'
 
 /**
  * Content collections manager (AGL-81): collections (e.g. Blog) with
@@ -251,6 +199,96 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
     [entryDocs],
   )
 
+  // Category taxonomy (AGL-582): `{ id, name }` pairs on the COLLECTION
+  // doc. Entries reference the stable id, so renaming a category here
+  // updates every post at render time without touching any entry.
+  const categories = useMemo<Array<{ id: string; name: string }>>(
+    () =>
+      Array.isArray(selected?.categories)
+        ? selected.categories.filter(
+            (item: any) =>
+              typeof item?.id === 'string' &&
+              item.id.trim() !== '' &&
+              typeof item?.name === 'string' &&
+              item.name.trim() !== '',
+          )
+        : [],
+    [selected],
+  )
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  // Inline rename drafts keyed by category id; committed on blur.
+  const [categoryDrafts, setCategoryDrafts] = useState<
+    Record<string, string>
+  >({})
+  const persistCategories = useCallback(
+    async (next: Array<{ id: string; name: string }>) => {
+      if (!selected) return
+      await updateDoc(
+        doc(firestore, 'hosts', hostId, 'collections', selected.$id),
+        { categories: next },
+      )
+    },
+    [selected, firestore, hostId],
+  )
+  const handleAddCategory = useCallback(async () => {
+    const name = newCategoryName.trim()
+    if (!name || categories.length >= Aglyn.COLLECTION_CATEGORIES_MAX) return
+    // Stable id (AGL-582): slugified ONCE from the initial name and
+    // uniqued; later renames never change it — that is the whole point.
+    const base = slugify(name) || 'category'
+    let categoryId = base
+    for (
+      let suffix = 2;
+      categories.some((category) => category.id === categoryId);
+      suffix += 1
+    ) {
+      categoryId = `${base}-${suffix}`
+    }
+    await persistCategories([...categories, { id: categoryId, name }])
+    setNewCategoryName('')
+  }, [newCategoryName, categories, persistCategories])
+  const handleRenameCategory = useCallback(
+    (categoryId: string) => async () => {
+      const draft = (categoryDrafts[categoryId] ?? '').trim()
+      setCategoryDrafts((prev) => {
+        const rest = { ...prev }
+        delete rest[categoryId]
+        return rest
+      })
+      const current = categories.find(
+        (category) => category.id === categoryId,
+      )
+      if (!current || !draft || draft === current.name) return
+      // Rename updates the COLLECTION doc only — entries keep their ids.
+      await persistCategories(
+        categories.map((category) =>
+          category.id === categoryId ? { ...category, name: draft } : category,
+        ),
+      )
+    },
+    [categoryDrafts, categories, persistCategories],
+  )
+  const handleDeleteCategory = useCallback(
+    (category: { id: string; name: string }) => async () => {
+      const confirmed = await confirm({
+        title: `Delete "${category.name}"?`,
+        description:
+          'Entries assigned to this category keep their reference but ' +
+          'will show no category until they are reassigned.',
+        confirmationText: 'Delete',
+        confirmationButtonProps: { color: 'error' },
+      })
+        .then(() => true)
+        .catch(() => false)
+      if (!confirmed) return
+      await persistCategories(
+        categories.filter((item) => item.id !== category.id),
+      )
+    },
+    [confirm, categories, persistCategories],
+  )
+
   const [newCollectionOpen, setNewCollectionOpen] = useState(false)
   const [collectionName, setCollectionName] = useState('')
   const handleCreateCollection = useCallback(async () => {
@@ -287,13 +325,23 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
     // comma-separated STRING while editing; saved as string[].
     seoTitle: string
     seoDescription: string
-    category: string
+    // Category taxonomy (AGL-582): entries reference the collection's
+    // categories by stable id (lookup, not typed) so renames never touch
+    // entries. `legacyCategory` is the old free-typed string, shown
+    // read-only until a category is picked (which clears it on save).
+    categoryId: string
+    legacyCategory: string
     tags: string
   } | null>(null)
   // Media picker target: entry cover image or an inline body image.
   const [pickerTarget, setPickerTarget] = useState<'cover' | 'body' | null>(
     null,
   )
+  // Body editing mode (AGL-582): the WYSIWYG surface is the default; the
+  // raw markdown textarea (with live preview) stays one tab away. Both
+  // edit the same markdown-lite string, so switching re-parses/serializes.
+  const [bodyTab, setBodyTab] = useState<'visual' | 'markdown'>('visual')
+  const visualEditorRef = useRef<MarkdownVisualEditorHandle | null>(null)
   // Markdown toolbar (AGL-582): wraps the CURRENT SELECTION of the body
   // textarea instead of appending at the end.
   const bodyInputRef = useRef<HTMLTextAreaElement | null>(null)
@@ -331,6 +379,16 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
       })
     },
     [],
+  )
+  // One toolbar, two surfaces (AGL-582): in the Visual tab commands mutate
+  // the editor's block model; in the Markdown tab they wrap the textarea
+  // selection as before.
+  const handleToolbar = useCallback(
+    (kind: MarkdownEditorCommand) => {
+      if (bodyTab === 'visual') visualEditorRef.current?.exec(kind)
+      else applyMarkdown(kind)
+    },
+    [bodyTab, applyMarkdown],
   )
   // AI assist (AGL-130): write or improve the markdown-lite body.
   const { data: aiUser } = useUser()
@@ -418,7 +476,13 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
         // Entry model v2 (AGL-582): SEO overrides + taxonomy.
         seoTitle: editor.seoTitle.trim(),
         seoDescription: editor.seoDescription.trim(),
-        category: editor.category.trim(),
+        // Category lookup (AGL-582): the entry stores the STABLE
+        // categoryId; picking one clears the legacy free-typed field.
+        // "None" only clears the id — the legacy value stays untouched so
+        // simply re-saving an old entry never wipes its category.
+        ...(editor.categoryId
+          ? { categoryId: editor.categoryId, category: deleteField() }
+          : { categoryId: deleteField() }),
         tags: editor.tags
           .split(',')
           .map((tag) => tag.trim())
@@ -638,7 +702,16 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                   size="small"
                   variant="outlined"
                   color="secondary"
-                  onClick={() =>
+                  onClick={() => setCategoriesOpen(true)}
+                >
+                  {'Categories'}
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => {
+                    setBodyTab('visual')
                     setEditor({
                       id: null,
                       title: '',
@@ -647,10 +720,11 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                       coverImage: '',
                       seoTitle: '',
                       seoDescription: '',
-                      category: '',
+                      categoryId: '',
+                      legacyCategory: '',
                       tags: '',
                     })
-                  }
+                  }}
                 >
                   {'New entry'}
                 </Button>
@@ -706,7 +780,8 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                           <Button
                             size="small"
-                            onClick={() =>
+                            onClick={() => {
+                              setBodyTab('visual')
                               setEditor({
                                 id: entry.$id,
                                 title: entry.title ?? '',
@@ -715,12 +790,13 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                                 coverImage: entry.coverImage ?? '',
                                 seoTitle: entry.seoTitle ?? '',
                                 seoDescription: entry.seoDescription ?? '',
-                                category: entry.category ?? '',
+                                categoryId: entry.categoryId ?? '',
+                                legacyCategory: entry.category ?? '',
                                 tags: Array.isArray(entry.tags)
                                   ? entry.tags.join(', ')
                                   : '',
                               })
-                            }
+                            }}
                           >
                             {'Edit'}
                           </Button>
@@ -819,6 +895,99 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      {/* Category taxonomy manager (AGL-582): add / inline-rename /
+          delete the collection's categories. Renames only touch the
+          collection doc — entries keep their stable ids. */}
+      <Dialog
+        open={categoriesOpen}
+        onClose={() => setCategoriesOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {`Categories${selected ? ` — ${selected.displayName}` : ''}`}
+        </DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 1 }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            {'Entries reference categories by a stable id, so renaming ' +
+              'one here updates every post — no entry is ever touched.'}
+          </Typography>
+          {categories.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              {'No categories yet — add the first one below.'}
+            </Typography>
+          ) : (
+            categories.map((category) => (
+              <Stack
+                key={category.id}
+                direction="row"
+                spacing={1}
+                sx={{ alignItems: 'flex-start' }}
+              >
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={categoryDrafts[category.id] ?? category.name}
+                  onChange={(event) =>
+                    setCategoryDrafts((prev) => ({
+                      ...prev,
+                      [category.id]: event.target.value,
+                    }))
+                  }
+                  onBlur={handleRenameCategory(category.id)}
+                  helperText={`id: ${category.id}`}
+                />
+                <Button
+                  size="small"
+                  color="error"
+                  onClick={handleDeleteCategory(category)}
+                >
+                  {'Delete'}
+                </Button>
+              </Stack>
+            ))
+          )}
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
+            <TextField
+              size="small"
+              fullWidth
+              label="New category"
+              value={newCategoryName}
+              onChange={(event) => setNewCategoryName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  void handleAddCategory()
+                }
+              }}
+              helperText={
+                categories.length >= Aglyn.COLLECTION_CATEGORIES_MAX
+                  ? `Limit of ${Aglyn.COLLECTION_CATEGORIES_MAX} reached`
+                  : newCategoryName.trim()
+                    ? `id: ${slugify(newCategoryName) || 'category'}`
+                    : 'e.g. Guides'
+              }
+            />
+            <Button
+              size="small"
+              variant="contained"
+              color="secondary"
+              disabled={
+                !newCategoryName.trim() ||
+                categories.length >= Aglyn.COLLECTION_CATEGORIES_MAX
+              }
+              onClick={handleAddCategory}
+            >
+              {'Add'}
+            </Button>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCategoriesOpen(false)}>{'Done'}</Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
         open={Boolean(editor)}
         onClose={() => setEditor(null)}
@@ -875,18 +1044,51 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
             </Button>
           </Stack>
           <Stack direction="row" spacing={1}>
+            {/* Category is a LOOKUP (AGL-582): entries store the stable
+                categoryId, names resolve at render — renames never touch
+                posts. The legacy free-typed value shows until migrated. */}
             <TextField
+              select
               label="Category"
-              value={editor?.category ?? ''}
-              onChange={(event) =>
+              value={editor?.categoryId ?? ''}
+              onChange={(event) => {
+                const value = event.target.value
+                if (value === MANAGE_CATEGORIES_VALUE) {
+                  return void setCategoriesOpen(true)
+                }
                 setEditor((prev) =>
-                  prev ? { ...prev, category: event.target.value } : prev,
+                  prev ? { ...prev, categoryId: value } : prev,
                 )
-              }
+              }}
               size="small"
               sx={{ flexGrow: 1 }}
-              helperText="Single bucket, e.g. Guides"
-            />
+              helperText={
+                editor?.legacyCategory && !editor.categoryId
+                  ? `Typed category "${editor.legacyCategory}" — pick one ` +
+                    'to migrate this entry'
+                  : 'Pick from this collection’s categories'
+              }
+            >
+              <MenuItem value="">{'None'}</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+              {editor?.categoryId &&
+              !categories.some(
+                (category) => category.id === editor.categoryId,
+              ) ? (
+                // The referenced category was deleted: keep the Select
+                // valid and let the author see (and move off) the id.
+                <MenuItem value={editor.categoryId}>
+                  {`${editor.categoryId} (deleted)`}
+                </MenuItem>
+              ) : null}
+              <MenuItem value={MANAGE_CATEGORIES_VALUE}>
+                {'Manage categories…'}
+              </MenuItem>
+            </TextField>
             <TextField
               label="Tags"
               value={editor?.tags ?? ''}
@@ -925,19 +1127,41 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
             helperText="Meta description — falls back to the excerpt"
           />
           <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={() => applyMarkdown('bold')}>
+            {/* mousedown preventDefault keeps the visual editor's DOM
+                selection alive while the toolbar button is clicked. */}
+            <Button
+              size="small"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => handleToolbar('bold')}
+            >
               {'B'}
             </Button>
-            <Button size="small" onClick={() => applyMarkdown('italic')}>
+            <Button
+              size="small"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => handleToolbar('italic')}
+            >
               {'I'}
             </Button>
-            <Button size="small" onClick={() => applyMarkdown('heading')}>
+            <Button
+              size="small"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => handleToolbar('heading')}
+            >
               {'H2'}
             </Button>
-            <Button size="small" onClick={() => applyMarkdown('link')}>
+            <Button
+              size="small"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => handleToolbar('link')}
+            >
               {'Link'}
             </Button>
-            <Button size="small" onClick={() => applyMarkdown('image')}>
+            <Button
+              size="small"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => handleToolbar('image')}
+            >
               {'Image'}
             </Button>
             <Button size="small" onClick={() => setPickerTarget('body')}>
@@ -960,57 +1184,72 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
               {editor?.body?.trim() ? 'Improve with AI' : 'Write with AI'}
             </Button>
           </Stack>
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={2}
-            sx={{ alignItems: 'stretch' }}
-          >
-            <TextField
-              label="Body"
-              value={editor?.body ?? ''}
-              onChange={(event) =>
-                setEditor((prev) =>
-                  prev ? { ...prev, body: event.target.value } : prev,
-                )
-              }
-              size="small"
-              multiline
-              minRows={12}
-              inputRef={bodyInputRef}
-              sx={{ flex: 1, minWidth: 0 }}
-              helperText="Markdown-lite: **bold**, *italic*, ## headings, - lists, [links](https:// or /page), ![images](https://)."
-            />
-            {/* Live preview (AGL-582): same parser the tenant renders with. */}
-            <Box
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                maxHeight: 420,
-                overflow: 'auto',
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 1,
-                px: 2,
-                pb: 2,
-              }}
-            >
-              <Typography
-                variant="overline"
-                color="text.secondary"
-                component="div"
-                sx={{ pt: 1 }}
-              >
-                {'Preview'}
-              </Typography>
-              {editor?.body?.trim() ? (
-                <MarkdownLitePreview body={editor.body} />
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  {'Start writing to see the preview.'}
-                </Typography>
-              )}
-            </Box>
-          </Stack>
+          <Box>
+            {bodyTab === 'visual' ? (
+              // WYSIWYG surface (AGL-582): the editor IS the preview — it
+              // round-trips through the same markdown-lite parser/serializer
+              // the tenant renders with. Raw markdown is an advanced escape
+              // hatch behind the "Edit markdown" button, not a co-equal tab.
+              <Box>
+                <MarkdownVisualEditor
+                  ref={visualEditorRef}
+                  value={editor?.body ?? ''}
+                  onChange={(body) =>
+                    setEditor((prev) => (prev ? { ...prev, body } : prev))
+                  }
+                />
+                <Stack
+                  direction="row"
+                  sx={{
+                    mt: 0.5,
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    component="div"
+                  >
+                    {'Cmd/Ctrl+B bold · Cmd/Ctrl+I italic · Cmd/Ctrl+Z undo · ' +
+                      'type "## ", "### " or "- " at a line start to convert'}
+                  </Typography>
+                  <Button
+                    size="small"
+                    color="inherit"
+                    onClick={() => setBodyTab('markdown')}
+                    sx={{ flexShrink: 0, color: 'text.secondary' }}
+                  >
+                    {'Edit markdown'}
+                  </Button>
+                </Stack>
+              </Box>
+            ) : (
+              <Box>
+                <TextField
+                  label="Markdown source"
+                  value={editor?.body ?? ''}
+                  onChange={(event) =>
+                    setEditor((prev) =>
+                      prev ? { ...prev, body: event.target.value } : prev,
+                    )
+                  }
+                  size="small"
+                  multiline
+                  minRows={14}
+                  fullWidth
+                  inputRef={bodyInputRef}
+                  helperText="Markdown-lite: **bold**, *italic*, ## headings, - lists, [links](https:// or /page), ![images](https://)."
+                />
+                <Stack direction="row" sx={{ mt: 0.5, justifyContent: 'flex-end' }}>
+                  <Button size="small" onClick={() => setBodyTab('visual')}>
+                    {'Done — back to the editor'}
+                  </Button>
+                </Stack>
+              </Box>
+            )}
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditor(null)}>{'Cancel'}</Button>
@@ -1079,16 +1318,22 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
         onPick={(media) => {
           const url = (media as any).url as string | undefined
           if (url) {
-            setEditor((prev) =>
-              prev
-                ? pickerTarget === 'cover'
-                  ? { ...prev, coverImage: url }
-                  : {
-                      ...prev,
-                      body: `${prev.body}\n\n![${(media as any).alt ?? (media as any).fileName ?? ''}](${url})`,
-                    }
-                : prev,
+            const alt = String(
+              (media as any).alt ?? (media as any).fileName ?? '',
             )
+            if (pickerTarget === 'cover') {
+              setEditor((prev) => (prev ? { ...prev, coverImage: url } : prev))
+            } else if (bodyTab === 'visual') {
+              // Visual tab (AGL-582): insert as an image block at the caret
+              // row; the editor serializes it back to ![alt](url).
+              visualEditorRef.current?.insertImage(alt, url)
+            } else {
+              setEditor((prev) =>
+                prev
+                  ? { ...prev, body: `${prev.body}\n\n![${alt}](${url})` }
+                  : prev,
+              )
+            }
           }
           setPickerTarget(null)
         }}

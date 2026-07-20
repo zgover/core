@@ -28,14 +28,52 @@ publish at the right time.
 
 Each entry carries, besides the title, excerpt, cover image, and markdown body:
 
-- **Category** — a single bucket (e.g. `Guides`) used for filtering and related posts.
+- **Category** — a single bucket (e.g. `Guides`) used for filtering and related posts,
+  **picked from the collection's category list** (see below), never typed free-form.
 - **Tags** — comma-separated labels (e.g. `nextjs, seo`).
 - **SEO title / SEO description** — search & social overrides; they fall back to the
   title and excerpt when blank.
 
-The body editor ships a **markdown toolbar** (bold, italic, H2, link, image — each wraps
-your current selection) plus a **live preview pane** rendered with the exact same
-markdown parser the published site uses. Markdown supports `**bold**`, `*italic*`,
+### Categories
+
+Categories are **managed per collection** — open **Categories** next to the template
+pickers (or **Manage categories…** inside the entry editor) to add, rename, or delete
+them. Entries reference a category by a **stable id**, so **renaming a category updates
+every post instantly without touching a single entry** — the display name is resolved at
+render time wherever it appears (entry pages, meta lines, related posts, RSS, JSON-LD).
+Deleting a category leaves its entries uncategorized until they are reassigned. A
+collection holds up to 50 categories.
+
+Posts written before category lookup existed keep rendering their old free-typed
+category; the entry editor flags them so you can migrate each post to a real category
+with one save.
+
+### Visual editor
+
+The body opens in a **Visual** tab — a WYSIWYG surface where you edit the formatted
+article directly. It is native to the markdown dialect: what you type round-trips
+losslessly to the same markdown string the site stores and renders, so nothing is ever
+saved as HTML. A **Markdown** tab sits beside it with the raw source and a live preview
+pane (rendered with the exact same parser the published site uses); both tabs edit the
+same content, so you can switch freely.
+
+The shared **toolbar** works in both tabs:
+
+- **B / I** — bold or italicize the selection (`Cmd/Ctrl+B`, `Cmd/Ctrl+I` in Visual).
+- **H2** — toggle the current line between paragraph and heading.
+- **Link** — wrap the selection as a link; you're prompted for an `https://` URL or a
+  site path like `/pricing`. In Visual mode, clicking an existing link opens a small
+  popover to **edit or remove** it (it never navigates).
+- **Image** — insert an image by URL; **Insert image** picks one from your media
+  library instead.
+
+Visual-mode shortcuts: type `## `, `### `, or `- ` at the start of a line to convert it
+to a heading or list item; **Enter** splits a block (and exits a list from an empty
+item); **Backspace** at a line start demotes headings/list items and then merges
+paragraphs; `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z` undo and redo. Pasting inserts plain
+text — formatting in the clipboard is stripped.
+
+Markdown supports `**bold**`, `*italic*`,
 `## headings`, `- lists`, `[links](https://…)` — including **site-relative links**
 (`[pricing](/pricing)`) that get client-side navigation — and `![images](https://…)`.
 
@@ -92,7 +130,8 @@ The Collection Entries block also works on **any** screen — set its **Collecti
 attribute (e.g. `blog`) and an **Entries limit** to build a "Latest posts" section on
 your home page. Its **Filter by category** / **Filter by tag** attributes narrow the
 list (e.g. a "Guides only" rail), so filtered landing pages are built as filtered
-blocks.
+blocks. The category filter matches either the category's display name or its stable
+id, so it keeps working across renames.
 :::
 
 ### No template? Still designed

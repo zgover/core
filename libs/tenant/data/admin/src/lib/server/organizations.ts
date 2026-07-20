@@ -46,6 +46,23 @@ export class OrgSlugTakenError extends Error {
   }
 }
 
+/**
+ * Whether an `orgSlugs/{slug}` reservation may be (re)claimed (AGL-585):
+ * free when the doc is missing, when the claimant already owns it, or when
+ * it is a tombstone (`movedTo` set) — a renamed-away slug keeps redirecting
+ * old URLs only until someone wants it, it is never reserved forever.
+ * Claiming writes a full-replace `{ orgId }`, which ends the redirect —
+ * links to a reclaimed slug resolve to the new owner from then on.
+ */
+export function isSlugReservationClaimable(
+  reservation: { orgId?: unknown; movedTo?: unknown } | undefined,
+  claimingOrgId: string | null,
+): boolean {
+  if (!reservation) return true
+  if (claimingOrgId !== null && reservation.orgId === claimingOrgId) return true
+  return Boolean(reservation.movedTo)
+}
+
 export interface CreateOrganizationOptions {
   name: string
   slug: string
@@ -68,7 +85,17 @@ export async function createOrganization(
   const orgId = createResourceUid()
   await db.runTransaction(async (tx) => {
     const reservation = await tx.get(db.collection('orgSlugs').doc(slug))
-    if (reservation.exists) throw new OrgSlugTakenError(slug)
+    // Tombstones (renamed-away slugs) are claimable by new orgs (AGL-585).
+    if (
+      !isSlugReservationClaimable(
+        reservation.exists
+          ? (reservation.data() as { orgId?: unknown; movedTo?: unknown })
+          : undefined,
+        null,
+      )
+    ) {
+      throw new OrgSlugTakenError(slug)
+    }
     tx.set(db.collection('orgSlugs').doc(slug), { orgId })
     tx.set(db.collection('orgs').doc(orgId), {
       name,
@@ -180,8 +207,9 @@ export async function ensureOrgForUser(
  * updates the org doc in one transaction, leaving the old reservation as
  * a tombstone (`movedTo`) so existing workspace URLs keep resolving —
  * the middleware redirects them. Reverse-index slugs fan out after.
- * Throws `OrgSlugTakenError` when another org holds the new slug; slug
- * validity/authorization are the API route's job.
+ * Throws `OrgSlugTakenError` only when another org ACTIVELY holds the new
+ * slug — tombstones are claimable (AGL-585). Slug validity/authorization
+ * are the API route's job.
  */
 export async function changeOrgSlug(
   orgId: string,
@@ -196,8 +224,17 @@ export async function changeOrgSlug(
     previousSlug = (orgSnapshot.get('slug') as string | undefined) ?? null
     if (previousSlug === newSlug) return
     const reservation = await tx.get(db.collection('orgSlugs').doc(newSlug))
-    // A tombstone pointing back at this org may be re-claimed.
-    if (reservation.exists && reservation.get('orgId') !== orgId) {
+    // Claimable when free, own (moving back), or a tombstone another org
+    // renamed away from (AGL-585) — abandoned slugs are never reserved
+    // forever. Only another org's ACTIVE slug blocks the change.
+    if (
+      !isSlugReservationClaimable(
+        reservation.exists
+          ? (reservation.data() as { orgId?: unknown; movedTo?: unknown })
+          : undefined,
+        orgId,
+      )
+    ) {
       throw new OrgSlugTakenError(newSlug)
     }
     tx.set(db.collection('orgSlugs').doc(newSlug), { orgId })
