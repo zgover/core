@@ -90,6 +90,7 @@ import {
   type ScreenMoveRequest,
 } from '../../../../../components/screens-hierarchy-table.component'
 import { checkOrgQuota } from '../../../../../constants/entitlements'
+import { docsHelp } from '../../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../../constants/route-links'
 import { buildScreenLiveUrl } from '../../../../../constants/tenant-links'
 import hostNavTabItems from '../../../../../constants/host-nav-tabs'
@@ -785,6 +786,12 @@ const formSchema = {
       name: 'slug',
       type: 'text',
       label: 'Slug',
+      help: docsHelp('screens', {
+        anchor: '#screens--routing',
+        excerpt:
+          'Publishing registers the slug in the routing map — nested ' +
+          'screens compose their path from their parents.',
+      }),
       helperText:
         'Path the screen is served at on your site ("/" for the home page). Leave empty to keep it unpublished.',
       validate: [

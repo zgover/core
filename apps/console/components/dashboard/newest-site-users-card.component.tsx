@@ -25,6 +25,7 @@ import {
   query,
 } from 'firebase/firestore'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../../constants/docs-links'
 import { buildRoute, Route } from '../../constants/route-links'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 
@@ -50,6 +51,12 @@ export function NewestSiteUsersCard(props: { hostId: string }) {
   return (
     <CardDisplay
       header={'Newest site users'}
+      help={docsHelp('members', {
+        anchor: '#4-manage-members-from-the-console',
+        excerpt:
+          'The five newest visitor accounts on this site — the Users page ' +
+          'has the full, searchable list.',
+      })}
       contentGutterX
       contentGutterY
       HeaderProps={{

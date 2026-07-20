@@ -35,9 +35,11 @@ The **console** is where you manage a site. Here's what each part of the chrome 
 
 ## In-context help
 
-Feature pages show a small **?** icon next to their title. Hover it for a
-one-line summary of the feature, and click it (or the **Open documentation**
-link in the tooltip) to jump straight to that feature's docs page in a new tab.
+Look for the small **?** icons throughout the console — next to page titles,
+card titles, form fields, table column headers, and the Besigner's style and
+attribute panels. Hover one for a one- or two-line explanation, and click it
+(or the **Open documentation** link in the tooltip) to jump straight to the
+matching section of these docs in a new tab.
 
 ## Primary navigation
 

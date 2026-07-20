@@ -16,6 +16,10 @@ Each links into its section for the how-to.
   the account menu now has a **Documentation** entry that opens this site in a
   new tab, and feature pages grew a small **?** icon next to their titles: hover
   for a one-line summary, click through for the full docs page.
+- **[Help everywhere](getting-started/console-tour.md#in-context-help)** — the
+  same **?** affordance now covers cards, form fields, table headers, the
+  staff console, and the Besigner's style and attribute panels, each
+  deep-linking to the exact docs section it explains.
 
 ## Nav menu system
 

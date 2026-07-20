@@ -36,6 +36,7 @@ import OrgInvitesBanner from '../../../components/org-invites-banner.component'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
+import { docsHelp } from '../../../constants/docs-links'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useOrgHosts } from '../../../hooks/use-org-hosts'
@@ -202,6 +203,14 @@ function HostsContent() {
                     }}
                     subheader={host?.$id}
                     header={host?.displayName}
+                    help={docsHelp('gettingStarted', {
+                      anchor: '#what-a-site-contains',
+                      title: 'Your sites',
+                      excerpt:
+                        'Each site has its own screens, media, users, and ' +
+                        'settings. Visit opens the live site; Manage opens ' +
+                        'its dashboard.',
+                    })}
                     actions={
                       <>
                         <AppLink

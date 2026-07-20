@@ -38,6 +38,7 @@ import AuthenticatedLayout from '../../../../../../components/layouts/authentica
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../components/layouts/main.layout'
 import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
+import { docsHelp } from '../../../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
 import useFirestoreCollection from '../../../../../../hooks/use-firestore-collection'
@@ -106,7 +107,16 @@ const CommunityPublisher: NextPageWithLayout<Record<string, never>> = () => {
             </Typography>
           ) : (
             <Stack spacing={3}>
-              <CardDisplay header={title} contentGutterX contentGutterY>
+              <CardDisplay
+                header={title}
+                help={docsHelp('publisherHandbook', {
+                  excerpt:
+                    "A publisher's public community profile — their " +
+                    'handle, bio, and everything they have published.',
+                })}
+                contentGutterX
+                contentGutterY
+              >
                 <Stack spacing={0.5}>
                   {profile?.handle ? (
                     <Typography variant="body2" color="text.secondary">
@@ -120,6 +130,12 @@ const CommunityPublisher: NextPageWithLayout<Record<string, never>> = () => {
               </CardDisplay>
               <CardDisplay
                 header={'Published components'}
+                help={docsHelp('publisherHandbook', {
+                  anchor: '#authoring-your-listing',
+                  excerpt:
+                    'Components and templates this publisher has listed ' +
+                    'on the community marketplace — open one to install it.',
+                })}
                 contentGutterX
                 contentGutterY
               >

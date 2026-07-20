@@ -18,7 +18,7 @@
 
 import { canManageOrg } from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
-import { AppLink, Container } from '@aglyn/shared-ui-jsx'
+import { AppLink, Container, HelpTip } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -36,6 +36,7 @@ import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import OrgPluginsCard from '../../../../components/org-plugins-card.component'
 import PluginConfigCards from '../../../../components/plugin-config-card.component'
 import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgHosts } from '../../../../hooks/use-org-hosts'
@@ -137,9 +138,24 @@ const OrgPlugins: NextPageWithLayout<Record<string, never>> = () => {
                 spacing={2}
                 sx={{ alignItems: 'center', flexWrap: 'wrap' }}
               >
-                <Typography variant="h6" sx={{ flex: 1 }}>
-                  {'Marketplace add-ons'}
-                </Typography>
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  sx={{ flex: 1, alignItems: 'center' }}
+                >
+                  <Typography variant="h6">
+                    {'Marketplace add-ons'}
+                  </Typography>
+                  <HelpTip
+                    {...docsHelp('plugins', {
+                      anchor: '#install--upgrade',
+                      excerpt:
+                        'Marketplace installs pin a version per site or for ' +
+                        'the whole organization — upgrades and uninstalls ' +
+                        'happen here.',
+                    })}
+                  />
+                </Stack>
                 {hostIds.length > 1 ? (
                   <TextField
                     select

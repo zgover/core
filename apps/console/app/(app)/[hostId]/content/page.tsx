@@ -62,6 +62,7 @@ import { useHostId } from '../../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { hasEntitlement } from '../../../../constants/entitlements'
 import useCurrentOrg from '../../../../hooks/use-current-org'
@@ -637,6 +638,7 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <CardDisplay
             header={'Collections & Entries'}
+            help={docsHelp('buildABlog')}
             contentGutterX
             contentGutterY
             contentBordered="all"

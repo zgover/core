@@ -29,6 +29,7 @@ import {
 import { collection, limit, query } from 'firebase/firestore'
 import { useRef, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../../constants/docs-links'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 
 /**
@@ -107,6 +108,11 @@ export function OrgMediaCard(props: { orgId: string | null }) {
   return (
     <CardDisplay
       header={'Organization media (shared with all sites)'}
+      help={docsHelp('media', {
+        excerpt:
+          'A shared library for the whole organization — any site can use ' +
+          'these assets, unlike the site-private library.',
+      })}
       contentGutterX
       contentGutterY
     >

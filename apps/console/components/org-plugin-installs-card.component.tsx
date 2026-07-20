@@ -31,6 +31,7 @@ import {
 } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../constants/docs-links'
 import { buildRoute, Route } from '../constants/route-links'
 import { useOrgHosts } from '../hooks/use-org-hosts'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
@@ -113,6 +114,12 @@ export function OrgPluginInstallsCard(props: OrgPluginInstallsCardProps) {
   return (
     <CardDisplay
       header="Organization plugin installs"
+      help={docsHelp('plugins', {
+        anchor: '#install--upgrade',
+        excerpt:
+          'Marketplace plugins installed for the whole organization — ' +
+          'they load on every site until uninstalled here.',
+      })}
       contentGutterX
       contentGutterY
     >

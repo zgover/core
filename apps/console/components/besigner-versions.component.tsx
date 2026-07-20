@@ -24,13 +24,16 @@ import {
   ICON_VARIANT_MODIFY_EDIT,
 } from '@aglyn/shared-data-enums'
 import {
+  HelpTip,
   MdiIcon,
   useConfirmationContext,
   useLoading,
 } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { docsHelp } from '../constants/docs-links'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
+  Box,
   Button,
   Chip,
   Dialog,
@@ -472,7 +475,21 @@ export const BesignerVersionsComponent = observer(
               justifyContent: 'space-between',
             }}
           >
-            {'Versions'}
+            <Box
+              component="span"
+              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+            >
+              {'Versions'}
+              <HelpTip
+                {...docsHelp('screens', {
+                  anchor: '#versions--scheduled-publishing',
+                  title: 'Versions & scheduled publishing',
+                  excerpt:
+                    'Every publish creates a version you can view, restore, or schedule to go live at a set time.',
+                })}
+                sx={{ fontSize: '0.7em' }}
+              />
+            </Box>
             <Button
               variant="outlined"
               color="secondary"

@@ -48,6 +48,7 @@ import MainLayout from '../../../../../components/layouts/main.layout'
 import OrgActivityCard from '../../../../../components/org-activity-card.component'
 import { useOrgHosts } from '../../../../../hooks/use-org-hosts'
 import useOrgNavTabItems from '../../../../../hooks/use-org-nav-tabs'
+import { docsHelp } from '../../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../constants/shared'
 import { useOrgScope } from '../../../../../hooks/use-org-scope'
@@ -218,7 +219,17 @@ const TeamMemberDetail: NextPageWithLayout<Record<string, never>> = () => {
                 {'This person is not a member of the organization.'}
               </Alert>
             ) : (
-              <CardDisplay header={'Member'} contentGutterX contentGutterY>
+              <CardDisplay
+                header={'Member'}
+                help={docsHelp('inviteTeammates', {
+                  anchor: '#how-team-members-act',
+                  excerpt:
+                    "Set this member's role and job title, and restrict " +
+                    'editors and viewers to specific sites.',
+                })}
+                contentGutterX
+                contentGutterY
+              >
                 <Stack spacing={2} sx={{ maxWidth: 480 }}>
                   <Stack
                     direction="row"

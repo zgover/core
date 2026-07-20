@@ -35,6 +35,7 @@ import {
 import { collection, doc, limit, query } from 'firebase/firestore'
 import { useCallback, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../constants/docs-links'
 import { checkOrgSeatQuota } from '../constants/entitlements'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentOrg from '../hooks/use-current-org'
@@ -179,6 +180,12 @@ export function HostMembersCard(props: HostMembersCardProps) {
   return (
     <CardDisplay
       header={'Users'}
+      help={docsHelp('team', {
+        anchor: '#site-membership',
+        excerpt:
+          'Teammates with console access to this site — add by email ' +
+          'with a role; membership uses your plan’s member seats.',
+      })}
       contentGutterX
       contentGutterY
       contentBordered="all"

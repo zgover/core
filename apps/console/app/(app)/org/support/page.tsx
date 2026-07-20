@@ -38,6 +38,7 @@ import { useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -179,6 +180,12 @@ const ManageSupport: NextPageWithLayout<Record<string, never>> = () => {
                 children: (
                   <CardDisplay
                     header={'Support tickets'}
+                    help={docsHelp('billing', {
+                      anchor: '#tiers--entitlements',
+                      excerpt:
+                        'Private ticket threads with the Aglyn team — ' +
+                        'included with every paid plan.',
+                    })}
                     contentGutterX
                     contentGutterY
                   >
@@ -230,6 +237,12 @@ const ManageSupport: NextPageWithLayout<Record<string, never>> = () => {
                 children: (
                   <CardDisplay
                     header={'Community forum'}
+                    help={docsHelp('billing', {
+                      anchor: '#tiers--entitlements',
+                      excerpt:
+                        'The subscriber forum — ask questions and share ' +
+                        'tips with other Aglyn builders on paid plans.',
+                    })}
                     contentGutterX
                     contentGutterY
                   >

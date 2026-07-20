@@ -60,6 +60,7 @@ import BillingPlanCardsComponent, {
 import BillingMeteredEstimateComponent from '../../../../components/billing/billing-metered-estimate.component'
 import BillingUsageComponent from '../../../../components/billing/billing-usage.component'
 import { useReleaseFlag } from '../../../../hooks/use-release-flags'
+import { docsHelp } from '../../../../constants/docs-links'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
@@ -403,7 +404,17 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
               {
                 size: { xs: 12, md: 4 },
                 children: (
-                  <CardDisplay header={'Current plan'} contentGutterX contentGutterY>
+                  <CardDisplay
+                    header={'Current plan'}
+                    help={docsHelp('billing', {
+                      anchor: '#tiers--entitlements',
+                      excerpt:
+                        'Your subscription tier and its headline limits — ' +
+                        'every plan\'s full entitlements are in the docs.',
+                    })}
+                    contentGutterX
+                    contentGutterY
+                  >
                     <Stack
                       direction="row"
                       spacing={1}
@@ -527,7 +538,17 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
               {
                 size: { xs: 12, md: 8 },
                 children: (
-                  <CardDisplay header={'Usage'} contentGutterX contentGutterY>
+                  <CardDisplay
+                    header={'Usage'}
+                    help={docsHelp('billing', {
+                      anchor: '#usage-meters',
+                      excerpt:
+                        'Live meters for sites, storage, bandwidth, and ' +
+                        'email sends against your plan\'s quotas.',
+                    })}
+                    contentGutterX
+                    contentGutterY
+                  >
                     <BillingUsageComponent
                       org={org}
                       hosts={hosts ?? []}
@@ -540,6 +561,12 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
                 children: (
                   <CardDisplay
                     header={'Metered usage estimate'}
+                    help={docsHelp('billing', {
+                      anchor: '#usage-meters',
+                      excerpt:
+                        'A cost estimate for metered overages this period, ' +
+                        'based on current usage across your sites.',
+                    })}
                     contentGutterX
                     contentGutterY
                   >
@@ -552,6 +579,12 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
                 children: (
                   <CardDisplay
                     header={'Billing history'}
+                    help={docsHelp('billing', {
+                      anchor: '#payments',
+                      excerpt:
+                        'Invoices from Stripe with status and amounts, plus ' +
+                        'links to the hosted invoice, PDF, and receipt.',
+                    })}
                     contentGutterX
                     contentGutterY
                   >
@@ -673,6 +706,9 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
                       <Box id="addons">
                         <CardDisplay
                           header={'Add-ons'}
+                          help={docsHelp('addOns', {
+                            anchor: '#what-you-can-add',
+                          })}
                           contentGutterX
                           contentGutterY
                         >

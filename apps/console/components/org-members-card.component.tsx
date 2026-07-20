@@ -49,6 +49,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../constants/docs-links'
 import { checkOrgSeatQuota } from '../constants/entitlements'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentOrg from '../hooks/use-current-org'
@@ -191,6 +192,12 @@ export function OrgMembersCard() {
   return (
     <CardDisplay
       header={`Organization members — ${currentOrg.orgName ?? currentOrg.$id}`}
+      help={docsHelp('inviteTeammates', {
+        anchor: '#invite-someone',
+        excerpt:
+          'Add or invite people by email, set org and custom roles, and ' +
+          'limit editors and viewers to specific sites.',
+      })}
       contentGutterX
       contentGutterY
     >

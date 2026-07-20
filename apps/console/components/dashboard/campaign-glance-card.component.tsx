@@ -21,6 +21,7 @@ import { Button, Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { useMemo } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../../constants/docs-links'
 import { buildRoute, Route } from '../../constants/route-links'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 
@@ -53,6 +54,12 @@ export function CampaignGlanceCard(props: { hostId: string }) {
   return (
     <CardDisplay
       header={'Last campaign'}
+      help={docsHelp('emailCampaigns', {
+        anchor: '#opens--clicks',
+        excerpt:
+          'Sent, opens, and clicks for your most recent campaign — open ' +
+          'Marketing for the full history.',
+      })}
       contentGutterX
       contentGutterY
       HeaderProps={{

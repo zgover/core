@@ -45,6 +45,7 @@ import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { useOrgScope } from '../../../../hooks/use-org-scope'
@@ -299,6 +300,13 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
                 content: (
                   <CardDisplay
                     header={'Public profile'}
+                    help={docsHelp('publisherHandbook', {
+                      anchor: '#before-your-first-publish',
+                      excerpt:
+                        'Your public publisher identity — handle, name, and ' +
+                        'bio shown on everything you publish to the ' +
+                        'marketplace.',
+                    })}
                     contentGutterX
                     contentGutterY
                   >
@@ -355,6 +363,12 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
                 content: (
                   <CardDisplay
                     header={'Your listings'}
+                    help={docsHelp('publisherHandbook', {
+                      anchor: '#authoring-your-listing',
+                      excerpt:
+                        'Everything you have published, with preview images ' +
+                        'and per-listing unpublish/republish.',
+                    })}
                     contentGutterX
                     contentGutterY
                   >
@@ -424,6 +438,13 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
                 content: (
                   <CardDisplay
                     header={'Payouts'}
+                    help={docsHelp('publisherHandbook', {
+                      anchor: '#getting-paid',
+                      excerpt:
+                        'Connect Stripe to receive payouts for paid ' +
+                        'listings. Platform fee: 20% per sale, 30% on the ' +
+                        'Free plan.',
+                    })}
                     contentGutterX
                     contentGutterY
                   >
@@ -461,7 +482,17 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
                 id: 'sales',
                 label: 'Sales',
                 content: (
-                  <CardDisplay header={'Sales'} contentGutterX contentGutterY>
+                  <CardDisplay
+                    header={'Sales'}
+                    help={docsHelp('publishAPlugin', {
+                      anchor: '#paid-listings',
+                      excerpt:
+                        'Your sales ledger — gross, platform fee, and net ' +
+                        'across every paid listing.',
+                    })}
+                    contentGutterX
+                    contentGutterY
+                  >
                     {(sales ?? []).length === 0 ? (
                       <Typography variant="body2" color="text.secondary">
                         {'No sales yet. Paid listings appear here with ' +

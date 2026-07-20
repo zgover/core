@@ -46,6 +46,7 @@ import OrgPluginsCard from '../../../../components/org-plugins-card.component'
 import useCurrentOrg from '../../../../hooks/use-current-org'
 import HubTabs from '../../../../components/hub-tabs.component'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgScope } from '../../../../hooks/use-org-scope'
@@ -344,7 +345,17 @@ const OrgSettings: NextPageWithLayout<Record<string, never>> = () => {
                   id: 'general',
                   label: 'General',
                   content: (
-            <CardDisplay header={'General'} contentGutterX contentGutterY>
+            <CardDisplay
+              header={'General'}
+              help={docsHelp('glossary', {
+                anchor: '#workspace',
+                excerpt:
+                  'Rename the organization and change its workspace URL — ' +
+                  '"workspace" is the console word for your organization\'s home.',
+              })}
+              contentGutterX
+              contentGutterY
+            >
               <Stack spacing={2} sx={{ maxWidth: 480 }}>
                 <TextField
                   label="Organization name"
@@ -419,6 +430,12 @@ const OrgSettings: NextPageWithLayout<Record<string, never>> = () => {
                         content: (
             <CardDisplay
               header={'Organization profile'}
+              help={docsHelp('glossary', {
+                anchor: '#organization-org',
+                excerpt:
+                  'Logo and contact details for the organization — shown in ' +
+                  'the console and available to your sites.',
+              })}
               contentGutterX
               contentGutterY
               sx={{ mt: 3 }}
@@ -535,6 +552,13 @@ const OrgSettings: NextPageWithLayout<Record<string, never>> = () => {
                         content: (
             <CardDisplay
               header={'Transfer ownership'}
+              help={docsHelp('team', {
+                anchor: '#team-roles',
+                excerpt:
+                  'Only the owner can transfer ownership. The new owner ' +
+                  'gains billing, workspace-URL, and transfer powers; you ' +
+                  'step down to admin.',
+              })}
               contentGutterX
               contentGutterY
               sx={{ mt: 3 }}
@@ -597,6 +621,9 @@ const OrgSettings: NextPageWithLayout<Record<string, never>> = () => {
                         content: (
             <CardDisplay
               header={'Delete organization'}
+              help={docsHelp('downgradingAndCanceling', {
+                anchor: '#deleting-your-organization',
+              })}
               contentGutterX
               contentGutterY
               sx={{ mt: 3 }}

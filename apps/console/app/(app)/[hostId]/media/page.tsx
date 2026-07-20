@@ -30,6 +30,7 @@ import HostDisplayNameComponent from '../../../../components/host-display-name.c
 import MediaLibraryComponent from '../../../../components/media/media-library.component'
 import OrgMediaCard from '../../../../components/media/org-media-card.component'
 import useHostOrgId from '../../../../hooks/use-host-org-id'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import hostNavTabItems from '../../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -62,6 +63,11 @@ const HostMedia: NextPageWithLayout<Record<string, never>> = () => {
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <CardDisplay
             header={'Library'}
+            help={docsHelp('media', {
+              excerpt:
+                "This site's private library — organize uploads into " +
+                'folders and serve them fast over the CDN.',
+            })}
             contentGutterX
             contentGutterY
             contentBordered="all"

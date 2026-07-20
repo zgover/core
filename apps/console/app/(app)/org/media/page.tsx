@@ -26,6 +26,7 @@ import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { MediaLibraryComponent } from '../../../../components/media/media-library.component'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgScope } from '../../../../hooks/use-org-scope'
@@ -65,6 +66,12 @@ const OrgMedia: NextPageWithLayout<Record<string, never>> = () => {
             // media page (AGL-368).
             <CardDisplay
               header={'Library'}
+              help={docsHelp('media', {
+                excerpt:
+                  "The organization's shared media library — folders, " +
+                  'uploads, editing, and a quota meter, available to every ' +
+                  'site in the workspace.',
+              })}
               contentGutterX
               contentGutterY
               contentBordered="all"

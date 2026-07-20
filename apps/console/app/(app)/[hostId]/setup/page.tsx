@@ -56,6 +56,7 @@ import SiteTemplateCard from '../../../../components/site-template-card.componen
 import DeleteSiteCard from '../../../../components/delete-site-card.component'
 import ThemeEditor from '../../../../components/theme-editor/theme-editor.component'
 import HostDisplayNameComponent from '../../../../components/host-display-name.component'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import hostNavTabItems from '../../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -64,6 +65,14 @@ import useHostActivityLogger from '../../../../hooks/use-host-activity-logger'
 const basicSchema: FormSchema = {
   id: 'hostDetails',
   title: 'Basic details',
+  CardDisplayProps: {
+    help: docsHelp('gettingStarted', {
+      anchor: '#what-a-site-contains',
+      excerpt:
+        'The site name shown across the console and the subdomain it is ' +
+        'served from.',
+    }),
+  },
   fields: [
     {
       component: FieldComponentType.TEXT_FIELD,
@@ -94,6 +103,12 @@ const basicSchema: FormSchema = {
       name: 'subdomain',
       label: 'Subdomain',
       type: 'text',
+      help: docsHelp('gettingStarted', {
+        anchor: '#create-your-first-site',
+        excerpt:
+          "Your site's address on aglyn.app — you can also connect your " +
+          'own domain from the Custom Domain tab.',
+      }),
       isRequired: true,
       validate: [
         {
@@ -113,12 +128,25 @@ const basicSchema: FormSchema = {
 const seoSchema: FormSchema = {
   id: 'hostSeo',
   title: 'SEO',
+  CardDisplayProps: {
+    help: docsHelp('seo', {
+      excerpt:
+        'Site-wide defaults for titles, descriptions, and structured ' +
+        'data — screens can override them in their own SEO editor.',
+    }),
+  },
   fields: [
     {
       component: FieldComponentType.TEXT_FIELD,
       name: 'analytics.gaMeasurementId',
       label: 'Google Analytics measurement ID',
       helperText: 'Optional — e.g. G-XXXXXXXXXX; injects gtag on your site',
+      help: docsHelp('analytics', {
+        anchor: '#google-analytics',
+        excerpt:
+          'Track your site in Google Analytics alongside the built-in ' +
+          'pageview analytics.',
+      }),
       type: 'text',
       FormFieldGridProps: {
         size: {
@@ -132,6 +160,12 @@ const seoSchema: FormSchema = {
       name: 'seo.title',
       label: 'Title',
       type: 'text',
+      help: docsHelp('seo', {
+        anchor: '#per-screen-seo',
+        excerpt:
+          'Default title emitted in the page head and browser tab — ' +
+          'screens without their own SEO title fall back to it.',
+      }),
       isRequired: true,
       resolveProps: (_, { input: { value } }) => {
         const len = value?.length || 0
@@ -166,6 +200,12 @@ const seoSchema: FormSchema = {
       name: 'seo.description',
       label: 'Description',
       type: 'text',
+      help: docsHelp('seo', {
+        anchor: '#per-screen-seo',
+        excerpt:
+          'Default meta description shown under your site in search ' +
+          'results when a screen sets none of its own.',
+      }),
       isRequired: true,
       multiline: true,
       rows: 2,
@@ -202,6 +242,11 @@ const seoSchema: FormSchema = {
       name: 'seo.separator',
       label: 'Separator',
       type: 'text',
+      help: docsHelp('seo', {
+        excerpt:
+          'Character placed between a screen title and the site title ' +
+          'in the browser tab, e.g. "|" or "·".',
+      }),
       isRequired: true,
       validate: [
         {
@@ -225,6 +270,12 @@ const seoSchema: FormSchema = {
       component: FieldComponentType.SUB_FORM,
       name: 'seo.entity',
       title: 'Entity',
+      help: docsHelp('seo', {
+        anchor: '#structured-data',
+        excerpt:
+          'Who publishes this site — emitted as JSON-LD structured data ' +
+          'so search engines show rich results.',
+      }),
       className: false,
       fields: [
         {
@@ -436,7 +487,14 @@ const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
                     sm: 3,
                   },
                   children: (
-                    <CardDisplay header="Navigation">
+                    <CardDisplay
+                      header="Navigation"
+                      help={docsHelp('consoleTour', {
+                        excerpt:
+                          "Jump between this site's setup sections — " +
+                          'details, SEO, theme, custom domain, and activity.',
+                      })}
+                    >
                       <TabList
                         orientation="vertical"
                         textColor="secondary"
