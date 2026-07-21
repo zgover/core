@@ -76,6 +76,36 @@ function chromeExecutable() {
 if (!getApps().length) initializeApp({ projectId: 'aglyn-main' })
 const db = getFirestore()
 
+// The shared seed has no layouts and no reusable components, so this
+// harness makes its own — otherwise two of the three kinds would skip and a
+// green run would overstate what it covered. Admin SDK, so rules don't
+// apply: this is fixture setup, not part of what's under test.
+const hostRef = db.collection('hosts').doc(HOST_ID)
+const FIXTURE_NODES = {
+  'layout-root': { componentId: 'box', childIds: ['layout-slot'] },
+  'layout-slot': { componentId: 'layoutSlot' },
+}
+const layoutRef = hostRef.collection('layouts').doc('e2e-layout')
+await layoutRef.set({
+  displayName: 'E2E Layout',
+  versionId: 'e2e-layout-v1',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+})
+await layoutRef.collection('versions').doc('e2e-layout-v1').set({
+  layoutId: 'e2e-layout',
+  hostId: HOST_ID,
+  nodes: FIXTURE_NODES,
+  createdAt: new Date(),
+})
+await hostRef.collection('components').doc('e2e-component').set({
+  displayName: 'E2E Component',
+  rootId: 'cmp-root',
+  nodes: { 'cmp-root': { componentId: 'box' } },
+  createdAt: new Date(),
+  updatedAt: new Date(),
+})
+
 const listPath = `/${ORG_SLUG}/hosts/${HOST_ID}/screens/list`
 // Warm the dev server so compilation doesn't eat the navigation budget.
 await fetch(`${BASE_URL}${listPath}`).catch(() => undefined)
@@ -151,8 +181,96 @@ try {
     check('createdAt stamped', !!data.createdAt)
   }
 
+  // ── Layouts ────────────────────────────────────────────────────────────
+  const layoutName = `${TEMPLATE_NAME} layout`
+  await page.goto(`${BASE_URL}/${ORG_SLUG}/hosts/${HOST_ID}/layouts/list`, {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_MS,
+  })
+  const layoutTrigger = page
+    .locator('button[aria-label="Save as template"]')
+    .first()
+  const hasLayoutRow = await layoutTrigger
+    .waitFor({ state: 'visible', timeout: 15_000 })
+    .then(() => true)
+    .catch(() => false)
+  if (hasLayoutRow) {
+    await layoutTrigger.click()
+    const layoutDialog = page.locator(
+      'div[role="dialog"]:has-text("Save as template")',
+    )
+    await layoutDialog.waitFor({ state: 'visible', timeout: TIMEOUT_MS })
+    await layoutDialog.locator('input').first().fill(layoutName)
+    await layoutDialog.getByRole('button', { name: 'Save template' }).click()
+    await layoutDialog.waitFor({ state: 'hidden', timeout: TIMEOUT_MS })
+    const layoutSnapshot = await db
+      .collection('hosts')
+      .doc(HOST_ID)
+      .collection('templates')
+      .where('displayName', '==', layoutName)
+      .get()
+    check('layout template written', layoutSnapshot.size === 1)
+    if (layoutSnapshot.size === 1) {
+      const data = layoutSnapshot.docs[0].data()
+      check('layout kind', data.kind === 'layout', `got ${data.kind}`)
+      check('layout nodes captured', Object.keys(data.nodes ?? {}).length > 0)
+    }
+  } else {
+    // Reported, not silently skipped — a green run that covered two of
+    // three kinds should not read as full coverage.
+    console.log('SKIP  layout template — no layout rows in the seed')
+  }
+
+  // ── Reusable components ────────────────────────────────────────────────
+  const componentName = `${TEMPLATE_NAME} component`
+  await page.goto(`${BASE_URL}/${ORG_SLUG}/hosts/${HOST_ID}/components`, {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_MS,
+  })
+  const componentTrigger = page
+    .getByRole('button', { name: 'Save as template' })
+    .first()
+  const hasComponentRow = await componentTrigger
+    .waitFor({ state: 'visible', timeout: 15_000 })
+    .then(() => true)
+    .catch(() => false)
+  if (hasComponentRow) {
+    await componentTrigger.click()
+    const componentDialog = page.locator(
+      'div[role="dialog"]:has-text("Save as template")',
+    )
+    await componentDialog.waitFor({ state: 'visible', timeout: TIMEOUT_MS })
+    await componentDialog.locator('input').first().fill(componentName)
+    await componentDialog.getByRole('button', { name: 'Save template' }).click()
+    await componentDialog.waitFor({ state: 'hidden', timeout: TIMEOUT_MS })
+    const componentSnapshot = await db
+      .collection('hosts')
+      .doc(HOST_ID)
+      .collection('templates')
+      .where('displayName', '==', componentName)
+      .get()
+    check('component template written', componentSnapshot.size === 1)
+    if (componentSnapshot.size === 1) {
+      const data = componentSnapshot.docs[0].data()
+      check('component kind', data.kind === 'component', `got ${data.kind}`)
+      // rootId is what makes a component tree graftable; without it the
+      // template is a bag of nodes with no entry point.
+      check('component rootId captured', !!data.rootId, `got ${data.rootId}`)
+    }
+  } else {
+    console.log('SKIP  component template — no component rows in the seed')
+  }
+
+  // "Could not reach Cloud Firestore backend" fires when the SDK briefly
+  // drops its listen channel across a client-side navigation and retries.
+  // It is ignorable HERE only because every write in this run is asserted
+  // against Firestore directly — if a reconnect had actually eaten one, the
+  // document checks above would have failed rather than this line.
   const relevantErrors = consoleErrors.filter(
-    (text) => !/network-request-failed|popup-blocked|App Check/i.test(text),
+    (text) =>
+      !/network-request-failed|popup-blocked|App Check|Could not reach Cloud Firestore backend/i.test(
+        text,
+      ),
   )
   check(
     'no unexpected console errors',
