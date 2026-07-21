@@ -220,6 +220,31 @@ function ComponentBesignerPage(props) {
     const dequeueLoading = queueLoading()
 
     const nodes = Aglyn.canvas.toJSON().nodes
+    // Size guard (AGL-678): the node map is stored as one msgpack blob and
+    // Firestore rejects documents over 1 MiB. Nothing checked this before,
+    // so an oversized component simply stopped saving with a generic error and
+    // no way to tell which content was to blame.
+    const size = Aglyn.measureNodeMap(nodes as Record<string, unknown>)
+    if (size.tooLarge) {
+      const worst = size.largest[0]
+      return enqueueSnackbar(
+        `This component is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
+          'save. Move repeated sections into reusable components, or replace ' +
+          'inlined images with uploads from the media library' +
+          (worst
+            ? ` — the largest element is ${Aglyn.formatBytes(worst.bytes)}.`
+            : '.'),
+        { variant: 'error', allowDuplicate: true },
+      )
+    }
+    if (size.nearLimit) {
+      enqueueSnackbar(
+        `Heads up: this component is ${Aglyn.formatBytes(size.bytes)}. Past ` +
+          'about 900 KB it stops saving — moving repeated sections into ' +
+          'reusable components is the usual fix.',
+        { variant: 'warning', persist: false },
+      )
+    }
     const saveComponent = updateComponentVersion as unknown as (
       data: Partial<Aglyn.AglynHostComponentVersion>,
       options?: Parameters<typeof updateComponentVersion>[1],
