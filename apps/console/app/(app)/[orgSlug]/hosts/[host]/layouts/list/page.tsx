@@ -27,7 +27,11 @@ import {
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_EDIT,
 } from '@aglyn/shared-data-enums'
-import { mdiBookmarkOutline, mdiPageLayoutBody } from '@aglyn/shared-data-mdi'
+import {
+  mdiBookmarkOutline,
+  mdiPageLayoutBody,
+  mdiStorefrontOutline,
+} from '@aglyn/shared-data-mdi'
 import {
   AppLink,
   AppLinkNakedLinkProps,
@@ -62,6 +66,9 @@ import AuthErrorAlertComponent from '../../../../../../../components/auth-error-
 import AuthFormTemplateComponent from '../../../../../../../components/auth-form-template.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
+import PublishArtifactDialog, {
+  type PublishArtifactTarget,
+} from '../../../../../../../components/templates/publish-artifact-dialog.component'
 import SaveAsTemplateDialog, {
   type SaveAsTemplateSource,
 } from '../../../../../../../components/templates/save-as-template-dialog.component'
@@ -94,6 +101,8 @@ function Layouts(props) {
   const [quickDrawerOpen, setQuickDrawerOpen] = useState<boolean>(false)
   const [saveTemplateFor, setSaveTemplateFor] =
     useState<SaveAsTemplateSource | null>(null)
+  const [publishTarget, setPublishTarget] =
+    useState<PublishArtifactTarget | null>(null)
   const handleFormOpen = useCallback(() => {
     setQuickDrawerOpen(true)
   }, [])
@@ -299,6 +308,23 @@ function Layouts(props) {
               )
             }
           />,
+          // Publishing shares the whole layout with other organizations;
+          // saving a template above keeps it on this site (AGL-672).
+          <GridActionsCellItem
+            key="action-publish"
+            icon={<MdiIcon path={mdiStorefrontOutline.path} />}
+            label="Publish to marketplace"
+            onClick={() =>
+              setPublishTarget({
+                endpoint: 'community/publish-layout',
+                payload: { hostId, layoutId },
+                displayName: row.displayName,
+                description: row.description,
+                noun: 'layout',
+                categoryPlaceholder: 'e.g. Marketing, Docs, Storefront',
+              })
+            }
+          />,
           <GridActionsCellItem
             key="action-delete"
             icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} color="error" />}
@@ -439,6 +465,10 @@ function Layouts(props) {
         hostId={hostId}
         source={saveTemplateFor}
         onClose={() => setSaveTemplateFor(null)}
+      />
+      <PublishArtifactDialog
+        target={publishTarget}
+        onClose={() => setPublishTarget(null)}
       />
     </>
   )

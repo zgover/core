@@ -137,6 +137,31 @@ await hostRef.collection('components').doc('e2e-component').set({
   updatedAt: new Date(),
 })
 
+// Placeholder authoring (AGL-672): a token already present in the page
+// becomes a declared placeholder when saved as a template. The host
+// binding beside it must NOT — declaring it would overwrite a binding that
+// already resolves against the site's own variables.
+{
+  const homeScreen = await hostRef.collection('screens').doc('seed-home').get()
+  const versionId = homeScreen.get('versionId')
+  if (versionId) {
+    const versionRef = homeScreen.ref
+      .collection('versions')
+      .doc(String(versionId))
+    const existingNodes = (await versionRef.get()).get('nodes') ?? {}
+    await versionRef.update({
+      nodes: {
+        ...existingNodes,
+        'e2e-token': {
+          $id: 'e2e-token',
+          componentId: 'text',
+          props: { text: 'Hi {{visitorName}} — {{var:someBinding}}' },
+        },
+      },
+    })
+  }
+}
+
 const listPath = `/${ORG_SLUG}/hosts/${HOST_ID}/screens/list`
 // Warm the dev server so compilation doesn't eat the navigation budget.
 await fetch(`${BASE_URL}${listPath}`).catch(() => undefined)
@@ -210,6 +235,17 @@ try {
     const nodeCount = Object.keys(data.nodes ?? {}).length
     check('nodes captured', nodeCount > 0, `${nodeCount} nodes`)
     check('createdAt stamped', !!data.createdAt)
+    const declared = (data.placeholders ?? []).map((entry) => entry.name)
+    check(
+      'placeholder authored from page content',
+      declared.includes('visitorName'),
+      JSON.stringify(declared),
+    )
+    check(
+      'host binding not declared as a placeholder',
+      !declared.some((token) => String(token).startsWith('var:')),
+      JSON.stringify(declared),
+    )
   }
 
   // ── Layouts ────────────────────────────────────────────────────────────

@@ -20,6 +20,7 @@ import { useLoading } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { useCallback } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
+import { listingArtifactType } from '../model/community'
 
 /**
  * Shared install/buy handlers for community listings (AGL-95): used by the
@@ -37,7 +38,20 @@ export function useCommunityActions(hostId: string) {
       const dequeue = queueLoading()
       try {
         const idToken = await (user as any)?.getIdToken?.()
-        const response = await fetch('/api/community/install', {
+        // Each artifact type has its own installer; routing everything to
+        // the component one silently installed the wrong thing or 404'd
+        // (AGL-672). `listingArtifactType` tolerates the legacy
+        // `type`/`kind` discriminators (AGL-654).
+        const artifactType = listingArtifactType(listing)
+        const endpoint =
+          artifactType === 'template'
+            ? 'community/install-template'
+            : artifactType === 'layout'
+              ? 'community/install-layout'
+              : artifactType === 'plugin'
+                ? 'community/install-plugin'
+                : 'community/install'
+        const response = await fetch(`/api/${endpoint}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -52,10 +66,17 @@ export function useCommunityActions(hostId: string) {
             allowDuplicate: true,
           })
         }
+        // Templates and layouts land in the library and publish nothing
+        // (AGL-669), so the message must not imply the site changed.
+        const landsInLibrary =
+          artifactType === 'template' || artifactType === 'layout'
         enqueueSnackbar(
-          payload.updated
-            ? `Updated "${listing.displayName}" to v${payload.version}`
-            : `Installed "${listing.displayName}" — find it under Your components`,
+          landsInLibrary
+            ? `Saved "${listing.displayName}" to your Templates — nothing is ` +
+              'live until you use it.'
+            : payload.updated
+              ? `Updated "${listing.displayName}" to v${payload.version}`
+              : `Installed "${listing.displayName}" — find it under Your components`,
           { variant: 'success', persist: false },
         )
       } catch (error) {
