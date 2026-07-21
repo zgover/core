@@ -23,6 +23,7 @@ import {
 } from '@aglyn/aglyn'
 import { mdiBellOutline } from '@aglyn/shared-data-mdi'
 import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import {
@@ -68,7 +69,9 @@ import useOrgHosts from '../../../../hooks/use-org-hosts'
 import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
 import {
   desktopNotificationPermission,
+  playNotificationChime,
   requestDesktopNotifications,
+  showDesktopNotification,
 } from '../../../../utils/notification-alerts'
 import { normalizeNotificationLink } from '../../../../utils/notification-links'
 
@@ -90,12 +93,44 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
   // Per-device alert settings (AGL-650) — separate from the category mutes
   // below, which are account-wide on the user doc.
   const [alertPrefs, setAlertPrefs] = useNotificationAlertPrefs()
+  const { enqueueSnackbar } = useSnackbar()
   const [permission, setPermission] = useState<
     NotificationPermission | 'unsupported'
   >('default')
   useEffect(() => {
     setPermission(desktopNotificationPermission())
   }, [])
+  // ---- TEMPORARY test affordance (AGL-650) — delete this block and the
+  // "Test alerts" button below to remove. Exists because there is otherwise
+  // no way to hear the chime or confirm the desktop permission without
+  // waiting for a real notification to arrive.
+  const handleTestAlerts = useCallback(async () => {
+    playNotificationChime()
+    let current = desktopNotificationPermission()
+    if (current === 'default') current = await requestDesktopNotifications()
+    setPermission(current)
+    if (current === 'granted') {
+      // force: the tab is focused by definition when you click Test, and
+      // desktop alerts are otherwise hidden-tab-only.
+      showDesktopNotification({
+        title: 'Aglyn notifications are on',
+        body: 'This is what a notification looks like.',
+        tag: 'aglyn-test',
+        force: true,
+      })
+      setAlertPrefs({ desktop: true })
+    }
+    enqueueSnackbar(
+      current === 'granted'
+        ? 'Played the chime and sent a test notification.'
+        : current === 'denied'
+          ? 'Chime played. Desktop notifications are blocked for this site — re-allow them in your browser settings.'
+          : 'Chime played. Desktop notifications were not granted.',
+      { variant: current === 'granted' ? 'success' : 'info', persist: false },
+    )
+  }, [setAlertPrefs, enqueueSnackbar])
+  // ---- end temporary test affordance
+
   const handleDesktopToggle = useCallback(async () => {
     if (alertPrefs.desktop) {
       setAlertPrefs({ desktop: false })
@@ -355,6 +390,14 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
                   label="Desktop notifications"
                   slotProps={{ typography: { variant: 'caption' } }}
                 />
+                {/* TEMPORARY (AGL-650): delete with the handler above. */}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => void handleTestAlerts()}
+                >
+                  {'Test alerts'}
+                </Button>
                 {permission === 'denied' || permission === 'unsupported' ? (
                   <Typography variant="caption" color="text.secondary">
                     {permission === 'denied'
