@@ -32,6 +32,7 @@ import { RATING_FIELD } from './model/rating-field'
 import { installLayoutHandler } from './server/install-layout'
 import { installTemplateHandler } from './server/install-template'
 import { publishHandler } from './server/publish'
+import { reviewsHandler } from './server/reviews'
 import { publisherProfileSaveHandler } from './server/publisher-profile-save'
 import { publishLayoutHandler } from './server/publish-layout'
 import { publishTemplateHandler } from './server/publish-template'
@@ -56,6 +57,7 @@ export function registerCommunityConsoleApi(): void {
   registerPluginApiRoute('community/install-template', installTemplateHandler)
   registerPluginApiRoute('community/listing-versions', listingVersionsHandler)
   registerPluginApiRoute('community/publish', publishHandler)
+  registerPluginApiRoute('community/reviews', reviewsHandler)
   registerPluginApiRoute(
     'community/publisher-profile',
     publisherProfileSaveHandler,

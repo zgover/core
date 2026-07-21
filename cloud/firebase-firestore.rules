@@ -469,6 +469,18 @@ service cloud.firestore {
     match /communityListings/{listingId} {
       allow read: if true;
       allow create: if false;
+      // Listings are ORG-owned since AGL-652, so `profileId` holds an org
+      // id. The owner check used to compare it to `request.auth.uid`, which
+      // a uid can never satisfy — it did not error, it just silently denied
+      // every publisher access to their own listing. Same shape as the
+      // publisherProfiles block above; `exists()` first because reading
+      // `.data` off a missing member doc errors rather than denying.
+      function listingManager() {
+        return isSignedIn() &&
+          exists(/databases/$(database)/documents/orgs/$(resource.data.profileId)/members/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/orgs/$(resource.data.profileId)/members/$(request.auth.uid))
+            .data.role in ['owner', 'admin'];
+      }
       // Owners toggle metadata (deletedAt un/republish) client-side, but
       // must NOT touch server-managed fields (AGL-503): installCount is
       // incremented by the install API (ranking integrity), priceUsd gates
@@ -479,18 +491,33 @@ service cloud.firestore {
       // staff review outright. Delete stays open to the owner; staff moderate
       // anything.
       allow update: if isStaff() ||
-        (isSignedIn() && resource.data.profileId == request.auth.uid &&
+        (listingManager() &&
           !request.resource.data.diff(resource.data).affectedKeys()
             .hasAny(['installCount', 'priceUsd', 'profileId',
                      'reviewStatus', 'reviewedBy', 'reviewedAt',
-                     'rejectionReason']));
-      allow delete: if isStaff() ||
-        (isSignedIn() && resource.data.profileId == request.auth.uid);
+                     'rejectionReason',
+                     // Rating aggregates (AGL-655) drive ranking and the
+                     // trust signal buyers read, so they are maintained by
+                     // the reviews API alone — a publisher who could write
+                     // them could invent a five-star average.
+                     'ratingSum', 'ratingCount', 'ratingAverage',
+                     'commentCount']));
+      allow delete: if isStaff() || listingManager();
       // Version snapshots hold the actual (possibly paid) content — no
       // client reads; installs go through /api/community/install, which
       // checks the purchase record server-side (AGL-46).
       match /versions/{version} {
         allow read, write: if isStaff();
+      }
+      // Ratings and comments (AGL-655). Public read so the detail page can
+      // render them without auth. Writes are API-ONLY: the route decides
+      // whether the author is a verified installer, blocks the publisher's
+      // own org, and adjusts the listing aggregates in the same
+      // transaction. Letting a client write here would make every one of
+      // those checks advisory.
+      match /reviews/{authorUid} {
+        allow read: if true;
+        allow write: if false;
       }
       // Plugin version records hold the artifact sha256 + manifest (AGL-45).
       // Server-only, same as component versions: installs go through
