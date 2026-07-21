@@ -33,15 +33,9 @@ import {
 } from '@mui/material'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { publishScreenRoute } from '../../constants/screen-publishing'
-
-/** Firestore-safe slug: lowercase, dashes, no leading/trailing dash. */
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
+import createPageFromTemplate, {
+  slugifyPageName as slugify,
+} from './create-page-from-template'
 
 /**
  * Use a template (AGL-670) — the deliberate second step that installing no
@@ -158,39 +152,26 @@ export function UseTemplateDialog({
       const used = new Set<string>(
         Object.values((hostSnapshot.get('screens') ?? {}) as Record<string, string>),
       )
-      const base = slugify(slug) || slugify(name) || 'page'
-      let finalSlug = base
-      let attempt = 2
-      while (used.has(finalSlug)) finalSlug = `${base}-${attempt++}`
-
-      const screenId = Aglyn.createResourceUid()
-      const versionId = Aglyn.createResourceUid()
-      await createHostResource({
-        hostId,
-        resource: 'screen',
-        id: screenId,
-        data: {
-          displayName: name.trim(),
-          ...(template.description ? { description: template.description } : {}),
-          ...(template.seo ? { seo: template.seo } : {}),
-          versionId,
-        },
-      })
-      await setDoc(
-        doc(firestore, 'hosts', hostId, 'screens', screenId, 'versions', versionId),
+      const created = await createPageFromTemplate(
+        firestore,
+        createHostResource as any,
         {
-          screenId,
-          displayName: 'Initial version',
-          nodes,
-          createdAt: timestamp,
-          updatedAt: timestamp,
+          hostId,
+          displayName: name.trim(),
+          // Already substituted above so the component and layout branches
+          // share the same resolved nodes.
+          nodes: nodes as Record<string, unknown>,
+          description: template.description,
+          seo: template.seo,
+          slug,
+          usedSlugs: used,
         },
       )
-      await publishScreenRoute(firestore, { hostId, screenId }, finalSlug)
       enqueueSnackbar(
-        finalSlug === base
-          ? `Created “${name.trim()}” at /${finalSlug}`
-          : `Created “${name.trim()}” at /${finalSlug} — /${base} was taken`,
+        created.slug === created.requestedSlug
+          ? `Created “${name.trim()}” at /${created.slug}`
+          : `Created “${name.trim()}” at /${created.slug} — ` +
+            `/${created.requestedSlug} was taken`,
         { variant: 'success', persist: false },
       )
       onClose()

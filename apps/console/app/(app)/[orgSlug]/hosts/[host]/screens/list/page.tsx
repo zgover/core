@@ -559,9 +559,13 @@ function Screens(props) {
             <MdiIcon path={mdiTranslate.path} size={0.8} />
           </IconButton>
         ) : null}
+        {/* Named for screen readers — the action repeats once per row, so
+            "Save as template" alone says nothing about which screen. */}
         <IconButton
           size="small"
-          aria-label="Save as template"
+          aria-label={`Save ${
+            (row as { displayName?: string }).displayName ?? row.$id
+          } as template`}
           onClick={() => setSaveTemplateFor(buildTemplateSource(row))}
         >
           <MdiIcon path={mdiBookmarkOutline.path} size={0.8} />
