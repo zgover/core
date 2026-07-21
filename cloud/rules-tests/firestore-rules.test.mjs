@@ -257,6 +257,57 @@ describe('hosts', () => {
     await assertSucceeds(deleteDoc(doc(authed(OWNER), 'hosts', HOST)))
   })
 
+  /**
+   * AGL-679. Component versions live under a collection whose NAME is in
+   * the catch-all's create-exclusion list, and `{document=**}` matches
+   * nested paths — so without a dedicated block, creating
+   * `components/{id}/versions/{v}` was denied along with the component doc
+   * itself. The component doc must STAY API-only; only its history opens up.
+   */
+  it('component versions are editor-writable; the component doc stays API-only', async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), 'hosts', HOST, 'components', 'cmp-1'),
+        { displayName: 'Hero', rootId: 'r', nodes: { r: {} } },
+      )
+    })
+    // Editors write history…
+    await assertSucceeds(
+      setDoc(
+        doc(authed(EDITOR), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v1'),
+        { componentId: 'cmp-1', nodes: {} },
+      ),
+    )
+    await assertSucceeds(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'components', 'cmp-1'), {
+        versionId: 'v1',
+      }),
+    )
+    // …but still cannot create a component, which is quota/entitlement
+    // gated through /api/hosts/resources.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'components', 'cmp-new'), {
+        displayName: 'Sneak',
+      }),
+    )
+    // Viewers read but never write.
+    await assertSucceeds(
+      getDoc(doc(authed(VIEWER), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v1')),
+    )
+    await assertFails(
+      setDoc(
+        doc(authed(VIEWER), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v2'),
+        { nodes: {} },
+      ),
+    )
+    await assertFails(
+      setDoc(
+        doc(authed(OUTSIDER), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v2'),
+        { nodes: {} },
+      ),
+    )
+  })
+
   // AGL-655 / AGL-652. Two things this pins:
   //   1. Listings are ORG-owned, so the owner check must resolve org
   //      membership. Comparing `profileId` to a uid silently denied every

@@ -294,6 +294,24 @@ service cloud.firestore {
             (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
         }
       }
+      // Reusable components (AGL-679) now carry editing history like screens
+      // and layouts. The component DOC stays API-create-only (the catch-all
+      // below excludes `components`, and the resources route enforces the
+      // reusableComponents entitlement) — but its `versions` subcollection
+      // has to be client-writable, and the catch-all's create exclusion is
+      // by collection NAME, so `components/{id}/versions/{v}` was caught by
+      // it too. This dedicated block carves the versions back out.
+      match /components/{componentId} {
+        allow read: if isStaff() || isHostAdmin(hostId);
+        allow create: if isStaff();
+        allow update, delete: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        match /{sub}/{document=**} {
+          allow read: if isStaff() || isHostAdmin(hostId);
+          allow write: if isStaff() ||
+            (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        }
+      }
       // Templates (AGL-666): saved starting points for pages, components and
       // layouts, and where marketplace downloads land instead of becoming
       // live pages. Creates go through /api/hosts/resources like screens and
