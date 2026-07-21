@@ -37,8 +37,14 @@ const StyledAccordion = styled(MuiAccordion)(({ theme }) => {
   border: `1px solid ${tv.palette.divider}`,
   borderLeft: 0,
   borderRight: 0,
-  '&:not(:last-of-type)': {
-    borderBottom: 0,
+  // Collapse the shared edge between stacked accordions. Keyed off the
+  // preceding sibling rather than `:not(:last-of-type)`, which compares
+  // against every sibling *div* — so a run followed by any other element
+  // (the styles panel ends with a Container) matched no accordion at all
+  // and the stack lost its closing border. For a contiguous run the two
+  // are equivalent: n top edges + 1 bottom, vs 1 top + n bottom edges.
+  '& + &': {
+    borderTop: 0,
   },
   '&:before': {
     display: 'none',

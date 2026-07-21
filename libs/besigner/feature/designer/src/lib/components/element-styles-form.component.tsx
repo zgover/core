@@ -762,7 +762,6 @@ const ElementStylesForm = observer(
               'Configure the selected element as a flex or grid container — alignment, wrapping, direction, and gaps between children.',
             href: besignerDocsUrl('responsiveStyling', '#style-groups'),
           }}
-          sx={{ mb: 2 }}
         >
           <ToggleButtonFormControl
             onChange={handleFlexboxChange(alignItems.name)}
@@ -822,7 +821,6 @@ const ElementStylesForm = observer(
               'Hide the element on whole device bands — e.g. hide a desktop link cluster on mobile and show a menu button instead.',
             href: besignerDocsUrl('responsiveStyling', '#visibility-per-device-band'),
           }}
-          sx={{ mb: 2 }}
         >
           {VISIBILITY_BANDS.map((band) => (
             <FormControlLabel
@@ -861,7 +859,6 @@ const ElementStylesForm = observer(
                   'Every field edits the selected element at the active breakpoint and scheme scope; hover a field’s ? for what it does.',
                 href: besignerDocsUrl('responsiveStyling', '#style-groups'),
               }}
-              sx={{ mb: 2 }}
             >
               <FormRenderer
                 key={formSeedKey}
@@ -883,7 +880,6 @@ const ElementStylesForm = observer(
               'Attach reusable style classes to the element, or write raw CSS (sx) for anything the panels don’t cover.',
             href: besignerDocsUrl('responsiveStyling', '#custom-classes'),
           }}
-          sx={{ mb: 2 }}
         >
           <ElementClassesField node={node} />
           <CustomCssForm node={node} breakpoint={activeBreakpoint} />
