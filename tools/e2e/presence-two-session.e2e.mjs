@@ -30,12 +30,13 @@
 //
 // Then:  npm run e2e:presence
 //
-// ⚠️ THIS CURRENTLY FAILS at "first session sees the second arrive", and
-// that failure is the point: presence is merged but does not work end to
-// end. The broker returns 200 for both sessions and the RTDB rules pass
-// their own matrix, so the break is between getting a token and the entry
-// appearing in the room. Keeping the harness red is deliberate — deleting
-// it would hide a gap that every individual green suite already misses.
+// This was red at "first session sees the second arrive" and the fault was
+// the harness, not presence. Org membership is a PAIR of writes —
+// `orgs/{orgId}/members/{uid}` (what the token broker checks) and
+// `users/{uid}/orgs/{orgId}` (what useOrgScope resolves `/[orgSlug]/…`
+// against). Only the first was written, so the second account was bounced
+// off the editor route before presence mounted, while the unconditional
+// `check('second editor opens', true)` reported PASS. Both are asserted now.
 
 import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright-core'
@@ -185,7 +186,20 @@ try {
   void roomBefore
 
   second = await openEditorAs(SECOND)
-  check('second editor opens', true)
+  // Assert it, don't assume it. `check(..., true)` was unconditional, so a
+  // second session that never reached the editor reported PASS and the
+  // blame landed on presence.
+  const secondInEditor = await second.page
+    .getByText(/hierarchy/i)
+    .first()
+    .waitFor({ state: 'attached', timeout: 30_000 })
+    .then(() => true)
+    .catch(() => false)
+  check(
+    'second editor opens',
+    secondInEditor,
+    secondInEditor ? undefined : `landed on ${second.page.url()}`,
+  )
 
   // The real assertion: the FIRST session must learn about the second.
   const sawOther = await first.page
