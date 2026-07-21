@@ -45,8 +45,24 @@ const RESOURCES: Record<string, {
   entitlement?: keyof OrgFeatureFlags
   /** Human label for quota error messages. */
   label: string
+  /**
+   * Fields the client may never set, stripped from `data` before the write.
+   * For anything the UI later presents as trustworthy — provenance, counts,
+   * review verdicts — the client must not be the one writing it.
+   */
+  serverManagedFields?: Array<string>
 }> = {
   screen: { collection: 'screens', quotaKey: 'screensPerHost', label: 'screens' },
+  // Templates (AGL-666) are inert until instantiated, so they carry no
+  // entitlement of their own — the gate is on what you make FROM them
+  // (screensPerHost, sharedLayoutsPerHost, reusableComponents). `source`
+  // is stamped here so a client cannot claim marketplace provenance.
+  template: {
+    collection: 'templates',
+    quotaKey: 'templatesPerHost',
+    label: 'templates',
+    serverManagedFields: ['source'],
+  },
   layout: { collection: 'layouts', quotaKey: 'sharedLayoutsPerHost', label: 'shared layouts' },
   variable: { collection: 'variables', quotaKey: 'variablesPerHost', label: 'variables' },
   function: { collection: 'functions', quotaKey: 'functionsPerHost', label: 'functions' },
@@ -183,9 +199,14 @@ async function handler(request: Request): Promise<Response> {
     const id = typeof body?.id === 'string' && body.id
       ? String(body.id).slice(0, 64)
       : createResourceUid()
-    const doc = data as Record<string, unknown>
+    const doc = { ...(data as Record<string, unknown>) }
+    // Dropped, not rejected: a client sending one is more likely stale than
+    // hostile, and failing the create would be a worse experience than
+    // ignoring a field it was never allowed to set.
+    for (const field of resource.serverManagedFields ?? []) delete doc[field]
     await collectionRef.doc(id).create({
       ...doc,
+      ...(resourceKey === 'template' ? { source: { type: 'authored' } } : {}),
       ...(doc['createdAt'] === undefined ? { createdAt: Timestamp.now() } : {}),
       ...(doc['updatedAt'] === undefined ? { updatedAt: Timestamp.now() } : {}),
     })
