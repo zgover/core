@@ -65,6 +65,7 @@ export enum Route {
   HOST_LOGIC = '/[orgSlug]/hosts/[host]/logic',
   HOST_PRODUCTS = '/[orgSlug]/hosts/[host]/products',
   HOST_COMPONENTS = '/[orgSlug]/hosts/[host]/components',
+  HOST_TEMPLATES = '/[orgSlug]/hosts/[host]/templates',
   HOST_MARKETING = '/[orgSlug]/hosts/[host]/marketing',
   HOST_BOOKINGS = '/[orgSlug]/hosts/[host]/bookings',
   // Events now come from the events-calendar plugin, served by the generic
@@ -134,6 +135,7 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.HOST_LOGIC]: { orgSlug: string; host: string }
   [Route.HOST_PRODUCTS]: { orgSlug: string; host: string }
   [Route.HOST_COMPONENTS]: { orgSlug: string; host: string }
+  [Route.HOST_TEMPLATES]: { orgSlug: string; host: string }
   [Route.HOST_MARKETING]: { orgSlug: string; host: string }
   [Route.HOST_BOOKINGS]: { orgSlug: string; host: string }
   [Route.HOST_REDIRECTS]: { orgSlug: string; host: string }
