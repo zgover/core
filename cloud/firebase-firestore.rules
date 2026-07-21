@@ -391,6 +391,50 @@ service cloud.firestore {
           .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
     }
 
+    // Org publisher identity (AGL-652). Publishing is ORG-ONLY: this is the
+    // org's public marketplace presence, keyed by org id so authorization is
+    // a plain role check with no ownership indirection. Public read — buyers
+    // see who they are installing from. `profiles/{uid}` above stays as the
+    // personal identity (the support forum renders author names from it) and
+    // is no longer a publisher.
+    match /publisherProfiles/{orgId} {
+      allow read: if true;
+      // The org rules' helpers are scoped to `match /orgs/{orgId}`, so this
+      // block resolves membership itself. `exists()` first: reading `.data`
+      // off a missing member doc errors rather than denying cleanly.
+      function publisherManager() {
+        return isStaff() || (isSignedIn() &&
+          exists(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid))
+            .data.role in ['owner', 'admin']);
+      }
+      function publisherFieldsValid() {
+        return request.resource.data.handle is string &&
+          request.resource.data.handle.size() >= 3 &&
+          request.resource.data.handle.size() <= 30 &&
+          request.resource.data.handle.matches('[a-z0-9][a-z0-9-]*') &&
+          request.resource.data.displayName is string &&
+          request.resource.data.displayName.size() <= 80;
+      }
+      // The payout keys decide who receives money — Connect route only.
+      allow create: if publisherManager() && publisherFieldsValid() &&
+        !request.resource.data.keys()
+          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
+      allow update: if publisherManager() && publisherFieldsValid() &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
+      allow delete: if isStaff();
+    }
+
+    // Handle uniqueness (AGL-652), mirroring orgSlugs: public read so a
+    // handle resolves pre-auth, and claimed ONLY by the publish API inside a
+    // transaction. Client-writable reservations would race, and whoever wrote
+    // last would take another publisher's marketplace URL.
+    match /publisherHandles/{handle} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Listings are public reads. Creates and version snapshots happen ONLY
     // through the publish API (Admin SDK, server-side sanitization) — no
     // client create. Owners may update/delete their own listing metadata
