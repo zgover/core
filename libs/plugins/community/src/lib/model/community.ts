@@ -21,12 +21,65 @@
  * public listing. Pure data module — safe to import from API routes.
  */
 
-/** `profiles/{uid}` — one public publisher profile per account. */
+/**
+ * `profiles/{uid}` — a person's public identity.
+ *
+ * NOT a publisher identity as of AGL-652: publishing is org-only, and the
+ * marketplace presence lives on `publisherProfiles/{orgId}` below. This doc
+ * survives because it is also the support forum's author identity, which
+ * renders poster names from `displayName`.
+ */
 export interface CommunityProfile {
   handle: string
   displayName: string
   bio?: string
   avatarUrl?: string
+}
+
+/**
+ * `publisherProfiles/{orgId}` — an organization's marketplace presence
+ * (AGL-652). Publishing is org-only: an org publishes, an org gets paid, and
+ * the org is who buyers see. Keyed by org id so authorization is a plain org
+ * role check with no ownership indirection.
+ *
+ * `stripeAccountId` / `stripeChargesEnabled` are written only by the Connect
+ * route via the Admin SDK and are frozen from client writes by the rules —
+ * they decide who receives money.
+ */
+export interface CommunityPublisherProfile {
+  /** Unique marketplace handle; reserved in `publisherHandles/{handle}`. */
+  handle: string
+  displayName: string
+  bio?: string
+  avatarUrl?: string
+  website?: string
+  /** Server-only. */
+  stripeAccountId?: string
+  /** Server-only; true once Connect onboarding can accept charges. */
+  stripeChargesEnabled?: boolean
+}
+
+/**
+ * `publisherHandles/{handle}` — uniqueness reservation for publisher handles,
+ * mirroring `orgSlugs` (AGL-652). Without it two publishers could claim the
+ * same handle, which the marketplace URL space cannot represent. `movedTo`
+ * tombstones a renamed handle so old links can still resolve.
+ */
+export interface PublisherHandleReservation {
+  orgId: string
+  movedTo?: string
+}
+
+/**
+ * Publisher handles share the org-slug shape: 3–30 chars, lowercase
+ * alphanumeric plus internal hyphens. Single source of truth — the two
+ * community pages historically applied two subtly different regexes to the
+ * same field (AGL-653).
+ */
+export const PUBLISHER_HANDLE_PATTERN = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/
+
+export function isValidPublisherHandle(handle: string): boolean {
+  return PUBLISHER_HANDLE_PATTERN.test(handle)
 }
 
 /**
