@@ -20,7 +20,7 @@ import type { TemplateKind } from '@aglyn/aglyn'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
+import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import {
   Button,
   Chip,
@@ -28,8 +28,15 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { collection, doc, limit, query, updateDoc } from 'firebase/firestore'
-import { useCallback, useMemo, useState } from 'react'
+import {
+  collection,
+  doc,
+  getDoc,
+  limit,
+  query,
+  updateDoc,
+} from 'firebase/firestore'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { docsHelp } from '../../constants/docs-links'
 import useFirestoreCollection from '../../hooks/use-firestore-collection'
 import UseTemplateDialog from './use-template-dialog.component'
@@ -78,9 +85,21 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
+  const { data: user } = useUser()
   const [useTemplate, setUseTemplate] = useState<Record<string, any> | null>(
     null,
   )
+  const [updating, setUpdating] = useState<string | null>(null)
+  /**
+   * Listing id → latest published version (AGL-671).
+   *
+   * "An update is available" needs no new data: a listing already records
+   * `latestVersion`, and an installed template records the version it came
+   * from. This is that comparison.
+   */
+  const [latestByListing, setLatestByListing] = useState<
+    Map<string, number | string>
+  >(new Map())
   const { data: templateDocs, status } = useFirestoreCollection<any>(
     () => query(collection(firestore, 'hosts', hostId, 'templates'), limit(200)),
     [firestore, hostId],
@@ -105,6 +124,97 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
   const total = useMemo(
     () => (templateDocs ?? []).filter((entry: any) => !entry.deletedAt).length,
     [templateDocs],
+  )
+
+  const listingIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const entry of templateDocs ?? []) {
+      if (entry.deletedAt) continue
+      const id = entry.source?.listingId
+      if (entry.source?.type === 'marketplace' && id) ids.add(id)
+    }
+    return Array.from(ids).sort().join(',')
+  }, [templateDocs])
+
+  useEffect(() => {
+    if (!listingIds) return
+    let active = true
+    void Promise.all(
+      listingIds.split(',').map(async (id) => {
+        try {
+          const snapshot = await getDoc(doc(firestore, 'communityListings', id))
+          const version = snapshot.get('latestVersion')
+          return version == null ? null : ([id, version] as const)
+        } catch {
+          // Listing removed or unreadable — no badge rather than a wrong one.
+          return null
+        }
+      }),
+    ).then((entries) => {
+      if (!active) return
+      setLatestByListing(
+        new Map(entries.filter(Boolean) as Array<readonly [string, any]>),
+      )
+    })
+    return () => {
+      active = false
+    }
+  }, [firestore, listingIds])
+
+  const hasUpdate = useCallback(
+    (template: any) => {
+      if (template.source?.type !== 'marketplace') return false
+      const latest = latestByListing.get(template.source.listingId)
+      if (latest == null || template.source.version == null) return false
+      // Versions are numbers in practice but typed loosely; compare
+      // numerically when both parse, otherwise fall back to inequality.
+      const a = Number(template.source.version)
+      const b = Number(latest)
+      return Number.isFinite(a) && Number.isFinite(b)
+        ? b > a
+        : String(latest) !== String(template.source.version)
+    },
+    [latestByListing],
+  )
+
+  const handleUpdate = useCallback(
+    (template: any) => async () => {
+      const listingId = template.source?.listingId
+      if (!listingId || updating) return
+      setUpdating(template.$id)
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch('/api/community/install-template', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+          body: JSON.stringify({ listingId, hostId }),
+        })
+        const payload = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          return void enqueueSnackbar(payload?.error ?? 'Update failed', {
+            variant: response.status === 402 ? 'warning' : 'error',
+            allowDuplicate: true,
+          })
+        }
+        enqueueSnackbar(
+          `Updated to v${payload.version} — pages you already created are ` +
+            'unchanged.',
+          { variant: 'success', persist: false },
+        )
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar('Update failed', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      } finally {
+        setUpdating(null)
+      }
+    },
+    [updating, user, hostId, enqueueSnackbar],
   )
 
   const handleDelete = useCallback(
@@ -207,6 +317,21 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
                       >
                         <Chip size="small" label={chip.label} color={chip.color} />
                       </Tooltip>
+                      {hasUpdate(template) ? (
+                        <Button
+                          size="small"
+                          color="secondary"
+                          disabled={updating === template.$id}
+                          aria-label={`Update ${
+                            template.displayName ?? template.$id
+                          }`}
+                          onClick={handleUpdate(template)}
+                        >
+                          {updating === template.$id
+                            ? 'Updating…'
+                            : 'Update available'}
+                        </Button>
+                      ) : null}
                       {/* Named for screen readers — "Use" alone repeats
                           once per row with no indication of which. */}
                       <Button
