@@ -33,6 +33,7 @@ import { collection, doc, getDoc, limit, query, where } from 'firebase/firestore
 import { useEffect, useMemo, useState } from 'react'
 import type { OrgPermissions } from '@aglyn/aglyn'
 import {
+  useConsoleHostRoute,
   useFirestore,
   useFirestoreCollection,
   useUser,
@@ -73,34 +74,22 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   // Resolved from the routing mirror rather than a new prop so the component
   // stays self-contained; hostIndex is signed-in readable.
   const [viewerOrgId, setViewerOrgId] = useState<string | null>(null)
-  // Console routes are `/[orgSlug]/hosts/[subdomain]/…` since AGL-621/622.
-  // The card links were still built as `/{hostDocId}/community/…`, a shape
-  // that has not resolved since — every publisher and listing link on this
-  // grid 404'd. Resolved here rather than taken as a prop so the component
-  // stays self-contained, the same reasoning as viewerOrgId above.
-  const [routeBase, setRouteBase] = useState<string | null>(null)
   useEffect(() => {
     let active = true
     void getDoc(doc(firestore, 'hostIndex', hostId))
-      .then(async (snapshot) => {
-        if (!active) return
-        const orgId = (snapshot.get('orgId') as string) ?? null
-        setViewerOrgId(orgId)
-        const subdomain = (snapshot.get('subdomain') as string) ?? hostId
-        if (!orgId) return
-        const org = await getDoc(doc(firestore, 'orgs', orgId)).catch(
-          () => undefined,
-        )
-        const slug = org?.get('slug') as string | undefined
-        // No slug means no valid link — leaving it null renders plain text
-        // rather than a link to nowhere.
-        if (active && slug) setRouteBase(`/${slug}/hosts/${subdomain}`)
+      .then((snapshot) => {
+        if (active) setViewerOrgId((snapshot.get('orgId') as string) ?? null)
       })
       .catch(() => undefined)
     return () => {
       active = false
     }
   }, [firestore, hostId])
+  // Card links were built as `/{hostDocId}/community/…`, a shape that has
+  // not resolved since AGL-621/622 — every listing and publisher link on
+  // this grid 404'd. One shared resolution (AGL-673); null renders plain
+  // text rather than a link to nowhere.
+  const { base: routeBase } = useConsoleHostRoute(hostId)
 
   const { data: listings } = useFirestoreCollection<any>(
     () =>
