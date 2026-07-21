@@ -49,6 +49,7 @@ import {
   useUser,
 } from '@aglyn/tenant-feature-instance'
 import HubTabs from '@aglyn/shared-ui-next/components/hub-tabs'
+import ListingReviews from './listing-reviews.component'
 import { MenuItem, TextField } from '@mui/material'
 import { useCommunityActions } from '../hooks/use-community-actions'
 
@@ -735,6 +736,10 @@ export function CommunityListingContent({
                         )}
                       </CardDisplay>
                       )}
+                      <ListingReviews
+                        listingId={listingId}
+                        listing={listing}
+                      />
                     </Stack>
                   ),
                 },
