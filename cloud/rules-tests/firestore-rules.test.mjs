@@ -239,6 +239,16 @@ describe('hosts', () => {
     await assertSucceeds(
       updateDoc(doc(authed(EDITOR), 'hosts', HOST), { displayName: 'Renamed' }),
     )
+    // The subdomain is the site's public address, so it is server-only
+    // (AGL-642) — a client write could take a reserved name or collide with
+    // another org's site. Closed even to the site admin; renames go through
+    // /api/hosts/rename, which claims uniqueness transactionally.
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST), { subdomain: 'grabbed' }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'hosts', HOST), { subdomain: 'grabbed' }),
+    )
     await assertFails(deleteDoc(doc(authed(EDITOR), 'hosts', HOST)))
     await assertSucceeds(deleteDoc(doc(authed(OWNER), 'hosts', HOST)))
   })

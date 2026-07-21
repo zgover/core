@@ -34,7 +34,7 @@ import { useHost } from '@aglyn/tenant-feature-instance'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { InputAdornment, Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { useAnalytics, useUser } from '@aglyn/tenant-feature-instance'
 import HostActivityTable from '../../../../../../components/host-activity-table.component'
@@ -332,6 +332,7 @@ const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
   const hostId = useHostId()
   const orgSlug = useOrgSlug()
   const host = useHostSubdomain()
+  const router = useRouter()
   const {
     doc: { data, status },
     setDoc,
@@ -364,64 +365,91 @@ const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
   const handleBasicSave = useCallback(
     async (fields: any) => {
       const dequeueLoading = queueLoading()
-      // Rename guards (AGL-147): the create API validates new hosts, but
-      // this save path could silently rename onto a taken or blocked
-      // subdomain — run the same server checks first.
       const subdomainChanged =
         typeof fields.subdomain === 'string' &&
         fields.subdomain !== data?.subdomain
       const displayNameChanged =
         typeof fields.displayName === 'string' &&
         fields.displayName !== data?.displayName
-      if (subdomainChanged || displayNameChanged) {
+      const idToken = await (user as any)?.getIdToken?.()
+
+      // A duplicate display name is allowed, so this check stays advisory.
+      if (displayNameChanged) {
         try {
-          const idToken = await (user as any)?.getIdToken?.()
           const response = await fetch('/api/hosts/validate-name', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
             },
-            body: JSON.stringify({
-              hostId,
-              ...(subdomainChanged && { subdomain: fields.subdomain }),
-              ...(displayNameChanged && { displayName: fields.displayName }),
-            }),
+            body: JSON.stringify({ hostId, displayName: fields.displayName }),
           })
           const validation = response.ok ? await response.json() : null
-          if (validation) {
-            if (
-              !validation.subdomainValid ||
-              validation.subdomainBlocked ||
-              validation.subdomainTaken
-            ) {
-              dequeueLoading()
-              const hint = validation.suggestions?.length
-                ? ` Try: ${validation.suggestions.join(', ')}`
-                : ''
-              return void enqueueSnackbar(
-                (validation.subdomainTaken
-                  ? 'That subdomain is taken.'
-                  : 'That subdomain is not available.') + hint,
-                { variant: 'warning', persist: false },
-              )
-            }
-            if (validation.displayNameCollision) {
-              enqueueSnackbar(
-                'Another of your sites already uses this name — saved ' +
-                  'anyway, but consider renaming one.',
-                { variant: 'info', persist: false },
-              )
-            }
+          if (validation?.displayNameCollision) {
+            enqueueSnackbar(
+              'Another of your sites already uses this name — saved ' +
+                'anyway, but consider renaming one.',
+              { variant: 'info', persist: false },
+            )
           }
         } catch {
-          // Validation is advisory on network failure; the save proceeds.
+          // Advisory on network failure; the save proceeds.
         }
       }
-      await setDoc(fields, { merge: true })
+
+      // The subdomain is the site's public address, so the server owns it
+      // (AGL-642) — it revalidates and claims uniqueness transactionally
+      // with the Admin SDK. This used to be a client write guarded only by
+      // an advisory check, which meant the pattern/reserved/uniqueness rules
+      // could be skipped entirely. The rules now reject a client write, so a
+      // failure here has to abort rather than fall through to setDoc.
+      let renamedTo: string | null = null
+      if (subdomainChanged) {
+        try {
+          const response = await fetch('/api/hosts/rename', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+            },
+            body: JSON.stringify({ hostId, subdomain: fields.subdomain }),
+          })
+          const payload = await response.json().catch(() => null)
+          if (!response.ok) {
+            dequeueLoading()
+            const hint = payload?.suggestions?.length
+              ? ` Try: ${payload.suggestions.join(', ')}`
+              : ''
+            return void enqueueSnackbar(
+              (payload?.error ?? 'Could not change the subdomain.') + hint,
+              { variant: 'warning', persist: false },
+            )
+          }
+          renamedTo = String(payload?.subdomain ?? fields.subdomain)
+        } catch {
+          dequeueLoading()
+          return void enqueueSnackbar(
+            'Could not reach the server to change the subdomain.',
+            { variant: 'error' },
+          )
+        }
+      }
+
+      // `subdomain` is server-owned above; the rules reject it from here.
+      const clientFields = { ...fields }
+      delete clientFields.subdomain
+      await setDoc(clientFields, { merge: true })
         .then(() => {
           enqueueSnackbar('Saved!', { variant: 'success' })
           logActivity('Updated host settings', { type: 'host', id: hostId })
+          // The subdomain addresses this page, so a rename leaves the
+          // current URL pointing at nothing — the host guard would render
+          // the designed 404 on a successful save. Follow it across.
+          if (renamedTo && renamedTo !== host) {
+            router.replace(
+              buildRoute(Route.HOST_SETUP, { orgSlug, host: renamedTo }),
+            )
+          }
         })
         .catch((e) => {
           enqueueSnackbar(`Error: ${JSON.stringify(e)}`, { variant: 'error' })
@@ -430,7 +458,18 @@ const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
           dequeueLoading()
         })
     },
-    [enqueueSnackbar, queueLoading, setDoc, hostId, logActivity, data, user],
+    [
+      enqueueSnackbar,
+      queueLoading,
+      setDoc,
+      hostId,
+      logActivity,
+      data,
+      user,
+      router,
+      orgSlug,
+      host,
+    ],
   )
 
   const forms = [

@@ -253,13 +253,17 @@ service cloud.firestore {
       // editors update it too; deletion is admin-only. Editors must NOT be
       // able to rewrite the identity/projection keys: `memberRoles` is the
       // access list (self-escalation / add-outsider / lock-out-owner),
-      // `orgId` gates suspension, and `admins`/`hosts` are legacy/ownership.
+      // `orgId` gates suspension, `admins`/`hosts` are legacy/ownership, and
+      // `subdomain` is the site's public address — a client write could take
+      // a reserved name or collide with another org's site, making
+      // subdomain->host resolution ambiguous (AGL-642). It goes through
+      // /api/hosts/rename, which claims uniqueness transactionally.
       // Those keys are Admin-SDK-only (org APIs bypass rules); staff keep
       // full control for tooling.
       allow update: if isStaff() ||
         (canWriteHostContent(hostId) && !hostOrgSuspended(hostId) &&
           !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['memberRoles', 'orgId', 'admins', 'hosts']));
+            .hasAny(['memberRoles', 'orgId', 'admins', 'hosts', 'subdomain']));
       allow delete: if isStaff() ||
         (hostMemberRole(hostId) == 'admin' && !hostOrgSuspended(hostId));
       // Screen/layout DOC creates are API-only (AGL-473): /api/hosts/
