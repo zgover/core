@@ -1,0 +1,64 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as Aglyn from '@aglyn/aglyn'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
+import { DocumentReference } from '@firebase/firestore'
+import { doc } from 'firebase/firestore'
+import {
+  useFirestore,
+  type FirestoreDocOptions,
+} from './firebase/firebase-services'
+import useDoc from './helpers/use-doc'
+
+/**
+ * A reusable component definition (AGL-680).
+ *
+ * `nodes` and `rootId` on this doc are the PUBLISHED copy — what the tenant
+ * runtime renders, read for every component in one collection query. They
+ * are stored plainly rather than compressed, unlike screen and layout
+ * versions, so the runtime can read them without decoding.
+ */
+export const useComponentRef = ({
+  hostId,
+  componentId,
+}: {
+  hostId: Aglyn.HostUid
+  componentId: string
+}) => {
+  const firestore = useFirestore()
+  const ref = doc(firestore, 'hosts', hostId, 'components', componentId)
+  return ref.withConverter({
+    toFirestore(data: Aglyn.AglynHostComponent) {
+      const { $id, ...rest } = data
+      return { ...rest, updatedAt: Timestamp.now() }
+    },
+    fromFirestore(snapshot, options) {
+      if (!snapshot.exists()) return undefined
+      return snapshot.data(options) as Aglyn.AglynHostComponent
+    },
+  }) as DocumentReference<Aglyn.AglynHostComponent>
+}
+
+export const useComponent = (
+  data: { hostId: Aglyn.HostUid; componentId: string },
+  options?: FirestoreDocOptions<Aglyn.AglynHostComponent>,
+) => {
+  return useDoc(useComponentRef(data), options)
+}
+
+export default useComponent

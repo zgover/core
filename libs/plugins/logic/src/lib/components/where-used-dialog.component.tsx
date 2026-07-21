@@ -26,6 +26,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import { useConsoleHostRoute } from '@aglyn/tenant-feature-instance'
 import type { WhereUsedResult } from '../utils/fetch-where-used'
 
 /**
@@ -34,15 +35,16 @@ import type { WhereUsedResult } from '../utils/fetch-where-used'
  * them directly rather than importing app-only route constants.
  */
 const screenBesignerHref = (
+  // Console route base, not a host doc id (AGL-673).
   hostId: string,
   screenId: string,
   versionId: string,
-) => `/${hostId}/screens/${screenId}/versions/${versionId}/besigner`
+) => `${hostId}/screens/${screenId}/versions/${versionId}/besigner`
 const layoutBesignerHref = (
   hostId: string,
   layoutId: string,
   versionId: string,
-) => `/${hostId}/layouts/${layoutId}/versions/${versionId}/besigner`
+) => `${hostId}/layouts/${layoutId}/versions/${versionId}/besigner`
 
 export interface WhereUsedDialogProps {
   hostId: string
@@ -58,6 +60,8 @@ export interface WhereUsedDialogProps {
  */
 export function WhereUsedDialog(props: WhereUsedDialogProps) {
   const { hostId, usage, onClose } = props
+  const consoleRoute = useConsoleHostRoute(hostId)
+  const base = consoleRoute.base
   return (
     <Dialog open={Boolean(usage)} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>{`Where "${usage?.name}" is used`}</DialogTitle>
@@ -70,11 +74,13 @@ export function WhereUsedDialog(props: WhereUsedDialogProps) {
         ) : (
           <Stack spacing={1}>
             {usage?.result.dependents.map((dependent) => {
+              // No resolved base means no valid link — the branch below
+              // already renders plain text, which beats a link to nowhere.
               const href =
-                dependent.versionId && dependent.type === 'screen'
-                  ? screenBesignerHref(hostId, dependent.id, dependent.versionId)
-                  : dependent.versionId && dependent.type === 'layout'
-                    ? layoutBesignerHref(hostId, dependent.id, dependent.versionId)
+                base && dependent.versionId && dependent.type === 'screen'
+                  ? screenBesignerHref(base, dependent.id, dependent.versionId)
+                  : base && dependent.versionId && dependent.type === 'layout'
+                    ? layoutBesignerHref(base, dependent.id, dependent.versionId)
                     : null
               return (
                 <Stack

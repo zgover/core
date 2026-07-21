@@ -320,11 +320,13 @@ export interface AglynScreen extends AglynDocument {
   // CONCEPT: Contextual visibility
   visibility?: HostScreenVisibility
 
-  // CONCEPT: Attribute editors
-  owner?: UserUid
-  contributors?: {
-    [P in string & UserUid]: true
-  }
+  // NOTE (AGL-676): `owner` and `contributors` were declared here and NEVER
+  // read or written by anything — zero call sites across the whole repo.
+  // Removed rather than left dangling: a declared-but-unmaintained field is
+  // how the next person builds on something that was never real. Editor
+  // attribution lives in `hosts/{hostId}/activity`, which is actually
+  // written. If a contributor set is wanted later, add one that is kept up
+  // to date.
 
   /** Shared layout this screen renders inside (see {@link AglynLayout}). */
   layoutId?: LayoutUid
@@ -361,12 +363,48 @@ export interface AglynHostComponent<N = AglynNodeSchema>
   hostId?: HostUid
   displayName?: string
   description?: string
-  /** Definition tree root id within {@link AglynHostComponent.nodes}. */
+  /**
+   * Definition tree root id within {@link AglynHostComponent.nodes}.
+   *
+   * `rootId` and `nodes` on THIS doc are the published snapshot — the copy
+   * the tenant runtime renders. `getComponents` reads every component in a
+   * single collection query on each page render, so they deliberately stay
+   * here rather than moving into the version docs below: relocating them
+   * would turn one query into N+1 on the hot path of every published site
+   * (AGL-679).
+   */
+  rootId?: NodeId
+  nodes?: Record<NodeId, N>
+  /**
+   * Working version pointer (AGL-679). Absent on components that predate
+   * the standalone editor — those still render from the fields above, and
+   * opening one creates version 1 from them.
+   */
+  versionId?: VersionUid
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
+  deletedAt?: ITimestamp
+}
+
+/**
+ * A reusable component's editing history (AGL-679), at
+ * `hosts/{hostId}/components/{componentId}/versions/{versionId}`.
+ *
+ * Same shape as a screen version, with the component's `rootId` carried so
+ * publishing is a copy of both fields onto the parent rather than a
+ * reconstruction. Edits here are invisible to live sites until published —
+ * the same mental model screens already have.
+ */
+export interface AglynHostComponentVersion<N = AglynNodeSchema>
+  extends AglynDocument {
+  $id: VersionUid
+  hostId?: HostUid
+  componentId?: ComponentDefUid
+  displayName?: string
   rootId?: NodeId
   nodes?: Record<NodeId, N>
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
-  deletedAt?: ITimestamp
 }
 
 /**
@@ -383,7 +421,7 @@ export interface AglynLayout extends AglynDocument {
   versions?: Array<VersionUid>
   displayName?: string
   description?: string
-  contributors?: Array<UserUid>
+  // `contributors` removed here too — see the note on AglynScreen (AGL-676).
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
 }

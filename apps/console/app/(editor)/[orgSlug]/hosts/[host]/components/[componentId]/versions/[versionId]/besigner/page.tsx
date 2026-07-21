@@ -34,15 +34,21 @@ import {
   LOADING_OVERLAY_ELEMENT,
   useLoading,
 } from '@aglyn/shared-ui-jsx'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   getGoogleFontsUrl,
   HostThemeDocumentContext,
 } from '@aglyn/shared-ui-theme'
-import { useHost, useLayout, useLayoutVersion, useHostActivityLogger } from '@aglyn/tenant-feature-instance'
+import {
+  useComponent,
+  useComponentVersion,
+  useHost,
+  useHostActivityLogger,
+} from '@aglyn/tenant-feature-instance'
 import { Alert, Button, Stack, Typography } from '@mui/material'
-import { collection, limit, query } from 'firebase/firestore'
+import { collection, doc, limit, query, updateDoc } from 'firebase/firestore'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
@@ -94,14 +100,14 @@ function setLocalNodes(value: Aglyn.ProcessableNodes) {
   return nodes
 }
 
-function LayoutBesignerPage(props) {
+function ComponentBesignerPage(props) {
   const params = useParams<{
     hostId: string
-    layoutId: string
+    componentId: string
     versionId: string
   }>()
   const hostId = useHostId()
-  const layoutId = params?.layoutId as string
+  const componentId = params?.componentId as string
   const versionId = params?.versionId as string
   const { enqueueSnackbar } = useSnackbar()
   const orgSlug = useOrgSlug()
@@ -110,12 +116,11 @@ function LayoutBesignerPage(props) {
   const logActivity = useHostActivityLogger(hostId)
   const saveAvailable = !Aglyn.canvas.isInitialSame
   const handleAddElementClick = useAddElementDrawerCallback()
-  const listUrl = buildRoute(Route.LAYOUT_LIST, { orgSlug,  host })
+  const listUrl = buildRoute(Route.HOST_COMPONENTS, { orgSlug,  host })
   const { doc: hostResult } = useHost({ hostId })
-  const { doc: layoutResult } = useLayout({ hostId, layoutId })
-  const layoutPublishedVersionId = layoutResult?.data?.versionId
-  // Id-based screen links: a layout's appbar is exactly where by-id links
-  // live, so the canvas needs the routing map to resolve hrefs and the
+  const { doc: componentResult } = useComponent({ hostId, componentId })
+  const publishedVersionId = componentResult?.data?.versionId
+  // Id-based screen links: a component can contain a link, so the canvas needs the routing map to resolve hrefs and the
   // Attributes panel needs screen names for the screen-select field.
   const firestore = useFirestore()
   const { data: screenDocs } = useFirestoreCollection<any>(
@@ -136,9 +141,9 @@ function LayoutBesignerPage(props) {
     }),
     [hostResult?.data?.screens, screenDocs],
   )
-  const { doc: result, setDoc: updateLayoutVersion } = useLayoutVersion({
+  const { doc: result, setDoc: updateComponentVersion } = useComponentVersion({
     hostId,
-    layoutId,
+    componentId,
     versionId,
   })
   const { data, status, error } = result
@@ -146,23 +151,10 @@ function LayoutBesignerPage(props) {
   const hasError = Boolean(error) || status === 'error'
   const notFound = status === 'success' && !data
 
-  // The canvas edits a layout: expose the LayoutSlot in the components
-  // drawer and let downstream surfaces adapt. Reset on unmount so screen
-  // editing sessions are unaffected.
-  useEffect(() => {
-    if (!Besigner.doesBesignerAppExist()) return
-    const app = Besigner.getBesignerApp()
-    Besigner.setBesignerFlag(app, {
-      flag: 'viewType',
-      value: () => Aglyn.HostViewType.LAYOUT,
-    })
-    return () => {
-      Besigner.setBesignerFlag(app, {
-        flag: 'viewType',
-        value: () => Aglyn.HostViewType.SCREEN,
-      })
-    }
-  }, [])
+  // Deliberately NO viewType override: a component edits like screen
+  // content. The LAYOUT view is what exposes the LayoutSlot outlet in the
+  // element drawer, and a slot inside a reusable component would have
+  // nowhere to graft (AGL-680).
 
   // The canvas is a singleton shared by every editing session; without a
   // reset on leave, client-side navigation to a screen or another layout
@@ -172,7 +164,7 @@ function LayoutBesignerPage(props) {
       Aglyn.canvas.reset()
       Besigner.focus.clearFocusStatus()
     }
-  }, [hostId, layoutId, versionId])
+  }, [hostId, componentId, versionId])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -190,7 +182,15 @@ function LayoutBesignerPage(props) {
 
   useEffect(() => {
     if (nodes && !Aglyn.canvas.didSetInitial) {
-      setLocalNodes(nodes)
+      // A definition's root is the promoted node, not the canvas root, so
+      // it has to be wrapped or the canvas has no root and renders nothing
+      // (AGL-680).
+      setLocalNodes(
+        Aglyn.definitionToCanvasTree({
+          rootId: data?.rootId,
+          nodes: nodes as Record<string, unknown>,
+        }) as Aglyn.ProcessableNodes,
+      )
       Aglyn.canvas.updateInitialNodes()
       baseStampRef.current = Aglyn.versionStamp(
         (data as { updatedAt?: unknown } | undefined)?.updatedAt,
@@ -232,13 +232,13 @@ function LayoutBesignerPage(props) {
     const nodes = Aglyn.canvas.toJSON().nodes
     // Size guard (AGL-678): the node map is stored as one msgpack blob and
     // Firestore rejects documents over 1 MiB. Nothing checked this before,
-    // so an oversized layout simply stopped saving with a generic error and
+    // so an oversized component simply stopped saving with a generic error and
     // no way to tell which content was to blame.
     const size = Aglyn.measureNodeMap(nodes as Record<string, unknown>)
     if (size.tooLarge) {
       const worst = size.largest[0]
       return enqueueSnackbar(
-        `This layout is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
+        `This component is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
           'save. Move repeated sections into reusable components, or replace ' +
           'inlined images with uploads from the media library' +
           (worst
@@ -249,18 +249,18 @@ function LayoutBesignerPage(props) {
     }
     if (size.nearLimit) {
       enqueueSnackbar(
-        `Heads up: this layout is ${Aglyn.formatBytes(size.bytes)}. Past ` +
+        `Heads up: this component is ${Aglyn.formatBytes(size.bytes)}. Past ` +
           'about 900 KB it stops saving — moving repeated sections into ' +
           'reusable components is the usual fix.',
         { variant: 'warning', persist: false },
       )
     }
-    const saveLayout = updateLayoutVersion as unknown as (
-      data: Partial<Aglyn.AglynLayoutVersion>,
-      options?: Parameters<typeof updateLayoutVersion>[1],
+    const saveComponent = updateComponentVersion as unknown as (
+      data: Partial<Aglyn.AglynHostComponentVersion>,
+      options?: Parameters<typeof updateComponentVersion>[1],
     ) => Promise<void>
-    await saveLayout(
-      { nodes: nodes as unknown as Aglyn.AglynLayoutVersion['nodes'] },
+    await saveComponent(
+      { nodes: nodes as unknown as Aglyn.AglynHostComponentVersion['nodes'] },
       { merge: true },
     )
       .then(() => {
@@ -269,12 +269,12 @@ function LayoutBesignerPage(props) {
         // carries no actor, so "someone changed this" could never become
         // "Sam changed this". Fire-and-forget — an audit miss must not
         // break the edit that triggered it.
-        logActivity('Saved the layout', { type: 'layout', id: layoutId })
+        logActivity('Saved the component', { type: 'component', id: componentId })
         // Our own write moves the stamp; the new value arrives on the next
         // snapshot, so mark it as ours rather than somebody else's edit.
         expectOwnWriteRef.current = true
         setRemoteChanged(false)
-        enqueueSnackbar('Layout saved successfully', {
+        enqueueSnackbar('Component saved successfully', {
           variant: 'success',
           persist: false,
         })
@@ -291,9 +291,77 @@ function LayoutBesignerPage(props) {
   }, [
     saveAvailable,
     remoteChanged,
-    updateLayoutVersion,
+    updateComponentVersion,
     enqueueSnackbar,
     queueLoading,
+  ])
+
+  /**
+   * Publish (AGL-679): copy this version's tree onto the component doc.
+   *
+   * The parent doc IS the published copy — `getComponents` reads it for
+   * every component in a single query on each tenant render, which is why
+   * nodes were never moved into version docs. So publishing is a copy, and
+   * until it happens the live site keeps rendering the previous tree.
+   */
+  const [publishing, setPublishing] = useState(false)
+  const handlePublish = useCallback(async () => {
+    if (publishing) return
+    if (saveAvailable) {
+      return enqueueSnackbar('Save your changes before publishing', {
+        variant: 'warning',
+        persist: false,
+      })
+    }
+    setPublishing(true)
+    try {
+      // Unwrap the synthetic canvas root: the tenant runtime grafts from
+      // `rootId`, so publishing the wrapper would put an always-empty
+      // container inside every instance of this component (AGL-680).
+      const definition = Aglyn.canvasTreeToDefinition(
+        Aglyn.canvas.toJSON().nodes as Record<string, unknown>,
+      )
+      if (definition.ambiguousRoot) {
+        return enqueueSnackbar(
+          'A component needs a single top-level element. Wrap what you have ' +
+            'in one container, then publish.',
+          { variant: 'warning', allowDuplicate: true },
+        )
+      }
+      const publishedNodes = definition.nodes
+      const rootId = definition.rootId ?? componentResult?.data?.rootId
+      await updateDoc(doc(firestore, 'hosts', hostId, 'components', componentId), {
+        nodes: publishedNodes,
+        ...(rootId ? { rootId } : {}),
+        versionId,
+        updatedAt: Timestamp.now(),
+      })
+      // Tenant pages are ISR with `revalidate = 60` and there is no
+      // on-demand revalidation hook, so propagation is a cache window, not
+      // a deploy. Saying "next build" would have people waiting for
+      // something that never happens.
+      enqueueSnackbar(
+        'Published. Every screen using this component picks it up within a ' +
+          'minute — you do not need to republish them.',
+        { variant: 'success', persist: false },
+      )
+    } catch (error) {
+      enqueueSnackbar(
+        error instanceof Error ? error.message : 'Publish failed',
+        { variant: 'error', allowDuplicate: true },
+      )
+    } finally {
+      setPublishing(false)
+    }
+  }, [
+    publishing,
+    saveAvailable,
+    firestore,
+    hostId,
+    componentId,
+    versionId,
+    componentResult?.data?.rootId,
+    enqueueSnackbar,
   ])
 
   const [jsonOpen, setJsonOpen] = useState(false)
@@ -347,21 +415,14 @@ function LayoutBesignerPage(props) {
         title={'Besigner'}
         enableAppBarElevation
         besigner
-        centerPrefix={
-          <BesignerDocumentSwitcherComponent
-            hostId={hostId}
-            current={{ kind: 'layout', id: layoutId }}
-          />
-        }
         actionsPrefix={
           <>
             <BesignerFunctionsButton hostId={hostId} />
-            <BesignerVersionsComponent
-              hostId={hostId}
-              parent={{ kind: 'layout', id: layoutId }}
-              versionId={versionId}
-              publishedVersionId={layoutPublishedVersionId}
-            />
+            {/* No version switcher yet: BesignerVersionsComponent maps any
+                non-screen parent to the "layouts" collection, so pointing
+                it at a component would write its versions to the wrong
+                place entirely. Tracked separately rather than shipped
+                broken (AGL-680). */}
           </>
         }
         backButton={
@@ -384,6 +445,17 @@ function LayoutBesignerPage(props) {
                   : { path: ICON_VARIANT_SYMBOL_CONFIRMED.path },
                 children: saveAvailable ? 'Save' : 'Up to Date',
                 onClick: handleSave,
+              },
+              {
+                // Saving records history; publishing is what live sites
+                // actually render (AGL-679).
+                id: 'center-nav-file-publish',
+                disabled: publishing || saveAvailable,
+                children:
+                  publishedVersionId === versionId
+                    ? 'Publish again'
+                    : 'Publish to sites',
+                onClick: handlePublish,
               },
               {
                 id: 'center-nav-file-close',
@@ -446,7 +518,7 @@ function LayoutBesignerPage(props) {
           },
         ]}
       >
-        <NextPageTitle screen={'Layout Besigner'} />
+        <NextPageTitle screen={'Component Besigner'} />
 
         {error || notFound ? (
           <Stack
@@ -515,6 +587,6 @@ function LayoutBesignerPage(props) {
   )
 }
 
-LayoutBesignerPage.displayName = 'Page:LayoutBesigner'
+ComponentBesignerPage.displayName = 'Page:LayoutBesigner'
 
-export default withSitePlugins(withBesignerContext(observer(LayoutBesignerPage)))
+export default withSitePlugins(withBesignerContext(observer(ComponentBesignerPage)))

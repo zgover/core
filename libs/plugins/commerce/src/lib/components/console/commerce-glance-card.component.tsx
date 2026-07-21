@@ -21,7 +21,10 @@ import { AppLink, CardDisplay } from '@aglyn/shared-ui-jsx'
 import { Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { useMemo } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
+import {
+  useConsoleHostRoute,
+  useFirestore,
+} from '@aglyn/tenant-feature-instance'
 import { useFirestoreCollection } from '@aglyn/tenant-feature-instance'
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
@@ -33,6 +36,9 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
  */
 export function CommerceGlanceCard(props: { hostId: string }) {
   const { hostId } = props
+  // Console routes are /[orgSlug]/hosts/[subdomain]/… (AGL-673); this
+  // component only has a host doc id.
+  const consoleRoute = useConsoleHostRoute(hostId)
   const firestore = useFirestore()
   const { data: orderDocs } = useFirestoreCollection<any>(
     () => query(collection(firestore, 'hosts', hostId, 'orders'), limit(200)),
@@ -94,7 +100,7 @@ export function CommerceGlanceCard(props: { hostId: string }) {
           <Button
             component={AppLink as any}
             {...({ componentVariant: 'naked' } as any)}
-            href={`/${hostId}/products`}
+            href={consoleRoute.base ? `${consoleRoute.base}/products` : undefined}
             size="small"
             color="secondary"
           >

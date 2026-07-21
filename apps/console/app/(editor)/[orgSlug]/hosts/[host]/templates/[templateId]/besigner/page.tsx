@@ -34,15 +34,16 @@ import {
   LOADING_OVERLAY_ELEMENT,
   useLoading,
 } from '@aglyn/shared-ui-jsx'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   getGoogleFontsUrl,
   HostThemeDocumentContext,
 } from '@aglyn/shared-ui-theme'
-import { useHost, useLayout, useLayoutVersion, useHostActivityLogger } from '@aglyn/tenant-feature-instance'
+import { useHost, useHostTemplate, useHostActivityLogger } from '@aglyn/tenant-feature-instance'
 import { Alert, Button, Stack, Typography } from '@mui/material'
-import { collection, limit, query } from 'firebase/firestore'
+import { collection, doc, limit, query, updateDoc } from 'firebase/firestore'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
@@ -51,23 +52,23 @@ import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // Dynamic site-plugin activation (AGL-417): canvas components register
 // via the org-gated loader; the page gates the canvas on readiness.
-import { withSitePlugins } from '../../../../../../../../../../components/console-plugins-gate.component'
-import BesignerFunctionsButton from '../../../../../../../../../../components/besigner-functions-button.component'
-import BindingPickerProvider from '../../../../../../../../../../components/binding-picker-provider.component'
-import InteractionsProvider from '../../../../../../../../../../components/interactions-provider.component'
-import BesignerMediaPickerProvider from '../../../../../../../../../../components/besigner-media-picker-provider.component'
-import BesignerAppBarComponent from '../../../../../../../../../../components/besigner-app-bar.component'
-import BesignerDocumentSwitcherComponent from '../../../../../../../../../../components/besigner-document-switcher.component'
-import BesignerVersionsComponent from '../../../../../../../../../../components/besigner-versions.component'
-import EntityPickerProvider from '../../../../../../../../../../components/entity-picker-provider.component'
-import ReusableComponentsProvider from '../../../../../../../../../../components/reusable-components-provider.component'
-import AuthenticatedLayout from '../../../../../../../../../../components/layouts/authenticated.layout'
-import MainLayout from '../../../../../../../../../../components/layouts/main.layout'
-import '../../../../../../../../../../constants/app-setup'
-import { buildRoute, Route } from '../../../../../../../../../../constants/route-links'
-import { useHostId, useHostSubdomain } from '../../../../../../../../../../components/host-id-provider'
-import { useOrgSlug } from '../../../../../../../../../../hooks/use-org-scope'
-import useFirestoreCollection from '../../../../../../../../../../hooks/use-firestore-collection'
+import { withSitePlugins } from '../../../../../../../../components/console-plugins-gate.component'
+import BesignerFunctionsButton from '../../../../../../../../components/besigner-functions-button.component'
+import BindingPickerProvider from '../../../../../../../../components/binding-picker-provider.component'
+import InteractionsProvider from '../../../../../../../../components/interactions-provider.component'
+import BesignerMediaPickerProvider from '../../../../../../../../components/besigner-media-picker-provider.component'
+import BesignerAppBarComponent from '../../../../../../../../components/besigner-app-bar.component'
+import BesignerDocumentSwitcherComponent from '../../../../../../../../components/besigner-document-switcher.component'
+import BesignerVersionsComponent from '../../../../../../../../components/besigner-versions.component'
+import EntityPickerProvider from '../../../../../../../../components/entity-picker-provider.component'
+import ReusableComponentsProvider from '../../../../../../../../components/reusable-components-provider.component'
+import AuthenticatedLayout from '../../../../../../../../components/layouts/authenticated.layout'
+import MainLayout from '../../../../../../../../components/layouts/main.layout'
+import '../../../../../../../../constants/app-setup'
+import { buildRoute, Route } from '../../../../../../../../constants/route-links'
+import { useHostId, useHostSubdomain } from '../../../../../../../../components/host-id-provider'
+import { useOrgSlug } from '../../../../../../../../hooks/use-org-scope'
+import useFirestoreCollection from '../../../../../../../../hooks/use-firestore-collection'
 
 
 const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
@@ -94,15 +95,13 @@ function setLocalNodes(value: Aglyn.ProcessableNodes) {
   return nodes
 }
 
-function LayoutBesignerPage(props) {
+function TemplateBesignerPage(props) {
   const params = useParams<{
     hostId: string
-    layoutId: string
-    versionId: string
+    templateId: string
   }>()
   const hostId = useHostId()
-  const layoutId = params?.layoutId as string
-  const versionId = params?.versionId as string
+  const templateId = params?.templateId as string
   const { enqueueSnackbar } = useSnackbar()
   const orgSlug = useOrgSlug()
   const host = useHostSubdomain()
@@ -110,12 +109,10 @@ function LayoutBesignerPage(props) {
   const logActivity = useHostActivityLogger(hostId)
   const saveAvailable = !Aglyn.canvas.isInitialSame
   const handleAddElementClick = useAddElementDrawerCallback()
-  const listUrl = buildRoute(Route.LAYOUT_LIST, { orgSlug,  host })
+  const listUrl = buildRoute(Route.HOST_COMPONENTS, { orgSlug,  host })
   const { doc: hostResult } = useHost({ hostId })
-  const { doc: layoutResult } = useLayout({ hostId, layoutId })
-  const layoutPublishedVersionId = layoutResult?.data?.versionId
-  // Id-based screen links: a layout's appbar is exactly where by-id links
-  // live, so the canvas needs the routing map to resolve hrefs and the
+
+  // Id-based screen links: a component can contain a link, so the canvas needs the routing map to resolve hrefs and the
   // Attributes panel needs screen names for the screen-select field.
   const firestore = useFirestore()
   const { data: screenDocs } = useFirestoreCollection<any>(
@@ -136,33 +133,19 @@ function LayoutBesignerPage(props) {
     }),
     [hostResult?.data?.screens, screenDocs],
   )
-  const { doc: result, setDoc: updateLayoutVersion } = useLayoutVersion({
+  const { doc: result, setDoc: updateTemplate } = useHostTemplate({
     hostId,
-    layoutId,
-    versionId,
+    templateId,
   })
   const { data, status, error } = result
   const nodes = data?.nodes
   const hasError = Boolean(error) || status === 'error'
   const notFound = status === 'success' && !data
 
-  // The canvas edits a layout: expose the LayoutSlot in the components
-  // drawer and let downstream surfaces adapt. Reset on unmount so screen
-  // editing sessions are unaffected.
-  useEffect(() => {
-    if (!Besigner.doesBesignerAppExist()) return
-    const app = Besigner.getBesignerApp()
-    Besigner.setBesignerFlag(app, {
-      flag: 'viewType',
-      value: () => Aglyn.HostViewType.LAYOUT,
-    })
-    return () => {
-      Besigner.setBesignerFlag(app, {
-        flag: 'viewType',
-        value: () => Aglyn.HostViewType.SCREEN,
-      })
-    }
-  }, [])
+  // Deliberately NO viewType override: a component edits like screen
+  // content. The LAYOUT view is what exposes the LayoutSlot outlet in the
+  // element drawer, and a slot inside a reusable component would have
+  // nowhere to graft (AGL-680).
 
   // The canvas is a singleton shared by every editing session; without a
   // reset on leave, client-side navigation to a screen or another layout
@@ -172,7 +155,7 @@ function LayoutBesignerPage(props) {
       Aglyn.canvas.reset()
       Besigner.focus.clearFocusStatus()
     }
-  }, [hostId, layoutId, versionId])
+  }, [hostId, templateId])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -187,10 +170,22 @@ function LayoutBesignerPage(props) {
   /** Set when we save, so the resulting snapshot is adopted, not flagged. */
   const expectOwnWriteRef = useRef(false)
   const [remoteChanged, setRemoteChanged] = useState(false)
+  /** Whether the stored tree had to be wrapped for the canvas. */
+  const wrappedOnLoadRef = useRef(false)
 
   useEffect(() => {
     if (nodes && !Aglyn.canvas.didSetInitial) {
-      setLocalNodes(nodes)
+      // A page template holds a screen's canvas tree (already rooted at the
+      // canonical id); a component-kind template holds a DEFINITION, whose
+      // root is the promoted node. The canvas only renders the former, so
+      // the latter is wrapped — and remembered, so save can put it back the
+      // way it came (AGL-680/681).
+      const canvasTree = Aglyn.definitionToCanvasTree({
+        rootId: data?.rootId,
+        nodes: nodes as Record<string, unknown>,
+      })
+      wrappedOnLoadRef.current = canvasTree !== nodes
+      setLocalNodes(canvasTree as Aglyn.ProcessableNodes)
       Aglyn.canvas.updateInitialNodes()
       baseStampRef.current = Aglyn.versionStamp(
         (data as { updatedAt?: unknown } | undefined)?.updatedAt,
@@ -229,16 +224,29 @@ function LayoutBesignerPage(props) {
     }
     const dequeueLoading = queueLoading()
 
-    const nodes = Aglyn.canvas.toJSON().nodes
+    // Save in the shape it arrived in: unwrapping a page template would
+    // strip the canvas root its instantiation depends on.
+    const canvasNodes = Aglyn.canvas.toJSON().nodes as Record<string, unknown>
+    const unwrapped = wrappedOnLoadRef.current
+      ? Aglyn.canvasTreeToDefinition(canvasNodes)
+      : null
+    if (unwrapped?.ambiguousRoot) {
+      return enqueueSnackbar(
+        'This template needs a single top-level element. Wrap what you have ' +
+          'in one container, then save.',
+        { variant: 'warning', allowDuplicate: true },
+      )
+    }
+    const nodes = unwrapped ? unwrapped.nodes : canvasNodes
     // Size guard (AGL-678): the node map is stored as one msgpack blob and
     // Firestore rejects documents over 1 MiB. Nothing checked this before,
-    // so an oversized layout simply stopped saving with a generic error and
+    // so an oversized template simply stopped saving with a generic error and
     // no way to tell which content was to blame.
     const size = Aglyn.measureNodeMap(nodes as Record<string, unknown>)
     if (size.tooLarge) {
       const worst = size.largest[0]
       return enqueueSnackbar(
-        `This layout is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
+        `This template is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
           'save. Move repeated sections into reusable components, or replace ' +
           'inlined images with uploads from the media library' +
           (worst
@@ -249,18 +257,43 @@ function LayoutBesignerPage(props) {
     }
     if (size.nearLimit) {
       enqueueSnackbar(
-        `Heads up: this layout is ${Aglyn.formatBytes(size.bytes)}. Past ` +
+        `Heads up: this template is ${Aglyn.formatBytes(size.bytes)}. Past ` +
           'about 900 KB it stops saving — moving repeated sections into ' +
           'reusable components is the usual fix.',
         { variant: 'warning', persist: false },
       )
     }
-    const saveLayout = updateLayoutVersion as unknown as (
-      data: Partial<Aglyn.AglynLayoutVersion>,
-      options?: Parameters<typeof updateLayoutVersion>[1],
+    // Placeholders are DERIVED from the tokens in the content (AGL-672), so
+    // editing has to recompute them: otherwise a template goes on asking
+    // for a placeholder its copy no longer contains, or silently stops
+    // asking for one the author just added. Existing labels and defaults
+    // survive for tokens that are still there.
+    const declared = Aglyn.detectTemplatePlaceholders(
+      nodes as Record<string, unknown>,
+    )
+    const previous = new Map(
+      ((data?.placeholders ?? []) as Array<{ name: string }>).map((entry) => [
+        entry.name,
+        entry,
+      ]),
+    )
+    const placeholders = declared.map(
+      (name) => previous.get(name) ?? { name },
+    )
+    const saveTemplate = updateTemplate as unknown as (
+      value: Partial<Aglyn.AglynTemplate>,
+      options?: Parameters<typeof updateTemplate>[1],
     ) => Promise<void>
-    await saveLayout(
-      { nodes: nodes as unknown as Aglyn.AglynLayoutVersion['nodes'] },
+    await saveTemplate(
+      {
+        nodes: nodes as unknown as Aglyn.AglynTemplate['nodes'],
+        placeholders,
+        // Records that this copy has diverged from what was installed.
+        // `source` itself stays server-managed and frozen (AGL-666) so
+        // provenance cannot be forged; "I edited my own copy" is a claim
+        // nobody gains by lying about.
+        editedAt: Timestamp.now(),
+      } as Partial<Aglyn.AglynTemplate>,
       { merge: true },
     )
       .then(() => {
@@ -269,12 +302,12 @@ function LayoutBesignerPage(props) {
         // carries no actor, so "someone changed this" could never become
         // "Sam changed this". Fire-and-forget — an audit miss must not
         // break the edit that triggered it.
-        logActivity('Saved the layout', { type: 'layout', id: layoutId })
+        logActivity('Saved the template', { type: 'template', id: templateId })
         // Our own write moves the stamp; the new value arrives on the next
         // snapshot, so mark it as ours rather than somebody else's edit.
         expectOwnWriteRef.current = true
         setRemoteChanged(false)
-        enqueueSnackbar('Layout saved successfully', {
+        enqueueSnackbar('Template saved', {
           variant: 'success',
           persist: false,
         })
@@ -291,10 +324,15 @@ function LayoutBesignerPage(props) {
   }, [
     saveAvailable,
     remoteChanged,
-    updateLayoutVersion,
+    updateTemplate,
+    data?.placeholders,
     enqueueSnackbar,
     queueLoading,
   ])
+
+  // No publish step: a template is inert by definition — nothing renders
+  // from it until it is used to create a page, component or layout, so
+  // there is no draft-versus-live distinction to maintain (AGL-681).
 
   const [jsonOpen, setJsonOpen] = useState(false)
   const openJsonEditor = useCallback(() => setJsonOpen(true), [])
@@ -347,21 +385,14 @@ function LayoutBesignerPage(props) {
         title={'Besigner'}
         enableAppBarElevation
         besigner
-        centerPrefix={
-          <BesignerDocumentSwitcherComponent
-            hostId={hostId}
-            current={{ kind: 'layout', id: layoutId }}
-          />
-        }
         actionsPrefix={
           <>
             <BesignerFunctionsButton hostId={hostId} />
-            <BesignerVersionsComponent
-              hostId={hostId}
-              parent={{ kind: 'layout', id: layoutId }}
-              versionId={versionId}
-              publishedVersionId={layoutPublishedVersionId}
-            />
+            {/* No version switcher yet: BesignerVersionsComponent maps any
+                non-screen parent to the "layouts" collection, so pointing
+                it at a component would write its versions to the wrong
+                place entirely. Tracked separately rather than shipped
+                broken (AGL-680). */}
           </>
         }
         backButton={
@@ -446,7 +477,7 @@ function LayoutBesignerPage(props) {
           },
         ]}
       >
-        <NextPageTitle screen={'Layout Besigner'} />
+        <NextPageTitle screen={'Template Besigner'} />
 
         {error || notFound ? (
           <Stack
@@ -515,6 +546,6 @@ function LayoutBesignerPage(props) {
   )
 }
 
-LayoutBesignerPage.displayName = 'Page:LayoutBesigner'
+TemplateBesignerPage.displayName = 'Page:LayoutBesigner'
 
-export default withSitePlugins(withBesignerContext(observer(LayoutBesignerPage)))
+export default withSitePlugins(withBesignerContext(observer(TemplateBesignerPage)))
