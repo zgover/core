@@ -261,6 +261,38 @@ try {
     console.log('SKIP  component template — no component rows in the seed')
   }
 
+  // ── Templates page (AGL-667) ───────────────────────────────────────────
+  // Seed a marketplace-sourced template directly so the provenance badge has
+  // something to render — the UI cannot create one, by design.
+  await hostRef.collection('templates').doc('e2e-installed').set({
+    kind: 'page',
+    displayName: `${TEMPLATE_NAME} installed`,
+    nodes: { root: { componentId: 'box' } },
+    source: { type: 'marketplace', listingId: 'listing-1', version: 3 },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  })
+  await page.goto(`${BASE_URL}/${ORG_SLUG}/hosts/${HOST_ID}/templates`, {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_MS,
+  })
+  const templatesBody = page.locator('body')
+  await page
+    .getByText('Templates', { exact: true })
+    .first()
+    .waitFor({ state: 'visible', timeout: TIMEOUT_MS })
+  const bodyText = await templatesBody.innerText()
+  check('page lists the saved page template', bodyText.includes(TEMPLATE_NAME))
+  check('page groups by kind', /Pages/.test(bodyText) && /Layouts/.test(bodyText))
+  check('marketplace provenance badge shown', bodyText.includes('Marketplace'))
+  check('authored provenance badge shown', bodyText.includes('Saved here'))
+  const navTab = page.getByRole('tab', { name: 'Templates' })
+  check(
+    'nav tab present',
+    (await navTab.count()) > 0 ||
+      (await page.getByRole('link', { name: 'Templates' }).count()) > 0,
+  )
+
   // "Could not reach Cloud Firestore backend" fires when the SDK briefly
   // drops its listen channel across a client-side navigation and retries.
   // It is ignorable HERE only because every write in this run is asserted
