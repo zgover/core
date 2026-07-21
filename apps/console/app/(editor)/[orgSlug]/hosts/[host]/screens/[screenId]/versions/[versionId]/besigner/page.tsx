@@ -68,7 +68,7 @@ import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // Dynamic site-plugin activation (AGL-417): canvas components register
 // via the org-gated loader; the page gates the canvas on readiness.
 import { withSitePlugins } from '../../../../../../../../../../components/console-plugins-gate.component'
@@ -221,18 +221,55 @@ function BesignerPage(props) {
     }
   }, [status])
 
+  // Conflict detection (AGL-674). Two people editing one version both write
+  // the WHOLE node map, so without this the later save silently replaces
+  // the earlier one and neither is told. `baseStamp` is what the document
+  // looked like when this editor last agreed with it.
+  const baseStampRef = useRef<string | null>(null)
+  /** Set when we save, so the resulting snapshot is adopted, not flagged. */
+  const expectOwnWriteRef = useRef(false)
+  const [remoteChanged, setRemoteChanged] = useState(false)
+
   useEffect(() => {
     if (nodes && !Aglyn.canvas.didSetInitial) {
       setLocalNodes(nodes)
       Aglyn.canvas.updateInitialNodes()
+      baseStampRef.current = Aglyn.versionStamp(
+        (data as { updatedAt?: unknown } | undefined)?.updatedAt,
+      )
     }
   }, [nodes])
+
+  // The snapshot listener was already delivering other people's saves; the
+  // editor just dropped them after the first load. Now they surface.
+  useEffect(() => {
+    const stored = Aglyn.versionStamp(
+      (data as { updatedAt?: unknown } | undefined)?.updatedAt,
+    )
+    if (!Aglyn.hasConcurrentWrite(baseStampRef.current, stored)) return
+    if (expectOwnWriteRef.current) {
+      // This is the echo of our own save landing.
+      expectOwnWriteRef.current = false
+      baseStampRef.current = stored
+      return
+    }
+    setRemoteChanged(true)
+  }, [data])
 
   const handleSave = useCallback(async () => {
     if (!saveAvailable) {
       return enqueueSnackbar('Already saved', {
         variant: 'info',
         persist: false,
+      })
+    }
+    // Refuse rather than merge. A wrong automatic merge of a whole node map
+    // is worse than a refusal the user can act on — and their work is still
+    // in the canvas either way.
+    if (remoteChanged) {
+      return enqueueSnackbar(new Aglyn.ConcurrentEditError().message, {
+        variant: 'warning',
+        allowDuplicate: true,
       })
     }
     const dequeueLoading = queueLoading()
@@ -248,6 +285,11 @@ function BesignerPage(props) {
     )
       .then(() => {
         Aglyn.canvas.updateInitialNodes(nodes)
+        // Our own write moves the stamp too. The new value arrives on the
+        // next snapshot, so mark it as ours — otherwise our own save comes
+        // back looking like somebody else's edit.
+        expectOwnWriteRef.current = true
+        setRemoteChanged(false)
         enqueueSnackbar('Canvas saved successfully', {
           variant: 'success',
           persist: false,
@@ -262,7 +304,13 @@ function BesignerPage(props) {
       .finally(() => {
         dequeueLoading()
       })
-  }, [saveAvailable, updateScreen, enqueueSnackbar, queueLoading])
+  }, [
+    saveAvailable,
+    remoteChanged,
+    updateScreen,
+    enqueueSnackbar,
+    queueLoading,
+  ])
 
   const [jsonOpen, setJsonOpen] = useState(false)
   const openJsonEditor = useCallback(() => setJsonOpen(true), [])
@@ -890,6 +938,29 @@ function BesignerPage(props) {
               onPropertiesEdit={() => setScreenDialog(true)}
               saveAvailable={saveAvailable}
             />
+            {/* Surfaced as soon as their save lands, not on Save — finding
+                out after twenty more minutes of editing is the bad
+                version of this (AGL-674). */}
+            {remoteChanged ? (
+              <Alert
+                severity="warning"
+                sx={{ borderRadius: 0, position: 'relative', zIndex: 'appBar' }}
+                action={
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={() => window.location.reload()}
+                  >
+                    {'Reload'}
+                  </Button>
+                }
+              >
+                {'Someone else saved this screen while you were editing. ' +
+                  'Saving is paused so their work is not overwritten — ' +
+                  'reload to pick up their changes. Nothing you have done ' +
+                  'here is lost until you do.'}
+              </Alert>
+            ) : null}
             {layoutId ? (
               <Alert
                 severity="info"
