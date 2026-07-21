@@ -489,6 +489,56 @@ try {
     )
   }
 
+  // ── Update available (AGL-671) ─────────────────────────────────────────
+  // Publish a v2 of the same listing; the library compares the version it
+  // installed against the listing's latestVersion.
+  await listingRef.collection('versions').doc('2').set({
+    template: {
+      screens: [
+        { displayName: 'Installed Home v2', slug: 'home', nodes: { a: { componentId: 'box' } } },
+      ],
+    },
+    publishedAt: new Date(),
+  })
+  await listingRef.update({ latestVersion: 2, screenCount: 1 })
+
+  await page.goto(`${BASE_URL}/${ORG_SLUG}/hosts/${HOST_ID}/templates`, {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_MS,
+  })
+  const updateButton = page.locator('button[aria-label^="Update Installed"]').first()
+  const sawUpdate = await updateButton
+    .waitFor({ state: 'visible', timeout: 20_000 })
+    .then(() => true)
+    .catch(() => false)
+  check('update-available badge appears', sawUpdate)
+  if (sawUpdate) {
+    await updateButton.click()
+    // Replaced, not stacked: the old bundle is soft-deleted.
+    await page.waitForTimeout(2500)
+    const afterUpdate = await hostRef
+      .collection('templates')
+      .where('source.listingId', '==', listingId)
+      .get()
+    const live = afterUpdate.docs.filter((entry) => !entry.get('deletedAt'))
+    check(
+      'update replaces rather than stacks',
+      live.length === 1,
+      `${live.length} live, ${afterUpdate.size} total`,
+    )
+    check(
+      'installed version advanced to 2',
+      live[0]?.get('source.version') === 2,
+      `got ${live[0]?.get('source.version')}`,
+    )
+    // The page created earlier from v1 must be untouched by an update.
+    const survivors = await hostRef
+      .collection('screens')
+      .where('displayName', '==', createdPageName)
+      .get()
+    check('pages created earlier are untouched', survivors.size === 1)
+  }
+
   // "Could not reach Cloud Firestore backend" fires when the SDK briefly
   // drops its listen channel across a client-side navigation and retries.
   // It is ignorable HERE only because every write in this run is asserted

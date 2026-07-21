@@ -131,9 +131,14 @@ export const installTemplateHandler: PluginApiHandler = async (req, res) => {
     // plan-less org resolves as `free` (not unmetered).
     const org = (await getOrgForHost(hostId))?.org
     {
-      const count = (
-        await hostRef.collection('templates').count().get()
-      ).data().count
+      const existing = await hostRef.collection('templates').get()
+      // Templates from THIS listing are about to be replaced, so counting
+      // them would make a re-install look like it doubles the library and
+      // fail the quota on an update the user is entitled to.
+      const count = existing.docs.filter(
+        (entry) =>
+          !entry.get('deletedAt') && entry.get('source.listingId') !== listingId,
+      ).length
       const quota = checkQuota(
         org as any,
         'templatesPerHost',
@@ -158,7 +163,27 @@ export const installTemplateHandler: PluginApiHandler = async (req, res) => {
       listingId,
       version: listing.latestVersion ?? null,
     }
+    // Re-installing the same listing REPLACES its previous bundle rather
+    // than stacking a second copy (AGL-671) — that is what makes "Update
+    // available" actionable with no separate refresh route.
+    //
+    // Matching old templates to new ones individually is not possible: a
+    // published snapshot's screens carry no stable identity, only a
+    // displayName and slug, so any pairing would be a guess. Replacing the
+    // bundle wholesale is honest about that. Pages already created from the
+    // old templates are untouched — they are ordinary screens with no link
+    // back.
+    const superseded = await hostRef
+      .collection('templates')
+      .where('source.listingId', '==', listingId)
+      .get()
     const batch = firestore.batch()
+    let replaced = 0
+    for (const stale of superseded.docs) {
+      if (stale.get('deletedAt')) continue
+      batch.update(stale.ref, { deletedAt: now, updatedAt: now })
+      replaced += 1
+    }
     let created = 0
     for (const screen of screens) {
       const templateRef = hostRef.collection('templates').doc(createResourceUid())
@@ -193,6 +218,9 @@ export const installTemplateHandler: PluginApiHandler = async (req, res) => {
     return res.status(200).json({
       installed: true,
       templates: created,
+      /** Prior templates from this listing, superseded by this install. */
+      replaced,
+      version: listing.latestVersion ?? null,
       // Retained so an older client doesn't render "Added undefined screens".
       screens: 0,
       themeApplied: false,
