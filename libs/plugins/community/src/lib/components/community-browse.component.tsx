@@ -166,7 +166,9 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   // fetched page of listings.
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<string | null>(null)
-  const [sort, setSort] = useState<'newest' | 'installed'>('newest')
+  const [sort, setSort] = useState<'newest' | 'installed' | 'rated'>(
+    'newest',
+  )
   const categories = useMemo(
     () =>
       [
@@ -194,11 +196,19 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         .filter(Boolean)
         .some((value: string) => value.toLowerCase().includes(needle))
     })
-    return [...filtered].sort((a: any, b: any) =>
-      sort === 'installed'
-        ? (b.installCount ?? 0) - (a.installCount ?? 0)
-        : (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
-    )
+    return [...filtered].sort((a: any, b: any) => {
+      if (sort === 'installed') {
+        return (b.installCount ?? 0) - (a.installCount ?? 0)
+      }
+      if (sort === 'rated') {
+        // Unrated listings sort last rather than as zero-stars — a new
+        // listing has not been judged badly, it has not been judged.
+        const byAverage =
+          (b.ratingAverage ?? -1) - (a.ratingAverage ?? -1)
+        return byAverage || (b.ratingCount ?? 0) - (a.ratingCount ?? 0)
+      }
+      return (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0)
+    })
   }, [listings, search, category, sort, user?.uid])
 
   return (
@@ -235,6 +245,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         >
           <MenuItem value="newest">{'Newest'}</MenuItem>
           <MenuItem value="installed">{'Most installed'}</MenuItem>
+          <MenuItem value="rated">{'Highest rated'}</MenuItem>
         </TextField>
       </Stack>
       {items.length === 0 ? (
@@ -326,6 +337,13 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                       ? ` · ${listing.installCount} install${
                           listing.installCount === 1 ? '' : 's'
                         }`
+                      : ''}
+                    {/* Count alongside the average: "5.0" from one rating
+                        and from forty are not the same claim (AGL-655). */}
+                    {listing.ratingCount
+                      ? ` · ★ ${listing.ratingAverage ?? 0} (${
+                          listing.ratingCount
+                        })`
                       : ''}
                   </Typography>
                   {listing.description ? (
