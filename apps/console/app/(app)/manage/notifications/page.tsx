@@ -101,10 +101,22 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
   useEffect(() => {
     setPermission(desktopNotificationPermission())
   }, [])
-  // ---- TEMPORARY test affordance (AGL-650) — delete this block and the
-  // "Test alerts" button below to remove. Exists because there is otherwise
-  // no way to hear the chime or confirm the desktop permission without
-  // waiting for a real notification to arrive.
+  /**
+   * Send a test alert (AGL-650).
+   *
+   * Alert settings are otherwise unverifiable: you cannot tell whether the
+   * chime is audible, whether the browser actually granted permission, or
+   * what a desktop notification looks like on your OS, without waiting for
+   * something real to happen. Waiting to find out that alerts were silently
+   * broken is the failure this prevents.
+   *
+   * The chime always plays — previewing it is the point, and muting the
+   * preview because sound is off would make the button do nothing in the
+   * exact case where you want to hear it before switching it on. Desktop
+   * notifications need permission, so a still-undecided browser is prompted
+   * here; granting in response to a test is a clear enough signal to switch
+   * the preference on.
+   */
   const handleTestAlerts = useCallback(async () => {
     playNotificationChime()
     let current = desktopNotificationPermission()
@@ -126,11 +138,12 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
         ? 'Played the chime and sent a test notification.'
         : current === 'denied'
           ? 'Chime played. Desktop notifications are blocked for this site — re-allow them in your browser settings.'
-          : 'Chime played. Desktop notifications were not granted.',
+          : current === 'unsupported'
+            ? "Chime played. This browser doesn't support desktop notifications."
+            : 'Chime played. Desktop notifications were not granted.',
       { variant: current === 'granted' ? 'success' : 'info', persist: false },
     )
   }, [setAlertPrefs, enqueueSnackbar])
-  // ---- end temporary test affordance
 
   const handleDesktopToggle = useCallback(async () => {
     if (alertPrefs.desktop) {
@@ -396,13 +409,12 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
                   label="Desktop notifications"
                   slotProps={{ typography: { variant: 'caption' } }}
                 />
-                {/* TEMPORARY (AGL-650): delete with the handler above. */}
                 <Button
                   size="small"
                   variant="outlined"
                   onClick={() => void handleTestAlerts()}
                 >
-                  {'Test alerts'}
+                  {'Send test alert'}
                 </Button>
                 {permission === 'denied' || permission === 'unsupported' ? (
                   <Typography variant="caption" color="text.secondary">
