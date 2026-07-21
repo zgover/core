@@ -69,6 +69,7 @@ import { buildDocsUrl } from '../../constants/docs-links'
 import { buildRoute, Route } from '../../constants/route-links'
 import { useOrgSlug } from '../../hooks/use-org-scope'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
+import NotificationPrompt from '../notification-prompt.component'
 import NotificationsMenu from '../notifications-menu.component'
 import OrgSwitcherNav from '../org-switcher-nav.component'
 
@@ -436,6 +437,10 @@ export function MainLayout(props: MainLayoutProps) {
             <>
               {actionsPrefix}
               <NotificationsMenu />
+              {/* Pre-permission ask (AGL-662): the browser allows exactly one
+                  native prompt per origin, so we offer in-app first where a
+                  decline is reversible. Renders nothing unless it applies. */}
+              <NotificationPrompt />
             </>
           }
           appBarSuffix={appBarSuffix}
