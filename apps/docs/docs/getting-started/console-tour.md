@@ -105,6 +105,11 @@ These are per-device, not per-account: notification permission is granted
 per browser, so muting sound on your laptop leaves your other devices alone.
 The **category mutes** above are account-wide and apply everywhere.
 
+**Send test alert** plays the chime and, if you've allowed them, fires a desktop
+notification — so you can confirm your setup works instead of discovering weeks
+later that you never heard a thing. The chime always plays, even with **Sound**
+switched off, so you can hear it before deciding.
+
 Aglyn asks you in-app before triggering your browser's own permission prompt.
 That's deliberate: **browsers allow exactly one permission request per site**.
 Dismiss the browser's prompt and the answer is remembered as a permanent *no* —

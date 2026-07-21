@@ -34,6 +34,9 @@ import { useCallback, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { docsHelp } from '../constants/docs-links'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
+import SaveAsTemplateDialog, {
+  type SaveAsTemplateSource,
+} from './templates/save-as-template-dialog.component'
 
 export interface HostComponentsCardProps {
   hostId: string
@@ -81,6 +84,9 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     price: string
     busy?: boolean
   } | null>(null)
+  // Save as template (AGL-668) — same dialog as screens and layouts.
+  const [saveTemplateFor, setSaveTemplateFor] =
+    useState<SaveAsTemplateSource | null>(null)
 
   const handlePublishConfirm = useCallback(async () => {
     if (!publisher || !publisher.name.trim() || publisher.busy) return
@@ -221,6 +227,26 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
                 }
               >
                 {'Publish'}
+              </Button>
+              {/* Unlike screens and layouts, a component definition holds
+                  its own nodes — there is no version doc to fetch. */}
+              <Button
+                size="small"
+                onClick={() =>
+                  setSaveTemplateFor({
+                    kind: 'component',
+                    displayName: definition.displayName ?? '',
+                    loadNodes: async () =>
+                      definition.nodes
+                        ? {
+                            nodes: definition.nodes,
+                            rootId: definition.rootId,
+                          }
+                        : null,
+                  })
+                }
+              >
+                {'Save as template'}
               </Button>
               <Button
                 size="small"
@@ -364,6 +390,11 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
           </Button>
         </DialogActions>
       </Dialog>
+      <SaveAsTemplateDialog
+        hostId={hostId}
+        source={saveTemplateFor}
+        onClose={() => setSaveTemplateFor(null)}
+      />
     </CardDisplay>
   )
 }

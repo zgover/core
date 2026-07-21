@@ -27,7 +27,7 @@ import {
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_EDIT,
 } from '@aglyn/shared-data-enums'
-import { mdiPageLayoutBody } from '@aglyn/shared-data-mdi'
+import { mdiBookmarkOutline, mdiPageLayoutBody } from '@aglyn/shared-data-mdi'
 import {
   AppLink,
   AppLinkNakedLinkProps,
@@ -49,6 +49,7 @@ import { GridActionsCellItem, type GridColDef } from '@mui/x-data-grid'
 import {
   collection,
   doc,
+  getDoc,
   limit,
   query,
   setDoc,
@@ -61,6 +62,9 @@ import AuthErrorAlertComponent from '../../../../../../../components/auth-error-
 import AuthFormTemplateComponent from '../../../../../../../components/auth-form-template.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
+import SaveAsTemplateDialog, {
+  type SaveAsTemplateSource,
+} from '../../../../../../../components/templates/save-as-template-dialog.component'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import HostDisplayNameComponent from '../../../../../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
@@ -88,6 +92,8 @@ function Layouts(props) {
   const { queueLoading, loading } = useLoading()
   const { confirm } = useConfirmationContext()
   const [quickDrawerOpen, setQuickDrawerOpen] = useState<boolean>(false)
+  const [saveTemplateFor, setSaveTemplateFor] =
+    useState<SaveAsTemplateSource | null>(null)
   const handleFormOpen = useCallback(() => {
     setQuickDrawerOpen(true)
   }, [])
@@ -97,6 +103,40 @@ function Layouts(props) {
   const [pageSize, setPageSize] = useState<number>(5)
   const firestore = useFirestore()
   const createHostResource = useHostResourceApi()
+  // Save as template (AGL-668). A layout's nodes live on its published
+  // version doc, so they are read on confirm rather than per row.
+  const buildTemplateSource = useCallback(
+    (
+      layoutId: string,
+      versionId: string,
+      displayName?: string,
+    ): SaveAsTemplateSource => ({
+      kind: 'layout',
+      displayName,
+      loadNodes: async () => {
+        if (!versionId) return null
+        const snapshot = await getDoc(
+          doc(
+            firestore,
+            'hosts',
+            hostId,
+            'layouts',
+            layoutId,
+            'versions',
+            versionId,
+          ),
+        )
+        const nodes = snapshot.get('nodes') as
+          | Record<string, unknown>
+          | undefined
+        // The LayoutSlot node rides along inside `nodes` — it marks where a
+        // bound screen grafts in, so a layout template without it would be
+        // chrome with nowhere to put the page.
+        return nodes ? { nodes } : null
+      },
+    }),
+    [firestore, hostId],
+  )
   const { status, data } = useFirestoreCollection<any>(
     () => query(collection(firestore, 'hosts', hostId, 'layouts'), limit(pageSize)),
     [firestore, hostId, pageSize],
@@ -250,6 +290,16 @@ function Layouts(props) {
             } as any)}
           />,
           <GridActionsCellItem
+            key="action-save-template"
+            icon={<MdiIcon path={mdiBookmarkOutline.path} />}
+            label="Save as template"
+            onClick={() =>
+              setSaveTemplateFor(
+                buildTemplateSource(layoutId, versionId, row.displayName),
+              )
+            }
+          />,
+          <GridActionsCellItem
             key="action-delete"
             icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} color="error" />}
             label="Delete"
@@ -385,6 +435,11 @@ function Layouts(props) {
           </CardDisplay>
         </Container>
       </DashboardLayout>
+      <SaveAsTemplateDialog
+        hostId={hostId}
+        source={saveTemplateFor}
+        onClose={() => setSaveTemplateFor(null)}
+      />
     </>
   )
 }

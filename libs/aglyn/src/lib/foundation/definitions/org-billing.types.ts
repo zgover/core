@@ -132,6 +132,8 @@ export interface OrgEntitlements {
   hostLimit?: number
   screensPerHost?: number
   sharedLayoutsPerHost?: number
+  /** Saved templates per host (AGL-666) — includes marketplace downloads. */
+  templatesPerHost?: number
   storagePerHostMb?: number
   totalSiteSizeMb?: number
   membersPerHost?: number

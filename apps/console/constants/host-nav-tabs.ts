@@ -52,6 +52,13 @@ export function hostNavTabItems(orgSlug: string, host: string) {
       label: 'Components',
       href: buildRoute(Route.HOST_COMPONENTS, { orgSlug, host }),
     },
+    // Templates (AGL-667) sit next to the things they produce — a template
+    // is a saved starting point for a screen, component or layout.
+    {
+      id: 'nav-tab-templates',
+      label: 'Templates',
+      href: buildRoute(Route.HOST_TEMPLATES, { orgSlug, host }),
+    },
     // Theme lives under Setup → Theme (AGL-114); the /theme route redirects.
     {
       id: 'nav-tab-media',

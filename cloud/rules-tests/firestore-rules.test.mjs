@@ -104,6 +104,10 @@ beforeEach(async () => {
     })
     await setDoc(doc(db, 'hosts', HOST, 'screens', 'screen-1'), { name: 'Home' })
     await setDoc(doc(db, 'hosts', HOST, 'variables', 'var-1'), { name: 'v', value: '1' })
+    await setDoc(doc(db, 'hosts', HOST, 'templates', 'tpl-1'), {
+      kind: 'page', displayName: 'Hero page',
+      source: { type: 'marketplace', listingId: 'listing-1', version: 2 },
+    })
     // Suspension write-block (AGL-238): host owned by a suspended org.
     await setDoc(doc(db, 'orgs', SUSPENDED_ORG), {
       name: 'Frozen', slug: 'frozen', ownerUid: OWNER,
@@ -231,7 +235,7 @@ describe('hosts', () => {
     )
     // Commerce/bookings/redirects/reusable-components/registers collections
     // are API-create-only too (registers gate the posRegisters cap).
-    for (const coll of ['services', 'redirects', 'locations', 'products', 'components', 'registers']) {
+    for (const coll of ['services', 'redirects', 'locations', 'products', 'components', 'registers', 'templates']) {
       await assertFails(
         setDoc(doc(authed(EDITOR), 'hosts', HOST, coll, 'new-doc'), { name: 'x' }),
       )
@@ -251,6 +255,32 @@ describe('hosts', () => {
     )
     await assertFails(deleteDoc(doc(authed(EDITOR), 'hosts', HOST)))
     await assertSucceeds(deleteDoc(doc(authed(OWNER), 'hosts', HOST)))
+  })
+
+  // AGL-666. `source` says whether a template was authored here, downloaded
+  // from the marketplace, or came from a starter — and the library shows that
+  // as provenance. A client that can rewrite it can stamp "marketplace" on
+  // its own work, so it is frozen even for the editors who own the doc.
+  it('template source is frozen; the rest of the doc stays editable', async () => {
+    await assertSucceeds(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1'), {
+        displayName: 'Renamed hero',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1'), {
+        source: { type: 'marketplace', listingId: 'not-mine' },
+      }),
+    )
+    // Including clearing it, which would erase provenance just as effectively.
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1'), {
+        source: { type: 'authored' },
+      }),
+    )
+    await assertSucceeds(
+      deleteDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1')),
+    )
   })
 
   it('the retired admins map no longer authorizes; outsiders and anon never do', async () => {

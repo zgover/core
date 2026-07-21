@@ -48,7 +48,11 @@ import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { mdiOpenInNew, mdiTranslate } from '@aglyn/shared-data-mdi'
+import {
+  mdiBookmarkOutline,
+  mdiOpenInNew,
+  mdiTranslate,
+} from '@aglyn/shared-data-mdi'
 import {
   Button,
   Dialog,
@@ -82,6 +86,9 @@ import AuthenticatedLayout from '../../../../../../../components/layouts/authent
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import HostDisplayNameComponent from '../../../../../../../components/host-display-name.component'
+import SaveAsTemplateDialog, {
+  type SaveAsTemplateSource,
+} from '../../../../../../../components/templates/save-as-template-dialog.component'
 import TemplateGalleryDialog from '../../../../../../../components/templates/template-gallery-dialog.component'
 import {
   compareScreenSiblings,
@@ -433,6 +440,42 @@ function Screens(props) {
     locale: string
     variants: Record<string, string>
   } | null>(null)
+  // Save as template (AGL-668). Nodes live on the published version doc, so
+  // they are fetched when the user confirms rather than per row.
+  const [saveTemplateFor, setSaveTemplateFor] =
+    useState<SaveAsTemplateSource | null>(null)
+  const buildTemplateSource = useCallback(
+    (row: ScreenHierarchyRow): SaveAsTemplateSource => ({
+      kind: 'page',
+      displayName: (row as { displayName?: string }).displayName,
+      loadNodes: async () => {
+        const screen = screens.find((entry: any) => entry.$id === row.$id) as any
+        const versionId = screen?.versionId ?? row.versionId
+        if (!versionId) return null
+        const snapshot = await getDoc(
+          doc(
+            firestore,
+            'hosts',
+            hostId,
+            'screens',
+            row.$id,
+            'versions',
+            String(versionId),
+          ),
+        )
+        const nodes = snapshot.get('nodes') as Record<string, unknown> | undefined
+        if (!nodes) return null
+        return {
+          nodes,
+          // The slug is a suggestion only — instantiation de-conflicts it
+          // against the host's routing map.
+          slug: routingMap?.[row.$id],
+          seo: screen?.seo,
+        }
+      },
+    }),
+    [screens, firestore, hostId, routingMap],
+  )
   const handleSaveTranslations = useCallback(async () => {
     if (!translationsFor) return
     const variants: Record<string, string> = {}
@@ -518,6 +561,13 @@ function Screens(props) {
         ) : null}
         <IconButton
           size="small"
+          aria-label="Save as template"
+          onClick={() => setSaveTemplateFor(buildTemplateSource(row))}
+        >
+          <MdiIcon path={mdiBookmarkOutline.path} size={0.8} />
+        </IconButton>
+        <IconButton
+          size="small"
           aria-label="Delete"
           onClick={handleDeleteScreen(row.$id, row.versionId as string)}
         >
@@ -537,6 +587,7 @@ function Screens(props) {
       screens,
       hostData,
       routingMap,
+      buildTemplateSource,
     ],
   )
 
@@ -666,6 +717,11 @@ function Screens(props) {
           </CardDisplay>
         </Container>
       </DashboardLayout>
+      <SaveAsTemplateDialog
+        hostId={hostId}
+        source={saveTemplateFor}
+        onClose={() => setSaveTemplateFor(null)}
+      />
       <TemplateGalleryDialog
         hostId={hostId}
         open={templatesOpen}

@@ -70,6 +70,10 @@ export type {
   RedirectUid,
   ScreenSlug,
   ScreenUid,
+  TemplateKind,
+  TemplatePlaceholder,
+  TemplateSource,
+  TemplateUid,
   UserUid,
   VersionUid,
 } from './definitions/platform.types'
