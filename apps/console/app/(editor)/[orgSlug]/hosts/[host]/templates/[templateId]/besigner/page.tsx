@@ -212,6 +212,31 @@ function TemplateBesignerPage(props) {
     const dequeueLoading = queueLoading()
 
     const nodes = Aglyn.canvas.toJSON().nodes
+    // Size guard (AGL-678): the node map is stored as one msgpack blob and
+    // Firestore rejects documents over 1 MiB. Nothing checked this before,
+    // so an oversized template simply stopped saving with a generic error and
+    // no way to tell which content was to blame.
+    const size = Aglyn.measureNodeMap(nodes as Record<string, unknown>)
+    if (size.tooLarge) {
+      const worst = size.largest[0]
+      return enqueueSnackbar(
+        `This template is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
+          'save. Move repeated sections into reusable components, or replace ' +
+          'inlined images with uploads from the media library' +
+          (worst
+            ? ` — the largest element is ${Aglyn.formatBytes(worst.bytes)}.`
+            : '.'),
+        { variant: 'error', allowDuplicate: true },
+      )
+    }
+    if (size.nearLimit) {
+      enqueueSnackbar(
+        `Heads up: this template is ${Aglyn.formatBytes(size.bytes)}. Past ` +
+          'about 900 KB it stops saving — moving repeated sections into ' +
+          'reusable components is the usual fix.',
+        { variant: 'warning', persist: false },
+      )
+    }
     // Placeholders are DERIVED from the tokens in the content (AGL-672), so
     // editing has to recompute them: otherwise a template goes on asking
     // for a placeholder its copy no longer contains, or silently stops
