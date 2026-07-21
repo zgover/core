@@ -109,7 +109,15 @@ const HostPluginPage: NextPageWithLayout<Record<string, never>> = () => {
       <NextPageTitle screen={title} />
       <DashboardLayout
         navTabItems={hostNavTabItems(orgSlug, host)}
-        activeTab={`/${hostId}/${pluginSlug}`}
+        // Must match the href hostNavTabItems builds for plugin tabs
+        // (`{hostBase}/{slug}`). The old `/{hostId}/{slug}` form predates the
+        // org-slug/subdomain routes, so it matched nothing — leaving the whole
+        // bar with no selection, hence no indicator and nothing to scroll to
+        // (AGL-649).
+        activeTab={`${buildRoute(Route.HOST_DASHBOARD, {
+          orgSlug,
+          host,
+        })}/${pluginSlug}`}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

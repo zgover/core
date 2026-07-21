@@ -26,8 +26,11 @@ import {
   type TabsProps as MuiTabsProps,
 } from '@mui/material'
 import { usePathname } from 'next/navigation'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
 import { TAB_HEIGHT } from '../constants/shared'
+
+/** Breathing room so the tab doesn't sit flush against a scroll button. */
+const SCROLL_INTO_VIEW_PADDING = 24
 
 export interface TabItemProps
   extends MuiTabProps<any, any>,
@@ -74,21 +77,110 @@ export const AppLinkTabsComponent = forwardRef<any, AppLinkTabsProps>(
     const pathname = usePathname()
 
     const tabValue = useMemo(() => {
-      const active = activeTab
-      const specific = typeof active !== 'undefined'
-      return (
-        items.find((i) => {
-          const href = i?.href,
-            id = i?.id
-          if (specific) return active === href || active === id
-          return pathname === href || pathname === id
-        })?.href || false
+      const byPathname = items.find(
+        (i) => pathname === i?.href || pathname === i?.id,
       )
+      // An explicit activeTab wins, but it must not be able to blank the bar:
+      // a stale or wrongly-shaped one used to short-circuit the pathname
+      // check entirely, leaving NO tab selected — so no indicator, and
+      // nothing for the scroller to bring into view (AGL-649). Fall through
+      // to the pathname when it matches nothing.
+      if (typeof activeTab !== 'undefined') {
+        const byActive = items.find(
+          (i) => activeTab === i?.href || activeTab === i?.id,
+        )
+        return byActive?.href ?? byPathname?.href ?? false
+      }
+      return byPathname?.href ?? false
     }, [pathname, items, activeTab])
+
+    // Keep the active tab on screen (AGL-649). MUI scrolls the selection into
+    // view once on mount, but this bar's plugin-contributed tabs register
+    // afterwards — every tab shifts and the one-shot scroll is left short, so
+    // on a deep tab you land with the bar parked at the far left. Re-running
+    // on the item count catches those late arrivals.
+    const rootRef = useRef<HTMLDivElement | null>(null)
+    const setRefs = useCallback(
+      (node: HTMLDivElement | null) => {
+        rootRef.current = node
+        if (typeof ref === 'function') ref(node)
+        else if (ref) (ref as { current: unknown }).current = node
+      },
+      [ref],
+    )
+
+    // Once the user scrolls the bar themselves, leave it where they put it —
+    // until they navigate, which is a fresh intent to see the active tab.
+    const userScrolledRef = useRef(false)
+    useEffect(() => {
+      userScrolledRef.current = false
+    }, [tabValue])
+
+    const itemCount = items.length
+    useEffect(() => {
+      if (tabValue === false) return
+      const root = rootRef.current
+      const scroller = root?.querySelector<HTMLElement>('.MuiTabs-scroller')
+      // `.MuiTabs-list` is the current class; `.MuiTabs-flexContainer` was its
+      // name before MUI v7. Fall back to the scroller so a future rename
+      // degrades to observing the viewport rather than silently doing nothing.
+      const strip =
+        root?.querySelector<HTMLElement>('.MuiTabs-list') ??
+        root?.querySelector<HTMLElement>('.MuiTabs-flexContainer') ??
+        scroller
+      if (!scroller || !strip) return
+
+      const align = () => {
+        if (userScrolledRef.current) return
+        const selected =
+          root?.querySelector<HTMLElement>('[aria-selected="true"]')
+        if (!selected) return
+        const view = scroller.getBoundingClientRect()
+        const tab = selected.getBoundingClientRect()
+        if (tab.right > view.right) {
+          scroller.scrollLeft +=
+            tab.right - view.right + SCROLL_INTO_VIEW_PADDING
+        } else if (tab.left < view.left) {
+          scroller.scrollLeft -= view.left - tab.left + SCROLL_INTO_VIEW_PADDING
+        }
+      }
+
+      // Re-align whenever the strip resizes rather than after a fixed number
+      // of frames: MUI does its own one-shot scroll in this commit, and the
+      // plugin-contributed tabs and their icons keep changing the strip's
+      // width for several frames afterwards — each shift pushes a deep tab
+      // back out of view. Observing converges instead of guessing; `align`
+      // is a no-op once the tab is fully visible.
+      const frame = requestAnimationFrame(align)
+      const observer = new ResizeObserver(align)
+      observer.observe(strip)
+      observer.observe(scroller)
+      return () => {
+        cancelAnimationFrame(frame)
+        observer.disconnect()
+      }
+    }, [tabValue, itemCount])
+
+    // Only genuinely user-driven gestures count — a programmatic scrollLeft
+    // write also emits `scroll`, so listening for that would immediately
+    // disable the very behaviour above.
+    const markUserScrolled = useCallback(() => {
+      userScrolledRef.current = true
+    }, [])
+    // The arrow buttons are the third way to scroll the bar by hand.
+    const handlePointerDown = useCallback((event: { target: unknown }) => {
+      const target = event.target as HTMLElement | null
+      if (target?.closest?.('.MuiTabs-scrollButtons')) {
+        userScrolledRef.current = true
+      }
+    }, [])
 
     return (
       <MuiTabs
-        ref={ref}
+        ref={setRefs}
+        onWheel={markUserScrolled}
+        onTouchMove={markUserScrolled}
+        onPointerDown={handlePointerDown}
         aria-label="area navigation"
         indicatorColor="secondary"
         scrollButtons="auto"
