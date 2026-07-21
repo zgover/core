@@ -240,7 +240,11 @@ export function HostMembersCard(props: HostMembersCardProps) {
             ) : seatQuota.addonPriceUsd != null ? (
               <>
                 {` — extra seats $${seatQuota.addonPriceUsd}/mo in `}
-                <Link href="/org/billing#addons">{'Billing'}</Link>
+                <Link
+                  href={`${buildRoute(Route.MANAGE_BILLING, { orgSlug })}#addons`}
+                >
+                  {'Billing'}
+                </Link>
               </>
             ) : null}
           </Typography>

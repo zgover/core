@@ -253,13 +253,17 @@ service cloud.firestore {
       // editors update it too; deletion is admin-only. Editors must NOT be
       // able to rewrite the identity/projection keys: `memberRoles` is the
       // access list (self-escalation / add-outsider / lock-out-owner),
-      // `orgId` gates suspension, and `admins`/`hosts` are legacy/ownership.
+      // `orgId` gates suspension, `admins`/`hosts` are legacy/ownership, and
+      // `subdomain` is the site's public address — a client write could take
+      // a reserved name or collide with another org's site, making
+      // subdomain->host resolution ambiguous (AGL-642). It goes through
+      // /api/hosts/rename, which claims uniqueness transactionally.
       // Those keys are Admin-SDK-only (org APIs bypass rules); staff keep
       // full control for tooling.
       allow update: if isStaff() ||
         (canWriteHostContent(hostId) && !hostOrgSuspended(hostId) &&
           !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['memberRoles', 'orgId', 'admins', 'hosts']));
+            .hasAny(['memberRoles', 'orgId', 'admins', 'hosts', 'subdomain']));
       allow delete: if isStaff() ||
         (hostMemberRole(hostId) == 'admin' && !hostOrgSuspended(hostId));
       // Screen/layout DOC creates are API-only (AGL-473): /api/hosts/
@@ -387,6 +391,50 @@ service cloud.firestore {
           .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
     }
 
+    // Org publisher identity (AGL-652). Publishing is ORG-ONLY: this is the
+    // org's public marketplace presence, keyed by org id so authorization is
+    // a plain role check with no ownership indirection. Public read — buyers
+    // see who they are installing from. `profiles/{uid}` above stays as the
+    // personal identity (the support forum renders author names from it) and
+    // is no longer a publisher.
+    match /publisherProfiles/{orgId} {
+      allow read: if true;
+      // The org rules' helpers are scoped to `match /orgs/{orgId}`, so this
+      // block resolves membership itself. `exists()` first: reading `.data`
+      // off a missing member doc errors rather than denying cleanly.
+      function publisherManager() {
+        return isStaff() || (isSignedIn() &&
+          exists(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid))
+            .data.role in ['owner', 'admin']);
+      }
+      function publisherFieldsValid() {
+        return request.resource.data.handle is string &&
+          request.resource.data.handle.size() >= 3 &&
+          request.resource.data.handle.size() <= 30 &&
+          request.resource.data.handle.matches('[a-z0-9][a-z0-9-]*') &&
+          request.resource.data.displayName is string &&
+          request.resource.data.displayName.size() <= 80;
+      }
+      // The payout keys decide who receives money — Connect route only.
+      allow create: if publisherManager() && publisherFieldsValid() &&
+        !request.resource.data.keys()
+          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
+      allow update: if publisherManager() && publisherFieldsValid() &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
+      allow delete: if isStaff();
+    }
+
+    // Handle uniqueness (AGL-652), mirroring orgSlugs: public read so a
+    // handle resolves pre-auth, and claimed ONLY by the publish API inside a
+    // transaction. Client-writable reservations would race, and whoever wrote
+    // last would take another publisher's marketplace URL.
+    match /publisherHandles/{handle} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Listings are public reads. Creates and version snapshots happen ONLY
     // through the publish API (Admin SDK, server-side sanitization) — no
     // client create. Owners may update/delete their own listing metadata
@@ -397,12 +445,18 @@ service cloud.firestore {
       // Owners toggle metadata (deletedAt un/republish) client-side, but
       // must NOT touch server-managed fields (AGL-503): installCount is
       // incremented by the install API (ranking integrity), priceUsd gates
-      // purchases, and profileId is the ownership key. Delete stays open to
-      // the owner; staff moderate anything.
+      // purchases, and profileId is the ownership key. The review verdict is
+      // equally server-owned (AGL-651): `reviewStatus` decides both the
+      // trust badge and whether a plugin is publicly browsable at all, so an
+      // owner who could write it could self-promote to 'verified' and skip
+      // staff review outright. Delete stays open to the owner; staff moderate
+      // anything.
       allow update: if isStaff() ||
         (isSignedIn() && resource.data.profileId == request.auth.uid &&
           !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['installCount', 'priceUsd', 'profileId']));
+            .hasAny(['installCount', 'priceUsd', 'profileId',
+                     'reviewStatus', 'reviewedBy', 'reviewedAt',
+                     'rejectionReason']));
       allow delete: if isStaff() ||
         (isSignedIn() && resource.data.profileId == request.auth.uid);
       // Version snapshots hold the actual (possibly paid) content — no

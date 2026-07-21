@@ -156,10 +156,17 @@ async function handler(request: Request): Promise<Response> {
       })
     // Org directory + hostIndex mirror + memberRoles projection (AGL-233).
     await registerOrgHost(orgMembership.orgId, hostId, subdomain)
-    // orgSlug lets the client route to /[orgSlug]/hosts/[hostId]/setup even
-    // when the workspace was just auto-created for a first-time user (AGL-621).
+    // orgSlug lets the client route to /[orgSlug]/hosts/[host]/setup even when
+    // the workspace was just auto-created for a first-time user (AGL-621), and
+    // the route is keyed by the SUBDOMAIN, not the doc id (AGL-622) — so hand
+    // back the subdomain too rather than making the caller guess.
     return Response.json(
-      { hostId, orgId: orgMembership.orgId, orgSlug: org?.['slug'] ?? null },
+      {
+        hostId,
+        subdomain,
+        orgId: orgMembership.orgId,
+        orgSlug: org?.['slug'] ?? null,
+      },
       { status: 200 },
     )
   } catch (error) {

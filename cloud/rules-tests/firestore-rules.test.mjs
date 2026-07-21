@@ -239,6 +239,16 @@ describe('hosts', () => {
     await assertSucceeds(
       updateDoc(doc(authed(EDITOR), 'hosts', HOST), { displayName: 'Renamed' }),
     )
+    // The subdomain is the site's public address, so it is server-only
+    // (AGL-642) — a client write could take a reserved name or collide with
+    // another org's site. Closed even to the site admin; renames go through
+    // /api/hosts/rename, which claims uniqueness transactionally.
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST), { subdomain: 'grabbed' }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'hosts', HOST), { subdomain: 'grabbed' }),
+    )
     await assertFails(deleteDoc(doc(authed(EDITOR), 'hosts', HOST)))
     await assertSucceeds(deleteDoc(doc(authed(OWNER), 'hosts', HOST)))
   })
@@ -477,6 +487,72 @@ describe('pre-release hardening guards', () => {
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'hosts', HOST, 'variables', 'var-1')))
   })
 
+  it('org publisher profiles are manager-written, payout keys server-only (AGL-652)', async () => {
+    // Public read — buyers see who they install from.
+    await assertSucceeds(getDoc(doc(anon(), 'publisherProfiles', ORG)))
+    // Org managers write it.
+    await assertSucceeds(
+      setDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+      }),
+    )
+    // Editors and viewers are members but not managers.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+      }),
+    )
+    await assertFails(
+      setDoc(doc(authed(VIEWER), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+      }),
+    )
+    // Another org's owner cannot publish as us.
+    await assertFails(
+      setDoc(doc(authed(OUTSIDER), 'publisherProfiles', ORG), {
+        handle: 'stolen',
+        displayName: 'Stolen',
+      }),
+    )
+    // Payout keys decide who receives money — Connect route (Admin SDK) only.
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+        stripeAccountId: 'acct_attacker',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        stripeChargesEnabled: true,
+      }),
+    )
+    // Malformed handles are rejected.
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'No Spaces',
+        displayName: 'Acme Labs',
+      }),
+    )
+  })
+
+  it('publisher handle reservations are readable but never client-written (AGL-652)', async () => {
+    await assertSucceeds(getDoc(doc(anon(), 'publisherHandles', 'acme-labs')))
+    // Client-writable reservations would race — last writer would take
+    // another publisher's marketplace URL.
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'publisherHandles', 'acme-labs'), { orgId: ORG }),
+    )
+    await assertFails(
+      setDoc(doc(authed(OUTSIDER), 'publisherHandles', 'acme-labs'), {
+        orgId: OTHER_ORG,
+      }),
+    )
+  })
+
   it('listing owner cannot tamper server-managed fields (AGL-503)', async () => {
     await assertSucceeds(
       updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { deletedAt: new Date() }),
@@ -489,6 +565,25 @@ describe('pre-release hardening guards', () => {
     )
     await assertFails(
       updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { profileId: OUTSIDER }),
+    )
+    // The review verdict is staff-owned (AGL-651). It decides the trust badge
+    // AND whether a plugin is publicly browsable, so an owner able to write it
+    // could self-promote to 'verified' and bypass staff review entirely.
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), {
+        reviewStatus: 'verified',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), {
+        reviewStatus: 'listed',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), {
+        reviewedBy: OWNER,
+        reviewedAt: new Date(),
+      }),
     )
     // Non-owners still can't touch someone else's listing.
     await assertFails(

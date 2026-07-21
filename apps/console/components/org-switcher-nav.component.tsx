@@ -106,7 +106,10 @@ export function OrgSwitcherNav() {
   }
 
   if (!currentOrg) return null
-  const currentBadge = titleCase(plan) || titleCase(currentOrg.role)
+  // The pill is the BILLING TIER. Falling back to the member's role meant a
+  // free org — which carries no `plan` field — showed "Owner", a role badge
+  // masquerading as a plan (AGL-646). No plan means free.
+  const currentBadge = titleCase(plan ?? 'free')
 
   const orgAvatar = (url?: string) =>
     url ? (
@@ -114,7 +117,15 @@ export function OrgSwitcherNav() {
     ) : (
       <Avatar
         variant="rounded"
-        sx={{ width: 22, height: 22, bgcolor: 'primary.main' }}
+        // Pair the glyph with the background it sits on. Avatar's default
+        // fallback color is `background.default`, which against primary.main
+        // lands at ~1.4:1 in dark mode — the icon reads as dark-on-dark.
+        sx={{
+          width: 22,
+          height: 22,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+        }}
       >
         <MdiIcon path={ICON_VARIANT_ORGANIZATION.path} fontSize="small" />
       </Avatar>
@@ -187,7 +198,7 @@ export function OrgSwitcherNav() {
               // Billing tier, like the button — the current org's plan is
               // known immediately, others resolve as the reads land.
               const tier = titleCase(
-                plans[item.$id] ?? (isCurrent ? plan : undefined),
+                plans[item.$id] ?? (isCurrent ? plan ?? 'free' : undefined),
               )
               return (
                 <MenuItem

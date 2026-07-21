@@ -328,23 +328,17 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
     ],
   },
   panelRight: {
-    defaultTab: BesignerPanelTabFlag.ELEMENT_INFO,
+    // Attributes first and open by default — it is what you reach for on
+    // selecting an element; Info is reference detail, so it moves last.
+    // Tab order here is display order only; the flag values are persisted
+    // in panel state, so they stay put.
+    defaultTab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
     panel: {
       id: 'right',
       anchor: 'right',
       'aria-label': 'right toolbox panel',
     },
     tabs: [
-      {
-        value: BesignerPanelTabFlag.ELEMENT_INFO,
-        tab: {
-          icon: { path: ICON_VARIANT_ELEMENT_DETAILS.path },
-          label: 'Info',
-        },
-        panel: {
-          Component: withLastSelectedNode(ElementInfo),
-        },
-      },
       {
         value: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
         tab: {
@@ -363,6 +357,16 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
         },
         panel: {
           Component: withLastSelectedNode(ElementStylesForm as any),
+        },
+      },
+      {
+        value: BesignerPanelTabFlag.ELEMENT_INFO,
+        tab: {
+          icon: { path: ICON_VARIANT_ELEMENT_DETAILS.path },
+          label: 'Info',
+        },
+        panel: {
+          Component: withLastSelectedNode(ElementInfo),
         },
       },
     ],
