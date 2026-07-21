@@ -96,13 +96,24 @@ async function handler(request: Request): Promise<Response> {
       return Response.json({ error: 'billing.manage required' }, { status: 403 })
     }
     const origin = headers.origin ?? `https://${headers.host}`
+    // Stripe sends the browser back to these, so they have to be real console
+    // paths. Billing moved under the org slug (AGL-621), leaving `/org/billing`
+    // a dead route — every post-checkout return landed on a 404. Falling back
+    // to the org jump page keeps that true even if the slug is missing.
+    const orgSlug = (await firebaseAdmin
+      .app()
+      .firestore()
+      .collection('orgs')
+      .doc(orgId)
+      .get()).get('slug') as string | undefined
+    const billingPath = orgSlug ? `/${orgSlug}/billing` : '/'
 
     const params = new URLSearchParams({
       mode: 'subscription',
       'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
-      success_url: `${origin}/org/billing?status=success`,
-      cancel_url: `${origin}/org/billing?status=canceled`,
+      success_url: `${origin}${billingPath}?status=success`,
+      cancel_url: `${origin}${billingPath}?status=canceled`,
       client_reference_id: orgId,
       'subscription_data[metadata][orgId]': orgId,
       'subscription_data[metadata][plan]': plan,

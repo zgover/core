@@ -114,7 +114,15 @@ export function OrgSwitcherNav() {
     ) : (
       <Avatar
         variant="rounded"
-        sx={{ width: 22, height: 22, bgcolor: 'primary.main' }}
+        // Pair the glyph with the background it sits on. Avatar's default
+        // fallback color is `background.default`, which against primary.main
+        // lands at ~1.4:1 in dark mode — the icon reads as dark-on-dark.
+        sx={{
+          width: 22,
+          height: 22,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+        }}
       >
         <MdiIcon path={ICON_VARIANT_ORGANIZATION.path} fontSize="small" />
       </Avatar>

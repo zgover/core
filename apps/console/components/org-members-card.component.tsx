@@ -215,7 +215,11 @@ export function OrgMembersCard() {
             ) : seatQuota.addonPriceUsd != null ? (
               <>
                 {` — extra seats $${seatQuota.addonPriceUsd}/mo in `}
-                <MuiLink href="/org/billing#addons">{'Billing'}</MuiLink>
+                <MuiLink
+                  href={`${buildRoute(Route.MANAGE_BILLING, { orgSlug })}#addons`}
+                >
+                  {'Billing'}
+                </MuiLink>
               </>
             ) : null}
           </Typography>

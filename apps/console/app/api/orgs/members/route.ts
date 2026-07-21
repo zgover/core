@@ -217,7 +217,12 @@ async function handler(request: Request): Promise<Response> {
           ? { body: `Access to ${grantedHosts.length} site(s)` }
           : {}),
         orgId,
-        link: '/hosts',
+        // The sites list is org-scoped now (AGL-621/644); bare `/hosts` is a
+        // dead route. Links are frozen at write time, so emit canonical here
+        // and let the reader repair anything already stored.
+        link: (orgSnapshot.get('slug') as string | undefined)
+          ? `/${orgSnapshot.get('slug')}/hosts`
+          : '/hosts',
       })
       return Response.json({ ok: true, uid: targetUid }, { status: 200 })
     }

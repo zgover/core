@@ -52,6 +52,9 @@ import { useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { buildRoute, Route } from '../constants/route-links'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
+import useOrgHosts from '../hooks/use-org-hosts'
+import { useOrgScope, useOrgSlug } from '../hooks/use-org-scope'
+import { normalizeNotificationLink } from '../utils/notification-links'
 
 /**
  * App-bar notifications dropdown (AGL-260): unread badge over the 10 most
@@ -64,6 +67,31 @@ export function NotificationsMenu() {
   const router = useRouter()
   const uid = (user as any)?.uid as string | undefined
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+  // Stored links predate the org-slug/subdomain routes (AGL-644), so they are
+  // normalized when followed. Resolving a host's subdomain needs the current
+  // org's sites; a notification for another org simply won't resolve and the
+  // link degrades to its stored value rather than a wrong destination.
+  const orgSlug = useOrgSlug()
+  const { currentOrg, orgs } = useOrgScope()
+  const { hosts } = useOrgHosts(firestore, uid, currentOrg?.$id ?? undefined)
+  const subdomainByHostId = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const host of hosts ?? []) {
+      const subdomain = (host as { subdomain?: string }).subdomain
+      if (subdomain) map.set(host.$id, subdomain)
+    }
+    return map
+  }, [hosts])
+  // Resolve against the notification's OWN org, not the one currently open —
+  // otherwise a billing alert for org A, clicked while viewing org B, would
+  // rewrite to org B's billing page.
+  const slugByOrgId = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const org of orgs ?? []) {
+      if (org.slug) map.set(org.$id, org.slug)
+    }
+    return map
+  }, [orgs])
 
   const { data: recent } = useFirestoreCollection<any>(
     () =>
@@ -108,7 +136,16 @@ export function NotificationsMenu() {
   ) => {
     if (!notification.readAt) markRead(notification)
     setAnchor(null)
-    if (notification.link) void router.push(notification.link)
+    const target = normalizeNotificationLink(notification.link, {
+      orgSlug:
+        (notification.orgId ? slugByOrgId.get(notification.orgId) : null) ??
+        orgSlug,
+      hostId: notification.hostId,
+      hostSubdomain: notification.hostId
+        ? subdomainByHostId.get(notification.hostId)
+        : undefined,
+    })
+    if (target) void router.push(target)
   }
 
   const handleMarkAll = () => {

@@ -217,6 +217,10 @@ async function handler(request: Request): Promise<Response> {
         if (orgId) {
           const amount = Number(object?.amount_due ?? object?.amount_paid ?? 0)
           const dollars = (amount / 100).toFixed(2)
+          // Billing is org-scoped now (AGL-621/644). Links are frozen at write
+          // time, so emit the canonical path; the reader normalizes anything
+          // legacy that predates this.
+          const orgSlug = orgs.docs[0]?.get('slug') as string | undefined
           void notifyOrgAdmins(orgId, {
             type:
               type === 'invoice.payment_failed'
@@ -226,7 +230,8 @@ async function handler(request: Request): Promise<Response> {
               type === 'invoice.payment_failed'
                 ? `Payment failed for your $${dollars} invoice`
                 : `Your $${dollars} invoice is available`,
-            link: '/org/billing',
+            orgId,
+            link: orgSlug ? `/${orgSlug}/billing` : '/org/billing',
           })
         }
       }

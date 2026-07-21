@@ -176,7 +176,12 @@ async function handler(request: Request): Promise<Response> {
           body:
             `${Math.round(check.used)} of ${check.limit} used — upgrade ` +
             'in Billing to raise the limit.',
-          link: '/org/billing',
+          orgId: org.id,
+          // Billing is org-scoped now (AGL-621/644); links are frozen at write
+          // time, so emit canonical and let the reader repair the legacy ones.
+          link: (org.get('slug') as string | undefined)
+            ? `/${org.get('slug')}/billing`
+            : '/org/billing',
         })
         alerted.push({ orgId: org.id, quota: check.key, threshold })
       }

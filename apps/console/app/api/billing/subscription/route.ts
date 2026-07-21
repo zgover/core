@@ -152,13 +152,16 @@ async function handler(request: Request): Promise<Response> {
       // Billing portal (AGL-275): no subscription requirement — orgs fix
       // failing cards here even after a subscription dies.
       const origin = headers.origin ?? `https://${headers.host}`
+      // Billing moved under the org slug (AGL-621), so `/org/billing` is a
+      // dead route — returning from the portal landed on a 404.
+      const orgSlug = org.get('slug') as string | undefined
       const session = await stripeRequest(
         secretKey,
         'POST',
         'billing_portal/sessions',
         new URLSearchParams({
           customer: String(customerId),
-          return_url: `${origin}/org/billing`,
+          return_url: `${origin}${orgSlug ? `/${orgSlug}/billing` : '/'}`,
         }),
       )
       return Response.json({ url: session.url }, { status: 200 })

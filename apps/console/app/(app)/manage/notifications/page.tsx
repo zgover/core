@@ -63,6 +63,9 @@ import MainLayout from '../../../../components/layouts/main.layout'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
+import useOrgHosts from '../../../../hooks/use-org-hosts'
+import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
+import { normalizeNotificationLink } from '../../../../utils/notification-links'
 
 const PAGE_SIZE = 25
 
@@ -75,6 +78,11 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
   const firestore = useFirestore()
   const router = useRouter()
   const uid = (user as any)?.uid as string | undefined
+  // Links are normalized when followed (AGL-644) — stored ones predate the
+  // org-slug/subdomain routes and can't be migrated in place.
+  const orgSlug = useOrgSlug()
+  const { currentOrg, orgs } = useOrgScope()
+  const { hosts } = useOrgHosts(firestore, uid, currentOrg?.$id ?? undefined)
   const [rows, setRows] = useState<any[]>([])
   const [cursors, setCursors] = useState<QueryDocumentSnapshot[]>([])
   const [page, setPage] = useState(0)
@@ -188,7 +196,19 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
         { readAt: serverTimestamp() },
       ).catch(console.error)
     }
-    if (notification.link) void router.push(notification.link)
+    const target = normalizeNotificationLink(notification.link, {
+      // The notification's own org, not the one currently open (AGL-644).
+      orgSlug:
+        (notification.orgId
+          ? (orgs ?? []).find((org) => org.$id === notification.orgId)?.slug
+          : null) ?? orgSlug,
+      hostId: notification.hostId,
+      hostSubdomain: notification.hostId
+        ? (hosts ?? []).find((host) => host.$id === notification.hostId)
+            ?.subdomain
+        : undefined,
+    })
+    if (target) void router.push(target)
   }
 
   return (
