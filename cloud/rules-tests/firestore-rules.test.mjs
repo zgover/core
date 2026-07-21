@@ -257,6 +257,131 @@ describe('hosts', () => {
     await assertSucceeds(deleteDoc(doc(authed(OWNER), 'hosts', HOST)))
   })
 
+  // AGL-655 / AGL-652. Two things this pins:
+  //   1. Listings are ORG-owned, so the owner check must resolve org
+  //      membership. Comparing `profileId` to a uid silently denied every
+  //      publisher access to their own listing.
+  //   2. Rating aggregates drive ranking and the trust signal buyers read,
+  //      so they stay server-only even for the owner.
+  it('listing owners are resolved via the org, and cannot write rating aggregates', async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore()
+      await setDoc(doc(db, 'communityListings', 'listing-rated'), {
+        displayName: 'Thing',
+        profileId: ORG, // org-owned (AGL-652)
+        artifactType: 'component',
+        ratingAverage: 5,
+        ratingCount: 2,
+      })
+      await setDoc(
+        doc(db, 'communityListings', 'listing-rated', 'reviews', VIEWER),
+        { uid: VIEWER, rating: 5 },
+      )
+    })
+    // An org manager may edit their own listing's metadata.
+    await assertSucceeds(
+      updateDoc(doc(authed(OWNER), 'communityListings', 'listing-rated'), {
+        displayName: 'Renamed',
+      }),
+    )
+    // A non-manager member of the same org may not.
+    await assertFails(
+      updateDoc(doc(authed(VIEWER), 'communityListings', 'listing-rated'), {
+        displayName: 'Nope',
+      }),
+    )
+    // Nor may an outsider.
+    await assertFails(
+      updateDoc(doc(authed(OUTSIDER), 'communityListings', 'listing-rated'), {
+        displayName: 'Nope',
+      }),
+    )
+    // Even the owner cannot invent a rating. Values must DIFFER from the
+    // fixture: `diff()` reports changed keys only, so re-writing the same
+    // number is an empty diff and legitimately allowed — that is a quirk of
+    // the test, not a hole in the rule.
+    for (const [field, value] of [
+      ['ratingAverage', 1],
+      ['ratingCount', 99],
+      ['ratingSum', 500],
+    ]) {
+      await assertFails(
+        updateDoc(doc(authed(OWNER), 'communityListings', 'listing-rated'), {
+          [field]: value,
+        }),
+      ).catch((error) => {
+        throw new Error(`owner could write ${field}: ${error.message}`)
+      })
+    }
+    // Reviews are world-readable but never client-written — every gate
+    // (verified installer, publisher self-review) lives in the API.
+    await assertSucceeds(
+      getDoc(doc(authed(OUTSIDER), 'communityListings', 'listing-rated', 'reviews', VIEWER)),
+    )
+    await assertFails(
+      setDoc(
+        doc(authed(OUTSIDER), 'communityListings', 'listing-rated', 'reviews', OUTSIDER),
+        { uid: OUTSIDER, rating: 5, verifiedInstaller: true },
+      ),
+    )
+    // Including overwriting someone else's.
+    await assertFails(
+      updateDoc(
+        doc(authed(OWNER), 'communityListings', 'listing-rated', 'reviews', VIEWER),
+        { rating: 1 },
+      ),
+    )
+  })
+
+  // AGL-658. Takedown has to survive the person being taken down.
+  it('staff takedown fields and abuse reports are out of owner reach', async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore()
+      await setDoc(doc(db, 'communityListings', 'listing-hidden'), {
+        displayName: 'Dodgy', profileId: ORG, artifactType: 'component',
+        hiddenAt: new Date(), hiddenBy: STAFF, hiddenReason: 'spam',
+      })
+      await setDoc(doc(db, 'communityReports', 'report-1'), {
+        targetType: 'listing', listingId: 'listing-hidden',
+        reporterUid: OUTSIDER, reason: 'spam', status: 'open',
+      })
+    })
+    // The owner may still edit ordinary metadata...
+    await assertSucceeds(
+      updateDoc(doc(authed(OWNER), 'communityListings', 'listing-hidden'), {
+        description: 'Reworded',
+      }),
+    )
+    // ...but cannot un-hide themselves, which would make moderation a
+    // suggestion.
+    for (const field of ['hiddenAt', 'hiddenBy', 'hiddenReason']) {
+      await assertFails(
+        updateDoc(doc(authed(OWNER), 'communityListings', 'listing-hidden'), {
+          [field]: null,
+        }),
+      ).catch((error) => {
+        throw new Error(`owner could clear ${field}: ${error.message}`)
+      })
+    }
+    // Reports name their reporter, so only staff read them — otherwise a
+    // publisher learns exactly who to retaliate against.
+    await assertSucceeds(
+      getDoc(doc(authed(STAFF, { staff: true }), 'communityReports', 'report-1')),
+    )
+    await assertFails(getDoc(doc(authed(OWNER), 'communityReports', 'report-1')))
+    await assertFails(
+      getDoc(doc(authed(OUTSIDER), 'communityReports', 'report-1')),
+    )
+    // And nobody files one by writing directly — the route stamps the
+    // reporter from the verified token.
+    await assertFails(
+      setDoc(doc(authed(OUTSIDER), 'communityReports', 'forged'), {
+        targetType: 'listing', listingId: 'listing-hidden',
+        reporterUid: OWNER, reason: 'framed',
+      }),
+    )
+  })
+
   // AGL-666. `source` says whether a template was authored here, downloaded
   // from the marketplace, or came from a starter — and the library shows that
   // as provenance. A client that can rewrite it can stamp "marketplace" on
@@ -431,9 +556,12 @@ describe('pre-release hardening guards', () => {
       await setDoc(doc(db, 'hosts', HOST, 'installs', 'p1'), {
         version: '1.0.0', sha256: 'abc',
       })
-      // Community listing owned by OWNER with server-managed fields (M6).
+      // Community listing with server-managed fields (M6). `profileId` holds
+      // the publishing ORG since AGL-652 — the fixture used to carry a uid,
+      // which no publish path has produced since, so the ownership rule was
+      // being exercised against a shape that no longer exists.
       await setDoc(doc(db, 'communityListings', LISTING), {
-        profileId: OWNER, name: 'Plugin', installCount: 5, priceUsd: 10,
+        profileId: ORG, name: 'Plugin', installCount: 5, priceUsd: 10,
       })
       // Org publisher profile (AGL-652) — created server-side, so the rules
       // tests seed it rather than creating it through a client write.

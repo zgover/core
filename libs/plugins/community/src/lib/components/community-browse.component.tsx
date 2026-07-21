@@ -42,10 +42,10 @@ import useCommunityActions from '../hooks/use-community-actions'
 
 // Community console routes live in the app's route table; the patterns are
 // stable, so the plugin builds them directly (AGL-395).
-const listingHref = (hostId: string, listingId: string) =>
-  `/${hostId}/community/${listingId}`
-const publisherHref = (hostId: string, profileId: string) =>
-  `/${hostId}/community/publisher/${profileId}`
+const listingHref = (base: string, listingId: string) =>
+  `${base}/community/${listingId}`
+const publisherHref = (base: string, profileId: string) =>
+  `${base}/community/publisher/${profileId}`
 
 export interface CommunityBrowseProps {
   hostId: string
@@ -73,11 +73,28 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   // Resolved from the routing mirror rather than a new prop so the component
   // stays self-contained; hostIndex is signed-in readable.
   const [viewerOrgId, setViewerOrgId] = useState<string | null>(null)
+  // Console routes are `/[orgSlug]/hosts/[subdomain]/…` since AGL-621/622.
+  // The card links were still built as `/{hostDocId}/community/…`, a shape
+  // that has not resolved since — every publisher and listing link on this
+  // grid 404'd. Resolved here rather than taken as a prop so the component
+  // stays self-contained, the same reasoning as viewerOrgId above.
+  const [routeBase, setRouteBase] = useState<string | null>(null)
   useEffect(() => {
     let active = true
     void getDoc(doc(firestore, 'hostIndex', hostId))
-      .then((snapshot) => {
-        if (active) setViewerOrgId((snapshot.get('orgId') as string) ?? null)
+      .then(async (snapshot) => {
+        if (!active) return
+        const orgId = (snapshot.get('orgId') as string) ?? null
+        setViewerOrgId(orgId)
+        const subdomain = (snapshot.get('subdomain') as string) ?? hostId
+        if (!orgId) return
+        const org = await getDoc(doc(firestore, 'orgs', orgId)).catch(
+          () => undefined,
+        )
+        const slug = org?.get('slug') as string | undefined
+        // No slug means no valid link — leaving it null renders plain text
+        // rather than a link to nowhere.
+        if (active && slug) setRouteBase(`/${slug}/hosts/${subdomain}`)
       })
       .catch(() => undefined)
     return () => {
@@ -166,7 +183,9 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   // fetched page of listings.
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<string | null>(null)
-  const [sort, setSort] = useState<'newest' | 'installed'>('newest')
+  const [sort, setSort] = useState<'newest' | 'installed' | 'rated'>(
+    'newest',
+  )
   const categories = useMemo(
     () =>
       [
@@ -194,11 +213,19 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         .filter(Boolean)
         .some((value: string) => value.toLowerCase().includes(needle))
     })
-    return [...filtered].sort((a: any, b: any) =>
-      sort === 'installed'
-        ? (b.installCount ?? 0) - (a.installCount ?? 0)
-        : (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
-    )
+    return [...filtered].sort((a: any, b: any) => {
+      if (sort === 'installed') {
+        return (b.installCount ?? 0) - (a.installCount ?? 0)
+      }
+      if (sort === 'rated') {
+        // Unrated listings sort last rather than as zero-stars — a new
+        // listing has not been judged badly, it has not been judged.
+        const byAverage =
+          (b.ratingAverage ?? -1) - (a.ratingAverage ?? -1)
+        return byAverage || (b.ratingCount ?? 0) - (a.ratingCount ?? 0)
+      }
+      return (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0)
+    })
   }, [listings, search, category, sort, user?.uid])
 
   return (
@@ -235,6 +262,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         >
           <MenuItem value="newest">{'Newest'}</MenuItem>
           <MenuItem value="installed">{'Most installed'}</MenuItem>
+          <MenuItem value="rated">{'Highest rated'}</MenuItem>
         </TextField>
       </Stack>
       {items.length === 0 ? (
@@ -286,7 +314,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     sx={{ alignItems: 'center' }}
                   >
                     <MuiLink
-                      href={listingHref(hostId, listing.$id)}
+                      href={routeBase ? listingHref(routeBase, listing.$id) : undefined}
                       color="inherit"
                       underline="hover"
                       variant="subtitle2"
@@ -312,7 +340,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                       <>
                         {' · by '}
                         <MuiLink
-                          href={publisherHref(hostId, listing.profileId)}
+                          href={routeBase ? publisherHref(routeBase, listing.profileId) : undefined}
                           color="secondary"
                           underline="hover"
                         >
@@ -326,6 +354,13 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                       ? ` · ${listing.installCount} install${
                           listing.installCount === 1 ? '' : 's'
                         }`
+                      : ''}
+                    {/* Count alongside the average: "5.0" from one rating
+                        and from forty are not the same claim (AGL-655). */}
+                    {listing.ratingCount
+                      ? ` · ★ ${listing.ratingAverage ?? 0} (${
+                          listing.ratingCount
+                        })`
                       : ''}
                   </Typography>
                   {listing.description ? (
