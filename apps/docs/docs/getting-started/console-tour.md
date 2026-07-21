@@ -104,3 +104,13 @@ reaches you in **this browser**:
 These are per-device, not per-account: notification permission is granted
 per browser, so muting sound on your laptop leaves your other devices alone.
 The **category mutes** above are account-wide and apply everywhere.
+
+Aglyn asks you in-app before triggering your browser's own permission prompt.
+That's deliberate: **browsers allow exactly one permission request per site**.
+Dismiss the browser's prompt and the answer is remembered as a permanent *no* —
+Aglyn can't ask again, and only you can undo it from your browser's site
+settings. The in-app card gives you a "Not now" that costs nothing, so the real
+prompt is only raised once you've said yes. To clear a previous block, open your
+browser's site settings for Aglyn (the icon at the left of the address bar in
+Chrome and Edge; **Settings → Websites → Notifications** in Safari) and set
+notifications back to *Allow*.
