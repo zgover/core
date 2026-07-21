@@ -400,6 +400,79 @@ export interface AglynLayoutVersion<N = AglynNodeSchema>
   hostId?: HostUid
 }
 
+export type TemplateUid = string
+
+/** What a template can be instantiated as. */
+export type TemplateKind = 'page' | 'component' | 'layout'
+
+/**
+ * A named substitution offered when the template is instantiated. Values are
+ * applied with `resolveNamedTokens` — the same `{{name}}` mechanism that
+ * renders collection entry templates — so a template author marks copy as
+ * `{{productName}}` and is prompted for it on use.
+ */
+export interface TemplatePlaceholder {
+  /** Token name as it appears in the nodes, without the braces. */
+  name: string
+  /** Prompt label shown when instantiating. */
+  label?: string
+  defaultValue?: string
+}
+
+/**
+ * Where a template came from.
+ *
+ * SERVER-MANAGED. A client that could write this would be able to stamp
+ * `marketplace` provenance on something it authored, and the library shows
+ * this to the user as a trust signal.
+ */
+export interface TemplateSource {
+  type: 'authored' | 'marketplace' | 'starter'
+  /** Marketplace listing this was installed from. */
+  listingId?: string
+  /** Listing version installed — compared against `latestVersion` to
+   *  surface "update available" without storing anything extra. */
+  version?: number | string
+  /** First-party starter id from `starter-templates.ts`. */
+  starterId?: string
+}
+
+/**
+ * Reusable starting point for a page, component or layout (AGL-666).
+ * Host-scoped document at `hosts/{hostId}/templates/{templateId}`.
+ *
+ * Distinct from the things it produces: a template is inert until
+ * instantiated, so marketplace downloads land here rather than becoming live
+ * pages. `nodes` carries the same node-map shape screens, components and
+ * layouts already use, which is what lets one collection serve all three
+ * kinds.
+ */
+export interface AglynTemplate<N = AglynNodeSchema> extends AglynDocument {
+  $id: TemplateUid
+  hostId?: HostUid
+  kind?: TemplateKind
+  displayName?: string
+  description?: string
+  category?: string
+  nodes?: Record<NodeId, N>
+  /** Definition tree root — `component` kind, mirroring AglynHostComponent. */
+  rootId?: NodeId
+  /** Suggested slug — `page` kind; de-conflicted against the host on use. */
+  slug?: string
+  /** Mirrors AglynScreen.seo — carried through to the created page. */
+  seo?: {
+    title?: string
+    description?: string
+    breadcrumb?: string
+    image?: HostMediaUid
+  }
+  placeholders?: Array<TemplatePlaceholder>
+  source?: TemplateSource
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
+  deletedAt?: ITimestamp
+}
+
 export type RedirectUid = string
 
 /** CONCEPT: Host redirects. Host-scoped document */

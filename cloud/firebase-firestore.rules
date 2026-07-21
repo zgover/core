@@ -294,6 +294,25 @@ service cloud.firestore {
             (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
         }
       }
+      // Templates (AGL-666): saved starting points for pages, components and
+      // layouts, and where marketplace downloads land instead of becoming
+      // live pages. Creates go through /api/hosts/resources like screens and
+      // layouts so templatesPerHost is enforced server-side.
+      //
+      // `source` is frozen on update: it records whether a template was
+      // authored here, downloaded from the marketplace, or came from a
+      // first-party starter, and the library shows that to the user. A client
+      // able to rewrite it could stamp marketplace provenance on its own work.
+      match /templates/{templateId} {
+        allow read: if isStaff() || isHostAdmin(hostId);
+        allow create: if isStaff();
+        allow update: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId) &&
+           !request.resource.data.diff(resource.data)
+             .affectedKeys().hasAny(['source']));
+        allow delete: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+      }
       // Secret-/PII-bearing subcollections are carved out of the viewer-
       // readable catch-all below (AGL-502): `webhooks` docs hold an HMAC
       // signing secret + target URL, and `orders` hold customer PII/payment
@@ -328,10 +347,15 @@ service cloud.firestore {
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
             !(subcollection in ['screens', 'layouts', 'variables',
               'functions', 'workflows', 'services', 'redirects',
-              'locations', 'products', 'components', 'registers', 'installs']));
+              'locations', 'products', 'components', 'registers', 'installs',
+              'templates']));
+        // `templates` is excluded from update as well as create: its
+        // dedicated block above freezes `source`, and leaving it here would
+        // re-grant the unrestricted update this catch-all allows (AGL-666).
         allow update: if isStaff() ||
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
-            !(subcollection in ['screens', 'layouts', 'installs']));
+            !(subcollection in ['screens', 'layouts', 'installs',
+              'templates']));
         allow delete: if isStaff() ||
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
             !(subcollection in ['screens', 'layouts']));
