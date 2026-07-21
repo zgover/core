@@ -437,7 +437,7 @@ export function MainLayout(props: MainLayoutProps) {
             <>
               {actionsPrefix}
               <NotificationsMenu />
-              {/* Pre-permission ask (AGL-662): the browser allows exactly one
+              {/* Pre-permission ask (AGL-663): the browser allows exactly one
                   native prompt per origin, so we offer in-app first where a
                   decline is reversible. Renders nothing unless it applies. */}
               <NotificationPrompt />

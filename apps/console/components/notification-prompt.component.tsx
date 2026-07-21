@@ -50,7 +50,7 @@ function readDismissed(): 'never' | 'session' | null {
 }
 
 /**
- * Pre-permission prompt for desktop notifications (AGL-662).
+ * Pre-permission prompt for desktop notifications (AGL-663).
  *
  * The browser grants exactly ONE permission prompt per origin: decline it and
  * the API is permanently `denied`, with no way for the app to ask again —
