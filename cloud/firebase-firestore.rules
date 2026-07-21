@@ -85,6 +85,19 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Monthly usage rollups (AGL-41) + the live API-request meter
+      // (AGL-635): member-readable so the Billing page usage meters show real
+      // numbers. Written only by the server — the report-usage cron and the
+      // customer-API auth chokepoint via the Admin SDK, which bypasses rules.
+      match /usage/{month} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+      match /apiUsage/{month} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+
       // Per-plugin settings (AGL-428): overrides for a plugin's declared
       // config schema. Readers defensively coerce types (the doc is
       // manager-writable), so junk here can misconfigure only that
