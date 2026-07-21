@@ -37,9 +37,32 @@ plan to re-issue, and never as a routine hygiene step.
 
 ## Current state — check before you change anything
 
-As of 2026-07-21 this is **already provisioned** as a shared variable on `preview` and
-`production`, linked to both `app-aglyn-io` and `tenant-aglyn-app`. Setting a "new" value
-would be a live rotation with the consequences in rule 2. Audit first, always.
+As of 2026-07-21 this is **already provisioned** as a shared variable on `development`,
+`preview` and `production`, linked to both `app-aglyn-io` and `tenant-aglyn-app`. Setting a
+"new" value would be a live rotation with the consequences in rule 2. Audit first, always.
+
+### Recreating a shared variable silently drops its project links
+
+Changing a shared variable's targets in the dashboard can **replace** it rather than edit it
+— a new `id`, and an **empty `projectId` array**. The variable still lists correctly, still
+shows the right targets, and applies to *nothing*. Nothing warns you.
+
+This happened on 2026-07-21: `TOKEN_SIGNING_SECRET` was recreated with all three targets and
+zero linked projects. Nothing broke at the time, because running deployments hold the env
+snapshot taken at build time — it would have surfaced on the **next unrelated deploy**, as
+downloads, gift-card and supplier tokens, and gated video all failing closed at once, with
+no obvious connection to the deploy that triggered it.
+
+So after any shared-variable edit, re-check `projectId` — not just the targets:
+
+```bash
+curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+  "https://api.vercel.com/v1/env?teamId=$VERCEL_TEAM_ID" \
+  | jq '.data[] | select(.key=="TOKEN_SIGNING_SECRET") | {id, target, projectId}'
+```
+
+An empty `projectId` means the variable applies to no project. (Note the response envelope
+is `.data`; older payloads used `.envs`, so handle both.)
 
 ### Auditing it correctly (this is the part that misleads people)
 
