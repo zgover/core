@@ -137,6 +137,31 @@ await hostRef.collection('components').doc('e2e-component').set({
   updatedAt: new Date(),
 })
 
+// Placeholder authoring (AGL-672): a token already present in the page
+// becomes a declared placeholder when saved as a template. The host
+// binding beside it must NOT — declaring it would overwrite a binding that
+// already resolves against the site's own variables.
+{
+  const homeScreen = await hostRef.collection('screens').doc('seed-home').get()
+  const versionId = homeScreen.get('versionId')
+  if (versionId) {
+    const versionRef = homeScreen.ref
+      .collection('versions')
+      .doc(String(versionId))
+    const existingNodes = (await versionRef.get()).get('nodes') ?? {}
+    await versionRef.update({
+      nodes: {
+        ...existingNodes,
+        'e2e-token': {
+          $id: 'e2e-token',
+          componentId: 'text',
+          props: { text: 'Hi {{visitorName}} — {{var:someBinding}}' },
+        },
+      },
+    })
+  }
+}
+
 const listPath = `/${ORG_SLUG}/hosts/${HOST_ID}/screens/list`
 // Warm the dev server so compilation doesn't eat the navigation budget.
 await fetch(`${BASE_URL}${listPath}`).catch(() => undefined)
@@ -173,7 +198,10 @@ try {
     waitUntil: 'domcontentloaded',
     timeout: TIMEOUT_MS,
   })
-  const trigger = page.locator('button[aria-label="Save as template"]').first()
+  // Target the seeded Home row by name. `.first()` was order-dependent:
+  // pages created by an earlier run sort ahead of Home, and the save then
+  // captured the wrong screen — which looked like a placeholder bug.
+  const trigger = page.locator('button[aria-label="Save Home as template"]')
   await trigger.waitFor({ state: 'visible', timeout: TIMEOUT_MS })
   check('row action renders', true)
 
@@ -210,6 +238,17 @@ try {
     const nodeCount = Object.keys(data.nodes ?? {}).length
     check('nodes captured', nodeCount > 0, `${nodeCount} nodes`)
     check('createdAt stamped', !!data.createdAt)
+    const declared = (data.placeholders ?? []).map((entry) => entry.name)
+    check(
+      'placeholder authored from page content',
+      declared.includes('visitorName'),
+      JSON.stringify(declared),
+    )
+    check(
+      'host binding not declared as a placeholder',
+      !declared.some((token) => String(token).startsWith('var:')),
+      JSON.stringify(declared),
+    )
   }
 
   // ── Layouts ────────────────────────────────────────────────────────────
@@ -487,6 +526,100 @@ try {
       screensAfter === screensBefore,
       `${screensBefore} → ${screensAfter}`,
     )
+  }
+
+  // ── Update available (AGL-671) ─────────────────────────────────────────
+  // Publish a v2 of the same listing; the library compares the version it
+  // installed against the listing's latestVersion.
+  await listingRef.collection('versions').doc('2').set({
+    template: {
+      screens: [
+        { displayName: 'Installed Home v2', slug: 'home', nodes: { a: { componentId: 'box' } } },
+      ],
+    },
+    publishedAt: new Date(),
+  })
+  await listingRef.update({ latestVersion: 2, screenCount: 1 })
+
+  await page.goto(`${BASE_URL}/${ORG_SLUG}/hosts/${HOST_ID}/templates`, {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_MS,
+  })
+  const updateButton = page.locator('button[aria-label^="Update Installed"]').first()
+  const sawUpdate = await updateButton
+    .waitFor({ state: 'visible', timeout: 20_000 })
+    .then(() => true)
+    .catch(() => false)
+  check('update-available badge appears', sawUpdate)
+  if (sawUpdate) {
+    await updateButton.click()
+    // Replaced, not stacked: the old bundle is soft-deleted.
+    await page.waitForTimeout(2500)
+    const afterUpdate = await hostRef
+      .collection('templates')
+      .where('source.listingId', '==', listingId)
+      .get()
+    const live = afterUpdate.docs.filter((entry) => !entry.get('deletedAt'))
+    check(
+      'update replaces rather than stacks',
+      live.length === 1,
+      `${live.length} live, ${afterUpdate.size} total`,
+    )
+    check(
+      'installed version advanced to 2',
+      live[0]?.get('source.version') === 2,
+      `got ${live[0]?.get('source.version')}`,
+    )
+    // The page created earlier from v1 must be untouched by an update.
+    const survivors = await hostRef
+      .collection('screens')
+      .where('displayName', '==', createdPageName)
+      .get()
+    check('pages created earlier are untouched', survivors.size === 1)
+  }
+
+  // ── Gallery renders both sources (AGL-672) ─────────────────────────────
+  // The screens list's "Browse templates" gallery used to show only
+  // code-defined starters, bypassing the library entirely.
+  await page.goto(`${BASE_URL}${listPath}`, {
+    waitUntil: 'domcontentloaded',
+    timeout: TIMEOUT_MS,
+  })
+  // The header button reads "Templates"; "Browse templates" only exists in
+  // the empty state, and the seeded host has screens.
+  const browseButton = page.getByRole('button', {
+    name: 'Templates',
+    exact: true,
+  })
+  await browseButton.waitFor({ state: 'visible', timeout: TIMEOUT_MS })
+  await browseButton.click()
+  const gallery = page.locator(
+    'div[role="dialog"]:has-text("Start from a template")',
+  )
+  await gallery.waitFor({ state: 'visible', timeout: TIMEOUT_MS })
+  const galleryText = await gallery.innerText()
+  check('gallery shows the library section', galleryText.includes('Your templates'))
+  check(
+    'gallery lists a saved template',
+    galleryText.includes(TEMPLATE_NAME),
+    galleryText.slice(0, 120).replace(/\n/g, ' | '),
+  )
+  check(
+    'gallery still shows code starters',
+    galleryText.includes('Starter sites'),
+  )
+  // Using from the gallery opens the same Use dialog as the Templates page.
+  await gallery.getByRole('button', { name: 'Use' }).first().click()
+  const galleryUse = page.locator(
+    'div[role="dialog"]:has-text("Use this template")',
+  )
+  const openedUse = await galleryUse
+    .waitFor({ state: 'visible', timeout: 15_000 })
+    .then(() => true)
+    .catch(() => false)
+  check('gallery Use opens the shared Use dialog', openedUse)
+  if (openedUse) {
+    await galleryUse.getByRole('button', { name: 'Cancel' }).click()
   }
 
   // "Could not reach Cloud Firestore backend" fires when the SDK briefly

@@ -16,10 +16,8 @@
  */
 'use client'
 
-import * as Aglyn from '@aglyn/aglyn'
 import { useLoading } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
   Box,
   Button,
@@ -34,14 +32,7 @@ import {
   Grid,
   Typography,
 } from '@mui/material'
-import {
-  collection,
-  doc,
-  limit,
-  query,
-  setDoc,
-  where,
-} from 'firebase/firestore'
+import { collection, limit, query, where } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
 import {
   useFirestore,
@@ -49,7 +40,8 @@ import {
   useUser,
 } from '@aglyn/tenant-feature-instance'
 import { checkOrgQuota } from '../../constants/entitlements'
-import { publishScreenRoute } from '../../constants/screen-publishing'
+import createPageFromTemplate from './create-page-from-template'
+import UseTemplateDialog from './use-template-dialog.component'
 import {
   STARTER_TEMPLATES,
   type StarterTemplate,
@@ -95,6 +87,21 @@ export function TemplateGalleryDialog(props: TemplateGalleryDialogProps) {
   )
   const communityTemplates = (templateListings ?? []).filter(
     (listing: any) => !listing.deletedAt,
+  )
+  // The host's own library (AGL-672) — saved templates and marketplace
+  // installs, the same collection the Templates page renders. Page kind
+  // only: a component or layout template has nothing to do with "start
+  // from a template" on the screens list.
+  const { data: libraryDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'templates'), limit(50)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const libraryPages = (libraryDocs ?? []).filter(
+    (entry: any) => !entry.deletedAt && (entry.kind ?? 'page') === 'page',
+  )
+  const [useTemplate, setUseTemplate] = useState<Record<string, any> | null>(
+    null,
   )
   const [installingId, setInstallingId] = useState<string | null>(null)
   const handleInstallTemplate = useCallback(
@@ -164,46 +171,19 @@ export function TemplateGalleryDialog(props: TemplateGalleryDialogProps) {
       try {
         const used = new Set(existingSlugs)
         for (const screen of template.screens) {
-          const screenId = Aglyn.createResourceUid()
-          const versionId = Aglyn.createResourceUid()
-          const timestamp = Timestamp.now()
-          let slug = screen.slug
-          let attempt = 2
-          while (used.has(slug)) slug = `${screen.slug}-${attempt++}`
-          used.add(slug)
-
-          // Screen doc rides the quota-enforcing resources API (AGL-473,
-          // server stamps timestamps); the version stays client-written.
-          await createHostResource({
+          // Same helper the library's Use flow calls (AGL-672) — one
+          // implementation of create-screen → write-version → publish-route,
+          // including the slug de-confliction that must not overwrite a
+          // live page.
+          await createPageFromTemplate(firestore, createHostResource as any, {
             hostId,
-            resource: 'screen',
-            id: screenId,
-            data: {
-              displayName: screen.displayName,
-              ...(screen.description && { description: screen.description }),
-              ...(screen.seo && { seo: screen.seo }),
-              versionId,
-            },
+            displayName: screen.displayName,
+            nodes: screen.nodes as Record<string, unknown>,
+            description: screen.description,
+            seo: screen.seo,
+            slug: screen.slug,
+            usedSlugs: used,
           })
-          await setDoc(
-            doc(
-              firestore,
-              'hosts',
-              hostId,
-              'screens',
-              screenId,
-              'versions',
-              versionId,
-            ),
-            {
-              screenId,
-              displayName: 'Initial version',
-              nodes: screen.nodes,
-              createdAt: timestamp,
-              updatedAt: timestamp,
-            },
-          )
-          await publishScreenRoute(firestore, { hostId, screenId }, slug)
         }
         enqueueSnackbar(
           `Added ${template.screens.length} screen${
@@ -243,6 +223,58 @@ export function TemplateGalleryDialog(props: TemplateGalleryDialogProps) {
           {'Templates add ready-made, published screens you can restyle in ' +
             'the besigner. Existing screens are never touched.'}
         </Typography>
+        {/* Your own library first (AGL-672): saved and installed templates
+            are the ones a returning user is looking for, and they open the
+            same Use flow as the Templates page rather than a second
+            implementation. */}
+        {libraryPages.length ? (
+          <>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              {'Your templates'}
+            </Typography>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              {libraryPages.map((template: any) => (
+                <Grid key={template.$id} size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Card variant="outlined" sx={{ height: '100%' }}>
+                    <CardContent>
+                      <Typography variant="h6">
+                        {template.displayName}
+                      </Typography>
+                      <Chip
+                        label={
+                          template.source?.type === 'marketplace'
+                            ? 'Marketplace'
+                            : 'Saved here'
+                        }
+                        size="small"
+                        variant="outlined"
+                        sx={{ my: 1 }}
+                      />
+                      {template.description ? (
+                        <Typography variant="body2" color="text.secondary">
+                          {template.description}
+                        </Typography>
+                      ) : null}
+                    </CardContent>
+                    <CardActions>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => setUseTemplate(template)}
+                      >
+                        {'Use'}
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              {'Starter sites'}
+            </Typography>
+          </>
+        ) : null}
         <Grid container spacing={2}>
           {STARTER_TEMPLATES.map((template) => (
             <Grid key={template.id} size={{ xs: 12, sm: 6, md: 4 }}>
@@ -356,6 +388,16 @@ export function TemplateGalleryDialog(props: TemplateGalleryDialogProps) {
       <DialogActions>
         <Button onClick={onClose}>{'Start blank instead'}</Button>
       </DialogActions>
+      <UseTemplateDialog
+        hostId={hostId}
+        template={useTemplate}
+        onClose={() => {
+          setUseTemplate(null)
+          // The gallery's job is done once a page exists; leaving it open
+          // over a fresh page invites a second accidental create.
+          onClose()
+        }}
+      />
     </Dialog>
   )
 }
