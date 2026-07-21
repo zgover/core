@@ -69,7 +69,8 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
   const { enqueueSnackbar } = useSnackbar()
   const uid = user?.uid
   const { data: profile } = useFirestoreDoc<any>(
-    () => doc(firestore, 'profiles', uid ?? '-anonymous-'),
+    // The org's marketplace identity (AGL-652), not the personal one.
+    () => doc(firestore, 'publisherProfiles', currentOrg?.$id ?? '-none-'),
     [firestore, uid],
     { idField: '$id' },
   )
@@ -87,7 +88,8 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
     () =>
       query(
         collection(firestore, 'communityPurchases'),
-        where('sellerUid', '==', uid ?? '-anonymous-'),
+        // Sales belong to the ORG that published (AGL-652).
+        where('sellerOrgId', '==', currentOrg?.$id ?? '-none-'),
       ),
     [firestore, uid],
     { idField: '$id' },
@@ -156,10 +158,10 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
   const validHandle = HANDLE_PATTERN.test(handle)
 
   const handleSave = useCallback(async () => {
-    if (!uid || !validHandle || !displayName.trim()) return
+    if (!currentOrg?.$id || !validHandle || !displayName.trim()) return
     try {
       await setDoc(
-        doc(firestore, 'profiles', uid),
+        doc(firestore, 'publisherProfiles', currentOrg?.$id ?? '-none-'),
         {
           handle,
           displayName: displayName.trim().slice(0, 80),

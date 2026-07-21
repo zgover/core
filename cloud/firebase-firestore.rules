@@ -486,9 +486,12 @@ service cloud.firestore {
     // webhook (Admin SDK). Buyers read their own purchases (install
     // gating); sellers read sales of their listings (revenue ledger).
     match /communityPurchases/{purchaseId} {
+      // The seller is an ORG (AGL-652), so the sales side is a membership
+      // check, not a uid match — a uid never equals an org id, and leaving
+      // the old comparison would hide every publisher's own revenue.
       allow read: if isStaff() || (isSignedIn() &&
         (resource.data.buyerUid == request.auth.uid ||
-         resource.data.sellerUid == request.auth.uid));
+         exists(/databases/$(database)/documents/orgs/$(resource.data.sellerOrgId)/members/$(request.auth.uid))));
       allow write: if false;
     }
 
