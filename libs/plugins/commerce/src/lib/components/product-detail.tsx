@@ -278,10 +278,13 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
       Boolean(subscription) &&
       (!resolved.subscriptionOptional || billing === 'subscribe')
 
-    // schema.org Product/Offer (AGL-299), same inline-script convention
-    // as the event-list block (AGL-143).
+    // schema.org Product/Offer (AGL-299). Kept ONLY for the case where this
+    // block renders without server-seeded page data — the besigner preview,
+    // or a page whose resolver didn't supply it. When the tenant page seeds
+    // us it emits the same Product node server-side (AGL-660), and two
+    // Product nodes for one item is worse than one, so we stand down.
     const structuredData =
-      hostId && resolvedId
+      hostId && resolvedId && !seededProduct
         ? {
             '@context': 'https://schema.org',
             '@type': 'Product',

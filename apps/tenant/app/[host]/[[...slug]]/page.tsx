@@ -228,6 +228,80 @@ function buildJsonLd(props: Props): string[] {
 
   // Screen render → WebSite (+ BreadcrumbList for nested paths).
   const ld: string[] = []
+
+  // Product detail → Product/Offer (AGL-660). Emitted HERE, on the server,
+  // from the payload the commerce resolver already resolved (AGL-659). The
+  // PDP block used to build this from client state, so it never reached the
+  // HTML a crawler reads — which is the whole point of product structured
+  // data (rich results, Merchant listings).
+  const seededProduct = (
+    props.pageData as
+      | {
+          commerce?: {
+            product?: {
+              name: string
+              slug: string
+              description?: string
+              mediaUrls?: string[]
+              variants?: Array<{ priceUsd: number; soldOut?: boolean }>
+            }
+          }
+        }
+      | undefined
+  )?.commerce?.product
+  if (seededProduct && canonicalBase) {
+    const prices = (seededProduct.variants ?? [])
+      .map((variant) => Number(variant.priceUsd))
+      .filter((price) => Number.isFinite(price))
+    const low = prices.length ? Math.min(...prices) : undefined
+    const high = prices.length ? Math.max(...prices) : undefined
+    // Out of stock only when EVERY variant is — one available size still
+    // makes the product purchasable.
+    const inStock = (seededProduct.variants ?? []).some(
+      (variant) => !variant.soldOut,
+    )
+    const availability = `https://schema.org/${
+      inStock ? 'InStock' : 'OutOfStock'
+    }`
+    ld.push(
+      Aglyn.safeJsonLd({
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: seededProduct.name,
+        ...(seededProduct.description && {
+          description: seededProduct.description,
+        }),
+        ...(seededProduct.mediaUrls?.length && {
+          image: seededProduct.mediaUrls,
+        }),
+        url: `${canonicalBase}/products/${seededProduct.slug}`,
+        ...(publisher && { brand: publisher }),
+        // Currency isn't modelled on the product yet, so USD is assumed —
+        // the same assumption the client block made. Revisit with
+        // multi-currency. `sku` is absent because the public DTO strips it.
+        ...(low != null && {
+          offers:
+            low === high
+              ? {
+                  '@type': 'Offer',
+                  price: low,
+                  priceCurrency: 'USD',
+                  availability,
+                  url: `${canonicalBase}/products/${seededProduct.slug}`,
+                }
+              : {
+                  '@type': 'AggregateOffer',
+                  lowPrice: low,
+                  highPrice: high,
+                  priceCurrency: 'USD',
+                  offerCount: prices.length,
+                  availability,
+                },
+        }),
+      }),
+    )
+  }
+
   const screen = props.data?.screen?.data as any
   const siteTitle: string | undefined = host?.seo?.title ?? host?.displayName
   if (canonicalBase) {
