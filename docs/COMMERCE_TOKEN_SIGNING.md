@@ -32,14 +32,19 @@ plan to re-issue, and never as a routine hygiene step.
 
 ## Provisioning
 
-Generate once, then set the *same* value everywhere:
+Scope of "the same value" is exactly one deployment tier: **console and tenant must match
+each other within an environment.** Local does *not* need to match production, and should
+not — a laptop `.env` is plaintext and `nx` injects it into every task (AGL-690), so
+reusing it in production needlessly widens where the production secret lives.
+
+Generate a fresh value per tier:
 
 ```bash
 openssl rand -hex 32
 ```
 
-Set it on both Vercel projects, all three environments, plus the root `.env` for local work
-and `tools/scripts/*`:
+Set it on both Vercel projects, all three environments. The root `.env` gets its own
+separate value for local work and `tools/scripts/*`:
 
 | Vercel project | Directory to run from |
 | --- | --- |
