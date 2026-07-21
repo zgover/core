@@ -101,6 +101,12 @@ export interface DesktopNotificationInput {
   tag?: string
   /** Followed when the notification is clicked. */
   onActivate?: () => void
+  /**
+   * Show even while the tab is visible. Only for the settings "Test" action:
+   * the tab is by definition focused when you click it, so the normal
+   * hidden-only rule would make a test silently do nothing.
+   */
+  force?: boolean
 }
 
 /**
@@ -114,7 +120,9 @@ export function showDesktopNotification(
   input: DesktopNotificationInput,
 ): boolean {
   if (!desktopNotificationsGranted()) return false
-  if (typeof document !== 'undefined' && !document.hidden) return false
+  if (!input.force && typeof document !== 'undefined' && !document.hidden) {
+    return false
+  }
   try {
     const notification = new Notification(input.title, {
       body: input.body,
