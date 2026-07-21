@@ -289,10 +289,15 @@ function ComponentBesignerPage(props) {
         versionId,
         updatedAt: Timestamp.now(),
       })
-      enqueueSnackbar('Component published — live sites pick it up on their next build', {
-        variant: 'success',
-        persist: false,
-      })
+      // Tenant pages are ISR with `revalidate = 60` and there is no
+      // on-demand revalidation hook, so propagation is a cache window, not
+      // a deploy. Saying "next build" would have people waiting for
+      // something that never happens.
+      enqueueSnackbar(
+        'Published. Every screen using this component picks it up within a ' +
+          'minute — you do not need to republish them.',
+        { variant: 'success', persist: false },
+      )
     } catch (error) {
       enqueueSnackbar(
         error instanceof Error ? error.message : 'Publish failed',
