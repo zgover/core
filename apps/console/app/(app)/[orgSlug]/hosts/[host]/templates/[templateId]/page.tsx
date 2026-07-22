@@ -16,8 +16,15 @@
  */
 'use client'
 
+import { ICON_VARIANT_BESIGNER } from '@aglyn/shared-data-enums'
 import { mdiBookmarkOutline } from '@aglyn/shared-data-mdi'
-import { CardDisplay, Container, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  CardDisplay,
+  Container,
+  GridItems,
+  MdiIcon,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -197,8 +204,31 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
           children: template?.displayName ?? 'Template',
           icon: { path: mdiBookmarkOutline.path },
         }}
+        // The besigner is what this page exists to reach, so it belongs in
+        // the hero like the screen detail page's, not as a text button at
+        // the bottom of a card (AGL-702).
+        headerRight={
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => router.push(besignerUrl)}
+            startIcon={
+              <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} />
+            }
+          >
+            {'Open Besigner'}
+          </Button>
+        }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <GridItems
+            spacing={3}
+            items={[
+              {
+                // Full width when it is the only card, so a plain template
+                // does not render as a narrow column beside dead space.
+                size: siblings.length > 1 ? { xs: 12, lg: 5 } : { xs: 12 },
+                children: (
           <CardDisplay header={'Details'} contentGutterX contentGutterY>
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
@@ -231,6 +261,10 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
               <Typography variant="caption" color="text.secondary">
                 {`ID ${templateId} — provenance is server-managed and cannot be edited here`}
               </Typography>
+              {/* Save stays with the fields it saves. Open-besigner moved to
+                  the hero, and "Back to templates" is dropped — the
+                  breadcrumb already goes there, and the screen detail page
+                  carries no back button either (AGL-702). */}
               <Stack direction="row" spacing={1}>
                 <Button
                   variant="contained"
@@ -241,12 +275,6 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
                 >
                   {'Save'}
                 </Button>
-                <Button size="small" onClick={() => router.push(besignerUrl)}>
-                  {'Open in besigner'}
-                </Button>
-                <Button size="small" onClick={() => router.push(listUrl)}>
-                  {'Back to templates'}
-                </Button>
               </Stack>
               <Typography variant="caption" color="text.secondary">
                 {'Templates have no publish step — the besigner edits this ' +
@@ -254,8 +282,13 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
               </Typography>
             </Stack>
           </CardDisplay>
-
-          {siblings.length > 1 ? (
+                ),
+              },
+              ...(siblings.length > 1
+                ? [
+                    {
+                      size: { xs: 12, lg: 7 },
+                      children: (
             <CardDisplay
               header={`Starter bundle · ${template?.source?.starterName ?? starterId}`}
               contentGutterX
@@ -308,7 +341,12 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
                 </TableBody>
               </Table>
             </CardDisplay>
-          ) : null}
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </Container>
       </DashboardLayout>
     </>
