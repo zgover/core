@@ -208,6 +208,30 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
                   outline: 'none',
                 },
               },
+              // Column headers styled to match a plain MUI <TableHead>, which
+              // is what the screens list renders (it uses a bespoke table, not
+              // this grid). Without this the console shows two different table
+              // header designs depending on which listing you look at.
+              //
+              // Nested inside .MuiDataGrid-root deliberately: at the Box level
+              // these lost the cascade to the grid's own class-level styles —
+              // the separators stayed visible while the font rules landed,
+              // which is exactly the kind of half-applied styling that reads
+              // as "close but wrong".
+              '& .MuiDataGrid-columnSeparator': { display: 'none' },
+              '& .MuiDataGrid-columnHeaders': {
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                '&:focus, &:focus-within': { outline: 'none' },
+              },
+              '& .MuiDataGrid-columnHeaderTitle': {
+                // Matches MuiTableCell head: medium weight at body-2 size.
+                fontWeight: 500,
+                fontSize: '0.875rem',
+                lineHeight: 1.5,
+              },
             },
           },
           sx,
@@ -216,6 +240,9 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
       >
         <DataGrid
           sx={{ flexGrow: 1 }}
+          // Same height as a row by default, like a TableHead cell; a caller
+          // that sets columnHeaderHeight explicitly still wins via `rest`.
+          columnHeaderHeight={48}
           rows={rows}
           columns={withColumnHelp(columns)}
           loading={loading}
