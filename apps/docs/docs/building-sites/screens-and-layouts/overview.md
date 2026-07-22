@@ -44,6 +44,15 @@ renders. Bind a screen to a layout in the Besigner and the layout chrome wraps t
 both in the editor and on the published site. Layouts have their own versions and admin
 converters, just like screens.
 
+### Used by
+
+A layout's detail page has a **Used by** card listing the screens that render inside it,
+so you can see what a change or a deletion would reach. Every screen is checked, whether
+or not it has been published.
+
+Screens are the complete answer: a layout is chosen per screen, and a layout cannot
+contain another layout. A layout used by no screens is genuinely unused.
+
 ## Reusable components
 
 Promote a subtree into a **reusable component** and insert instances anywhere. Instances

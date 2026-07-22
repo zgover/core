@@ -56,6 +56,7 @@ import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 import { useOrgSlug } from '../../../../../../../hooks/use-org-scope'
 import useFirestoreCollection from '../../../../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../../../../hooks/use-firestore-doc'
+import UsedByCard from '../../../../../../../components/used-by-card.component'
 
 /**
  * Layout detail (AGL-695).
@@ -379,6 +380,19 @@ const LayoutDetails: NextPageWithLayout<Record<string, never>> = () => {
               </Table>
             )}
           </CardDisplay>
+                ),
+              },
+              {
+                // Which screens render inside this layout (AGL-703) — the
+                // one question worth answering before deleting it.
+                size: { xs: 12, lg: 5 },
+                children: (
+                  <UsedByCard
+                    hostId={hostId}
+                    kind="layout"
+                    id={layoutId}
+                    noun="layout"
+                  />
                 ),
               },
             ]}
