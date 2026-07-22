@@ -69,6 +69,10 @@ export enum Route {
   HOST_LOGIC = '/[orgSlug]/hosts/[host]/logic',
   HOST_PRODUCTS = '/[orgSlug]/hosts/[host]/products',
   HOST_COMPONENTS = '/[orgSlug]/hosts/[host]/components',
+  // Component detail (AGL-693): the listing links here, and the besigner is
+  // reached from here — matching SCREEN_DETAILS rather than jumping a row
+  // straight into the editor.
+  COMPONENT_DETAILS = '/[orgSlug]/hosts/[host]/components/[componentId]',
   HOST_TEMPLATES = '/[orgSlug]/hosts/[host]/templates',
   HOST_MARKETING = '/[orgSlug]/hosts/[host]/marketing',
   HOST_BOOKINGS = '/[orgSlug]/hosts/[host]/bookings',
@@ -156,6 +160,11 @@ export interface RoutePayload {
   [Route.HOST_LOGIC]: { orgSlug: string; host: string }
   [Route.HOST_PRODUCTS]: { orgSlug: string; host: string }
   [Route.HOST_COMPONENTS]: { orgSlug: string; host: string }
+  [Route.COMPONENT_DETAILS]: {
+    orgSlug: string
+    host: string
+    componentId: string
+  }
   [Route.HOST_TEMPLATES]: { orgSlug: string; host: string }
   [Route.HOST_MARKETING]: { orgSlug: string; host: string }
   [Route.HOST_BOOKINGS]: { orgSlug: string; host: string }
