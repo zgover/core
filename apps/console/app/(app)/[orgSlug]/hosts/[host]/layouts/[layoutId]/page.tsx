@@ -17,8 +17,15 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import { ICON_VARIANT_BESIGNER } from '@aglyn/shared-data-enums'
 import { mdiPageLayoutBody } from '@aglyn/shared-data-mdi'
-import { CardDisplay, Container, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  CardDisplay,
+  Container,
+  GridItems,
+  MdiIcon,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -232,8 +239,30 @@ const LayoutDetails: NextPageWithLayout<Record<string, never>> = () => {
           children: definition?.displayName ?? 'Layout',
           icon: { path: mdiPageLayoutBody.path },
         }}
+        // The besigner is what this page exists to reach, so it belongs in
+        // the hero like the screen detail page's, not as a text button at
+        // the bottom of a card (AGL-702).
+        headerRight={
+          <Button
+            size="small"
+            variant="contained"
+            disabled={opening}
+            onClick={handleOpen()}
+            startIcon={
+              <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} />
+            }
+          >
+            {opening ? 'Opening…' : 'Open Besigner'}
+          </Button>
+        }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <GridItems
+            spacing={3}
+            items={[
+              {
+                size: { xs: 12, lg: 5 },
+                children: (
           <CardDisplay header={'Details'} contentGutterX contentGutterY>
             <Stack spacing={2}>
               <TextField
@@ -256,6 +285,10 @@ const LayoutDetails: NextPageWithLayout<Record<string, never>> = () => {
               <Typography variant="caption" color="text.secondary">
                 {`ID ${layoutId} — persisted in screen documents, so it never changes`}
               </Typography>
+              {/* Save stays with the fields it saves. Open-besigner moved to
+                  the hero, and "Back to layouts" is dropped — the breadcrumb
+                  already goes there, and the screen detail page carries no
+                  back button either (AGL-702). */}
               <Stack direction="row" spacing={1}>
                 <Button
                   variant="contained"
@@ -266,20 +299,14 @@ const LayoutDetails: NextPageWithLayout<Record<string, never>> = () => {
                 >
                   {'Save'}
                 </Button>
-                <Button
-                  size="small"
-                  disabled={opening}
-                  onClick={handleOpen()}
-                >
-                  {opening ? 'Opening…' : 'Open in besigner'}
-                </Button>
-                <Button size="small" onClick={() => router.push(listUrl)}>
-                  {'Back to layouts'}
-                </Button>
               </Stack>
             </Stack>
           </CardDisplay>
-
+                ),
+              },
+              {
+                size: { xs: 12, lg: 7 },
+                children: (
           <CardDisplay header={'Versions'} contentGutterX contentGutterY>
             {versions.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
@@ -333,6 +360,10 @@ const LayoutDetails: NextPageWithLayout<Record<string, never>> = () => {
               </Table>
             )}
           </CardDisplay>
+                ),
+              },
+            ]}
+          />
         </Container>
       </DashboardLayout>
     </>
