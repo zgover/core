@@ -113,7 +113,11 @@ export function OrgMembersCard() {
     [hosts, orgId],
   )
 
-  const request = useCallback(
+  // Low-level fetch that reports status + payload without side effects, so
+  // callers that treat an error as an expected branch (e.g. the add/invite
+  // probe below) can decide whether to surface it. `request` wraps this and
+  // keeps the toast-on-error behaviour every other caller relies on.
+  const rawRequest = useCallback(
     async (path: string, method: string, body?: Record<string, unknown>) => {
       const idToken = await (user as any)?.getIdToken?.()
       const response = await fetch(path, {
@@ -125,7 +129,15 @@ export function OrgMembersCard() {
         ...(body ? { body: JSON.stringify(body) } : {}),
       })
       const payload = await response.json().catch(() => ({}))
-      if (!response.ok) {
+      return { ok: response.ok, status: response.status, payload }
+    },
+    [user],
+  )
+
+  const request = useCallback(
+    async (path: string, method: string, body?: Record<string, unknown>) => {
+      const { ok, payload } = await rawRequest(path, method, body)
+      if (!ok) {
         enqueueSnackbar(payload?.error ?? 'Organization request failed', {
           variant: 'warning',
           persist: false,
@@ -134,7 +146,7 @@ export function OrgMembersCard() {
       }
       return payload
     },
-    [user, enqueueSnackbar],
+    [rawRequest, enqueueSnackbar],
   )
 
   const refresh = useCallback(async () => {
@@ -160,33 +172,62 @@ export function OrgMembersCard() {
     if (!target || !orgId || busy) return
     setBusy(true)
     try {
-      // Direct add when the account exists; fall back to an invite.
-      const added = await request('/api/orgs/members', 'POST', {
+      // Try a direct add when the account already exists. This is a silent
+      // probe: a 404 means "no Aglyn account yet", which is the normal path
+      // into an invite — not an error worth a toast. Any OTHER failure (seat
+      // quota, owner, permissions) is real and surfaced as-is, and we do NOT
+      // fall through to an invite for it.
+      const added = await rawRequest('/api/orgs/members', 'POST', {
         orgId,
         action: 'upsert',
         email: target,
         role,
         allHosts,
       })
-      if (!added) {
-        const invited = await request('/api/orgs/invites', 'POST', {
-          orgId,
-          action: 'create',
-          email: target,
-          role,
-          allHosts,
-        })
-        if (!invited) return
-        enqueueSnackbar(`Invited ${target}`, { variant: 'success' })
-      } else {
+      if (added.ok) {
         enqueueSnackbar(`Added ${target}`, { variant: 'success' })
+        setEmail('')
+        await refresh()
+        return
       }
+      if (added.status !== 404) {
+        enqueueSnackbar(added.payload?.error ?? 'Organization request failed', {
+          variant: 'warning',
+          persist: false,
+        })
+        return
+      }
+      // No account yet — create a pending invite instead.
+      const invited = await request('/api/orgs/invites', 'POST', {
+        orgId,
+        action: 'create',
+        email: target,
+        role,
+        allHosts,
+      })
+      if (!invited) return
+      enqueueSnackbar(
+        invited.emailed
+          ? `Invited ${target} — email sent`
+          : `Invited ${target} — they'll see it when they sign in`,
+        { variant: 'success' },
+      )
       setEmail('')
       await refresh()
     } finally {
       setBusy(false)
     }
-  }, [email, orgId, busy, role, allHosts, request, enqueueSnackbar, refresh])
+  }, [
+    email,
+    orgId,
+    busy,
+    role,
+    allHosts,
+    rawRequest,
+    request,
+    enqueueSnackbar,
+    refresh,
+  ])
 
   if (!currentOrg) return null
 

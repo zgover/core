@@ -124,10 +124,18 @@ async function handler(request: Request): Promise<Response> {
         targetUid = record.uid
         email = record.email ?? null
         displayName = record.displayName ?? null
-      } catch {
-        return Response.json({
-          error: 'No account with that identity — send an invite instead',
-        }, { status: 404 })
+      } catch (lookupError) {
+        // Only a genuinely-missing account is the "invite them instead" 404.
+        // Anything else (transient Admin SDK failure, misconfig) must NOT be
+        // masked as "no account" — that made real errors look like the
+        // account didn't exist, even for users who do (AGL-708).
+        const code = (lookupError as { code?: string } | null)?.code
+        if (code === 'auth/user-not-found' || code === 'auth/invalid-email') {
+          return Response.json({
+            error: 'No account with that identity — send an invite instead',
+          }, { status: 404 })
+        }
+        throw lookupError
       }
       if (targetUid === ownerUid) {
         return Response.json({ error: "The owner's membership can't be changed here" }, { status: 400 })
