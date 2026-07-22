@@ -434,6 +434,9 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
       flex: 1,
       minWidth: 220,
       type: 'string',
+      // Blank reads as a rendering gap; '--' reads as "nothing here",
+      // which is what the screens list has always shown.
+      valueFormatter: (value: any) => value || '--',
     },
     {
       field: 'updatedAt',

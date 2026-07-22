@@ -296,6 +296,9 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
       flex: 1,
       minWidth: 240,
       type: 'string',
+      // Blank reads as a rendering gap; '--' reads as "nothing here",
+      // which is what the screens list has always shown.
+      valueFormatter: (value: any) => value || '--',
     },
     {
       field: 'updatedAt',

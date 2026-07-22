@@ -361,6 +361,9 @@ function Layouts(props) {
       flex: 1,
       minWidth: 275,
       type: 'string',
+      // Blank reads as a rendering gap; '--' reads as "nothing here",
+      // which is what the screens list has always shown.
+      valueFormatter: (value: any) => value || '--',
     },
     {
       field: 'updatedAt',
