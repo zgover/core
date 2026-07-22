@@ -44,6 +44,7 @@ import { Chip, Tooltip } from '@mui/material'
 import {
   collection,
   doc,
+  getCountFromServer,
   getDoc,
   limit,
   query,
@@ -393,30 +394,44 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
         .catch(() => false)
       if (!confirmed) return
       const dequeue = queueLoading()
+      // Tracked outside the try so a failure part-way can say how far it
+      // actually got. Creating five pages is five writes, not one — there
+      // is no transaction to roll back, and silently reporting only the
+      // error would leave pages on the site the message never mentioned.
+      let created = 0
       try {
-        // Read the routing map fresh: the slug check and the quota both have
-        // to reflect anything published since this page loaded.
+        // Read the routing map fresh so the slug check reflects anything
+        // published since this page loaded.
         const hostSnapshot = await getDoc(doc(firestore, 'hosts', hostId))
-        const screens = (hostSnapshot.get('screens') ?? {}) as Record<
+        const routes = (hostSnapshot.get('screens') ?? {}) as Record<
           string,
           string
         >
+        // Count screen DOCUMENTS, which is what the server's quota counts —
+        // NOT the routing map, which holds only routed screens and so
+        // under-counts. Getting this wrong lets a doomed run start and
+        // abort half way, which is exactly what it did before this.
+        const screenCount = (
+          await getCountFromServer(
+            collection(firestore, 'hosts', hostId, 'screens'),
+          )
+        ).data().count
         // `- 1` because checkQuota allows while usage is BELOW the limit, so
-        // this asks "is the count after adding them still within plan?" —
-        // the same arithmetic the gallery's bundle card uses.
+        // this asks "is the count after adding them still within plan?"
         const quota = checkOrgQuota(
           org,
           'screensPerHost',
-          Object.keys(screens).length + pages.length - 1,
+          screenCount + pages.length - 1,
         )
         if (!quota.allowed) {
           return void enqueueSnackbar(
-            `This starter needs ${pages.length} screens — your plan allows ` +
-              `${quota.limit}. See Billing to upgrade.`,
+            `This starter needs ${pages.length} screens and this site has ` +
+              `${screenCount} — your plan allows ${quota.limit}. See Billing ` +
+              'to upgrade.',
             { variant: 'warning', persist: false },
           )
         }
-        const used = new Set<string>(Object.values(screens))
+        const used = new Set<string>(Object.values(routes))
         for (const page of pages) {
           // Same helper the single-template Use flow calls (AGL-672), so
           // create-screen → write-version → publish-route and its slug
@@ -430,6 +445,7 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
             slug: page.slug,
             usedSlugs: used,
           })
+          created += 1
         }
         enqueueSnackbar(
           `Added ${pages.length} screens from "${row.displayName}"`,
@@ -437,8 +453,13 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
         )
       } catch (error) {
         console.error(error)
+        const reason =
+          error instanceof Error ? error.message : 'Could not use the starter.'
         enqueueSnackbar(
-          error instanceof Error ? error.message : 'Could not use the starter.',
+          created
+            ? `Added ${created} of ${pages.length} pages, then stopped: ` +
+              `${reason} The pages already created are on your site.`
+            : reason,
           { variant: 'error', allowDuplicate: true },
         )
       } finally {
