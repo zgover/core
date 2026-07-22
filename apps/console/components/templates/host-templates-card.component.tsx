@@ -434,14 +434,28 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
       flex: 1,
       minWidth: 220,
       type: 'string',
+      // Blank reads as a rendering gap; '--' reads as "nothing here",
+      // which is what the screens list has always shown.
+      valueFormatter: (value: any) => value || '--',
     },
     {
       field: 'updatedAt',
       headerName: 'Updated',
-      minWidth: 160,
+      flex: 1,
+      minWidth: 170,
       type: 'date',
       valueGetter: (_value: any, row: any) =>
         row.template.updatedAt?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Created',
+      flex: 1,
+      minWidth: 170,
+      type: 'date',
+      valueGetter: (_value: any, row: any) =>
+        row.template.createdAt?.toDate?.() ?? null,
       valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
     {
@@ -503,6 +517,16 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
         columns={columns}
         noRowsLabel="No templates yet — use Create template above, save one from a screen, or install one from the marketplace"
         rows={rows}
+        onRowClick={({ row }) =>
+          router.push(
+            buildRoute(Route.TEMPLATE_DETAILS, {
+              orgSlug,
+              host,
+              templateId: row.template.$id,
+            }),
+          )
+        }
+        sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
         loading={status === 'loading'}
         initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
         pageSizeOptions={[5, 10, 15]}

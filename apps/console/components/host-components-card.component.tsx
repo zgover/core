@@ -296,12 +296,31 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
       flex: 1,
       minWidth: 240,
       type: 'string',
+      // Blank reads as a rendering gap; '--' reads as "nothing here",
+      // which is what the screens list has always shown.
+      valueFormatter: (value: any) => value || '--',
     },
     {
       field: 'updatedAt',
       headerName: 'Updated',
-      minWidth: 160,
+      flex: 1,
+      minWidth: 170,
       type: 'date',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Created',
+      flex: 1,
+      minWidth: 170,
+      type: 'date',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
       valueGetter: (value: any) => value?.toDate?.() ?? null,
       valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
@@ -387,6 +406,18 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
         columns={columns}
         noRowsLabel="No reusable components yet — use Create component above, or save one from the besigner"
         rows={components}
+        // The whole row opens the detail page (AGL-693); action cells stop
+        // propagation so a menu click never navigates underneath it.
+        onRowClick={({ id }) =>
+          router.push(
+            buildRoute(Route.COMPONENT_DETAILS, {
+              orgSlug,
+              host,
+              componentId: id as string,
+            }),
+          )
+        }
+        sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
         initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
         pageSizeOptions={[5, 10, 15]}
         pagination

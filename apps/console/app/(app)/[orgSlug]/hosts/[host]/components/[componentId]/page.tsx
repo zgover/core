@@ -213,6 +213,10 @@ const ComponentDetails: NextPageWithLayout<Record<string, never>> = () => {
       <NextPageTitle screen={definition?.displayName ?? 'Component'} />
       <DashboardLayout
         navTabItems={hostNavTabItems(orgSlug, host)}
+        // Keep the parent tab lit on a detail page, the way the
+        // admin detail pages do — without this the nav loses its
+        // selected state as soon as you open a row.
+        activeTab={buildRoute(Route.HOST_COMPONENTS, { orgSlug, host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

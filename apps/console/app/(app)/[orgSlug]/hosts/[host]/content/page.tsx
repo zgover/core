@@ -68,7 +68,10 @@ import { useOrgSlug } from '../../../../../../hooks/use-org-scope'
 import { hasEntitlement } from '../../../../../../constants/entitlements'
 import useCurrentOrg from '../../../../../../hooks/use-current-org'
 import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
-import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
+import {
+  CONTENT_MAX_WIDTH,
+  TABLE_HEAD_HEIGHT,
+} from '../../../../../../constants/shared'
 import useFirestoreCollection from '../../../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../../../hooks/use-firestore-doc'
 import useHostActivityLogger from '../../../../../../hooks/use-host-activity-logger'
@@ -750,17 +753,46 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                 </Typography>
               ) : (
                 <Table size="small">
-                  <TableHead>
+                  <TableHead
+                    sx={{ '& .MuiTableCell-head': { height: TABLE_HEAD_HEIGHT } }}
+                  >
                     <TableRow>
                       <TableCell>{'Title'}</TableCell>
                       <TableCell>{'Status'}</TableCell>
                       <TableCell>{'Updated'}</TableCell>
+                      <TableCell>{'Created'}</TableCell>
                       <TableCell align="right">{'Actions'}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {entries.map((entry) => (
-                      <TableRow key={entry.$id} hover>
+                    {entries.map((entry) => {
+                      // Row click opens the same editor the Edit button does,
+                      // matching the artifact listings (AGL-698).
+                      const openEntry = () => {
+                        setBodyTab('visual')
+                        setEditor({
+                          id: entry.$id,
+                          title: entry.title ?? '',
+                          excerpt: entry.excerpt ?? '',
+                          body: entry.body ?? '',
+                          coverImage: entry.coverImage ?? '',
+                          seoTitle: entry.seoTitle ?? '',
+                          seoDescription: entry.seoDescription ?? '',
+                          authorName: entry.authorName ?? '',
+                          categoryId: entry.categoryId ?? '',
+                          legacyCategory: entry.category ?? '',
+                          tags: Array.isArray(entry.tags)
+                            ? entry.tags.join(', ')
+                            : '',
+                        })
+                      }
+                      return (
+                      <TableRow
+                        key={entry.$id}
+                        hover
+                        onClick={openEntry}
+                        sx={{ cursor: 'pointer' }}
+                      >
                         <TableCell>
                           {entry.title}
                           <Typography
@@ -792,28 +824,15 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                         <TableCell>
                           {entry.updatedAt?.toDate?.().toLocaleString() ?? '--'}
                         </TableCell>
-                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setBodyTab('visual')
-                              setEditor({
-                                id: entry.$id,
-                                title: entry.title ?? '',
-                                excerpt: entry.excerpt ?? '',
-                                body: entry.body ?? '',
-                                coverImage: entry.coverImage ?? '',
-                                seoTitle: entry.seoTitle ?? '',
-                                seoDescription: entry.seoDescription ?? '',
-                                authorName: entry.authorName ?? '',
-                                categoryId: entry.categoryId ?? '',
-                                legacyCategory: entry.category ?? '',
-                                tags: Array.isArray(entry.tags)
-                                  ? entry.tags.join(', ')
-                                  : '',
-                              })
-                            }}
-                          >
+                        <TableCell>
+                          {entry.createdAt?.toDate?.().toLocaleString() ?? '--'}
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ whiteSpace: 'nowrap' }}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <Button size="small" onClick={openEntry}>
                             {'Edit'}
                           </Button>
                           <Button
@@ -865,7 +884,8 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
                           </Button>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      )
+                    })}
                   </TableBody>
                 </Table>
               )}

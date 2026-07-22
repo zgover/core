@@ -76,7 +76,7 @@ import {
   updateDoc,
   writeBatch,
 } from 'firebase/firestore'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useHostResourceApi } from '@aglyn/tenant-feature-instance'
 import AuthErrorAlertComponent from '../../../../../../../components/auth-error-alert.component'
@@ -124,6 +124,7 @@ CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 function Screens(props) {
   const params = useParams<{ hostId: string }>()
   const orgSlug = useOrgSlug()
+  const router = useRouter()
   const host = useHostSubdomain()
   const hostId = useHostId()
   const { queueLoading, loading } = useLoading()
@@ -508,6 +509,44 @@ function Screens(props) {
     }
   }, [translationsFor, firestore, hostId, enqueueSnackbar])
 
+  // Detail sits with the drag handle on the LEFT of the row (AGL-693) —
+  // it is navigation, not a row action, and it reads better beside the
+  // handle than lost among the trailing icons.
+  const renderRowLeadingActions = useCallback(
+    (row: any) => (
+      <IconButton
+        size="small"
+        aria-label={`Details for ${row.displayName ?? row.$id}`}
+        component={CellItemLinkComponent as any}
+        {...({
+          href: buildRoute(Route.SCREEN_DETAILS, {
+            orgSlug,
+            host,
+            screenId: row.$id,
+            versionId: row.versionId as string,
+          }),
+        } as any)}
+      >
+        <MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} size={0.8} />
+      </IconButton>
+    ),
+    [orgSlug, host],
+  )
+
+  const handleRowOpen = useCallback(
+    (row: any) => {
+      router.push(
+        buildRoute(Route.SCREEN_DETAILS, {
+          orgSlug,
+          host,
+          screenId: row.$id,
+          versionId: row.versionId as string,
+        }),
+      )
+    },
+    [router, orgSlug, host],
+  )
+
   const renderRowActions = useCallback(
     (row: ScreenHierarchyRow) => {
       // AGL-374: buildScreenLiveUrl handles slug→path normalization,
@@ -527,20 +566,6 @@ function Screens(props) {
             <MdiIcon path={mdiOpenInNew.path} size={0.8} />
           </IconButton>
         ) : null}
-        <IconButton
-          size="small"
-          aria-label="detail"
-          component={CellItemLinkComponent as any}
-          {...({
-            href: buildRoute(Route.SCREEN_DETAILS, { orgSlug, 
-              host,
-              screenId: row.$id,
-              versionId: row.versionId as string,
-            }),
-          } as any)}
-        >
-          <MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} size={0.8} />
-        </IconButton>
         {hostLocales.length ? (
           <IconButton
             size="small"
@@ -693,6 +718,8 @@ function Screens(props) {
             {/*  getItemId={(item) => item.$id}*/}
             {/*/>*/}
             <ScreensHierarchyTableComponent
+              renderRowLeadingActions={renderRowLeadingActions}
+              onRowOpen={handleRowOpen}
               screens={screens}
               routingMap={routingMap}
               loading={status === 'loading'}

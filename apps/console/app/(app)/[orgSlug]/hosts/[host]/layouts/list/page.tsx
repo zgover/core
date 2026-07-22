@@ -59,7 +59,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useHostResourceApi } from '@aglyn/tenant-feature-instance'
 import AuthErrorAlertComponent from '../../../../../../../components/auth-error-alert.component'
@@ -94,6 +94,7 @@ CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 function Layouts(props) {
   const params = useParams<{ hostId: string }>()
   const orgSlug = useOrgSlug()
+  const router = useRouter()
   const host = useHostSubdomain()
   const hostId = useHostId()
   const { queueLoading, loading } = useLoading()
@@ -360,24 +361,33 @@ function Layouts(props) {
       flex: 1,
       minWidth: 275,
       type: 'string',
+      // Blank reads as a rendering gap; '--' reads as "nothing here",
+      // which is what the screens list has always shown.
+      valueFormatter: (value: any) => value || '--',
     },
     {
       field: 'updatedAt',
       headerName: 'Updated',
       flex: 1,
-      minWidth: 150,
+      minWidth: 170,
       type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
     {
       field: 'createdAt',
       headerName: 'Created',
       flex: 1,
-      minWidth: 150,
+      minWidth: 170,
       type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
   ]
 
@@ -465,6 +475,16 @@ function Layouts(props) {
               columns={columns}
               noRowsLabel="No layouts"
               rows={layouts}
+              onRowClick={({ id }) =>
+                router.push(
+                  buildRoute(Route.LAYOUT_DETAILS, {
+                    orgSlug,
+                    host,
+                    layoutId: id as string,
+                  }),
+                )
+              }
+              sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
               loading={status === 'loading'}
               initialState={{ pagination: { paginationModel: { pageSize } } }}
               onPaginationModelChange={(model) => setPageSize(model.pageSize)}

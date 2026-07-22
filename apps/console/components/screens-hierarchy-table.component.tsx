@@ -88,11 +88,15 @@ export interface ScreensHierarchyTableProps {
   loading?: boolean
   onMoveScreen: (move: ScreenMoveRequest) => void | Promise<void>
   renderRowActions: (row: ScreenHierarchyRow) => ReactNode
+  /** Actions rendered beside the drag handle, left of the name (AGL-693). */
+  renderRowLeadingActions?: (row: ScreenHierarchyRow) => ReactNode
+  /** Row click target — the whole row opens the screen's detail page. */
+  onRowOpen?: (row: ScreenHierarchyRow) => void
   /** Onboarding CTA rendered inside the empty state (AGL-125). */
   emptyAction?: ReactNode
 }
 
-const COLUMN_COUNT = 7
+const COLUMN_COUNT = 8
 
 type VisibleRow = {
   row: ScreenHierarchyRow
@@ -119,8 +123,9 @@ function GapDropRow(props: {
   id: string
   disabled: boolean
   depth: number
+  dragging: boolean
 }) {
-  const { id, disabled, depth } = props
+  const { id, disabled, depth, dragging } = props
   const { isOver, setNodeRef } = useDroppable({ id, disabled })
   return (
     <TableRow>
@@ -130,9 +135,11 @@ function GapDropRow(props: {
         padding="none"
         sx={{
           border: 0,
-          // Constant height: droppable rects are measured while dragging, so
-          // the layout must not shift when a drag starts.
-          height: 6,
+          // Zero-height until a drag starts, otherwise every row carries a
+          // 6px band of dead space above it. Safe to collapse because the
+          // DndContext measures with MeasuringStrategy.Always, so the rects
+          // are re-read after the rows expand rather than once up front.
+          height: dragging ? 6 : 0,
           position: 'relative',
         }}
       >
@@ -196,6 +203,9 @@ function ScreenTableRow(props: {
   nestDisabled: boolean
   onToggleCollapse: (id: ScreenUid) => void
   renderRowActions: ScreensHierarchyTableProps['renderRowActions']
+  renderRowLeadingActions: ScreensHierarchyTableProps['renderRowLeadingActions']
+  anyExpandable: boolean
+  onRowOpen: ScreensHierarchyTableProps['onRowOpen']
   routingMap?: Record<ScreenUid, string>
 }) {
   const {
@@ -204,6 +214,9 @@ function ScreenTableRow(props: {
     nestDisabled,
     onToggleCollapse,
     renderRowActions,
+    renderRowLeadingActions,
+    onRowOpen,
+    anyExpandable,
     routingMap,
   } = props
   const { row, depth, hasChildren } = entry
@@ -230,7 +243,9 @@ function ScreenTableRow(props: {
         setDragRef(node)
       }}
       hover
+      onClick={onRowOpen ? () => onRowOpen(row) : undefined}
       sx={{
+        cursor: onRowOpen ? 'pointer' : undefined,
         opacity: isDragging ? 0.4 : 1,
         ...(isOver &&
           !nestDisabled && {
@@ -240,7 +255,18 @@ function ScreenTableRow(props: {
           }),
       }}
     >
-      <TableCell sx={{ pl: 2 + depth * 3 }}>
+      {/* Row controls live in their OWN leading column (drag, collapse, and
+          the detail link) so the "Display name" heading lines up with the
+          name itself. Previously the controls sat inside the name cell and
+          pushed the text a couple of icons to the right of its heading. */}
+      <TableCell
+        padding="none"
+        // width '1%' + nowrap is the table idiom for "only as wide as its
+        // content". MUI sx reads a bare `1` as 100%, which made this column
+        // swallow the row.
+        sx={{ pl: 1 + depth * 3, whiteSpace: 'nowrap', width: '1%' }}
+        onClick={(event) => event.stopPropagation()}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <IconButton
             ref={setActivatorNodeRef}
@@ -267,18 +293,27 @@ function ScreenTableRow(props: {
                 size={0.7}
               />
             </IconButton>
-          ) : (
+          ) : anyExpandable ? (
+            // Reserve the toggle slot only when the tree actually nests —
+            // on a flat list this was 28px of dead width in every row.
             <Box sx={{ width: 28 }} />
-          )}
-          <Typography variant="body2">{row.displayName || '--'}</Typography>
+          ) : null}
+          {renderRowLeadingActions?.(row)}
         </Box>
+      </TableCell>
+      <TableCell>
+        <Typography variant="body2">{row.displayName || '--'}</Typography>
       </TableCell>
       <TableCell>{row.$id}</TableCell>
       <TableCell>{path ? screenRoutePathToUrl(path) : '--'}</TableCell>
       <TableCell>{row.description || '--'}</TableCell>
       <TableCell>{row.updatedAt?.toDate?.().toLocaleString() || '--'}</TableCell>
       <TableCell>{row.createdAt?.toDate?.().toLocaleString() || '--'}</TableCell>
-      <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+      <TableCell
+        align="right"
+        sx={{ whiteSpace: 'nowrap' }}
+        onClick={(event) => event.stopPropagation()}
+      >
         {renderRowActions(row)}
       </TableCell>
     </TableRow>
@@ -305,12 +340,21 @@ export function ScreensHierarchyTableComponent(
     loading,
     onMoveScreen,
     renderRowActions,
+    renderRowLeadingActions,
+    onRowOpen,
     emptyAction,
   } = props
   const [collapsedIds, setCollapsedIds] = useState<Set<ScreenUid>>(new Set())
   const [activeId, setActiveId] = useState<ScreenUid | undefined>(undefined)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  )
+
+  // True when any row in the tree has children, i.e. a collapse toggle can
+  // appear. Drives whether rows reserve space for that toggle.
+  const anyExpandable = useMemo(
+    () => screens.some((entry: any) => Boolean(entry.parentId)),
+    [screens],
   )
 
   const screensById = useMemo(() => {
@@ -415,7 +459,8 @@ export function ScreensHierarchyTableComponent(
               screens table reads as a different, cramped design. */}
           <TableHead sx={{ '& .MuiTableCell-head': { height: TABLE_HEAD_HEIGHT } }}>
             <TableRow>
-              <TableCell sx={{ minWidth: 240 }}>Display name</TableCell>
+              <TableCell padding="none" sx={{ width: '1%' }} />
+              <TableCell sx={{ minWidth: 200 }}>Display name</TableCell>
               <TableCell sx={{ minWidth: 130 }}>ID</TableCell>
               <TableCell sx={{ minWidth: 120 }}>Path</TableCell>
               <TableCell sx={{ minWidth: 200 }}>Description</TableCell>
@@ -475,6 +520,7 @@ export function ScreensHierarchyTableComponent(
                     id={`drop:gap:${row.$id}`}
                     disabled={gapDisabled}
                     depth={entry.depth}
+                    dragging={Boolean(activeId)}
                   />
                   <ScreenTableRow
                     entry={entry}
@@ -482,6 +528,9 @@ export function ScreensHierarchyTableComponent(
                     nestDisabled={nestDisabled}
                     onToggleCollapse={handleToggleCollapse}
                     renderRowActions={renderRowActions}
+                    renderRowLeadingActions={renderRowLeadingActions}
+                    onRowOpen={onRowOpen}
+                    anyExpandable={anyExpandable}
                     routingMap={routingMap}
                   />
                 </Fragment>
