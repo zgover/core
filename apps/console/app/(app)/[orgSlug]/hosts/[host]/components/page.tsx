@@ -16,8 +16,16 @@
  */
 'use client'
 
+import * as Aglyn from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container } from '@aglyn/shared-ui-jsx'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
+import { Button } from '@mui/material'
+import { useFirestore } from '@aglyn/tenant-feature-instance'
+import { doc, setDoc } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
+import { useCallback, useState } from 'react'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import HostComponentsCard from '../../../../../../components/host-components-card.component'
@@ -39,6 +47,50 @@ const HostComponents: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
   const orgSlug = useOrgSlug()
   const host = useHostSubdomain()
+  const firestore = useFirestore()
+  const router = useRouter()
+  const { enqueueSnackbar } = useSnackbar()
+
+  // Create lives in the page header, not inside the card — that is where
+  // Screens and Layouts put theirs, and a create action buried in the list
+  // it creates into reads as part of the list (AGL-693).
+  const [creating, setCreating] = useState(false)
+  const handleCreate = useCallback(async () => {
+    if (creating) return
+    setCreating(true)
+    try {
+      const componentId = Aglyn.createResourceUid()
+      const timestamp = Timestamp.now()
+      await setDoc(doc(firestore, 'hosts', hostId, 'components', componentId), {
+        hostId,
+        displayName: 'Untitled component',
+        description: '',
+        // A canvas needs a ROOT node to render — an empty `{}` renders as
+        // "Invalid node" in the besigner (AGL-693).
+        rootId: Aglyn.CANVAS_ROOT_ELEMENT_ID,
+        nodes: {
+          [Aglyn.CANVAS_ROOT_ELEMENT_ID]: {
+            $id: Aglyn.CANVAS_ROOT_ELEMENT_ID,
+            componentId: 'div',
+            nodes: [],
+          },
+        },
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      })
+      router.push(
+        buildRoute(Route.COMPONENT_DETAILS, { orgSlug, host, componentId }),
+      )
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('Could not create the component', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } finally {
+      setCreating(false)
+    }
+  }, [creating, firestore, hostId, router, orgSlug, host, enqueueSnackbar])
 
   return (
     <>
@@ -60,6 +112,16 @@ const HostComponents: NextPageWithLayout<Record<string, never>> = () => {
           children: 'Reusable Components',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },
         }}
+        headerRight={
+          <Button
+            size="small"
+            variant="contained"
+            disabled={creating}
+            onClick={handleCreate}
+          >
+            {creating ? 'Creating…' : 'Create Component'}
+          </Button>
+        }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <HostComponentsCard hostId={hostId} />

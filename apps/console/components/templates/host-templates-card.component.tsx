@@ -18,7 +18,20 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import type { TemplateKind } from '@aglyn/aglyn'
-import { AppLink, CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import {
+  AppLink,
+  CardDisplay,
+  DataTableComponent,
+  MdiIcon,
+  useConfirmationContext,
+} from '@aglyn/shared-ui-jsx'
+import { GridActionsCellItem, type GridColDef } from '@mui/x-data-grid'
+import {
+  mdiDownloadOutline,
+  mdiPencilOutline,
+  mdiPlusBoxOutline,
+  mdiTrashCanOutline,
+} from '@aglyn/shared-data-mdi'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
@@ -46,6 +59,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { docsHelp } from '../../constants/docs-links'
+import { TABLE_ROW_HEIGHT } from '../../constants/shared'
 import { buildRoute, Route } from '../../constants/route-links'
 import { useHostSubdomain } from '../host-id-provider'
 import { useOrgSlug } from '../../hooks/use-org-scope'
@@ -362,211 +376,138 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
     [confirm, firestore, hostId, enqueueSnackbar],
   )
 
-  // Create from the listing (AGL-694). Templates could previously only be
-  // born from "Save as template" elsewhere in the product, so the page that
-  // lists them offered no way to make one.
-  //
-  // Written with `source.type: 'authored'` explicitly rather than left
-  // absent: provenance is what the badge and the marketplace update path key
-  // off, and an absent source reads as "unknown" rather than "mine".
-  const [creating, setCreating] = useState(false)
-  const handleCreate = useCallback(async () => {
-    if (creating) return
-    setCreating(true)
-    try {
-      const templateId = Aglyn.createResourceUid()
-      const timestamp = Timestamp.now()
-      await setDoc(doc(firestore, 'hosts', hostId, 'templates', templateId), {
-        hostId,
-        kind: 'page',
-        displayName: 'Untitled template',
-        description: '',
-        nodes: {},
-        source: { type: 'authored' },
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      })
-      router.push(
-        buildRoute(Route.TEMPLATE_DETAILS, { orgSlug, host, templateId }),
-      )
-    } catch (error) {
-      console.error(error)
-      enqueueSnackbar('Could not create the template', {
-        variant: 'error',
-        allowDuplicate: true,
-      })
-    } finally {
-      setCreating(false)
-    }
-  }, [creating, firestore, hostId, router, orgSlug, host, enqueueSnackbar])
+  // Matches the layouts and screens column/action shape (AGL-694).
+  const columns: GridColDef[] = [
+    {
+      field: 'displayName',
+      headerName: 'Display name',
+      minWidth: 220,
+      type: 'string',
+      renderCell: ({ row }: any) => (
+        <AppLink
+          href={buildRoute(Route.TEMPLATE_DETAILS, {
+            orgSlug,
+            host,
+            templateId: row.template.$id,
+          })}
+        >
+          {row.pageCount > 1
+            ? `${row.displayName} (${row.pageCount} pages)`
+            : row.displayName}
+        </AppLink>
+      ),
+    },
+    {
+      field: 'kind',
+      headerName: 'Kind',
+      minWidth: 110,
+      type: 'string',
+      valueGetter: (_value: any, row: any) => row.template.kind ?? 'page',
+    },
+    {
+      field: 'source',
+      headerName: 'Source',
+      minWidth: 150,
+      sortable: false,
+      renderCell: ({ row }: any) => {
+        const chip = sourceChip(row.template.source, row.template.editedAt)
+        return (
+          // Provenance is server-managed (AGL-666), so this badge means
+          // something — a client cannot claim a marketplace origin.
+          <Tooltip
+            title={
+              row.template.source?.type === 'marketplace'
+                ? 'Installed from the marketplace'
+                : row.template.source?.type === 'starter'
+                  ? 'A first-party starter'
+                  : 'Saved from this site'
+            }
+          >
+            <Chip size="small" label={chip.label} color={chip.color} />
+          </Tooltip>
+        )
+      },
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      flex: 1,
+      minWidth: 220,
+      type: 'string',
+    },
+    {
+      field: 'updatedAt',
+      headerName: 'Updated',
+      minWidth: 160,
+      type: 'date',
+      valueGetter: (_value: any, row: any) =>
+        row.template.updatedAt?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 160,
+      getActions: ({ row }: any) => {
+        const template = row.template
+        const actions = [
+          <GridActionsCellItem
+            key="action-edit"
+            icon={<MdiIcon path={mdiPencilOutline.path} />}
+            label="Edit in besigner"
+            LinkComponent={AppLink as any}
+            {...({
+              href: buildRoute(Route.TEMPLATE_BESIGNER, {
+                orgSlug,
+                host,
+                templateId: template.$id,
+              }),
+            } as any)}
+          />,
+          <GridActionsCellItem
+            key="action-use"
+            icon={<MdiIcon path={mdiPlusBoxOutline.path} />}
+            label="Use"
+            onClick={() => setUseTemplate(template)}
+          />,
+          <GridActionsCellItem
+            key="action-delete"
+            icon={<MdiIcon path={mdiTrashCanOutline.path} />}
+            label="Delete"
+            showInMenu
+            onClick={handleDelete(template)}
+          />,
+        ]
+        if (hasUpdate(template)) {
+          actions.unshift(
+            <GridActionsCellItem
+              key="action-update"
+              icon={<MdiIcon path={mdiDownloadOutline.path} />}
+              label="Update available"
+              disabled={updating === template.$id}
+              onClick={handleUpdate(template)}
+            />,
+          )
+        }
+        return actions
+      },
+    },
+  ]
 
   return (
-    <CardDisplay
-      header={'Templates'}
-      help={docsHelp('templatesLibrary', { anchor: '#the-three-kinds' })}
-      contentGutterX
-      contentGutterY
-    >
-      {status === 'loading' ? (
-        <Typography variant="body2" color="text.secondary">
-          {'Loading…'}
-        </Typography>
-      ) : total === 0 ? (
-        <Stack spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-          <Typography variant="body2" color="text.secondary">
-            {'No templates yet. Create one here, save one from the Screens, ' +
-              'Layouts or Components list — look for “Save as template” — ' +
-              'or install one from the marketplace.'}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {'Templates stay out of your live site until you use them.'}
-          </Typography>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            disabled={creating}
-            onClick={handleCreate}
-          >
-            {creating ? 'Creating…' : 'Create template'}
-          </Button>
-        </Stack>
-      ) : (
-        <>
-          <Stack direction="row" sx={{ justifyContent: 'flex-end', mb: 1.5 }}>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              disabled={creating}
-              onClick={handleCreate}
-            >
-              {creating ? 'Creating…' : 'Create template'}
-            </Button>
-          </Stack>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>{'Display name'}</TableCell>
-                <TableCell>{'Kind'}</TableCell>
-                <TableCell>{'Source'}</TableCell>
-                <TableCell>{'Description'}</TableCell>
-                <TableCell>{'Updated'}</TableCell>
-                <TableCell align="right">{'Actions'}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => {
-                const template = row.template
-                const chip = sourceChip(template.source, template.editedAt)
-                return (
-                  <TableRow key={row.key} hover>
-                    <TableCell>
-                      <Stack spacing={0.25}>
-                        <AppLink
-                          href={buildRoute(Route.TEMPLATE_DETAILS, {
-                            orgSlug,
-                            host,
-                            templateId: template.$id,
-                          })}
-                        >
-                          {row.displayName}
-                        </AppLink>
-                        {row.pageCount > 1 ? (
-                          <Typography variant="caption" color="text.secondary">
-                            {`${row.pageCount} pages`}
-                          </Typography>
-                        ) : null}
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary">
-                        {template.kind ?? 'page'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {/* Provenance is server-managed (AGL-666), so this
-                          badge means something — a client cannot claim a
-                          marketplace origin for its own work. */}
-                      <Tooltip
-                        title={
-                          template.source?.type === 'marketplace'
-                            ? `Installed from the marketplace${
-                                template.source.version
-                                  ? ` (v${template.source.version})`
-                                  : ''
-                              }`
-                            : template.source?.type === 'starter'
-                              ? 'A first-party starter'
-                              : 'Saved from this site'
-                        }
-                      >
-                        <Chip size="small" label={chip.label} color={chip.color} />
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {row.description || '--'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {template.updatedAt?.toDate?.().toLocaleString() ?? '--'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                      {hasUpdate(template) ? (
-                        <Button
-                          size="small"
-                          color="secondary"
-                          disabled={updating === template.$id}
-                          aria-label={`Update ${row.displayName}`}
-                          onClick={handleUpdate(template)}
-                        >
-                          {updating === template.$id
-                            ? 'Updating…'
-                            : 'Update available'}
-                        </Button>
-                      ) : null}
-                      <Button
-                        size="small"
-                        aria-label={`Edit ${row.displayName}`}
-                        component={AppLink as any}
-                        {...({ componentVariant: 'naked' } as any)}
-                        href={buildRoute(Route.TEMPLATE_BESIGNER, {
-                          orgSlug,
-                          host,
-                          templateId: template.$id,
-                        })}
-                      >
-                        {'Edit'}
-                      </Button>
-                      {/* Named for screen readers — "Use" alone repeats
-                          once per row with no indication of which. */}
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        aria-label={`Use ${row.displayName}`}
-                        onClick={() => setUseTemplate(template)}
-                      >
-                        {'Use'}
-                      </Button>
-                      <Button
-                        size="small"
-                        color="error"
-                        aria-label={`Delete ${row.displayName}`}
-                        onClick={handleDelete(template)}
-                      >
-                        {'Delete'}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </>
-      )}
+    <CardDisplay>
+      <DataTableComponent
+        rowHeight={TABLE_ROW_HEIGHT}
+        getRowId={(row) => row.key}
+        columns={columns}
+        noRowsLabel="No templates yet — use Create template above, save one from a screen, or install one from the marketplace"
+        rows={rows}
+        loading={status === 'loading'}
+        initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+        pageSizeOptions={[5, 10, 15]}
+        pagination
+      />
       <UseTemplateDialog
         hostId={hostId}
         template={useTemplate}
