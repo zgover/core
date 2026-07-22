@@ -16,8 +16,16 @@
  */
 'use client'
 
+import * as Aglyn from '@aglyn/aglyn'
 import { mdiBookmarkOutline } from '@aglyn/shared-data-mdi'
 import { Container } from '@aglyn/shared-ui-jsx'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
+import { Button } from '@mui/material'
+import { useFirestore } from '@aglyn/tenant-feature-instance'
+import { doc, setDoc } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
+import { useCallback, useState } from 'react'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import HostDisplayNameComponent from '../../../../../../components/host-display-name.component'
@@ -43,6 +51,51 @@ const HostTemplates: NextPageWithLayout<Record<string, never>> = () => {
   const hostId = useHostId()
   const orgSlug = useOrgSlug()
   const host = useHostSubdomain()
+  const firestore = useFirestore()
+  const router = useRouter()
+  const { enqueueSnackbar } = useSnackbar()
+
+  // Create sits in the page header alongside Screens and Layouts (AGL-694).
+  const [creating, setCreating] = useState(false)
+  const handleCreate = useCallback(async () => {
+    if (creating) return
+    setCreating(true)
+    try {
+      const templateId = Aglyn.createResourceUid()
+      const timestamp = Timestamp.now()
+      await setDoc(doc(firestore, 'hosts', hostId, 'templates', templateId), {
+        hostId,
+        kind: 'page',
+        displayName: 'Untitled template',
+        description: '',
+        // A canvas needs a ROOT node — `{}` renders as "Invalid node".
+        rootId: Aglyn.CANVAS_ROOT_ELEMENT_ID,
+        nodes: {
+          [Aglyn.CANVAS_ROOT_ELEMENT_ID]: {
+            $id: Aglyn.CANVAS_ROOT_ELEMENT_ID,
+            componentId: 'div',
+            nodes: [],
+          },
+        },
+        // Explicit rather than absent: an absent source reads as "unknown"
+        // to the badge and the marketplace update path, not as "mine".
+        source: { type: 'authored' },
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      })
+      router.push(
+        buildRoute(Route.TEMPLATE_DETAILS, { orgSlug, host, templateId }),
+      )
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('Could not create the template', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } finally {
+      setCreating(false)
+    }
+  }, [creating, firestore, hostId, router, orgSlug, host, enqueueSnackbar])
 
   return (
     <>
@@ -65,6 +118,16 @@ const HostTemplates: NextPageWithLayout<Record<string, never>> = () => {
           children: 'Templates',
           icon: { path: mdiBookmarkOutline.path },
         }}
+        headerRight={
+          <Button
+            size="small"
+            variant="contained"
+            disabled={creating}
+            onClick={handleCreate}
+          >
+            {creating ? 'Creating…' : 'Create Template'}
+          </Button>
+        }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <HostTemplatesCard hostId={hostId} />

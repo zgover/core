@@ -16,7 +16,21 @@
  */
 'use client'
 
-import { AppLink, CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import {
+  AppLink,
+  CardDisplay,
+  DataTableComponent,
+  MdiIcon,
+  useConfirmationContext,
+} from '@aglyn/shared-ui-jsx'
+import { GridActionsCellItem, type GridColDef } from '@mui/x-data-grid'
+import {
+  mdiBookmarkOutline,
+  mdiPencilOutline,
+  mdiStorefrontOutline,
+  mdiTrashCanOutline,
+  mdiVectorSquare,
+} from '@aglyn/shared-data-mdi'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
@@ -50,6 +64,7 @@ import { useHostSubdomain } from './host-id-provider'
 import { useCallback, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { docsHelp } from '../constants/docs-links'
+import { TABLE_ROW_HEIGHT } from '../constants/shared'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 import SaveAsTemplateDialog, {
   type SaveAsTemplateSource,
@@ -254,205 +269,128 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     [confirm, firestore, hostId, enqueueSnackbar],
   )
 
-  // Create from the listing (AGL-693). Until now a reusable component could
-  // only be born inside the besigner via "Save as reusable component", so the
-  // page that lists them offered no way to make one.
-  //
-  // The component doc is created empty; the first version is minted lazily by
-  // handleOpenInBesigner, which is the path that already existed for the
-  // components that predate versioning. Creating a version here too would
-  // mean two places that decide what an initial version looks like.
-  const [creating, setCreating] = useState(false)
-  const handleCreate = useCallback(async () => {
-    if (creating) return
-    setCreating(true)
-    try {
-      const componentId = Aglyn.createResourceUid()
-      const timestamp = Timestamp.now()
-      await setDoc(doc(firestore, 'hosts', hostId, 'components', componentId), {
-        hostId,
-        displayName: 'Untitled component',
-        description: '',
-        // A canvas needs a ROOT node to render (AGL-693). Created empty as
-        // `{}`, the besigner showed "Invalid node" — same shape the screens
-        // list writes for a new screen.
-        rootId: Aglyn.CANVAS_ROOT_ELEMENT_ID,
-        nodes: {
-          [Aglyn.CANVAS_ROOT_ELEMENT_ID]: {
-            $id: Aglyn.CANVAS_ROOT_ELEMENT_ID,
-            componentId: 'div',
-            nodes: [],
-          },
-        },
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      })
-      router.push(
-        buildRoute(Route.COMPONENT_DETAILS, { orgSlug, host, componentId }),
-      )
-    } catch (error) {
-      console.error(error)
-      enqueueSnackbar('Could not create the component', {
-        variant: 'error',
-        allowDuplicate: true,
-      })
-    } finally {
-      setCreating(false)
-    }
-  }, [creating, firestore, hostId, router, orgSlug, host, enqueueSnackbar])
+  // Same column/action shape the layouts and screens lists use (AGL-693),
+  // so the four artifact listings read as one product rather than three.
+  const columns: GridColDef[] = [
+    {
+      field: 'displayName',
+      headerName: 'Display name',
+      minWidth: 220,
+      type: 'string',
+      renderCell: ({ id, value }: any) => (
+        <AppLink
+          href={buildRoute(Route.COMPONENT_DETAILS, {
+            orgSlug,
+            host,
+            componentId: id as string,
+          })}
+        >
+          {value || (id as string)}
+        </AppLink>
+      ),
+    },
+    { field: '$id', headerName: 'ID', type: 'string', minWidth: 150 },
+    {
+      field: 'description',
+      headerName: 'Description',
+      flex: 1,
+      minWidth: 240,
+      type: 'string',
+    },
+    {
+      field: 'updatedAt',
+      headerName: 'Updated',
+      minWidth: 160,
+      type: 'date',
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 190,
+      getActions: ({ id, row }: any) => {
+        const definition = { ...row, $id: id as string }
+        return [
+          <GridActionsCellItem
+            key="action-besigner"
+            icon={<MdiIcon path={mdiVectorSquare.path} />}
+            label="Open in besigner"
+            disabled={opening === definition.$id}
+            onClick={() => void handleOpenInBesigner(definition)}
+          />,
+          <GridActionsCellItem
+            key="action-rename"
+            icon={<MdiIcon path={mdiPencilOutline.path} />}
+            label="Rename"
+            onClick={() =>
+              setEditor({
+                id: definition.$id,
+                name: definition.displayName ?? '',
+                description: definition.description ?? '',
+              })
+            }
+          />,
+          <GridActionsCellItem
+            key="action-save-template"
+            icon={<MdiIcon path={mdiBookmarkOutline.path} />}
+            label="Save as template"
+            showInMenu
+            onClick={() =>
+              setSaveTemplateFor({
+                kind: 'component',
+                displayName: definition.displayName ?? '',
+                // Unlike screens and layouts, a component definition holds
+                // its own nodes — there is no version doc to fetch.
+                loadNodes: async () =>
+                  definition.nodes
+                    ? { nodes: definition.nodes, rootId: definition.rootId }
+                    : null,
+              })
+            }
+          />,
+          <GridActionsCellItem
+            key="action-publish"
+            icon={<MdiIcon path={mdiStorefrontOutline.path} />}
+            label="Publish to marketplace"
+            showInMenu
+            onClick={() =>
+              setPublisher({
+                id: definition.$id,
+                name: definition.displayName ?? '',
+                description: definition.description ?? '',
+                category: '',
+                price: '',
+              })
+            }
+          />,
+          <GridActionsCellItem
+            key="action-delete"
+            icon={<MdiIcon path={mdiTrashCanOutline.path} />}
+            label="Delete"
+            showInMenu
+            onClick={handleDelete(definition)}
+          />,
+        ]
+      },
+    },
+  ]
 
+  // No card header: the page header already says "Reusable Components",
+  // and screens/layouts do not repeat it either (AGL-693).
   return (
-    <CardDisplay
-      header={'Reusable components'}
-      help={docsHelp('components', { anchor: '#manage' })}
-      contentGutterX
-      contentGutterY
-    >
-      {components.length === 0 ? (
-        <Stack spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-          <Typography variant="body2" color="text.secondary">
-            {'No reusable components yet. Create one here, or select an ' +
-              'element in the besigner and choose "Save as reusable ' +
-              'component" — definitions appear here and in the element ' +
-              'drawer.'}
-          </Typography>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            disabled={creating}
-            onClick={handleCreate}
-          >
-            {creating ? 'Creating…' : 'Create component'}
-          </Button>
-        </Stack>
-      ) : (
-        <>
-          <Stack
-            direction="row"
-            sx={{ justifyContent: 'flex-end', mb: 1.5 }}
-          >
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              disabled={creating}
-              onClick={handleCreate}
-            >
-              {creating ? 'Creating…' : 'Create component'}
-            </Button>
-          </Stack>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>{'Display name'}</TableCell>
-                <TableCell>{'ID'}</TableCell>
-                <TableCell>{'Description'}</TableCell>
-                <TableCell>{'Updated'}</TableCell>
-                <TableCell align="right">{'Actions'}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {components.map((definition: any) => (
-                <TableRow key={definition.$id} hover>
-                  <TableCell>
-                    {/* The row leads to the detail page; the besigner is
-                        reached from there (AGL-693). */}
-                    <AppLink
-                      href={buildRoute(Route.COMPONENT_DETAILS, {
-                        orgSlug,
-                        host,
-                        componentId: definition.$id,
-                      })}
-                    >
-                      {definition.displayName ?? definition.$id}
-                    </AppLink>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="text.secondary">
-                      {definition.$id}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {definition.description || '--'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary">
-                      {definition.updatedAt?.toDate?.().toLocaleString() ?? '--'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                    <Button
-                      size="small"
-                      disabled={opening === definition.$id}
-                      aria-label={`Open ${definition.displayName ?? definition.$id} in besigner`}
-                      onClick={() => void handleOpenInBesigner(definition)}
-                    >
-                      {opening === definition.$id ? 'Opening…' : 'Besigner'}
-                    </Button>
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        setEditor({
-                          id: definition.$id,
-                          name: definition.displayName ?? '',
-                          description: definition.description ?? '',
-                        })
-                      }
-                    >
-                      {'Rename'}
-                    </Button>
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        setPublisher({
-                          id: definition.$id,
-                          name: definition.displayName ?? '',
-                          description: definition.description ?? '',
-                          category: '',
-                          price: '',
-                        })
-                      }
-                    >
-                      {'Publish'}
-                    </Button>
-                    {/* Unlike screens and layouts, a component definition
-                        holds its own nodes — there is no version doc to
-                        fetch. */}
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        setSaveTemplateFor({
-                          kind: 'component',
-                          displayName: definition.displayName ?? '',
-                          loadNodes: async () =>
-                            definition.nodes
-                              ? {
-                                  nodes: definition.nodes,
-                                  rootId: definition.rootId,
-                                }
-                              : null,
-                        })
-                      }
-                    >
-                      {'Save as template'}
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={handleDelete(definition)}
-                    >
-                      {'Delete'}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
-      )}
+    <CardDisplay>
+      <DataTableComponent
+        rowHeight={TABLE_ROW_HEIGHT}
+        getRowId={(row) => row.$id}
+        columns={columns}
+        noRowsLabel="No reusable components yet — use Create component above, or save one from the besigner"
+        rows={components}
+        initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+        pageSizeOptions={[5, 10, 15]}
+        pagination
+      />
       <Dialog
         open={Boolean(editor)}
         onClose={() => setEditor(null)}
