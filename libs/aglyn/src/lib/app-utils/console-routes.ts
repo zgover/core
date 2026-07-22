@@ -74,6 +74,10 @@ export enum Route {
   // straight into the editor.
   COMPONENT_DETAILS = '/[orgSlug]/hosts/[host]/components/[componentId]',
   HOST_TEMPLATES = '/[orgSlug]/hosts/[host]/templates',
+  // Template detail (AGL-694), the counterpart to COMPONENT_DETAILS. Note
+  // TEMPLATE_BESIGNER carries no versionId — templates version but never
+  // publish, so there is no "current" pointer to route through.
+  TEMPLATE_DETAILS = '/[orgSlug]/hosts/[host]/templates/[templateId]',
   HOST_MARKETING = '/[orgSlug]/hosts/[host]/marketing',
   HOST_BOOKINGS = '/[orgSlug]/hosts/[host]/bookings',
   // Events now come from the events-calendar plugin, served by the generic
@@ -85,6 +89,9 @@ export enum Route {
   TEMPLATE_BESIGNER = '/[orgSlug]/hosts/[host]/templates/[templateId]/besigner',
   LAYOUT_BESIGNER = '/[orgSlug]/hosts/[host]/layouts/[layoutId]/versions/[versionId]/besigner',
   LAYOUT_LIST = '/[orgSlug]/hosts/[host]/layouts/list',
+  // Layout detail (AGL-695), completing the list → detail → besigner shape
+  // across screens, components, templates and layouts.
+  LAYOUT_DETAILS = '/[orgSlug]/hosts/[host]/layouts/[layoutId]',
   SCREEN_BESIGNER = '/[orgSlug]/hosts/[host]/screens/[screenId]/versions/[versionId]/besigner',
   SCREEN_DETAILS = '/[orgSlug]/hosts/[host]/screens/[screenId]/versions/[versionId]/view',
   SCREEN_PREVIEW = '/[orgSlug]/hosts/[host]/screens/[screenId]/versions/[versionId]/preview',
@@ -166,6 +173,11 @@ export interface RoutePayload {
     componentId: string
   }
   [Route.HOST_TEMPLATES]: { orgSlug: string; host: string }
+  [Route.TEMPLATE_DETAILS]: {
+    orgSlug: string
+    host: string
+    templateId: string
+  }
   [Route.HOST_MARKETING]: { orgSlug: string; host: string }
   [Route.HOST_BOOKINGS]: { orgSlug: string; host: string }
   [Route.HOST_REDIRECTS]: { orgSlug: string; host: string }
@@ -189,6 +201,7 @@ export interface RoutePayload {
     versionId: string
   }
   [Route.LAYOUT_LIST]: { orgSlug: string; host: string }
+  [Route.LAYOUT_DETAILS]: { orgSlug: string; host: string; layoutId: string }
   [Route.SCREEN_DETAILS]: {
     orgSlug: string
     host: string
