@@ -204,6 +204,7 @@ function ScreenTableRow(props: {
   onToggleCollapse: (id: ScreenUid) => void
   renderRowActions: ScreensHierarchyTableProps['renderRowActions']
   renderRowLeadingActions: ScreensHierarchyTableProps['renderRowLeadingActions']
+  anyExpandable: boolean
   onRowOpen: ScreensHierarchyTableProps['onRowOpen']
   routingMap?: Record<ScreenUid, string>
 }) {
@@ -215,6 +216,7 @@ function ScreenTableRow(props: {
     renderRowActions,
     renderRowLeadingActions,
     onRowOpen,
+    anyExpandable,
     routingMap,
   } = props
   const { row, depth, hasChildren } = entry
@@ -291,9 +293,11 @@ function ScreenTableRow(props: {
                 size={0.7}
               />
             </IconButton>
-          ) : (
+          ) : anyExpandable ? (
+            // Reserve the toggle slot only when the tree actually nests —
+            // on a flat list this was 28px of dead width in every row.
             <Box sx={{ width: 28 }} />
-          )}
+          ) : null}
           {renderRowLeadingActions?.(row)}
         </Box>
       </TableCell>
@@ -344,6 +348,13 @@ export function ScreensHierarchyTableComponent(
   const [activeId, setActiveId] = useState<ScreenUid | undefined>(undefined)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  )
+
+  // True when any row in the tree has children, i.e. a collapse toggle can
+  // appear. Drives whether rows reserve space for that toggle.
+  const anyExpandable = useMemo(
+    () => screens.some((entry: any) => Boolean(entry.parentId)),
+    [screens],
   )
 
   const screensById = useMemo(() => {
@@ -519,6 +530,7 @@ export function ScreensHierarchyTableComponent(
                     renderRowActions={renderRowActions}
                     renderRowLeadingActions={renderRowLeadingActions}
                     onRowOpen={onRowOpen}
+                    anyExpandable={anyExpandable}
                     routingMap={routingMap}
                   />
                 </Fragment>

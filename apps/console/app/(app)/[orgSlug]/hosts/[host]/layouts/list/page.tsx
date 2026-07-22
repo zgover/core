@@ -366,19 +366,25 @@ function Layouts(props) {
       field: 'updatedAt',
       headerName: 'Updated',
       flex: 1,
-      minWidth: 150,
+      minWidth: 170,
       type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
     {
       field: 'createdAt',
       headerName: 'Created',
       flex: 1,
-      minWidth: 150,
+      minWidth: 170,
       type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
   ]
 

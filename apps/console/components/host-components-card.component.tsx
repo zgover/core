@@ -300,8 +300,24 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     {
       field: 'updatedAt',
       headerName: 'Updated',
-      minWidth: 160,
+      flex: 1,
+      minWidth: 170,
       type: 'date',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Created',
+      flex: 1,
+      minWidth: 170,
+      type: 'date',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
       valueGetter: (value: any) => value?.toDate?.() ?? null,
       valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },

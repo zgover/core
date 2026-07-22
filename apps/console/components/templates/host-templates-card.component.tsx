@@ -438,10 +438,21 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
     {
       field: 'updatedAt',
       headerName: 'Updated',
-      minWidth: 160,
+      flex: 1,
+      minWidth: 170,
       type: 'date',
       valueGetter: (_value: any, row: any) =>
         row.template.updatedAt?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Created',
+      flex: 1,
+      minWidth: 170,
+      type: 'date',
+      valueGetter: (_value: any, row: any) =>
+        row.template.createdAt?.toDate?.() ?? null,
       valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
     {
