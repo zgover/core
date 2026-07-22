@@ -59,7 +59,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useHostResourceApi } from '@aglyn/tenant-feature-instance'
 import AuthErrorAlertComponent from '../../../../../../../components/auth-error-alert.component'
@@ -94,6 +94,7 @@ CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 function Layouts(props) {
   const params = useParams<{ hostId: string }>()
   const orgSlug = useOrgSlug()
+  const router = useRouter()
   const host = useHostSubdomain()
   const hostId = useHostId()
   const { queueLoading, loading } = useLoading()
@@ -465,6 +466,16 @@ function Layouts(props) {
               columns={columns}
               noRowsLabel="No layouts"
               rows={layouts}
+              onRowClick={({ id }) =>
+                router.push(
+                  buildRoute(Route.LAYOUT_DETAILS, {
+                    orgSlug,
+                    host,
+                    layoutId: id as string,
+                  }),
+                )
+              }
+              sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
               loading={status === 'loading'}
               initialState={{ pagination: { paginationModel: { pageSize } } }}
               onPaginationModelChange={(model) => setPageSize(model.pageSize)}

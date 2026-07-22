@@ -387,6 +387,18 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
         columns={columns}
         noRowsLabel="No reusable components yet — use Create component above, or save one from the besigner"
         rows={components}
+        // The whole row opens the detail page (AGL-693); action cells stop
+        // propagation so a menu click never navigates underneath it.
+        onRowClick={({ id }) =>
+          router.push(
+            buildRoute(Route.COMPONENT_DETAILS, {
+              orgSlug,
+              host,
+              componentId: id as string,
+            }),
+          )
+        }
+        sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
         initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
         pageSizeOptions={[5, 10, 15]}
         pagination

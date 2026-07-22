@@ -503,6 +503,16 @@ export function HostTemplatesCard({ hostId }: { hostId: string }) {
         columns={columns}
         noRowsLabel="No templates yet — use Create template above, save one from a screen, or install one from the marketplace"
         rows={rows}
+        onRowClick={({ row }) =>
+          router.push(
+            buildRoute(Route.TEMPLATE_DETAILS, {
+              orgSlug,
+              host,
+              templateId: row.template.$id,
+            }),
+          )
+        }
+        sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
         loading={status === 'loading'}
         initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
         pageSizeOptions={[5, 10, 15]}
