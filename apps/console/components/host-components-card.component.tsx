@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { AppLink, CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
@@ -26,6 +26,11 @@ import {
   DialogContent,
   DialogTitle,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from '@mui/material'
@@ -249,6 +254,42 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     [confirm, firestore, hostId, enqueueSnackbar],
   )
 
+  // Create from the listing (AGL-693). Until now a reusable component could
+  // only be born inside the besigner via "Save as reusable component", so the
+  // page that lists them offered no way to make one.
+  //
+  // The component doc is created empty; the first version is minted lazily by
+  // handleOpenInBesigner, which is the path that already existed for the
+  // components that predate versioning. Creating a version here too would
+  // mean two places that decide what an initial version looks like.
+  const [creating, setCreating] = useState(false)
+  const handleCreate = useCallback(async () => {
+    if (creating) return
+    setCreating(true)
+    try {
+      const componentId = Aglyn.createResourceUid()
+      const timestamp = Timestamp.now()
+      await setDoc(doc(firestore, 'hosts', hostId, 'components', componentId), {
+        hostId,
+        displayName: 'Untitled component',
+        description: '',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      })
+      router.push(
+        buildRoute(Route.COMPONENT_DETAILS, { orgSlug, host, componentId }),
+      )
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('Could not create the component', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } finally {
+      setCreating(false)
+    }
+  }, [creating, firestore, hostId, router, orgSlug, host, enqueueSnackbar])
+
   return (
     <CardDisplay
       header={'Reusable components'}
@@ -257,93 +298,149 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
       contentGutterY
     >
       {components.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
-          {'Select an element in the besigner and choose "Save as reusable ' +
-            'component" — definitions appear here and in the element drawer.'}
-        </Typography>
-      ) : (
-        <Stack spacing={1}>
-          {components.map((definition: any) => (
-            <Stack
-              key={definition.$id}
-              direction="row"
-              spacing={1}
-              sx={{ alignItems: 'center' }}
-            >
-              <Stack sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="body2" noWrap>
-                  {definition.displayName ?? definition.$id}
-                </Typography>
-                {definition.description ? (
-                  <Typography variant="caption" color="text.secondary" noWrap>
-                    {definition.description}
-                  </Typography>
-                ) : null}
-              </Stack>
-              <Button
-                size="small"
-                onClick={() =>
-                  setEditor({
-                    id: definition.$id,
-                    name: definition.displayName ?? '',
-                    description: definition.description ?? '',
-                  })
-                }
-              >
-                {'Rename'}
-              </Button>
-              <Button
-                size="small"
-                disabled={opening === definition.$id}
-                aria-label={`Open ${definition.displayName ?? definition.$id} in besigner`}
-                onClick={() => void handleOpenInBesigner(definition)}
-              >
-                {opening === definition.$id ? 'Opening…' : 'Open in besigner'}
-              </Button>
-              <Button
-                size="small"
-                onClick={() =>
-                  setPublisher({
-                    id: definition.$id,
-                    name: definition.displayName ?? '',
-                    description: definition.description ?? '',
-                    category: '',
-                    price: '',
-                  })
-                }
-              >
-                {'Publish'}
-              </Button>
-              {/* Unlike screens and layouts, a component definition holds
-                  its own nodes — there is no version doc to fetch. */}
-              <Button
-                size="small"
-                onClick={() =>
-                  setSaveTemplateFor({
-                    kind: 'component',
-                    displayName: definition.displayName ?? '',
-                    loadNodes: async () =>
-                      definition.nodes
-                        ? {
-                            nodes: definition.nodes,
-                            rootId: definition.rootId,
-                          }
-                        : null,
-                  })
-                }
-              >
-                {'Save as template'}
-              </Button>
-              <Button
-                size="small"
-                color="error"
-                onClick={handleDelete(definition)}
-              >
-                {'Delete'}
-              </Button>
-            </Stack>
-          ))}
+        <Stack spacing={1.5} sx={{ alignItems: 'flex-start' }}>
+          <Typography variant="body2" color="text.secondary">
+            {'No reusable components yet. Create one here, or select an ' +
+              'element in the besigner and choose "Save as reusable ' +
+              'component" — definitions appear here and in the element ' +
+              'drawer.'}
+          </Typography>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            disabled={creating}
+            onClick={handleCreate}
+          >
+            {creating ? 'Creating…' : 'Create component'}
+          </Button>
         </Stack>
+      ) : (
+        <>
+          <Stack
+            direction="row"
+            sx={{ justifyContent: 'flex-end', mb: 1.5 }}
+          >
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              disabled={creating}
+              onClick={handleCreate}
+            >
+              {creating ? 'Creating…' : 'Create component'}
+            </Button>
+          </Stack>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>{'Display name'}</TableCell>
+                <TableCell>{'ID'}</TableCell>
+                <TableCell>{'Description'}</TableCell>
+                <TableCell>{'Updated'}</TableCell>
+                <TableCell align="right">{'Actions'}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {components.map((definition: any) => (
+                <TableRow key={definition.$id} hover>
+                  <TableCell>
+                    {/* The row leads to the detail page; the besigner is
+                        reached from there (AGL-693). */}
+                    <AppLink
+                      href={buildRoute(Route.COMPONENT_DETAILS, {
+                        orgSlug,
+                        host,
+                        componentId: definition.$id,
+                      })}
+                    >
+                      {definition.displayName ?? definition.$id}
+                    </AppLink>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" color="text.secondary">
+                      {definition.$id}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary" noWrap>
+                      {definition.description || '--'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
+                      {definition.updatedAt?.toDate?.().toLocaleString() ?? '--'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                    <Button
+                      size="small"
+                      disabled={opening === definition.$id}
+                      aria-label={`Open ${definition.displayName ?? definition.$id} in besigner`}
+                      onClick={() => void handleOpenInBesigner(definition)}
+                    >
+                      {opening === definition.$id ? 'Opening…' : 'Besigner'}
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        setEditor({
+                          id: definition.$id,
+                          name: definition.displayName ?? '',
+                          description: definition.description ?? '',
+                        })
+                      }
+                    >
+                      {'Rename'}
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        setPublisher({
+                          id: definition.$id,
+                          name: definition.displayName ?? '',
+                          description: definition.description ?? '',
+                          category: '',
+                          price: '',
+                        })
+                      }
+                    >
+                      {'Publish'}
+                    </Button>
+                    {/* Unlike screens and layouts, a component definition
+                        holds its own nodes — there is no version doc to
+                        fetch. */}
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        setSaveTemplateFor({
+                          kind: 'component',
+                          displayName: definition.displayName ?? '',
+                          loadNodes: async () =>
+                            definition.nodes
+                              ? {
+                                  nodes: definition.nodes,
+                                  rootId: definition.rootId,
+                                }
+                              : null,
+                        })
+                      }
+                    >
+                      {'Save as template'}
+                    </Button>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={handleDelete(definition)}
+                    >
+                      {'Delete'}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </>
       )}
       <Dialog
         open={Boolean(editor)}
