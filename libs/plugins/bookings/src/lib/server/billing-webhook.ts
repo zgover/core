@@ -17,7 +17,7 @@
 
 import type { BillingWebhookHandler } from '@aglyn/aglyn/server'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import { sendEmail } from '@aglyn/shared-util-email'
+import { renderHostEmail, sendEmail } from '@aglyn/shared-util-email'
 
 /**
  * Paid-booking section of the platform Stripe webhook (AGL-170/418):
@@ -62,13 +62,31 @@ export const bookingsBillingWebhookHandler: BillingWebhookHandler = async ({
             dateStyle: 'full',
             timeStyle: 'short',
           })
+          const fallbackText =
+            `Hi ${booking['name'] ?? ''},\n\nPayment received — ` +
+            `"${booking['serviceName'] ?? 'your booking'}" is ` +
+            `confirmed for ${when}.\n\nReference: ${bookingId}`
+          // Site-owner-designed template when published (AGL-770); null keeps
+          // the built-in copy.
+          const designed = await renderHostEmail(
+            firebaseAdmin.app().firestore(),
+            String(hostId),
+            'booking-confirmed',
+            {
+              name: String(booking['name'] ?? ''),
+              'service.name': String(booking['serviceName'] ?? ''),
+              when,
+              timezone: String(booking['timezone'] ?? ''),
+              'booking.ref': String(bookingId),
+            },
+          )
           await sendEmail({
             to: String(booking['email']),
-            subject: `Booking confirmed: ${booking['serviceName'] ?? ''}`,
-            text:
-              `Hi ${booking['name'] ?? ''},\n\nPayment received — ` +
-              `"${booking['serviceName'] ?? 'your booking'}" is ` +
-              `confirmed for ${when}.\n\nReference: ${bookingId}`,
+            subject:
+              designed?.subject ??
+              `Booking confirmed: ${booking['serviceName'] ?? ''}`,
+            text: designed?.text || fallbackText,
+            ...(designed?.html ? { html: designed.html } : {}),
             context: 'paid booking confirmation',
           })
         }

@@ -70,7 +70,14 @@ import {
   resolveOrgIdForHost,
 } from '@aglyn/tenant-data-admin'
 import { emitHostEvent } from '@aglyn/tenant-runtime'
-import { isEmailConfigured, sendEmail } from '@aglyn/shared-util-email'
+import {
+  isEmailConfigured,
+  loadHostEmail,
+  renderHostEmail,
+  renderLoadedHostEmail,
+  sendEmail,
+  type LoadedHostEmail,
+} from '@aglyn/shared-util-email'
 import { FieldValue } from 'firebase-admin/firestore'
 
 const BOOKING_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -401,13 +408,29 @@ const bookHandler: PluginApiHandler = async (req, res) => {
         dateStyle: 'full',
         timeStyle: 'short',
       }).format(new Date(startsAtMs))
+      const fallbackText =
+        `Hi ${name},\n\nYour booking for "${service.name}" is ` +
+        `confirmed for ${when} (${timezone}).\n\n` +
+        `Reference: ${bookingId}`
+      // Site-owner-designed template when published (AGL-770); null keeps the
+      // built-in copy above.
+      const designed = await renderHostEmail(
+        firestore,
+        hostId,
+        'booking-confirmed',
+        {
+          name: String(name ?? ''),
+          'service.name': String(service.name ?? ''),
+          when,
+          timezone,
+          'booking.ref': String(bookingId),
+        },
+      )
       await sendEmail({
         to: email,
-        subject: `Booking confirmed: ${service.name}`,
-        text:
-          `Hi ${name},\n\nYour booking for "${service.name}" is ` +
-          `confirmed for ${when} (${timezone}).\n\n` +
-          `Reference: ${bookingId}`,
+        subject: designed?.subject ?? `Booking confirmed: ${service.name}`,
+        text: designed?.text || fallbackText,
+        ...(designed?.html ? { html: designed.html } : {}),
         context: 'booking confirmation',
       })
     }
@@ -464,6 +487,9 @@ const remindersHandler: PluginApiHandler = async (req, res) => {
 
     let sent = 0
     let skipped = 0
+    // Resolve each host's designed reminder template once per run (AGL-770),
+    // not once per booking — a busy site has many bookings in the window.
+    const templateCache = new Map<string, LoadedHostEmail | null>()
     for (const doc of upcoming.docs) {
       const data = doc.data()
       if (
@@ -478,13 +504,32 @@ const remindersHandler: PluginApiHandler = async (req, res) => {
         'en-US',
         { dateStyle: 'full', timeStyle: 'short' },
       )
+      // bookings live at hosts/{hostId}/bookings/{id}, so the grandparent is
+      // the host.
+      const hostId = doc.ref.parent.parent?.id ?? ''
+      let loaded = templateCache.get(hostId)
+      if (loaded === undefined) {
+        loaded = hostId
+          ? await loadHostEmail(firestore, hostId, 'booking-reminder')
+          : null
+        templateCache.set(hostId, loaded)
+      }
+      const serviceName = String(data['serviceName'] ?? 'your booking')
+      const designed = loaded
+        ? renderLoadedHostEmail(loaded, {
+            name: String(data['name'] ?? ''),
+            'service.name': serviceName,
+            when,
+          })
+        : null
       const result = await sendEmail({
         to: String(data['email']),
-        subject: `Reminder: ${data['serviceName'] ?? 'your booking'} tomorrow`,
+        subject: designed?.subject ?? `Reminder: ${serviceName} tomorrow`,
         text:
-          `Hi ${data['name'] ?? ''},\n\nA reminder that "${
-            data['serviceName'] ?? 'your booking'
-          }" is scheduled for ${when}.\n\nReference: ${doc.id}`,
+          designed?.text ||
+          `Hi ${data['name'] ?? ''},\n\nA reminder that "${serviceName}" is ` +
+            `scheduled for ${when}.\n\nReference: ${doc.id}`,
+        ...(designed?.html ? { html: designed.html } : {}),
         context: 'booking reminder',
       })
       if (result.sent) {
