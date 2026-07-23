@@ -23,6 +23,7 @@ import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Alert, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import HubTabs from '../../../../components/hub-tabs.component'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import { buildRoute, Route } from '../../../../constants/route-links'
@@ -102,7 +103,7 @@ const OrgMarketplace: NextPageWithLayout<Record<string, never>> = () => {
                   sx={{ alignItems: 'center', flexWrap: 'wrap' }}
                 >
                   <Typography variant="body2" color="text.secondary">
-                    {'Installing to'}
+                    {'Acting site'}
                   </Typography>
                   <TextField
                     select
@@ -120,14 +121,31 @@ const OrgMarketplace: NextPageWithLayout<Record<string, never>> = () => {
                   </TextField>
                 </Stack>
               ) : null}
-              {/* Community plugin's org-scope browse (the app stays
-                  plugin-free). Renders nothing if the community plugin is
-                  disabled for the workspace. */}
-              <PluginWidgetSlot
-                slot="orgMarketplace"
-                hostId={actingHost}
-                permissions={permissions}
-                orgScoped
+              {/* Browse + manage in one place (AGL-774). Both are the
+                  community plugin's widgets (the app stays plugin-free) and
+                  render nothing if the community plugin is disabled. */}
+              <HubTabs
+                tabs={[
+                  {
+                    id: 'browse',
+                    label: 'Browse',
+                    content: (
+                      <PluginWidgetSlot
+                        slot="orgMarketplace"
+                        hostId={actingHost}
+                        permissions={permissions}
+                        orgScoped
+                      />
+                    ),
+                  },
+                  {
+                    id: 'installed',
+                    label: 'Installed',
+                    content: (
+                      <PluginWidgetSlot slot="orgAddons" hostId={actingHost} />
+                    ),
+                  },
+                ]}
               />
             </Stack>
           )}
