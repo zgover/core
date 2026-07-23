@@ -204,6 +204,59 @@ export function installTargetsFor(listing: {
   return INSTALL_TARGETS[listingArtifactType(listing)] ?? ['host']
 }
 
+/** A plugin install pin — the version-pinned doc the install API writes. */
+export interface InstallPin {
+  version?: number | string
+}
+
+/**
+ * The install state of a plugin listing for one site, told honestly (AGL-656).
+ *
+ * A plugin can be pinned at two scopes: the org pin
+ * (`orgs/{orgId}/installs/{listingId}`) applies to every site, and a host pin
+ * (`hosts/{hostId}/installs/{listingId}`) applies to just this one AND shadows
+ * the org pin. Detecting installs from `hosts/{h}/components` — the COMPONENT
+ * collection — never sees either pin, so an installed plugin used to read as
+ * "not installed" on both the browse grid and the detail page. This resolves
+ * the effective state from the two pins the way the loader does.
+ */
+export interface PluginInstallState {
+  /** Effective pin scope for this site — host wins over org — or null. */
+  scope: InstallTarget | null
+  /** Version pinned at the effective scope, or null when not installed. */
+  installedVersion: string | null
+  /** Both pins exist: the host pin takes precedence, shadowing the org one. */
+  shadowed: boolean
+  /** Installed, but the pinned version is behind the listing's latest. */
+  updateAvailable: boolean
+}
+
+/**
+ * Resolves a plugin listing's install state for a site from its two pins
+ * (AGL-656). The host pin shadows the org pin, mirroring the loader, so the
+ * effective version and update prompt always describe what actually runs here.
+ */
+export function resolvePluginInstallState(
+  latestVersion: number | string | undefined,
+  hostPin: InstallPin | null | undefined,
+  orgPin: InstallPin | null | undefined,
+): PluginInstallState {
+  const effective = hostPin ?? orgPin ?? null
+  const installedVersion =
+    effective?.version != null ? String(effective.version) : null
+  return {
+    scope: hostPin ? 'host' : orgPin ? 'org' : null,
+    installedVersion,
+    shadowed: Boolean(hostPin && orgPin),
+    // Any difference is an upgrade prompt, matching the installed-plugins card
+    // — pins only ever move forward, so "different" means "behind".
+    updateAvailable:
+      installedVersion != null &&
+      latestVersion != null &&
+      String(latestVersion) !== installedVersion,
+  }
+}
+
 /**
  * The listing's artifact type, tolerating the pre-AGL-654 shape.
  *

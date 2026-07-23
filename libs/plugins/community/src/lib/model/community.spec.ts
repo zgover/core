@@ -19,6 +19,7 @@ import {
   COMMUNITY_COMPONENT_ID_ALLOWLIST,
   installTargetsFor,
   isListingBrowsable,
+  resolvePluginInstallState,
   sanitizeCommunityDefinition,
 } from './community'
 
@@ -284,5 +285,65 @@ describe('installTargetsFor (AGL-656)', () => {
     expect(
       installTargetsFor({ artifactType: 'somethingNew' }).length,
     ).toBeGreaterThan(0)
+  })
+})
+
+/**
+ * The browse grid and detail page detected installs from `hosts/{h}/components`
+ * — the component collection, which never holds a plugin PIN — so an installed
+ * plugin read as "not installed" everywhere (AGL-656). This resolves the real
+ * state from the two pins the loader honors, host shadowing org.
+ */
+describe('resolvePluginInstallState (AGL-656)', () => {
+  it('reports not-installed when neither pin exists', () => {
+    expect(resolvePluginInstallState('3', null, null)).toEqual({
+      scope: null,
+      installedVersion: null,
+      shadowed: false,
+      updateAvailable: false,
+    })
+  })
+
+  it('reads a host pin as this-site scope', () => {
+    expect(resolvePluginInstallState('3', { version: '3' }, null)).toEqual({
+      scope: 'host',
+      installedVersion: '3',
+      shadowed: false,
+      updateAvailable: false,
+    })
+  })
+
+  it('reads an org pin as org-wide scope', () => {
+    expect(resolvePluginInstallState('3', null, { version: '3' })).toEqual({
+      scope: 'org',
+      installedVersion: '3',
+      shadowed: false,
+      updateAvailable: false,
+    })
+  })
+
+  it('lets a host pin shadow an org pin, reporting the host version', () => {
+    // Org shares v2, this site has pinned its own v3 — the loader runs v3.
+    expect(
+      resolvePluginInstallState('3', { version: '3' }, { version: '2' }),
+    ).toEqual({
+      scope: 'host',
+      installedVersion: '3',
+      shadowed: true,
+      updateAvailable: false,
+    })
+  })
+
+  it('flags an upgrade when the pinned version is behind the listing', () => {
+    expect(resolvePluginInstallState('4', null, { version: '2' })).toMatchObject(
+      { scope: 'org', installedVersion: '2', updateAvailable: true },
+    )
+  })
+
+  it('compares versions as strings, so number/string pins agree', () => {
+    // latestVersion is number|string on the listing; pins store a string.
+    expect(
+      resolvePluginInstallState(3, { version: 3 }, null).updateAvailable,
+    ).toBe(false)
   })
 })

@@ -21,6 +21,7 @@ import {
   LISTING_README_MAX_CHARS,
   listingArtifactType,
   installTargetsFor,
+  resolvePluginInstallState,
 } from '../model/community'
 import {
   buildRoute,
@@ -50,6 +51,7 @@ import {
   useFirestore,
   useFirestoreCollection,
   useFirestoreDoc,
+  useHostOrgId,
   useUser,
 } from '@aglyn/tenant-feature-instance'
 import HubTabs from '@aglyn/shared-ui-next/components/hub-tabs'
@@ -357,6 +359,39 @@ export function CommunityListingContent({
     [firestore, user?.uid],
     { idField: '$id' },
   )
+  const isPlugin = listing ? listingArtifactType(listing) === 'plugin' : false
+  // Plugin installs are version PINS, not component snapshots (AGL-656): a
+  // host pin lives at `hosts/{h}/installs/{id}`, an org pin at
+  // `orgs/{o}/installs/{id}` and applies to every site. Reading only
+  // `components` above never sees either, so an installed plugin read as
+  // "not installed" here; the two pins tell the honest story, host over org.
+  const orgId = useHostOrgId(hostId)
+  const { data: hostPin } = useFirestoreDoc<any>(
+    () => doc(firestore, 'hosts', hostId, 'installs', listingId || '-missing-'),
+    [firestore, hostId, listingId],
+    { idField: '$id' },
+  )
+  const { data: orgPin } = useFirestoreDoc<any>(
+    () =>
+      doc(
+        firestore,
+        'orgs',
+        orgId ?? '-pending-',
+        'installs',
+        listingId || '-missing-',
+      ),
+    [firestore, orgId, listingId],
+    { idField: '$id' },
+  )
+  const pluginState = useMemo(
+    () =>
+      resolvePluginInstallState(
+        listing?.latestVersion,
+        isPlugin ? hostPin : null,
+        isPlugin ? orgPin : null,
+      ),
+    [listing?.latestVersion, isPlugin, hostPin, orgPin],
+  )
 
   // Public version history + trust tier (AGL-431): the pluginVersions
   // docs are server-only, so the community API exposes the buyer-safe
@@ -383,7 +418,10 @@ export function CommunityListingContent({
     latestEntry?.hostAbi != null &&
     latestEntry.hostAbi !== PLUGIN_HOST_ABI_VERSION
 
-  const install_ = useMemo(
+  // Component listings still install into `hosts/{h}/components`; plugin
+  // state comes from the pins above. `installed` unifies the two so the CTA
+  // and the buy gate read the same for either artifact type.
+  const componentInstall = useMemo(
     () =>
       (installedDocs ?? []).find(
         (definition: any) =>
@@ -402,11 +440,26 @@ export function CommunityListingContent({
 
   const missing =
     status === 'success' && (!listing?.profileId || listing?.deletedAt)
-  const installedVersion = install_?.community?.version
-  const upToDate = install_ && installedVersion >= listing?.latestVersion
+  const installed = isPlugin
+    ? pluginState.scope != null
+    : Boolean(componentInstall)
+  const installedVersion = isPlugin
+    ? pluginState.installedVersion
+    : componentInstall?.community?.version
+  const upToDate = isPlugin
+    ? installed && !pluginState.updateAvailable
+    : componentInstall && installedVersion >= listing?.latestVersion
   const priceUsd = Number(listing?.priceUsd ?? 0)
   const mustBuy =
-    priceUsd > 0 && !purchased && listing?.profileId !== viewerOrgId && !install_
+    priceUsd > 0 && !purchased && listing?.profileId !== viewerOrgId && !installed
+  // Updating an installed plugin stays at its current scope; a fresh install
+  // uses the picker (plugins) or the artifact's only target (everything else).
+  const installTargetScope: 'org' | 'host' | undefined =
+    isPlugin && installed
+      ? (pluginState.scope ?? undefined)
+      : installTargets.length > 1
+        ? installScope
+        : undefined
   const versionHistory: any[] = Array.isArray(listing?.versionHistory)
     ? [...listing.versionHistory].sort((a, b) => b.version - a.version)
     : []
@@ -563,11 +616,34 @@ export function CommunityListingContent({
                             <ListingReadme readme={listing.readme} />
                           </>
                         ) : null}
+                        {/* Existing state, told honestly (AGL-656): an org
+                            pin applies everywhere, and this site's own pin
+                            shadows it. Showing this is the difference between
+                            "Add to this site" lying and the truth. */}
+                        {isPlugin && installed ? (
+                          <Alert
+                            severity="success"
+                            icon={false}
+                            sx={{ py: 0.5 }}
+                          >
+                            {pluginState.shadowed
+                              ? `Installed on this site (v${installedVersion}), ` +
+                                'overriding the organization-wide install.'
+                              : pluginState.scope === 'org'
+                                ? `Installed for the whole organization ` +
+                                  `(v${installedVersion}) — available on every site.`
+                                : `Installed on this site (v${installedVersion}).`}
+                            {pluginState.updateAvailable
+                              ? ` A newer version (v${listing?.latestVersion}) is available.`
+                              : ''}
+                          </Alert>
+                        ) : null}
                         {/* Install target (AGL-656). Only shown when the
-                            artifact actually HAS a choice — offering "this
-                            whole organization" for a template would be a
-                            lie, since templates only ever land on a site. */}
-                        {installTargets.length > 1 ? (
+                            artifact actually HAS a choice AND is not already
+                            installed — offering "this whole organization" for
+                            a template, or re-asking once the scope is settled,
+                            would be a lie. */}
+                        {installTargets.length > 1 && !installed ? (
                           <TextField
                             select
                             size="small"
@@ -591,7 +667,7 @@ export function CommunityListingContent({
                         ) : null}
                         <Box>
                           <Button
-                            variant={install_ ? 'outlined' : 'contained'}
+                            variant={installed ? 'outlined' : 'contained'}
                             color="secondary"
                             disabled={Boolean(upToDate) || !listing?.profileId}
                             onClick={
@@ -599,12 +675,7 @@ export function CommunityListingContent({
                                 ? () =>
                                     mustBuy
                                       ? buy(listing)
-                                      : install(
-                                          listing,
-                                          installTargets.length > 1
-                                            ? installScope
-                                            : undefined,
-                                        )
+                                      : install(listing, installTargetScope)
                                 : () =>
                                     enqueueSnackbar(
                                       'Your team role does not allow installing from the community',
@@ -614,11 +685,13 @@ export function CommunityListingContent({
                           >
                             {upToDate
                               ? `Installed (v${installedVersion})`
-                              : install_
+                              : installed
                                 ? `Update to v${listing?.latestVersion}`
                                 : mustBuy
                                   ? `Buy for $${priceUsd}`
-                                  : 'Add to this site'}
+                                  : installTargets.length > 1
+                                    ? 'Install'
+                                    : 'Add to this site'}
                           </Button>
                         </Box>
                       </Stack>

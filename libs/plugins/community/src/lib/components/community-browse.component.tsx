@@ -36,9 +36,14 @@ import {
   useConsoleHostRoute,
   useFirestore,
   useFirestoreCollection,
+  useHostOrgId,
   useUser,
 } from '@aglyn/tenant-feature-instance'
-import { isListingBrowsable } from '../model/community'
+import {
+  isListingBrowsable,
+  listingArtifactType,
+  resolvePluginInstallState,
+} from '../model/community'
 import useCommunityActions from '../hooks/use-community-actions'
 
 // The console route table is shared (AGL-685), so these go through
@@ -133,6 +138,36 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
     return map
   }, [installedDocs])
 
+  // Plugin installs are version PINS, not component snapshots (AGL-656): the
+  // `components` map above never holds one, so a plugin already installed —
+  // at host or org scope — showed "Add to this site". These two pin
+  // collections are what the loader honors (a host pin shadows an org pin).
+  const orgId = useHostOrgId(hostId)
+  const { data: hostPinDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'installs'), limit(100)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const { data: orgPinDocs } = useFirestoreCollection<any>(
+    () =>
+      query(
+        collection(firestore, 'orgs', orgId ?? '-pending-', 'installs'),
+        limit(100),
+      ),
+    [firestore, orgId],
+    { idField: '$id' },
+  )
+  const hostPins = useMemo(() => {
+    const map: Record<string, any> = {}
+    for (const pin of hostPinDocs ?? []) map[pin.$id] = pin
+    return map
+  }, [hostPinDocs])
+  const orgPins = useMemo(() => {
+    const map: Record<string, any> = {}
+    for (const pin of orgPinDocs ?? []) map[pin.$id] = pin
+    return map
+  }, [orgPinDocs])
+
   useEffect(() => {
     const profileIds = [
       ...new Set((listings ?? []).map((listing: any) => listing.profileId)),
@@ -162,7 +197,12 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   // Server-side install (AGL-46): version snapshots aren't client-readable
   // (paid content), so the API verifies access and copies the definition.
   // Handlers shared with the detail page live in useCommunityActions.
-  const handleInstall = (listing: any) => () => runInstall(listing)
+  // A fresh install from the grid lands on this site (the org/host picker
+  // lives on the detail page); updating an existing pin keeps its scope so an
+  // org-wide install is not silently shadowed by a new host pin (AGL-656).
+  const handleInstall =
+    (listing: any, scope?: 'org' | 'host') => () =>
+      runInstall(listing, scope)
   const handleBuy = (listing: any) => () => runBuy(listing)
 
   // Browse controls (AGL-95): client-side search/filter/sort over the
@@ -259,16 +299,32 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
       ) : (
         <Grid container spacing={2}>
           {items.map((listing: any) => {
-            const install = installed[listing.$id]
-            const installedVersion = install?.community?.version
-            const upToDate =
-              install && installedVersion >= listing.latestVersion
+            const isPlugin = listingArtifactType(listing) === 'plugin'
+            const pluginState = resolvePluginInstallState(
+              listing.latestVersion,
+              isPlugin ? hostPins[listing.$id] : null,
+              isPlugin ? orgPins[listing.$id] : null,
+            )
+            const componentInstall = installed[listing.$id]
+            const isInstalled = isPlugin
+              ? pluginState.scope != null
+              : Boolean(componentInstall)
+            const installedVersion = isPlugin
+              ? pluginState.installedVersion
+              : componentInstall?.community?.version
+            const upToDate = isPlugin
+              ? isInstalled && !pluginState.updateAvailable
+              : componentInstall && installedVersion >= listing.latestVersion
+            const targetScope =
+              isPlugin && isInstalled
+                ? (pluginState.scope ?? undefined)
+                : undefined
             const priceUsd = Number(listing.priceUsd ?? 0)
             const mustBuy =
               priceUsd > 0 &&
               !purchased[listing.$id] &&
               listing.profileId !== viewerOrgId &&
-              !install
+              !isInstalled
             return (
               <Grid key={listing.$id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Stack
@@ -319,6 +375,14 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     </MuiLink>
                     {listing.category ? (
                       <Chip size="small" label={listing.category} />
+                    ) : null}
+                    {/* Org-wide installs apply to every site (AGL-656). */}
+                    {isPlugin && pluginState.scope === 'org' ? (
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        label={pluginState.shadowed ? 'Org-wide (shadowed)' : 'Org-wide'}
+                      />
                     ) : null}
                     {priceUsd > 0 ? (
                       <Chip
@@ -378,14 +442,14 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                   )}
                   <Button
                     size="small"
-                    variant={install ? 'outlined' : 'contained'}
+                    variant={isInstalled ? 'outlined' : 'contained'}
                     color="secondary"
                     disabled={Boolean(upToDate)}
                     onClick={
                       permissions?.installPlugins
                         ? mustBuy
                           ? handleBuy(listing)
-                          : handleInstall(listing)
+                          : handleInstall(listing, targetScope)
                         : () =>
                             enqueueSnackbar(
                               'Your team role does not allow installing from the community',
@@ -395,7 +459,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                   >
                     {upToDate
                       ? `Installed (v${installedVersion})`
-                      : install
+                      : isInstalled
                         ? `Update to v${listing.latestVersion}`
                         : mustBuy
                           ? `Buy for $${priceUsd}`
