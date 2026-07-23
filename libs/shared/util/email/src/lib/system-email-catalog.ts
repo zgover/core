@@ -469,7 +469,9 @@ const PLACEHOLDER_DEFAULT_BODY: readonly SystemEmailDefaultBlock[] = [
  * and determinism keeps the map stable and diffable.
  */
 export function buildDefaultEmailNodeMap(
-  definition: SystemEmailTemplateDefinition,
+  // Structural so the tenant catalog (AGL-770) can seed the same way — every
+  // definition that carries a `defaultBody` builds an identical node map.
+  definition: { defaultBody?: readonly SystemEmailDefaultBlock[] },
 ): Record<string, SystemEmailNode> {
   const blocks = definition.defaultBody?.length
     ? definition.defaultBody
