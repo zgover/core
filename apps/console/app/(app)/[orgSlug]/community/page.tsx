@@ -47,7 +47,6 @@ import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
@@ -61,7 +60,6 @@ const HANDLE_PATTERN = /^[a-z0-9][a-z0-9-]{2,29}$/
  * explicit unpublish. Handle format mirrors the Firestore rule.
  */
 const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
-  const orgNavTabs = useOrgNavTabItems()
   const orgSlug = useOrgSlug()
   const { currentOrg } = useOrgScope()
   const firestore = useFirestore()
@@ -293,7 +291,6 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Community profile'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
         breadcrumbItems={[
           {
             children: 'Community profile',

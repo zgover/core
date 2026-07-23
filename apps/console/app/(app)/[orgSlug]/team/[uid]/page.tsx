@@ -47,7 +47,6 @@ import DashboardLayout from '../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../components/layouts/main.layout'
 import OrgActivityCard from '../../../../../components/org-activity-card.component'
 import { useOrgHosts } from '../../../../../hooks/use-org-hosts'
-import useOrgNavTabItems from '../../../../../hooks/use-org-nav-tabs'
 import { docsHelp } from '../../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../constants/shared'
@@ -63,7 +62,6 @@ const TeamMemberDetail: NextPageWithLayout<Record<string, never>> = () => {
   const uid = params?.uid as string
   const router = useRouter()
   const orgSlug = useOrgSlug()
-  const orgNavTabs = useOrgNavTabItems()
   const { currentOrg } = useOrgScope()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
@@ -199,8 +197,6 @@ const TeamMemberDetail: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Team member'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.MANAGE_TEAM, { orgSlug })}
         breadcrumbItems={[
           { children: 'Team', href: buildRoute(Route.MANAGE_TEAM, { orgSlug }) },
           {

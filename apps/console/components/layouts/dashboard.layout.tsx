@@ -24,7 +24,6 @@ import DashboardHeaderComponent, {
 } from '../dashboard-header.component'
 import FooterComponent from '../footer.component'
 import QuotaWarningsBanner from '../quota-warnings-banner.component'
-import { type SecondaryAppBarProps } from '../secondary-app-bar.component'
 
 const defaultBreadcrumbs = [
   {
@@ -43,18 +42,6 @@ export interface DashboardLayoutProps {
   header?: DashboardHeaderProps['header']
   headerRight?: DashboardHeaderProps['headerRight']
   help?: DashboardHeaderProps['help']
-  /**
-   * Accepted and ignored: the secondary app bar moved to the `(app)` layout
-   * and derives its own strip from the route (AGL-755). Kept on the type so
-   * the 41 existing call sites keep compiling until AGL-756 sweeps them.
-   *
-   * @deprecated
-   */
-  tabBarTitle?: SecondaryAppBarProps['tabBarTitle']
-  /** @deprecated see {@link DashboardLayoutProps.tabBarTitle} */
-  navTabItems?: SecondaryAppBarProps['navTabItems']
-  /** @deprecated see {@link DashboardLayoutProps.tabBarTitle} */
-  activeTab?: SecondaryAppBarProps['activeTab']
   aside?: JSX.Node
 }
 

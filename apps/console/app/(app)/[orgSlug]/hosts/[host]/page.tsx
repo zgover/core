@@ -32,7 +32,6 @@ import HostDisplayNameComponent from '../../../../../components/host-display-nam
 import { buildRoute, Route } from '../../../../../constants/route-links'
 import { useHostId, useHostSubdomain } from '../../../../../components/host-id-provider'
 import { useOrgSlug } from '../../../../../hooks/use-org-scope'
-import hostNavTabItems from '../../../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../../constants/shared'
 
 const Index: NextPageWithLayout<Record<string, never>> = (props) => {
@@ -44,7 +43,6 @@ const Index: NextPageWithLayout<Record<string, never>> = (props) => {
 
   return (
     <DashboardLayout
-      navTabItems={hostNavTabItems(orgSlug, host)}
       help="consoleTour"
       header={{
         children: 'My Dashboard',

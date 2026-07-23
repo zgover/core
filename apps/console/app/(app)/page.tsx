@@ -70,7 +70,6 @@ function OrgJump() {
       disableDefaultBreadcrumb
       breadcrumbItems={[{ children: 'Workspaces' }]}
       // No host is in scope here, so suppress the default host nav tabs.
-      navTabItems={[]}
       header={{
         children: 'Workspaces',
         icon: { path: ICON_VARIANT_ORGANIZATION.path },

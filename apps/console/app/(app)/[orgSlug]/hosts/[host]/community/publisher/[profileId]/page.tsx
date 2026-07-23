@@ -37,7 +37,6 @@ import { useHostId, useHostSubdomain } from '../../../../../../../../components/
 import AuthenticatedLayout from '../../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../../../components/layouts/main.layout'
-import hostNavTabItems from '../../../../../../../../constants/host-nav-tabs'
 import { docsHelp } from '../../../../../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../../../../../constants/route-links'
 import { useOrgSlug } from '../../../../../../../../hooks/use-org-scope'
@@ -80,7 +79,6 @@ const CommunityPublisher: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={title} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

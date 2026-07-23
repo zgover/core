@@ -23,7 +23,6 @@ import HostDisplayNameComponent from '../../../../../../../components/host-displ
 import { useHostId, useHostSubdomain } from '../../../../../../../components/host-id-provider'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
 import PluginWidgetSlot from '../../../../../../../components/plugin-widget-slot.component'
-import hostNavTabItems from '../../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
 import { useOrgSlug } from '../../../../../../../hooks/use-org-scope'
 import useOrgPermissions from '../../../../../../../hooks/use-org-permissions'
@@ -43,7 +42,6 @@ const CommunityListingDetail: NextPageWithLayout<Record<string, never>> = () => 
 
   return (
     <DashboardLayout
-      navTabItems={hostNavTabItems(orgSlug, host)}
       breadcrumbItems={[
         {
           children: <HostDisplayNameComponent hostId={hostId} />,

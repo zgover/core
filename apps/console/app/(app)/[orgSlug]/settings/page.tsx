@@ -46,7 +46,6 @@ import OrgApiKeysCard from '../../../../components/org-api-keys-card.component'
 import OrgPluginsCard from '../../../../components/org-plugins-card.component'
 import useCurrentOrg from '../../../../hooks/use-current-org'
 import HubTabs from '../../../../components/hub-tabs.component'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -62,7 +61,6 @@ const WORKSPACE_DOMAIN =
  * workspace info. Slug changes and deletion stay deliberate future flows.
  */
 const OrgSettings: NextPageWithLayout<Record<string, never>> = () => {
-  const orgNavTabs = useOrgNavTabItems()
   const orgSlug = useOrgSlug()
   const { currentOrg, loading } = useOrgScope()
   const { data: user } = useUser()
@@ -318,8 +316,6 @@ const OrgSettings: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Settings – Organization'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.ORG_SETTINGS, { orgSlug })}
         breadcrumbItems={[
           { children: 'Settings', href: buildRoute(Route.ORG_SETTINGS, { orgSlug }) },
         ]}

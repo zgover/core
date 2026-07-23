@@ -85,7 +85,6 @@ import MainLayout from '../../../../../../../../../../components/layouts/main.la
 import SecondaryNavBarComponent from '../../../../../../../../../../components/secondary-nav-bar.component'
 import HostDisplayNameComponent from '../../../../../../../../../../components/host-display-name.component'
 import { hasEntitlement } from '../../../../../../../../../../constants/entitlements'
-import hostNavTabItems from '../../../../../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../../../../../constants/route-links'
 import { useHostId, useHostSubdomain } from '../../../../../../../../../../components/host-id-provider'
 import { useOrgSlug } from '../../../../../../../../../../hooks/use-org-scope'

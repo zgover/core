@@ -33,7 +33,6 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
-import adminNavTabItems from '../../../../constants/admin-nav-tabs'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -173,8 +172,6 @@ const PluginReviews: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Plugin reviews – Admin'} />
       <DashboardLayout
-        navTabItems={adminNavTabItems()}
-        activeTab={buildRoute(Route.ADMIN_PLUGIN_REVIEWS)}
         breadcrumbItems={[
           {
             children: 'Plugin reviews',

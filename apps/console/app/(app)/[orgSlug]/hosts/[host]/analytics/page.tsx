@@ -29,7 +29,6 @@ import HostDisplayNameComponent from '../../../../../../components/host-display-
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../components/layouts/main.layout'
-import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { useOrgSlug } from '../../../../../../hooks/use-org-scope'
 import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
@@ -48,8 +47,6 @@ const HostAnalytics: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Analytics'} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
-        activeTab={buildRoute(Route.HOST_ANALYTICS, { orgSlug,  host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

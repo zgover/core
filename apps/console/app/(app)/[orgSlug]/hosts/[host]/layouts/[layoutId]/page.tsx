@@ -50,7 +50,6 @@ import ArtifactNotFound from '../../../../../../../components/artifact-not-found
 import HostDisplayNameComponent from '../../../../../../../components/host-display-name.component'
 import { useHostId, useHostSubdomain } from '../../../../../../../components/host-id-provider'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
-import hostNavTabItems from '../../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 import { useOrgSlug } from '../../../../../../../hooks/use-org-scope'
@@ -265,11 +264,9 @@ const LayoutDetails: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={definition?.displayName ?? 'Layout'} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
         // Keep the parent tab lit on a detail page, the way the
         // admin detail pages do — without this the nav loses its
         // selected state as soon as you open a row.
-        activeTab={buildRoute(Route.LAYOUT_LIST, { orgSlug, host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

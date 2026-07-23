@@ -41,7 +41,6 @@ import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgHosts } from '../../../../hooks/use-org-hosts'
 import useCurrentOrg from '../../../../hooks/use-current-org'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
 
 /**
@@ -54,7 +53,6 @@ import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
  * pins are validated against host membership; the selector picks which.
  */
 const OrgPlugins: NextPageWithLayout<Record<string, never>> = () => {
-  const orgNavTabs = useOrgNavTabItems()
   const orgSlug = useOrgSlug()
   const { currentOrg, loading } = useOrgScope()
   const { org } = useCurrentOrg()
@@ -107,8 +105,6 @@ const OrgPlugins: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Plugins & add-ons – Organization'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.ORG_PLUGINS, { orgSlug })}
         breadcrumbItems={[
           { children: 'Plugins', href: buildRoute(Route.ORG_PLUGINS, { orgSlug }) },
         ]}

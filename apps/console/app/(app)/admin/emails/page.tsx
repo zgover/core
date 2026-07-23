@@ -40,7 +40,6 @@ import { useCallback, useState } from 'react'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
-import adminNavTabItems from '../../../../constants/admin-nav-tabs'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -112,8 +111,6 @@ function AdminEmails() {
     <>
       <NextPageTitle screen={'System emails'} />
       <DashboardLayout
-        navTabItems={adminNavTabItems()}
-        activeTab={buildRoute(Route.ADMIN_EMAILS)}
         help="staffConsole"
         breadcrumbItems={[
           { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
