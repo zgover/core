@@ -19,15 +19,18 @@
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
+  TENANT_EMAIL_COLLECTION,
   TENANT_EMAILS,
   type TenantEmailEntry,
 } from '@aglyn/shared-util-email'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { Alert, Button, Chip, Stack, Typography } from '@mui/material'
+import { collection, doc, updateDoc } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import { useCurrentOrg } from '../hooks/use-current-org'
+import useFirestoreCollection from '../hooks/use-firestore-collection'
 import { useOrgSlug } from '../hooks/use-org-scope'
 import { useHostId, useHostSubdomain } from './host-id-provider'
 import { openHostEmailVersion } from '../utils/open-host-email-version'
@@ -71,6 +74,31 @@ export function SiteEmailsCard() {
   const host = useHostSubdomain()
   const { org } = useCurrentOrg()
   const [opening, setOpening] = useState<string | null>(null)
+  const [resetting, setResetting] = useState<string | null>(null)
+
+  // Which emails have a published design, so the row can offer Edit + Reset
+  // instead of Design. Guarded path keeps the query valid before hostId lands.
+  const { data: templateDocs } = useFirestoreCollection<{
+    $id: string
+    versionId?: string
+  }>(
+    () =>
+      collection(
+        firestore,
+        'hosts',
+        hostId || '-pending-',
+        TENANT_EMAIL_COLLECTION,
+      ),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const customizedByKey = useMemo(() => {
+    const map = new Map<string, boolean>()
+    for (const entry of templateDocs ?? []) {
+      map.set(entry.$id, Boolean(entry.versionId))
+    }
+    return map
+  }, [templateDocs])
 
   // Fail-open: an org with no explicit plugin list (pre-billing) shows every
   // group as enabled, matching how entitlement helpers treat undefined.
@@ -101,6 +129,31 @@ export function SiteEmailsCard() {
         { variant: 'error', allowDuplicate: true },
       )
       setOpening(null)
+    }
+  }
+
+  const resetToDefault = async (entry: TenantEmailEntry) => {
+    if (!hostId) return
+    setResetting(entry.key)
+    try {
+      // Clear the pointer rather than deleting the document, so the record
+      // survives and a later Design starts fresh (parity with the staff
+      // system-email reset).
+      await updateDoc(
+        doc(firestore, 'hosts', hostId, TENANT_EMAIL_COLLECTION, entry.key),
+        { versionId: null },
+      )
+      enqueueSnackbar(`${entry.name} is back to the default`, {
+        variant: 'success',
+        persist: false,
+      })
+    } catch (error) {
+      enqueueSnackbar(
+        `Could not reset ${entry.name}: ${(error as Error)?.message}`,
+        { variant: 'error', allowDuplicate: true },
+      )
+    } finally {
+      setResetting(null)
     }
   }
 
@@ -158,14 +211,48 @@ export function SiteEmailsCard() {
                   </Stack>
                   <Stack sx={{ flexShrink: 0, alignItems: 'flex-end' }}>
                     {email.control === 'besigner' ? (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        disabled={!groupEnabled || opening === email.key}
-                        onClick={() => void openDesigner(email)}
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ alignItems: 'center' }}
                       >
-                        {'Design'}
-                      </Button>
+                        {customizedByKey.get(email.key) ? (
+                          <>
+                            <Chip
+                              size="small"
+                              label="Customized"
+                              color="primary"
+                            />
+                            <Button
+                              size="small"
+                              color="inherit"
+                              disabled={
+                                !groupEnabled || resetting === email.key
+                              }
+                              onClick={() => void resetToDefault(email)}
+                            >
+                              {'Reset to default'}
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              disabled={!groupEnabled || opening === email.key}
+                              onClick={() => void openDesigner(email)}
+                            >
+                              {'Edit'}
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            disabled={!groupEnabled || opening === email.key}
+                            onClick={() => void openDesigner(email)}
+                          >
+                            {'Design'}
+                          </Button>
+                        )}
+                      </Stack>
                     ) : email.control === 'external' ? (
                       <Typography variant="caption" color="text.secondary">
                         {`Edited in ${email.authoredIn}`}
