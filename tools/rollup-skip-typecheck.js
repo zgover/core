@@ -21,6 +21,22 @@
  *      must be strings that are neither absolute nor relative paths.
  *    This is the fatal error that was crashing shared-ui-jsx:build on Vercel.
  */
+/**
+ * Diagnostics that must never be downgraded to a warning.
+ *
+ * TS2307 ("Cannot find module … or its corresponding type declarations") means an
+ * import did not resolve at all. Under `skipTypeCheck: true` the plugin reports it
+ * via context.warn(), so the build printed thirteen of them and still exited 0 —
+ * see AGL-739. Everything downstream of an unresolved module widens to `any`,
+ * which in turn masks whatever real type errors that module was preventing.
+ *
+ * Type-level complaints (TS2339, TS2488, …) stay warnings here: `npm run typecheck`
+ * is the gate for those, and the rollup executor's rootDir mismatch makes them
+ * unreliable in this context. Resolution failures are different in kind — they are
+ * about whether the emitted bundle can work at all.
+ */
+const FATAL_DIAGNOSTICS = /TS2307\b/
+
 module.exports = function skipTypecheckConfig(config) {
   if (!Array.isArray(config.plugins)) return config
 
@@ -34,9 +50,14 @@ module.exports = function skipTypecheckConfig(config) {
         const origWarn = this.warn.bind(this)
         const origEmitFile = this.emitFile.bind(this)
 
-        // Silence TypeScript type-checking errors (TS followed by a number)
+        // Silence TypeScript type-checking errors (TS followed by a number),
+        // except module-resolution failures — see FATAL_DIAGNOSTICS.
         this.error = function (err) {
           const msg = typeof err === 'string' ? err : (err && err.message) || ''
+          if (FATAL_DIAGNOSTICS.test(msg)) {
+            origError(err)
+            return
+          }
           if (/\[plugin typescript\].*TS\d+/.test(msg) || /TS\d+/.test(msg)) {
             origWarn(typeof err === 'string' ? { message: err, code: 'TS_TYPE_ERROR' } : err)
             return
@@ -44,14 +65,17 @@ module.exports = function skipTypecheckConfig(config) {
           origError(err)
         }.bind(this)
 
-        // Suppress specific TS warning patterns (e.g. TS6059 rootDir noise)
-        if (suppressWarnPattern) {
-          this.warn = function (err) {
-            const msg = typeof err === 'string' ? err : (err && err.message) || ''
-            if (suppressWarnPattern.test(msg)) return
-            origWarn(err)
-          }.bind(this)
-        }
+        // Suppress specific TS warning patterns (e.g. TS6059 rootDir noise), and
+        // promote module-resolution diagnostics from warning to fatal.
+        this.warn = function (err) {
+          const msg = typeof err === 'string' ? err : (err && err.message) || ''
+          if (FATAL_DIAGNOSTICS.test(msg)) {
+            origError(err)
+            return
+          }
+          if (suppressWarnPattern && suppressWarnPattern.test(msg)) return
+          origWarn(err)
+        }.bind(this)
 
         // Drop emitFile calls whose fileName is a relative or absolute path.
         // On Vercel, the TypeScript plugin computes .d.ts paths relative to the
