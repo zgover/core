@@ -25,12 +25,19 @@ import { EMAIL_NODE_ROOT_ID } from './email-render'
  *
  * `firebase` — Firebase Auth sends it from its own templates, configured in
  * the Firebase console. **A besigner template cannot affect these at all**
- * until the send is taken over (AGL-751). They are listed so staff can see
- * the full set of mail the product sends and where each one is controlled;
- * the UI must present them as non-editable rather than offering an editor
- * that silently does nothing.
+ * until the send is taken over (AGL-751).
+ *
+ * `stripe` — Stripe sends it on Aglyn's behalf from the Dashboard's
+ * Customer-emails settings (billing receipts, dunning, refunds, expiring-card
+ * notices). Aglyn never composes these, so like `firebase` they cannot be
+ * designed here (AGL-767).
+ *
+ * The non-`resend` entries are listed so staff can see the full set of mail
+ * the product sends and where each one is controlled; the UI must present
+ * them as non-editable rather than offering an editor that silently does
+ * nothing.
  */
-export type SystemEmailDeliveredBy = 'resend' | 'firebase'
+export type SystemEmailDeliveredBy = 'resend' | 'firebase' | 'stripe'
 
 export interface SystemEmailMergeToken {
   /** Token as written in the template, without braces. */
@@ -226,6 +233,68 @@ export const SYSTEM_EMAIL_TEMPLATES: readonly SystemEmailTemplateDefinition[] =
       defaultSubject: 'Verify your email address',
       mergeTokens: [],
       source: 'apps/console/app/(auth)/verify-email/page.tsx',
+    },
+    // Stripe-delivered billing email (AGL-767). Aglyn never composes these —
+    // Stripe sends them from the Dashboard's Customer-emails and Subscription
+    // settings, so they are listed for visibility only and are not designable.
+    // Whether each actually sends is a Dashboard toggle the code cannot read;
+    // the descriptions say "if enabled" rather than asserting it is on.
+    {
+      key: 'stripe-receipt',
+      name: 'Payment receipt',
+      description:
+        'Receipt for a successful subscription or invoice payment. Sent by ' +
+        'Stripe if "Successful payments" is enabled under Customer emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your receipt from Aglyn',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Customer emails',
+    },
+    {
+      key: 'stripe-payment-failed',
+      name: 'Payment failed',
+      description:
+        'Dunning notice when a subscription charge fails and Stripe retries ' +
+        'it. Sent by Stripe if failed-payment emails are enabled under ' +
+        'Subscriptions and emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your Aglyn payment could not be processed',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Subscriptions and emails',
+    },
+    {
+      key: 'stripe-refund',
+      name: 'Refund confirmation',
+      description:
+        'Confirms a refund back to the customer. Sent by Stripe if ' +
+        '"Refunds" is enabled under Customer emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your Aglyn refund',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Customer emails',
+    },
+    {
+      key: 'stripe-card-expiring',
+      name: 'Card expiring soon',
+      description:
+        'Reminder that the card on file is about to expire. Sent by Stripe ' +
+        'if expiring-card reminders are enabled under Subscriptions and ' +
+        'emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your card on file is expiring soon',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Subscriptions and emails',
+    },
+    {
+      key: 'stripe-invoice',
+      name: 'Invoice',
+      description:
+        'A finalized invoice emailed to the organization. Sent by Stripe ' +
+        'when invoice emails are enabled for the billing configuration.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your Aglyn invoice',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Customer emails',
     },
   ]
 

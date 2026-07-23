@@ -95,7 +95,9 @@ describe('SYSTEM_EMAIL_TEMPLATES', () => {
       }
     })
 
-    it('gives Firebase-delivered templates no body (they have no editor)', () => {
+    it('gives non-editable templates no body (they have no editor)', () => {
+      // Firebase- and Stripe-delivered entries are sent by those services
+      // from their own templates, so a defaultBody would be dead data.
       for (const entry of SYSTEM_EMAIL_TEMPLATES) {
         if (isSystemEmailEditable(entry)) continue
         expect(entry.defaultBody).toBeUndefined()
@@ -119,6 +121,22 @@ describe('SYSTEM_EMAIL_TEMPLATES', () => {
     it('marks the emails Aglyn sends itself as Resend-delivered', () => {
       for (const key of ['org-invite', 'usage-summary', 'erasure-hold-alert']) {
         expect(getSystemEmailTemplate(key)?.deliveredBy).toBe('resend')
+      }
+    })
+
+    it('marks the billing emails as Stripe-delivered and non-editable', () => {
+      // Listed for visibility only (AGL-767); Stripe owns the copy, so an
+      // editor here would silently do nothing — same guard as the auth rows.
+      for (const key of [
+        'stripe-receipt',
+        'stripe-payment-failed',
+        'stripe-refund',
+        'stripe-card-expiring',
+        'stripe-invoice',
+      ]) {
+        const entry = getSystemEmailTemplate(key)
+        expect(entry?.deliveredBy).toBe('stripe')
+        expect(isSystemEmailEditable(entry!)).toBe(false)
       }
     })
 
