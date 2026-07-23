@@ -24,7 +24,11 @@ import {
   upsertHostContact,
 } from '@aglyn/tenant-data-admin'
 import { createHmac } from 'crypto'
-import { isEmailConfigured, sendEmail } from '@aglyn/shared-util-email'
+import {
+  isEmailConfigured,
+  renderHostEmail,
+  sendEmail,
+} from '@aglyn/shared-util-email'
 import * as CommerceModel from '../model'
 import { mintDownloadToken, tokenSigningSecret } from './download'
 
@@ -219,14 +223,30 @@ export const commerceBillingWebhookHandler: BillingWebhookHandler = async ({
             const checkIn = new Date(
               Number(snapshot.get('checkInDayMs')),
             ).toUTCString()
+            const paid = `$${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}`
+            const checkInShort = checkIn.slice(0, 16)
+            const fallbackText =
+              `Your stay is confirmed!\n\nCheck-in: ${checkInShort}\n` +
+              `Nights: ${snapshot.get('nights')}\n` +
+              `Paid today: ${paid}\n` +
+              `Reference: ${reservationId}`
+            // Site-owner-designed template when published (AGL-771).
+            const designed = await renderHostEmail(
+              firebaseAdmin.app().firestore(),
+              String(hostId),
+              'reservation-confirmed',
+              {
+                'reservation.checkIn': checkInShort,
+                'reservation.nights': String(snapshot.get('nights') ?? ''),
+                'reservation.paid': paid,
+                'reservation.ref': String(reservationId),
+              },
+            )
             await sendEmail({
               to: guestEmail,
-              subject: 'Reservation confirmed',
-              text:
-                `Your stay is confirmed!\n\nCheck-in: ${checkIn.slice(0, 16)}\n` +
-                `Nights: ${snapshot.get('nights')}\n` +
-                `Paid today: $${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}\n` +
-                `Reference: ${reservationId}`,
+              subject: designed?.subject ?? 'Reservation confirmed',
+              text: designed?.text || fallbackText,
+              ...(designed?.html ? { html: designed.html } : {}),
               context: 'reservation confirmation',
             })
           }
@@ -423,16 +443,34 @@ export const commerceBillingWebhookHandler: BillingWebhookHandler = async ({
                 `&productId=${line.productId}&token=${downloadToken}`,
             )
             .join('\n')
+          const orderTotal = `$${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}`
+          const orderSummary = [linesText, licenseText, downloadLines]
+            .filter(Boolean)
+            .join('\n\n')
+          const fallbackText =
+            `Thanks for your purchase!\n\n${linesText}\n\n` +
+            (licenseText ? `${licenseText}\n\n` : '') +
+            (downloadLines ? `${downloadLines}\n\n` : '') +
+            `Total: ${orderTotal}\n` +
+            `Order reference: ${object.id}` +
+            (receiptFooter ? `\n\n${receiptFooter}` : '')
+          // Site-owner-designed template when published (AGL-771). The
+          // license keys and download links ride in {{order.summary}}.
+          const designed = await renderHostEmail(
+            firebaseAdmin.app().firestore(),
+            String(hostId),
+            'order-receipt',
+            {
+              'order.summary': orderSummary,
+              'order.total': orderTotal,
+              'order.ref': String(object.id),
+            },
+          )
           await sendEmail({
             to: buyerEmailForReceipt,
-            subject: `Receipt for your order`,
-            text:
-              `Thanks for your purchase!\n\n${linesText}\n\n` +
-              (licenseText ? `${licenseText}\n\n` : '') +
-              (downloadLines ? `${downloadLines}\n\n` : '') +
-              `Total: $${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}\n` +
-              `Order reference: ${object.id}` +
-              (receiptFooter ? `\n\n${receiptFooter}` : ''),
+            subject: designed?.subject ?? `Receipt for your order`,
+            text: designed?.text || fallbackText,
+            ...(designed?.html ? { html: designed.html } : {}),
             context: 'cart receipt',
           })
         }
@@ -558,13 +596,23 @@ export const commerceBillingWebhookHandler: BillingWebhookHandler = async ({
               .catch(() => undefined)
             const giftTo = object?.customer_details?.email
             if (giftTo) {
+              const giftValue = `$${(line.unitAmountCents / 100).toFixed(2)}`
+              const fallbackText =
+                `Gift card code: ${code}\n` +
+                `Value: ${giftValue}\n\n` +
+                'Enter it at checkout to apply the balance.'
+              // Site-owner-designed template when published (AGL-771).
+              const designed = await renderHostEmail(
+                firebaseAdmin.app().firestore(),
+                String(hostId),
+                'gift-card',
+                { 'giftcard.code': code, 'giftcard.value': giftValue },
+              )
               await sendEmail({
                 to: giftTo,
-                subject: 'Your gift card',
-                text:
-                  `Gift card code: ${code}\n` +
-                  `Value: $${(line.unitAmountCents / 100).toFixed(2)}\n\n` +
-                  'Enter it at checkout to apply the balance.',
+                subject: designed?.subject ?? 'Your gift card',
+                text: designed?.text || fallbackText,
+                ...(designed?.html ? { html: designed.html } : {}),
                 context: 'gift card',
               })
             }
@@ -927,13 +975,27 @@ export const commerceBillingWebhookHandler: BillingWebhookHandler = async ({
           )
           const amount = (Number(object?.amount_total ?? 0) / 100).toFixed(2)
           const buyerEmail = object?.customer_details?.email
+          const orderTotal = `$${amount}`
           if (buyerEmail) {
+            const fallbackText =
+              `Thanks for your purchase!\n\n${productName} — $${amount}` +
+              `\nOrder reference: ${object.id}`
+            // Site-owner-designed template when published (AGL-771).
+            const designed = await renderHostEmail(
+              firebaseAdmin.app().firestore(),
+              String(hostId),
+              'order-receipt',
+              {
+                'order.summary': productName,
+                'order.total': orderTotal,
+                'order.ref': String(object.id),
+              },
+            )
             await sendEmail({
               to: String(buyerEmail),
-              subject: `Receipt: ${productName}`,
-              text:
-                `Thanks for your purchase!\n\n${productName} — $${amount}` +
-                `\nOrder reference: ${object.id}`,
+              subject: designed?.subject ?? `Receipt: ${productName}`,
+              text: designed?.text || fallbackText,
+              ...(designed?.html ? { html: designed.html } : {}),
               context: 'receipt',
             })
           }
@@ -947,15 +1009,31 @@ export const commerceBillingWebhookHandler: BillingWebhookHandler = async ({
               .getUser(sellerUid)
               .catch(() => null)
             if (seller?.email) {
+              const siteName = String(
+                hostSnapshot.get('displayName') ?? hostId,
+              )
+              const fallbackText =
+                `You made a sale on ${siteName}!\n\n${productName} — $${amount}` +
+                (buyerEmail ? `\nBuyer: ${buyerEmail}` : '') +
+                `\nOrder reference: ${object.id}`
+              // Site-owner-designed template when published (AGL-771).
+              const designed = await renderHostEmail(
+                firebaseAdmin.app().firestore(),
+                String(hostId),
+                'sale-notification',
+                {
+                  'site.name': siteName,
+                  'order.summary': `${productName} — $${amount}`,
+                  'order.total': orderTotal,
+                  'buyer.email': String(buyerEmail ?? ''),
+                  'order.ref': String(object.id),
+                },
+              )
               await sendEmail({
                 to: seller.email,
-                subject: `New order: ${productName}`,
-                text:
-                  `You made a sale on ${String(
-                    hostSnapshot.get('displayName') ?? hostId,
-                  )}!\n\n${productName} — $${amount}` +
-                  (buyerEmail ? `\nBuyer: ${buyerEmail}` : '') +
-                  `\nOrder reference: ${object.id}`,
+                subject: designed?.subject ?? `New order: ${productName}`,
+                text: designed?.text || fallbackText,
+                ...(designed?.html ? { html: designed.html } : {}),
                 context: 'seller order notice',
               })
             }

@@ -86,8 +86,8 @@ describe('renderHostEmail (AGL-770)', () => {
   it('returns null for a non-designable (fixed/external) key without reading', async () => {
     const reads = { templates: 0, versions: 0 }
     const fs = fakeFirestore(null, null, reads)
-    // order-receipt is `fixed`, campaign is `external` — neither is besigner.
-    expect(await renderHostEmail(fs, 'h1', 'order-receipt')).toBeNull()
+    // member-post is `fixed`, campaign is `external` — neither is besigner.
+    expect(await renderHostEmail(fs, 'h1', 'member-post')).toBeNull()
     expect(await renderHostEmail(fs, 'h1', 'campaign')).toBeNull()
     expect(reads.templates).toBe(0)
   })

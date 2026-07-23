@@ -145,7 +145,35 @@ export const TENANT_EMAILS: readonly TenantEmailEntry[] = [
     description: 'Sent to the buyer after a successful order or checkout.',
     pluginId: 'commerce',
     plugin: 'Commerce',
-    control: 'fixed',
+    control: 'besigner',
+    defaultSubject: 'Receipt for your order',
+    mergeTokens: [
+      {
+        name: 'order.summary',
+        description: 'The ordered items, one per line (with any license/download links)',
+        sample: 'House Blend × 2 — $24.00',
+      },
+      {
+        name: 'order.total',
+        description: 'Order total',
+        sample: '$24.00',
+      },
+      {
+        name: 'order.ref',
+        description: 'Order reference id',
+        sample: 'cs_test_123',
+      },
+    ],
+    defaultBody: [
+      { block: 'text', text: 'Thanks for your purchase!', variant: 'heading' },
+      { block: 'text', text: '{{order.summary}}', variant: 'body' },
+      { block: 'text', text: 'Total: {{order.total}}', variant: 'body' },
+      {
+        block: 'text',
+        text: 'Order reference: {{order.ref}}',
+        variant: 'caption',
+      },
+    ],
   },
   {
     key: 'sale-notification',
@@ -153,7 +181,46 @@ export const TENANT_EMAILS: readonly TenantEmailEntry[] = [
     description: 'Notifies the seller when an order is placed.',
     pluginId: 'commerce',
     plugin: 'Commerce',
-    control: 'fixed',
+    control: 'besigner',
+    defaultSubject: 'New order on {{site.name}}',
+    mergeTokens: [
+      {
+        name: 'site.name',
+        description: 'The site the sale happened on',
+        sample: 'Northwind Coffee',
+      },
+      {
+        name: 'order.summary',
+        description: 'The ordered items',
+        sample: 'House Blend — $12.00',
+      },
+      { name: 'order.total', description: 'Order total', sample: '$12.00' },
+      {
+        name: 'buyer.email',
+        description: "The buyer's email",
+        sample: 'buyer@example.com',
+      },
+      {
+        name: 'order.ref',
+        description: 'Order reference id',
+        sample: 'cs_test_123',
+      },
+    ],
+    defaultBody: [
+      { block: 'text', text: 'You made a sale', variant: 'heading' },
+      {
+        block: 'text',
+        text: 'A new order came in on {{site.name}}.',
+        variant: 'body',
+      },
+      { block: 'text', text: '{{order.summary}}', variant: 'body' },
+      { block: 'text', text: 'Total: {{order.total}}', variant: 'body' },
+      {
+        block: 'text',
+        text: 'Buyer: {{buyer.email}} · Order {{order.ref}}',
+        variant: 'caption',
+      },
+    ],
   },
   {
     key: 'reservation-confirmed',
@@ -161,7 +228,50 @@ export const TENANT_EMAILS: readonly TenantEmailEntry[] = [
     description: 'Confirms a paid reservation to the customer.',
     pluginId: 'commerce',
     plugin: 'Commerce',
-    control: 'fixed',
+    control: 'besigner',
+    defaultSubject: 'Reservation confirmed',
+    mergeTokens: [
+      {
+        name: 'reservation.checkIn',
+        description: 'Check-in date',
+        sample: 'Mon, 01 Jun 2026',
+      },
+      {
+        name: 'reservation.nights',
+        description: 'Number of nights',
+        sample: '2',
+      },
+      {
+        name: 'reservation.paid',
+        description: 'Amount paid today',
+        sample: '$240.00',
+      },
+      {
+        name: 'reservation.ref',
+        description: 'Reservation reference id',
+        sample: 'resv_123',
+      },
+    ],
+    defaultBody: [
+      { block: 'text', text: 'Reservation confirmed', variant: 'heading' },
+      { block: 'text', text: 'Your stay is confirmed!', variant: 'body' },
+      {
+        block: 'text',
+        text: 'Check-in: {{reservation.checkIn}}',
+        variant: 'body',
+      },
+      { block: 'text', text: 'Nights: {{reservation.nights}}', variant: 'body' },
+      {
+        block: 'text',
+        text: 'Paid today: {{reservation.paid}}',
+        variant: 'body',
+      },
+      {
+        block: 'text',
+        text: 'Reference: {{reservation.ref}}',
+        variant: 'caption',
+      },
+    ],
   },
   {
     key: 'gift-card',
@@ -169,7 +279,34 @@ export const TENANT_EMAILS: readonly TenantEmailEntry[] = [
     description: 'Delivers a purchased gift card to its recipient.',
     pluginId: 'commerce',
     plugin: 'Commerce',
-    control: 'fixed',
+    control: 'besigner',
+    defaultSubject: 'Your gift card',
+    mergeTokens: [
+      {
+        name: 'giftcard.code',
+        description: 'The gift card code',
+        sample: 'GC-ABC123DEF456',
+      },
+      {
+        name: 'giftcard.value',
+        description: 'The gift card value',
+        sample: '$25.00',
+      },
+    ],
+    defaultBody: [
+      { block: 'text', text: 'Your gift card', variant: 'heading' },
+      {
+        block: 'text',
+        text: 'Gift card code: {{giftcard.code}}',
+        variant: 'body',
+      },
+      { block: 'text', text: 'Value: {{giftcard.value}}', variant: 'body' },
+      {
+        block: 'text',
+        text: 'Enter it at checkout to apply the balance.',
+        variant: 'body',
+      },
+    ],
   },
   {
     key: 'supplier-fulfillment',
