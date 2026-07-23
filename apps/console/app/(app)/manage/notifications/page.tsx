@@ -59,7 +59,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
-import manageNavTabItems from '../../../../constants/manage-nav-tabs'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
@@ -295,8 +294,6 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Notifications'} />
       <DashboardLayout
-        navTabItems={manageNavTabItems()}
-        activeTab={buildRoute(Route.MANAGE_NOTIFICATIONS)}
         breadcrumbItems={[
           {
             children: 'Notifications',

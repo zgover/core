@@ -103,7 +103,6 @@ import { buildRoute, Route } from '../../../../../../../constants/route-links'
 import { useHostId, useHostSubdomain } from '../../../../../../../components/host-id-provider'
 import { useOrgSlug } from '../../../../../../../hooks/use-org-scope'
 import { buildScreenLiveUrl } from '../../../../../../../constants/tenant-links'
-import hostNavTabItems from '../../../../../../../constants/host-nav-tabs'
 import {
   publishScreenRoute,
   syncScreenRouteEntries,
@@ -638,8 +637,6 @@ function Screens(props) {
     <>
       <NextPageTitle screen={'Screens'} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
-        activeTab={buildRoute(Route.SCREEN_LIST, { orgSlug,  host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

@@ -32,7 +32,6 @@ import AuthenticatedLayout from '../../../../components/layouts/authenticated.la
 import OrgInvitesBanner from '../../../../components/org-invites-banner.component'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -90,7 +89,6 @@ function HostsContent() {
   )
   const [creating, setCreating] = useState(false)
   const { permissions } = useOrgPermissions()
-  const orgNavTabs = useOrgNavTabItems()
   // When the user has a pending invite, the banner's "accept" is the primary
   // path to their first org — so the zero-state steps aside to avoid two
   // competing calls to action (AGL-234).
@@ -100,8 +98,6 @@ function HostsContent() {
     <>
       <NextPageTitle screen={'Settings'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.HOST_LIST, { orgSlug })}
         breadcrumbItems={[
           {
             children: 'Sites',

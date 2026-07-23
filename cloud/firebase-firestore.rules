@@ -585,5 +585,26 @@ service cloud.firestore {
       allow read, create: if isStaff();
       allow update, delete: if false;
     }
+
+    // Designed templates for Aglyn's own outbound email — invites, usage
+    // summaries, staff alerts (AGL-747). Platform-level, not per-org: there
+    // is no membership to check, only the staff claim.
+    //
+    // Delete stays closed deliberately. The catalog of system emails is
+    // code-defined, so a template document is either present (customized) or
+    // absent (using the built-in copy); "reset to default" clears the fields
+    // through the same update path rather than removing the document, which
+    // keeps the audit trail of who changed what.
+    //
+    // The send path reads these through the Admin SDK and bypasses rules.
+    match /systemEmailTemplates/{templateKey} {
+      allow read, create, update: if isStaff();
+      allow delete: if false;
+
+      match /versions/{versionId} {
+        allow read, create, update: if isStaff();
+        allow delete: if false;
+      }
+    }
   }
 }

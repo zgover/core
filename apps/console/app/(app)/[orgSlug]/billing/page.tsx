@@ -66,7 +66,6 @@ import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { useOrgSlug } from '../../../../hooks/use-org-scope'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgHosts } from '../../../../hooks/use-org-hosts'
 import useCurrentOrg from '../../../../hooks/use-current-org'
@@ -74,7 +73,6 @@ import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
 
 const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
-  const orgNavTabs = useOrgNavTabItems()
   const orgSlug = useOrgSlug()
   const { data: user } = useUser()
   const firestore = useFirestore()
@@ -381,8 +379,6 @@ const BillingContent: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Billing'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.MANAGE_BILLING, { orgSlug })}
         breadcrumbItems={[
           { children: 'Billing', href: buildRoute(Route.MANAGE_BILLING, { orgSlug }) },
         ]}

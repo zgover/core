@@ -25,7 +25,6 @@ import OrgActivityCard from '../../../../components/org-activity-card.component'
 import OrgMembersCard from '../../../../components/org-members-card.component'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
@@ -40,7 +39,6 @@ import OrgRolesCard from '../../../../components/org-roles-card.component'
  * site's own Users card, which grants org membership scoped to that site.
  */
 const ManageTeam: NextPageWithLayout<Record<string, never>> = () => {
-  const orgNavTabs = useOrgNavTabItems()
   const orgSlug = useOrgSlug()
   const { currentOrg } = useOrgScope()
   const { can, loaded: permissionsLoaded } = useOrgPermissions()
@@ -48,8 +46,6 @@ const ManageTeam: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Team'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.MANAGE_TEAM, { orgSlug })}
         breadcrumbItems={[
           {
             children: 'Team',

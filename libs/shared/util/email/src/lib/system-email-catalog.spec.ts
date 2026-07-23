@@ -1,0 +1,108 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+  SYSTEM_EMAIL_TEMPLATES,
+  getSystemEmailTemplate,
+  isSystemEmailEditable,
+} from './system-email-catalog'
+
+describe('SYSTEM_EMAIL_TEMPLATES', () => {
+  it('has unique keys', () => {
+    const keys = SYSTEM_EMAIL_TEMPLATES.map((entry) => entry.key)
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+
+  it('uses storage-safe keys, since they are Firestore document ids', () => {
+    for (const entry of SYSTEM_EMAIL_TEMPLATES) {
+      expect(entry.key).toMatch(/^[a-z][a-z0-9-]*$/)
+    }
+  })
+
+  it('gives every entry the fields the staff list renders', () => {
+    for (const entry of SYSTEM_EMAIL_TEMPLATES) {
+      expect(entry.name.length).toBeGreaterThan(0)
+      expect(entry.description.length).toBeGreaterThan(0)
+      expect(entry.defaultSubject.length).toBeGreaterThan(0)
+      expect(entry.source.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('declares unique, brace-free merge tokens with samples', () => {
+    for (const entry of SYSTEM_EMAIL_TEMPLATES) {
+      const names = entry.mergeTokens.map((token) => token.name)
+      expect(new Set(names).size).toBe(names.length)
+      for (const token of entry.mergeTokens) {
+        // Templates write `{{token}}`; the registry stores the bare name.
+        expect(token.name).not.toMatch(/[{}]/)
+        expect(token.sample.length).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('only references tokens it declares in the default subject', () => {
+    for (const entry of SYSTEM_EMAIL_TEMPLATES) {
+      const used = [...entry.defaultSubject.matchAll(/\{\{([^}]+)\}\}/g)].map(
+        (match) => match[1].trim(),
+      )
+      const declared = new Set(entry.mergeTokens.map((token) => token.name))
+      for (const token of used) {
+        expect(declared.has(token)).toBe(true)
+      }
+    }
+  })
+
+  describe('delivery ownership', () => {
+    it('marks the auth emails as Firebase-delivered', () => {
+      // These are the ones a besigner template cannot reach yet (AGL-751).
+      // If this ever flips to 'resend' without the takeover shipping, staff
+      // get an editor that silently does nothing.
+      expect(getSystemEmailTemplate('password-reset')?.deliveredBy).toBe(
+        'firebase',
+      )
+      expect(getSystemEmailTemplate('email-verification')?.deliveredBy).toBe(
+        'firebase',
+      )
+    })
+
+    it('marks the emails Aglyn sends itself as Resend-delivered', () => {
+      for (const key of ['org-invite', 'usage-summary', 'erasure-hold-alert']) {
+        expect(getSystemEmailTemplate(key)?.deliveredBy).toBe('resend')
+      }
+    })
+
+    it('treats only Resend-delivered entries as editable', () => {
+      for (const entry of SYSTEM_EMAIL_TEMPLATES) {
+        expect(isSystemEmailEditable(entry)).toBe(
+          entry.deliveredBy === 'resend',
+        )
+      }
+    })
+  })
+
+  describe('getSystemEmailTemplate', () => {
+    it('finds a known key', () => {
+      expect(getSystemEmailTemplate('org-invite')?.name).toBe(
+        'Organization invite',
+      )
+    })
+
+    it('returns undefined for an unknown key rather than throwing', () => {
+      expect(getSystemEmailTemplate('not-a-template')).toBeUndefined()
+    })
+  })
+})

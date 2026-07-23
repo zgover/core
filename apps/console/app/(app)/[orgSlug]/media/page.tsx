@@ -25,7 +25,6 @@ import AuthenticatedLayout from '../../../../components/layouts/authenticated.la
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { MediaLibraryComponent } from '../../../../components/media/media-library.component'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -36,15 +35,12 @@ import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
  * library, scoped to the workspace switcher's current org.
  */
 const OrgMedia: NextPageWithLayout<Record<string, never>> = () => {
-  const orgNavTabs = useOrgNavTabItems()
   const orgSlug = useOrgSlug()
   const { currentOrg, loading } = useOrgScope()
   return (
     <>
       <NextPageTitle screen={'Media – Organization'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.ORG_MEDIA, { orgSlug })}
         breadcrumbItems={[
           { children: 'Media', href: buildRoute(Route.ORG_MEDIA, { orgSlug }) },
         ]}

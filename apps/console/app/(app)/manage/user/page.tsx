@@ -52,7 +52,6 @@ import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import CardDisplayFormTemplate from '../../../../components/card-display-form-template'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
-import manageNavTabItems from '../../../../constants/manage-nav-tabs'
 import MainLayout from '../../../../components/layouts/main.layout'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
@@ -202,8 +201,6 @@ const ManageUser: NextPageWithLayout<Record<string, never>> = (props) => {
     <>
       <NextPageTitle screen={'Settings'} />
       <DashboardLayout
-        navTabItems={manageNavTabItems()}
-        activeTab={buildRoute(Route.MANAGE_USER_SETTINGS)}
         breadcrumbItems={[
           {
             children: 'Settings',

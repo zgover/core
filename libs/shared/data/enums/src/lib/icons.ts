@@ -54,6 +54,7 @@ import {
   mdiDrag,
   mdiFileTree,
   mdiFilter,
+  mdiEmailOutline,
   mdiFlagVariant,
   mdiFormatAlignCenter,
   mdiFormatAlignJustify,
@@ -197,5 +198,7 @@ export const ICON_VARIANT_SYMBOL_CONFIRMED = mdiCheck
 // Release-flagged surface marker (AGL-229): staff-only badge on nav tabs
 // and admin flag rows for features hidden from customers.
 export const ICON_VARIANT_SYMBOL_FLAG = mdiFlagVariant
+// Staff system-email templates (AGL-748).
+export const ICON_VARIANT_SYMBOL_MAIL = mdiEmailOutline
 export const ICON_VARIANT_SYMBOL_MINUS = mdiMinus
 export const ICON_VARIANT_SYMBOL_SECURE = mdiShieldLock

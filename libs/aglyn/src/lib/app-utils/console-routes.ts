@@ -32,6 +32,7 @@ export enum Route {
   ADMIN_USER_DETAIL = '/admin/users/[uid]',
   ADMIN_FLAGS = '/admin/flags',
   ADMIN_PLUGIN_REVIEWS = '/admin/plugin-reviews',
+  ADMIN_EMAILS = '/admin/emails',
   ORG_HOME = '/[orgSlug]',
   ORG_MEDIA = '/[orgSlug]/media',
   ORG_DATA = '/[orgSlug]/data',
@@ -131,6 +132,7 @@ export interface RoutePayload {
   [Route.ADMIN_USER_DETAIL]: { uid: string }
   [Route.ADMIN_FLAGS]: undefined
   [Route.ADMIN_PLUGIN_REVIEWS]: undefined
+  [Route.ADMIN_EMAILS]: undefined
   [Route.ORG_MEDIA]: { orgSlug: string }
   [Route.ORG_DATA]: { orgSlug: string }
   [Route.ORG_PLUGINS]: { orgSlug: string }

@@ -31,7 +31,6 @@ import HostDisplayNameComponent from '../../../../../../components/host-display-
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../components/layouts/main.layout'
-import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { useHostId, useHostSubdomain } from '../../../../../../components/host-id-provider'
 import { useOrgSlug } from '../../../../../../hooks/use-org-scope'
@@ -108,16 +107,6 @@ const HostPluginPage: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={title} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
-        // Must match the href hostNavTabItems builds for plugin tabs. Both
-        // sides now go through Route.HOST_PLUGIN — this used to be two
-        // independent concatenations, and when they drifted the bar lost its
-        // selection entirely: no indicator, nothing to scroll to (AGL-649).
-        activeTab={buildRoute(Route.HOST_PLUGIN, {
-          orgSlug,
-          host,
-          pluginSlug,
-        })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

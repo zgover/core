@@ -44,7 +44,6 @@ import { useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
-import adminNavTabItems from '../../../../constants/admin-nav-tabs'
 import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -224,8 +223,6 @@ const AdminUsers: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Users – Staff'} />
       <DashboardLayout
-        navTabItems={adminNavTabItems()}
-        activeTab={buildRoute(Route.ADMIN_USERS)}
         breadcrumbItems={[
           { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
           { children: 'Users', href: buildRoute(Route.ADMIN_USERS) },

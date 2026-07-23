@@ -28,7 +28,6 @@ import AuthenticatedLayout from '../../../../../../components/layouts/authentica
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../components/layouts/main.layout'
 import SiteAccountsCard from '../../../../../../components/site-accounts-card.component'
-import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { useOrgSlug } from '../../../../../../hooks/use-org-scope'
 import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
@@ -46,8 +45,6 @@ const HostUsers: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Users'} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
-        activeTab={buildRoute(Route.HOST_USERS, { orgSlug,  host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

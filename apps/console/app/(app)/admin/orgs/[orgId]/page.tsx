@@ -58,7 +58,6 @@ import AuthenticatedLayout from '../../../../../components/layouts/authenticated
 import DashboardLayout from '../../../../../components/layouts/dashboard.layout'
 import PluginWidgetSlot from '../../../../../components/plugin-widget-slot.component'
 import MainLayout from '../../../../../components/layouts/main.layout'
-import adminNavTabItems from '../../../../../constants/admin-nav-tabs'
 import { docsHelp } from '../../../../../constants/docs-links'
 import MediaUrlField from '../../../../../components/media-url-field.component'
 import { buildRoute, Route } from '../../../../../constants/route-links'
@@ -408,8 +407,6 @@ const AdminOrgDetail: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Organization – Staff'} />
       <DashboardLayout
-        navTabItems={adminNavTabItems()}
-        activeTab={buildRoute(Route.ADMIN_ORGS)}
         breadcrumbItems={[
           { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
           { children: 'Organizations', href: buildRoute(Route.ADMIN_ORGS) },

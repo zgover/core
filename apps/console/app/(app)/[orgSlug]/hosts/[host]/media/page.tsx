@@ -33,7 +33,6 @@ import useHostOrgId from '../../../../../../hooks/use-host-org-id'
 import { docsHelp } from '../../../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { useOrgSlug } from '../../../../../../hooks/use-org-scope'
-import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
 
 const HostMedia: NextPageWithLayout<Record<string, never>> = () => {
@@ -46,7 +45,6 @@ const HostMedia: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Media'} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

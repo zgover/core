@@ -59,7 +59,6 @@ import HostDisplayNameComponent from '../../../../../../components/host-display-
 import { docsHelp } from '../../../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { useOrgSlug } from '../../../../../../hooks/use-org-scope'
-import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
 import useHostActivityLogger from '../../../../../../hooks/use-host-activity-logger'
 
@@ -501,7 +500,6 @@ const HostSetup: NextPageWithLayout<Record<string, never>> = (props) => {
     <>
       <NextPageTitle screen={'Host Setup'} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

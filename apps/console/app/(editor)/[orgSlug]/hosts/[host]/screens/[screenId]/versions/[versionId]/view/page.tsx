@@ -82,9 +82,9 @@ import ScreenAnalyticsCard from '../../../../../../../../../../components/analyt
 import AuthenticatedLayout from '../../../../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../../../../../components/layouts/main.layout'
+import SecondaryNavBarComponent from '../../../../../../../../../../components/secondary-nav-bar.component'
 import HostDisplayNameComponent from '../../../../../../../../../../components/host-display-name.component'
 import { hasEntitlement } from '../../../../../../../../../../constants/entitlements'
-import hostNavTabItems from '../../../../../../../../../../constants/host-nav-tabs'
 import { buildRoute, Route } from '../../../../../../../../../../constants/route-links'
 import { useHostId, useHostSubdomain } from '../../../../../../../../../../components/host-id-provider'
 import { useOrgSlug } from '../../../../../../../../../../hooks/use-org-scope'
@@ -596,9 +596,14 @@ function ScreenDetails() {
 
   return (
     <MainLayout title={[displayName, 'Screen']}>
+      {/*
+        This page sits in the full-screen `(editor)` group but wants the normal
+        console chrome, so it mounts MainLayout itself — and, since AGL-755
+        moved the secondary bar into the `(app)` layout this route never sees,
+        it mounts that itself too.
+      */}
+      <SecondaryNavBarComponent />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
-        activeTab={buildRoute(Route.SCREEN_LIST, { orgSlug,  host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

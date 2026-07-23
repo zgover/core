@@ -67,7 +67,6 @@ import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { useOrgSlug } from '../../../../../../hooks/use-org-scope'
 import { hasEntitlement } from '../../../../../../constants/entitlements'
 import useCurrentOrg from '../../../../../../hooks/use-current-org'
-import hostNavTabItems from '../../../../../../constants/host-nav-tabs'
 import {
   CONTENT_MAX_WIDTH,
   TABLE_HEAD_HEIGHT,
@@ -623,7 +622,6 @@ const HostContent: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Content'} />
       <DashboardLayout
-        navTabItems={hostNavTabItems(orgSlug, host)}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,

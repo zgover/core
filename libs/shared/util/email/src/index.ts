@@ -17,3 +17,6 @@
 
 export * from './lib/send-email'
 export * from './lib/email-health'
+export * from './lib/system-email-catalog'
+export * from './lib/email-render'
+export * from './lib/email-merge'

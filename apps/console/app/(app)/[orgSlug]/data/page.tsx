@@ -26,7 +26,6 @@ import PluginWidgetSlot from '../../../../components/plugin-widget-slot.componen
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
-import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
@@ -38,7 +37,6 @@ import useCurrentOrg from '../../../../hooks/use-current-org'
  * Data page shows the same collections in host context.
  */
 const OrgData: NextPageWithLayout<Record<string, never>> = () => {
-  const orgNavTabs = useOrgNavTabItems()
   const orgSlug = useOrgSlug()
   const { currentOrg, loading } = useOrgScope()
   const { org } = useCurrentOrg()
@@ -46,8 +44,6 @@ const OrgData: NextPageWithLayout<Record<string, never>> = () => {
     <>
       <NextPageTitle screen={'Data – Organization'} />
       <DashboardLayout
-        navTabItems={orgNavTabs}
-        activeTab={buildRoute(Route.ORG_DATA, { orgSlug })}
         breadcrumbItems={[
           { children: 'Data', href: buildRoute(Route.ORG_DATA, { orgSlug }) },
         ]}
