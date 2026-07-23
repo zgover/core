@@ -18,6 +18,7 @@
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { isCronAuthorized } from '../../../../utils/cron-auth'
 import { sendEmail } from '@aglyn/shared-util-email'
+import { renderSystemEmail } from '../../_lib/render-system-email'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 const RETENTION_DAYS = 90
@@ -123,19 +124,30 @@ async function handler(request: Request): Promise<Response> {
     }))
     const staffEmail = process.env.STAFF_ALERT_EMAIL
     if (due.length && staffEmail) {
+      const orgsList = due
+        .map(
+          (entry) =>
+            `- ${entry.name ?? entry.orgId} (${entry.orgId}), ` +
+            `requested ${entry.requestedAt?.toISOString() ?? '?'}`,
+        )
+        .join('\n')
+      const fallbackText =
+        'These organizations are past their GDPR erasure hold. Run ' +
+        'tools/scripts/erase-tenant.mjs to export and hard-delete:\n\n' +
+        orgsList
+      // One send per run, so resolving the staff-designed template here is a
+      // single Firestore read (AGL-768); null keeps the built-in copy.
+      const designed = await renderSystemEmail('erasure-hold-alert', {
+        count: String(due.length),
+        'orgs.list': orgsList,
+      })
       await sendEmail({
         to: staffEmail,
-        subject: `${due.length} erasure request(s) past the 7-day hold`,
-        text:
-          'These organizations are past their GDPR erasure hold. Run ' +
-          'tools/scripts/erase-tenant.mjs to export and hard-delete:\n\n' +
-          due
-            .map(
-              (entry) =>
-                `- ${entry.name ?? entry.orgId} (${entry.orgId}), ` +
-                `requested ${entry.requestedAt?.toISOString() ?? '?'}`,
-            )
-            .join('\n'),
+        subject:
+          designed?.subject ??
+          `${due.length} erasure request(s) past the 7-day hold`,
+        text: designed?.text || fallbackText,
+        ...(designed?.html ? { html: designed.html } : {}),
         context: 'erasure-hold staff alert',
       })
     }
