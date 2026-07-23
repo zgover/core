@@ -93,6 +93,16 @@ const TEXT_STYLES: Record<string, string> = {
 const row = (cellHtml: string, cellStyle = ''): string =>
   `<tr><td style="${cellStyle}">${cellHtml}</td></tr>`
 
+/**
+ * The id the besigner roots every stored node map at — `CANVAS_ROOT_ELEMENT_ID`
+ * in `@aglyn/aglyn`. `renderEmailHtml` still defaults `rootId` to `'root'` for
+ * ad-hoc callers, but anything rendering a real besigner document MUST pass
+ * this: rendering a besigner map as `'root'` finds no root and emits nothing
+ * (AGL-765). Kept here so server code need not import the heavy `@aglyn/aglyn`
+ * barrel; a drift guard in the console specs asserts the two stay equal.
+ */
+export const EMAIL_NODE_ROOT_ID = '_@_'
+
 export function renderEmailHtml(options: EmailRenderOptions): RenderedEmail {
   const {
     nodes,

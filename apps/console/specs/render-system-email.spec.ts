@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/aglyn'
+import { EMAIL_NODE_ROOT_ID } from '@aglyn/shared-util-email'
 import { renderSystemEmail } from '../app/api/_lib/render-system-email'
 
 const mockGet = jest.fn()
@@ -52,12 +54,15 @@ function snapshot(data: Record<string, unknown> | null) {
  */
 describe('renderSystemEmail', () => {
   const NODES = {
-    root: { $id: 'root', componentId: 'div', nodes: ['t1'] },
+    // The besigner roots its node map at CANVAS_ROOT_ELEMENT_ID ('_@_'), not
+    // 'root'. The fixture used 'root' and so never exercised the real data
+    // shape — which is how AGL-765 (renderSystemEmail rendering empty) shipped.
+    '_@_': { $id: '_@_', componentId: 'div', nodes: ['t1'] },
     t1: {
       $id: 't1',
       componentId: 'emailText',
       pluginId: 'email',
-      parentId: 'root',
+      parentId: '_@_',
       props: { children: 'Hello {{org.name}}', variant: 'body' },
     },
   }
@@ -146,5 +151,13 @@ describe('renderSystemEmail', () => {
       const result = await renderSystemEmail('org-invite', {})
       expect(result?.subject).not.toContain('{{')
     })
+  })
+
+  // Drift guard (AGL-765): the render lib carries its own copy of the besigner
+  // root id so server code needn't pull the @aglyn/aglyn barrel. If the
+  // besigner ever changes CANVAS_ROOT_ELEMENT_ID this fails loudly, pointing
+  // here — a silent divergence would make every designed template render empty.
+  it('keeps EMAIL_NODE_ROOT_ID in sync with the besigner root', () => {
+    expect(EMAIL_NODE_ROOT_ID).toBe(CANVAS_ROOT_ELEMENT_ID)
   })
 })

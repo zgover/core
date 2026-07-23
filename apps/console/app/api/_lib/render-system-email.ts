@@ -16,6 +16,7 @@
  */
 
 import {
+  EMAIL_NODE_ROOT_ID,
   SYSTEM_EMAIL_COLLECTION,
   getSystemEmailTemplate,
   renderEmailHtml,
@@ -95,6 +96,10 @@ export async function renderSystemEmail(
       definition.defaultSubject
     const rendered = renderEmailHtml({
       nodes: nodes as never,
+      // Besigner maps are rooted at '_@_', not renderEmailHtml's default
+      // 'root' — without this a designed template rendered empty and the send
+      // fell back to built-in copy, so designing did nothing (AGL-765).
+      rootId: EMAIL_NODE_ROOT_ID,
       subject: substituteMergeTokens(subjectTemplate, merge),
       preheader: substituteMergeTokens(
         String(templateSnapshot.get('preheader') ?? ''),
