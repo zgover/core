@@ -24,11 +24,11 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
 
 /**
  * Server-authoritative last-activity for idle expiry (AGL-697). `POST`
- * records a heartbeat — every signed-in tab on any `.aglyn.io` origin beats
+ * records a heartbeat — every signed-in tab on any `.aglyn.com` origin beats
  * here on real user input, so the HttpOnly parent-domain cookie set below is
  * a session-wide "last-seen" no single tab could otherwise observe. `GET`
  * reports it, so a tab that believes itself idle can confirm the WHOLE
@@ -36,7 +36,7 @@ const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
  * subdomain — the global sign-out AGL-697 is about.
  *
  * The cookie is HttpOnly (a foreign origin can neither read nor forge it)
- * and mirrors the session cookie's scope: `Domain=.aglyn.io` + `Secure`
+ * and mirrors the session cookie's scope: `Domain=.aglyn.com` + `Secure`
  * only on the real deployment, so localhost dev still works.
  */
 function activityCookie(request: Request, valueMs: number): string {

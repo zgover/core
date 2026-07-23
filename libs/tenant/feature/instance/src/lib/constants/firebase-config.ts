@@ -23,12 +23,12 @@ export const FIREBASE_CLIENT_APP_NAME = 'DEFAULT_AGLYN'
 /**
  * On deployed workspace hosts the OAuth handshake is funnelled through one
  * dedicated same-site auth origin — `auth.<workspaceDomain>` (e.g.
- * auth.aglyn.io), which reverse-proxies the Firebase auth helpers under
+ * auth.aglyn.com), which reverse-proxies the Firebase auth helpers under
  * /__/* (console next.config rewrite, AGL-462). This keeps the handshake
- * same-site (all *.aglyn.io share the aglyn.io eTLD+1, so browser storage
+ * same-site (all *.aglyn.com share the aglyn.com eTLD+1, so browser storage
  * partitioning — which severed the cross-origin *.firebaseapp.com
  * authDomain and broke mobile Google sign-in — never applies), while
- * every host, including dynamically-provisioned {org}.aglyn.io
+ * every host, including dynamically-provisioned {org}.aglyn.com
  * workspaces, presents the SAME redirect URI. Google OAuth forbids
  * wildcard redirect URIs, so a per-host authDomain would need a new
  * registration per org; the single auth host needs exactly one.
@@ -44,7 +44,7 @@ function resolveFirebaseAuthDomain(): string | undefined {
   if (process.env['FIREBASE_AUTH_EMULATOR_ENABLED'] === 'true') {
     return configured
   }
-  const workspaceDomain = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+  const workspaceDomain = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
   const { hostname } = window.location
   const onWorkspaceDomain =
     hostname === workspaceDomain || hostname.endsWith(`.${workspaceDomain}`)

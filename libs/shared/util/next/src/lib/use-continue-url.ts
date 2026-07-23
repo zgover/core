@@ -40,7 +40,7 @@ export const ContinueParamName = 'continue'
 export const continueParam = (value: string) => `${ContinueParamName}=${value}`
 
 const WORKSPACE_DOMAIN =
-  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
 
 /**
  * Same-site absolute returns (AGL-465): the auth host signs a user in and
