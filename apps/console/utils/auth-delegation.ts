@@ -27,7 +27,7 @@
  */
 
 const WORKSPACE_DOMAIN =
-  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
 
 /**
  * First-party infrastructure labels that host their own sign-in (or are

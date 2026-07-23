@@ -16,8 +16,16 @@
  */
 'use client'
 
+import { ICON_VARIANT_BESIGNER } from '@aglyn/shared-data-enums'
 import { mdiBookmarkOutline } from '@aglyn/shared-data-mdi'
-import { CardDisplay, Container, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  CardDisplay,
+  Container,
+  GridItems,
+  MdiIcon,
+  useConfirmationContext,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -39,6 +47,7 @@ import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { collection, doc, limit, query, updateDoc } from 'firebase/firestore'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState } from 'react'
+import ArtifactNotFound from '../../../../../../../components/artifact-not-found.component'
 import HostDisplayNameComponent from '../../../../../../../components/host-display-name.component'
 import { useHostId, useHostSubdomain } from '../../../../../../../components/host-id-provider'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
@@ -48,6 +57,7 @@ import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 import { useOrgSlug } from '../../../../../../../hooks/use-org-scope'
 import useFirestoreCollection from '../../../../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../../../../hooks/use-firestore-doc'
+import UseTemplateDialog from '../../../../../../../components/templates/use-template-dialog.component'
 
 /** Human label + colour for the frozen `source.type` (AGL-666/687). */
 function sourceLabel(source: { type?: string; version?: string } | undefined) {
@@ -98,12 +108,17 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
   const router = useRouter()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
+  const { confirm } = useConfirmationContext()
 
-  const { data: template } = useFirestoreDoc<any>(
+  const { data: template, status } = useFirestoreDoc<any>(
     () => doc(firestore, 'hosts', hostId, 'templates', templateId),
     [firestore, hostId, templateId],
     { idField: '$id' },
   )
+  // Three states, not two (AGL-706): a document that is still loading and one
+  // that does not exist both arrive as `undefined`, and rendering an empty
+  // editable form for the second made a mistyped id look like data loss.
+  const notFound = status === 'success' && !template
   const { data: templateDocs } = useFirestoreCollection<any>(
     () => query(collection(firestore, 'hosts', hostId, 'templates'), limit(100)),
     [firestore, hostId],
@@ -128,6 +143,77 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
 
   const [name, setName] = useState<string | null>(null)
   const [description, setDescription] = useState<string | null>(null)
+  const [useTemplate, setUseTemplate] = useState<Record<string, any> | null>(
+    null,
+  )
+
+  /**
+   * Deletes ONE page of a starter bundle (AGL-696).
+   *
+   * The library row for a starter acts on the whole bundle, so this is where
+   * "remove just the checkout page" lives — without it, grouping would have
+   * taken a per-page action away rather than merely relocating it.
+   */
+  const handleDeleteSibling = useCallback(
+    (entry: any) => async () => {
+      const confirmed = await confirm({
+        title: 'Delete this page?',
+        description:
+          `"${entry.displayName ?? entry.$id}" is removed from your library. ` +
+          'The rest of the starter and anything you already created from it ' +
+          'are unaffected.',
+        confirmationText: 'Delete',
+        confirmationButtonProps: { color: 'error' },
+      })
+        .then(() => true)
+        .catch(() => false)
+      if (!confirmed) return
+      const dequeue = queueLoading()
+      try {
+        // Soft delete, matching the library card.
+        await updateDoc(
+          doc(firestore, 'hosts', hostId, 'templates', entry.$id),
+          { deletedAt: Timestamp.now() },
+        )
+        enqueueSnackbar('Page deleted', { variant: 'success', persist: false })
+        // Deleting the page you are looking at leaves this route pointing at
+        // a soft-deleted document, which renders as not-found (AGL-706) —
+        // land on a sibling instead, or the list when none is left.
+        if (entry.$id === templateId) {
+          const next = siblings.find((other: any) => other.$id !== templateId)
+          router.push(
+            next
+              ? buildRoute(Route.TEMPLATE_DETAILS, {
+                  orgSlug,
+                  host,
+                  templateId: next.$id,
+                })
+              : buildRoute(Route.HOST_TEMPLATES, { orgSlug, host }),
+          )
+        }
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar('Could not delete the page', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      } finally {
+        dequeue()
+      }
+    },
+    [
+      confirm,
+      queueLoading,
+      firestore,
+      hostId,
+      templateId,
+      siblings,
+      router,
+      orgSlug,
+      host,
+      enqueueSnackbar,
+    ],
+  )
 
   const handleSave = useCallback(async () => {
     const dequeue = queueLoading()
@@ -173,6 +259,10 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
       <NextPageTitle screen={template?.displayName ?? 'Template'} />
       <DashboardLayout
         navTabItems={hostNavTabItems(orgSlug, host)}
+        // Keep the parent tab lit on a detail page, the way the
+        // admin detail pages do — without this the nav loses its
+        // selected state as soon as you open a row.
+        activeTab={buildRoute(Route.HOST_TEMPLATES, { orgSlug, host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,
@@ -193,8 +283,45 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
           children: template?.displayName ?? 'Template',
           icon: { path: mdiBookmarkOutline.path },
         }}
+        // The besigner is what this page exists to reach, so it belongs in
+        // the hero like the screen detail page's, not as a text button at
+        // the bottom of a card (AGL-702).
+        // Withheld when there is no template: the besigner would open on an
+        // id with no document behind it (AGL-706).
+        headerRight={
+          notFound ? null : (
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => router.push(besignerUrl)}
+              startIcon={
+                <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} />
+              }
+            >
+              {'Open Besigner'}
+            </Button>
+          )
+        }
       >
+        {notFound ? (
+          <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+            <ArtifactNotFound
+              noun="template"
+              listUrl={listUrl}
+              listLabel="templates"
+              id={templateId}
+            />
+          </Container>
+        ) : (
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <GridItems
+            spacing={3}
+            items={[
+              {
+                // Full width when it is the only card, so a plain template
+                // does not render as a narrow column beside dead space.
+                size: siblings.length > 1 ? { xs: 12, lg: 5 } : { xs: 12 },
+                children: (
           <CardDisplay header={'Details'} contentGutterX contentGutterY>
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
@@ -227,6 +354,10 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
               <Typography variant="caption" color="text.secondary">
                 {`ID ${templateId} — provenance is server-managed and cannot be edited here`}
               </Typography>
+              {/* Save stays with the fields it saves. Open-besigner moved to
+                  the hero, and "Back to templates" is dropped — the
+                  breadcrumb already goes there, and the screen detail page
+                  carries no back button either (AGL-702). */}
               <Stack direction="row" spacing={1}>
                 <Button
                   variant="contained"
@@ -237,12 +368,6 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
                 >
                   {'Save'}
                 </Button>
-                <Button size="small" onClick={() => router.push(besignerUrl)}>
-                  {'Open in besigner'}
-                </Button>
-                <Button size="small" onClick={() => router.push(listUrl)}>
-                  {'Back to templates'}
-                </Button>
               </Stack>
               <Typography variant="caption" color="text.secondary">
                 {'Templates have no publish step — the besigner edits this ' +
@@ -250,8 +375,13 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
               </Typography>
             </Stack>
           </CardDisplay>
-
-          {siblings.length > 1 ? (
+                ),
+              },
+              ...(siblings.length > 1
+                ? [
+                    {
+                      size: { xs: 12, lg: 7 },
+                      children: (
             <CardDisplay
               header={`Starter bundle · ${template?.source?.starterName ?? starterId}`}
               contentGutterX
@@ -262,8 +392,10 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
                 color="text.secondary"
                 sx={{ mb: 1.5 }}
               >
-                {'This starter was authored as a set of pages. Each one is a ' +
-                  'separate template you can edit, use or delete on its own.'}
+                {'This starter was authored as a set of pages. The Templates ' +
+                  'list shows it as one row and acts on all of them at once; ' +
+                  'here each page is the separate template it really is, and ' +
+                  'can be edited, used or deleted on its own.'}
               </Typography>
               <Table size="small">
                 <TableHead>
@@ -283,29 +415,77 @@ const TemplateDetails: NextPageWithLayout<Record<string, never>> = () => {
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
-                        <Button
-                          size="small"
-                          disabled={entry.$id === templateId}
-                          onClick={() =>
-                            router.push(
-                              buildRoute(Route.TEMPLATE_DETAILS, {
-                                orgSlug,
-                                host,
-                                templateId: entry.$id,
-                              }),
-                            )
-                          }
+                        {/* Per-page Edit / Use / Delete: the library row
+                            covers the bundle, so this is the only place a
+                            single page of a starter can be acted on
+                            (AGL-696). */}
+                        <Stack
+                          direction="row"
+                          spacing={0.5}
+                          sx={{ justifyContent: 'flex-end' }}
                         >
-                          {entry.$id === templateId ? 'Viewing' : 'Open'}
-                        </Button>
+                          <Button
+                            size="small"
+                            disabled={entry.$id === templateId}
+                            onClick={() =>
+                              router.push(
+                                buildRoute(Route.TEMPLATE_DETAILS, {
+                                  orgSlug,
+                                  host,
+                                  templateId: entry.$id,
+                                }),
+                              )
+                            }
+                          >
+                            {entry.$id === templateId ? 'Viewing' : 'Open'}
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() =>
+                              router.push(
+                                buildRoute(Route.TEMPLATE_BESIGNER, {
+                                  orgSlug,
+                                  host,
+                                  templateId: entry.$id,
+                                }),
+                              )
+                            }
+                          >
+                            {'Edit'}
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() => setUseTemplate(entry)}
+                          >
+                            {'Use'}
+                          </Button>
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={handleDeleteSibling(entry)}
+                          >
+                            {'Delete'}
+                          </Button>
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </CardDisplay>
-          ) : null}
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+          />
+          <UseTemplateDialog
+            hostId={hostId}
+            template={useTemplate}
+            onClose={() => setUseTemplate(null)}
+          />
         </Container>
+        )}
       </DashboardLayout>
     </>
   )

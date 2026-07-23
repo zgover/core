@@ -25,18 +25,18 @@ import {
 
 describe('shouldDelegateSignIn', () => {
   it('delegates org workspace subdomains', () => {
-    expect(shouldDelegateSignIn('aglyn-org.aglyn.io')).toBe(true)
-    expect(shouldDelegateSignIn('acme.aglyn.io')).toBe(true)
-    expect(shouldDelegateSignIn('aglyn-org.aglyn.io:443')).toBe(true)
+    expect(shouldDelegateSignIn('aglyn-org.aglyn.com')).toBe(true)
+    expect(shouldDelegateSignIn('acme.aglyn.com')).toBe(true)
+    expect(shouldDelegateSignIn('aglyn-org.aglyn.com:443')).toBe(true)
   })
 
   it('does not delegate the apex or platform/auth hosts', () => {
-    expect(shouldDelegateSignIn('aglyn.io')).toBe(false)
-    expect(shouldDelegateSignIn('app.aglyn.io')).toBe(false)
-    expect(shouldDelegateSignIn('auth.aglyn.io')).toBe(false)
-    expect(shouldDelegateSignIn('www.aglyn.io')).toBe(false)
-    expect(shouldDelegateSignIn('console.aglyn.io')).toBe(false)
-    expect(shouldDelegateSignIn('admin.aglyn.io')).toBe(false)
+    expect(shouldDelegateSignIn('aglyn.com')).toBe(false)
+    expect(shouldDelegateSignIn('app.aglyn.com')).toBe(false)
+    expect(shouldDelegateSignIn('auth.aglyn.com')).toBe(false)
+    expect(shouldDelegateSignIn('www.aglyn.com')).toBe(false)
+    expect(shouldDelegateSignIn('console.aglyn.com')).toBe(false)
+    expect(shouldDelegateSignIn('admin.aglyn.com')).toBe(false)
   })
 
   it('does not delegate off-workspace hosts (localhost, previews)', () => {
@@ -44,22 +44,22 @@ describe('shouldDelegateSignIn', () => {
     expect(shouldDelegateSignIn('localhost:4200')).toBe(false)
     expect(shouldDelegateSignIn('app-aglyn-abc.vercel.app')).toBe(false)
     // A look-alike suffix must not be treated as same-site.
-    expect(shouldDelegateSignIn('evil-aglyn.io')).toBe(false)
+    expect(shouldDelegateSignIn('evil-aglyn.com')).toBe(false)
   })
 
   it('does not delegate deeper nested hosts (not a single org label)', () => {
-    expect(shouldDelegateSignIn('a.b.aglyn.io')).toBe(false)
+    expect(shouldDelegateSignIn('a.b.aglyn.com')).toBe(false)
   })
 
   describe('on mobile', () => {
     const mobile = { isMobile: true }
     it('delegates apex/platform hosts too (cross-origin authDomain breaks redirect)', () => {
-      expect(shouldDelegateSignIn('app.aglyn.io', mobile)).toBe(true)
-      expect(shouldDelegateSignIn('console.aglyn.io', mobile)).toBe(true)
-      expect(shouldDelegateSignIn('aglyn-org.aglyn.io', mobile)).toBe(true)
+      expect(shouldDelegateSignIn('app.aglyn.com', mobile)).toBe(true)
+      expect(shouldDelegateSignIn('console.aglyn.com', mobile)).toBe(true)
+      expect(shouldDelegateSignIn('aglyn-org.aglyn.com', mobile)).toBe(true)
     })
     it('never delegates the auth host itself (same-origin OAuth)', () => {
-      expect(shouldDelegateSignIn('auth.aglyn.io', mobile)).toBe(false)
+      expect(shouldDelegateSignIn('auth.aglyn.com', mobile)).toBe(false)
     })
     it('still signs in locally off-workspace (previews/localhost)', () => {
       expect(shouldDelegateSignIn('localhost:4200', mobile)).toBe(false)
@@ -73,33 +73,33 @@ describe('shouldDelegateSignIn', () => {
 describe('buildDelegatedSignInUrl', () => {
   it('carries an absolute same-site return on the auth host', () => {
     expect(
-      buildDelegatedSignInUrl('https://aglyn-org.aglyn.io', '/screens'),
+      buildDelegatedSignInUrl('https://aglyn-org.aglyn.com', '/screens'),
     ).toBe(
-      'https://auth.aglyn.io/signin?continue=' +
-        encodeURIComponent('https://aglyn-org.aglyn.io/screens'),
+      'https://auth.aglyn.com/signin?continue=' +
+        encodeURIComponent('https://aglyn-org.aglyn.com/screens'),
     )
   })
 
   it('routes signup to the auth host signup page', () => {
     expect(
-      buildDelegatedSignInUrl('https://acme.aglyn.io', '/', 'signup'),
+      buildDelegatedSignInUrl('https://acme.aglyn.com', '/', 'signup'),
     ).toBe(
-      'https://auth.aglyn.io/signup?continue=' +
-        encodeURIComponent('https://acme.aglyn.io/'),
+      'https://auth.aglyn.com/signup?continue=' +
+        encodeURIComponent('https://acme.aglyn.com/'),
     )
   })
 
   it('sanitizes an unsafe return path to root (no open redirect)', () => {
     expect(
-      buildDelegatedSignInUrl('https://acme.aglyn.io', '//evil.com'),
+      buildDelegatedSignInUrl('https://acme.aglyn.com', '//evil.com'),
     ).toBe(
-      'https://auth.aglyn.io/signin?continue=' +
-        encodeURIComponent('https://acme.aglyn.io/'),
+      'https://auth.aglyn.com/signin?continue=' +
+        encodeURIComponent('https://acme.aglyn.com/'),
     )
   })
 
   it('exposes the auth host', () => {
-    expect(authSignInHost()).toBe('auth.aglyn.io')
+    expect(authSignInHost()).toBe('auth.aglyn.com')
   })
 })
 

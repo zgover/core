@@ -34,7 +34,7 @@
 // Why this exists: after promoting to production, the tenant wildcard domain
 // (*.aglyn.app) has repeatedly stayed aliased to a STALE deployment. Directory
 // links are a footgun here — the repo-root `.vercel/repo.json` maps EVERY
-// directory to the console project (`app-aglyn-io`) — so this script never
+// directory to the console project (`aglyn-console`) — so this script never
 // relies on the cwd link at all: it names the project explicitly in
 // `vercel ls <project> --prod`, identifies deployments by URL, and
 // cross-checks every result against the project name that `vercel inspect`
@@ -50,7 +50,7 @@
 //
 // Env knobs for the commit check (all optional):
 //   VERCEL_TOKEN     API token (else the CLI auth file is read)
-//   DEPLOY_REMOTE    git remote that Vercel builds from (else auto-detect zgover/core)
+//   DEPLOY_REMOTE    git remote that Vercel builds from (else auto-detect aglyn/aglyn)
 //   DEPLOY_BRANCH    production branch name (default: production)
 //
 // Exit codes: 0 = all domains current AND on HEAD; 1 = a domain is stale, or an
@@ -68,7 +68,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const TEAM_SCOPE = 'team_Mu9NFauDO31nvj89PgmQJEtN'
+const TEAM_SCOPE = 'team_JFfQodGE8VhCAZM6usYTu54M'
 const INSPECT_TIMEOUT_MS = 30_000
 const LS_TIMEOUT_MS = 60_000
 const PROMOTE_TIMEOUT_MS = 240_000
@@ -78,14 +78,16 @@ const MAX_LS_CANDIDATES = 25
 
 const PROJECTS = [
   {
-    name: 'app-aglyn-io',
+    name: 'aglyn-console',
+    legacyNames: ['app-aglyn-io'],
     label: 'console',
-    domains: ['https://app.aglyn.io'],
+    domains: ['https://app.aglyn.com'],
     // Builds on every production push; its commit must equal HEAD.
     alwaysBuilds: true,
   },
   {
-    name: 'tenant-aglyn-app',
+    name: 'aglyn-tenant',
+    legacyNames: ['tenant-aglyn-app'],
     label: 'tenant',
     // northwind-coffee.aglyn.app probes the *.aglyn.app wildcard alias.
     domains: ['https://northwind-coffee.aglyn.app'],
@@ -94,19 +96,23 @@ const PROJECTS = [
   {
     name: 'www-aglyn-io',
     label: 'www',
-    // The aglyn.app apex serves the marketing site, not the tenant wildcard.
-    domains: ['https://aglyn.app'],
-    // Per-path ignore-build-step: rebuilds only when apps/www changes, so its
-    // commit trails HEAD by design — report the SHA, never fail on it.
+    // The aglyn.com apex serves the marketing site (AGL-718). aglyn.io and
+    // aglyn.app are redirects to it, so probing those would test the redirect
+    // rather than the deployment actually serving.
+    domains: ['https://aglyn.com'],
+    // This project is frozen (`commandForIgnoringBuildStep = "exit 0"`) pending
+    // the Aglyn-built marketing site (AGL-724), so its commit trails HEAD by
+    // design — report the SHA, never fail on it.
     alwaysBuilds: false,
   },
   {
-    name: 'docs-aglyn-io',
+    name: 'aglyn-docs',
+    legacyNames: ['docs-aglyn-io'],
     label: 'docs',
     // Docusaurus docs site (apps/docs). Builds on every production push;
     // three consecutive Error builds went unnoticed until AGL-580 because
     // this project wasn't verified — a lagging commit now flags loudly.
-    domains: ['https://docs.aglyn.io'],
+    domains: ['https://docs.aglyn.com'],
     alwaysBuilds: true,
   },
 ]
@@ -117,7 +123,7 @@ const JSON_OUT = args.includes('--json')
 if (args.includes('--help') || args.includes('-h')) {
   console.log(
     'Usage: node tools/deploy/verify-production-aliases.mjs [--fix] [--json]\n\n' +
-      'Verifies app.aglyn.io, *.aglyn.app (via northwind-coffee.aglyn.app) and\n' +
+      'Verifies app.aglyn.com, *.aglyn.app (via northwind-coffee.aglyn.app) and\n' +
       'aglyn.app against the newest READY production deployment of their Vercel\n' +
       'projects. --fix promotes the newest deployment when a domain is stale.\n' +
       'Exit codes: 0 current, 1 stale, 2 operational error.',
@@ -208,7 +214,7 @@ function git(cmdArgs, { timeoutMs = INSPECT_TIMEOUT_MS } = {}) {
 /**
  * The production branch HEAD SHA that Vercel builds from (AGL-566). Uses
  * `DEPLOY_REMOTE`/`DEPLOY_BRANCH` when set, else the first git remote whose URL
- * points at the Vercel-connected repo (…/zgover/core). Returns null on failure
+ * points at the Vercel-connected repo (…/aglyn/aglyn). Returns null on failure
  * (the commit check then reports "unknown" rather than failing the run).
  */
 async function productionHeadSha() {
@@ -219,7 +225,7 @@ async function productionHeadSha() {
     remote =
       remotes
         .split('\n')
-        .find((l) => /\bzgover\/core\b/i.test(l) && /\(fetch\)/.test(l))
+        .find((l) => /\baglyn\/aglyn\b/i.test(l) && /\(fetch\)/.test(l))
         ?.split(/\s+/)[0] ?? 'origin'
   }
   const res = await git(['ls-remote', remote, `refs/heads/${branch}`])
@@ -298,8 +304,9 @@ async function findNewestReady(project) {
   for (const url of listed.urls.slice(0, MAX_LS_CANDIDATES)) {
     const info = await inspect(url)
     if (info.error) return { error: info.error }
-    // Authoritative cross-check: inspect reports the owning project's name.
-    if (info.name && info.name !== project.name) {
+    // Authoritative cross-check: inspect reports the owning project's name
+    // (or a pre-rename name it still carries — see ownedByProject).
+    if (!ownedByProject(info.name, project)) {
       return {
         error:
           `\`vercel inspect ${url}\` reports project "${info.name}", expected ` +
@@ -318,6 +325,28 @@ async function findNewestReady(project) {
   }
 }
 
+/**
+ * Does `vercel inspect`'s reported project name identify this project? (AGL-730)
+ *
+ * A deployment's `name` is the project name AT DEPLOY TIME — it is frozen into
+ * the deployment record and does NOT follow a project rename. After the
+ * 2026-07-23 renames, every pre-existing deployment still reports the old name,
+ * which made the cross-check below abort with exit 2 on all three renamed
+ * projects. Accepting the old names keeps the guard's real purpose intact (it
+ * still catches `vercel ls` handing back a genuinely different project) without
+ * failing on history.
+ *
+ * `legacyNames` can be dropped once every project has produced a production
+ * deployment under its new name.
+ */
+function ownedByProject(reportedName, project) {
+  if (!reportedName) return true
+  return (
+    reportedName === project.name ||
+    (project.legacyNames ?? []).includes(reportedName)
+  )
+}
+
 /** Which deployment currently serves this domain? (inspect resolves the alias) */
 async function checkDomain(project, domain, newestReady) {
   const info = await inspect(domain)
@@ -326,7 +355,7 @@ async function checkDomain(project, domain, newestReady) {
   const current =
     (serving.id && newestReady.id && serving.id === newestReady.id) ||
     (serving.url && hostOf(serving.url) === hostOf(newestReady.url))
-  const nameMismatch = serving.name && serving.name !== project.name
+  const nameMismatch = !ownedByProject(serving.name, project)
   return {
     domain,
     serving,

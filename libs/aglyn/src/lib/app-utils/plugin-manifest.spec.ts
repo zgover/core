@@ -111,11 +111,11 @@ describe('pluginArtifactPath', () => {
 describe('pluginContentSecurityPolicy', () => {
   it("uses 'none' for connect-src without network capability", () => {
     const csp = pluginContentSecurityPolicy(base as PluginManifest, [
-      'https://console.aglyn.io',
+      'https://app.aglyn.com',
     ])
     expect(csp).toContain("default-src 'none'")
     expect(csp).toContain("connect-src 'none'")
-    expect(csp).toContain('frame-ancestors https://console.aglyn.io')
+    expect(csp).toContain('frame-ancestors https://app.aglyn.com')
   })
 
   it('allowlists declared network origins in connect-src', () => {

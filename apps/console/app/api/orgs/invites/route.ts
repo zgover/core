@@ -39,8 +39,9 @@ const HOST_ROLES = new Set<HostAccessRole>(['admin', 'editor', 'viewer'])
  * Org invites (AGL-234) for people without Aglyn accounts yet. Admins
  * create/revoke; anyone signed in with a matching verified email accepts,
  * which materializes the membership via the same Admin-SDK path as direct
- * adds (reverse index + host projections included). Email delivery is a
- * follow-up — invites surface in the console for now.
+ * adds (reverse index + host projections included). Invite emails send via
+ * Resend when RESEND_API_KEY + USAGE_EMAIL_FROM are configured (the response
+ * reports `emailed`); invites also surface in the console after sign-in.
  */
 async function handler(request: Request): Promise<Response> {
   const { method, query, body, headers: rawHeaders } = await pluginRequestFromWeb(request)
@@ -185,32 +186,52 @@ async function handler(request: Request): Promise<Response> {
       )
       // Best-effort notification via Resend (same provider as AGL-137's
       // usage emails); the invite works without it — the console banner
-      // surfaces it after sign-in either way.
+      // surfaces it after sign-in either way. `emailed` tells the client
+      // whether a message actually went out so it can say so honestly
+      // (AGL-708): unconfigured or a failed send both report false.
+      let emailed = false
       const resendKey = process.env.RESEND_API_KEY
       const from = process.env.USAGE_EMAIL_FROM
       if (resendKey && from) {
-        const orgName =
-          (await firestore.collection('orgs').doc(orgId).get()).get('name') ??
-          'an organization'
-        const origin = headers.origin ?? `https://${headers.host}`
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${resendKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from,
-            to: email,
-            subject: `You've been invited to ${orgName} on Aglyn`,
-            text:
-              `You've been invited to join ${orgName} as ${role}.\n\n` +
-              `Sign in at ${origin} with this email address and accept ` +
-              'the invite from your dashboard.',
-          }),
-        }).catch((error) => console.error('invite email failed', error))
+        try {
+          const orgName =
+            (await firestore.collection('orgs').doc(orgId).get()).get('name') ??
+            'an organization'
+          const origin = headers.origin ?? `https://${headers.host}`
+          const emailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${resendKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from,
+              to: email,
+              subject: `You've been invited to ${orgName} on Aglyn`,
+              text:
+                `You've been invited to join ${orgName} as ${role}.\n\n` +
+                `Sign in at ${origin} with this email address and accept ` +
+                'the invite from your dashboard.',
+            }),
+          })
+          emailed = emailResponse.ok
+          if (!emailed) {
+            console.error(
+              'invite email failed',
+              emailResponse.status,
+              await emailResponse.text().catch(() => ''),
+            )
+          }
+        } catch (error) {
+          console.error('invite email failed', error)
+        }
+      } else {
+        console.warn(
+          'invite email skipped — set RESEND_API_KEY and USAGE_EMAIL_FROM ' +
+            'to deliver invite emails',
+        )
       }
-      return Response.json({ ok: true, inviteId }, { status: 200 })
+      return Response.json({ ok: true, inviteId, emailed }, { status: 200 })
     }
 
     if (action === 'revoke') {

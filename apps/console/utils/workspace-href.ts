@@ -19,8 +19,8 @@
  * Drop the leading `/{orgSlug}` from a console href when the browser is
  * already on that org's workspace subdomain (AGL-627).
  *
- * On `acme.aglyn.io` the org IS the hostname, so repeating it in the path
- * reads as `acme.aglyn.io/acme/hosts/x`. Routes stay canonically
+ * On `acme.aglyn.com` the org IS the hostname, so repeating it in the path
+ * reads as `acme.aglyn.com/acme/hosts/x`. Routes stay canonically
  * `/[orgSlug]/…` underneath — middleware rewrites the segment back in — so
  * this is presentation only and is always safe to skip.
  *

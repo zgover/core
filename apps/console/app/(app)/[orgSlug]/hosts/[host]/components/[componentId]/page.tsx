@@ -17,8 +17,17 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
-import { CardDisplay, Container, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  ICON_VARIANT_APP_SETTINGS,
+  ICON_VARIANT_BESIGNER,
+} from '@aglyn/shared-data-enums'
+import {
+  CardDisplay,
+  Container,
+  GridItems,
+  MdiIcon,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -39,6 +48,7 @@ import { useFirestore } from '@aglyn/tenant-feature-instance'
 import { collection, doc, limit, query, setDoc, updateDoc } from 'firebase/firestore'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
+import ArtifactNotFound from '../../../../../../../components/artifact-not-found.component'
 import HostDisplayNameComponent from '../../../../../../../components/host-display-name.component'
 import { useHostId, useHostSubdomain } from '../../../../../../../components/host-id-provider'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
@@ -48,6 +58,7 @@ import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 import { useOrgSlug } from '../../../../../../../hooks/use-org-scope'
 import useFirestoreCollection from '../../../../../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../../../../../hooks/use-firestore-doc'
+import UsedByCard from '../../../../../../../components/used-by-card.component'
 
 /**
  * Component detail (AGL-693).
@@ -68,11 +79,15 @@ const ComponentDetails: NextPageWithLayout<Record<string, never>> = () => {
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
 
-  const { data: definition } = useFirestoreDoc<any>(
+  const { data: definition, status } = useFirestoreDoc<any>(
     () => doc(firestore, 'hosts', hostId, 'components', componentId),
     [firestore, hostId, componentId],
     { idField: '$id' },
   )
+  // Three states, not two (AGL-706): a document that is still loading and one
+  // that does not exist both arrive as `undefined`, and rendering an empty
+  // editable form for the second made a mistyped id look like data loss.
+  const notFound = status === 'success' && !definition
   // No orderBy: the oldest version docs predate `createdAt`, and Firestore
   // drops documents missing the ordered field. Sort client-side, same as
   // BesignerVersionsComponent.
@@ -213,6 +228,10 @@ const ComponentDetails: NextPageWithLayout<Record<string, never>> = () => {
       <NextPageTitle screen={definition?.displayName ?? 'Component'} />
       <DashboardLayout
         navTabItems={hostNavTabItems(orgSlug, host)}
+        // Keep the parent tab lit on a detail page, the way the
+        // admin detail pages do — without this the nav loses its
+        // selected state as soon as you open a row.
+        activeTab={buildRoute(Route.HOST_COMPONENTS, { orgSlug, host })}
         breadcrumbItems={[
           {
             children: <HostDisplayNameComponent hostId={hostId} />,
@@ -233,8 +252,44 @@ const ComponentDetails: NextPageWithLayout<Record<string, never>> = () => {
           children: definition?.displayName ?? 'Component',
           icon: { path: ICON_VARIANT_APP_SETTINGS.path },
         }}
+        // The besigner is what this page exists to reach, so it belongs in
+        // the hero like the screen detail page's, not as a text button at
+        // the bottom of a card (AGL-702).
+        // Withheld when there is no component: Open Besigner would mint a
+        // version document under an id that has none (AGL-706).
+        headerRight={
+          notFound ? null : (
+            <Button
+              size="small"
+              variant="contained"
+              disabled={opening}
+              onClick={handleOpen()}
+              startIcon={
+                <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} />
+              }
+            >
+              {opening ? 'Opening…' : 'Open Besigner'}
+            </Button>
+          )
+        }
       >
+        {notFound ? (
+          <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+            <ArtifactNotFound
+              noun="component"
+              listUrl={listUrl}
+              listLabel="components"
+              id={componentId}
+            />
+          </Container>
+        ) : (
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <GridItems
+            spacing={3}
+            items={[
+              {
+                size: { xs: 12, lg: 5 },
+                children: (
           <CardDisplay header={'Details'} contentGutterX contentGutterY>
             <Stack spacing={2}>
               <TextField
@@ -257,6 +312,10 @@ const ComponentDetails: NextPageWithLayout<Record<string, never>> = () => {
               <Typography variant="caption" color="text.secondary">
                 {`ID ${componentId} — persisted in screen documents, so it never changes`}
               </Typography>
+              {/* Save stays with the fields it saves. Open-besigner moved to
+                  the hero, and "Back to components" is dropped — the
+                  breadcrumb already goes there, and the screen detail page
+                  carries no back button either (AGL-702). */}
               <Stack direction="row" spacing={1}>
                 <Button
                   variant="contained"
@@ -267,20 +326,14 @@ const ComponentDetails: NextPageWithLayout<Record<string, never>> = () => {
                 >
                   {'Save'}
                 </Button>
-                <Button
-                  size="small"
-                  disabled={opening}
-                  onClick={handleOpen()}
-                >
-                  {opening ? 'Opening…' : 'Open in besigner'}
-                </Button>
-                <Button size="small" onClick={() => router.push(listUrl)}>
-                  {'Back to components'}
-                </Button>
               </Stack>
             </Stack>
           </CardDisplay>
-
+                ),
+              },
+              {
+                size: { xs: 12, lg: 7 },
+                children: (
           <CardDisplay header={'Versions'} contentGutterX contentGutterY>
             {versions.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
@@ -334,7 +387,26 @@ const ComponentDetails: NextPageWithLayout<Record<string, never>> = () => {
               </Table>
             )}
           </CardDisplay>
+                ),
+              },
+              {
+                // Sits under Details, beside Versions: what USES this
+                // component is a property of the component, not of any one
+                // version (AGL-703).
+                size: { xs: 12, lg: 5 },
+                children: (
+                  <UsedByCard
+                    hostId={hostId}
+                    kind="component"
+                    id={componentId}
+                    noun="component"
+                  />
+                ),
+              },
+            ]}
+          />
         </Container>
+        )}
       </DashboardLayout>
     </>
   )

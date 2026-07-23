@@ -29,8 +29,8 @@ import {
 
 /**
  * Cross-subdomain session sync (AGL-236). Firebase client auth is
- * per-origin, so each {org}.aglyn.io workspace starts signed out even
- * when app.aglyn.io is authenticated. The parent-domain `__session`
+ * per-origin, so each {org}.aglyn.com workspace starts signed out even
+ * when app.aglyn.com is authenticated. The parent-domain `__session`
  * cookie is the source of truth for the workspace session:
  *
  * - interactive sign-in (signed-out → signed-in transition) → mint the

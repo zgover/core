@@ -33,7 +33,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 
-const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
 
 export interface CreateOrgDialogProps {
   open: boolean

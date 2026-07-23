@@ -17,7 +17,7 @@ node tools/scripts/bootstrap-platform.mjs
 
 # Apply everything the current env has credentials for
 FIREBASE_PROJECT_ID=... STRIPE_SECRET_KEY=... VERCEL_TOKEN=... \
-  node tools/scripts/bootstrap-platform.mjs --apply --staff you@aglyn.io
+  node tools/scripts/bootstrap-platform.mjs --apply --staff you@aglyn.com
 ```
 
 Sections (each skips with instructions when its credential is absent):

@@ -18,6 +18,7 @@
 import { styled } from '@mui/material/styles'
 import Link, { type LinkProps } from 'next/link'
 import { type AnchorHTMLAttributes, forwardRef } from 'react'
+import { LinkNavigationReporter } from './link-navigation-reporter'
 
 export interface NextAnchorProps
   extends AnchorHTMLAttributes<HTMLAnchorElement> {}
@@ -64,6 +65,9 @@ export const NextLink = forwardRef<any, NextLinkProps>((props, ref) => {
       {...rest}
     >
       {children}
+      {/* null-rendering: drives the global loading overlay off this link's
+          real navigation transition (useLinkStatus), not URL-commit. */}
+      <LinkNavigationReporter />
     </Link>
   )
 })

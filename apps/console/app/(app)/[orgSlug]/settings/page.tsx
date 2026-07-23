@@ -54,7 +54,7 @@ import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
 import useOrgPermissions from '../../../../hooks/use-org-permissions'
 
 const WORKSPACE_DOMAIN =
-  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+  process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
 
 /**
  * Org settings without host context (AGL-236): rename (the only

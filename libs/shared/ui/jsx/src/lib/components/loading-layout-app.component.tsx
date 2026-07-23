@@ -16,94 +16,28 @@
  */
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
-import {
-  forwardRef,
-  type ReactNode,
-  Suspense,
-  useEffect,
-  useRef,
-} from 'react'
-import {
-  LoadingProviderComponent,
-  useLoading,
-} from '../contexts/loading.context'
+import { forwardRef, type ReactNode } from 'react'
+import { LoadingProviderComponent } from '../contexts/loading.context'
 import { LoadingModal } from './loading-modal'
 import type { LoadingLayoutComponentProps } from './loading-layout.component'
-
-/** Never wedge the UI when a navigation is interrupted/cancelled. */
-const NAVIGATION_OVERLAY_MAX_MS = 10_000
-
-/**
- * App Router replacement for the Pages Router `router.events` wiring
- * (AGL-459): the App Router has no transition events, so navigation intent
- * is detected from same-origin link clicks (capture phase catches every
- * `next/link`), and the overlay is dropped when the rendered route actually
- * changes (`usePathname`/`useSearchParams`), on `popstate`, or after a
- * safety timeout.
- */
-function RouterLoadingApp({ children }: { children?: ReactNode }) {
-  const { queueLoading } = useLoading()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const dequeueRef = useRef<(() => void) | null>(null)
-
-  const settle = () => {
-    dequeueRef.current?.()
-    dequeueRef.current = null
-  }
-  const settleRef = useRef(settle)
-  settleRef.current = settle
-
-  // The route the app actually renders changed — navigation completed.
-  useEffect(() => {
-    settleRef.current()
-  }, [pathname, searchParams])
-
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0) return
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-        return
-      }
-      const anchor = (event.target as Element | null)?.closest?.('a[href]')
-      if (!(anchor instanceof HTMLAnchorElement)) return
-      if (anchor.target && anchor.target !== '_self') return
-      if (anchor.hasAttribute('download')) return
-      const url = new URL(anchor.href, window.location.href)
-      if (url.origin !== window.location.origin) return
-      if (
-        url.pathname === window.location.pathname &&
-        url.search === window.location.search
-      ) {
-        return
-      }
-      if (!dequeueRef.current) dequeueRef.current = queueLoading()
-      window.setTimeout(() => settleRef.current(), NAVIGATION_OVERLAY_MAX_MS)
-    }
-    const handlePopState = () => settleRef.current()
-
-    document.addEventListener('click', handleClick, true)
-    window.addEventListener('popstate', handlePopState)
-    return () => {
-      document.removeEventListener('click', handleClick, true)
-      window.removeEventListener('popstate', handlePopState)
-      settleRef.current()
-    }
-  }, [queueLoading])
-
-  return children ?? null
-}
-RouterLoadingApp.displayName = 'RouterLoadingApp'
-RouterLoadingApp.aglyn = true
 
 /**
  * App Router variant of {@link LoadingLayoutComponent}. The Pages Router
  * version wires `RouterLoading` on `router.events`, which does not exist in
- * the App Router (and `useRouter()` from `next/router` throws there) —
- * {@link RouterLoadingApp} covers navigations via link-click detection
- * instead, and imperative `useLoading().queueLoading()` calls still render
- * the modal.
+ * the App Router (and `useRouter()` from `next/router` throws there).
+ *
+ * Navigation intent no longer comes from a link-click heuristic. Every
+ * `<Link>` (through {@link NextLink}) renders a `LinkNavigationReporter` that
+ * drives this overlay off the link's real navigation transition
+ * (`useLinkStatus`) — so the overlay stays up until the destination route is
+ * genuinely ready, instead of settling on URL commit (AGL-459 originally
+ * settled on `usePathname`/`useSearchParams`, which fired before a slow
+ * segment finished fetching/compiling and flashed the modal away early).
+ *
+ * Dropping `useSearchParams` from this host also removes the ISR/SSG
+ * `BAILOUT_TO_CLIENT_SIDE_RENDERING` hazard it once needed a Suspense
+ * boundary to contain (AGL-594). Imperative `useLoading().queueLoading()`
+ * calls still render the modal.
  */
 export interface LoadingLayoutAppComponentProps
   extends Omit<LoadingLayoutComponentProps, 'children'> {
@@ -124,18 +58,9 @@ const LoadingLayoutAppComponent = forwardRef<
     return (
       <LoadingProviderComponent>
         <LoadingModal ref={ref} {...rest}>
-          {/* The listener holds useSearchParams(), which MUST sit under
-              its own Suspense boundary or ISR/SSG routes 500 at request
-              time (BAILOUT_TO_CLIENT_SIDE_RENDERING — took the tenant
-              down, AGL-594). Children stay OUTSIDE the boundary so site
-              pages keep their server-rendered HTML; only the
-              null-rendering listener client-renders. */}
-          <>
-            <Suspense fallback={null}>
-              <RouterLoadingApp />
-            </Suspense>
-            {children}
-          </>
+          {/* Fragment keeps LoadingModal's single-ReactElement child contract
+              (children is a ReactNode — string/array otherwise won't type). */}
+          <>{children}</>
         </LoadingModal>
       </LoadingProviderComponent>
     )

@@ -23,7 +23,6 @@ import {
 } from '@aglyn/aglyn'
 import { MUI_BUNDLE_ID } from '@aglyn/aglyn'
 import {
-  ICON_VARIANT_CLOSE,
   ICON_VARIANT_MODIFY_DELETE,
   ICON_VARIANT_MODIFY_EDIT,
 } from '@aglyn/shared-data-enums'
@@ -39,16 +38,14 @@ import {
   Container,
   DataTableComponent,
   MdiIcon,
-  NavigationDrawerComponent,
-  SrOnly,
   useConfirmationContext,
   useLoading,
 } from '@aglyn/shared-ui-jsx'
-import { FormRenderer, simpleComponentMapper } from '@aglyn/shared-ui-jsx-forms'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { Button, IconButton, Typography } from '@mui/material'
+import { Button, Stack } from '@mui/material'
+import TemplateGalleryDialog from '../../../../../../../components/templates/template-gallery-dialog.component'
 import { GridActionsCellItem, type GridColDef } from '@mui/x-data-grid'
 import {
   collection,
@@ -59,11 +56,10 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useHostResourceApi } from '@aglyn/tenant-feature-instance'
-import AuthErrorAlertComponent from '../../../../../../../components/auth-error-alert.component'
-import AuthFormTemplateComponent from '../../../../../../../components/auth-form-template.component'
+import CreateArtifactDrawer from '../../../../../../../components/create-artifact-drawer.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
 import PublishArtifactDialog, {
@@ -94,6 +90,10 @@ CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 function Layouts(props) {
   const params = useParams<{ hostId: string }>()
   const orgSlug = useOrgSlug()
+  const router = useRouter()
+  // Layout templates, not layouts (AGL-699) — the same picker the screens
+  // page uses, filtered to the layout kind.
+  const [templatesOpen, setTemplatesOpen] = useState(false)
   const host = useHostSubdomain()
   const hostId = useHostId()
   const { queueLoading, loading } = useLoading()
@@ -360,24 +360,33 @@ function Layouts(props) {
       flex: 1,
       minWidth: 275,
       type: 'string',
+      // Blank reads as a rendering gap; '--' reads as "nothing here",
+      // which is what the screens list has always shown.
+      valueFormatter: (value: any) => value || '--',
     },
     {
       field: 'updatedAt',
       headerName: 'Updated',
       flex: 1,
-      minWidth: 150,
+      minWidth: 170,
       type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
     {
       field: 'createdAt',
       headerName: 'Created',
       flex: 1,
-      minWidth: 150,
+      minWidth: 170,
       type: 'date',
-      valueFormatter: ({ value }: any) =>
-        value?.toDate?.().toLocaleTimeString() || '--',
+      // MUI X v9 passes the value positionally. The old v6 object form
+      // (`({ value })`) silently destructures undefined off a Date and every
+      // row renders '--', which is what these columns were doing.
+      valueGetter: (value: any) => value?.toDate?.() ?? null,
+      valueFormatter: (value: any) => value?.toLocaleString?.() || '--',
     },
   ]
 
@@ -403,61 +412,42 @@ function Layouts(props) {
           icon: { path: mdiPageLayoutBody.path },
         }}
         headerRight={
-          <Button size="small" variant="contained" onClick={handleFormOpen}>
-            {'Create New Layout'}
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setTemplatesOpen(true)}
+            >
+              {'Templates'}
+            </Button>
+            <Button size="small" variant="contained" onClick={handleFormOpen}>
+              {'Create New Layout'}
+            </Button>
+          </Stack>
         }
         aside={
-          <NavigationDrawerComponent
+          // Shared with the component and template creates (AGL-700); this
+          // drawer's chrome and field schema were lifted from here.
+          <CreateArtifactDrawer
             open={quickDrawerOpen}
-            anchor="right"
-            variant="temporary"
             onClose={handleFormClose}
-            AppBarProps={{ color: 'surface' }}
-            appBarLeft={
-              <>
-                <IconButton
-                  color="inherit"
-                  edge="start"
-                  onClick={handleFormClose}
-                  sx={{ mr: 2 }}
-                >
-                  <MdiIcon path={ICON_VARIANT_CLOSE.path} />
-                  <SrOnly>close drawer</SrOnly>
-                </IconButton>
-                <Typography variant="h6" component="div">
-                  {'Create new layout'}
-                </Typography>
-              </>
-            }
-            appBarRight={
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={handleFormClose}
-              >
-                {'Cancel'}
-              </Button>
-            }
-          >
-            <Container gutterY>
-              <FormRenderer
-                FormTemplate={AuthFormTemplateComponent}
-                componentMapper={simpleComponentMapper}
-                onSubmit={handleFormSubmit}
-                schema={formSchema}
-                subscription={{ values: true }}
-                clearOnUnmount
-              />
-              <AuthErrorAlertComponent
-                error={error as any}
-                sx={{ mt: 2, mb: 1 }}
-              />
-            </Container>
-          </NavigationDrawerComponent>
+            title="Create new layout"
+            onSubmit={handleFormSubmit}
+            error={error}
+          />
         }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <TemplateGalleryDialog
+            hostId={hostId}
+            open={templatesOpen}
+            onClose={() => setTemplatesOpen(false)}
+            existingSlugs={[]}
+            screenCount={0}
+            kind="layout"
+            title="Start from a layout template"
+            blurb="Layout templates add a ready-made layout you can restyle in the besigner. Existing layouts are never touched."
+          />
           <CardDisplay>
             <DataTableComponent
               rowHeight={TABLE_ROW_HEIGHT}
@@ -465,6 +455,16 @@ function Layouts(props) {
               columns={columns}
               noRowsLabel="No layouts"
               rows={layouts}
+              onRowClick={({ id }) =>
+                router.push(
+                  buildRoute(Route.LAYOUT_DETAILS, {
+                    orgSlug,
+                    host,
+                    layoutId: id as string,
+                  }),
+                )
+              }
+              sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
               loading={status === 'loading'}
               initialState={{ pagination: { paginationModel: { pageSize } } }}
               onPaginationModelChange={(model) => setPageSize(model.pageSize)}
@@ -485,39 +485,6 @@ function Layouts(props) {
       />
     </>
   )
-}
-const formSchema = {
-  fields: [
-    {
-      component: 'text-field',
-      name: 'displayName',
-      helperText: 'Friendly name for internal reference',
-      type: 'text',
-      label: 'Display name',
-      isRequired: true,
-      validate: [
-        { type: 'required', message: 'Provide a display name' },
-        {
-          type: 'max-length',
-          threshold: 25,
-          message: 'Must not exceed 25 characters',
-        },
-      ],
-    },
-    {
-      component: 'textarea',
-      name: 'description',
-      label: 'Description',
-      helperText: 'Brief description for internal reference',
-      validate: [
-        {
-          type: 'max-length',
-          threshold: 80,
-          message: 'Must not exceed 80 characters',
-        },
-      ],
-    },
-  ],
 }
 Layouts.displayName = 'Page:Layouts'
 
