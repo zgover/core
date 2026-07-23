@@ -510,6 +510,26 @@ function SystemEmailBesignerPage() {
               {` — ${token.description}`}
             </Typography>
           ))}
+
+          {/* AGL-761: a platform email belongs to no host or org, so the
+              designer's "Browse media" affordance — which reads a host media
+              library through `BesignerMediaPickerProvider` — has no scope to
+              browse and is deliberately not mounted here. That leaves an
+              Image block's URL as the only way in, which is fine while the
+              catalog is text and links; the gap was that nothing said so, so
+              a staffer met a blank "Browse media"-less panel with no
+              explanation. State it rather than leave it to be discovered. A
+              dedicated platform media source is future work (see AGL-761). */}
+          <Typography variant="subtitle2" sx={{ pt: 2 }}>
+            {'Images'}
+          </Typography>
+          <Alert severity="info" sx={{ mt: 0.5 }}>
+            {'System email has no media library — it belongs to no site or ' +
+              'organization, so there is nothing host-scoped to browse. Add ' +
+              'an image by dropping in an Image block and pasting a publicly ' +
+              'reachable https URL (for example an asset on aglyn.com) into ' +
+              'its URL field.'}
+          </Alert>
         </Stack>
       </CloseableDrawerComponent>
 
