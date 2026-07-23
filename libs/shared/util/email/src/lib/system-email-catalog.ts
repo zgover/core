@@ -25,12 +25,19 @@ import { EMAIL_NODE_ROOT_ID } from './email-render'
  *
  * `firebase` — Firebase Auth sends it from its own templates, configured in
  * the Firebase console. **A besigner template cannot affect these at all**
- * until the send is taken over (AGL-751). They are listed so staff can see
- * the full set of mail the product sends and where each one is controlled;
- * the UI must present them as non-editable rather than offering an editor
- * that silently does nothing.
+ * until the send is taken over (AGL-751).
+ *
+ * `stripe` — Stripe sends it on Aglyn's behalf from the Dashboard's
+ * Customer-emails settings (billing receipts, dunning, refunds, expiring-card
+ * notices). Aglyn never composes these, so like `firebase` they cannot be
+ * designed here (AGL-767).
+ *
+ * The non-`resend` entries are listed so staff can see the full set of mail
+ * the product sends and where each one is controlled; the UI must present
+ * them as non-editable rather than offering an editor that silently does
+ * nothing.
  */
-export type SystemEmailDeliveredBy = 'resend' | 'firebase'
+export type SystemEmailDeliveredBy = 'resend' | 'firebase' | 'stripe'
 
 export interface SystemEmailMergeToken {
   /** Token as written in the template, without braces. */
@@ -206,6 +213,162 @@ export const SYSTEM_EMAIL_TEMPLATES: readonly SystemEmailTemplateDefinition[] =
       source: 'apps/console/app/api/admin/audit-archive/route.ts',
     },
     {
+      key: 'welcome',
+      name: 'Welcome',
+      description:
+        'Sent to a new owner the first time they create an organization ' +
+        '(not on every organization they later create).',
+      deliveredBy: 'resend',
+      defaultSubject: 'Welcome to Aglyn',
+      mergeTokens: [
+        {
+          name: 'name',
+          description: "The new owner's display name",
+          sample: 'Alex',
+        },
+        {
+          name: 'org.name',
+          description: 'The organization they just created',
+          sample: 'Test Org',
+        },
+        {
+          name: 'consoleUrl',
+          description: 'Console dashboard URL',
+          sample: 'https://app.aglyn.com',
+        },
+      ],
+      // Mirrors the fallbackText in orgs/create/route.ts.
+      defaultBody: [
+        { block: 'text', text: 'Welcome to Aglyn', variant: 'heading' },
+        {
+          block: 'text',
+          text:
+            'Hi {{name}}, thanks for creating {{org.name}}. Your workspace ' +
+            'is ready.',
+          variant: 'body',
+        },
+        {
+          block: 'text',
+          text:
+            'From your dashboard you can add a site, invite your team, and ' +
+            'start building.',
+          variant: 'body',
+        },
+        { block: 'button', label: 'Open your dashboard', href: '{{consoleUrl}}' },
+      ],
+      source: 'apps/console/app/api/orgs/create/route.ts',
+    },
+    {
+      key: 'member-added',
+      name: 'Added to an organization',
+      description:
+        'Sent when an existing Aglyn account is added directly to an ' +
+        'organization. People who do not have an account yet get the ' +
+        'organization invite email instead.',
+      deliveredBy: 'resend',
+      defaultSubject: "You've been added to {{org.name}}",
+      mergeTokens: [
+        {
+          name: 'org.name',
+          description: 'The organization they were added to',
+          sample: 'Test Org',
+        },
+        {
+          name: 'member.role',
+          description: 'Role they were given',
+          sample: 'editor',
+        },
+        {
+          name: 'signInUrl',
+          description: 'Console URL to open the organization',
+          sample: 'https://app.aglyn.com',
+        },
+      ],
+      // Mirrors the fallbackText in orgs/members/route.ts.
+      defaultBody: [
+        {
+          block: 'text',
+          text: 'You were added to {{org.name}} as {{member.role}}.',
+          variant: 'body',
+        },
+        {
+          block: 'text',
+          text: 'Sign in to switch to it from your dashboard.',
+          variant: 'body',
+        },
+        { block: 'button', label: 'Open Aglyn', href: '{{signInUrl}}' },
+      ],
+      source: 'apps/console/app/api/orgs/members/route.ts',
+    },
+    {
+      key: 'erasure-confirmation',
+      name: 'Erasure completed',
+      description:
+        'Sent to an organization owner once its data has been permanently ' +
+        'erased under a GDPR request.',
+      deliveredBy: 'resend',
+      defaultSubject: 'Your Aglyn data has been erased',
+      mergeTokens: [
+        {
+          name: 'org.name',
+          description: 'The organization that was erased',
+          sample: 'Test Org',
+        },
+      ],
+      // Mirrors the fallbackText in admin/run-erasures/route.ts.
+      defaultBody: [
+        { block: 'text', text: 'Your data has been erased', variant: 'heading' },
+        {
+          block: 'text',
+          text:
+            '{{org.name}} and all of its data have been permanently erased ' +
+            'from Aglyn, as requested.',
+          variant: 'body',
+        },
+        {
+          block: 'text',
+          text: 'This is complete and cannot be undone.',
+          variant: 'body',
+        },
+      ],
+      source: 'apps/console/app/api/admin/run-erasures/route.ts',
+    },
+    {
+      key: 'erasure-requested',
+      name: 'Erasure requested',
+      description:
+        'Confirms to an organization owner that a GDPR erasure request was ' +
+        'recorded, and that deletion follows after a 7-day hold.',
+      deliveredBy: 'resend',
+      defaultSubject: 'We received your erasure request',
+      mergeTokens: [
+        {
+          name: 'org.name',
+          description: 'The organization to be erased',
+          sample: 'Test Org',
+        },
+      ],
+      // Mirrors the fallbackText in admin/erasure-request/route.ts.
+      defaultBody: [
+        { block: 'text', text: 'Erasure request received', variant: 'heading' },
+        {
+          block: 'text',
+          text:
+            'We have recorded a request to erase {{org.name}} and all of ' +
+            'its data from Aglyn.',
+          variant: 'body',
+        },
+        {
+          block: 'text',
+          text:
+            'Deletion is permanent and happens after a 7-day hold. If this ' +
+            'was not intended, contact support before then to cancel.',
+          variant: 'body',
+        },
+      ],
+      source: 'apps/console/app/api/admin/erasure-request/route.ts',
+    },
+    {
       key: 'password-reset',
       name: 'Forgot password',
       description:
@@ -226,6 +389,68 @@ export const SYSTEM_EMAIL_TEMPLATES: readonly SystemEmailTemplateDefinition[] =
       defaultSubject: 'Verify your email address',
       mergeTokens: [],
       source: 'apps/console/app/(auth)/verify-email/page.tsx',
+    },
+    // Stripe-delivered billing email (AGL-767). Aglyn never composes these —
+    // Stripe sends them from the Dashboard's Customer-emails and Subscription
+    // settings, so they are listed for visibility only and are not designable.
+    // Whether each actually sends is a Dashboard toggle the code cannot read;
+    // the descriptions say "if enabled" rather than asserting it is on.
+    {
+      key: 'stripe-receipt',
+      name: 'Payment receipt',
+      description:
+        'Receipt for a successful subscription or invoice payment. Sent by ' +
+        'Stripe if "Successful payments" is enabled under Customer emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your receipt from Aglyn',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Customer emails',
+    },
+    {
+      key: 'stripe-payment-failed',
+      name: 'Payment failed',
+      description:
+        'Dunning notice when a subscription charge fails and Stripe retries ' +
+        'it. Sent by Stripe if failed-payment emails are enabled under ' +
+        'Subscriptions and emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your Aglyn payment could not be processed',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Subscriptions and emails',
+    },
+    {
+      key: 'stripe-refund',
+      name: 'Refund confirmation',
+      description:
+        'Confirms a refund back to the customer. Sent by Stripe if ' +
+        '"Refunds" is enabled under Customer emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your Aglyn refund',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Customer emails',
+    },
+    {
+      key: 'stripe-card-expiring',
+      name: 'Card expiring soon',
+      description:
+        'Reminder that the card on file is about to expire. Sent by Stripe ' +
+        'if expiring-card reminders are enabled under Subscriptions and ' +
+        'emails.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your card on file is expiring soon',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Subscriptions and emails',
+    },
+    {
+      key: 'stripe-invoice',
+      name: 'Invoice',
+      description:
+        'A finalized invoice emailed to the organization. Sent by Stripe ' +
+        'when invoice emails are enabled for the billing configuration.',
+      deliveredBy: 'stripe',
+      defaultSubject: 'Your Aglyn invoice',
+      mergeTokens: [],
+      source: 'Stripe Dashboard → Settings → Customer emails',
     },
   ]
 
@@ -279,7 +504,9 @@ const PLACEHOLDER_DEFAULT_BODY: readonly SystemEmailDefaultBlock[] = [
  * and determinism keeps the map stable and diffable.
  */
 export function buildDefaultEmailNodeMap(
-  definition: SystemEmailTemplateDefinition,
+  // Structural so the tenant catalog (AGL-770) can seed the same way — every
+  // definition that carries a `defaultBody` builds an identical node map.
+  definition: { defaultBody?: readonly SystemEmailDefaultBlock[] },
 ): Record<string, SystemEmailNode> {
   const blocks = definition.defaultBody?.length
     ? definition.defaultBody

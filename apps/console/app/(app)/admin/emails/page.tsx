@@ -53,6 +53,9 @@ import { openSystemEmailVersion } from '../../../../utils/open-system-email-vers
 const FIREBASE_TEMPLATES_URL =
   'https://console.firebase.google.com/project/aglyn-main/authentication/emails'
 
+/** Stripe's own customer-email settings, for the billing rows (AGL-767). */
+const STRIPE_EMAILS_URL = 'https://dashboard.stripe.com/settings/emails'
+
 interface TemplateState {
   $id: string
   versionId?: string
@@ -209,7 +212,14 @@ function AdminEmails() {
                               color={customized ? 'primary' : 'default'}
                             />
                           ) : (
-                            <Chip size="small" label="Sent by Firebase" />
+                            <Chip
+                              size="small"
+                              label={
+                                definition.deliveredBy === 'stripe'
+                                  ? 'Sent by Stripe'
+                                  : 'Sent by Firebase'
+                              }
+                            />
                           )}
                         </Stack>
                         <Typography variant="body2" color="text.secondary">
@@ -259,12 +269,18 @@ function AdminEmails() {
                           </>
                         ) : (
                           <Link
-                            href={FIREBASE_TEMPLATES_URL}
+                            href={
+                              definition.deliveredBy === 'stripe'
+                                ? STRIPE_EMAILS_URL
+                                : FIREBASE_TEMPLATES_URL
+                            }
                             target="_blank"
                             rel="noreferrer"
                             variant="body2"
                           >
-                            {'Firebase console'}
+                            {definition.deliveredBy === 'stripe'
+                              ? 'Stripe dashboard'
+                              : 'Firebase console'}
                           </Link>
                         )}
                       </Stack>
@@ -280,7 +296,9 @@ function AdminEmails() {
               {'Password reset and email verification are sent by Firebase ' +
                 'Auth from its own templates, so they cannot be designed ' +
                 'here yet. Editing them will become possible once Aglyn ' +
-                'takes over those sends (AGL-751).'}
+                'takes over those sends (AGL-751). Billing emails — receipts, ' +
+                'failed payments, refunds — are sent by Stripe from its ' +
+                'Dashboard settings and are shown here for reference only.'}
             </Alert>
 
             <Typography variant="caption" color="text.secondary">
