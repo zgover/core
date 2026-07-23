@@ -98,6 +98,10 @@ export enum Route {
   // across screens, components, templates and layouts.
   LAYOUT_DETAILS = '/[orgSlug]/hosts/[host]/layouts/[layoutId]',
   SCREEN_BESIGNER = '/[orgSlug]/hosts/[host]/screens/[screenId]/versions/[versionId]/besigner',
+  // Per-site email besigner (AGL-770): a site owner designs a transactional
+  // email their site sends. The host-scoped sibling of the staff system-email
+  // editor (ADMIN_EMAIL_BESIGNER).
+  HOST_EMAIL_BESIGNER = '/[orgSlug]/hosts/[host]/emails/[templateKey]/versions/[versionId]/besigner',
   SCREEN_DETAILS = '/[orgSlug]/hosts/[host]/screens/[screenId]/versions/[versionId]/view',
   SCREEN_PREVIEW = '/[orgSlug]/hosts/[host]/screens/[screenId]/versions/[versionId]/preview',
   SCREEN_LIST = '/[orgSlug]/hosts/[host]/screens/list',
@@ -138,6 +142,12 @@ export interface RoutePayload {
   [Route.ADMIN_PLUGIN_REVIEWS]: undefined
   [Route.ADMIN_EMAILS]: undefined
   [Route.ADMIN_EMAIL_BESIGNER]: { templateKey: string; versionId: string }
+  [Route.HOST_EMAIL_BESIGNER]: {
+    orgSlug: string
+    host: string
+    templateKey: string
+    versionId: string
+  }
   [Route.ORG_MEDIA]: { orgSlug: string }
   [Route.ORG_DATA]: { orgSlug: string }
   [Route.ORG_PLUGINS]: { orgSlug: string }
