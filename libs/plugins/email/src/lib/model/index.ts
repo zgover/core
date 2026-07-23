@@ -20,5 +20,19 @@
  * Context-free — importable by client components, /server handlers, and
  * other plugins/apps via `@aglyn/plugins-email/model`.
  */
-export * from './email-render'
-export * from './email-merge'
+// The renderer and merge-tag helpers moved to `@aglyn/shared-util-email`
+// (AGL-750): they are pure functions over a node map with no imports at all,
+// and the console's own API routes need them to render system email
+// templates. Apps are forbidden to import feature plugins (the `scope:app`
+// → `aglyn:addons` boundary), so leaving them here made them unreachable
+// from exactly the code that has to send the mail.
+//
+// Re-exported so `@aglyn/plugins-email/model` keeps working unchanged.
+export {
+  renderEmailHtml,
+  substituteMergeTokens,
+  resolveMergeTags,
+  type EmailRenderOptions,
+  type EmailRenderProduct,
+  type RenderedEmail,
+} from '@aglyn/shared-util-email'
