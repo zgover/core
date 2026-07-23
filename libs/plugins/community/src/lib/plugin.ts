@@ -16,7 +16,6 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import * as PluginSdk from '@aglyn/aglyn'
 import { mdiAccountGroupOutline } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
 import { AiAssistProvider } from './components/ai-assist-provider.component'
@@ -43,8 +42,8 @@ const CommunityConsolePage = lazy(
  */
 export function registerCommunityConsole(): void {
   // Custom field type (AGL-434): rating rides int32 with a starred input.
-  PluginSdk.registerCustomFieldType({ ...RATING_FIELD, Input: RatingInput })
-  PluginSdk.registerConsoleExtension({
+  Aglyn.registerCustomFieldType({ ...RATING_FIELD, Input: RatingInput })
+  Aglyn.registerConsoleExtension({
     // AI assist (AGL-89/419): mounted by the shell around every console
     // page; besigner consumes AiAssistContext from besigner-ui.
     providers: [AiAssistProvider],
