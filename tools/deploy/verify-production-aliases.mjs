@@ -81,7 +81,7 @@ const PROJECTS = [
     name: 'aglyn-console',
     legacyNames: ['app-aglyn-io'],
     label: 'console',
-    domains: ['https://app.aglyn.io'],
+    domains: ['https://app.aglyn.com'],
     // Builds on every production push; its commit must equal HEAD.
     alwaysBuilds: true,
   },
@@ -96,10 +96,13 @@ const PROJECTS = [
   {
     name: 'www-aglyn-io',
     label: 'www',
-    // The aglyn.app apex serves the marketing site, not the tenant wildcard.
-    domains: ['https://aglyn.app'],
-    // Per-path ignore-build-step: rebuilds only when apps/www changes, so its
-    // commit trails HEAD by design — report the SHA, never fail on it.
+    // The aglyn.com apex serves the marketing site (AGL-718). aglyn.io and
+    // aglyn.app are redirects to it, so probing those would test the redirect
+    // rather than the deployment actually serving.
+    domains: ['https://aglyn.com'],
+    // This project is frozen (`commandForIgnoringBuildStep = "exit 0"`) pending
+    // the Aglyn-built marketing site (AGL-724), so its commit trails HEAD by
+    // design — report the SHA, never fail on it.
     alwaysBuilds: false,
   },
   {
@@ -109,7 +112,7 @@ const PROJECTS = [
     // Docusaurus docs site (apps/docs). Builds on every production push;
     // three consecutive Error builds went unnoticed until AGL-580 because
     // this project wasn't verified — a lagging commit now flags loudly.
-    domains: ['https://docs.aglyn.io'],
+    domains: ['https://docs.aglyn.com'],
     alwaysBuilds: true,
   },
 ]
@@ -120,7 +123,7 @@ const JSON_OUT = args.includes('--json')
 if (args.includes('--help') || args.includes('-h')) {
   console.log(
     'Usage: node tools/deploy/verify-production-aliases.mjs [--fix] [--json]\n\n' +
-      'Verifies app.aglyn.io, *.aglyn.app (via northwind-coffee.aglyn.app) and\n' +
+      'Verifies app.aglyn.com, *.aglyn.app (via northwind-coffee.aglyn.app) and\n' +
       'aglyn.app against the newest READY production deployment of their Vercel\n' +
       'projects. --fix promotes the newest deployment when a domain is stale.\n' +
       'Exit codes: 0 current, 1 stale, 2 operational error.',

@@ -32,8 +32,8 @@ import '../public/_static/styles/styles.css'
 const SOCIAL_CARD = '/_static/images/social/aglyn-console-social-card.png'
 
 // Resolves the relative og:image above to an absolute URL for crawlers. The
-// console apex is `app.aglyn.io` (see middleware); override via env per deploy.
-const SITE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'https://app.aglyn.io'
+// console apex is `app.aglyn.com` (see middleware); override via env per deploy.
+const SITE_URL = process.env.NEXT_PUBLIC_CONSOLE_URL ?? 'https://app.aglyn.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

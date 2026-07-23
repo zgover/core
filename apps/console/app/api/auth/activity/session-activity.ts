@@ -23,9 +23,9 @@
  * Why the server holds this: `useIdleLogout` retires the SHARED
  * cross-subdomain `__session` cookie on expiry (AGL-236/AGL-464). Deciding
  * "idle" from a single tab's `localStorage`/host-only cookie let one
- * untouched tab sign the user out of every `.aglyn.io` subdomain, because
+ * untouched tab sign the user out of every `.aglyn.com` subdomain, because
  * activity on a sibling tab or subdomain was invisible to it. The server is
- * the one place every `.aglyn.io` origin's requests converge, so an
+ * the one place every `.aglyn.com` origin's requests converge, so an
  * HttpOnly parent-domain heartbeat cookie set here is an authoritative,
  * unspoofable "last-seen across the whole session" that a tab must consult
  * before performing that global sign-out.

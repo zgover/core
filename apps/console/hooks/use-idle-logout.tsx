@@ -48,12 +48,12 @@ const ACTIVITY_EVENTS = [
  * tab" check never touches the network.
  *
  * Cross-subdomain activity is NOT synced here anymore. The old parent-domain
- * `aglyn_last_activity` cookie could only be written `Domain=.aglyn.io` from
+ * `aglyn_last_activity` cookie could only be written `Domain=.aglyn.com` from
  * a tab already on the workspace domain — from dev or a tenant origin it was
- * host-only and invisible to `.aglyn.io` tabs, so one untouched tab retired
+ * host-only and invisible to `.aglyn.com` tabs, so one untouched tab retired
  * the shared session for every subdomain (AGL-697). The authoritative
  * session-wide last-seen now lives server-side (`/api/auth/activity`), which
- * every `.aglyn.io` origin's heartbeats reach, and is consulted before any
+ * every `.aglyn.com` origin's heartbeats reach, and is consulted before any
  * global sign-out.
  */
 function writeActivity(now: number): void {
@@ -106,7 +106,7 @@ async function readServerActivity(): Promise<number> {
  * rather than waiting a full tick.
  *
  * Because that sign-out is GLOBAL — it retires the cross-subdomain `__session`
- * cookie for every `.aglyn.io` tab — a tab that looks idle locally must first
+ * cookie for every `.aglyn.com` tab — a tab that looks idle locally must first
  * confirm the WHOLE session is idle with the server before pulling the trigger
  * (AGL-697). A sibling tab or subdomain the local store can't see may still be
  * active; only when no origin has beaten for the timeout window does the

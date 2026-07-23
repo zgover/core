@@ -71,7 +71,7 @@ const TENANT_HOST_PARAM = 'tenantHost'
 const TENANT_HOST_COOKIE = 'aglyn-tenant-host'
 
 export const middleware: NextMiddleware = (req, event) => {
-  const reqHost = req?.headers?.get('host') || 'console.aglyn.io'
+  const reqHost = req?.headers?.get('host') || 'app.aglyn.com'
   const AGLYN_TENANT_HOST_CNAME = process.env.AGLYN_TENANT_HOST_CNAME
   const AGLYN_TENANT_DEMO = process.env.AGLYN_TENANT_DEMO
   const VERCEL_ENV = process.env.VERCEL_ENV as EnvVercelEnv
@@ -127,7 +127,7 @@ export const middleware: NextMiddleware = (req, event) => {
       break
     // Vercel deployment urls (preview, branch and canonical project domains)
     case IS_VERCEL && reqHost.endsWith('.vercel.app'):
-    case reqHost === 'console.aglyn.io':
+    case reqHost === 'app.aglyn.com':
     case reqHost === 'localhost:4500': {
       const override =
         req.nextUrl.searchParams.get(TENANT_HOST_PARAM) ||
@@ -137,8 +137,8 @@ export const middleware: NextMiddleware = (req, event) => {
         'assign',
         "reqHost.endsWith('.vercel.app')=",
         reqHost.endsWith('.vercel.app'),
-        "reqHost === 'console.aglyn.io'=",
-        reqHost === 'console.aglyn.io',
+        "reqHost === 'app.aglyn.com'=",
+        reqHost === 'app.aglyn.com',
         "reqHost === 'localhost:4500'=",
         reqHost === 'localhost:4500',
         'override=',
@@ -179,9 +179,9 @@ export const middleware: NextMiddleware = (req, event) => {
         'req.nextUrl.pathname=',
         req.nextUrl.pathname,
         'Destination=',
-        'https://console.aglyn.io',
+        'https://app.aglyn.com',
       )
-      return NextResponse.redirect('https://console.aglyn.io')
+      return NextResponse.redirect('https://app.aglyn.com')
     }
   }
 

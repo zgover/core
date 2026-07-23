@@ -25,7 +25,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * client-side (OrgScopeProvider); this only stops dead subdomains
  * from rendering a broken console.
  *
- * Inert until ops sets NEXT_PUBLIC_WORKSPACE_DOMAIN (e.g. "aglyn.io" — the console apex is app.aglyn.io)
+ * Inert until ops sets NEXT_PUBLIC_WORKSPACE_DOMAIN (e.g. "aglyn.com" — the console apex is app.aglyn.com)
  * on the console deployment alongside the wildcard domain — the tenant
  * sites' own subdomain space must not be claimed by accident.
  */
@@ -49,7 +49,7 @@ const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
 const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY
 
 // Reserved subdomain labels that are never org workspaces. `auth` hosts
-// the Firebase OAuth helper origin (auth.aglyn.io, AGL-462) — without
+// the Firebase OAuth helper origin (auth.aglyn.com, AGL-462) — without
 // this it resolves as an unknown org slug and 307s the /__/auth/*
 // handshake away to the apex, breaking Google sign-in.
 const APEX_LABELS = new Set(['www', 'console', 'app', 'auth'])
@@ -136,8 +136,8 @@ export async function middleware(request: NextRequest) {
   }
   if (verdict.known) {
     // On a workspace subdomain the org IS the hostname, so the path should
-    // not repeat it (AGL-627): `acme.aglyn.io/hosts/x`, never
-    // `acme.aglyn.io/acme/hosts/x`. Routes are still the canonical
+    // not repeat it (AGL-627): `acme.aglyn.com/hosts/x`, never
+    // `acme.aglyn.com/acme/hosts/x`. Routes are still the canonical
     // `/[orgSlug]/…` underneath, so rewrite the org segment back in.
     //
     // Account, staff and auth routes are NOT org-scoped and must not be

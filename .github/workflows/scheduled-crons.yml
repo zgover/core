@@ -8,7 +8,7 @@ name: Scheduled console crons
 #
 # Requires:
 #   - secret  CRON_SECRET       — same value as the console Vercel env var
-#   - var     CONSOLE_BASE_URL   — optional; defaults to https://app.aglyn.io
+#   - var     CONSOLE_BASE_URL   — optional; defaults to https://app.aglyn.com
 #
 # Every `schedule` entry triggers this one workflow; `github.event.schedule`
 # carries the cron string that fired, which the job maps to a route. Note
@@ -65,7 +65,7 @@ jobs:
 
       - name: POST the console cron route
         env:
-          BASE_URL: ${{ vars.CONSOLE_BASE_URL || 'https://app.aglyn.io' }}
+          BASE_URL: ${{ vars.CONSOLE_BASE_URL || 'https://app.aglyn.com' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           ROUTE: ${{ steps.route.outputs.path }}
         run: |

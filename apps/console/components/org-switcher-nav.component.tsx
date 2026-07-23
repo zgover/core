@@ -45,7 +45,7 @@ import { useOrgScope } from '../hooks/use-org-scope'
 import CreateOrgDialog from './create-org-dialog.component'
 import SwitcherSearchField from './switcher-search-field.component'
 
-const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
+const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.com'
 
 const titleCase = (value?: string) =>
   value ? value.charAt(0).toUpperCase() + value.slice(1) : ''
