@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { renderSystemEmail } from '../app/api/_lib/render-system-email'
+import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/aglyn'
+import { EMAIL_NODE_ROOT_ID } from '@aglyn/shared-util-email'
+import {
+  renderEffectiveSystemEmail,
+  renderSystemEmail,
+} from '../app/api/_lib/render-system-email'
 
 const mockGet = jest.fn()
 const mockVersionGet = jest.fn()
@@ -52,12 +57,15 @@ function snapshot(data: Record<string, unknown> | null) {
  */
 describe('renderSystemEmail', () => {
   const NODES = {
-    root: { $id: 'root', componentId: 'div', nodes: ['t1'] },
+    // The besigner roots its node map at CANVAS_ROOT_ELEMENT_ID ('_@_'), not
+    // 'root'. The fixture used 'root' and so never exercised the real data
+    // shape — which is how AGL-765 (renderSystemEmail rendering empty) shipped.
+    '_@_': { $id: '_@_', componentId: 'div', nodes: ['t1'] },
     t1: {
       $id: 't1',
       componentId: 'emailText',
       pluginId: 'email',
-      parentId: 'root',
+      parentId: '_@_',
       props: { children: 'Hello {{org.name}}', variant: 'body' },
     },
   }
@@ -146,5 +154,46 @@ describe('renderSystemEmail', () => {
       const result = await renderSystemEmail('org-invite', {})
       expect(result?.subject).not.toContain('{{')
     })
+  })
+
+  // The test-send path renders the effective email — designed if published,
+  // else the catalog default — so a test never sends an empty message (AGL-766).
+  describe('renderEffectiveSystemEmail', () => {
+    it('returns the designed version when one is published', async () => {
+      mockGet.mockResolvedValue(
+        snapshot({ versionId: 'v1', subject: 'Join {{org.name}}' }),
+      )
+      mockVersionGet.mockResolvedValue(snapshot({ nodes: NODES }))
+      const result = await renderEffectiveSystemEmail('org-invite', {
+        'org.name': 'Test Org',
+      })
+      expect(result?.subject).toBe('Join Test Org')
+      expect(result?.html).toContain('Hello Test Org')
+    })
+
+    it('falls back to the catalog default when nothing is published', async () => {
+      // No version pointer → renderSystemEmail returns null → default renders.
+      mockGet.mockResolvedValue(snapshot({ versionId: null }))
+      const result = await renderEffectiveSystemEmail('org-invite', {
+        'org.name': 'Test Org',
+        'invite.role': 'editor',
+      })
+      expect(result?.html).toContain('invited to join Test Org as editor')
+      expect(result?.subject).toContain('Test Org')
+      expect(result?.subject).not.toContain('{{')
+    })
+
+    it('returns null for a Firebase-delivered or unknown key', async () => {
+      expect(await renderEffectiveSystemEmail('password-reset')).toBeNull()
+      expect(await renderEffectiveSystemEmail('not-a-template')).toBeNull()
+    })
+  })
+
+  // Drift guard (AGL-765): the render lib carries its own copy of the besigner
+  // root id so server code needn't pull the @aglyn/aglyn barrel. If the
+  // besigner ever changes CANVAS_ROOT_ELEMENT_ID this fails loudly, pointing
+  // here — a silent divergence would make every designed template render empty.
+  it('keeps EMAIL_NODE_ROOT_ID in sync with the besigner root', () => {
+    expect(EMAIL_NODE_ROOT_ID).toBe(CANVAS_ROOT_ELEMENT_ID)
   })
 })
