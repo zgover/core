@@ -334,6 +334,41 @@ export const SYSTEM_EMAIL_TEMPLATES: readonly SystemEmailTemplateDefinition[] =
       source: 'apps/console/app/api/admin/run-erasures/route.ts',
     },
     {
+      key: 'erasure-requested',
+      name: 'Erasure requested',
+      description:
+        'Confirms to an organization owner that a GDPR erasure request was ' +
+        'recorded, and that deletion follows after a 7-day hold.',
+      deliveredBy: 'resend',
+      defaultSubject: 'We received your erasure request',
+      mergeTokens: [
+        {
+          name: 'org.name',
+          description: 'The organization to be erased',
+          sample: 'Test Org',
+        },
+      ],
+      // Mirrors the fallbackText in admin/erasure-request/route.ts.
+      defaultBody: [
+        { block: 'text', text: 'Erasure request received', variant: 'heading' },
+        {
+          block: 'text',
+          text:
+            'We have recorded a request to erase {{org.name}} and all of ' +
+            'its data from Aglyn.',
+          variant: 'body',
+        },
+        {
+          block: 'text',
+          text:
+            'Deletion is permanent and happens after a 7-day hold. If this ' +
+            'was not intended, contact support before then to cancel.',
+          variant: 'body',
+        },
+      ],
+      source: 'apps/console/app/api/admin/erasure-request/route.ts',
+    },
+    {
       key: 'password-reset',
       name: 'Forgot password',
       description:

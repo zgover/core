@@ -290,6 +290,21 @@ const AdminOrgs: NextPageWithLayout<Record<string, never>> = () => {
           after: { erasureRequested: requesting },
           at: Timestamp.now(),
         })
+        // Acknowledge to the owner at request time (AGL-768 follow-up). Fire-
+        // and-forget: the request already succeeded, and the endpoint is
+        // best-effort. The completion confirmation is sent later by
+        // run-erasures.
+        if (requesting) {
+          const idToken = await (user as any)?.getIdToken?.()
+          void fetch('/api/admin/erasure-request', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+            },
+            body: JSON.stringify({ orgId: org.$id }),
+          }).catch(() => undefined)
+        }
         enqueueSnackbar(
           requesting
             ? 'Erasure requested — deletable via script after 7 days (audited)'
