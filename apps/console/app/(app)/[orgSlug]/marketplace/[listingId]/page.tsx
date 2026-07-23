@@ -53,10 +53,18 @@ const OrgMarketplaceListing: NextPageWithLayout<Record<string, never>> = () => {
     user?.uid,
     loading ? undefined : (currentOrg?.$id ?? null),
   )
-  const actingHost = useMemo(
-    () => ((hosts as Array<{ $id: string }>) ?? [])[0]?.$id ?? '',
+  const hostList = useMemo(
+    () =>
+      ((hosts as Array<{ $id: string; subdomain?: string; displayName?: string }>) ??
+        []).map((host) => ({
+        id: host.$id,
+        label: host.displayName || host.subdomain || host.$id,
+      })),
     [hosts],
   )
+  // Install pins resolve the org from a site, so org-scope installs still
+  // act through the first site; the picker (AGL-773) chooses the real targets.
+  const actingHost = hostList[0]?.id ?? ''
 
   return (
     <DashboardLayout
@@ -92,6 +100,7 @@ const OrgMarketplaceListing: NextPageWithLayout<Record<string, never>> = () => {
           listingId={listingId}
           permissions={permissions}
           orgScoped
+          hosts={hostList}
         />
       )}
     </DashboardLayout>

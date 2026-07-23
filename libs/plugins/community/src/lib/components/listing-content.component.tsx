@@ -21,7 +21,9 @@ import {
   LISTING_README_MAX_CHARS,
   listingArtifactType,
   installTargetsFor,
+  resolveInstallPlan,
   resolvePluginInstallState,
+  type InstallTargeting,
 } from '../model/community'
 import {
   buildRoute,
@@ -295,6 +297,12 @@ export interface CommunityListingContentProps {
    * page being retired.
    */
   orgScoped?: boolean
+  /**
+   * The org's sites, for the install-targeting picker (AGL-773). Present only
+   * at org scope; when given (and non-empty) the CTA offers All sites vs
+   * Selected sites instead of the single org/host choice.
+   */
+  hosts?: ReadonlyArray<{ id: string; label: string }>
 }
 
 /**
@@ -308,6 +316,7 @@ export function CommunityListingContent({
   listingId,
   permissions,
   orgScoped,
+  hosts,
 }: CommunityListingContentProps) {
   // The publisher link was `/{hostDocId}/community/publisher/{id}` — the
   // pre-AGL-621 shape, dead since. The sibling browse grid was fixed for
@@ -317,8 +326,15 @@ export function CommunityListingContent({
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
-  const { install, buy } = useCommunityActions(hostId)
+  const { install, installPlan, buy } = useCommunityActions(hostId)
   const [installScope, setInstallScope] = useState<'org' | 'host'>('org')
+  // Org-scope install targeting (AGL-773): All sites vs a chosen subset. Only
+  // engaged at org scope with a known site list; otherwise the per-site tab's
+  // simpler org/host choice (AGL-656) still applies.
+  const orgTargeting = Boolean(orgScoped && hosts && hosts.length > 0)
+  const [targeting, setTargeting] = useState<InstallTargeting>('all-sites')
+  const [selectedHostIds, setSelectedHostIds] = useState<string[]>([])
+  const allHostIds = useMemo(() => (hosts ?? []).map((h) => h.id), [hosts])
   // Listings are org-owned (AGL-652) — "did I publish this" is an org
   // comparison, resolved from the routing mirror like the browse grid.
   const [viewerOrgId, setViewerOrgId] = useState<string | null>(null)
@@ -468,6 +484,20 @@ export function CommunityListingContent({
       : installTargets.length > 1
         ? installScope
         : undefined
+  // Org-scope targeting (AGL-773): "Selected sites" is only offered when the
+  // artifact can host-pin (plugins, components, templates, layouts) — an
+  // org-only artifact can't target a subset.
+  const canSelectSites = installTargets.includes('host')
+  const installPlanSteps = useMemo(
+    () =>
+      listing
+        ? resolveInstallPlan(listing, targeting, {
+            selectedHostIds,
+            allHostIds,
+          })
+        : [],
+    [listing, targeting, selectedHostIds, allHostIds],
+  )
   const versionHistory: any[] = Array.isArray(listing?.versionHistory)
     ? [...listing.versionHistory].sort((a, b) => b.version - a.version)
     : []
@@ -646,12 +676,73 @@ export function CommunityListingContent({
                               : ''}
                           </Alert>
                         ) : null}
-                        {/* Install target (AGL-656). Only shown when the
-                            artifact actually HAS a choice AND is not already
-                            installed — offering "this whole organization" for
-                            a template, or re-asking once the scope is settled,
-                            would be a lie. */}
-                        {installTargets.length > 1 && !installed ? (
+                        {/* Install targeting (AGL-773): at org scope, choose
+                            All sites vs a chosen subset. Only when NOT already
+                            installed — re-asking once it's settled would lie.
+                            The per-site tab keeps the simpler org/host choice
+                            (AGL-656) below until it's retired. */}
+                        {orgTargeting && !installed ? (
+                          <Stack spacing={1.5} sx={{ maxWidth: 420 }}>
+                            <TextField
+                              select
+                              size="small"
+                              label="Install to"
+                              value={targeting}
+                              onChange={(event) =>
+                                setTargeting(
+                                  event.target.value as InstallTargeting,
+                                )
+                              }
+                              helperText={
+                                targeting === 'all-sites'
+                                  ? installTargets.includes('org')
+                                    ? 'Available on every site — including sites you add later.'
+                                    : `Installs to all ${allHostIds.length} site` +
+                                      (allHostIds.length === 1 ? '' : 's') +
+                                      ". New sites won't get it automatically."
+                                  : 'Installs only to the sites you choose.'
+                              }
+                            >
+                              <MenuItem value="all-sites">
+                                {'All sites'}
+                              </MenuItem>
+                              {canSelectSites ? (
+                                <MenuItem value="selected-sites">
+                                  {'Selected sites'}
+                                </MenuItem>
+                              ) : null}
+                            </TextField>
+                            {targeting === 'selected-sites' &&
+                            canSelectSites ? (
+                              <TextField
+                                select
+                                size="small"
+                                label="Sites"
+                                value={selectedHostIds}
+                                onChange={(event) =>
+                                  setSelectedHostIds(
+                                    typeof event.target.value === 'string'
+                                      ? event.target.value.split(',')
+                                      : (event.target
+                                          .value as unknown as string[]),
+                                  )
+                                }
+                                slotProps={{ select: { multiple: true } }}
+                                helperText={
+                                  selectedHostIds.length
+                                    ? ' '
+                                    : 'Pick at least one site.'
+                                }
+                              >
+                                {(hosts ?? []).map((host) => (
+                                  <MenuItem key={host.id} value={host.id}>
+                                    {host.label}
+                                  </MenuItem>
+                                ))}
+                              </TextField>
+                            ) : null}
+                          </Stack>
+                        ) : installTargets.length > 1 && !installed ? (
                           <TextField
                             select
                             size="small"
@@ -677,13 +768,23 @@ export function CommunityListingContent({
                           <Button
                             variant={installed ? 'outlined' : 'contained'}
                             color="secondary"
-                            disabled={Boolean(upToDate) || !listing?.profileId}
+                            disabled={
+                              Boolean(upToDate) ||
+                              !listing?.profileId ||
+                              // Nothing selected to install to (AGL-773).
+                              (orgTargeting &&
+                                !installed &&
+                                !mustBuy &&
+                                installPlanSteps.length === 0)
+                            }
                             onClick={
                               permissions.installPlugins
                                 ? () =>
                                     mustBuy
                                       ? buy(listing)
-                                      : install(listing, installTargetScope)
+                                      : orgTargeting && !installed
+                                        ? installPlan(listing, installPlanSteps)
+                                        : install(listing, installTargetScope)
                                 : () =>
                                     enqueueSnackbar(
                                       'Your team role does not allow installing from the community',
@@ -697,7 +798,7 @@ export function CommunityListingContent({
                                 ? `Update to v${listing?.latestVersion}`
                                 : mustBuy
                                   ? `Buy for $${priceUsd}`
-                                  : installTargets.length > 1
+                                  : orgTargeting || installTargets.length > 1
                                     ? 'Install'
                                     : 'Add to this site'}
                           </Button>

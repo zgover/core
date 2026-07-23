@@ -257,6 +257,53 @@ export function resolvePluginInstallState(
   }
 }
 
+/** How the admin chose to target an install from the org marketplace. */
+export type InstallTargeting = 'all-sites' | 'selected-sites'
+
+/** One concrete install operation: an org pin, or a pin on a named host. */
+export interface InstallPlanStep {
+  scope: InstallTarget
+  /** Present iff `scope === 'host'`. */
+  hostId?: string
+}
+
+/**
+ * Turns a targeting choice into the concrete install operations for a listing
+ * (AGL-773), honoring what each artifact type physically supports (see
+ * {@link INSTALL_TARGETS}).
+ *
+ * The rules aren't uniform, and the picker must not promise what an artifact
+ * can't do:
+ * - **Org-pinnable** (plugin, datasetSchema) + "all sites" → a SINGLE org pin,
+ *   which also covers sites created later.
+ * - **Host-scoped** (component, template, layout, emailTemplate) has no org
+ *   pin, so "all sites" fans out to every CURRENT host — new sites are NOT
+ *   covered automatically. The UI has to say so.
+ * - "Selected sites" is always host pins, even for an org-pinnable artifact:
+ *   the admin named specific sites, so honor that literally — UNLESS the
+ *   artifact can't host-pin at all (datasetSchema), where the per-site choice
+ *   is meaningless and collapses to the org pin.
+ */
+export function resolveInstallPlan(
+  listing: { artifactType?: string; type?: string; kind?: string },
+  targeting: InstallTargeting,
+  hosts: {
+    selectedHostIds: readonly string[]
+    allHostIds: readonly string[]
+  },
+): InstallPlanStep[] {
+  const targets = installTargetsFor(listing)
+  const canOrgPin = targets.includes('org')
+  const canHostPin = targets.includes('host')
+  if (targeting === 'all-sites') {
+    if (canOrgPin) return [{ scope: 'org' }]
+    return hosts.allHostIds.map((hostId) => ({ scope: 'host', hostId }))
+  }
+  // selected-sites
+  if (!canHostPin) return [{ scope: 'org' }]
+  return hosts.selectedHostIds.map((hostId) => ({ scope: 'host', hostId }))
+}
+
 /**
  * The listing's artifact type, tolerating the pre-AGL-654 shape.
  *

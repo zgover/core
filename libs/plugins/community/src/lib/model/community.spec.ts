@@ -19,6 +19,7 @@ import {
   COMMUNITY_COMPONENT_ID_ALLOWLIST,
   installTargetsFor,
   isListingBrowsable,
+  resolveInstallPlan,
   resolvePluginInstallState,
   sanitizeCommunityDefinition,
 } from './community'
@@ -345,5 +346,76 @@ describe('resolvePluginInstallState (AGL-656)', () => {
     expect(
       resolvePluginInstallState(3, { version: 3 }, null).updateAvailable,
     ).toBe(false)
+  })
+})
+
+/**
+ * The targeting picker must not promise what an artifact can't do (AGL-773):
+ * only org-pinnable artifacts get a single "all sites" pin; host-scoped ones
+ * fan out to every current host and don't cover future sites.
+ */
+describe('resolveInstallPlan (AGL-773)', () => {
+  const hosts = { selectedHostIds: ['h1', 'h3'], allHostIds: ['h1', 'h2', 'h3'] }
+
+  it('plugin + all sites → one org pin (covers future sites too)', () => {
+    expect(
+      resolveInstallPlan({ artifactType: 'plugin' }, 'all-sites', hosts),
+    ).toEqual([{ scope: 'org' }])
+  })
+
+  it('plugin + selected sites → a host pin per chosen site', () => {
+    expect(
+      resolveInstallPlan({ artifactType: 'plugin' }, 'selected-sites', hosts),
+    ).toEqual([
+      { scope: 'host', hostId: 'h1' },
+      { scope: 'host', hostId: 'h3' },
+    ])
+  })
+
+  it('host-scoped artifact + all sites → a host pin for EVERY current site', () => {
+    // No org pin exists for templates/components/layouts — "all sites" means
+    // fan out, and new sites are not covered automatically.
+    for (const artifactType of ['component', 'template', 'layout']) {
+      expect(resolveInstallPlan({ artifactType }, 'all-sites', hosts)).toEqual([
+        { scope: 'host', hostId: 'h1' },
+        { scope: 'host', hostId: 'h2' },
+        { scope: 'host', hostId: 'h3' },
+      ])
+    }
+  })
+
+  it('host-scoped artifact + selected sites → only the chosen sites', () => {
+    expect(
+      resolveInstallPlan({ artifactType: 'template' }, 'selected-sites', hosts),
+    ).toEqual([
+      { scope: 'host', hostId: 'h1' },
+      { scope: 'host', hostId: 'h3' },
+    ])
+  })
+
+  it('org-only artifact (datasetSchema) collapses either choice to the org pin', () => {
+    // datasetSchema can't host-pin, so a per-site selection is meaningless.
+    expect(
+      resolveInstallPlan({ artifactType: 'datasetSchema' }, 'all-sites', hosts),
+    ).toEqual([{ scope: 'org' }])
+    expect(
+      resolveInstallPlan(
+        { artifactType: 'datasetSchema' },
+        'selected-sites',
+        hosts,
+      ),
+    ).toEqual([{ scope: 'org' }])
+  })
+
+  it('reads legacy discriminators like the rest of the model', () => {
+    expect(resolveInstallPlan({ type: 'plugin' }, 'all-sites', hosts)).toEqual([
+      { scope: 'org' },
+    ])
+    // A component was the absence of both discriminators → host-scoped.
+    expect(resolveInstallPlan({}, 'all-sites', hosts)).toEqual([
+      { scope: 'host', hostId: 'h1' },
+      { scope: 'host', hostId: 'h2' },
+      { scope: 'host', hostId: 'h3' },
+    ])
   })
 })
