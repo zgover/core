@@ -21,6 +21,7 @@ import * as Besigner from '@aglyn/besigner'
 import type { JsonEditorProps } from '@aglyn/shared-ui-json-editor'
 import {
   useAddElementDrawerCallback,
+  useBesignerDocument,
   withBesignerContext,
   type WorkspaceEditorComponentProps,
 } from '@aglyn/besigner-ui'
@@ -49,7 +50,7 @@ import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 // Dynamic site-plugin activation (AGL-417): canvas components register
 // via the org-gated loader; the page gates the canvas on readiness.
 import { withSitePlugins } from '../../../../../../../../components/console-plugins-gate.component'
@@ -89,12 +90,6 @@ const JsonEditor = dynamic<JsonEditorProps>(
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
 
-function setLocalNodes(value: Aglyn.ProcessableNodes) {
-  const parsed = Aglyn.canvas.processNodesToDenormalized(value)
-  const nodes = Aglyn.canvas.setNodes(parsed)
-  return nodes
-}
-
 function TemplateBesignerPage(props) {
   const params = useParams<{
     hostId: string
@@ -107,7 +102,6 @@ function TemplateBesignerPage(props) {
   const host = useHostSubdomain()
   const { queueLoading } = useLoading()
   const logActivity = useHostActivityLogger(hostId)
-  const saveAvailable = !Aglyn.canvas.isInitialSame
   const handleAddElementClick = useAddElementDrawerCallback()
   const listUrl = buildRoute(Route.HOST_COMPONENTS, { orgSlug,  host })
   const { doc: hostResult } = useHost({ hostId })
@@ -139,8 +133,6 @@ function TemplateBesignerPage(props) {
   })
   const { data, status, error } = result
   const nodes = data?.nodes
-  const hasError = Boolean(error) || status === 'error'
-  const notFound = status === 'success' && !data
 
   // Deliberately NO viewType override: a component edits like screen
   // content. The LAYOUT view is what exposes the LayoutSlot outlet in the
@@ -163,184 +155,101 @@ function TemplateBesignerPage(props) {
     }
   }, [status])
 
-  // Concurrent-edit detection (AGL-674), same as the screen editor: a
-  // layout version is written as one whole node map, so without this the
-  // later save silently replaces the earlier one.
-  const baseStampRef = useRef<string | null>(null)
-  /** Set when we save, so the resulting snapshot is adopted, not flagged. */
-  const expectOwnWriteRef = useRef(false)
-  const [remoteChanged, setRemoteChanged] = useState(false)
   /** Whether the stored tree had to be wrapped for the canvas. */
   const wrappedOnLoadRef = useRef(false)
 
-  useEffect(() => {
-    if (nodes && !Aglyn.canvas.didSetInitial) {
-      // A page template holds a screen's canvas tree (already rooted at the
-      // canonical id); a component-kind template holds a DEFINITION, whose
-      // root is the promoted node. The canvas only renders the former, so
-      // the latter is wrapped — and remembered, so save can put it back the
-      // way it came (AGL-680/681).
-      const canvasTree = Aglyn.definitionToCanvasTree({
-        rootId: data?.rootId,
-        nodes: nodes as Record<string, unknown>,
-      })
-      wrappedOnLoadRef.current = canvasTree !== nodes
-      setLocalNodes(canvasTree as Aglyn.ProcessableNodes)
-      Aglyn.canvas.updateInitialNodes()
-      baseStampRef.current = Aglyn.versionStamp(
-        (data as { updatedAt?: unknown } | undefined)?.updatedAt,
+  const saveTemplateNodes = useCallback(
+    async (nextNodes: Record<string, unknown>) => {
+      // Placeholders are DERIVED from the tokens in the content (AGL-672),
+      // so editing has to recompute them: otherwise a template goes on
+      // asking for a placeholder its copy no longer contains, or silently
+      // stops asking for one the author just added. Existing labels and
+      // defaults survive for tokens that are still there.
+      const declared = Aglyn.detectTemplatePlaceholders(nextNodes)
+      const previous = new Map(
+        ((data?.placeholders ?? []) as Array<{ name: string }>).map(
+          (entry) => [entry.name, entry],
+        ),
       )
-    }
-  }, [nodes])
+      const placeholders = declared.map((name) => previous.get(name) ?? { name })
+      const save = updateTemplate as unknown as (
+        value: Partial<Aglyn.AglynTemplate>,
+        options?: Parameters<typeof updateTemplate>[1],
+      ) => Promise<void>
+      await save(
+        {
+          nodes: nextNodes as unknown as Aglyn.AglynTemplate['nodes'],
+          placeholders,
+          // Records that this copy has diverged from what was installed.
+          // `source` itself stays server-managed and frozen (AGL-666) so
+          // provenance cannot be forged; "I edited my own copy" is a claim
+          // nobody gains by lying about.
+          editedAt: Timestamp.now(),
+        } as Partial<Aglyn.AglynTemplate>,
+        { merge: true },
+      )
+    },
+    [updateTemplate, data?.placeholders],
+  )
 
-  useEffect(() => {
-    const stored = Aglyn.versionStamp(
-      (data as { updatedAt?: unknown } | undefined)?.updatedAt,
-    )
-    if (!Aglyn.hasConcurrentWrite(baseStampRef.current, stored)) return
-    if (expectOwnWriteRef.current) {
-      // The echo of our own save landing.
-      expectOwnWriteRef.current = false
-      baseStampRef.current = stored
-      return
-    }
-    setRemoteChanged(true)
-  }, [data])
-
-  const handleSave = useCallback(async () => {
-    if (!saveAvailable) {
-      return enqueueSnackbar('Already saved', {
-        variant: 'info',
-        persist: false,
-      })
-    }
-    // Refuse rather than merge — their work and yours are both still
-    // intact, which a bad automatic merge cannot promise.
-    if (remoteChanged) {
-      return enqueueSnackbar(new Aglyn.ConcurrentEditError().message, {
-        variant: 'warning',
-        allowDuplicate: true,
-      })
-    }
-    const dequeueLoading = queueLoading()
-
-    // Save in the shape it arrived in: unwrapping a page template would
-    // strip the canvas root its instantiation depends on.
-    const canvasNodes = Aglyn.canvas.toJSON().nodes as Record<string, unknown>
-    const unwrapped = wrappedOnLoadRef.current
-      ? Aglyn.canvasTreeToDefinition(canvasNodes)
-      : null
-    if (unwrapped?.ambiguousRoot) {
-      return enqueueSnackbar(
-        'This template needs a single top-level element. Wrap what you have ' +
-          'in one container, then save.',
-        { variant: 'warning', allowDuplicate: true },
-      )
-    }
-    const nodes = unwrapped ? unwrapped.nodes : canvasNodes
-    // Size guard (AGL-678): the node map is stored as one msgpack blob and
-    // Firestore rejects documents over 1 MiB. Nothing checked this before,
-    // so an oversized template simply stopped saving with a generic error and
-    // no way to tell which content was to blame.
-    const size = Aglyn.measureNodeMap(nodes as Record<string, unknown>)
-    if (size.tooLarge) {
-      const worst = size.largest[0]
-      return enqueueSnackbar(
-        `This template is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
-          'save. Move repeated sections into reusable components, or replace ' +
-          'inlined images with uploads from the media library' +
-          (worst
-            ? ` — the largest element is ${Aglyn.formatBytes(worst.bytes)}.`
-            : '.'),
-        { variant: 'error', allowDuplicate: true },
-      )
-    }
-    if (size.nearLimit) {
-      enqueueSnackbar(
-        `Heads up: this template is ${Aglyn.formatBytes(size.bytes)}. Past ` +
-          'about 900 KB it stops saving — moving repeated sections into ' +
-          'reusable components is the usual fix.',
-        { variant: 'warning', persist: false },
-      )
-    }
-    // Placeholders are DERIVED from the tokens in the content (AGL-672), so
-    // editing has to recompute them: otherwise a template goes on asking
-    // for a placeholder its copy no longer contains, or silently stops
-    // asking for one the author just added. Existing labels and defaults
-    // survive for tokens that are still there.
-    const declared = Aglyn.detectTemplatePlaceholders(
-      nodes as Record<string, unknown>,
-    )
-    const previous = new Map(
-      ((data?.placeholders ?? []) as Array<{ name: string }>).map((entry) => [
-        entry.name,
-        entry,
-      ]),
-    )
-    const placeholders = declared.map(
-      (name) => previous.get(name) ?? { name },
-    )
-    const saveTemplate = updateTemplate as unknown as (
-      value: Partial<Aglyn.AglynTemplate>,
-      options?: Parameters<typeof updateTemplate>[1],
-    ) => Promise<void>
-    await saveTemplate(
-      {
-        nodes: nodes as unknown as Aglyn.AglynTemplate['nodes'],
-        placeholders,
-        // Records that this copy has diverged from what was installed.
-        // `source` itself stays server-managed and frozen (AGL-666) so
-        // provenance cannot be forged; "I edited my own copy" is a claim
-        // nobody gains by lying about.
-        editedAt: Timestamp.now(),
-      } as Partial<Aglyn.AglynTemplate>,
-      { merge: true },
-    )
-      .then(() => {
-        Aglyn.canvas.updateInitialNodes(nodes)
-        // Attribution (AGL-676): `updatedAt` is stamped on every write but
-        // carries no actor, so "someone changed this" could never become
-        // "Sam changed this". Fire-and-forget — an audit miss must not
-        // break the edit that triggered it.
-        logActivity('Saved the template', { type: 'template', id: templateId })
-        // Our own write moves the stamp; the new value arrives on the next
-        // snapshot, so mark it as ours rather than somebody else's edit.
-        expectOwnWriteRef.current = true
-        setRemoteChanged(false)
-        enqueueSnackbar('Template saved', {
-          variant: 'success',
-          persist: false,
-        })
-      })
-      .catch((e) => {
-        enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
-          variant: 'error',
-          allowDuplicate: true,
-        })
-      })
-      .finally(() => {
-        dequeueLoading()
-      })
-  }, [
+  // Canvas lifecycle, first load, concurrent-write detection (AGL-674) and
+  // the size-guarded save (AGL-678) are shared by every besigner editor
+  // (AGL-746). What stays here is what is actually about a template.
+  const {
     saveAvailable,
     remoteChanged,
-    updateTemplate,
-    data?.placeholders,
-    enqueueSnackbar,
+    handleSave,
+    jsonOpen,
+    openJsonEditor,
+    closeJsonEditor,
+    handleJsonSave,
+    hasError,
+    notFound,
+  } = useBesignerDocument({
+    nodes,
+    updatedAt: (data as { updatedAt?: unknown } | undefined)?.updatedAt,
+    status,
+    error,
+    save: saveTemplateNodes,
+    noun: 'template',
+    savedMessage: 'Template saved',
+    documentKey: `${hostId}:${templateId}`,
+    notify: enqueueSnackbar,
     queueLoading,
-  ])
+    // A page template holds a screen's canvas tree (already rooted at the
+    // canonical id); a component-kind template holds a DEFINITION, whose
+    // root is the promoted node. The canvas only renders the former, so the
+    // latter is wrapped (AGL-680/681).
+    toCanvasNodes: (storedNodes) => {
+      const canvasTree = Aglyn.definitionToCanvasTree({
+        rootId: data?.rootId,
+        nodes: storedNodes as Record<string, unknown>,
+      })
+      wrappedOnLoadRef.current = canvasTree !== storedNodes
+      return canvasTree as Aglyn.ProcessableNodes
+    },
+    // Save in the shape it arrived in: unwrapping a page template would
+    // strip the canvas root its instantiation depends on.
+    fromCanvasNodes: (canvasNodes) => {
+      const unwrapped = wrappedOnLoadRef.current
+        ? Aglyn.canvasTreeToDefinition(canvasNodes)
+        : null
+      if (unwrapped?.ambiguousRoot) {
+        return {
+          error:
+            'This template needs a single top-level element. Wrap what you ' +
+            'have in one container, then save.',
+        }
+      }
+      return { nodes: unwrapped ? unwrapped.nodes : canvasNodes }
+    },
+    onSaved: () =>
+      logActivity('Saved the template', { type: 'template', id: templateId }),
+  })
 
   // No publish step: a template is inert by definition — nothing renders
   // from it until it is used to create a page, component or layout, so
   // there is no draft-versus-live distinction to maintain (AGL-681).
-
-  const [jsonOpen, setJsonOpen] = useState(false)
-  const openJsonEditor = useCallback(() => setJsonOpen(true), [])
-  const closeJsonEditor = useCallback(() => setJsonOpen(false), [])
-  const handleJsonSave = useCallback((e, value) => {
-    Aglyn.canvas.applyNodes(value)
-    setJsonOpen(false)
-  }, [])
 
   const hostTheme = hostResult?.data?.theme
   const hostFontsHref = useMemo(

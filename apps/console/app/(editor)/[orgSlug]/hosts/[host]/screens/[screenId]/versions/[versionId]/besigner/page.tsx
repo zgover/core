@@ -23,6 +23,7 @@ import {
   LayoutChromeContext,
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
+  useBesignerDocument,
   useLayoutChromeCanvas,
   withBesignerContext,
   type WorkspaceEditorComponentProps,
@@ -69,7 +70,7 @@ import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 // Dynamic site-plugin activation (AGL-417): canvas components register
 // via the org-gated loader; the page gates the canvas on readiness.
 import { withSitePlugins } from '../../../../../../../../../../components/console-plugins-gate.component'
@@ -122,12 +123,6 @@ const JsonEditor = dynamic<JsonEditorProps>(
   {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
-function setLocalNodes(value: Aglyn.ProcessableNodes) {
-  const parsed = Aglyn.canvas.processNodesToDenormalized(value)
-  const nodes = Aglyn.canvas.setNodes(parsed)
-  return nodes
-}
-
 function BesignerPage(props) {
   const params = useParams<{
     host: string,
@@ -146,7 +141,6 @@ function BesignerPage(props) {
   // will not open because nobody could be listed is far worse than an
   // empty avatar stack.
   const presence = usePresence({ hostId, docType: 'screen', docId: screenId })
-  const saveAvailable = !Aglyn.canvas.isInitialSame
   const [screenDialog, setScreenDialog] = useState(false)
   // Screen SEO fields (SEO Toolkit); null = untouched, falls back to doc.
   const [seoTitle, setSeoTitle] = useState<string | null>(null)
@@ -188,171 +182,58 @@ function BesignerPage(props) {
   })
   const {data, status, error} = result
   const nodes = data?.nodes
-  const hasError = Boolean(error) || status === 'error'
-  const notFound = status === 'success' && !data
 
-  // The canvas is a singleton shared by every editing session; without a
-  // reset on leave, client-side navigation to another screen or a layout
-  // keeps (and could save) this document's nodes.
-  useEffect(() => {
-    return () => {
-      Aglyn.canvas.reset()
-      Besigner.focus.clearFocusStatus()
-    }
-  }, [hostId, screenId, versionId])
-
-  // Email documents (kind 'email', AGL-395) restrict the component drawer to
-  // the email plugin's email-safe blocks. Reset to SCREEN on leave so a
-  // normal screen editing session on the singleton canvas is unaffected.
   const screenKind = screenResult?.data?.kind
-  useEffect(() => {
-    if (!Besigner.doesBesignerAppExist()) return undefined
-    const app = Besigner.getBesignerApp()
-    Besigner.setBesignerFlag(app, {
-      flag: 'viewType',
-      value: () =>
-        screenKind === 'email'
-          ? Aglyn.HostViewType.EMAIL
-          : Aglyn.HostViewType.SCREEN,
-    })
-    return () => {
-      Besigner.setBesignerFlag(app, {
-        flag: 'viewType',
-        value: () => Aglyn.HostViewType.SCREEN,
-      })
-    }
-  }, [screenKind])
 
-  useEffect(() => {
-    if (status === 'loading') {
-      return queueLoading()
-    }
-  }, [status])
-
-  // Conflict detection (AGL-674). Two people editing one version both write
-  // the WHOLE node map, so without this the later save silently replaces
-  // the earlier one and neither is told. `baseStamp` is what the document
-  // looked like when this editor last agreed with it.
-  const baseStampRef = useRef<string | null>(null)
-  /** Set when we save, so the resulting snapshot is adopted, not flagged. */
-  const expectOwnWriteRef = useRef(false)
-  const [remoteChanged, setRemoteChanged] = useState(false)
-
-  useEffect(() => {
-    if (nodes && !Aglyn.canvas.didSetInitial) {
-      setLocalNodes(nodes)
-      Aglyn.canvas.updateInitialNodes()
-      baseStampRef.current = Aglyn.versionStamp(
-        (data as { updatedAt?: unknown } | undefined)?.updatedAt,
+  const saveScreenVersion = useCallback(
+    async (nextNodes: Record<string, unknown>) => {
+      const save = updateScreen as unknown as (
+        data: Partial<Aglyn.AglynScreenVersion>,
+        options?: Parameters<typeof updateScreen>[1],
+      ) => Promise<void>
+      await save(
+        { nodes: nextNodes as unknown as Aglyn.AglynScreenVersion['nodes'] },
+        { merge: true },
       )
-    }
-  }, [nodes])
+    },
+    [updateScreen],
+  )
 
-  // The snapshot listener was already delivering other people's saves; the
-  // editor just dropped them after the first load. Now they surface.
-  useEffect(() => {
-    const stored = Aglyn.versionStamp(
-      (data as { updatedAt?: unknown } | undefined)?.updatedAt,
-    )
-    if (!Aglyn.hasConcurrentWrite(baseStampRef.current, stored)) return
-    if (expectOwnWriteRef.current) {
-      // This is the echo of our own save landing.
-      expectOwnWriteRef.current = false
-      baseStampRef.current = stored
-      return
-    }
-    setRemoteChanged(true)
-  }, [data])
-
-  const handleSave = useCallback(async () => {
-    if (!saveAvailable) {
-      return enqueueSnackbar('Already saved', {
-        variant: 'info',
-        persist: false,
-      })
-    }
-    // Refuse rather than merge. A wrong automatic merge of a whole node map
-    // is worse than a refusal the user can act on — and their work is still
-    // in the canvas either way.
-    if (remoteChanged) {
-      return enqueueSnackbar(new Aglyn.ConcurrentEditError().message, {
-        variant: 'warning',
-        allowDuplicate: true,
-      })
-    }
-    const dequeueLoading = queueLoading()
-
-    const nodes = Aglyn.canvas.toJSON().nodes
-    // Size guard (AGL-678): the node map is stored as one msgpack blob and
-    // Firestore rejects documents over 1 MiB. Nothing checked this before,
-    // so an oversized screen simply stopped saving with a generic error and
-    // no way to tell which content was to blame.
-    const size = Aglyn.measureNodeMap(nodes as Record<string, unknown>)
-    if (size.tooLarge) {
-      const worst = size.largest[0]
-      return enqueueSnackbar(
-        `This screen is ${Aglyn.formatBytes(size.bytes)} and too large to ` +
-          'save. Move repeated sections into reusable components, or replace ' +
-          'inlined images with uploads from the media library' +
-          (worst
-            ? ` — the largest element is ${Aglyn.formatBytes(worst.bytes)}.`
-            : '.'),
-        { variant: 'error', allowDuplicate: true },
-      )
-    }
-    if (size.nearLimit) {
-      enqueueSnackbar(
-        `Heads up: this screen is ${Aglyn.formatBytes(size.bytes)}. Past ` +
-          'about 900 KB it stops saving — moving repeated sections into ' +
-          'reusable components is the usual fix.',
-        { variant: 'warning', persist: false },
-      )
-    }
-    const saveScreen = updateScreen as unknown as (
-      data: Partial<Aglyn.AglynScreenVersion>,
-      options?: Parameters<typeof updateScreen>[1],
-    ) => Promise<void>
-    await saveScreen(
-      {nodes: nodes as unknown as Aglyn.AglynScreenVersion['nodes']},
-      {merge: true},
-    )
-      .then(() => {
-        Aglyn.canvas.updateInitialNodes(nodes)
-        // Attribution (AGL-676): `updatedAt` is stamped on every write but
-        // carries no actor, so "someone changed this" could never become
-        // "Sam changed this". Fire-and-forget — an audit miss must not
-        // break the edit that triggered it.
-        logActivity('Saved the screen', { type: 'screen', id: screenId })
-        // Our own write moves the stamp too. The new value arrives on the
-        // next snapshot, so mark it as ours — otherwise our own save comes
-        // back looking like somebody else's edit.
-        expectOwnWriteRef.current = true
-        setRemoteChanged(false)
-        enqueueSnackbar('Canvas saved successfully', {
-          variant: 'success',
-          persist: false,
-        })
-      })
-      .catch((e) => {
-        enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
-          variant: 'error',
-          allowDuplicate: true,
-        })
-      })
-      .finally(() => {
-        dequeueLoading()
-      })
-  }, [
+  // Canvas lifecycle, first load, concurrent-write detection (AGL-674) and
+  // the size-guarded save (AGL-678) are shared by every besigner editor
+  // (AGL-746). What stays in this route is what is actually about a screen
+  // belonging to a host — SEO, password protection, publishing, layout
+  // chrome and the live URL.
+  const {
     saveAvailable,
     remoteChanged,
-    updateScreen,
-    enqueueSnackbar,
+    handleSave,
+    jsonOpen,
+    openJsonEditor,
+    closeJsonEditor,
+    handleJsonSave,
+    hasError,
+    notFound,
+  } = useBesignerDocument({
+    nodes,
+    updatedAt: (data as { updatedAt?: unknown } | undefined)?.updatedAt,
+    status,
+    error,
+    save: saveScreenVersion,
+    noun: 'screen',
+    // Email documents (kind 'email', AGL-395) restrict the component drawer
+    // to the email plugin's email-safe blocks.
+    viewType:
+      screenKind === 'email'
+        ? Aglyn.HostViewType.EMAIL
+        : Aglyn.HostViewType.SCREEN,
+    documentKey: `${hostId}:${screenId}:${versionId}`,
+    notify: enqueueSnackbar,
     queueLoading,
-  ])
+    onSaved: () =>
+      logActivity('Saved the screen', { type: 'screen', id: screenId }),
+  })
 
-  const [jsonOpen, setJsonOpen] = useState(false)
-  const openJsonEditor = useCallback(() => setJsonOpen(true), [])
-  const closeJsonEditor = useCallback(() => setJsonOpen(false), [])
   const liveUrl = useMemo(
     () => buildScreenLiveUrl(hostResult?.data, screenId),
     [hostResult?.data, screenId],
@@ -783,11 +664,6 @@ function BesignerPage(props) {
     orgSlug,
     host,
   ])
-
-  const handleJsonSave = useCallback((e, value) => {
-    Aglyn.canvas.applyNodes(value)
-    setJsonOpen(false)
-  }, [])
 
   // Id-based screen links: the canvas resolves hrefs from the live routing
   // map (rendered, never navigable in the editor), and the Attributes panel
