@@ -543,7 +543,20 @@ export function sanitizeCommunityDefinition(
     if (sanitized[id]) continue
     const node = nodes[id]
     if (!node) return { ok: false, error: `Missing node "${id}"` }
-    if (!allowed.includes(node.componentId)) {
+    // The root node is the virtual root-collection wrapper (canvas
+    // `NODE_ROOT_ID` = `_@_`): it declares "everything inside <body>" for
+    // drag/drop mapping, not a rendered component, so a `div`/absent
+    // componentId there is structural — not a real component to allowlist
+    // (AGL-783). Exempt ONLY that wrapper shape; a root carrying a real
+    // component id is still checked, so a disallowed component can't be
+    // smuggled in as the root. Every descendant is real content and always
+    // checked below.
+    const isRootWrapper =
+      id === rootId &&
+      (node.componentId == null ||
+        node.componentId === '' ||
+        node.componentId === 'div')
+    if (!isRootWrapper && !allowed.includes(node.componentId)) {
       return {
         ok: false,
         error: `Component "${node.componentId}" cannot be published`,
@@ -555,6 +568,9 @@ export function sanitizeCommunityDefinition(
     }
     plain.$id = id
     plain.parentId = id === rootId ? null : (node.parentId ?? null)
+    // Give the wrapper an explicit container id so the installed definition
+    // renders its root collection the same way it did on the source site.
+    if (isRootWrapper) plain.componentId = 'div'
     sanitized[id] = plain
     if (Array.isArray(node.nodes)) queue.push(...node.nodes)
   }

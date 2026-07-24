@@ -144,6 +144,71 @@ describe('sanitizeCommunityDefinition', () => {
     ).toEqual({ ok: false, error: 'Missing node "ghost"' })
   })
 
+  /**
+   * The root node is the virtual root-collection wrapper (`_@_`) — a
+   * `div`/absent componentId there is drag/drop metadata, not a real
+   * component, so it must publish (AGL-783). Descendants stay checked, and a
+   * root carrying a real disallowed component id is NOT a free pass.
+   */
+  it('exempts the div/absent root wrapper but keeps checking descendants', () => {
+    const withDivRoot = sanitizeCommunityDefinition({
+      rootId: '_@_',
+      nodes: {
+        '_@_': { $id: '_@_', componentId: 'div', parentId: null, nodes: ['t'] },
+        t: {
+          $id: 't',
+          componentId: 'muiTypography',
+          parentId: '_@_',
+          props: { children: 'Footer' },
+        },
+      },
+    })
+    if (withDivRoot.ok === false) throw new Error(withDivRoot.error)
+    expect(withDivRoot.nodes['_@_'].componentId).toBe('div')
+    expect(Object.keys(withDivRoot.nodes).sort()).toEqual(['_@_', 't'])
+
+    // An absent root componentId is the same wrapper; normalized to div.
+    const withAbsentRoot = sanitizeCommunityDefinition({
+      rootId: '_@_',
+      nodes: {
+        '_@_': { $id: '_@_', parentId: null, nodes: [] },
+      } as any,
+    })
+    if (withAbsentRoot.ok === false) throw new Error(withAbsentRoot.error)
+    expect(withAbsentRoot.nodes['_@_'].componentId).toBe('div')
+  })
+
+  it('still rejects a NON-root div and a disallowed real component at the root', () => {
+    // A div that isn't the root is real content and must be allowlisted.
+    expect(
+      sanitizeCommunityDefinition({
+        rootId: '_@_',
+        nodes: {
+          '_@_': { $id: '_@_', componentId: 'div', parentId: null, nodes: ['d'] },
+          d: { $id: 'd', componentId: 'div', parentId: '_@_' },
+        },
+      }),
+    ).toEqual({ ok: false, error: 'Component "div" cannot be published' })
+
+    // The exemption is only for the wrapper shape — a real, disallowed
+    // component at the root can't be smuggled through.
+    expect(
+      sanitizeCommunityDefinition({
+        rootId: '_@_',
+        nodes: {
+          '_@_': {
+            $id: '_@_',
+            componentId: 'reusableInstance',
+            parentId: null,
+          },
+        },
+      }),
+    ).toEqual({
+      ok: false,
+      error: 'Component "reusableInstance" cannot be published',
+    })
+  })
+
   it('rejects oversized definitions', () => {
     const result = sanitizeCommunityDefinition({
       rootId: 'root',
