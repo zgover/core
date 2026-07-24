@@ -211,6 +211,15 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Durable rate-limit counters (AGL-794): one doc per (hashed key, window),
+    // written by the Admin SDK inside a transaction. Deny ALL client access —
+    // a client that could write these could reset its own counter, which
+    // defeats the whole point, and one that could read them could enumerate
+    // which buckets are near their cap.
+    match /rateLimits/{bucketId} {
+      allow read, write: if false;
+    }
+
     // Hosts and everything under them (content-hardening review,
     // 2026-07-07: tenant sites read through the Admin SDK, so no public
     // read). Access resolves through the org membership projection
