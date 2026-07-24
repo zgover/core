@@ -189,8 +189,8 @@ export const INSTALL_TARGETS: Record<
   component: ['host'],
   template: ['host'],
   layout: ['host'],
-  // Dataset schemas are org-shared data (AGL-237), so they will pin at org
-  // scope when publishing them lands (AGL-657).
+  // Dataset schemas are org-shared data (AGL-237), so they install at org
+  // scope — as a new empty dataset, not a pin (AGL-657).
   datasetSchema: ['org'],
   emailTemplate: ['host'],
 }
@@ -475,6 +475,31 @@ export const COMMUNITY_COMPONENT_ID_ALLOWLIST: readonly string[] = [
   'videoEmbed',
 ]
 
+/**
+ * Email block ids publishable as an `emailTemplate` (AGL-657).
+ *
+ * A separate list from the page allowlist because the two vocabularies don't
+ * overlap — an email design is built entirely from `plugins-email` blocks, and
+ * page components (MUI, forms, video) don't survive an email client anyway.
+ *
+ * `emailHtml` is excluded deliberately, for the same reason `reusableInstance`
+ * is excluded above: it is a raw-HTML escape hatch, and a published template
+ * lands in another org's OUTGOING CUSTOMER EMAIL. Email clients don't run
+ * scripts, so this isn't XSS — it's that arbitrary markup sent from someone
+ * else's domain is a phishing and tracking-pixel vector that no amount of
+ * render-time sanitization makes reviewable. Keep sorted.
+ */
+export const COMMUNITY_EMAIL_COMPONENT_ID_ALLOWLIST: readonly string[] = [
+  'emailButton',
+  'emailDivider',
+  'emailImage',
+  'emailProduct',
+  'emailRichtext',
+  'emailSection',
+  'emailSpacer',
+  'emailText',
+]
+
 /** Serialized definition size cap (Firestore doc limit is 1 MiB). */
 export const COMMUNITY_DEFINITION_MAX_BYTES = 200 * 1024
 
@@ -486,6 +511,60 @@ const KEPT_NODE_KEYS = [
   'props',
   'nodes',
 ] as const
+
+/** Only navigable protocols — mirrors ScreenLink/Image/Button hardening. */
+const SAFE_HREF = /^(https?:\/\/|mailto:|tel:|\/|#)/i
+/** `src` additionally allows inline images, which are inert. */
+const SAFE_SRC = /^(https?:\/\/|data:image\/|\/|#)/i
+
+/**
+ * Strips props a published node must never carry into someone else's site
+ * (AGL-784).
+ *
+ * `Leaf` spreads a node's props straight onto the rendered component, and MUI
+ * passes unknown props through to its root DOM element, so whatever survives
+ * publishing reaches the DOM of every org that installs the listing. Community
+ * components are auto-listed with no review, and `hosts/{h}/components` is
+ * writable by any org member, so a hand-crafted doc is a realistic input here.
+ *
+ * What each stripped key actually does, measured rather than assumed:
+ * - `dangerouslySetInnerHTML` is NOT the stored-XSS it looks like — `Leaf`
+ *   always passes a children array, so React throws
+ *   "Can only set one of `children` or `props.dangerouslySetInnerHTML`"
+ *   (and the void-element variant for self-closing components like `image`).
+ *   That is worse in practice than it sounds: the throw happens during SSR,
+ *   which is the AGL-579 failure mode that 500s the page and wedges ISR for
+ *   the whole site. One published component would take down every consumer.
+ * - `on*` handlers can only survive JSON as strings, which React drops with a
+ *   warning. Removed for hygiene, and so a future renderer that does eval-ish
+ *   prop handling can't turn them back into a vector.
+ * - `href`/`src` get the render-time URL policy applied at publish time too.
+ *   React already neutralizes `javascript:` hrefs and the mui components run
+ *   SAFE_HREF themselves, so this is defense in depth for any component that
+ *   forgets to — cheap, and it keeps the stored artifact honest.
+ *
+ * Deliberately shallow: only top-level props are spread onto the DOM. A nested
+ * object (`icon: { path }`) is consumed by the component, never spread, so
+ * recursing would strip legitimate data for no security gain.
+ */
+function sanitizePublishedNodeProps(
+  props: Record<string, unknown>,
+): Record<string, unknown> {
+  const safe: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(props)) {
+    if (key === 'dangerouslySetInnerHTML') continue
+    if (/^on[A-Z]/.test(key)) continue
+    if ((key === 'href' || key === 'src') && typeof value === 'string') {
+      const trimmed = value.trim()
+      const pattern = key === 'href' ? SAFE_HREF : SAFE_SRC
+      if (!pattern.test(trimmed)) continue
+      safe[key] = trimmed
+      continue
+    }
+    safe[key] = value
+  }
+  return safe
+}
 
 export type CommunityDefinitionNodes = Record<
   string,
@@ -505,10 +584,14 @@ export type CommunityDefinitionNodes = Record<
  * - only the persisted node keys (drops runtime fields like resolvedProps)
  * - the subtree reachable from `rootId` only, and a serialized size cap
  *
- * XSS note: rich-text `html` and link `href` props stay as-authored here —
- * both are sanitized at render time (sanitize-rich-text allowlist,
- * SAFE_HREF), which also covers definitions written to Firestore directly
- * (see docs/SECURITY_CONTENT_REVIEW.md).
+ * - per-node prop hardening (see `sanitizePublishedNodeProps`, AGL-784)
+ *
+ * XSS note: rich-text `html` props stay as-authored here — they are sanitized
+ * at render time (sanitize-rich-text allowlist), which also covers definitions
+ * written to Firestore directly (see docs/SECURITY_CONTENT_REVIEW.md). Props
+ * that are spread onto the DOM (`dangerouslySetInnerHTML`, `on*`, `href`,
+ * `src`) are hardened HERE as well, because publishing hands them to a
+ * different org's render tree.
  */
 export function sanitizeCommunityDefinition(
   definition: {
@@ -525,14 +608,22 @@ export function sanitizeCommunityDefinition(
      * globally so page and component publishing stay unchanged.
      */
     extraComponentIds?: readonly string[]
+    /**
+     * Replaces the page allowlist outright, for artifact types built from a
+     * disjoint component vocabulary — an email design uses `plugins-email`
+     * blocks and nothing else (AGL-657), so EXTENDING the page list would
+     * green-light a `videoEmbed` or `form` that no email client can render.
+     */
+    componentIds?: readonly string[]
   },
 ):
   | { ok: true; rootId: string; nodes: CommunityDefinitionNodes }
   | { ok: false; error: string } {
   const { rootId, nodes } = definition
+  const base = options?.componentIds ?? COMMUNITY_COMPONENT_ID_ALLOWLIST
   const allowed = options?.extraComponentIds?.length
-    ? [...COMMUNITY_COMPONENT_ID_ALLOWLIST, ...options.extraComponentIds]
-    : COMMUNITY_COMPONENT_ID_ALLOWLIST
+    ? [...base, ...options.extraComponentIds]
+    : base
   if (!rootId || !nodes?.[rootId]) {
     return { ok: false, error: 'Definition has no root node' }
   }
@@ -565,6 +656,10 @@ export function sanitizeCommunityDefinition(
     const plain: any = {}
     for (const key of KEPT_NODE_KEYS) {
       if (node[key] !== undefined) plain[key] = node[key]
+    }
+    // Per-node prop hardening (AGL-784) — see sanitizePublishedNodeProps.
+    if (plain.props && typeof plain.props === 'object') {
+      plain.props = sanitizePublishedNodeProps(plain.props)
     }
     plain.$id = id
     plain.parentId = id === rootId ? null : (node.parentId ?? null)
@@ -611,4 +706,205 @@ export function communityDefinitionToNested(
     }
   }
   return build(rootId)
+}
+
+/**
+ * Field types a published dataset schema may declare (AGL-657). Mirrors
+ * `DATASET_FIELD_TYPES` in core; duplicated rather than imported to keep this
+ * module dependency-free (it is imported by API routes and client components
+ * alike), and asserted against the source of truth in the spec.
+ */
+export const COMMUNITY_DATASET_FIELD_TYPES: readonly string[] = [
+  'bool',
+  'bytes',
+  'coordinates',
+  'float',
+  'int32',
+  'int64',
+  'map',
+  'nil',
+  'reference',
+  'sorted',
+  'text',
+  'timestamp',
+]
+
+/** Field cap on a published schema — mirrors the console's create limit. */
+export const COMMUNITY_DATASET_MAX_FIELDS = 100
+
+/** A published dataset schema: the model, with no records. */
+export interface CommunityDatasetSchema {
+  fields: Record<string, CommunityDatasetField>
+  order: string[]
+}
+
+export interface CommunityDatasetField {
+  name: string
+  type: string
+  customType?: string
+  description?: string
+  required?: boolean
+  default?: unknown
+  validation?: Record<string, unknown>
+  /**
+   * Kept so an install into an org that HAS the referenced dataset can relink
+   * it. `datasetId` is the publisher's id and is meaningless in another org,
+   * so `datasetLabel` carries the human name the installer matches on.
+   */
+  reference?: {
+    datasetId?: string
+    datasetLabel?: string
+    displayFieldId?: string
+    multiple?: boolean
+    onDelete?: string
+  }
+}
+
+const KEPT_VALIDATION_KEYS = ['required', 'regex', 'min', 'max', 'options']
+
+/**
+ * Validates and strips a `DatasetModel` for publishing as a marketplace
+ * dataset schema (AGL-657).
+ *
+ * Publishes STRUCTURE ONLY — records never travel. That is the whole safety
+ * story for this artifact type: a dataset's rows are the org's customer data,
+ * so the publish path reads the model and nothing else, and there is no code
+ * path here that can reach the `records` subcollection.
+ *
+ * Two cross-org hazards the issue called out, handled by carrying enough
+ * context for the INSTALLER to decide rather than by rejecting at publish:
+ * - `reference` FKs point at a dataset id that only exists in the publisher's
+ *   org. The id is kept alongside the referenced dataset's label so the
+ *   installer can relink by name and degrade the field when it can't (see
+ *   `resolveInstalledDatasetSchema`).
+ * - `customType` names a plugin-declared field type (AGL-434) whose plugin the
+ *   installing org may not have. Unknown custom types already degrade to their
+ *   base type at render, so the name rides along untouched.
+ */
+export function sanitizeDatasetSchema(model: {
+  fields?: Record<string, any>
+  order?: unknown
+}):
+  | { ok: true; schema: CommunityDatasetSchema }
+  | { ok: false; error: string } {
+  const fields = model?.fields
+  if (!fields || typeof fields !== 'object') {
+    return { ok: false, error: 'Dataset has no field model to publish' }
+  }
+  // Order is the display contract; fall back to key order for models written
+  // before `order` was required so older datasets stay publishable.
+  const order = Array.isArray(model.order)
+    ? model.order.map(String)
+    : Object.keys(fields)
+  const kept = order.filter((id) => fields[id])
+  if (!kept.length) {
+    return { ok: false, error: 'Dataset has no fields to publish' }
+  }
+  if (kept.length > COMMUNITY_DATASET_MAX_FIELDS) {
+    return {
+      ok: false,
+      error: `Dataset schemas are limited to ${COMMUNITY_DATASET_MAX_FIELDS} fields`,
+    }
+  }
+  const schema: CommunityDatasetSchema = { fields: {}, order: kept }
+  for (const id of kept) {
+    const field = fields[id] ?? {}
+    const type = String(field.type ?? 'text')
+    if (!COMMUNITY_DATASET_FIELD_TYPES.includes(type)) {
+      return { ok: false, error: `Field "${id}" has an unsupported type` }
+    }
+    const safe: CommunityDatasetField = {
+      name: String(field.name ?? id).slice(0, 120),
+      type,
+    }
+    if (field.customType) safe.customType = String(field.customType).slice(0, 60)
+    if (field.description) {
+      safe.description = String(field.description).slice(0, 500)
+    }
+    if (field.required === true) safe.required = true
+    // Defaults are publisher-authored values, not data — keep only primitives
+    // so a default can't smuggle a nested object into the installing org.
+    if (
+      field.default !== undefined &&
+      (typeof field.default === 'string' ||
+        typeof field.default === 'number' ||
+        typeof field.default === 'boolean')
+    ) {
+      safe.default = field.default
+    }
+    if (field.validation && typeof field.validation === 'object') {
+      const validation: Record<string, unknown> = {}
+      for (const key of KEPT_VALIDATION_KEYS) {
+        if (field.validation[key] !== undefined) {
+          validation[key] = field.validation[key]
+        }
+      }
+      if (Object.keys(validation).length) safe.validation = validation
+    }
+    if (field.reference && typeof field.reference === 'object') {
+      safe.reference = {
+        ...(field.reference.datasetId && {
+          datasetId: String(field.reference.datasetId),
+        }),
+        ...(field.reference.datasetLabel && {
+          datasetLabel: String(field.reference.datasetLabel).slice(0, 120),
+        }),
+        ...(field.reference.displayFieldId && {
+          displayFieldId: String(field.reference.displayFieldId),
+        }),
+        ...(field.reference.multiple === true && { multiple: true }),
+        ...(field.reference.onDelete && {
+          onDelete: String(field.reference.onDelete),
+        }),
+      }
+    }
+    schema.fields[id] = safe
+  }
+  const serialized = JSON.stringify(schema)
+  if (serialized.length > COMMUNITY_DEFINITION_MAX_BYTES) {
+    return { ok: false, error: 'Dataset schema is too large to publish' }
+  }
+  return { ok: true, schema }
+}
+
+/**
+ * Rewrites a published schema for the installing org (AGL-657).
+ *
+ * `reference` fields are the only part of a schema that can't cross an org
+ * boundary as-is: they name a dataset id in the PUBLISHER's org. Relink by the
+ * referenced dataset's label when the installing org has one by that name;
+ * otherwise degrade the field to plain `text` and report it, because a
+ * reference field pointing at a dataset that doesn't exist renders as a broken
+ * picker — silently keeping the dead id would install something visibly
+ * broken and blame the installer for it.
+ *
+ * `existingDatasets` maps lowercased display name → dataset id in the target.
+ */
+export function resolveInstalledDatasetSchema(
+  schema: CommunityDatasetSchema,
+  existingDatasets: Readonly<Record<string, string>>,
+): { schema: CommunityDatasetSchema; degradedFieldIds: string[] } {
+  const degradedFieldIds: string[] = []
+  const fields: Record<string, CommunityDatasetField> = {}
+  for (const id of schema.order) {
+    const field = schema.fields[id]
+    if (!field) continue
+    if (field.type !== 'reference' && !field.reference) {
+      fields[id] = field
+      continue
+    }
+    const label = String(field.reference?.datasetLabel ?? '').toLowerCase()
+    const relinked = label ? existingDatasets[label] : undefined
+    if (relinked) {
+      fields[id] = {
+        ...field,
+        reference: { ...field.reference, datasetId: relinked },
+      }
+      continue
+    }
+    const { reference: _dropped, ...rest } = field
+    fields[id] = { ...rest, type: 'text' }
+    degradedFieldIds.push(id)
+  }
+  return { schema: { fields, order: schema.order }, degradedFieldIds }
 }

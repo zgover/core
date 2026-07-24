@@ -8,13 +8,15 @@ name: Scheduled console crons
 #
 # Requires:
 #   - secret  CRON_SECRET       — same value as the console Vercel env var
+#   - var     CONSOLE_BASE_URL   — optional; defaults to https://app.aglyn.com
 #
-# The console's production host is hardcoded to https://app.aglyn.com. It was
-# once overridable via a CONSOLE_BASE_URL repo variable, but after the domain
-# move (AGL-720) that variable still pointed at app.aglyn.io, which now
-# 307-redirects to .com — and curl carries neither the POST body nor the
-# x-cron-secret header through the redirect, so every run failed on HTTP 307.
-# Pinning the canonical host removes that footgun (AGL-786).
+# Set CONSOLE_BASE_URL only if your console is not on the default host (a
+# fork, or a staging deployment). It must be the host that SERVES the console,
+# not one that redirects to it: curl carries neither the POST body nor the
+# x-cron-secret header across a redirect, so a redirecting host fails every
+# run. That is exactly what happened in AGL-786 — the variable still pointed
+# at app.aglyn.io after the AGL-720 domain move, and .io now 307s to .com.
+# The step below names that case explicitly when it sees a 3xx.
 #
 # Every `schedule` entry triggers this one workflow; `github.event.schedule`
 # carries the cron string that fired, which the job maps to a route. Note
@@ -71,7 +73,7 @@ jobs:
 
       - name: POST the console cron route
         env:
-          BASE_URL: https://app.aglyn.com
+          BASE_URL: ${{ vars.CONSOLE_BASE_URL || 'https://app.aglyn.com' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           ROUTE: ${{ steps.route.outputs.path }}
         run: |
@@ -87,6 +89,13 @@ jobs:
           echo "--- response ---"
           cat /tmp/cron-body || true
           echo
+          if [ "$code" -ge 300 ] && [ "$code" -lt 400 ]; then
+            echo "Cron route returned $code — BASE_URL ($BASE_URL) redirects." >&2
+            echo "curl drops the POST body and x-cron-secret across a redirect," >&2
+            echo "so set the CONSOLE_BASE_URL repo variable to the host that" >&2
+            echo "actually serves the console (see AGL-786)." >&2
+            exit 1
+          fi
           if [ "$code" != "200" ]; then
             echo "Cron route returned $code (expected 200)" >&2
             exit 1
