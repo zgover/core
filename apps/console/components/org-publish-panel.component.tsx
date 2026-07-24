@@ -27,9 +27,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { getTenantEmail } from '@aglyn/shared-util-email'
 import { collection, doc, limit, query } from 'firebase/firestore'
 import { useMemo, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../constants/docs-links'
 import { buildRoute, Route } from '../constants/route-links'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 import useFirestoreDoc from '../hooks/use-firestore-doc'
@@ -37,10 +39,51 @@ import PublishArtifactDialog, {
   type PublishArtifactTarget,
 } from './templates/publish-artifact-dialog.component'
 
-type PublishKind = 'component' | 'layout' | 'site'
+type PublishKind =
+  | 'component'
+  | 'layout'
+  | 'site'
+  | 'datasetSchema'
+  | 'emailTemplate'
 
 const artifactName = (artifact: any): string | undefined =>
   artifact?.displayName ?? artifact?.name ?? artifact?.title ?? undefined
+
+/**
+ * Email templates are keyed by a fixed catalog key, and the stored doc carries
+ * only the design — the human name lives in the catalog.
+ */
+const emailLabel = (templateKey: string): string =>
+  getTenantEmail(templateKey)?.name ?? templateKey
+
+/** Per-kind select label, option text, and empty-state copy. */
+const PICKERS: Record<
+  PublishKind,
+  { label: string; empty: string; optionLabel: (entry: any) => string }
+> = {
+  component: {
+    label: 'Component',
+    empty: 'This site has no reusable components to publish yet.',
+    optionLabel: (entry) => artifactName(entry) ?? entry.$id,
+  },
+  layout: {
+    label: 'Layout',
+    empty: 'This site has no layouts to publish yet.',
+    optionLabel: (entry) => artifactName(entry) ?? entry.$id,
+  },
+  datasetSchema: {
+    label: 'Dataset',
+    empty: 'This organization has no datasets to publish yet.',
+    optionLabel: (entry) => artifactName(entry) ?? entry.$id,
+  },
+  emailTemplate: {
+    label: 'Email',
+    empty: 'This site has no designed emails to publish yet.',
+    // The doc id IS the catalog key; the design carries no name of its own.
+    optionLabel: (entry) => emailLabel(entry.$id),
+  },
+  site: { label: 'Site', empty: '', optionLabel: () => '' },
+}
 
 /**
  * Org-level publish (AGL-776): pick a source site, then a component, a layout,
@@ -92,6 +135,26 @@ export function OrgPublishPanel({
     [firestore, hostId],
     { idField: '$id' },
   )
+  // Datasets are ORG-scoped (AGL-237), so unlike every other source here they
+  // don't depend on the selected site.
+  const { data: datasetDocs } = useFirestoreCollection<any>(
+    () =>
+      query(
+        collection(firestore, 'orgs', orgId || '-none-', 'datasets'),
+        limit(100),
+      ),
+    [firestore, orgId],
+    { idField: '$id' },
+  )
+  const { data: emailDocs } = useFirestoreCollection<any>(
+    () =>
+      query(
+        collection(firestore, 'hosts', hostId || '-none-', 'emailTemplates'),
+        limit(100),
+      ),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
   const components = useMemo(
     () => (componentDocs ?? []).filter((entry: any) => !entry.deletedAt),
     [componentDocs],
@@ -99,6 +162,19 @@ export function OrgPublishPanel({
   const layouts = useMemo(
     () => (layoutDocs ?? []).filter((entry: any) => !entry.deletedAt),
     [layoutDocs],
+  )
+  const datasets = useMemo(
+    () => (datasetDocs ?? []).filter((entry: any) => !entry.deletedAt),
+    [datasetDocs],
+  )
+  // Only emails that actually have a saved design are publishable — the doc
+  // exists with no `versionId` whenever the besigner was merely opened.
+  const emails = useMemo(
+    () =>
+      (emailDocs ?? []).filter(
+        (entry: any) => !entry.deletedAt && entry.versionId,
+      ),
+    [emailDocs],
   )
 
   // Validate the pick against the current list rather than resetting it in an
@@ -108,7 +184,18 @@ export function OrgPublishPanel({
   // artifact type simply reads as "nothing selected" this render, so we never
   // publish it, and the MUI <Select> value stays in range every render.
   const activeList =
-    kind === 'component' ? components : kind === 'layout' ? layouts : []
+    kind === 'component'
+      ? components
+      : kind === 'layout'
+        ? layouts
+        : kind === 'datasetSchema'
+          ? datasets
+          : kind === 'emailTemplate'
+            ? emails
+            : []
+  // One descriptor per source kind, so adding an artifact type is a row here
+  // rather than another arm of a nested ternary in the JSX below.
+  const picker = PICKERS[kind]
   const selectedId = activeList.some((entry: any) => entry.$id === artifactId)
     ? artifactId
     : ''
@@ -133,6 +220,24 @@ export function OrgPublishPanel({
         noun: 'component',
       })
     }
+    if (kind === 'datasetSchema') {
+      const chosen = datasets.find((entry: any) => entry.$id === selectedId)
+      // Datasets are org-scoped, so this route takes orgId rather than hostId.
+      return setTarget({
+        endpoint: 'community/publish-dataset-schema',
+        payload: { orgId, datasetId: selectedId },
+        displayName: artifactName(chosen),
+        noun: 'dataset schema',
+      })
+    }
+    if (kind === 'emailTemplate') {
+      return setTarget({
+        endpoint: 'community/publish-email-template',
+        payload: { hostId, templateKey: selectedId },
+        displayName: emailLabel(selectedId),
+        noun: 'email template',
+      })
+    }
     const chosen = layouts.find((entry: any) => entry.$id === selectedId)
     setTarget({
       endpoint: 'community/publish-layout',
@@ -142,7 +247,12 @@ export function OrgPublishPanel({
     })
   }
 
-  const canPublish = Boolean(hostId && (kind === 'site' || selectedId))
+  // Dataset schemas publish from the org, so they need no source site — an
+  // org with datasets but no sites yet can still publish one.
+  const canPublish =
+    kind === 'datasetSchema'
+      ? Boolean(orgId && selectedId)
+      : Boolean(hostId && (kind === 'site' || selectedId))
 
   // A publisher profile (with a handle) is required server-side; guide the
   // user there rather than letting the publish 412.
@@ -164,14 +274,24 @@ export function OrgPublishPanel({
   }
 
   return (
-    <CardDisplay header={'Publish to the marketplace'} contentGutterX contentGutterY>
+    <CardDisplay
+      header={'Publish to the marketplace'}
+      help={docsHelp('publisherHandbook', {
+        anchor: '#where-to-publish-from',
+        excerpt:
+          'Publish a component, layout, dataset schema, email template, or ' +
+          'whole site so other organizations can install it.',
+      })}
+      contentGutterX
+      contentGutterY
+    >
       <Stack spacing={2} sx={{ maxWidth: 480 }}>
         <Typography variant="body2" color="text.secondary">
-          {'Publish a component, a layout, or an entire site from your ' +
-            'organization so other organizations can install it. Your live ' +
-            'site is unaffected.'}
+          {'Publish a component, layout, dataset schema, email template, or ' +
+            'an entire site from your organization so other organizations ' +
+            'can install it. Your live site is unaffected.'}
         </Typography>
-        {hosts.length > 1 ? (
+        {hosts.length > 1 && kind !== 'datasetSchema' ? (
           <TextField
             select
             size="small"
@@ -195,54 +315,40 @@ export function OrgPublishPanel({
         >
           <MenuItem value="component">{'A component'}</MenuItem>
           <MenuItem value="layout">{'A layout'}</MenuItem>
+          <MenuItem value="datasetSchema">{'A dataset schema'}</MenuItem>
+          <MenuItem value="emailTemplate">{'An email template'}</MenuItem>
           <MenuItem value="site">{'This entire site (as a template)'}</MenuItem>
         </TextField>
-        {kind === 'component' ? (
-          components.length ? (
-            <TextField
-              select
-              size="small"
-              label="Component"
-              value={selectedId}
-              onChange={(event) => setArtifactId(event.target.value)}
-            >
-              {components.map((entry: any) => (
-                <MenuItem key={entry.$id} value={entry.$id}>
-                  {artifactName(entry) ?? entry.$id}
-                </MenuItem>
-              ))}
-            </TextField>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              {'This site has no reusable components to publish yet.'}
-            </Typography>
-          )
-        ) : kind === 'layout' ? (
-          layouts.length ? (
-            <TextField
-              select
-              size="small"
-              label="Layout"
-              value={selectedId}
-              onChange={(event) => setArtifactId(event.target.value)}
-            >
-              {layouts.map((entry: any) => (
-                <MenuItem key={entry.$id} value={entry.$id}>
-                  {artifactName(entry) ?? entry.$id}
-                </MenuItem>
-              ))}
-            </TextField>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              {'This site has no layouts to publish yet.'}
-            </Typography>
-          )
-        ) : (
+        {kind === 'site' ? (
           <Typography variant="body2" color="text.secondary">
             {'Publishes this site’s current published screens and theme as an ' +
               'installable starting point.'}
           </Typography>
+        ) : activeList.length ? (
+          <TextField
+            select
+            size="small"
+            label={picker.label}
+            value={selectedId}
+            onChange={(event) => setArtifactId(event.target.value)}
+          >
+            {activeList.map((entry: any) => (
+              <MenuItem key={entry.$id} value={entry.$id}>
+                {picker.optionLabel(entry)}
+              </MenuItem>
+            ))}
+          </TextField>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            {picker.empty}
+          </Typography>
         )}
+        {kind === 'emailTemplate' && activeList.length ? (
+          <Typography variant="caption" color="text.secondary">
+            {'Installing an email template adds it as a draft version — it ' +
+              'never replaces the design a site is already sending.'}
+          </Typography>
+        ) : null}
         <Box>
           <Button
             variant="contained"

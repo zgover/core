@@ -29,6 +29,8 @@ import { installHandler } from './server/install'
 import { installPluginHandler } from './server/install-plugin'
 import { listingVersionsHandler } from './server/listing-versions'
 import { RATING_FIELD } from './model/rating-field'
+import { installDatasetSchemaHandler } from './server/install-dataset-schema'
+import { installEmailTemplateHandler } from './server/install-email-template'
 import { installLayoutHandler } from './server/install-layout'
 import { installTemplateHandler } from './server/install-template'
 import { previewImageHandler } from './server/preview-image'
@@ -36,6 +38,8 @@ import { publishHandler } from './server/publish'
 import { reportHandler } from './server/report'
 import { reviewsHandler } from './server/reviews'
 import { publisherProfileSaveHandler } from './server/publisher-profile-save'
+import { publishDatasetSchemaHandler } from './server/publish-dataset-schema'
+import { publishEmailTemplateHandler } from './server/publish-email-template'
 import { publishLayoutHandler } from './server/publish-layout'
 import { publishTemplateHandler } from './server/publish-template'
 
@@ -62,6 +66,14 @@ export function registerCommunityConsoleApi(): void {
   registerPluginApiRoute('community/install-plugin', installPluginHandler)
   registerPluginApiRoute('community/install-layout', installLayoutHandler)
   registerPluginApiRoute('community/install-template', installTemplateHandler)
+  registerPluginApiRoute(
+    'community/install-dataset-schema',
+    installDatasetSchemaHandler,
+  )
+  registerPluginApiRoute(
+    'community/install-email-template',
+    installEmailTemplateHandler,
+  )
   registerPluginApiRoute('community/listing-versions', listingVersionsHandler)
   registerPluginApiRoute('community/preview-image', previewImageHandler)
   registerPluginApiRoute('community/publish', publishHandler)
@@ -73,6 +85,14 @@ export function registerCommunityConsoleApi(): void {
   )
   registerPluginApiRoute('community/publish-layout', publishLayoutHandler)
   registerPluginApiRoute('community/publish-template', publishTemplateHandler)
+  registerPluginApiRoute(
+    'community/publish-dataset-schema',
+    publishDatasetSchemaHandler,
+  )
+  registerPluginApiRoute(
+    'community/publish-email-template',
+    publishEmailTemplateHandler,
+  )
   // Relocated console routes (AGL-418): URLs preserved via the dispatcher.
   registerPluginApiRoute('community/publish-plugin', publishPluginHandler)
   registerPluginApiRoute('ai/assist', aiAssistHandler)

@@ -28,12 +28,44 @@ a **source site**, then what to publish:
 
 - **A component** — a reusable component from that site.
 - **A layout** — a published layout from that site.
+- **A dataset schema** — the field model of one of your organization's
+  datasets. **Records are never published** — only the structure travels.
+- **An email template** — a transactional email you've designed for that site
+  (only emails that already have a saved design are offered).
 - **This entire site** — its published screens and theme, as an installable
   template.
+
+Dataset schemas are the one exception to the source-site picker: datasets
+belong to the organization rather than to a site, so the picker is hidden and
+the schema publishes from the org directly.
 
 The per-site shortcuts still exist for convenience — the **Publish** actions
 on a site's **Components** and **Layouts** pages, and **Publish as template**
 on the **Setup** page — and open the same listing form.
+
+### What installing each type does
+
+Installing never changes a running site. What that means per type:
+
+| Type | Where it lands | Live immediately? |
+| --- | --- | --- |
+| Component | The site's components | Yes, once you place it |
+| Layout / Site template | The site's **Templates** library | No |
+| Plugin | An org or per-site version pin | Yes |
+| Dataset schema | A **new, empty** dataset in the org | Yes (it's new) |
+| Email template | A **draft version** of that email | No |
+
+Two details worth knowing before you publish one:
+
+- A **dataset schema** installs as a brand-new dataset every time; it never
+  merges into an existing one, since a schema change over existing rows would
+  reinterpret live data. `reference` fields are relinked to the installing
+  organization's datasets **by display name**, and any that can't be matched
+  are degraded to plain text — the installer is told which ones.
+- An **email template** installs as an inactive version of the same catalog
+  email it was designed for. The site owner activates it in the email
+  designer, so installing can't silently replace an email a site is already
+  sending its customers. `emailHtml` blocks can't be published at all.
 
 **Plugins are different**: a plugin is a code bundle, not a site artifact, so
 it's published from your built bundle (below) rather than the source-site

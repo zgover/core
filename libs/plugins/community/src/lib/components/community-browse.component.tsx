@@ -65,6 +65,29 @@ export interface CommunityBrowseProps {
 }
 
 /**
+ * Install CTA wording, per artifact type (AGL-657).
+ *
+ * "Add to this site" is a lie for anything that doesn't install onto a site: a
+ * dataset schema creates an org-level dataset, and an email template lands as
+ * an inactive draft rather than going live. The button is the last thing
+ * someone reads before committing, so it names what actually happens —
+ * `INSTALL_TARGETS` already encodes where each type physically writes.
+ */
+function installCta(listing: unknown): string {
+  switch (listingArtifactType(listing as any)) {
+    case 'datasetSchema':
+      return 'Add to this organization'
+    case 'emailTemplate':
+      return 'Add as a draft'
+    case 'template':
+    case 'layout':
+      return 'Save to Templates'
+    default:
+      return 'Add to this site'
+  }
+}
+
+/**
  * Community components browse + install (AGL-44). Installing copies the
  * listing's pinned version snapshot into `hosts/{hostId}/components` (with
  * `community` source metadata), so the element drawer, editor grafting, and
@@ -496,7 +519,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                         ? `Update to v${listing.latestVersion}`
                         : mustBuy
                           ? `Buy for $${priceUsd}`
-                          : 'Add to this site'}
+                          : installCta(listing)}
                   </Button>
                 </Stack>
               </Grid>

@@ -22,6 +22,11 @@ Each links into its section for the how-to.
 - **[Publish from any site](developers/plugins/publishing/publisher-handbook.md#where-to-publish-from)** —
   the **Publish** tab picks a source site, then a component, a layout, or the whole site as a
   template. The per-site Publish shortcuts still work.
+- **[Dataset schemas and email templates are publishable](developers/plugins/publishing/publisher-handbook.md#where-to-publish-from)** —
+  share the field model of a dataset (structure only — **records never travel**) or a
+  transactional email you've designed. A schema installs as a new empty dataset with its
+  reference fields relinked by name; an email installs as a **draft version**, so it never
+  replaces an email a site is already sending.
 
 ## REST API & API keys
 

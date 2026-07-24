@@ -39,8 +39,41 @@ function endpointForArtifact(artifactType: string): string {
       return 'community/install-layout'
     case 'plugin':
       return 'community/install-plugin'
+    case 'datasetSchema':
+      return 'community/install-dataset-schema'
+    case 'emailTemplate':
+      return 'community/install-email-template'
     default:
       return 'community/install'
+  }
+}
+
+/**
+ * Artifact types whose install deliberately does NOT touch the running site
+ * (AGL-669/671/657) — the copy must not imply otherwise. Templates and layouts
+ * land in the Templates library; an email template lands as an inactive
+ * version the owner still has to activate.
+ */
+function landingMessage(
+  artifactType: string,
+  displayName: string,
+): string | null {
+  switch (artifactType) {
+    case 'template':
+    case 'layout':
+      return (
+        `Saved "${displayName}" to your Templates — nothing is live until ` +
+        'you use it.'
+      )
+    case 'emailTemplate':
+      return (
+        `Saved "${displayName}" as a draft version — activate it in the ` +
+        'email designer to start sending it.'
+      )
+    case 'datasetSchema':
+      return `Created "${displayName}" as a new, empty dataset.`
+    default:
+      return null
   }
 }
 
@@ -84,19 +117,26 @@ export function useCommunityActions(hostId: string) {
             allowDuplicate: true,
           })
         }
-        // Templates and layouts land in the library and publish nothing
-        // (AGL-669), so the message must not imply the site changed.
-        const landsInLibrary =
-          artifactType === 'template' || artifactType === 'layout'
+        // Types that land inert must not read as "your site changed".
+        const landed = landingMessage(artifactType, listing.displayName)
         enqueueSnackbar(
-          landsInLibrary
-            ? `Saved "${listing.displayName}" to your Templates — nothing is ` +
-              'live until you use it.'
-            : payload.updated
+          landed ??
+            (payload.updated
               ? `Updated "${listing.displayName}" to v${payload.version}`
-              : `Installed "${listing.displayName}" — find it under Your components`,
+              : `Installed "${listing.displayName}" — find it under Your components`),
           { variant: 'success', persist: false },
         )
+        // A schema whose reference fields couldn't be relinked installs with
+        // those fields degraded to text — silently changing a field's type
+        // would be the kind of thing you discover much later (AGL-657).
+        if (payload.degradedFieldIds?.length) {
+          enqueueSnackbar(
+            `${payload.degradedFieldIds.length} reference field(s) became ` +
+              'plain text — the datasets they pointed at are not in this ' +
+              'organization.',
+            { variant: 'info', persist: false },
+          )
+        }
       } catch (error) {
         console.error(error)
         enqueueSnackbar('An error has occurred', {
@@ -148,9 +188,7 @@ export function useCommunityActions(hostId: string) {
           else errors.push(payload?.error ?? 'Install failed')
         }
         const orgWide = steps.some((step) => step.scope === 'org')
-        const landsInLibrary =
-          artifactType === 'template' || artifactType === 'layout'
-        const noun = landsInLibrary ? 'Saved' : 'Installed'
+        const noun = landingMessage(artifactType, '') ? 'Saved' : 'Installed'
         if (installed && !errors.length) {
           enqueueSnackbar(
             orgWide
