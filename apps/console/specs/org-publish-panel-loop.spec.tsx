@@ -17,22 +17,36 @@
  * @jest-environment jsdom
  */
 
+import { StrictMode } from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 
 /**
  * Does changing the publish panel's artifact kind loop? (AGL-788)
  *
  * The console dev server throws "Maximum update depth exceeded" from this
- * select's onChange. AGL-785 closed the same symptom as a dev-only StrictMode
- * artifact, and it is still firing — so the open question is whether the panel
- * has a genuine render loop or whether StrictMode's double-invoke is pushing a
- * borderline-but-correct component over React's limit.
+ * select's onChange, and AGL-785 closed the same symptom once already.
  *
- * This renders the panel WITHOUT StrictMode and drives the same interaction.
- * React's development build (which jest uses) still enforces the update-depth
- * limit, so a genuine loop throws here; a StrictMode-only artifact cannot,
- * because nothing double-invokes. That makes this a decisive experiment rather
- * than a smoke test — and a regression guard for a loop already "fixed" twice.
+ * **What this establishes: the panel itself is clean.** It drives the exact dev
+ * repro (component <-> layout, five rounds) both with and without StrictMode.
+ * React's development build — which jest uses — enforces the update-depth limit
+ * in both cases, so a render loop originating in this component would throw.
+ * Neither does.
+ *
+ * **What it does NOT establish: that the dev-server symptom is benign.** Two
+ * gaps, both deliberate and both worth knowing before trusting a green run
+ * here:
+ *
+ * 1. The panel is rendered STANDALONE. On the real page it lives inside
+ *    HubTabs, and AGL-785 diagnosed the loop as a diffuse HubTabs keepMounted
+ *    settling-window race — so the suspected culprit isn't even in this tree.
+ * 2. The Firestore hooks are mocked to resolve synchronously. The real
+ *    `useFirestoreCollection` runs `setData([])` inside an effect before an
+ *    `onSnapshot` subscription settles, which is the asynchronous window
+ *    AGL-785 pointed at.
+ *
+ * So: a regression guard for a loop already "fixed" twice, and evidence that
+ * this panel is not the origin. Settling AGL-788 still needs the production
+ * runtime, or a harness that mounts the whole marketplace page.
  */
 
 const firestoreCollections: Record<string, any[]> = {}
@@ -85,17 +99,22 @@ describe('OrgPublishPanel kind switching (AGL-788)', () => {
     ]
   })
 
-  const renderPanel = () =>
-    render(
-      <OrgPublishPanel
-        orgSlug="test-org"
-        orgId="org-1"
-        hosts={[
-          { id: 'h1', label: 'Northwind Coffee' },
-          { id: 'h2', label: 'Second Site' },
-        ]}
-      />,
-    )
+  const panel = (
+    <OrgPublishPanel
+      orgSlug="test-org"
+      orgId="org-1"
+      hosts={[
+        { id: 'h1', label: 'Northwind Coffee' },
+        { id: 'h2', label: 'Second Site' },
+      ]}
+    />
+  )
+  const renderPanel = () => render(panel)
+  // Next.js leaves `reactStrictMode` at its App Router default (on), so dev
+  // double-invokes render and effects and production does not. Rendering the
+  // SAME element both ways makes StrictMode the only variable between the two
+  // results — which is what turns "it didn't throw" into an attribution.
+  const renderPanelStrict = () => render(<StrictMode>{panel}</StrictMode>)
 
   const selectKind = (label: string) => {
     fireEvent.mouseDown(
@@ -124,6 +143,22 @@ describe('OrgPublishPanel kind switching (AGL-788)', () => {
 
   it('switching back and forth repeatedly does not loop', () => {
     renderPanel()
+    expect(() => {
+      for (let round = 0; round < 5; round += 1) {
+        selectKind('A layout')
+        selectKind('A component')
+      }
+    }).not.toThrow()
+  })
+
+  // The other half of the experiment. If the panel survives the same
+  // interaction UNDER StrictMode too, then StrictMode is not sufficient to
+  // trigger it here and this harness does not reproduce the dev server — the
+  // remaining suspect being live Firestore subscriptions settling
+  // asynchronously, which the mocks resolve synchronously. Either outcome is
+  // informative, so this asserts the behaviour rather than a hoped-for result.
+  it('behaves the same under StrictMode (attribution check)', () => {
+    renderPanelStrict()
     expect(() => {
       for (let round = 0; round < 5; round += 1) {
         selectKind('A layout')
