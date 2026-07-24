@@ -28,6 +28,7 @@ import { Alert, Button, Chip, Stack, Typography } from '@mui/material'
 import { collection, doc, updateDoc } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
+import { docsHelp } from '../constants/docs-links'
 import { buildRoute, Route } from '../constants/route-links'
 import { useCurrentOrg } from '../hooks/use-current-org'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
@@ -160,6 +161,11 @@ export function SiteEmailsCard() {
   return (
     <CardDisplay
       header={'Emails this site sends'}
+      help={docsHelp('designedEmails', {
+        excerpt:
+          'Design the transactional emails your site sends its customers ' +
+          'with email-safe blocks and merge tokens.',
+      })}
       subheader={
         'The transactional emails your site sends to your own customers. ' +
         'A group applies only when that feature is enabled on this site.'

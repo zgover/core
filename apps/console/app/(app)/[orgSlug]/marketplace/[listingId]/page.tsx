@@ -85,6 +85,7 @@ const OrgMarketplaceListing: NextPageWithLayout<Record<string, never>> = () => {
         children: 'Marketplace listing',
         icon: { path: mdiStorefrontOutline.path },
       }}
+      help="plugins"
     >
       {!actingHost ? (
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
