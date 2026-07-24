@@ -18,6 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn/server'
 import { extractEmailFromFields } from '@aglyn/aglyn/server'
 import {
+  consumeRateLimit,
   firebaseAdmin,
   getOrgForHost,
   notifyHostManagers,
@@ -32,19 +33,14 @@ export const dynamic = 'force-dynamic'
 const MAX_FIELDS = 20
 const MAX_PAYLOAD_CHARS = 10000
 
-// Best-effort per-instance rate limit — serverless instances are ephemeral,
-// so this only blunts bursts; the monthly quota is the real cap.
-const recentByIp = new Map<string, number[]>()
+// Per-IP submission limit (AGL-794). Previously a per-instance Map, which on
+// serverless resets each cold start and is held per concurrent instance — so
+// a spammer got roughly RATE_MAX × instances and could widen it by going
+// wider. The monthly plan quota is still the hard cap, but it is the wrong
+// thing to be defended BY: burning a site's whole allowance is the damage,
+// not the protection. This counter is global, keyed per (site, IP).
 const RATE_WINDOW_MS = 60_000
 const RATE_MAX = 10
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now()
-  const hits = (recentByIp.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS)
-  hits.push(now)
-  recentByIp.set(ip, hits)
-  return hits.length > RATE_MAX
-}
 
 const json = (body: unknown, status = 200) => Response.json(body, { status })
 
@@ -79,8 +75,22 @@ export async function POST(request: Request): Promise<Response> {
   const ip = String(
     request.headers.get('x-forwarded-for') ?? 'unknown',
   ).split(',')[0]
-  if (rateLimited(ip)) {
-    return json({ error: 'Too many submissions' }, 429)
+  const rate = await consumeRateLimit(`form:${hostId}:${ip}`, {
+    limit: RATE_MAX,
+    windowMs: RATE_WINDOW_MS,
+  })
+  if (!rate.allowed) {
+    return Response.json(
+      { error: 'Too many submissions' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(
+            Math.max(1, Math.ceil((rate.resetMs - Date.now()) / 1000)),
+          ),
+        },
+      },
+    )
   }
 
   try {

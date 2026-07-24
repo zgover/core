@@ -52,6 +52,38 @@ export interface CsrfMiddlewareOptions extends CsrfOptions {
 export const CSRF_SECRET = process.env.CSRF_SECRET || ''
 export const csrfTokens = new Tokens()
 
+/**
+ * Whether CSRF protection is actually usable (AGL-795).
+ *
+ * `CSRF_SECRET` is the key that SIGNS the double-submit cookie. Defaulting it
+ * to `''` meant an unset variable didn't disable the protection — it made it
+ * decorative: `sign(value, '')` is deterministic, so anyone who knows the
+ * scheme can mint a cookie/header pair that verifies. The middleware kept
+ * returning 200s and looked like it was working.
+ *
+ * That is the fail-open-defaults pattern the pre-release audit flagged as
+ * systemic, in the one place where the whole module's job is to say no.
+ *
+ * Checked at USE, deliberately not at import: throwing at module load would
+ * take down every app that merely pulls something else out of this barrel,
+ * turning a misconfiguration into an outage far from its cause.
+ */
+export function isCsrfConfigured(): boolean {
+  return CSRF_SECRET.length > 0
+}
+
+/** Logged once per process rather than per request. */
+let warnedUnconfigured = false
+export function warnCsrfUnconfigured(where: string): void {
+  if (warnedUnconfigured) return
+  warnedUnconfigured = true
+  console.error(
+    `[csrf] CSRF_SECRET is not set — ${where} is refusing requests. ` +
+      'Set it (see apps/www/.env.development.local.example) or remove the ' +
+      'CSRF middleware from the route; it cannot protect anything unset.',
+  )
+}
+
 const getCsrfTokenHeader = (
   req: NextApiRequest,
   tokenKey: string,
@@ -73,6 +105,17 @@ export function CsrfApiMiddleware(options: CsrfMiddlewareOptions) {
     next: () => any,
   ) {
     try {
+      // Fail CLOSED when unconfigured (AGL-795): without a signing key this
+      // middleware would hand out forgeable tokens and verify them happily,
+      // which is worse than having no CSRF at all — it looks protected.
+      if (!isCsrfConfigured()) {
+        warnCsrfUnconfigured('CsrfApiMiddleware')
+        throw new HttpResponseError(
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          'CSRF is not configured',
+        )
+      }
+
       // 1. extract secret and token from their cookies
       const tokenFromCookie = getApiRequestCookie(tokenKey, req)
 

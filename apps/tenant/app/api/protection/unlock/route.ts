@@ -17,12 +17,19 @@
 
 import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 import getScreen from '@aglyn/tenant-runtime/get-screen'
+import { consumeRateLimit } from '@aglyn/tenant-data-admin'
 import { createHash, timingSafeEqual } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
-// Best-effort per-instance brute-force damper.
-const attemptsByIp = new Map<string, number[]>()
+// Brute-force limits (AGL-794). This was a per-instance Map, which on
+// serverless resets every cold start and is kept per concurrent instance —
+// so the real cap was roughly 10 × instances, and an attacker widened it just
+// by going wider. A password guess is exactly the case worth paying a
+// transaction for, so the counter is durable and global.
+//
+// Keyed per (screen, IP): a shared NAT shouldn't lock a whole office out of
+// one site, and one IP shouldn't get a fresh budget per screen it attacks.
 const WINDOW_MS = 60_000
 const MAX_ATTEMPTS = 10
 
@@ -49,12 +56,22 @@ export async function POST(request: Request): Promise<Response> {
   const ip = String(
     request.headers.get('x-forwarded-for') ?? 'unknown',
   ).split(',')[0]
-  const now = Date.now()
-  const attempts = (attemptsByIp.get(ip) ?? []).filter((at) => now - at < WINDOW_MS)
-  attempts.push(now)
-  attemptsByIp.set(ip, attempts)
-  if (attempts.length > MAX_ATTEMPTS) {
-    return json({ error: 'Too many attempts' }, 429)
+  const rate = await consumeRateLimit(`unlock:${hostId}:${screenId}:${ip}`, {
+    limit: MAX_ATTEMPTS,
+    windowMs: WINDOW_MS,
+  })
+  if (!rate.allowed) {
+    return Response.json(
+      { error: 'Too many attempts' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(
+            Math.max(1, Math.ceil((rate.resetMs - Date.now()) / 1000)),
+          ),
+        },
+      },
+    )
   }
 
   try {

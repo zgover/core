@@ -18,7 +18,7 @@
 import { stringifySetCookie } from 'cookie'
 import { sign, unsign } from 'cookie-signature'
 import Tokens from 'csrf'
-import { CSRF_SECRET } from './csrf'
+import { CSRF_SECRET, isCsrfConfigured, warnCsrfUnconfigured } from './csrf'
 
 /**
  * App Router equivalent of {@link CsrfApiMiddleware} (the Pages Router
@@ -70,6 +70,15 @@ function issue(): string {
 }
 
 export function appCsrfCheck(request: Request): AppCsrfResult {
+  // Fail CLOSED when unconfigured (AGL-795). An empty signing key makes
+  // `sign()` deterministic, so the double-submit pair becomes forgeable and
+  // every check below would pass — protection that reports success while
+  // protecting nothing is worse than none.
+  if (!isCsrfConfigured()) {
+    warnCsrfUnconfigured('appCsrfCheck')
+    return { ok: false, status: 500, message: 'CSRF is not configured' }
+  }
+
   const method = request.method ?? 'GET'
   const tokenFromCookie = readCookie(request, TOKEN_KEY)
 
